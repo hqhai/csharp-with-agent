@@ -37,7 +37,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
             await _featureAccessTimeRepository.ExecuteTransactionAsync(async () =>
             {
-                var featureAccessTime = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && (x.ObjectId == request.ObjectId || (x.ObjectId == null && x.LessonId == null)) && x.EnumFeature == request.EnumFeature, cancellationToken);
+                var featureAccessTime = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && (x.ObjectId == request.ObjectId || (x.UnitId == null && x.LessonId == null && request.LessonId == null)) && x.EnumFeature == request.EnumFeature, cancellationToken);
 
                 if (featureAccessTime == null)
                 {
@@ -75,14 +75,19 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
         private FeatureAccessTime UpdateExistingFeatureAccessTime(FeatureAccessTime featureAccessTime, SaveFeatureAccessTimeCommand request)
         {
+            featureAccessTime = _mapper.Map<FeatureAccessTime>(request);
+
             if (request.AccessTime == null)
             {
                 featureAccessTime.Visit += 1;
             }
             featureAccessTime.AccessTime += request.AccessTime ?? default;
             featureAccessTime.LastVisited = DateTime.UtcNow;
+
             return _featureAccessTimeRepository.Update(featureAccessTime);
+
         }
+
 
 
         private static bool IsSameRangeHour(FeatureAccessTime featureAccessTime)
