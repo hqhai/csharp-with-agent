@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20231009035158_Create_VideoTimeCodeResult")]
+    [Migration("20231009065243_Create_VideoTimeCodeResult")]
     partial class Create_VideoTimeCodeResult
     {
         /// <inheritdoc />
@@ -4498,7 +4498,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("VideoResultId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("VideoTimeCodeId")
+                    b.Property<Guid?>("VideoTimeCodeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("VideoTimeCodeResultId")
@@ -5421,8 +5421,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasOne("Fsel.Course.Domain.Entities.VideoTimeCode", "VideoTimeCode")
                         .WithMany("VideoTimeCodeAnswers")
                         .HasForeignKey("VideoTimeCodeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Fsel.Course.Domain.Entities.VideoTimeCodeResult", "VideoTimeCodeResult")
                         .WithMany("VideoTimeCodeAnswers")

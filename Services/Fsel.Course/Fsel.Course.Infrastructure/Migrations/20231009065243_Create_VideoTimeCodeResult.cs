@@ -12,6 +12,14 @@ namespace Fsel.Course.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<Guid>(
+                name: "VideoTimeCodeId",
+                table: "VideoTimeCodeAnswers",
+                type: "uniqueidentifier",
+                nullable: true,
+                oldClrType: typeof(Guid),
+                oldType: "uniqueidentifier");
+
+            migrationBuilder.AlterColumn<Guid>(
                 name: "VideoResultId",
                 table: "VideoTimeCodeAnswers",
                 type: "uniqueidentifier",
@@ -105,6 +113,16 @@ namespace Fsel.Course.Infrastructure.Migrations
             migrationBuilder.DropColumn(
                 name: "VideoTimeCodeResultId",
                 table: "VideoTimeCodeAnswers");
+
+            migrationBuilder.AlterColumn<Guid>(
+                name: "VideoTimeCodeId",
+                table: "VideoTimeCodeAnswers",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
+                oldClrType: typeof(Guid),
+                oldType: "uniqueidentifier",
+                oldNullable: true);
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "VideoResultId",

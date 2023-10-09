@@ -67,9 +67,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             var video = await _videoRepository.Queryable
                                 .Include(x => x.LessonVideos)
                                 .Include(i => i.VideoTimeCodes)
-                                .ThenInclude(i => i.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
-                                .ThenInclude(x => x.VideoTimeCodeAnswers)
-                                .Include(i => i.VideoTimeCodes)
                                 .ThenInclude(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                 .Include(i => i.VideoResults)
                                 .Where(x => x.Id == request.VideoId)

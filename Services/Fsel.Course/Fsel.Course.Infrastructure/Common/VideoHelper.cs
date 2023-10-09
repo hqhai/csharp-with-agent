@@ -395,22 +395,17 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public bool GetUngraded(VideoTimeCode? videoTimeCode)
+        private static bool GetUngraded(VideoTimeCode? videoTimeCode)
         {
             return videoTimeCode?.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default;
         }
 
-        public int GetCorrectCount(VideoTimeCodeResult? videoTimeCodeResult)
-        {
-            return (videoTimeCodeResult != null && videoTimeCodeResult.VideoTimeCodeAnswers.Any()) ? videoTimeCodeResult.VideoTimeCodeAnswers.Sum(x => x.CorrectCount) : default;
-        }
-
-        public int GetCorrectCount(VideoTimeCode? videoTimeCode)
+        private static int GetCorrectCount(VideoTimeCode? videoTimeCode)
         {
             return (videoTimeCode != null && videoTimeCode.VideoTimeCodeAnswers.Any()) ? videoTimeCode.VideoTimeCodeAnswers.Sum(x => x.CorrectCount) : default;
         }
 
-        public int GetCorrectTotal(VideoTimeCode? videoTimeCode)
+        private static int GetCorrectTotal(VideoTimeCode? videoTimeCode)
         {
             return videoTimeCode?.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal) ?? default;
         }
@@ -460,9 +455,10 @@ namespace Fsel.Course.Infrastructure.Common
                 TimeCodeType = videoTimeCode.TimeCodeType,
                 VideoId = videoTimeCode.VideoId,
                 Ungraded = GetUngraded(videoTimeCode),
-                CorrectCount = videoTimeCodeResult != null ? GetCorrectCount(videoTimeCodeResult) : GetCorrectCount(videoTimeCode),
+                CorrectCount = GetCorrectCount(videoTimeCode),
                 CorrectTotal = GetCorrectTotal(videoTimeCode),
-                Status = videoTimeCodeResult != null ? GetTimeCodeStatus(videoTimeCodeResult) : GetTimeCodeStatus(videoTimeCode),
+                Status = GetTimeCodeStatus(videoTimeCode),
+                WorkingTime = videoTimeCodeResult?.WorkingTime ?? default,
                 Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n)).ToList(),
             };
         }
@@ -496,20 +492,7 @@ namespace Fsel.Course.Infrastructure.Common
             };
         }
 
-        public EnumTimeCodeStatus GetTimeCodeStatus(VideoTimeCodeResult? videoTimeCodeResult)
-        {
-            var learnProcess = EnumTimeCodeStatus.Process;
-            if (videoTimeCodeResult != null)
-            {
-                if (videoTimeCodeResult.VideoTimeCodeAnswers.All(x => x.Status == EnumTimeCodeStatus.Done))
-                {
-                    learnProcess = EnumTimeCodeStatus.Done;
-                }
-            }
-            return learnProcess;
-        }
-
-        public EnumTimeCodeStatus GetTimeCodeStatus(VideoTimeCode? videoTimeCode)
+        private static EnumTimeCodeStatus GetTimeCodeStatus(VideoTimeCode? videoTimeCode)
         {
             var learnProcess = EnumTimeCodeStatus.Process;
             if (videoTimeCode != null)
@@ -522,7 +505,7 @@ namespace Fsel.Course.Infrastructure.Common
             return learnProcess;
         }
 
-        public EnumTimeCodeStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
+        private static EnumTimeCodeStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
         {
             var timeCodeStatus = EnumTimeCodeStatus.Lock;
             if (indexProcess < indexTimeCode)
@@ -540,17 +523,13 @@ namespace Fsel.Course.Infrastructure.Common
             return timeCodeStatus;
         }
 
-        public int? GetIndexProcess(IList<VideoTimeCode>? videoTimeCodes, Guid videoResultId)
+        private static int? GetIndexProcess(IList<VideoTimeCode>? videoTimeCodes, Guid videoResultId)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCodes);
-            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeResults.Any() || x.VideoTimeCodeResults.Any(x => x.VideoResultId == videoResultId)).FirstOrDefault();
+            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeAnswers.Any() || x.VideoTimeCodeAnswers.Any(x => x.VideoResultId == videoResultId && x.Status != EnumTimeCodeStatus.Done)).FirstOrDefault();
             if (timeCode == null)
             {
-                timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeAnswers.Any() || x.VideoTimeCodeAnswers.Any(x => x.VideoResultId == videoResultId && x.Status != EnumTimeCodeStatus.Done)).FirstOrDefault();
-                if (timeCode == null)
-                {
-                    return null;
-                }
+                return null;
             }
             return videoTimeCodes.IndexOf(timeCode);
         }

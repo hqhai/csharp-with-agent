@@ -9,22 +9,20 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
         [JsonRequired]
         public string? Name { get; set; }
 
-        [JsonRequired]
-        public IList<string>? Contents { get; set; }
+        private IList<string>? _contents;
 
-        public IList<string>? Content
+        [JsonRequired]
+        public IList<string>? Contents
         {
-            get
+            get { return _contents; }
+            set
             {
-                if (Contents != null && Contents.Any())
-                {
-                    Content = Contents.ToList();
-                }
-                return Content;
+                _contents = value;
+                Content = _contents?.ToList();
             }
-            set { Contents = value; }
         }
 
+        public IList<string>? Content { get; private set; }
         public bool IsSpeakRequired { get; set; }
     }
 }
