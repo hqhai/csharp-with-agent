@@ -10,5 +10,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.ValueSettings
     }
     public class Services : BaseServices
     {
+        public string? SystemApiUrl { get; set; }
     }
 }

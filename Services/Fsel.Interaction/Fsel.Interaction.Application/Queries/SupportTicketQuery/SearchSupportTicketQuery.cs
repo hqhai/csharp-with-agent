@@ -2,6 +2,7 @@
 
 namespace Fsel.Interaction.Application.Queries.SupportTicketQuery
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -56,7 +57,7 @@ namespace Fsel.Interaction.Application.Queries.SupportTicketQuery
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                supportTicketQuery = supportTicketQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).Contains(request.Keyword));
+                supportTicketQuery = supportTicketQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.SupportCategoryId != null)
             {

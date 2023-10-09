@@ -35,6 +35,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Get Current-Position
+        /// </summary>
+        [HttpGet("current-student")]
+        [ProducesResponseType(typeof(MethodResult<LeaderBoardSearchModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCurrentStudentUser()
+        {
+            MethodResult<LeaderBoardSearchModel> queryResult = await _mediator.Send(new GetCurrentPositionQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Lesson Overview
         /// </summary>
         [HttpGet("lesson-overview")]

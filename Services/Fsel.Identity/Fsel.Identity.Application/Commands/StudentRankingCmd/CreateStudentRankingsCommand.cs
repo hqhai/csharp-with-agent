@@ -34,18 +34,21 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
         private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
         private const int POSITION_CHANGE = 31; // Vị trí nằm ngoài leaderboard là 31 (của tất cả học sinh)
         private const int TOP_LEADER = 30; //top leaderboard sẽ lấy(30 học sinh đầu tiên của level)
+        private readonly IStudentRepository _studentRepository;
 
         public CreateStudentRankingsCommandHandler(IMapper mapper,
             IStudentRankingRepository studentRankingRepository,
             ILmsCourseService lmsCourseService,
             LeaderBoardPublisher leaderBoardPublisher,
-            IStudentDailyStreakRepository studentDailyStreakRepository)
+            IStudentDailyStreakRepository studentDailyStreakRepository,
+            IStudentRepository studentRepository)
         {
             _mapper = mapper;
             _studentRankingRepository = studentRankingRepository;
             _lmsCourseService = lmsCourseService;
             _leaderBoardPublisher = leaderBoardPublisher;
             _studentDailyStreakRepository = studentDailyStreakRepository;
+            _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<List<StudentRankingModel>>> Handle(CreateStudentRankingsCommand request, CancellationToken cancellationToken)
@@ -114,8 +117,19 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             await _studentRankingRepository.ExecuteTransactionAsync(async () =>
             {
                 await UpdateStudentRankingDatabase(toAdd, toUpdate, toDelete);
-
+                var studentIds = studentRankings.Select(s => s.StudentId);
+                var studentInfo = _studentRepository.Queryable.Include(x => x.Human).Where(x => studentIds.Contains(x.Id)).ToList();
                 var studentRankingRealTime = _mapper.Map<List<StudentRankingRealTime>>(studentRankings);
+                studentRankingRealTime.ForEach(x =>
+                {
+                    var student = studentInfo.FirstOrDefault(s => s.Id == x.StudentId);
+                    if (student != null)
+                    {
+                        x.FullName = student.Human?.FullName;
+                        x.AvatarPath = student.Human?.AvatarPath;
+                    }
+                });
+
                 await SendToWebSocket(studentRankingRealTime, cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

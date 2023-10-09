@@ -82,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                                             Name = h.Name,
                                             CourseSkill = h.CourseSkill,
                                             CourseLevel = h.CourseLevel,
-                                            QuestionTotal = h.HomeWorkQuestions.Select(x => x.Question).Count(),
+                                            QuestionTotal = h.HomeWorkQuestions.Select(x => x.Question).Where(x => x.QuestionType != EnumQuestionType.ExercisePreparation).Count(),
                                             QuestionCompleted = h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == request.LessonResultId)!.HomeWorkAnswers.Count,
                                             HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == request.LessonResultId))
                                         })
