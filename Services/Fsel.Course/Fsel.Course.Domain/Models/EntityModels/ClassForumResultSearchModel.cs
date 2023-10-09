@@ -22,7 +22,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? LessonName { get; set; }
 
         public string? UnitName { get; set; }
-
+        public string? WordContent { get; set; }
         public string? PostArea { get; set; }
         public Guid? TeacherId { get; set; }
         public Guid? CourseId { get; set; }

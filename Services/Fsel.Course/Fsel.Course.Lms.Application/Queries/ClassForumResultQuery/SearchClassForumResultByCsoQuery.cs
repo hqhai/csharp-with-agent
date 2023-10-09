@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
-    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -18,7 +17,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -119,6 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                        UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
                                        TeacherId = x.GradingTeacherId,
                                        CourseId = x.LessonResult!.CourseId,
+                                       WordContent = x.WordContent
                                    });
 
             if (!string.IsNullOrEmpty(request.Keyword))

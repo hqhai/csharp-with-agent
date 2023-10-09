@@ -84,7 +84,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
                                         UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.Number).FirstOrDefault(),
                                         UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
-                                        TeacherId = x.GradingTeacherId
+                                        TeacherId = x.GradingTeacherId,
+                                        WordContent = x.WordContent
                                     });
 
             if (!string.IsNullOrEmpty(request.Keyword))
