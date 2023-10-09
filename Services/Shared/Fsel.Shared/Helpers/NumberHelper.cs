@@ -66,7 +66,7 @@ namespace Fsel.Shared.Helpers
 
         public static double ConvertRatingToDouble(double value)
         {
-            double convertedValue = Math.Round(value, 0, MidpointRounding.ToZero);
+            double convertedValue = Math.Round(value, 0, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
