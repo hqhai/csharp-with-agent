@@ -69,6 +69,7 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
             for (int i = 0; i < NUMBER_OF_WEEKDAY; i++)
             {
                 var expectedDate = currentDate.AddDays(-i).Date;
+                studentFocusTimesQuery.Where(x => x.CreatedDate.Date == expectedDate);
                 if (!studentFocusTimesQuery.Any(x => x.CreatedDate.Date == expectedDate))
                 {
                     hasContinuousData = false;
