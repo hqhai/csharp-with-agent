@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var lesson = lessonResult?.Lesson;
             if ((lessonResult != null && lessonResult.Status == EnumResultStatus.Done) || lessonResult == null)
             {
-                lesson = await GetLesson(lessonResult, course, cancellationToken);
+                lesson = await GetLesson(lessonResult, studentId, course, cancellationToken);
                 if (lessonResult != null && lesson != null && lessonResult.LessonId != lesson.Id)
                 {
                     lessonResult = default;
@@ -123,16 +123,16 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == courseId, cancellationToken);
         }
 
-        private async Task<Lesson?> GetLesson(LessonResult? lessonResult, Course course, CancellationToken cancellationToken)
+        private async Task<Lesson?> GetLesson(LessonResult? lessonResult, Guid? studentId, Course course, CancellationToken cancellationToken)
         {
             var unitId = await GetUnitId(lessonResult, course);
-            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons).Include(x => x.LessonResults).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons).Include(x => x.LessonResults.Where(x => x.StudentId == studentId)).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
             if (unit != null)
             {
                 Guid? lessonId = default;
                 if (unit.LessonResults.Any())
                 {
-                    lessonId = unit.LessonResults.OrderByDescending(x => x.CreatedDate).ThenBy(x => x.UpdatedDate).FirstOrDefault()?.LessonId;
+                    lessonId = unit.LessonResults.Where(x => x.StudentId == studentId).OrderByDescending(x => x.CreatedDate).ThenBy(x => x.UpdatedDate).FirstOrDefault()?.LessonId;
                 }
                 else
                 {
