@@ -69,7 +69,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -111,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
             }
             var result = await query.ToListAsync(cancellationToken);
-            var stars = result.Any() ? NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars)) : default;
+            var stars = result.Any() ? NumberHelper.ConvertRatingToDouble(result.Average(x => x.Stars)) : default;
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
@@ -125,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 foreach (var item in lists)
                 {
-                    item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+                    item.Stars = NumberHelper.ConvertRatingToDouble(item.Stars);
                     if (item.TeacherIds != null)
                     {
                         item.TeacherNames = new List<string>();
