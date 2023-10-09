@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -30,12 +31,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
 
-        public SearchClassForumResultByTeacherQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService, AuthContext authContext)
+        public SearchClassForumResultByTeacherQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService, AuthContext authContext, IUserService userService)
         {
             _classForumResultRepository = classForumResultRepository;
             _trainingService = trainingService;
             _authContext = authContext;
+            _userService = userService;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultByTeacherQuery request, CancellationToken cancellationToken)
@@ -47,6 +50,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+            var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
+            var teacherId = teacherResult.Content?.Result?.Id;
 
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.LessonResult)
@@ -56,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                     .ThenInclude(x => x!.CourseUnitMockTests)
                                     .ThenInclude(x => x.Course)
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading && (x.GradingTeacherId == null || x.GradingTeacherId == _authContext.CurrentUserId))
+                                    .Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading && (x.GradingTeacherId == null || x.GradingTeacherId == teacherId))
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
@@ -79,7 +84,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
                                         UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.Number).FirstOrDefault(),
                                         UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
-                                        TeacherId = x.GradingTeacherId
+                                        TeacherId = x.GradingTeacherId,
+                                        WordContent = x.WordContent
                                     });
 
             if (!string.IsNullOrEmpty(request.Keyword))

@@ -16,7 +16,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
     public class GetListTeacherOrCSOInClassQuery : IRequest<MethodResult<IList<CSOTeacherModel>>>
     {
         public bool ChangeFind { get; set; }
-        public string? Name { get; set; }
+        public string? Keyword { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
     }
 
@@ -53,9 +53,9 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                     CourseLevels = x.CourseLevels,
                     CountClass = allClass.Count(p => p.CsoId == x.Id),
                 }).ToList();
-                if (!string.IsNullOrEmpty(request.Name))
+                if (!string.IsNullOrEmpty(request.Keyword))
                 {
-                    allCSO = allCSO!.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.Contains(request.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+                    allCSO = allCSO!.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.Contains(request.Keyword, StringComparison.OrdinalIgnoreCase)).ToList();
                 }
                 if (request.CourseLevel.HasValue)
                 {
@@ -83,9 +83,9 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                     CourseLevels = x.CourseLevels,
                     CountClass = allClass.Count(p => p.TeacherId == x.Id),
                 }).ToList();
-                if (!string.IsNullOrEmpty(request.Name))
+                if (!string.IsNullOrEmpty(request.Keyword))
                 {
-                    allTeacher = allTeacher!.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.Contains(request.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+                    allTeacher = allTeacher!.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.Contains(request.Keyword, StringComparison.OrdinalIgnoreCase)).ToList();
                 }
                 if (request.CourseLevel.HasValue)
                 {

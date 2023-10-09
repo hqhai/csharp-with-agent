@@ -37,11 +37,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
                 return methodResult;
             }
-            if (classes.CsoId.HasValue)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassAlreadyHasCso));
-                return methodResult;
-            }
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
                 classes.CsoId = request.CsoId;
