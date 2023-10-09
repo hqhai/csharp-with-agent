@@ -25,8 +25,8 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     {
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
         private readonly AuthContext _authContext;
-        private const int RANGE_WEEK_DAY = 6; // khoảng cách từ ngày đầu tuần đến ngày cuối tuần
-        private const int MAX_HOUR = 23; // Giờ trong ngày
+        private const int RANGE_WEEK_DAY = 7; // khoảng cách từ ngày đầu tuần đến ngày cuối tuần
+        private const int MAX_HOUR = 24; // Giờ trong ngày
 
         public GetFeatureAccessTimeChartQueryHandler(IFeatureAccessTimeRepository featureAccessTimeRepository, AuthContext authContext)
         {
@@ -84,7 +84,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 
             var featureAccessTimeResult = new List<FeatureAccessTimeByTypeModel>();
 
-            for (var i = 0; i <= MAX_HOUR; i++)
+            for (var i = 0; i < MAX_HOUR; i++)
             {
                 var featureGroupHour = featureGroup.FirstOrDefault(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour == i);
                 var featureAccessTime = new FeatureAccessTimeByTypeModel();
@@ -110,14 +110,13 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
         {
             var currentDayOfWeek = DateTime.UtcNow.ConvertTimeFromUtc(EnumZoneRegion.Vietnam);
 
-            var startOfWeek = currentDayOfWeek.AddDays(-(int)currentDayOfWeek.DayOfWeek + (int)DayOfWeek.Monday).Date.AddHours(0).AddMinutes(0).AddSeconds(0);
-            var endOfWeek = startOfWeek.AddDays(RANGE_WEEK_DAY).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-            ;
+            var startOfWeek = currentDayOfWeek.AddDays(-(int)currentDayOfWeek.DayOfWeek + (int)DayOfWeek.Monday).Date;
+            var endOfWeek = startOfWeek.AddDays(RANGE_WEEK_DAY).Date;
 
             var featureGroup = featureAccessTimes
                                  .Where(f => f.LastVisited.HasValue &&
                                              f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam) >= startOfWeek &&
-                                             f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam) <= endOfWeek &&
+                                             f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam) < endOfWeek &&
                                              features.Contains(f.EnumFeature))
                                  .GroupBy(f => f.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Date)
                                  .Select(group => new FeatureAccessTime
