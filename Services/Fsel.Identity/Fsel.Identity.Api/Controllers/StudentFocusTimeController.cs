@@ -39,9 +39,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<List<StudentFocusTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetStudentFocusTime([FromQuery] GetStudentFocusTimeQuery query)
+        public async Task<IActionResult> GetStudentFocusTime()
         {
-            MethodResult<StudentFocusTimeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<StudentFocusTimeModel> commandResult = await _mediator.Send(new GetStudentFocusTimeQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

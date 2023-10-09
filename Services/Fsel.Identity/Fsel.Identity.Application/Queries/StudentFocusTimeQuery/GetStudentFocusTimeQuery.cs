@@ -23,6 +23,7 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
         private readonly IStudentFocusTimeRepository _studentFocusTimeRepository;
         private readonly AuthContext _authContext;
         private readonly IStudentRepository _studentRepository;
+        private const int NUMBER_OF_WEEKDAY = 7;
         public GetStudentFocusTimeQueryHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, AuthContext authContext, IStudentRepository studentRepository)
         {
             _mapper = mapper;
@@ -43,10 +44,40 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
                 return methodResult;
             }
 
+
+
             StudentFocusTimeModel studentFocusTime = new StudentFocusTimeModel();
             var studentFocusTimesQuery = _studentFocusTimeRepository.Queryable.Where(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
 
+            if (studentFocusTimesQuery == null)
+            {
+                studentFocusTime = new StudentFocusTimeModel();
+                methodResult.Result = studentFocusTime;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+            //Check xem học sinh có học liên tiếp trong 7 ngày hay không 
+            var currentDate = DateTime.UtcNow.Date;
+            var startDate = currentDate.AddDays(-NUMBER_OF_WEEKDAY).Date; // Ngày bắt đầu từ 7 ngày trước
+            var endDate = currentDate.Date; // Ngày kết thúc là hôm nay
+            var studentFocusTimesCheckQuery = _studentFocusTimeRepository.Queryable
+                                        .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && x.ExecuteTime >= x.TargetTime)
+                                        .OrderBy(x => x.CreatedDate.Date)
+                                        .ToList();
+            bool hasContinuousData = true;
+            for (int i = 0; i < NUMBER_OF_WEEKDAY; i++)
+            {
+                var expectedDate = currentDate.AddDays(-i).Date;
+                if (!studentFocusTimesQuery.Any(x => x.CreatedDate.Date == expectedDate))
+                {
+                    hasContinuousData = false;
+                    break;
+                }
+            }
+
             studentFocusTime.StudentId = student.Id;
+            studentFocusTime.IsWeekStreak = hasContinuousData;
             studentFocusTime = _mapper.Map<StudentFocusTimeModel>(studentFocusTimesQuery.FirstOrDefault());
 
             methodResult.Result = _mapper.Map<StudentFocusTimeModel>(studentFocusTime);
