@@ -31,7 +31,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             foreach (var item in request.FeatureAccessTimes)
             {
                 FeatureAccessTimeModel? featureAccessTime;
-                var query = _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && x.CourseId == item.CourseId);
+                var query = _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && x.CourseId == item.CourseId && x.ObjectId.HasValue);
                 if (item.UnitId != null)
                 {
                     query = query.Where(x => x.UnitId == item.UnitId);

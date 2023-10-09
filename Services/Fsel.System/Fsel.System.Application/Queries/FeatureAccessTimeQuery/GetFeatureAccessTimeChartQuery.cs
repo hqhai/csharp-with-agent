@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
@@ -24,8 +25,8 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     {
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
         private readonly AuthContext _authContext;
-        private const int MaxHour = 24;
-        private const int MaxWeek = 7;
+        private const int RANGE_WEEK_DAY = 6; // khoảng cách từ ngày đầu tuần đến ngày cuối tuần
+        private const int MAX_HOUR = 23; // Giờ trong ngày
 
         public GetFeatureAccessTimeChartQueryHandler(IFeatureAccessTimeRepository featureAccessTimeRepository, AuthContext authContext)
         {
@@ -39,7 +40,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             MethodResult<IList<FeatureAcessTimeChartModel>> methodResult = new MethodResult<IList<FeatureAcessTimeChartModel>>();
 
             var featureAccessTimes = await _featureAccessTimeRepository.Queryable
-                .Where(x => x.CreatedUserId == _authContext.CurrentUserId && x.ObjectId == null && x.LessonId == null)
+                .Where(x => x.CreatedUserId == _authContext.CurrentUserId && x.LessonId == null && x.UnitId == null)
                 .OrderByDescending(x => x.LastVisited)
                 .ToListAsync(cancellationToken);
 
@@ -63,7 +64,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                         {
                             CreateFeatureAccessTimeAWeek(featureAccessTimes.AsReadOnly(), socialFeatures, EnumFeatureBussinessType.Social),
                             CreateFeatureAccessTimeAWeek(featureAccessTimes.AsReadOnly(), new[] { EnumFeature.Other }, EnumFeatureBussinessType.Other),
-                            CreateFeatureAccessTimeAWeek(featureAccessTimes.AsReadOnly(), learnFeatures, EnumFeatureBussinessType.Learn)
+                            CreateFeatureAccessTimeAWeek(featureAccessTimes.AsReadOnly(), learnFeatures, EnumFeatureBussinessType.Learn )
                         };
                     break;
 
@@ -76,52 +77,79 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 
         private static FeatureAcessTimeChartModel CreateFeatureAccessTimeADay(ReadOnlyCollection<FeatureAccessTime> featureAccessTimes, EnumFeature[] features, EnumFeatureBussinessType type)
         {
-            var chartModel = new FeatureAcessTimeChartModel();
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Date;
 
-            var currentDate = DateTime.UtcNow.Date;
+            var featureGroup = featureAccessTimes
+                .Where(f => f.LastVisited.HasValue && f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Date == currentDate && features.Contains(f.EnumFeature)).ToList();
 
-            var groupedData = featureAccessTimes
-                .Where(f =>
-                    f.LastVisited.HasValue &&
-                    f.LastVisited.Value.Date == currentDate &&
-                    features.Contains(f.EnumFeature))
-                .GroupBy(f => f.LastVisited!.Value.Hour)
-                .ToDictionary(g => g.Key, g => g.Sum(f => f.AccessTime));
+            var featureAccessTimeResult = new List<FeatureAccessTimeByTypeModel>();
 
-            chartModel.FeatureBussinessType = type;
-            chartModel.Label = type.ToString();
-            chartModel.ChartData = new double[MaxHour];
-
-            for (int i = 0; i < MaxHour; i++)
+            for (var i = 0; i <= MAX_HOUR; i++)
             {
-                chartModel.ChartData[i] = groupedData.ContainsKey(i) ? groupedData[i] : 0;
+                var featureGroupHour = featureGroup.FirstOrDefault(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour == i);
+                var featureAccessTime = new FeatureAccessTimeByTypeModel();
+
+                featureAccessTime.AccessTime = featureGroupHour?.AccessTime ?? 0;
+                featureAccessTime.HourActive = featureGroupHour?.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour ?? i;
+                featureAccessTime.DayActive = featureGroupHour?.LastVisited!.Value.DayOfWeek ?? DateTime.UtcNow.DayOfWeek;
+
+                featureAccessTimeResult.Add(featureAccessTime);
             }
 
-            return chartModel;
+            var result = new FeatureAcessTimeChartModel
+            {
+                FeatureBussinessType = type,
+                FeatureAccessTimes = featureAccessTimeResult
+            };
+
+            return result;
+
         }
 
         private static FeatureAcessTimeChartModel CreateFeatureAccessTimeAWeek(ReadOnlyCollection<FeatureAccessTime> featureAccessTimes, EnumFeature[] features, EnumFeatureBussinessType type)
         {
-            var chartModel = new FeatureAcessTimeChartModel();
+            var currentDayOfWeek = DateTime.UtcNow.ConvertTimeFromUtc(EnumZoneRegion.Vietnam);
 
-            var groupedData = featureAccessTimes
-                .Where(f => f.LastVisited.HasValue && features.Contains(f.EnumFeature))
-                .GroupBy(f => f.LastVisited!.Value.DayOfWeek)
-                .ToDictionary(g => g.Key, g => g.Sum(f => f.AccessTime));
+            var startOfWeek = currentDayOfWeek.AddDays(-(int)currentDayOfWeek.DayOfWeek + (int)DayOfWeek.Monday).Date.AddHours(0).AddMinutes(0).AddSeconds(0);
+            var endOfWeek = startOfWeek.AddDays(RANGE_WEEK_DAY).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+            ;
 
-            chartModel.FeatureBussinessType = type;
-            chartModel.Label = type.ToString();
-            chartModel.ChartData = new double[MaxWeek];
+            var featureGroup = featureAccessTimes
+                                 .Where(f => f.LastVisited.HasValue &&
+                                             f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam) >= startOfWeek &&
+                                             f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam) <= endOfWeek &&
+                                             features.Contains(f.EnumFeature))
+                                 .GroupBy(f => f.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Date)
+                                 .Select(group => new FeatureAccessTime
+                                 {
+                                     LastVisited = group.Key, // Date
+                                     AccessTime = group.Sum(f => f.AccessTime),
+                                 })
+                                 .ToList();
+
+            var featureAccessTimeResult = new List<FeatureAccessTimeByTypeModel>();
 
             var daysOfWeek = EnumHelper.GetList<DayOfWeek>()!.Select(day => Enum.Parse<DayOfWeek>(day))
-                           .ToList();
+                          .ToList();
 
-            for (int i = 0; i < daysOfWeek!.Count; i++)
+            for (var i = 0; i < daysOfWeek!.Count; i++)
             {
-                chartModel.ChartData[i] = groupedData.ContainsKey(daysOfWeek[i]) ? groupedData[daysOfWeek[i]] : 0;
+                var featureGroupHour = featureGroup.FirstOrDefault(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).DayOfWeek == daysOfWeek[i]);
+                var featureAccessTime = new FeatureAccessTimeByTypeModel();
+
+                featureAccessTime.AccessTime = featureGroupHour?.AccessTime ?? 0;
+                featureAccessTime.HourActive = featureGroupHour?.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour ?? 0;
+                featureAccessTime.DayActive = featureGroupHour?.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).DayOfWeek ?? daysOfWeek[i];
+                featureAccessTimeResult.Add(featureAccessTime);
             }
 
-            return chartModel;
+            var result = new FeatureAcessTimeChartModel
+            {
+                FeatureBussinessType = type,
+                FeatureAccessTimes = featureAccessTimeResult
+            };
+
+            return result;
         }
 
     }
