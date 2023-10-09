@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var videoTimeCodeResultIds = videoResult.VideoTimeCodeResults.Select(x => x.Id).ToList();
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => videoTimeCodeResultIds.Contains(p.VideoTimeCodeResultId)).ToListAsync(cancellationToken);
+                var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => videoTimeCodeResultIds.Contains(p.VideoTimeCodeResultId ?? default)).ToListAsync(cancellationToken);
                 if (videoTimeCodeAnswers.Count > 0)
                 {
                     foreach (var item in videoTimeCodeAnswers)

@@ -22,7 +22,7 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.VideoTimeCodeResult)
                           .WithMany(b => b.VideoTimeCodeAnswers)
                           .HasForeignKey(b => b.VideoTimeCodeResultId)
-                          .OnDelete(DeleteBehavior.NoAction);
+                          .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(a => a.Exercise)
               .WithMany(b => b.VideoTimeCodeAnswers)
@@ -33,6 +33,16 @@ namespace Fsel.Course.Infrastructure.Configs
                    .WithMany(b => b.VideoTimeCodeAnswers)
                    .HasForeignKey(b => b.QuestionId)
                    .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.VideoResult)
+                  .WithMany(b => b.VideoTimeCodeAnswers)
+                  .HasForeignKey(b => b.VideoResultId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.VideoTimeCode)
+                          .WithMany(b => b.VideoTimeCodeAnswers)
+                          .HasForeignKey(b => b.VideoTimeCodeId)
+                          .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

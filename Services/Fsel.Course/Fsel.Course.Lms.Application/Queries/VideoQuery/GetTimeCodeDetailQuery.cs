@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                     .ThenInclude(x => x.Question)
-                                    .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => videoResult != null && x.VideoTimeCodeResultId == videoTimeCodeResultId))
+                                    .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => videoResult != null && x.VideoResultId == videoResult.Id && (!x.VideoTimeCodeResultId.HasValue || x.VideoTimeCodeResultId == videoTimeCodeResultId)))
                                 .Where(x => x.Id == request.VideoTimeCodeId && x.VideoId == request.VideoId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
