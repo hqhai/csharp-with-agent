@@ -68,6 +68,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                 .Include(x => x.LessonVideos)
                                 .Include(i => i.VideoTimeCodes)
                                 .ThenInclude(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
+                                .Include(i => i.VideoTimeCodes)
+                                .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
                                 .Include(i => i.VideoResults)
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()

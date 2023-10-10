@@ -422,12 +422,15 @@ namespace Fsel.Course.Infrastructure.Common
         public IList<VideoTimeCodeModel> GetTimeCodes(Video? video, Guid videoResultId)
         {
             ArgumentNullException.ThrowIfNull(video);
+
             var videoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).ToList();
             var videoTimeCodeModels = new List<VideoTimeCodeModel>();
             var indexProcess = GetIndexProcess(videoTimeCodes, videoResultId);
             foreach (var item in videoTimeCodes)
             {
                 var indexTimeCode = videoTimeCodes.IndexOf(item);
+                var videoTimeCodeResult = item.VideoTimeCodeResults.FirstOrDefault();
+
                 videoTimeCodeModels.Add(new VideoTimeCodeModel
                 {
                     Id = item.Id,
@@ -436,6 +439,7 @@ namespace Fsel.Course.Infrastructure.Common
                     ExecutionTime = item.ExecutionTime,
                     TimeCodeType = item.TimeCodeType,
                     VideoId = item.VideoId,
+                    WorkingTime = videoTimeCodeResult?.WorkingTime ?? default,
                     Status = GetTimeCodeStatus(indexProcess, indexTimeCode)
                 });
             }
@@ -473,21 +477,9 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 var indexTimeCode = videoTimeCodes.IndexOf(videoTimeCode);
                 var videoTimeCodeResult = videoTimeCode.VideoTimeCodeResults.FirstOrDefault();
-                videoTimeCodeModels.Add(new VideoTimeCodeModel
-                {
-                    Id = videoTimeCode.Id,
-                    TotalCount = GetTotalQuestion(videoTimeCode),
-                    DisplayTime = videoTimeCode.DisplayTime,
-                    ExecutionTime = videoTimeCode.ExecutionTime,
-                    TimeCodeType = videoTimeCode.TimeCodeType,
-                    VideoId = videoTimeCode.VideoId,
-                    Ungraded = GetUngraded(videoTimeCode),
-                    CorrectCount = GetCorrectCount(videoTimeCode),
-                    CorrectTotal = GetCorrectTotal(videoTimeCode),
-                    Status = GetTimeCodeStatus(indexProcess, indexTimeCode),
-                    WorkingTime = videoTimeCodeResult?.WorkingTime ?? default,
-                    Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n)).ToList(),
-                });
+                var timeCode = GetVideoTimeCode(videoTimeCode);
+                timeCode.Status = GetTimeCodeStatus(indexProcess, indexTimeCode);
+                videoTimeCodeModels.Add(timeCode);
             }
             return videoTimeCodeModels;
         }
