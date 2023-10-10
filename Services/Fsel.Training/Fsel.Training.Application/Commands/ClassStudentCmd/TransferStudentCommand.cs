@@ -51,11 +51,21 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 return methodResult;
             }
             var countStudent = await _classStudentRepository.Queryable.Where(p => p.ClassId == request.ClassId).ToListAsync(cancellationToken);
-            if (countStudent.Count >= 12)
+            //if (countStudent.Count >= 12)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassHasTooManyStudents));
+            //    return methodResult;
+            //}
+
+            #region for pilot
+
+            if (countStudent.Count >= 100)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassHasTooManyStudents));
                 return methodResult;
             }
+
+            #endregion for pilot
 
             var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == request.StudentId, cancellationToken);
             if (classStudent == null)
