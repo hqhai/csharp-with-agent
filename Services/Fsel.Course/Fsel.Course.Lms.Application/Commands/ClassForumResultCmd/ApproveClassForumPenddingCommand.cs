@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -45,6 +46,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var methodResult = new MethodResult<ClassForumResultModel>();
 
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumResultFiles)
+                                                                    .Include(x => x.ClassForum)
+                                                                    .Include(x => x.ClassForumScores)
                                                                     .Where(e => e.Id == request.ClassForumResultId)
                                                                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
@@ -61,7 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotPendding));
                 return methodResult;
             }
-
+            var classForumStatus = classForumResult.ClassForum.GradingStyle;
             //if (classForumResult.CheckCsoId != csoId)
             //{
             //    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.CsoInvalid), nameof(classForumResult.CheckCsoId));
@@ -71,10 +74,27 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 if (request.IsApprove)
                 {
-                    classForumResult.Status = EnumClassForumResultStatus.PendingForGrading;
-                    var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
-                    var csoId = csoResults.Content?.Result?.Id;
-                    classForumResult.CheckCsoId = csoId;
+                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot)
+                    {
+                        var enumClassForumScores = Enum.GetValues(typeof(EnumClassForumScoreCriteria)).Cast<EnumClassForumScoreCriteria>().ToList();
+                        classForumResult.ClassForumScores = enumClassForumScores.Select(x => new ClassForumScore
+                        {
+                            ClassForumResultId = classForumResult.Id,
+                            Score = 9,
+                            Criteria = x,
+                        }).ToList();
+                        classForumResult.Status = EnumClassForumResultStatus.Graded;
+                        var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+                        var csoId = csoResults.Content?.Result?.Id;
+                        classForumResult.CheckCsoId = csoId;
+                    }
+                    else
+                    {
+                        classForumResult.Status = EnumClassForumResultStatus.PendingForGrading;
+                        var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+                        var csoId = csoResults.Content?.Result?.Id;
+                        classForumResult.CheckCsoId = csoId;
+                    }
                 }
                 else
                 {

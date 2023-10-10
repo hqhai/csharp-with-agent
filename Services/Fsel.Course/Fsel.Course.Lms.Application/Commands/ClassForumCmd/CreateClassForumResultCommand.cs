@@ -130,19 +130,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumHasSubmitted));
                     return methodResult;
                 }
-                if (classForum.GradingStyle == EnumGradingStyle.AutoGrading)
-                {
-                    var enumClassForumScores = Enum.GetValues(typeof(EnumClassForumScoreCriteria)).Cast<EnumClassForumScoreCriteria>().ToList();
-                    classForumResult.ClassForumScores = enumClassForumScores.Select(x => new ClassForumScore
-                    {
-                        ClassForumResultId = classForumResult.Id,
-                        Score = 9,
-                        Criteria = x,
-                    }).ToList();
 
-                    classForumResult = _classForumResultRepository.Update(classForumResult);
-                    await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
                 //mặc định gửi cho tất cả CSO
                 IList<EnumRole> roles = new List<EnumRole>();
                 roles.Add(EnumRole.CSO);
