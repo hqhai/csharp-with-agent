@@ -22,6 +22,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         ///  PlacementTest Lock
         /// </summary>
-        PlacementTestLock
+        PlacementTestLock,
+
+        /// <summary>
+        ///  You chose the wrong Level
+        /// </summary>
+        YouChoseTheWrongLevel
     }
 }

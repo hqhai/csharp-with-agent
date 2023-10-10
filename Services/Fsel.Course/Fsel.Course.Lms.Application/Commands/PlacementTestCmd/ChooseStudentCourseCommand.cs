@@ -4,12 +4,14 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Enums;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.OrderServices.Model;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Enums.ErrorCodes;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,7 +49,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-
+            var isCheckLevel = request.Level.IsCheckCourseLevel(student?.CourseLevel ?? default);
+            if (!isCheckLevel)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.YouChoseTheWrongLevel), nameof(isCheckLevel));
+                return methodResult;
+            }
             Random random = new Random();
             var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == request.Level && x.Status == EnumCourseStatus.Active).ToListAsync(cancellationToken);
             var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();

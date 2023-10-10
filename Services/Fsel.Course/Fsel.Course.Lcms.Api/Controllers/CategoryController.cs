@@ -39,18 +39,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Get Course Levels By Type And Level And PT
-        /// </summary>
-        [HttpGet("course-levels-pt")]
-        [ProducesResponseType(typeof(MethodResult<IList<EnumCourseLevel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetCourseLevelsAsync([FromQuery] GetCourseLevelsByTypeAndLevelQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Get All PlacementTest type and Course level
         /// </summary>
         [HttpGet("all-course-skill")]

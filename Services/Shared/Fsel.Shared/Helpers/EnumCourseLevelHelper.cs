@@ -155,5 +155,23 @@ namespace Fsel.Shared.Helpers
                 }).ToList();
             }
         }
+
+        public static bool IsCheckCourseLevel(this EnumCourseLevel courseLevelSelected, EnumCourseLevel courseLevel)
+        {
+            int index = (int)s_courseTypeLevel.FirstOrDefault(x => x.Key == courseLevel.GetEnumCourseType() && x.Value == courseLevel).Value;
+            var levels = s_courseTypeLevel
+                        .Where((x, i) => i >= index - 1 && i <= index + 1 && x.Key == courseLevel.GetEnumCourseType())
+                        .Select(x => x.Value)
+                        .ToList();
+            if (courseLevel.GetEnumCourseType() == courseLevelSelected.GetEnumCourseType())
+            {
+                return levels.Any(x => x == courseLevelSelected);
+            }
+            else
+            {
+                var courseLevelIELSTs = s_levelMapping.Where(x => levels.Contains(x.Key)).Select(x => x.Value).ToList();
+                return courseLevelIELSTs.Any(x => x == courseLevelSelected);
+            }
+        }
     }
 }
