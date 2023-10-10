@@ -124,6 +124,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (data != null && data.Contents != null && data.Contents.Count > 0)
             {
                 data.Contents.Clear();
+                data.Content?.Clear();
             }
             return data;
         }

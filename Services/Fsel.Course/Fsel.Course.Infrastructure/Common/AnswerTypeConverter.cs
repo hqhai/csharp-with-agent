@@ -206,6 +206,7 @@ namespace Fsel.Course.Infrastructure.Common
                     dataAnswer.IsExact = false;
                 }
             }
+            else
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Content != null && dataQuestion.Content.Count > 0)
             {
                 if (dataQuestion.Content.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
