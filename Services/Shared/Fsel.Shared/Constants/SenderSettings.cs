@@ -16,5 +16,6 @@ namespace Fsel.Shared.Constants
         public const string SendPTResultSubject = "THÔNG BÁO KẾT QUẢ LÀM BÀI PLACEMENT TEST";
 
         public const string SendSurveyResultSubject = "THÔNG BÁO KẾT QUẢ KHẢO SÁT FSEL";
+        public const string SendStudentCompleteUnit = "Unit {0}_Thông báo kết quả học tập";
     }
 }

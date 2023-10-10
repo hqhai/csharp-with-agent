@@ -8,9 +8,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.SenderService;
+    using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using MediatR;
     using Microsoft.EntityFrameworkCore;
 
     public class BaseInternalEventHandler
@@ -32,6 +37,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly IFinalTestResultRepository _finalTestResultRepository;
         protected readonly IMockTestResultRepository _mockTestResultRepository;
         protected readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        protected readonly ISenderService _senderService;
+        protected readonly IUserService _userService;
+        protected readonly IMediator _mediator;
+        protected readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        protected readonly ITrainingService _trainingService;
         private const int TotalScoreClassForum = 36;
         private const int PercentClassForumAcademic = 20;
         private const int PercentClassForumIELST = 32;
@@ -44,7 +54,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentUnitTest = 24;
         private const int PercentSkillTest = 18;
 
-        public BaseInternalEventHandler(IVideoResultRepository videoResultRepository,
+        public BaseInternalEventHandler(ITrainingService trainingService, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ISenderService senderService, IVideoResultRepository videoResultRepository,
             IClassForumResultRepository classForumResultRepository,
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
@@ -79,6 +89,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _finalTestResultRepository = finalTestResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
+            _senderService = senderService;
+            _userService = userService;
+            _mediator = mediator;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _trainingService = trainingService;
         }
 
         private async Task<(List<SkillScores>, double)> GetCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
