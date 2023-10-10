@@ -36,13 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper
-            , AuthContext authContext
-            , IUserService userService
-            , IClassForumResultRepository classForumResultRepository
-            , IClassForumRepository classForumRepository
-            , ILessonResultRepository lessonResultRepository
-            , NotificationMessagePublisher notificationMessagePublisher)
+        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -136,7 +130,19 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumHasSubmitted));
                     return methodResult;
                 }
+                if (classForum.GradingStyle == EnumGradingStyle.AutoGrading)
+                {
+                    var enumClassForumScores = Enum.GetValues(typeof(EnumClassForumScoreCriteria)).Cast<EnumClassForumScoreCriteria>().ToList();
+                    classForumResult.ClassForumScores = enumClassForumScores.Select(x => new ClassForumScore
+                    {
+                        ClassForumResultId = classForumResult.Id,
+                        Score = 9,
+                        Criteria = x,
+                    }).ToList();
 
+                    classForumResult = _classForumResultRepository.Update(classForumResult);
+                    await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
                 //mặc định gửi cho tất cả CSO
                 IList<EnumRole> roles = new List<EnumRole>();
                 roles.Add(EnumRole.CSO);
