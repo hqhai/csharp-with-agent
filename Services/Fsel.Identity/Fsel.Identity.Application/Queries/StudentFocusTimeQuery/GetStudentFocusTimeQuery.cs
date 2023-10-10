@@ -66,22 +66,23 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
                                         .OrderBy(x => x.CreatedDate.Date)
                                         .ToList();
             bool hasContinuousData = true;
+
             for (int i = 0; i < NUMBER_OF_WEEKDAY; i++)
             {
-                var expectedDate = currentDate.AddDays(-i).Date;
-                studentFocusTimesQuery.Where(x => x.CreatedDate.Date == expectedDate);
-                if (!studentFocusTimesQuery.Any(x => x.CreatedDate.Date == expectedDate))
+                var expectedDate = currentDate.AddDays(-i);
+                var checkDate = studentFocusTimesCheckQuery.FirstOrDefault(x => x.CreatedDate.Date == expectedDate.Date);
+
+                if (checkDate == null)
                 {
                     hasContinuousData = false;
                     break;
                 }
             }
-
+            studentFocusTime = _mapper.Map<StudentFocusTimeModel>(studentFocusTimesQuery.FirstOrDefault());
             studentFocusTime.StudentId = student.Id;
             studentFocusTime.IsWeekStreak = hasContinuousData;
-            studentFocusTime = _mapper.Map<StudentFocusTimeModel>(studentFocusTimesQuery.FirstOrDefault());
 
-            methodResult.Result = _mapper.Map<StudentFocusTimeModel>(studentFocusTime);
+            methodResult.Result = studentFocusTime;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
