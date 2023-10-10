@@ -64,7 +64,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotPendding));
                 return methodResult;
             }
-            var classForumStatus = classForumResult.ClassForum.GradingStyle;
             //if (classForumResult.CheckCsoId != csoId)
             //{
             //    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.CsoInvalid), nameof(classForumResult.CheckCsoId));
@@ -74,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 if (request.IsApprove)
                 {
-                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot)
+                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.AutoGrading)
                     {
                         var enumClassForumScores = Enum.GetValues(typeof(EnumClassForumScoreCriteria)).Cast<EnumClassForumScoreCriteria>().ToList();
                         classForumResult.ClassForumScores = enumClassForumScores.Select(x => new ClassForumScore
@@ -84,17 +83,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                             Criteria = x,
                         }).ToList();
                         classForumResult.Status = EnumClassForumResultStatus.Graded;
-                        var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
-                        var csoId = csoResults.Content?.Result?.Id;
-                        classForumResult.CheckCsoId = csoId;
                     }
                     else
                     {
                         classForumResult.Status = EnumClassForumResultStatus.PendingForGrading;
-                        var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
-                        var csoId = csoResults.Content?.Result?.Id;
-                        classForumResult.CheckCsoId = csoId;
                     }
+
+                    var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+                    var csoId = csoResults.Content?.Result?.Id;
+                    classForumResult.CheckCsoId = csoId;
                 }
                 else
                 {
