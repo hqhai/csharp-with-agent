@@ -3,7 +3,6 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using System;
-    using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
@@ -194,18 +193,6 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
             int number = 0;
 
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0)
-            {
-                if (dataQuestion.Contents.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
-                {
-                    dataAnswer.IsExact = true;
-                    number++;
-                }
-                else
-                {
-                    dataAnswer.IsExact = false;
-                }
-            }
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Content != null && dataQuestion.Content.Count > 0)
             {
                 if (dataQuestion.Content.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
