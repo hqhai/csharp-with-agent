@@ -121,10 +121,9 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static object? ClearAnswers(ShortAnswerQuestionWordBaseQuestion? data)
         {
-            if (data != null && data.Contents != null && data.Contents.Count > 0)
+            if (data != null && data.Content != null && data.Content.Any())
             {
-                data.Contents.Clear();
-                data.Content?.Clear();
+                data.Content.Clear();
             }
             return data;
         }
