@@ -6,6 +6,7 @@ using System.Text;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.OrderService;
@@ -19,7 +20,6 @@ using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 

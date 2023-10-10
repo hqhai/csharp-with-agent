@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.TrainingService;
@@ -15,7 +16,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class GetUserProfileQuery : IRequest<MethodResult<UserProfileModel>>

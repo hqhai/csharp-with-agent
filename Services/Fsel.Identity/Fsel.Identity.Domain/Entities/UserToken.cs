@@ -2,11 +2,11 @@
 
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
-using Microsoft.AspNetCore.Identity;
+using Fsel.Core.Entities;
 
 namespace Fsel.Identity.Domain.Entities
 {
-    public class UserToken : IdentityUserToken<string>
+    public class UserToken : UserTokenEntity
     {
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? RefreshToken { get; set; }

@@ -35,7 +35,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpPost("get-all")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromBody] SearchAllQuery query)
+        public async Task<IActionResult> Search([FromBody] ExecuteQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

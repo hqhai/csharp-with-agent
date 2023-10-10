@@ -6,6 +6,7 @@ using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.StudentCmd;
 using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Domain.Entities;
@@ -20,7 +21,6 @@ using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
 
@@ -91,13 +91,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 await _roleManager.CreateAsync(role);
                             }
 
-                            IdentityResult result;
+                            Microsoft.AspNetCore.Identity.IdentityResult result;
                             if (user != null)
                             {
                                 var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
                                 user.PasswordHash = hashPassword;
                                 _mapper.Map(request, user);
                                 user.UserName = request.Email;
+                                if (!user.IsValid())
+                                {
+                                    methodResult.AddErrorBadRequest(user.ErrorMessages);
+                                    return methodResult;
+                                }
                                 result = await _userManager.UpdateAsync(user);
                             }
                             else
@@ -105,6 +110,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 user = new();
                                 _mapper.Map(request, user);
                                 user.UserName = request.Email;
+                                if (!user.IsValid())
+                                {
+                                    methodResult.AddErrorBadRequest(user.ErrorMessages);
+                                    return methodResult;
+                                }
 
                                 #region Add Platform to User
 

@@ -4,10 +4,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
 
     public class DeleteUserCommand : IRequest<MethodResult<bool>>
     {

@@ -9,18 +9,18 @@ namespace Fsel.Course.Application.Queries
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
 
-    public class SearchAllQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<CourseModel>>>
+    public class ExecuteQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<CourseModel>>>
     {
     }
-    public class SearchAllQueryHandler : IRequestHandler<SearchAllQuery, MethodResult<PagingItemsModel<CourseModel>>>
+    public class ExecuteQueryHandler : IRequestHandler<ExecuteQuery, MethodResult<PagingItemsModel<CourseModel>>>
     {
         private readonly ICourseRepository _courseRepository;
-        public SearchAllQueryHandler(ICourseRepository courseRepository)
+        public ExecuteQueryHandler(ICourseRepository courseRepository)
         {
             _courseRepository = courseRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<CourseModel>>> Handle(SearchAllQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<CourseModel>>> Handle(ExecuteQuery request, CancellationToken cancellationToken)
         {
             return await _courseRepository.GetListByPageAsync<CourseModel>(request, cancellationToken);
         }

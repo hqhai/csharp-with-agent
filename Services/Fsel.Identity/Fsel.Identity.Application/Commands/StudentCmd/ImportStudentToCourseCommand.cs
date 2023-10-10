@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.InteractionService.Models;
@@ -19,12 +20,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using EnumAuthErrorCode = Domain.Enums.ErrorCodes.EnumAuthErrorCode;
 
@@ -121,7 +120,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 foreach (var student in result.Datas.ToList())
                 {
-                    IdentityResult identityResult;
+                    Microsoft.AspNetCore.Identity.IdentityResult identityResult;
                     var user = new User();
                     user.UserName = student.Email;
                     user.Email = student.Email;

@@ -56,8 +56,8 @@ namespace Fsel.Notification.Application.Commands
             NotificationMessage notificationNew = _mapper.Map<NotificationMessage>(request);
 
             // check null data
-            var notificationTypeResult = request.NotificationTypeId != Guid.Empty ? await _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId) : null;
-            if (notificationTypeResult == null)
+            var notificationType = await _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId);
+            if (notificationType == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NotificationTypeId), request.NotificationTypeId);
                 return methodResult;
@@ -124,12 +124,21 @@ namespace Fsel.Notification.Application.Commands
 
                 //Push notification to onesignal
                 var oneSignalMessage = _mapper.Map<OneSignalMessageModel>(notificationNew);
+                oneSignalMessage.UserIds = listUserId;
+                oneSignalMessage.AvatarPath = avatarPath;
+                oneSignalMessage.Data = new
+                {
+                    notificationType.Type,
+                    notificationType.Content
+                };
                 await _oneSignalProvider.CreateNotificationAsync(oneSignalMessage, cancellationToken);
 
-                //Push notification
+                //Push notification to websocket
                 var notificationRealTime = _mapper.Map<NotificationMessageModel>(notificationNew);
                 notificationRealTime.UserIds = listUserId;
                 notificationRealTime.AvatarPath = avatarPath;
+                notificationRealTime.Type = notificationType.Type;
+                notificationRealTime.Content = notificationType.Content;
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
 
