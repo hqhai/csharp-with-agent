@@ -18,7 +18,10 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
             set
             {
                 _contents = value;
-                Content = _contents?.ToList();
+                if (_contents != null && _contents.Any())
+                {
+                    Content = _contents.ToList();
+                }
             }
         }
 
