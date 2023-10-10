@@ -463,6 +463,35 @@ namespace Fsel.Course.Infrastructure.Common
             };
         }
 
+        public IList<VideoTimeCodeModel> GetVideoTimeCodes(Video? video, Guid videoResultId)
+        {
+            ArgumentNullException.ThrowIfNull(video);
+            var videoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).ToList();
+            var videoTimeCodeModels = new List<VideoTimeCodeModel>();
+            var indexProcess = GetIndexProcess(videoTimeCodes, videoResultId);
+            foreach (var videoTimeCode in videoTimeCodes)
+            {
+                var indexTimeCode = videoTimeCodes.IndexOf(videoTimeCode);
+                var videoTimeCodeResult = videoTimeCode.VideoTimeCodeResults.FirstOrDefault();
+                videoTimeCodeModels.Add(new VideoTimeCodeModel
+                {
+                    Id = videoTimeCode.Id,
+                    TotalCount = GetTotalQuestion(videoTimeCode),
+                    DisplayTime = videoTimeCode.DisplayTime,
+                    ExecutionTime = videoTimeCode.ExecutionTime,
+                    TimeCodeType = videoTimeCode.TimeCodeType,
+                    VideoId = videoTimeCode.VideoId,
+                    Ungraded = GetUngraded(videoTimeCode),
+                    CorrectCount = GetCorrectCount(videoTimeCode),
+                    CorrectTotal = GetCorrectTotal(videoTimeCode),
+                    Status = GetTimeCodeStatus(indexProcess, indexTimeCode),
+                    WorkingTime = videoTimeCodeResult?.WorkingTime ?? default,
+                    Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n)).ToList(),
+                });
+            }
+            return videoTimeCodeModels;
+        }
+
         private ExerciseModel GetExercise(Exercise? n)
         {
             ArgumentNullException.ThrowIfNull(n);

@@ -74,6 +74,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                     .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                 .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
+                                 .ThenInclude(x => x!.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
+                                .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
@@ -95,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 CourseLevel = video.CourseLevel,
                 SubFilePath = video.SubFilePath,
                 Type = video.Type,
-                VideoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).Select(x => _videoHelper.GetVideoTimeCode(x)).ToList(),
+                VideoTimeCodes = _videoHelper.GetVideoTimeCodes(video, videoResult.Id),
                 VideoResult = video.VideoResults.Where(x => x.StudentId == studentId).Select(x => new VideoResultModel
                 {
                     Id = x.Id,
