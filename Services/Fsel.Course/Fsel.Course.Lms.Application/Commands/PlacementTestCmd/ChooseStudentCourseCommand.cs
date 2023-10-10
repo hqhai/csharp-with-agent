@@ -13,6 +13,7 @@ using Fsel.Shared.Enums;
 using Fsel.Shared.Enums.ErrorCodes;
 using Fsel.Shared.Helpers;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
@@ -74,6 +75,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 CodeCourse = course.Code,
                 UserId = _authContext.CurrentUserId
             }).ConfigureAwait(false);
+            methodResult.Result = true;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

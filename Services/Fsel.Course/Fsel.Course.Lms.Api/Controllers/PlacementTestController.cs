@@ -29,11 +29,25 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get Levels By Student
         /// </summary>
         [HttpGet("levels")]
+        [Authorize(Roles = nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLevelsByStudentsAsync([FromQuery] GetLevelsByStudentQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Choose Student Course
+        /// </summary>
+        [HttpPost("choose-student-course")]
+        [Authorize(Roles = nameof(EnumRole.Student))]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChooseStudentCourse([FromBody] ChooseStudentCourseCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
