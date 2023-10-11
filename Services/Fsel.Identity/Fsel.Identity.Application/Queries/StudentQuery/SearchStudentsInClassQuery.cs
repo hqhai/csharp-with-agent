@@ -43,7 +43,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
 
-            var students = _studentRepository.Queryable.Include(x => x.Human).Select(i => new SearchStudentsInClassModel
+            var students = _studentRepository.Queryable.Where(p => p.ClassId.HasValue).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
             {
                 Id = i.Id,
                 FullName = i.Human!.FullName,

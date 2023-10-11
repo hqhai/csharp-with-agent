@@ -75,8 +75,6 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
         private FeatureAccessTime UpdateExistingFeatureAccessTime(FeatureAccessTime featureAccessTime, SaveFeatureAccessTimeCommand request)
         {
-            featureAccessTime = _mapper.Map<FeatureAccessTime>(request);
-
             if (request.AccessTime == null)
             {
                 featureAccessTime.Visit += 1;
@@ -85,7 +83,6 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
             featureAccessTime.LastVisited = DateTime.UtcNow;
 
             return _featureAccessTimeRepository.Update(featureAccessTime);
-
         }
 
 
