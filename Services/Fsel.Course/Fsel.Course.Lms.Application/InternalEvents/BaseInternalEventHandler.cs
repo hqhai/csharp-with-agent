@@ -458,8 +458,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 NumberOfHour = featureAccessTime == null ? "0" : Math.Round(((double)featureAccessTime.AccessTime / 3600), 2).ToString(CultureInfo.CurrentCulture),
                 NumberOfUnit = _courseUnitMockTestRepository.Queryable.Where(p => p.CourseId == courseId && p.UnitId.HasValue).Count().ToString(CultureInfo.CurrentCulture),
                 LevelOfStudent = student?.CourseLevel.ToString(),
-                AccessLink = _appSetting.ConstantUrl?.LinkLMS,
-                HotLine = _appSetting.ConstantUrl?.HotLine
+                AccessLink = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                HotLine = _appSetting.ResourceContent?.HotLine
             };
             if (course?.CourseType == EnumCourseType.Academic)
             {

@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     ReadingScore = groupedSkillScores.FirstOrDefault(p => p.Skill == EnumCourseSkill.Reading)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty,
                     WritingScore = groupedSkillScores.FirstOrDefault(p => p.Skill == EnumCourseSkill.Writing)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty,
                     VocabularyScore = groupedSkillScores.FirstOrDefault(p => p.Skill == EnumCourseSkill.Vocabulary)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty,
-                    AccessLink = _appSetting.ConstantUrl?.LinkLMS,
+                    AccessLink = _appSetting.ResourceContent?.LmsWebsiteUrl,
                     CsoPhonenumber = cso.Content?.Result?.Human?.PhoneNumber
                 },
                 Template = percent >= 60 ? EnumSenderTemplate.SendStudentCompleteUnitGood : EnumSenderTemplate.SendStudentCompleteUnitWeak
