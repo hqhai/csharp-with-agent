@@ -73,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 if (request.IsApprove)
                 {
-                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.AutoGrading)
+                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot)
                     {
                         var enumClassForumScores = Enum.GetValues(typeof(EnumClassForumScoreCriteria)).Cast<EnumClassForumScoreCriteria>().ToList();
                         classForumResult.ClassForumScores = enumClassForumScores.Select(x => new ClassForumScore
