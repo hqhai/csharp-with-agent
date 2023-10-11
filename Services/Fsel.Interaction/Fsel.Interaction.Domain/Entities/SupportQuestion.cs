@@ -22,7 +22,6 @@ namespace Fsel.Interaction.Domain.Entities
         /// Tiêu đề
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Content { get; set; }
 
         public bool IsActive { get; set; }
