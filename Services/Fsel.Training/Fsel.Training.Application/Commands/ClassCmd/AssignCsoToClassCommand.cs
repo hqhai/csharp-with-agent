@@ -31,16 +31,23 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var classes = await _classRepository.GetByIdAsync(request.ClassId);
-            if (classes == null)
+            var @class = await _classRepository.GetByIdAsync(request.ClassId);
+            if (@class == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class));
                 return methodResult;
             }
+
+            if (@class.CsoId == request.CsoId)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CsoAlreadyInClass), nameof(@class));
+                return methodResult;
+            }
+
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                classes.CsoId = request.CsoId;
-                _classRepository.Update(classes);
+                @class.CsoId = request.CsoId;
+                _classRepository.Update(@class);
                 await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
