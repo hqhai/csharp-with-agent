@@ -29,6 +29,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly IStudentRepository _studentRepository;
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
+        private const int NUMBER_OF_WEEKDAY = 7;
 
         public CreateStudentFocusTimeCommandHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService)
         {
@@ -60,12 +61,16 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             {
                 if (studentFocusTime == null)
                 {
-                    if (request.TargetTime == 0)
+                    studentFocusTime = _mapper.Map<StudentFocusTime>(request);
+                    var systemConfigResult = systemConfig?.Content?.Result;
+                    if (systemConfigResult == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.TargetTime), request.TargetTime);
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                         return methodResult;
                     }
-                    studentFocusTime = _mapper.Map<StudentFocusTime>(request);
+
+                    var defaultTargetTime = systemConfigResult.OrderBy(x => x.Token).FirstOrDefault()!.TargetTime;
+                    studentFocusTime.TargetTime = defaultTargetTime;
                     studentFocusTime.StudentId = student.Id;
                     studentFocusTime.IsEstablished = false;
 
@@ -73,18 +78,18 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 }
                 else
                 {
-                    var systemConfigMap = systemConfig?.Content?.Result!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
-                    if (!studentFocusTime.IsEstablished)
+                    if (!studentFocusTime.IsEstablished && request.TargetTime != 0)
                     {
                         studentFocusTime.TargetTime = request.TargetTime;
                     }
 
+                    var systemConfigMap = systemConfig?.Content?.Result!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
                     studentFocusTime.ExecuteTime += request.ExecuteTime;
                     studentFocusTime.IsEstablished = true;
 
                     if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime)
                     {
-                        student.NumberOfToken = systemConfigMap.Token;
+                        student.NumberOfToken = CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token
                         _studentRepository.Update(student);
                         await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -98,6 +103,33 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             });
 
             return methodResult;
+        }
+
+        private bool CheckStudentHasStreak(Student student)
+        {
+            bool hasStreak = true;
+
+            var currentDate = DateTime.UtcNow.Date;
+            var startDate = currentDate.AddDays(-NUMBER_OF_WEEKDAY).Date; // Ngày bắt đầu từ 7 ngày trước
+            var endDate = currentDate.Date;
+            var studentFocusTimesCheckQuery = _studentFocusTimeRepository.Queryable
+                                        .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && x.ExecuteTime >= x.TargetTime)
+                                        .OrderBy(x => x.CreatedDate.Date)
+                                        .ToList();
+
+            for (int i = 1; i <= NUMBER_OF_WEEKDAY; i++)
+            {
+                var expectedDate = currentDate.AddDays(-i);
+                var checkDate = studentFocusTimesCheckQuery.FirstOrDefault(x => x.CreatedDate.Date == expectedDate.Date);
+
+                if (checkDate == null)
+                {
+                    hasStreak = false;
+                    break;
+                }
+            }
+
+            return hasStreak;
         }
 
     }

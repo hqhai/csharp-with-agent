@@ -15,8 +15,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public bool IsEstablished { get; set; }
 
-        public double TotalTime { get; set; }
-
         public bool IsWeekStreak { get; set; }
     }
 }
