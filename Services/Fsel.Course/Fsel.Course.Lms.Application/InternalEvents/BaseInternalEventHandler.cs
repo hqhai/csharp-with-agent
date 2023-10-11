@@ -12,10 +12,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
-    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -29,25 +27,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly IVideoResultRepository _videoResultRepository;
         protected readonly IClassForumResultRepository _classForumResultRepository;
         protected readonly IUnitResultRepository _unitResultRepository;
-        protected readonly ILessonResultRepository _lessonResultRepository;
         protected readonly ICourseResultRepository _courseResultRepository;
         protected readonly ICourseRepository _courseRepository;
         protected readonly IUnitRepository _unitRepository;
-        protected readonly IMockTestRepository _mockTestRepository;
-        protected readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
-        protected readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
-        protected readonly IQuestionRepository _questionRepository;
-        protected readonly IHomeWorkRepository _homeWorkRepository;
-        protected readonly FinishOneUnitPublisher _finishOneUnitPublisher;
-        protected readonly FinishOneLevelPassPublisher _finishOneLevelPassPublisher;
         protected readonly IFinalTestResultRepository _finalTestResultRepository;
         protected readonly IMockTestResultRepository _mockTestResultRepository;
         protected readonly IHomeWorkResultRepository _homeWorkResultRepository;
-        protected readonly ISenderService _senderService;
         protected readonly IUserService _userService;
         protected readonly IMediator _mediator;
         protected readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
-        protected readonly ITrainingService _trainingService;
+        protected readonly FinishOneLevelPassPublisher _finishOneLevelPassPublisher;
         protected readonly AppSetting _appSetting;
         protected readonly ISystemService _systemService;
         private const int TotalScoreClassForum = 36;
@@ -62,20 +51,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentUnitTest = 24;
         private const int PercentSkillTest = 18;
 
-        public BaseInternalEventHandler(ISystemService systemService, AppSetting appSetting, ITrainingService trainingService, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ISenderService senderService, IVideoResultRepository videoResultRepository,
+        public BaseInternalEventHandler(ISystemService systemService, AppSetting appSetting,
+            FinishOneLevelPassPublisher finishOneLevelPassPublisher,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IMediator mediator,
+            IUserService userService,
+            IVideoResultRepository videoResultRepository,
             IClassForumResultRepository classForumResultRepository,
             IUnitResultRepository unitResultRepository,
-            ILessonResultRepository lessonResultRepository,
             ICourseResultRepository courseResultRepository,
             ICourseRepository courseRepository,
             IUnitRepository unitRepository,
-            IMockTestRepository mockTestRepository,
-            IHomeWorkQuestionRepository homeWorkQuestionRepository,
-            IHomeWorkAnswerRepository homeWorkAnswerRepository,
-            IQuestionRepository questionRepository,
-            IHomeWorkRepository homeWorkRepository,
-            FinishOneUnitPublisher finishOneUnitPublisher,
-            FinishOneLevelPassPublisher finishOneLevelPassPublisher,
             IFinalTestResultRepository finalTestResultRepository,
             IMockTestResultRepository mockTestResultRepository,
             IHomeWorkResultRepository homeWorkResultRepository)
@@ -83,25 +69,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
             _unitResultRepository = unitResultRepository;
-            _lessonResultRepository = lessonResultRepository;
             _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
-            _mockTestRepository = mockTestRepository;
-            _homeWorkQuestionRepository = homeWorkQuestionRepository;
-            _homeWorkAnswerRepository = homeWorkAnswerRepository;
-            _questionRepository = questionRepository;
-            _homeWorkRepository = homeWorkRepository;
-            _finishOneUnitPublisher = finishOneUnitPublisher;
-            _finishOneLevelPassPublisher = finishOneLevelPassPublisher;
             _finalTestResultRepository = finalTestResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
-            _senderService = senderService;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _finishOneLevelPassPublisher = finishOneLevelPassPublisher;
             _userService = userService;
             _mediator = mediator;
-            _courseUnitMockTestRepository = courseUnitMockTestRepository;
-            _trainingService = trainingService;
             _appSetting = appSetting;
             _systemService = systemService;
         }
