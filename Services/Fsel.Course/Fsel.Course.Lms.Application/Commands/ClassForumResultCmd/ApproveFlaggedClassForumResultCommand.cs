@@ -26,11 +26,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMapper _mapper;
+        private readonly IClassForumResultFlagRepository _classForumResultFlagRepository;
 
-        public ApproveFlaggedClassForumResultCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper)
+        public ApproveFlaggedClassForumResultCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, IClassForumResultFlagRepository classForumResultFlagRepository)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
+            _classForumResultFlagRepository = classForumResultFlagRepository;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveFlaggedClassForumResultCommand request, CancellationToken cancellationToken)
@@ -40,14 +42,22 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumResultFiles)
                                                                     .Where(e => e.Id == request.ClassForumResultId)
                                                                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+            var classForumResultFlag = await _classForumResultFlagRepository.Queryable.Where(e => e.ClassForumResultId == request.ClassForumResultId)
+                                                                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (classForumResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
             }
+            if (classForumResultFlag == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResultFlag));
+                return methodResult;
+            }
             if (classForumResult.Status != EnumClassForumResultStatus.Graded)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotPendding));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
                 return methodResult;
             }
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
@@ -55,14 +65,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 if (request.IsApprove)
                 {
                     await _classForumResultRepository.DeleteAsync(classForumResult);
+
+                    classForumResultFlag.Status = EnumClassForumResultFlagStatus.Approve;
+                    _mapper.Map(classForumResultFlag, classForumResultFlag);
                 }
                 else
                 {
-                    classForumResult.IsFlagged = null;
-                    _classForumResultRepository.Update(classForumResult);
+                    classForumResultFlag.Status = EnumClassForumResultFlagStatus.Reject;
+                    _mapper.Map(classForumResultFlag, classForumResultFlag);
                 }
-
-                await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                _classForumResultFlagRepository.Update(classForumResultFlag);
+                await _classForumResultFlagRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;

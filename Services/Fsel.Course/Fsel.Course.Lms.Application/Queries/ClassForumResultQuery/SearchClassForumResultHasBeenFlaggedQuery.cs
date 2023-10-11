@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
-    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -41,7 +40,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.IsFlagged == true)
+                                    .Include(x => x.ClassForumResultFlags)
+                                    .Where(x => x.ClassForumResultFlags != null)
                                     .Select(x => new ClassForumResultModel
                                     {
                                         Id = x.Id,
@@ -49,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         CreatedUserId = x.CreatedUserId,
                                         CreatedFullName = x.CreatedFullName,
                                         Content = x.Content,
+                                        Status = x.Status,
                                     });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
