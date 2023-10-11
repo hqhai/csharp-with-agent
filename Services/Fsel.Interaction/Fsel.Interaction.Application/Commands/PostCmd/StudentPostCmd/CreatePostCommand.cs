@@ -7,7 +7,9 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Services.SystemService;
     using Fsel.Interaction.Domain.Entities;
+    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts.StudentPost;
     using Fsel.Interaction.Domain.Models.EntityModels;
@@ -23,12 +25,14 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly IPostRepository _iPostRepository;
+        private readonly ISystemService _systemService;
 
-        public CreatePostCommandHandler(IMapper mapper, AuthContext authContext, IPostRepository iPostRepository)
+        public CreatePostCommandHandler(IMapper mapper, AuthContext authContext, IPostRepository iPostRepository, ISystemService systemService)
         {
             _mapper = mapper;
             _authContext = authContext;
             _iPostRepository = iPostRepository;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<PostModel>> Handle(CreatePostCommand request, CancellationToken cancellationToken)
@@ -37,6 +41,17 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
             MethodResult<PostModel> methodResult = new MethodResult<PostModel>();
 
             Post studentPosts = _mapper.Map<Post>(request);
+            // Check từ khoá cấm
+            var listForbiddenWordResult = await _systemService.GetListForbiddenWordAsync();
+            var forbiddenWord = listForbiddenWordResult.Content?.Result;
+            var forbiddenWords = forbiddenWord.Select(Word => Word.Word);
+            var containsForbiddenWord = forbiddenWords.Where(x => request.Content.Contains(x, StringComparison.OrdinalIgnoreCase)).Select(word => word.ToLower()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (containsForbiddenWord.Any())
+            {
+                string combinedForbiddenWords = string.Join(", ", containsForbiddenWord);
+                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContainsForbiddenKeywords),combinedForbiddenWords);
+                return methodResult;
+            }
 
             studentPosts.UserId = _authContext.CurrentUserId;
 

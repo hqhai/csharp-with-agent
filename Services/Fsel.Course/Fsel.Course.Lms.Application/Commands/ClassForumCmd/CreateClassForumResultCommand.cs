@@ -5,6 +5,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
+    using Azure.Core;
+    using Deepgram.Models;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -15,6 +17,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -35,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly ISystemService _systemService;
 
         public CreateClassForumResultCommandHandler(IMapper mapper
             , AuthContext authContext
@@ -42,7 +47,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             , IClassForumResultRepository classForumResultRepository
             , IClassForumRepository classForumRepository
             , ILessonResultRepository lessonResultRepository
-            , NotificationMessagePublisher notificationMessagePublisher)
+            , NotificationMessagePublisher notificationMessagePublisher
+            , ISystemService systemService
+            )
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -51,12 +58,27 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _classForumRepository = classForumRepository;
             _lessonResultRepository = lessonResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
+
+            // Check từ khoá cấm
+            var listForbiddenWordResult = await _systemService.GetListForbiddenWordAsync();
+            var forbiddenWord = listForbiddenWordResult.Content?.Result;
+            var forbiddenWords = forbiddenWord.Select(Word => Word.Word);
+
+            var containsForbiddenWord = forbiddenWords.Where(x => request.WordContent.Contains(x, StringComparison.OrdinalIgnoreCase) || request.Content.Contains(x, StringComparison.OrdinalIgnoreCase)).Select(word => word.ToLower()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+           
+            if (containsForbiddenWord.Any())
+            {
+                string combinedForbiddenWords = string.Join(", ", containsForbiddenWord);
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords),combinedForbiddenWords);
+                return methodResult;
+            }
 
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
@@ -70,6 +92,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
+            
 
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.LessonId, cancellationToken);
             if (classForum == null)
