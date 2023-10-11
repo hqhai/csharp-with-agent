@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using Fsel.Course.Domain.Entities;
@@ -9,12 +10,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SenderService;
+    using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -42,6 +48,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly IMediator _mediator;
         protected readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         protected readonly ITrainingService _trainingService;
+        protected readonly AppSetting _appSetting;
+        protected readonly ISystemService _systemService;
         private const int TotalScoreClassForum = 36;
         private const int PercentClassForumAcademic = 20;
         private const int PercentClassForumIELST = 32;
@@ -54,7 +62,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentUnitTest = 24;
         private const int PercentSkillTest = 18;
 
-        public BaseInternalEventHandler(ITrainingService trainingService, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ISenderService senderService, IVideoResultRepository videoResultRepository,
+        public BaseInternalEventHandler(ISystemService systemService, AppSetting appSetting, ITrainingService trainingService, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ISenderService senderService, IVideoResultRepository videoResultRepository,
             IClassForumResultRepository classForumResultRepository,
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
@@ -94,6 +102,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _mediator = mediator;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _trainingService = trainingService;
+            _appSetting = appSetting;
+            _systemService = systemService;
         }
 
         private async Task<(List<SkillScores>, double)> GetCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
@@ -430,6 +440,43 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 courseResult.Status = EnumResultStatus.Done;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
+                var student = studentResult.Content?.Result?.FirstOrDefault();
+                var course = await _courseRepository.GetByIdAsync(courseId);
+                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = courseId, UserId = courseResult.CreatedUserId });
+                var featureAccessTime = featureAccessTimeResult.Content?.Result;
+                var sendStudentCompleteCourseModel = new SendStudentCompleteCourseModel
+                {
+                    StudentName = student?.Human?.FullName,
+                    CourseName = course?.Name,
+                    NumberOfHour = featureAccessTime == null ? "0" : Math.Round(((double)featureAccessTime.AccessTime / 3600), 2).ToString(CultureInfo.CurrentCulture),
+                    NumberOfUnit = _courseUnitMockTestRepository.Queryable.Where(p => p.CourseId == courseId && p.UnitId.HasValue).Count().ToString(CultureInfo.CurrentCulture),
+                    LevelOfStudent = student?.CourseLevel.ToString(),
+                    AccessLink = _appSetting.ConstantUrl?.LinkLMS,
+                    HotLine = _appSetting.ConstantUrl?.HotLine
+                };
+                if (course?.CourseType == EnumCourseType.Academic)
+                {
+                    var finalTestResult = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == courseId && p.StudentId == studentId, cancellationToken);
+                    sendStudentCompleteCourseModel.GrammarScore = finalTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Grammar)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+                    sendStudentCompleteCourseModel.ReadingScore = finalTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Reading)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+                    sendStudentCompleteCourseModel.VocabularyScore = finalTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Vocabulary)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+                }
+                else
+                {
+                    var mockTestResult = await _mockTestResultRepository.Queryable.Where(p => p.CourseId == courseId && p.StudentId == studentId).OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                    sendStudentCompleteCourseModel.SpeakingScore = mockTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Speaking)?.Percent.ToString(CultureInfo.CurrentCulture);
+                    sendStudentCompleteCourseModel.ReadingScore = mockTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Reading)?.Percent.ToString(CultureInfo.CurrentCulture);
+                    sendStudentCompleteCourseModel.WritingScore = mockTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Writing)?.Percent.ToString(CultureInfo.CurrentCulture);
+                    sendStudentCompleteCourseModel.ListeningScore = mockTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Listening)?.Percent.ToString(CultureInfo.CurrentCulture);
+                }
+                var sendResult = await _mediator.Send(new SenderCommand
+                {
+                    Email = student?.Human?.Email,
+                    Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course?.Name, student?.Human?.FullName),
+                    Params = sendStudentCompleteCourseModel,
+                    Template = course?.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
+                }, cancellationToken).ConfigureAwait(false);
             }
         }
     }

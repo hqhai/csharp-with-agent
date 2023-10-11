@@ -15,6 +15,8 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     public class ConstantUrl
     {
         public string? ConfirmOtpUrl { get; set; }
+        public string? LinkLMS { get; set; }
+        public string? HotLine { get; set; }
     }
 
     public class Services : BaseServices
