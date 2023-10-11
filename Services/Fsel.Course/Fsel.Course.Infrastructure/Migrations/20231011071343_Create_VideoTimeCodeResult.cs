@@ -48,7 +48,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    WorkingTime = table.Column<long>(type: "bigint", nullable: false),
                     VideoResultId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     VideoTimeCodeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CorrectCount = table.Column<int>(type: "int", nullable: false),

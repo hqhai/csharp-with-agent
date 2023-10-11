@@ -439,7 +439,6 @@ namespace Fsel.Course.Infrastructure.Common
                     ExecutionTime = item.ExecutionTime,
                     TimeCodeType = item.TimeCodeType,
                     VideoId = item.VideoId,
-                    WorkingTime = videoTimeCodeResult?.WorkingTime ?? default,
                     Status = GetTimeCodeStatus(indexProcess, indexTimeCode)
                 });
             }
@@ -462,7 +461,6 @@ namespace Fsel.Course.Infrastructure.Common
                 CorrectCount = GetCorrectCount(videoTimeCode),
                 CorrectTotal = GetCorrectTotal(videoTimeCode),
                 Status = GetTimeCodeStatus(videoTimeCode),
-                WorkingTime = videoTimeCodeResult?.WorkingTime ?? default,
                 Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n)).ToList(),
             };
         }

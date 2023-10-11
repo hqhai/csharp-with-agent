@@ -4,8 +4,6 @@ namespace Fsel.Course.Domain.Entities
 {
     public class VideoTimeCodeResult : BaseResultScore
     {
-        public long WorkingTime { get; set; }
-
         public VideoResult? VideoResult { get; set; }
         public Guid VideoResultId { get; set; }
 

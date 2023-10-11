@@ -4590,9 +4590,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("VideoTimeCodeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("WorkingTime")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("VideoResultId");

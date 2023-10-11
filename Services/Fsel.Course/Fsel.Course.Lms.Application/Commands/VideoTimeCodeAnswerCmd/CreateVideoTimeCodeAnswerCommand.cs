@@ -172,7 +172,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             videoTimeCodeResult.Percent = skillScores.Sum(x => x.CorrectCount).GetPercent(skillScores.Sum(x => x.TotalCount));
             videoTimeCodeResult.SkillScores = skillScores;
-            videoTimeCodeResult.WorkingTime += request.WorkingTime ?? default;
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 if (videoTimeCode?.TimeCodeType == EnumTimeCodeType.UnitTest)
