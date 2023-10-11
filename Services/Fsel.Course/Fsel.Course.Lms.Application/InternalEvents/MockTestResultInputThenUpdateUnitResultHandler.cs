@@ -28,6 +28,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && mockTestResult.Status == EnumResultStatus.Done)
             {
                 var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
+                                                   .Include(x => x.UnitResults.Where(x => x.UnitId == mockTestResult.UnitId && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId))
                                                    .Include(x => x.LessonResults.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId))
                                                    .FirstOrDefaultAsync(x => x.Id == mockTestResult.UnitId, cancellationToken);
                 if (unit != null)
@@ -36,7 +37,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == mockTestResult.UnitId && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId, cancellationToken);
                     if (unitResult != null && unit.LessonResults.Count == unit.UnitLessons.Count)
                     {
-                        await UpdateUnit(lessonResulIds, unit, mockTestResult.CourseId, mockTestResult.StudentId, true, cancellationToken);
+                        await UpdateUnitResultAsync(lessonResulIds, unit, mockTestResult.CourseId, mockTestResult.StudentId, true, cancellationToken);
                     }
                 }
             }

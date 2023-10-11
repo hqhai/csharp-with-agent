@@ -16,7 +16,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     public class ClassForumResultInputThenUpdateLessonResultHandler : BaseInternalLessonResultEventHandler,
         INotificationHandler<EntityChangedEvent<ClassForumResult>>, INotificationHandler<EntityCreatedEvent<ClassForumResult>>
     {
-        public ClassForumResultInputThenUpdateLessonResultHandler(IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
+        public ClassForumResultInputThenUpdateLessonResultHandler(FinishOneLessonPublisher finishOneLessonPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(finishOneLessonPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
         }
 
@@ -40,24 +40,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                                                          .FirstOrDefaultAsync(x => x.Id == classForumResult.LessonResultId, cancellationToken);
             if (lessonResult != null)
             {
-                if (classForumResult.Status == EnumClassForumResultStatus.Pending && lessonResult.ClassForumResults.Count == 1)
+                if (classForumResult.Status == EnumClassForumResultStatus.Pending)
                 {
                     await UpdateHomeWorks(classForumResult, cancellationToken).ConfigureAwait(false);
                 }
-                var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId && x.Status == EnumResultStatus.Done);
-                var isClassForumDone = lessonResult.ClassForumResults.Any(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
-                await GetLessonResult(lessonResult, cancellationToken);
-                if (isClassForumDone && isHomeWorksDone)
-                {
-                    lessonResult.Status = EnumResultStatus.Done;
-                    _lessonResultRepository.Update(lessonResult);
-                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    _lessonResultRepository.Update(lessonResult);
-                    await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
+                await UpdateLessonResultAsync(lessonResult, cancellationToken).ConfigureAwait(false);
             }
         }
 

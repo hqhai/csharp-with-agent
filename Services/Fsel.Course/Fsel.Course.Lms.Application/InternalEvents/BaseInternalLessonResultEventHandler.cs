@@ -12,22 +12,51 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
     public class BaseInternalLessonResultEventHandler : BaseInternalEventHandler
     {
-        public BaseInternalLessonResultEventHandler(IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
+        public BaseInternalLessonResultEventHandler(FinishOneLessonPublisher finishOneLessonPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
+            _finishOneLessonPublisher = finishOneLessonPublisher;
         }
 
-        private const int TotalClassForum = 36;
         private const int PercentOccupyHomeWork = 30;
         private const int PercentOccupyVideo = 40;
         private const int PercentOccupyClassForum = 40;
+        private readonly FinishOneLessonPublisher _finishOneLessonPublisher;
 
-        public async Task GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
+        public async Task UpdateLessonResultAsync(LessonResult? lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
+            var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done);
+            var isClassForumDone = lessonResult.ClassForumResults.Any(x => (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
+            if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
+            {
+                await _finishOneLessonPublisher.Publish(lessonResult, cancellationToken).ConfigureAwait(false);
+                await UpdateLessonResult(lessonResult, cancellationToken);
+                lessonResult.Status = EnumResultStatus.Done;
+                _lessonResultRepository.Update(lessonResult);
+                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                _lessonResultRepository.Update(lessonResult);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        public async Task UpdateLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(lessonResult);
+            var (correctCount, correctTotal, percent, skillScores) = await GetLessonResult(lessonResult, cancellationToken);
+            lessonResult.CorrectCount = correctCount;
+            lessonResult.CorrectTotal = correctTotal;
+            lessonResult.Percent = percent;
+            lessonResult.SkillScores = skillScores;
+        }
+
+        private async Task<(int, int, double, IList<SkillScores>?)> GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
+        {
             var (correctVideo, totalVideo, percentVideo, skillScoreVideos) = await GetVideoResult(lessonResult.Id, cancellationToken);
             var (correctHomeWork, totalHomeWork, percentHomeWork, skillScoreHomeWorks) = await GetHomeResults(lessonResult.Id, cancellationToken);
             var (correctClassForum, totalClassForum, percentClassForum, skillScoreClassForums) = await GetClassForumResult(lessonResult.Id, cancellationToken);
-
             var skillScores = new List<SkillScores>();
             if (skillScoreVideos != null && skillScoreVideos.Any())
             {
@@ -41,71 +70,60 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 skillScores = skillScores.Union(skillScoreClassForums).ToList();
             }
-            List<SkillScores> groupedSkillScores = skillScores
-                                    .GroupBy(x => x.Skill)
-                                    .Select(group => new SkillScores
-                                    {
-                                        Skill = group.Key,
-                                        Scores = group.Average(x => x.Scores),
-                                        TotalCount = group.Sum(x => x.TotalCount),
-                                        CorrectCount = group.Sum(x => x.CorrectCount),
-                                        CountQuestion = group.Sum(x => x.CountQuestion),
-                                        TotalQuestion = group.Sum(x => x.TotalQuestion),
-                                        Percent = NumberHelper.ConvertDouble(group.Average(x => x.Percent)),
-                                    }).ToList();
-            lessonResult.CorrectCount = (int)(correctVideo + correctClassForum + correctHomeWork ?? default);
-            lessonResult.CorrectTotal = (int)(totalVideo + totalHomeWork + totalClassForum ?? default);
-            lessonResult.Percent = NumberHelper.ConvertDoublePercent(percentVideo * PercentOccupyVideo + percentHomeWork * PercentOccupyHomeWork + percentClassForum * PercentOccupyClassForum);
-            lessonResult.SkillScores = groupedSkillScores;
+            List<SkillScores> groupedSkillScores = skillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
+            var correctCounts = new List<double> { correctVideo, correctHomeWork, correctClassForum };
+            var correctTotals = new List<double> { totalVideo, totalHomeWork, totalClassForum };
+            var percents = new List<double> { percentVideo * PercentOccupyVideo, percentHomeWork * PercentOccupyHomeWork, percentClassForum * PercentOccupyClassForum };
+            return ((int)correctCounts.Sum(), (int)correctTotals.Sum(), NumberHelper.ConvertDoublePercent(percents.Sum()), groupedSkillScores);
         }
 
-        private async Task<(double?, double?, double, IList<SkillScores>?)> GetVideoResult(Guid lessonResultId, CancellationToken cancellationToken)
+        private async Task<(double, double, double, IList<SkillScores>?)> GetVideoResult(Guid lessonResultId, CancellationToken cancellationToken)
         {
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultId, cancellationToken);
             if (videoResult != null)
             {
                 var skillScores = videoResult.VideoSkillScores?.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;
-                if (skillScores != null && skillScores.Count > 0)
-                {
-                    return (skillScores.Sum(x => x.TotalCount), skillScores.Sum(x => x.TotalCount), NumberHelper.ConvertDouble(videoResult.Percent), skillScores);
-                }
+                return GetValueAsync(skillScores);
             }
-
-            return (null, null, default, null);
+            return GetValueAsync(default);
         }
 
-        private async Task<(double?, double?, double, IList<SkillScores>?)> GetClassForumResult(Guid lessonResultId, CancellationToken cancellationToken)
+        private async Task<(double, double, double, IList<SkillScores>?)> GetClassForumResult(Guid lessonResultId, CancellationToken cancellationToken)
         {
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores)
                                                                             .Include(x => x.ClassForum)
                                                                             .FirstOrDefaultAsync(x => x.LessonResultId == lessonResultId, cancellationToken);
             if (classForumResult != null)
             {
-                var skillScores = new SkillScores
-                {
-                    CorrectCount = classForumResult.ClassForumScores?.Sum(x => x.Score) ?? default,
-                    CountQuestion = 1,
-                    TotalQuestion = 1,
-                    TotalCount = TotalClassForum,
-                    Skill = classForumResult.ClassForum?.CourseSkill ?? default,
-                };
-                skillScores.Percent = NumberHelper.ConvertPercentDouble((double)skillScores.CorrectCount / skillScores.TotalCount);
-                return (skillScores.CorrectCount, skillScores.TotalCount, skillScores.Percent, new List<SkillScores> { skillScores });
+                var skillScores = new List<SkillScores> { GetSkillScores(classForumResult) };
+                return GetValueAsync(skillScores);
             }
 
-            return (null, null, default, null);
+            return GetValueAsync(default);
         }
 
-        private async Task<(double?, double?, double, IList<SkillScores>?)> GetHomeResults(Guid lessonResultId, CancellationToken cancellationToken)
+        private async Task<(double, double, double, IList<SkillScores>?)> GetHomeResults(Guid lessonResultId, CancellationToken cancellationToken)
         {
             var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResultId && x.Status == EnumResultStatus.Done).ToListAsync(cancellationToken);
             if (!homeWorkResults.Any())
             {
-                return (null, null, default, null);
+                return GetValueAsync(default);
             }
-            var skillScores = homeWorkResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).ToList();
+            var skillScores = homeWorkResults.SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSumSkillScore(x)).ToList();
             skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertPercentDouble((double)x.CorrectCount / x.TotalCount) : default);
-            return (skillScores.Sum(x => x.TotalCount), skillScores.Sum(x => x.TotalCount), NumberHelper.ConvertDoubleDecimal(skillScores.Average(x => x.Scores)), skillScores);
+            return GetValueAsync(skillScores);
+        }
+
+        private static (double, double, double, IList<SkillScores>?) GetValueAsync(IList<SkillScores>? skillScores)
+        {
+            if (skillScores != null && skillScores.Any())
+            {
+                return (skillScores.Sum(x => x.CorrectCount), skillScores.Sum(x => x.TotalCount), NumberHelper.ConvertDoubleDecimal(skillScores.Average(x => x.Percent)), skillScores);
+            }
+            else
+            {
+                return (default, default, default, null);
+            }
         }
     }
 }
