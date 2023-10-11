@@ -54,20 +54,20 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.CSO)
-                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString())
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Teacher)
                                                    .ThenInclude(x => x!.TeacherBankAccounts)
-                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
-                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString() && x.EmailConfirmed, cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId && x.EmailConfirmed, cancellationToken);
                 if (userView?.Human?.Student?.CreatedByParent == false)
                 {
                     userView = await _userManager.Users.Include(x => x.Human)
@@ -75,7 +75,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                   .ThenInclude(x => x!.ParentStudents)
                                                   .ThenInclude(x => x!.Parent)
                                                   .ThenInclude(x => x!.Human)
-                                                  .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken);
+                                                  .FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
                 }
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Parent.ToString())
@@ -84,12 +84,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                    .ThenInclude(x => x!.Parent)
                                                    .ThenInclude(x => x!.ParentStudents.Where(y => !y.IsDeleted))
                                                    .ThenInclude(x => x.Student)
-                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString() && x.EmailConfirmed, cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId && x.EmailConfirmed, cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Moderator.ToString() || userRoles.FirstOrDefault() == EnumRole.MasterAdmin.ToString() || userRoles.FirstOrDefault() == EnumRole.Admin.ToString())
             {
                 userView = await _userManager.Users.Include(x => x.Human)
-                                                 .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken);
+                                                 .FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
             }
             var userModel = _mapper.Map<UserProfileModel>(userView ?? user);
             if (userView != null)

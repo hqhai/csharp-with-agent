@@ -40,7 +40,7 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
 
             await _userSettingRepository.ExecuteTransactionAsync(async () =>
             {
-                var userSetting = await _userSettingRepository.Queryable.Where(x => x.UserId == _authContext.CurrentUserId.ToString()).FirstOrDefaultAsync(cancellationToken);
+                var userSetting = await _userSettingRepository.Queryable.Where(x => x.UserId == _authContext.CurrentUserId).FirstOrDefaultAsync(cancellationToken);
 
                 if (userSetting != null)
                 {
@@ -58,7 +58,7 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
                     methodResult.AddErrorBadRequest(userSetting.ErrorMessages);
                     return methodResult;
                 }
-                userSetting.UserId = _authContext.CurrentUserId.ToString();
+                userSetting.UserId = _authContext.CurrentUserId;
                 await _userSettingRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

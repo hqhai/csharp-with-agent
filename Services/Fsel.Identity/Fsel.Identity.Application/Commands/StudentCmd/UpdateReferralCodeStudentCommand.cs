@@ -47,7 +47,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNotExistByCode));
                 return methodResult;
             }
-            var userReferralResult = await _orderService.CreateUserReferralAsync(new CreateUserReferralCommandModel { SenderId = new Guid(userReferral.Id), ReceiverId = request.UserId });
+            var userReferralResult = await _orderService.CreateUserReferralAsync(new CreateUserReferralCommandModel { SenderId = userReferral.Id, ReceiverId = request.UserId });
             if (!userReferralResult.IsSuccessStatusCode)
             {
                 methodResult.AddError(userReferralResult.Error);

@@ -44,7 +44,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == (request.UserId ?? _authContext.CurrentUserId.ToString()), cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == (request.UserId ?? _authContext.CurrentUserId), cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));

@@ -124,7 +124,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                userQuery = userQuery?.Where(m => m.Id == request.Keyword || m.FullName!.Contains(request.Keyword));
+                userQuery = userQuery?.Where(m => m.PhoneNumber == request.Keyword || m.FullName!.Contains(request.Keyword));
             }
 
             int totalItem = userQuery != null ? await userQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false) : default;

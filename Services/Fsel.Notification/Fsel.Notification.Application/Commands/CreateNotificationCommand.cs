@@ -64,11 +64,11 @@ namespace Fsel.Notification.Application.Commands
             }
 
             //list User bị tắt thông báo
-            var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId.ToString()).ToListAsync(cancellationToken);
+            var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId).ToListAsync(cancellationToken);
 
             // Handle list UserId
             GetUsersByRoleQueryModel roleQuery = new GetUsersByRoleQueryModel();
-            List<string> listUserId = new List<string>();
+            List<Guid> listUserId = new List<Guid>();
             if (request.Roles != null)
             {
                 foreach (var item in request.Roles)
@@ -78,7 +78,7 @@ namespace Fsel.Notification.Application.Commands
                     if (user.Content?.Result != null)
                     {
                         var users = user.Content.Result;
-                        listUserId.AddRange(users.Select(u => u.Id.ToString()));
+                        listUserId.AddRange(users.Select(u => u.Id));
                     }
                 }
 
@@ -94,7 +94,7 @@ namespace Fsel.Notification.Application.Commands
                 foreach (var item in listUserId)
                 {
                     NotificationMessage notificationElement = _mapper.Map<NotificationMessage>(request);
-                    notificationElement.UserId = new Guid(item);
+                    notificationElement.UserId = item;
                     listNotificationMessage.Add(notificationElement);
                 }
             }

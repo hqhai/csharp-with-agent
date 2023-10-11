@@ -46,7 +46,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             var methodResult = new MethodResult<bool>();
-            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
 
             if (user != null)
             {

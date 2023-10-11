@@ -16,7 +16,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
             _userDbContext = userDbContext;
         }
 
-        public virtual IQueryable<IdentityUserRole<string>> GetQuery()
+        public virtual IQueryable<IdentityUserRole<Guid>> GetQuery()
         {
             try
             {

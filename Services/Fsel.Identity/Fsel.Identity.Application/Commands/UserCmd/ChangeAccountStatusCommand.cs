@@ -31,7 +31,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            if (request.UserId == null || request.UserId.Count == 0)
+            if (request.UserIds == null || request.UserIds.Count == 0)
             {
                 return methodResult;
             }
@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 return methodResult;
             }
 
-            var userPlatforms = await _userPlatformRepository.Queryable.Where(p => request.UserId.Contains(p.UserId ?? string.Empty) && p.PlatformId == platform.Id).ToListAsync(cancellationToken);
+            var userPlatforms = await _userPlatformRepository.Queryable.Where(p => request.UserIds.Contains(p.UserId) && p.PlatformId == platform.Id).ToListAsync(cancellationToken);
 
             userPlatforms.ForEach(p => { p.Status = request.Status; });
 

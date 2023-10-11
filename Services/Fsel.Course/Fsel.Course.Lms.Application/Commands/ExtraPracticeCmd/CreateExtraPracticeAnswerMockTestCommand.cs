@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), _authContext.CurrentUserId);
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;

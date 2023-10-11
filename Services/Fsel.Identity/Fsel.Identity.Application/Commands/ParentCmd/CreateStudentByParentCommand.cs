@@ -61,7 +61,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
             var parent = await _parentRepository.Queryable.Include(x => x.Human)
                                                 .Include(x => x.ParentStudents.Where(n => !n.IsDeleted))
-                                                .FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId.ToString(), cancellationToken);
+                                                .FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId, cancellationToken);
 
             if (parent == null)
             {

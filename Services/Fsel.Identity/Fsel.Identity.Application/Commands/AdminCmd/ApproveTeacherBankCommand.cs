@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var methodResult = new MethodResult<UserModel>();
             var user = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Teacher)
-                                                   .ThenInclude(x => x!.TeacherBankAccounts).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
+                                                   .ThenInclude(x => x!.TeacherBankAccounts).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));

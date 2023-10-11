@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentsByIdsQuery : IRequest<MethodResult<List<StudentModel>>>
     {
-        public IList<string>? Ids { get; set; }
+        public IList<Guid>? Ids { get; set; }
     }
 
     public class GetStudentsByIdsQueryHandler : IRequestHandler<GetStudentsByIdsQuery, MethodResult<List<StudentModel>>>

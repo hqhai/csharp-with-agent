@@ -69,7 +69,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                                select commentG.Key;
 
             var comments = await commentQuery.ToListAsync();
-            var userResult = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = comments.Select(x => x.UserId.ToString()).ToList() });
+            var userResult = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = comments.Select(x => x.UserId).ToList() });
 
             var results = new List<CommentModel>();
             if (comments != null && comments.Count > 0)
@@ -78,8 +78,8 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                 foreach (var item in commentModels)
                 {
                     var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Id && x.Type == EnumInteractionActionType.Like).ToList();
-                    item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId.ToString())?.AvatarPath;
-                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId.ToString())?.FullName;
+                    item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId)?.AvatarPath;
+                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId)?.FullName;
                     item.Comments = await GetCommentsByObjectIdAsync(item.Id, filter);
                     item.CommentNumber = item.Comments?.Count ?? default;
                     item.LikeNumber = actionLikes.Count;

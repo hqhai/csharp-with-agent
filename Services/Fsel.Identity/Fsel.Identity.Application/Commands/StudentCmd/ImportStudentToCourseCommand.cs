@@ -156,7 +156,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     var course = getCourseByCodeResult.Content?.Result;
 
                     Human human = new Human();
-                    human.UserId = user?.Id;
+                    human.UserId = user!.Id;
                     human.Code = "Admin@123";
                     human.FullName = user?.FullName;
                     human.Student = new Student
@@ -196,7 +196,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         Address = "35 Lac Trung",
                         PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
                         CourseId = course.Id,
-                        UserId = Guid.Parse(user!.Id),
+                        UserId = user!.Id,
                         PackageId = package.Id,
                         CodeCourse = student.CodeCourse
                     });
@@ -221,7 +221,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
                     {
                         Email = student.Email,
-                        UserId = Guid.Parse(user.Id),
+                        UserId = user.Id,
                         Answers = new List<CreateSurveyCommandModel>
                         {
                             new CreateSurveyCommandModel
