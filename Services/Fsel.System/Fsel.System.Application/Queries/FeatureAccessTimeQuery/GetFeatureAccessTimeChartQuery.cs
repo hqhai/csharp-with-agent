@@ -40,7 +40,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             MethodResult<IList<FeatureAcessTimeChartModel>> methodResult = new MethodResult<IList<FeatureAcessTimeChartModel>>();
 
             var featureAccessTimes = await _featureAccessTimeRepository.Queryable
-                .Where(x => x.CreatedUserId == _authContext.CurrentUserId && x.LessonId == null && x.UnitId == null)
+                .Where(x => x.CreatedUserId == _authContext.CurrentUserId)
                 .OrderByDescending(x => x.LastVisited)
                 .ToListAsync(cancellationToken);
 
@@ -86,14 +86,19 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 
             for (var i = 0; i < MAX_HOUR; i++)
             {
-                var featureGroupHour = featureGroup.FirstOrDefault(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour == i);
-                var featureAccessTime = new FeatureAccessTimeByTypeModel();
+                var totalAccessTime = featureGroup
+                                     .Where(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour == i)
+                                     .Sum(x => x.AccessTime);
 
-                featureAccessTime.AccessTime = featureGroupHour?.AccessTime ?? 0;
-                featureAccessTime.HourActive = featureGroupHour?.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour ?? i;
-                featureAccessTime.DayActive = featureGroupHour?.LastVisited!.Value.DayOfWeek ?? DateTime.UtcNow.DayOfWeek;
+                var firstMatchingFeature = featureGroup
+                    .FirstOrDefault(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour == i);
 
-                featureAccessTimeResult.Add(featureAccessTime);
+                featureAccessTimeResult.Add(new FeatureAccessTimeByTypeModel
+                {
+                    AccessTime = totalAccessTime,
+                    HourActive = firstMatchingFeature?.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour ?? i,
+                    DayActive = firstMatchingFeature?.LastVisited!.Value.DayOfWeek ?? DateTime.UtcNow.DayOfWeek
+                });
             }
 
             var result = new FeatureAcessTimeChartModel
