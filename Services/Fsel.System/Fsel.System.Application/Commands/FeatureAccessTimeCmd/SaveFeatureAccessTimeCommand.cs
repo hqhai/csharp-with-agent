@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.FeatureAccessTimes;
@@ -37,24 +38,21 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
             await _featureAccessTimeRepository.ExecuteTransactionAsync(async () =>
             {
-                var featureAccessTime = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && (x.ObjectId == request.ObjectId || (x.UnitId == null && x.LessonId == null && request.LessonId == null)) && x.EnumFeature == request.EnumFeature, cancellationToken);
+                var featureAccessTime = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && (x.ObjectId == request.ObjectId || x.EnumFeature == EnumFeature.Other) && x.EnumFeature == request.EnumFeature, cancellationToken);
 
                 if (featureAccessTime == null)
                 {
                     featureAccessTime = AddNewFeatureAccessTime(request);
                 }
-                else if (featureAccessTime != null && request.LessonId == null && !IsSameRangeHour(featureAccessTime))
+                else if (featureAccessTime != null && !IsSameRangeHour(featureAccessTime))
                 {
                     featureAccessTime = AddNewFeatureAccessTime(request);
                 }
-                else if (featureAccessTime != null && request.LessonId == null && IsSameRangeHour(featureAccessTime))
+                else if (featureAccessTime != null && IsSameRangeHour(featureAccessTime))
                 {
                     featureAccessTime = UpdateExistingFeatureAccessTime(featureAccessTime, request);
                 }
-                else if (featureAccessTime != null)
-                {
-                    featureAccessTime = UpdateExistingFeatureAccessTime(featureAccessTime, request);
-                }
+
                 await _featureAccessTimeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
