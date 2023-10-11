@@ -67,12 +67,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     await _classForumResultRepository.DeleteAsync(classForumResult);
 
                     classForumResultFlag.Status = EnumClassForumResultFlagStatus.Approve;
-                    _mapper.Map(classForumResultFlag, classForumResultFlag);
                 }
                 else
                 {
                     classForumResultFlag.Status = EnumClassForumResultFlagStatus.Reject;
-                    _mapper.Map(classForumResultFlag, classForumResultFlag);
                 }
                 _classForumResultFlagRepository.Update(classForumResultFlag);
                 await _classForumResultFlagRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

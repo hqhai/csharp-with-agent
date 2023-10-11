@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
                                     .Include(x => x.ClassForumResultFlags)
-                                    .Where(x => x.ClassForumResultFlags != null)
+                                    .Where(x => x.ClassForumResultFlags != null && x.ClassForumResultFlags.Select(x => x.Status == Domain.Enums.EnumClassForumResultFlagStatus.New).FirstOrDefault())
                                     .Select(x => new ClassForumResultModel
                                     {
                                         Id = x.Id,
