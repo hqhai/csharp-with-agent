@@ -10,6 +10,8 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.IRepositories;
@@ -17,10 +19,9 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Http.HttpResults;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetCommentsByObjectIdQuery : IRequest<MethodResult<IList<CommentModel>>>
+    public class GetCommentsByObjectIdQuery : BaseQueryModel, IRequest<MethodResult<IList<CommentModel>>>
     {
         public Guid ObjectId { get; set; }
 
@@ -54,12 +55,12 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
 
             MethodResult<IList<CommentModel>> methodResult = new MethodResult<IList<CommentModel>>();
 
-            methodResult.Result = await GetCommentsByObjectIdAsync(request.ObjectId, request.Filter);
+            methodResult.Result = await GetCommentsByObjectIdAsync(request.ObjectId, request.Filter, request);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        public async Task<IList<CommentModel>?> GetCommentsByObjectIdAsync(Guid objectId, EnumCommentFilter? filter = null)
+        public async Task<IList<CommentModel>?> GetCommentsByObjectIdAsync(Guid objectId, EnumCommentFilter? filter = null, GetCommentsByObjectIdQuery? request = null)
         {
             var commentQuery = from c in _commentRepository.Queryable
                                join ca in _interactionActionRepository.Queryable on c.Id equals ca.ObjectId into caJ
@@ -99,7 +100,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                         break;
 
                     case EnumCommentFilter.MostPopular:
-                        results = results.OrderByDescending(x => x.LikeNumber).ToList();
+                        results = results.OrderByDescending(x => x.LikeNumber).ApplyPaging(request).ToList();
                         break;
 
                     case EnumCommentFilter.AllComment:

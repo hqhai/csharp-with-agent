@@ -60,21 +60,21 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
             if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
             {
-                methodResult.Result = null;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var videoResult = await _videoResultRepository.Queryable.Where(x => x.StudentId == request.StudentId && x.LessonResultId == lessonResult.Id).FirstOrDefaultAsync(cancellationToken);
             if (videoResult == null)
             {
-                methodResult.Result = null;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
             if (classForum == null)
             {
-                methodResult.Result = null;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }

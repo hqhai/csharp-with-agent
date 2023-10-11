@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var @class = classResult?.Content?.Result;
             if (@class == null)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var isCheckUserOrder = orderResult?.Content?.Result ?? default;
             if (!isCheckUserOrder)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             if (course == null)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }

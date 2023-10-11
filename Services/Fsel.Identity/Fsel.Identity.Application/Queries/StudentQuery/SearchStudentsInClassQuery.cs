@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.LmsCourseService;
+    using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -23,11 +24,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     {
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
-
-        public SearchStudentsInClassQueryHandler(IStudentRepository studentRepository, ILmsCourseService lmsCourseService)
+        private readonly ITrainingService _trainingService;
+        public SearchStudentsInClassQueryHandler(IStudentRepository studentRepository, ILmsCourseService lmsCourseService, ITrainingService trainingService)
         {
             _studentRepository = studentRepository;
             _lmsCourseService = lmsCourseService;
+            _trainingService = trainingService;
         }
 
         public async Task<MethodResult<PagingItemsModel<SearchStudentsInClassModel>>> Handle(SearchStudentsInClassQuery request, CancellationToken cancellationToken)
@@ -54,11 +56,18 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                students = students.Where(m => !string.IsNullOrEmpty(m.FullName) && m.FullName.ToLower().Contains(request.Keyword.ToLower()));
+                students = students.Where(m => (!string.IsNullOrEmpty(m.FullName) && m.FullName.ToLower().Contains(request.Keyword.ToLower()) || (!string.IsNullOrEmpty(m.Code) && m.Code == request.Keyword)));
             }
             if (request.ClassId.HasValue)
             {
-                students = students.Where(p => p.ClassId == request.ClassId);
+                var studentIdsResult = await _trainingService.GetStudentIdsByClassId(request.ClassId.Value);
+                if (!studentIdsResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(studentIdsResult.Error);
+                    return methodResult;
+                }
+                var studentIds = studentIdsResult.Content?.Result;
+                students = students.Where(p => studentIds != null && studentIds.Contains(p.Id));
             }
 
             int totalItem = await students.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

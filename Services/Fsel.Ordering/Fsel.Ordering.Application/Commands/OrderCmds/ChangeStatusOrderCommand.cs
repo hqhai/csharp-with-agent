@@ -110,6 +110,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
                         return methodResult;
                     }
+
+                    var updateStudentStatusInClass = await _trainingService.UpdateStatusStudentInClass(student.Content!.Result!.Id);
+                    if (!updateStudentStatusInClass.IsSuccessStatusCode)
+                    {
+                        methodResult.AddError(updateStudentStatusInClass.Error);
+                        return methodResult;
+                    }
+
                     await _notificationMessagePublisher.Publish(new NotificationQueueModel
                     {
                         UserId = order.CreatedUserId,
