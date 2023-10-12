@@ -54,6 +54,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CorrectTotal = table.Column<int>(type: "int", nullable: false),
                     Percent = table.Column<double>(type: "float", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SkillScoresStr = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>

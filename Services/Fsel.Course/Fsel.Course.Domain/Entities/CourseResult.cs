@@ -6,6 +6,5 @@ namespace Fsel.Course.Domain.Entities
     {
         public Course? Course { get; set; }
         public Guid CourseId { get; set; }
-        public Guid StudentId { get; set; }
     }
 }

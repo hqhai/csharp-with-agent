@@ -2,14 +2,8 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    using System.ComponentModel.DataAnnotations;
-    using Fsel.Common.Enums.ErrorCodes;
-
     public class ExtraPracticeResult : BaseResultScore
     {
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid StudentId { get; set; }
-
         public ExtraPractice? ExtraPractice { get; set; }
         public Guid ExtraPracticeId { get; set; }
 

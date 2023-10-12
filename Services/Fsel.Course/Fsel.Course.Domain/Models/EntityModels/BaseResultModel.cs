@@ -11,5 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int CorrectCount { get; set; }
         public int CorrectTotal { get; set; }
         public EnumResultStatus Status { get; set; }
+        public Guid StudentId { get; set; }
     }
 }

@@ -8,9 +8,6 @@ namespace Fsel.Course.Domain.Entities
     public class HomeWorkResult : BaseResultScore
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid StudentId { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid HomeWorkId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]

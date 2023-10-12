@@ -59,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
                 return methodResult;
             }
-            var studentId = studentsResult.Content?.Result?.Id;
+            var studentId = studentsResult.Content?.Result?.Id ?? default;
 
             var videoResult = await _videoResultRepository.Queryable.Include(x => x.VideoTimeCodeResults)
                         .ThenInclude(x => x.VideoTimeCodeAnswers)
@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCode));
                 return methodResult;
             }
-            await _mediator.Send(new CreateVideoTimeCodeResultCommand { VideoResultId = videoResult.Id, VideoTimeCodeId = request.VideoTimeCodeId }, cancellationToken).ConfigureAwait(false);
+            await _mediator.Send(new CreateVideoTimeCodeResultCommand { VideoResultId = videoResult.Id, StudentId = studentId, VideoTimeCodeId = request.VideoTimeCodeId }, cancellationToken).ConfigureAwait(false);
             var videoTimeCodeModel = _videoConverter.GetVideoTimeCode(videoTimeCode);
             methodResult.Result = videoTimeCodeModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

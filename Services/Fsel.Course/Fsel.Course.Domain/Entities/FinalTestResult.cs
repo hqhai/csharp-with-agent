@@ -7,9 +7,6 @@ namespace Fsel.Course.Domain.Entities
 
     public class FinalTestResult : BaseResultScore
     {
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid StudentId { get; set; }
-
         public FinalTest? FinalTest { get; set; }
         public Guid FinalTestId { get; set; }
         public Course? Course { get; set; }

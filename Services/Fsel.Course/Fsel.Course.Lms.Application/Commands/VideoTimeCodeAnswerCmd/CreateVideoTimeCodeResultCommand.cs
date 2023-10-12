@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
@@ -14,22 +13,20 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     public class CreateVideoTimeCodeResultCommand : IRequest<MethodResult<bool>>
     {
         public Guid VideoResultId { get; set; }
+        public Guid StudentId { get; set; }
         public Guid VideoTimeCodeId { get; set; }
     }
 
     public class CreateVideoTimeCodeResultCommandHandler : IRequestHandler<CreateVideoTimeCodeResultCommand, MethodResult<bool>>
     {
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly IMapper _mapper;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
 
         public CreateVideoTimeCodeResultCommandHandler(
             IVideoResultRepository videoResultRepository
-            , IMapper mapper
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository)
         {
             _videoResultRepository = videoResultRepository;
-            _mapper = mapper;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
         }
 
@@ -57,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 videoTimeCodeResult = new VideoTimeCodeResult
                 {
                     VideoResultId = request.VideoResultId,
+                    StudentId = request.StudentId,
                     VideoTimeCodeId = request.VideoTimeCodeId,
                 };
                 videoTimeCodeResult = _videoTimeCodeResultRepository.Add(videoTimeCodeResult);

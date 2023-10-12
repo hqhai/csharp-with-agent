@@ -7,6 +7,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class BaseResultScoreModel : BaseResultModel
     {
         public IList<SkillScores>? SkillScores { get; set; }
-        public Guid StudentId { get; set; }
     }
 }

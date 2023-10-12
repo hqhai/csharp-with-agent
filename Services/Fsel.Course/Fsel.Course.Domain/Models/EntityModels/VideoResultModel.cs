@@ -11,7 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Feedback { get; set; }
         public Guid LessonResultId { get; set; }
         public Guid VideoId { get; set; }
-        public Guid StudentId { get; set; }
         public Guid? CurrentVideoTimeCodeId { get; set; }
         public IList<VideoSkillScores>? VideoSkillScores { get; set; }
     }

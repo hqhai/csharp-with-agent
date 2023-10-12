@@ -29,9 +29,6 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid LessonId { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid StudentId { get; set; }
-
         public VideoResult? VideoResult { get; set; }
 
         public ICollection<LessonNote> LessonNotes { get; set; } = new List<LessonNote>();

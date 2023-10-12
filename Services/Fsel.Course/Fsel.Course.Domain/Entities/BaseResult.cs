@@ -2,8 +2,8 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
 
@@ -31,5 +31,8 @@ namespace Fsel.Course.Domain.Entities
         /// Trạng thái
         /// </summary>
         public EnumResultStatus Status { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid StudentId { get; set; }
     }
 }
