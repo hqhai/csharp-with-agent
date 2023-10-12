@@ -19,7 +19,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
-    public class VideoHelper
+    public class VideoConverter
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IQuestionRepository _questionRepository;
@@ -33,7 +33,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
         private readonly IMapper _mapper;
 
-        public VideoHelper(IVideoRepository videoRepository
+        public VideoConverter(IVideoRepository videoRepository
             , IQuestionRepository questionRepository
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
             , IExerciseRepository exerciseRepository

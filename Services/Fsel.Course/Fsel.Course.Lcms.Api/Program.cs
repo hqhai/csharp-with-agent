@@ -73,7 +73,7 @@ builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
 builder.Services.AddScoped<SectionConverter>();
-builder.Services.AddScoped<VideoHelper>();
+builder.Services.AddScoped<VideoConverter>();
 builder.Services.AddScoped<CourseHelper>();
 builder.Services.AddScoped<UnitHelper>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

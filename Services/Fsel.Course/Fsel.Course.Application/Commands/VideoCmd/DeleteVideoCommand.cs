@@ -19,12 +19,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class DeleteVideoCommandHandler : IRequestHandler<DeleteVideoCommand, MethodResult<bool>>
     {
         private readonly IVideoRepository _videoRepository;
-        private readonly VideoHelper _videoHelper;
+        private readonly VideoConverter _videoConverter;
 
-        public DeleteVideoCommandHandler(IVideoRepository videoRepository, VideoHelper videoHelper)
+        public DeleteVideoCommandHandler(IVideoRepository videoRepository, VideoConverter videoConverter)
         {
             _videoRepository = videoRepository;
-            _videoHelper = videoHelper;
+            _videoConverter = videoConverter;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteVideoCommand request, CancellationToken cancellationToken)
@@ -59,7 +59,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             await _videoRepository.ExecuteTransactionAsync(async () =>
             {
-                var method = await _videoHelper.DeleteExerciseToVideo(video);
+                var method = await _videoConverter.DeleteExerciseToVideo(video);
                 if (!method.IsOK)
                 {
                     methodResult.AddErrorBadRequest(method.ErrorMessages);

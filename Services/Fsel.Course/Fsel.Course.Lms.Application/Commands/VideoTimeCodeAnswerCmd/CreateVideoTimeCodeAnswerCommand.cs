@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     {
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly VideoHelper _videoHelper;
+        private readonly VideoConverter _videoConverter;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly FinishOneUnitTestPublisher _finishOneUnitTestPublisher;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
@@ -39,7 +39,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         public CreateVideoTimeCodeAnswerCommandHandler(
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , IVideoResultRepository videoResultRepository
-            , VideoHelper videoHelper
+            , VideoConverter videoConverter
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
             , FinishOneUnitTestPublisher finishOneUnitTestPublisher
             , IVideoTimeCodeRepository videoTimeCodeRepository
@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoResultRepository = videoResultRepository;
-            _videoHelper = videoHelper;
+            _videoConverter = videoConverter;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _finishOneUnitTestPublisher = finishOneUnitTestPublisher;
             _videoTimeCodeRepository = videoTimeCodeRepository;
@@ -210,7 +210,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 .ThenInclude(x => x.Question)
                 .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoTimeCodeResultId == videoResult.Id))
                 .FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId, cancellationToken);
-            var videoTimeCodeModel = _videoHelper.GetVideoTimeCode(videoTimeCode);
+            var videoTimeCodeModel = _videoConverter.GetVideoTimeCode(videoTimeCode);
             methodResult.Result = videoTimeCodeModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

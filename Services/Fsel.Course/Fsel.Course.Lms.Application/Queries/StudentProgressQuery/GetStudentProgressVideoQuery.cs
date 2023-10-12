@@ -30,9 +30,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly ISystemService _systemService;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly VideoHelper _videoConverter;
+        private readonly VideoConverter _videoConverter;
 
-        public GetStudentProgressVideoQueryHandler(IUserService userService, ISystemService systemService, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, VideoHelper videoConverter)
+        public GetStudentProgressVideoQueryHandler(IUserService userService, ISystemService systemService, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, VideoConverter videoConverter)
         {
             _userService = userService;
             _systemService = systemService;

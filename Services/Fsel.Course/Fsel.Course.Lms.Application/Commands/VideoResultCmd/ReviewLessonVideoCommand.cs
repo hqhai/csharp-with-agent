@@ -20,12 +20,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     public class ReviewLessonVideoCommandHandler : IRequestHandler<ReviewLessonVideoCommand, MethodResult<VideoResultModel>>
     {
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly VideoHelper _videoConverter;
+        private readonly VideoConverter _videoConverter;
         private readonly IMapper _mapper;
 
         public ReviewLessonVideoCommandHandler(IVideoResultRepository videoResultRepository,
             IMapper mapper,
-            VideoHelper videoConverter)
+            VideoConverter videoConverter)
         {
             _videoConverter = videoConverter;
             _videoResultRepository = videoResultRepository;

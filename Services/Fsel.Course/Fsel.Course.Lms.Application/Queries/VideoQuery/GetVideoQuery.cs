@@ -27,19 +27,19 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         private readonly IVideoRepository _videoRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly AuthContext _authContext;
-        private readonly VideoHelper _videoHelper;
+        private readonly VideoConverter _videoConverter;
         private readonly IUserService _userService;
 
         public GetVideoStandaloneQueryHandler(IVideoRepository videoRepository,
             IVideoResultRepository videoResultRepository,
             AuthContext authContext,
-            VideoHelper videoHelper,
+            VideoConverter videoConverter,
             IUserService userService)
         {
             _videoRepository = videoRepository;
             _videoResultRepository = videoResultRepository;
             _authContext = authContext;
-            _videoHelper = videoHelper;
+            _videoConverter = videoConverter;
             _userService = userService;
         }
 
@@ -97,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 CourseLevel = video.CourseLevel,
                 SubFilePath = video.SubFilePath,
                 Type = video.Type,
-                VideoTimeCodes = _videoHelper.GetVideoTimeCodes(video, videoResult.Id),
+                VideoTimeCodes = _videoConverter.GetVideoTimeCodes(video, videoResult.Id),
                 VideoResult = video.VideoResults.Where(x => x.StudentId == studentId).Select(x => new VideoResultModel
                 {
                     Id = x.Id,

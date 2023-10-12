@@ -30,21 +30,21 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
-        private readonly VideoHelper _videoHelper;
+        private readonly VideoConverter _videoConverter;
         private readonly IUserService _userService;
 
         public GetTimeCodeDetailQueryHandler(IVideoTimeCodeRepository videoTimeCodeRepository,
             IVideoResultRepository videoResultRepository,
             AuthContext authContext,
             IMediator mediator,
-            VideoHelper videoHelper,
+            VideoConverter videoConverter,
             IUserService userService)
         {
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoResultRepository = videoResultRepository;
             _authContext = authContext;
             _mediator = mediator;
-            _videoHelper = videoHelper;
+            _videoConverter = videoConverter;
             _userService = userService;
         }
 
@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
             await _mediator.Send(new CreateVideoTimeCodeResultCommand { VideoResultId = videoResult.Id, VideoTimeCodeId = request.VideoTimeCodeId }, cancellationToken).ConfigureAwait(false);
-            var videoTimeCodeModel = _videoHelper.GetVideoTimeCode(videoTimeCode);
+            var videoTimeCodeModel = _videoConverter.GetVideoTimeCode(videoTimeCode);
             methodResult.Result = videoTimeCodeModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
