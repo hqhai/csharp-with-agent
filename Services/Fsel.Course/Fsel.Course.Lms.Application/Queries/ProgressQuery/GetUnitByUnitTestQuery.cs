@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -73,12 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var videoIds = unit.UnitLessons.Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x!.VideoId).ToList();
             var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && lessonResultIds.Contains(x.LessonResultId)).Select(x => x.Id).ToListAsync(cancellationToken);
             var videos = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
-                                                        .Include(x => x.VideoTimeCodes)
-                                                        .ThenInclude(x => x.TimeCodeExercises)
-                                                        .ThenInclude(x => x.Exercise)
-                                                        .ThenInclude(x => x!.ExerciseQuestions)
-                                                        .ThenInclude(x => x.Question)
-                                                        .ThenInclude(x => x.VideoTimeCodeAnswers)
+                                                        .ThenInclude(x => x.VideoTimeCodeResults.Where(x => videoResultIds.Contains(x.VideoResultId)))
                                                         .Where(x => videoIds.Contains(x.Id))
                                                         .AsNoTracking()
                                                         .ToListAsync(cancellationToken);
@@ -93,30 +89,37 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }
 
             var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == request.Type).ToList();
-            var exercises = videoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).ToList();
-
-            var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x =>
+            var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).ToList();
+            var workingTime = videoTimeCodeResults.Sum(x => GetSecond(x));
+            var skillScores = videoTimeCodeResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).ToList();
+            skillScores = skillScores.GroupBy(x => x!.Skill).Select(x =>
             {
-                var questions = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).ToList();
-                var anwsers = questions.SelectMany(x => x!.VideoTimeCodeAnswers).ToList();
                 var skillScore = new SkillScores
                 {
                     Skill = x.Key,
-                    CountQuestion = anwsers.Count,
-                    TotalQuestion = questions.Count,
-                    CorrectCount = anwsers.Sum(x => x.CorrectCount),
-                    TotalCount = questions.Sum(x => x!.CorrectTotal),
+                    CountQuestion = x.Sum(x => x.CountQuestion),
+                    TotalQuestion = x.Sum(x => x.TotalQuestion),
+                    CorrectCount = x.Sum(x => x.CorrectCount),
+                    TotalCount = x.Sum(x => x.TotalCount),
                 };
                 return skillScore;
             }).ToList();
+
             skillScores.ForEach(x => x.Percent = NumberHelper.ConvertPercentDouble(x.CorrectCount / x.TotalCount));
             overallScoreReport.SkillScores = skillScores;
+            overallScoreReport.WorkingTime = videoTimeCodeResults.Sum(x => GetSecond(x));
             overallScoreReport.CourseSkills = skillScores.Select(x => x.Skill).ToList();
             overallScoreReport.CountQuestion = overallScoreReport.SkillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = overallScoreReport.SkillScores.Sum(x => x.TotalQuestion);
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreReport;
             return methodResult;
+        }
+
+        private static long GetSecond(VideoTimeCodeResult x)
+        {
+            TimeSpan timeDiff = x.UpdatedDate.HasValue ? x.UpdatedDate.Value - x.CreatedDate : default;
+            return Convert.ToInt64(timeDiff.TotalSeconds);
         }
     }
 }

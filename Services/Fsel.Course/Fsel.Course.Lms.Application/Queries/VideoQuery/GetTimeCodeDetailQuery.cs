@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -28,18 +29,21 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly AuthContext _authContext;
+        private readonly IMediator _mediator;
         private readonly VideoHelper _videoHelper;
         private readonly IUserService _userService;
 
         public GetTimeCodeDetailQueryHandler(IVideoTimeCodeRepository videoTimeCodeRepository,
             IVideoResultRepository videoResultRepository,
             AuthContext authContext,
+            IMediator mediator,
             VideoHelper videoHelper,
             IUserService userService)
         {
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoResultRepository = videoResultRepository;
             _authContext = authContext;
+            _mediator = mediator;
             _videoHelper = videoHelper;
             _userService = userService;
         }
@@ -66,7 +70,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-
             var videoTimeCodeResult = videoResult.VideoTimeCodeResults.Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId).FirstOrDefault();
             var videoTimeCodeResultId = videoTimeCodeResult?.Id;
             var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.Id == videoTimeCodeResultId))
@@ -85,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCode));
                 return methodResult;
             }
-
+            await _mediator.Send(new CreateVideoTimeCodeResultCommand { VideoResultId = videoResult.Id, VideoTimeCodeId = request.VideoTimeCodeId }, cancellationToken).ConfigureAwait(false);
             var videoTimeCodeModel = _videoHelper.GetVideoTimeCode(videoTimeCode);
             methodResult.Result = videoTimeCodeModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
