@@ -6,7 +6,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Commands.ForbiddenWordCmd;
-    using Fsel.System.Application.Queries.GetListForbiddenWordQuery;
+    using Fsel.System.Application.Queries.CheckContainForbiddenWordQuery;
     using Fsel.System.Application.Querys.ForbiddenWordQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
