@@ -36,13 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper
-            , AuthContext authContext
-            , IUserService userService
-            , IClassForumResultRepository classForumResultRepository
-            , IClassForumRepository classForumRepository
-            , ILessonResultRepository lessonResultRepository
-            , NotificationMessagePublisher notificationMessagePublisher)
+        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher)
         {
             _mapper = mapper;
             _authContext = authContext;

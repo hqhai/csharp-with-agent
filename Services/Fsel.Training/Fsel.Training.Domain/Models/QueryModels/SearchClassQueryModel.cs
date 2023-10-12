@@ -10,5 +10,6 @@ namespace Fsel.Training.Domain.Models.QueryModels
         public EnumCourseLevel? Level { get; set; }
         public EnumClassStatus? Status { get; set; }
         public bool? SortedByPT { get; set; }
+        public Guid? ClassId { get; set; }
     }
 }
