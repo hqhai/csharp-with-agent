@@ -38,5 +38,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/cso/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCSOByUserId([FromRoute] Guid id);
+
+        [Get("/cso/get-by-id/{id}")]
+        Task<IApiResponse<MethodResult<CSOModel>>> GetCSOById([FromRoute] Guid id);
     }
 }
