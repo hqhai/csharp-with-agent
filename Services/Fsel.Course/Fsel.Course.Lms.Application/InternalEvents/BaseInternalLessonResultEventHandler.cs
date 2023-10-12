@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using System.Threading;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -36,16 +37,25 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
             {
                 await _finishOneLessonPublisher.Publish(lessonResult, cancellationToken).ConfigureAwait(false);
-                await UpdateLessonResult(lessonResult, cancellationToken);
                 lessonResult.Status = EnumResultStatus.Done;
-                _lessonResultRepository.Update(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+            }
+            else if (lessonResult.Status == EnumResultStatus.Done)
+            {
+                await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
             }
             else
             {
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+        }
+
+        private async Task UpdateAsync(LessonResult lessonResult, CancellationToken cancellationToken)
+        {
+            await UpdateLessonResult(lessonResult, cancellationToken);
+            _lessonResultRepository.Update(lessonResult);
+            await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task UpdateLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
