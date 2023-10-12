@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == request.StudentId && x.CourseId == course.Id && x.Status == EnumResultStatus.Process, cancellationToken);
             if (unitResult == null)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }

@@ -10,6 +10,6 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public string? Label { get; set; }
 
-        public IList<double>? ChartData { get; set; }
+        public IList<FeatureAccessTimeByTypeModel>? FeatureAccessTimes { get; set; }
     }
 }

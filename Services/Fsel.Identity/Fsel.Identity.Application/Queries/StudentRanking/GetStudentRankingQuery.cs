@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             });
 
             methodResult.Result = studentRankingResult;
-            methodResult.Result = _mapper.Map<List<StudentRankingModel>>(studentRankingsQuery);
+            methodResult.Result = _mapper.Map<List<StudentRankingModel>>(studentRankingResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

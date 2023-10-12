@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var @class = classResult?.Content?.Result;
             if (@class == null)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var course = await GetCourse(@class.CourseId, cancellationToken);
             if (course == null)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }

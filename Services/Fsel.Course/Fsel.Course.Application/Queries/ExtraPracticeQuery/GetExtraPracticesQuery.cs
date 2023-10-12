@@ -30,12 +30,6 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
             MethodResult<IList<ExtraPracticeModel>> methodResult = new MethodResult<IList<ExtraPracticeModel>>();
             ArgumentNullException.ThrowIfNull(request);
             var extraPractices = await _extraPracticeRepository.Queryable.Where(x => x.IsActive).ToListAsync(cancellationToken);
-            if (extraPractices == null || extraPractices.Count == 0)
-            {
-                methodResult.Result = null;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
             methodResult.Result = _mapper.Map<IList<ExtraPracticeModel>>(extraPractices);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

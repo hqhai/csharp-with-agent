@@ -138,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var lists = query.ApplySortAndPaging(request).ToList();
             foreach (var item in lists)
             {
-                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+                item.Stars = NumberHelper.ConvertRatingToDouble(item.Stars);
             }
             methodResult.Result = new ReviewTeacherRatingDetailSearchModel { FullName = teacher?.Human?.FullName, PagingItemsModel = new PagingItemsModel<ReviewTeacherRatingDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
