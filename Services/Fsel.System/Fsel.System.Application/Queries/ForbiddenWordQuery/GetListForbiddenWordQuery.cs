@@ -1,16 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Application.Queries.ForbiddenWordQuery
+namespace Fsel.System.Application.Queries.GetListForbiddenWordQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.System.Application.Querys.ForbiddenWordQuery;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models.EntityModels;
     using global::System;
     using global::System.Collections.Generic;
     using global::System.Linq;
-    using global::System.Text;
     using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -20,11 +16,11 @@ namespace Fsel.System.Application.Queries.ForbiddenWordQuery
     {
         public string? Word { get; set; }
     }
-    public class GetListForbiddenWordQueryHandler : IRequestHandler<CheckContainForbiddenWordQuery, MethodResult<IList<String>>>
+    public class CheckContainForbiddenWordQueryHandler : IRequestHandler<CheckContainForbiddenWordQuery, MethodResult<IList<String>>>
     {
         private readonly IForbiddenWordRepository _forbiddenWordRepository;
 
-        public GetListForbiddenWordQueryHandler(IForbiddenWordRepository forbiddenWordRepository)
+        public CheckContainForbiddenWordQueryHandler(IForbiddenWordRepository forbiddenWordRepository)
         {
             _forbiddenWordRepository = forbiddenWordRepository;
         }
@@ -34,7 +30,7 @@ namespace Fsel.System.Application.Queries.ForbiddenWordQuery
             MethodResult<IList<String>> methodResult = new MethodResult<IList<String>>();
             ArgumentNullException.ThrowIfNull(request);
             var forbiddenWordQuery = await _forbiddenWordRepository.Queryable
-             .Where(x => request.Word.Contains(x.Word))
+             .Where(x => request.Word.ToLower().Contains(x.Word.ToLower()))
              .Select(x => x.Word.ToLower()).Distinct().ToListAsync(cancellationToken: cancellationToken);
             methodResult.Result = forbiddenWordQuery;
             methodResult.StatusCode = StatusCodes.Status200OK;
