@@ -31,6 +31,6 @@ namespace Fsel.Shared.Enums
         MS2,
 
         [Description("Mindset 3")]
-        MS3
+        MS3,
     }
 }

@@ -88,6 +88,10 @@ namespace Fsel.System.Application.Queries.GameVocabularies
             {
                 query = query.Where(p => p.PlatformId == request.PlatformId);
             }
+            if (request.GameVocabularyIds != null)
+            {
+                query = query.Where(p => request.GameVocabularyIds.Contains(p.Id));
+            }
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
