@@ -6,6 +6,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Commands.ForbiddenWordCmd;
+    using Fsel.System.Application.Queries.GetListForbiddenWordQuery;
     using Fsel.System.Application.Querys.ForbiddenWordQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
@@ -33,6 +34,19 @@ namespace Fsel.System.Api.Controllers
         public async Task<IActionResult> Search([FromQuery] SearchForbiddenWordQuery query)
         {
             MethodResult<PagingItemsModel<ForbiddenWordModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+
+        /// <summary>
+        /// get list
+        /// </summary>
+        [HttpGet("get-list-forbidden-word")]
+        [ProducesResponseType(typeof(MethodResult<IList<String>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckContainForbiddenWord([FromQuery] CheckContainForbiddenWordQuery  query)
+        {
+            MethodResult<IList<String>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
