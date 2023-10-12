@@ -35,8 +35,6 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid ClassForumId { get; set; }
 
-        public bool? IsFlagged { get; set; }
-
         public ClassForum? ClassForum { get; set; }
 
         public LessonResult? LessonResult { get; set; }
@@ -50,5 +48,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
+
+        public ICollection<ClassForumResultFlag> ClassForumResultFlags { get; set; } = new List<ClassForumResultFlag>();
     }
 }

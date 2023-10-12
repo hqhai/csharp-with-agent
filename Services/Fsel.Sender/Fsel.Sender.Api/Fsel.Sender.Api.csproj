@@ -25,6 +25,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Resources\SendStudentCompleteCourseAcademic.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\SendStudentCompleteCourseIetls.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\SendStudentCompleteUnitGood.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\SendStudentCompleteUnitWeak.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\SendStudentPTOnline.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
