@@ -42,11 +42,11 @@ namespace Fsel.System.Api.Controllers
         /// get list
         /// </summary>
         [HttpGet("get-list-forbidden-word")]
-        [ProducesResponseType(typeof(MethodResult<IList<ForbiddenWordModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<String>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetList()
+        public async Task<IActionResult> CheckContainForbiddenWord([FromQuery] CheckContainForbiddenWordQuery  query)
         {
-            MethodResult<IList<ForbiddenWordModel>> queryResult = await _mediator.Send(new GetListForbiddenWordQuery()).ConfigureAwait(false);
+            MethodResult<IList<String>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

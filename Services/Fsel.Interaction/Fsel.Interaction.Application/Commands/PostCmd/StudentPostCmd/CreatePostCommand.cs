@@ -42,14 +42,11 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
 
             Post studentPosts = _mapper.Map<Post>(request);
             // Check từ khoá cấm
-            var listForbiddenWordResult = await _systemService.GetListForbiddenWordAsync();
+            var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
             var forbiddenWord = listForbiddenWordResult.Content?.Result;
-            var forbiddenWords = forbiddenWord.Select(Word => Word.Word);
-            var containsForbiddenWord = forbiddenWords.Where(x => request.Content.Contains(x, StringComparison.OrdinalIgnoreCase)).Select(word => word.ToLower()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            if (containsForbiddenWord.Any())
+            if (forbiddenWord.Any())
             {
-                string combinedForbiddenWords = string.Join(", ", containsForbiddenWord);
-                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContainsForbiddenKeywords),combinedForbiddenWords);
+                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContainsForbiddenKeywords), string.Join(", ", forbiddenWord));
                 return methodResult;
             }
 

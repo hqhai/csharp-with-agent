@@ -25,6 +25,6 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         Task<IApiResponse<MethodResult<FeatureAccessTimeModel>>> GetFeatureAccessTimeAsync([FromQuery] FeatureAccessTimeQueryModel query);
 
         [Get("/forbidden-word/get-list-forbidden-word")]
-        Task<IApiResponse<MethodResult<IList<ForbiddenWordModel>>>> GetListForbiddenWordAsync();
+        Task<IApiResponse<MethodResult<IList<String>>>> CheckContainForbiddenWord([FromQuery] String Word);
     }
 }

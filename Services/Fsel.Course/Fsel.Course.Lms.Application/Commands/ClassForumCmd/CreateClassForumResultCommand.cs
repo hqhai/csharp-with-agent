@@ -67,16 +67,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
 
             // Check từ khoá cấm
-            var listForbiddenWordResult = await _systemService.GetListForbiddenWordAsync();
-            var forbiddenWord = listForbiddenWordResult.Content?.Result;
-            var forbiddenWords = forbiddenWord.Select(Word => Word.Word);
+            var listForbiddenWordResultContent = await _systemService.CheckContainForbiddenWord(request.Content);
+            var listForbiddenWordResultWordContent = await _systemService.CheckContainForbiddenWord(request.WordContent);
+            var containsForbiddenWord = (listForbiddenWordResultContent.Content?.Result ?? Enumerable.Empty<string>())
+             .Concat(listForbiddenWordResultWordContent.Content?.Result ?? Enumerable.Empty<string>())
+             .ToList();
 
-            var containsForbiddenWord = forbiddenWords.Where(x => request.WordContent.Contains(x, StringComparison.OrdinalIgnoreCase) || request.Content.Contains(x, StringComparison.OrdinalIgnoreCase)).Select(word => word.ToLower()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-           
             if (containsForbiddenWord.Any())
             {
-                string combinedForbiddenWords = string.Join(", ", containsForbiddenWord);
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords),combinedForbiddenWords);
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords), string.Join(", ", containsForbiddenWord));
                 return methodResult;
             }
 

@@ -16,11 +16,11 @@ namespace Fsel.System.Application.Queries.ForbiddenWordQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListForbiddenWordQuery: IRequest<MethodResult<IList<ForbiddenWordModel>>>
+    public class CheckContainForbiddenWordQuery : IRequest<MethodResult<IList<String>>>
     {
-
+        public string? Word { get; set; }
     }
-    public class GetListForbiddenWordQueryHandler : IRequestHandler<GetListForbiddenWordQuery, MethodResult<IList<ForbiddenWordModel>>>
+    public class GetListForbiddenWordQueryHandler : IRequestHandler<CheckContainForbiddenWordQuery, MethodResult<IList<String>>>
     {
         private readonly IForbiddenWordRepository _forbiddenWordRepository;
 
@@ -29,15 +29,13 @@ namespace Fsel.System.Application.Queries.ForbiddenWordQuery
             _forbiddenWordRepository = forbiddenWordRepository;
         }
 
-        public async Task<MethodResult<IList<ForbiddenWordModel>>> Handle(GetListForbiddenWordQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<String>>> Handle(CheckContainForbiddenWordQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<IList<ForbiddenWordModel>> methodResult = new MethodResult<IList<ForbiddenWordModel>>();
+            MethodResult<IList<String>> methodResult = new MethodResult<IList<String>>();
             ArgumentNullException.ThrowIfNull(request);
             var forbiddenWordQuery = await _forbiddenWordRepository.Queryable
-                               .Select(x => new ForbiddenWordModel
-                               {
-                                   Word = x.Word,
-                               }).ToListAsync(cancellationToken: cancellationToken);
+             .Where(x => request.Word.Contains(x.Word))
+             .Select(x => x.Word.ToLower()).Distinct().ToListAsync(cancellationToken: cancellationToken);
             methodResult.Result = forbiddenWordQuery;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

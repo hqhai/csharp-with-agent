@@ -53,18 +53,13 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             MethodResult<CommentModel> methodResult = new MethodResult<CommentModel>();
             Comment comment = _mapper.Map<Comment>(request);
             // Check từ khoá cấm
-            var listForbiddenWordResult = await _systemService.GetListForbiddenWordAsync();
+            var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
             var forbiddenWord = listForbiddenWordResult.Content?.Result;
-            var forbiddenWords = forbiddenWord.Select(Word => Word.Word);
-
-            var containsForbiddenWord = forbiddenWords.Where(x => request.Content.Contains(x, StringComparison.OrdinalIgnoreCase)).Select(word => word.ToLower()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            if (containsForbiddenWord.Any())
+            if (forbiddenWord.Any())
             {
-                string combinedForbiddenWords = string.Join(", ", containsForbiddenWord);
-                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContainsForbiddenKeywords), combinedForbiddenWords);
+                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContainsForbiddenKeywords), string.Join(", ", forbiddenWord));
                 return methodResult;
             }
-
             await _commentRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
             comment.UserId = _authContext.CurrentUserId;
             if (!comment.IsValid())
