@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Application.Queries.GetListForbiddenWordQuery
+namespace Fsel.System.Application.Queries.CheckContainForbiddenWordQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.System.Domain.IRepositories;
