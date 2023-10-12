@@ -74,8 +74,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                     .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                 .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
-                                 .ThenInclude(x => x!.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
-                                .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()

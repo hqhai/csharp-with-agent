@@ -429,7 +429,6 @@ namespace Fsel.Course.Infrastructure.Common
             foreach (var item in videoTimeCodes)
             {
                 var indexTimeCode = videoTimeCodes.IndexOf(item);
-                var videoTimeCodeResult = item.VideoTimeCodeResults.FirstOrDefault();
 
                 videoTimeCodeModels.Add(new VideoTimeCodeModel
                 {
@@ -448,7 +447,6 @@ namespace Fsel.Course.Infrastructure.Common
         public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode? videoTimeCode)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
-            var videoTimeCodeResult = videoTimeCode.VideoTimeCodeResults.FirstOrDefault();
             return new VideoTimeCodeModel
             {
                 Id = videoTimeCode.Id,
@@ -474,7 +472,6 @@ namespace Fsel.Course.Infrastructure.Common
             foreach (var videoTimeCode in videoTimeCodes)
             {
                 var indexTimeCode = videoTimeCodes.IndexOf(videoTimeCode);
-                var videoTimeCodeResult = videoTimeCode.VideoTimeCodeResults.FirstOrDefault();
                 var timeCode = GetVideoTimeCode(videoTimeCode);
                 timeCode.Status = GetTimeCodeStatus(indexProcess, indexTimeCode);
                 videoTimeCodeModels.Add(timeCode);

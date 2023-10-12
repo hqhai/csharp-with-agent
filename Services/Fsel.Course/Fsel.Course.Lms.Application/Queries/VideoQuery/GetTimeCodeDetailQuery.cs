@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             }
             var videoTimeCodeResult = videoResult.VideoTimeCodeResults.Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId).FirstOrDefault();
             var videoTimeCodeResultId = videoTimeCodeResult?.Id;
-            var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.Id == videoTimeCodeResultId))
+            var videoTimeCode = await _videoTimeCodeRepository.Queryable
                                     .Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                     .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                     .ThenInclude(x => x.Exercise)
