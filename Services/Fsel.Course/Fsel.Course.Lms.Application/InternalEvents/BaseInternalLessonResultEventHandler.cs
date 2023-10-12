@@ -16,14 +16,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
     public class BaseInternalLessonResultEventHandler : BaseInternalEventHandler
     {
-        private const int TotalClassForum = 36;
         private const int PercentOccupyHomeWork = 30;
         private const int PercentOccupyVideo = 40;
         private const int PercentOccupyClassForum = 40;
         private readonly FinishOneLessonPublisher _finishOneLessonPublisher;
+        private readonly ILessonResultRepository _lessonResultRepository;
 
-        public BaseInternalLessonResultEventHandler(ISystemService systemService, AppSetting appSetting, FinishOneLevelPassPublisher finishOneLevelPassPublisher, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(systemService, appSetting, finishOneLevelPassPublisher, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
+        public BaseInternalLessonResultEventHandler(FinishOneLessonPublisher finishOneLessonPublisher, ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, FinishOneLevelPassPublisher finishOneLevelPassPublisher, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(systemService, appSetting, finishOneLevelPassPublisher, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
+            _finishOneLessonPublisher = finishOneLessonPublisher;
+            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task UpdateLessonResultAsync(LessonResult? lessonResult, CancellationToken cancellationToken)

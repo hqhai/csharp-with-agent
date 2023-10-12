@@ -27,16 +27,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyHomeWork = 22;
         private const int PercentOccupyClassForum = 20;
 
-        public async Task UpdateUnitResultAsync(IList<Guid>? lessonResultIds, Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
         private readonly ITrainingService _trainingService;
         private readonly FinishOneUnitPublisher _finishOneUnitPublisher;
+
         public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, FinishOneLevelPassPublisher finishOneLevelPassPublisher, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, ITrainingService trainingService, FinishOneUnitPublisher finishOneUnitPublisher) : base(systemService, appSetting, finishOneLevelPassPublisher, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
             _trainingService = trainingService;
             _finishOneUnitPublisher = finishOneUnitPublisher;
         }
 
-        public async Task UpdateUnitResultAsync(IList<Guid>? lessonResultIds, Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
+        public async Task UpdateUnitResultAsync(IList<Guid>? lessonResultIds, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
 
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     unitResult.Status = EnumResultStatus.Done;
                     await _finishOneUnitPublisher.Publish(unitResult, cancellationToken);
-                    await SendStudentCompleteUnit(studentId, unit, courseId, groupedSkillScores, percent, cancellationToken);
+                    await SendStudentCompleteUnit(studentId, unit, courseId, skillScores, percent, cancellationToken);
                 }
                 unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
@@ -82,8 +82,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return (groupedSkillScores, (int)percents.Sum());
         }
 
-        private async Task SendStudentCompleteUnit(Guid studentId, Domain.Entities.Unit unit, Guid courseId, List<SkillScores> groupedSkillScores, double percent, CancellationToken cancellationToken)
+        private async Task SendStudentCompleteUnit(Guid studentId, Domain.Entities.Unit? unit, Guid courseId, List<SkillScores> groupedSkillScores, double percent, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(unit);
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
             var student = studentResult.Content?.Result?.FirstOrDefault();
             var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.FirstOrDefaultAsync(p => p.UnitId == unit.Id && courseId == p.CourseId, cancellationToken);
