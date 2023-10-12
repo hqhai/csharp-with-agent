@@ -21,6 +21,7 @@ namespace Fsel.System.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             //SeedQuestBoards(modelBuilder);
+            //SeedFocusTimeConfig(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfigConfiguration());
@@ -29,6 +30,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new FeatureAccessTimeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new GameTopicEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameVocabularyEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FocusTimeConfigEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -44,6 +46,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<QuestBoardConfig> QuestBoardConfigs { get; set; }
         public DbSet<GameTopic> GameTopics { get; set; }
         public DbSet<GameVocabulary> GameVocabularies { get; set; }
+        public DbSet<FocusTimeConfig> FocusTimeConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -66,6 +69,14 @@ namespace Fsel.System.Infrastructure
             var questBoardConfigs = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardConfig>>(path);
             ArgumentNullException.ThrowIfNull(questBoardConfigs);
             builder.Entity<QuestBoardConfig>().HasData(questBoardConfigs);
+        }
+
+        private static void SeedFocusTimeConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.FocusTimeFileName);
+            var focusTimeConfigs = ConvertHelper.DeserializeFromFilePath<IList<FocusTimeConfig>>(path);
+            ArgumentNullException.ThrowIfNull(focusTimeConfigs);
+            builder.Entity<FocusTimeConfig>().HasData(focusTimeConfigs);
         }
 
         private static void SeedCourselevel(ModelBuilder builder)

@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231006092539_AddTable_StudentFocusTime")]
+    partial class AddTable_StudentFocusTime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -405,44 +408,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Platform");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("c9c55ef5-01e0-4fa6-b68a-3aaea1089548"),
-                            Code = "LCMS",
-                            CreatedDate = new DateTime(2023, 10, 7, 11, 22, 45, 954, DateTimeKind.Local).AddTicks(9863),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "",
-                            IsDeleted = false,
-                            Name = "Learning Content Management System",
-                            Type = "Content"
-                        },
-                        new
-                        {
-                            Id = new Guid("856818e6-9e20-43d8-964f-5dab2ba1a355"),
-                            Code = "LMS",
-                            CreatedDate = new DateTime(2023, 10, 7, 11, 22, 45, 955, DateTimeKind.Local).AddTicks(333),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "",
-                            IsDeleted = false,
-                            Name = "Learning Management System",
-                            Type = "Learn"
-                        },
-                        new
-                        {
-                            Id = new Guid("f144a094-3f49-4ca8-8f1e-7234289dd1a5"),
-                            Code = "PlanetDefender",
-                            CreatedDate = new DateTime(2023, 10, 7, 11, 22, 45, 955, DateTimeKind.Local).AddTicks(370),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "",
-                            IsDeleted = false,
-                            Name = "Planet Defender",
-                            Type = "Game"
-                        });
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Role", b =>
@@ -764,8 +729,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("TotalScore")
-                        .HasColumnType("float");
+                    b.Property<int>("TotalScore")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
