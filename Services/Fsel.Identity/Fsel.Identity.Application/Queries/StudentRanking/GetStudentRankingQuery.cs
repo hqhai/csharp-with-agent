@@ -23,10 +23,12 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     {
         private readonly IStudentRankingRepository _studentRankingRepository;
         private readonly IMapper _mapper;
-        public GetStudentRankingQueryHandler(IStudentRankingRepository studentRankingRepository, IMapper mapper)
+        private readonly IStudentRepository _studentRepository;
+        public GetStudentRankingQueryHandler(IStudentRankingRepository studentRankingRepository, IMapper mapper, IStudentRepository studentRepository)
         {
             _studentRankingRepository = studentRankingRepository;
             _mapper = mapper;
+            _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<List<StudentRankingModel>>> Handle(GetStudentRankingQuery request, CancellationToken cancellationToken)
@@ -36,7 +38,22 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             var studentRankingsQuery = await _studentRankingRepository.Queryable.Where(x => x.CourseLevel == request.CourseLevel).OrderBy(x => x.CurrentPosition).ToListAsync(cancellationToken);
 
-            methodResult.Result = _mapper.Map<List<StudentRankingModel>>(studentRankingsQuery);
+            var studentIds = studentRankingsQuery.Select(s => s.StudentId);
+            var studentInfo = _studentRepository.Queryable.Include(x => x.Human).Where(x => studentIds.Contains(x.Id)).ToList();
+            var studentRankingResult = _mapper.Map<List<StudentRankingModel>>(studentRankingsQuery);
+
+            studentRankingResult.ForEach(x =>
+            {
+                var student = studentInfo.FirstOrDefault(s => s.Id == x.StudentId);
+                if (student != null)
+                {
+                    x.FullName = student.Human?.FullName;
+                    x.AvatarPath = student.Human?.AvatarPath;
+                }
+            });
+
+            methodResult.Result = studentRankingResult;
+            methodResult.Result = _mapper.Map<List<StudentRankingModel>>(studentRankingResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

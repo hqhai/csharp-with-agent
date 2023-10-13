@@ -60,7 +60,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
             if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
             {
-                methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -68,7 +67,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
             if (homeWorkResults == null)
             {
-                methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -96,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                       .Include(x => x!.LessonHomeWorks)
                                       .Include(x => x!.HomeWorkQuestions)
                                       .ThenInclude(x => x.Question)
-                                      .Include(x => x.HomeWorkResults)
+                                      .Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == lessonResult.Id))
                                       .ThenInclude(x => x.HomeWorkAnswers)
                                       .Where(x => x.LessonHomeWorks.Any(x => x.LessonId == lessonResult.LessonId))
                                       .AsNoTracking()
@@ -109,7 +107,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                           CourseSkill = h.CourseSkill,
                                           CourseLevel = h.CourseLevel,
                                           QuestionTotal = h.HomeWorkQuestions.Select(x => x.Question).Count(),
-                                          QuestionCompleted = h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id)!.HomeWorkAnswers.Count,
+                                          QuestionCompleted = h.HomeWorkResults.Where(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id).Select(x => x.HomeWorkAnswers.Count).FirstOrDefault(),
                                           HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id))
                                       })
                                       .ToListAsync(cancellationToken);

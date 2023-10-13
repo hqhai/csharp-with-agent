@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Globalization;
     using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -124,7 +125,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                userQuery = userQuery?.Where(m => m.PhoneNumber == request.Keyword || m.FullName!.Contains(request.Keyword));
+                userQuery = userQuery?.Where(m => m.PhoneNumber == request.Keyword || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = userQuery != null ? await userQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false) : default;

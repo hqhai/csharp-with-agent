@@ -90,7 +90,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                             Class = _mapper.Map<ClassModel>(x.Class)
                         });
 
-            var lists = await query
+            var lists = await query.OrderBy(x => x.LiveDate)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);

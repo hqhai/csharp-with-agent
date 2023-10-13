@@ -55,7 +55,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var studentId = studentResult?.Content?.Result?.Id;
-            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
+            var unit = await _unitRepository.Queryable
+                              .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
+                              .Include(x => x.UnitLessons)
                               .ThenInclude(x => x.Lesson)
                               .ThenInclude(x => x!.LessonVideos)
                               .Include(x => x.CourseUnitMockTests)
@@ -67,8 +69,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
+            var lessonResultIds = unit.LessonResults.Where(x => x.StudentId == studentId).Select(x => x.Id).ToList();
             var videoIds = unit.UnitLessons.Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x!.VideoId).ToList();
-            var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && videoIds.Contains(x.VideoId)).Select(x => x.Id).ToListAsync(cancellationToken);
+            var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && lessonResultIds.Contains(x.LessonResultId)).Select(x => x.Id).ToListAsync(cancellationToken);
             var videos = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
                                                         .Include(x => x.VideoTimeCodes)
                                                         .ThenInclude(x => x.TimeCodeExercises)
@@ -95,12 +98,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x =>
             {
                 var questions = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).ToList();
+                var anwsers = questions.SelectMany(x => x!.VideoTimeCodeAnswers).ToList();
                 var skillScore = new SkillScores
                 {
                     Skill = x.Key,
-                    CountQuestion = questions.Count,
-                    TotalQuestion = questions.SelectMany(x => x!.VideoTimeCodeAnswers).Count(),
-                    CorrectCount = questions.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
+                    CountQuestion = anwsers.Count,
+                    TotalQuestion = questions.Count,
+                    CorrectCount = anwsers.Sum(x => x.CorrectCount),
                     TotalCount = questions.Sum(x => x!.CorrectTotal),
                 };
                 return skillScore;

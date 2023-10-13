@@ -17,20 +17,19 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class SearchStudentsInClassQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<SearchStudentsInClassModel>>>
     {
-        public Guid ClassId { get; set; }
+        public Guid? ClassId { get; set; }
     }
 
     public class SearchStudentsInClassQueryHandler : IRequestHandler<SearchStudentsInClassQuery, MethodResult<PagingItemsModel<SearchStudentsInClassModel>>>
     {
         private readonly IStudentRepository _studentRepository;
-        private readonly ITrainingService _trainingService;
         private readonly ILmsCourseService _lmsCourseService;
-
-        public SearchStudentsInClassQueryHandler(IStudentRepository studentRepository, ITrainingService trainingService, ILmsCourseService lmsCourseService)
+        private readonly ITrainingService _trainingService;
+        public SearchStudentsInClassQueryHandler(IStudentRepository studentRepository, ILmsCourseService lmsCourseService, ITrainingService trainingService)
         {
             _studentRepository = studentRepository;
-            _trainingService = trainingService;
             _lmsCourseService = lmsCourseService;
+            _trainingService = trainingService;
         }
 
         public async Task<MethodResult<PagingItemsModel<SearchStudentsInClassModel>>> Handle(SearchStudentsInClassQuery request, CancellationToken cancellationToken)
@@ -43,15 +42,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var studentIdsResult = await _trainingService.GetStudentIdsByClassId(request.ClassId);
-            if (!studentIdsResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(studentIdsResult.Error?.Content, studentIdsResult.StatusCode);
-                return methodResult;
-            }
-            var studentIds = studentIdsResult.Content?.Result;
 
-            var students = _studentRepository.Queryable.Where(p => studentIds != null && studentIds!.Contains(p.Id)).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
+            var students = _studentRepository.Queryable.Where(p => p.ClassId.HasValue).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
             {
                 Id = i.Id,
                 FullName = i.Human!.FullName,
@@ -59,11 +51,23 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 Code = i.Human.Code,
                 CreatedDate = i.CreatedDate,
                 Email = i.Human.Email,
+                ClassId = i.ClassId
             });
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                students = students.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                students = students.Where(m => (!string.IsNullOrEmpty(m.FullName) && m.FullName.ToLower().Contains(request.Keyword.ToLower()) || (!string.IsNullOrEmpty(m.Code) && m.Code == request.Keyword)));
+            }
+            if (request.ClassId.HasValue)
+            {
+                var studentIdsResult = await _trainingService.GetStudentIdsByClassId(request.ClassId.Value);
+                if (!studentIdsResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(studentIdsResult.Error);
+                    return methodResult;
+                }
+                var studentIds = studentIdsResult.Content?.Result;
+                students = students.Where(p => studentIds != null && studentIds.Contains(p.Id));
             }
 
             int totalItem = await students.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -73,12 +77,15 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var ptrResult = await _lmsCourseService.GetPTPointByIds(lists.Select(p => p.Id).ToList());
-            var ptr = ptrResult.Content?.Result;
-
-            foreach (var item in lists)
+            if (lists.Count > 0)
             {
-                item.PTPoint = ptr!.FirstOrDefault(p => p.StudentId == item.Id) == null ? 0 : ptr!.FirstOrDefault(p => p.StudentId == item.Id)!.PTPoint;
+                var ptrResult = await _lmsCourseService.GetPTPointByIds(lists.Select(p => p.Id).ToList());
+                var ptr = ptrResult.Content?.Result;
+
+                foreach (var item in lists)
+                {
+                    item.PTPoint = ptr!.FirstOrDefault(p => p.StudentId == item.Id) == null ? 0 : Math.Round(ptr!.FirstOrDefault(p => p.StudentId == item.Id)!.PTPoint, 2);
+                }
             }
 
             methodResult.Result = new PagingItemsModel<SearchStudentsInClassModel>(lists, request, totalItem);

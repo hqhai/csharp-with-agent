@@ -23,7 +23,7 @@ namespace Fsel.Identity.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            //SeedPlatforms(builder);
+            SeedPlatforms(builder);
 
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
@@ -39,6 +39,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserPlatformEntityTypeConfiguration());
 
             builder.ApplyConfiguration(new StudenrRankingEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentFocusTimeEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
@@ -59,6 +60,8 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<Platform> Platform { get; set; }
         public DbSet<UserPlatform> UserPlatforms { get; set; }
         public DbSet<StudentRanking> StudentRankings { get; set; }
+        public DbSet<StudentFocusTime> StudentFocusTimes { get; set; }
+
 
         #endregion Db Set
 

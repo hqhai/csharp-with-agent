@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
+    using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -37,16 +38,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             var user = await _userManager.Users.Include(x => x.Human)
                                         .ThenInclude(x => x!.Student)
                                         .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
-            if (user == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
-                return methodResult;
-            }
+
             var studentCourseResults = await _trainingService.GetClassCourseStudentAsync(request.StudentId);
             var studentCourses = studentCourseResults.Content?.Result;
-            var query = studentCourses!.AsEnumerable();
-            int totalItem = query.Count();
-            var lists = query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var query = studentCourses?.AsEnumerable();
+            int totalItem = query?.Count() ?? default;
+            var lists = query?.ApplySortAndPaging(request).ToList();
 
             methodResult.Result = new PagingItemsModel<StudentCourseModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

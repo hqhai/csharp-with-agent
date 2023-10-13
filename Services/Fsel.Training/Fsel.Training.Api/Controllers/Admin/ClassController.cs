@@ -103,7 +103,7 @@ namespace Fsel.Training.Api.Controllers.Admin
         [HttpPut]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TransferStudent([FromQuery] TransferStudentCommand command)
+        public async Task<IActionResult> TransferStudent([FromBody] TransferStudentCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -167,7 +167,6 @@ namespace Fsel.Training.Api.Controllers.Admin
             return commandResult.GetActionResult();
         }
 
-
         /// <summary>
         /// get list teacher or cso in class
         /// </summary>
@@ -177,6 +176,18 @@ namespace Fsel.Training.Api.Controllers.Admin
         public async Task<IActionResult> Get([FromQuery] GetListTeacherOrCSOInClassQuery query)
         {
             MethodResult<IList<CSOTeacherModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// accept order
+        /// </summary>
+        [HttpPut("update-student-status-in-class/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStudentStatusInClass([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new UpdateStudentStatusInClassCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

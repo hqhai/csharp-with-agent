@@ -61,17 +61,5 @@ namespace Fsel.Course.Lms.Api.Controllers
             var commandResult = await _mediator.Send(new GetClassForumResultQuery { ClassForumResultId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Update a Class forum result flagged
-        /// </summary>
-        [HttpPut("flag/{id}")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Flag([FromRoute] Guid id)
-        {
-            MethodResult<bool> commandResult = await _mediator.Send(new FlagClassForumResultCommand { Id = id }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
     }
 }

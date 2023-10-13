@@ -108,7 +108,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                 query = query.Where(m => m.ClassId == request.ClassId.Value);
             }
 
-            var lists = await query
+            var lists = await query.OrderBy(x => x.LiveDate)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);

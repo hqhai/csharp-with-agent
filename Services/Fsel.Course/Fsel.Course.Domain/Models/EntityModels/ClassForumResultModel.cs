@@ -31,8 +31,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? FeedBackNote { get; set; }
 
-        public bool? IsFlagged { get; set; }
-
         public bool? IsLiked { get; set; }
 
         public string? PostArea { get; set; }
@@ -54,7 +52,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public DateTime? GradingStartDate { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }
-
         public LessonResultModel? LessonResult { get; set; }
         public string? CourseCode { get; set; }
         public int LessonDisplayOrder { get; set; }

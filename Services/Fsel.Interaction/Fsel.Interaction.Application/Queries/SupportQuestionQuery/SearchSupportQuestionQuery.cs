@@ -3,6 +3,7 @@
 namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.SupportQuestions;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -51,7 +53,7 @@ namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                supportQuestionQuery = supportQuestionQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                supportQuestionQuery = supportQuestionQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.SupportCategoryId != null)

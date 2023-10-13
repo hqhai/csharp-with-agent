@@ -16,8 +16,10 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
     public class GetListTeacherOrCSOInClassQuery : IRequest<MethodResult<IList<CSOTeacherModel>>>
     {
         public bool ChangeFind { get; set; }
-        public string? Name { get; set; }
+        public string? Keyword { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
+        public Guid? CsoId { get; set; }
+        public Guid? TeacherId { get; set; }
     }
 
     public class GetListTeacherOrCSOInClassQueryHandler : IRequestHandler<GetListTeacherOrCSOInClassQuery, MethodResult<IList<CSOTeacherModel>>>
@@ -53,13 +55,21 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                     CourseLevels = x.CourseLevels,
                     CountClass = allClass.Count(p => p.CsoId == x.Id),
                 }).ToList();
-                if (!string.IsNullOrEmpty(request.Name))
+                if (allCSO == null)
                 {
-                    allCSO = allCSO!.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.Contains(request.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+                    return methodResult;
+                }
+                if (!string.IsNullOrEmpty(request.Keyword))
+                {
+                    allCSO = allCSO.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.Contains(request.Keyword, StringComparison.OrdinalIgnoreCase)).ToList();
                 }
                 if (request.CourseLevel.HasValue)
                 {
-                    allCSO = allCSO!.Where(p => p.CourseLevels != null && p.CourseLevels.Contains(request.CourseLevel ?? default)).ToList();
+                    allCSO = allCSO.Where(p => p.CourseLevels != null && p.CourseLevels.Contains(request.CourseLevel ?? default)).ToList();
+                }
+                if (request.CsoId.HasValue)
+                {
+                    allCSO = allCSO.Where(p => p.Id != request.CsoId).ToList();
                 }
                 methodResult.Result = allCSO;
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -83,13 +93,21 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                     CourseLevels = x.CourseLevels,
                     CountClass = allClass.Count(p => p.TeacherId == x.Id),
                 }).ToList();
-                if (!string.IsNullOrEmpty(request.Name))
+                if (allTeacher == null)
                 {
-                    allTeacher = allTeacher!.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.Contains(request.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+                    return methodResult;
+                }
+                if (!string.IsNullOrEmpty(request.Keyword))
+                {
+                    allTeacher = allTeacher!.Where(p => !string.IsNullOrEmpty(p.Name) && p.Name.Contains(request.Keyword, StringComparison.OrdinalIgnoreCase)).ToList();
                 }
                 if (request.CourseLevel.HasValue)
                 {
                     allTeacher = allTeacher!.Where(p => p.CourseLevels != null && p.CourseLevels.Contains(request.CourseLevel ?? default)).ToList();
+                }
+                if (request.TeacherId.HasValue)
+                {
+                    allTeacher = allTeacher.Where(p => p.Id != request.TeacherId).ToList();
                 }
                 methodResult.Result = allTeacher;
                 methodResult.StatusCode = StatusCodes.Status200OK;

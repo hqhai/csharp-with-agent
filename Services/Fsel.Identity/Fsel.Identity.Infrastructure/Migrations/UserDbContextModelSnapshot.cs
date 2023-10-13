@@ -405,6 +405,44 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Platform");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c9c55ef5-01e0-4fa6-b68a-3aaea1089548"),
+                            Code = "LCMS",
+                            CreatedDate = new DateTime(2023, 10, 7, 11, 22, 45, 954, DateTimeKind.Local).AddTicks(9863),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "",
+                            IsDeleted = false,
+                            Name = "Learning Content Management System",
+                            Type = "Content"
+                        },
+                        new
+                        {
+                            Id = new Guid("856818e6-9e20-43d8-964f-5dab2ba1a355"),
+                            Code = "LMS",
+                            CreatedDate = new DateTime(2023, 10, 7, 11, 22, 45, 955, DateTimeKind.Local).AddTicks(333),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "",
+                            IsDeleted = false,
+                            Name = "Learning Management System",
+                            Type = "Learn"
+                        },
+                        new
+                        {
+                            Id = new Guid("f144a094-3f49-4ca8-8f1e-7234289dd1a5"),
+                            Code = "PlanetDefender",
+                            CreatedDate = new DateTime(2023, 10, 7, 11, 22, 45, 955, DateTimeKind.Local).AddTicks(370),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "",
+                            IsDeleted = false,
+                            Name = "Planet Defender",
+                            Type = "Game"
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Role", b =>
@@ -603,6 +641,74 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("StudentDailyStreak");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentFocusTime", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<double>("ExecuteTime")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsEstablished")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("TargetTime")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StudentFocusTimes");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentRanking", b =>
                 {
                     b.Property<Guid>("Id")
@@ -658,8 +764,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("TotalScore")
-                        .HasColumnType("int");
+                    b.Property<double>("TotalScore")
+                        .HasColumnType("float");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
