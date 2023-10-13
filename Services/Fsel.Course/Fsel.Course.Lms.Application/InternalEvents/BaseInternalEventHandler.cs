@@ -2,15 +2,24 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.SenderTemplates;
+    using MediatR;
     using Microsoft.EntityFrameworkCore;
 
     public class BaseInternalEventHandler
@@ -18,20 +27,18 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly IVideoResultRepository _videoResultRepository;
         protected readonly IClassForumResultRepository _classForumResultRepository;
         protected readonly IUnitResultRepository _unitResultRepository;
-        protected readonly ILessonResultRepository _lessonResultRepository;
         protected readonly ICourseResultRepository _courseResultRepository;
         protected readonly ICourseRepository _courseRepository;
         protected readonly IUnitRepository _unitRepository;
-        protected readonly IMockTestRepository _mockTestRepository;
-        protected readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
-        protected readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
-        protected readonly IQuestionRepository _questionRepository;
-        protected readonly IHomeWorkRepository _homeWorkRepository;
-        protected readonly FinishOneUnitPublisher _finishOneUnitPublisher;
-        protected readonly FinishOneLevelPassPublisher _finishOneLevelPassPublisher;
         protected readonly IFinalTestResultRepository _finalTestResultRepository;
         protected readonly IMockTestResultRepository _mockTestResultRepository;
         protected readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        protected readonly IUserService _userService;
+        protected readonly IMediator _mediator;
+        protected readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        protected readonly FinishOneLevelPassPublisher _finishOneLevelPassPublisher;
+        protected readonly AppSetting _appSetting;
+        protected readonly ISystemService _systemService;
         private const int TotalScoreClassForum = 36;
         private const int PercentClassForumAcademic = 20;
         private const int PercentClassForumIELST = 32;
@@ -44,20 +51,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentUnitTest = 24;
         private const int PercentSkillTest = 18;
 
-        public BaseInternalEventHandler(IVideoResultRepository videoResultRepository,
+        public BaseInternalEventHandler(ISystemService systemService, AppSetting appSetting,
+            FinishOneLevelPassPublisher finishOneLevelPassPublisher,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IMediator mediator,
+            IUserService userService,
+            IVideoResultRepository videoResultRepository,
             IClassForumResultRepository classForumResultRepository,
             IUnitResultRepository unitResultRepository,
-            ILessonResultRepository lessonResultRepository,
             ICourseResultRepository courseResultRepository,
             ICourseRepository courseRepository,
             IUnitRepository unitRepository,
-            IMockTestRepository mockTestRepository,
-            IHomeWorkQuestionRepository homeWorkQuestionRepository,
-            IHomeWorkAnswerRepository homeWorkAnswerRepository,
-            IQuestionRepository questionRepository,
-            IHomeWorkRepository homeWorkRepository,
-            FinishOneUnitPublisher finishOneUnitPublisher,
-            FinishOneLevelPassPublisher finishOneLevelPassPublisher,
             IFinalTestResultRepository finalTestResultRepository,
             IMockTestResultRepository mockTestResultRepository,
             IHomeWorkResultRepository homeWorkResultRepository)
@@ -65,20 +69,18 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
             _unitResultRepository = unitResultRepository;
-            _lessonResultRepository = lessonResultRepository;
             _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
-            _mockTestRepository = mockTestRepository;
-            _homeWorkQuestionRepository = homeWorkQuestionRepository;
-            _homeWorkAnswerRepository = homeWorkAnswerRepository;
-            _questionRepository = questionRepository;
-            _homeWorkRepository = homeWorkRepository;
-            _finishOneUnitPublisher = finishOneUnitPublisher;
-            _finishOneLevelPassPublisher = finishOneLevelPassPublisher;
             _finalTestResultRepository = finalTestResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _finishOneLevelPassPublisher = finishOneLevelPassPublisher;
+            _userService = userService;
+            _mediator = mediator;
+            _appSetting = appSetting;
+            _systemService = systemService;
         }
 
         private async Task<(List<SkillScores>, double)> GetCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
@@ -415,7 +417,49 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 courseResult.Status = EnumResultStatus.Done;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await SendStudentCompleteCourse(studentId, courseId, courseResult, cancellationToken);
             }
+        }
+
+        private async Task SendStudentCompleteCourse(Guid studentId, Guid courseId, CourseResult courseResult, CancellationToken cancellationToken)
+        {
+            var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
+            var student = studentResult.Content?.Result?.FirstOrDefault();
+            var course = await _courseRepository.GetByIdAsync(courseId);
+            var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = courseId, UserId = courseResult.CreatedUserId });
+            var featureAccessTime = featureAccessTimeResult.Content?.Result;
+            var sendStudentCompleteCourseModel = new SendStudentCompleteCourseModel
+            {
+                StudentName = student?.Human?.FullName,
+                CourseName = course?.Name,
+                NumberOfHour = featureAccessTime == null ? "0" : Math.Round(((double)featureAccessTime.AccessTime / 3600), 2).ToString(CultureInfo.CurrentCulture),
+                NumberOfUnit = _courseUnitMockTestRepository.Queryable.Where(p => p.CourseId == courseId && p.UnitId.HasValue).Count().ToString(CultureInfo.CurrentCulture),
+                LevelOfStudent = student?.CourseLevel.ToString(),
+                AccessLink = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                HotLine = _appSetting.ResourceContent?.HotLine
+            };
+            if (course?.CourseType == EnumCourseType.Academic)
+            {
+                var finalTestResult = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == courseId && p.StudentId == studentId, cancellationToken);
+                sendStudentCompleteCourseModel.GrammarScore = finalTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Grammar)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+                sendStudentCompleteCourseModel.ReadingScore = finalTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Reading)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+                sendStudentCompleteCourseModel.VocabularyScore = finalTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Vocabulary)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
+            }
+            else
+            {
+                var mockTestResult = await _mockTestResultRepository.Queryable.Where(p => p.CourseId == courseId && p.StudentId == studentId).OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                sendStudentCompleteCourseModel.SpeakingScore = mockTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Speaking)?.Percent.ToString(CultureInfo.CurrentCulture);
+                sendStudentCompleteCourseModel.ReadingScore = mockTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Reading)?.Percent.ToString(CultureInfo.CurrentCulture);
+                sendStudentCompleteCourseModel.WritingScore = mockTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Writing)?.Percent.ToString(CultureInfo.CurrentCulture);
+                sendStudentCompleteCourseModel.ListeningScore = mockTestResult?.SkillScores?.FirstOrDefault(p => p.Skill == EnumCourseSkill.Listening)?.Percent.ToString(CultureInfo.CurrentCulture);
+            }
+            var sendResult = await _mediator.Send(new SenderCommand
+            {
+                Email = student?.Human?.Email,
+                Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course?.Name, student?.Human?.FullName),
+                Params = sendStudentCompleteCourseModel,
+                Template = course?.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
+            }, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -169,6 +169,128 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("FeatureAccessTimes");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.FocusTimeConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<double>("TargetTime")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Token")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FocusTimeConfigs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("0a7b57f3-c964-4f1b-8986-df1579c5d08b"),
+                            CreatedDate = new DateTime(2023, 10, 6, 18, 29, 32, 470, DateTimeKind.Local).AddTicks(669),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Bắt đầu nhẹ nhàng",
+                            IsDeleted = false,
+                            TargetTime = 30.0,
+                            Token = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("9b4fa7b6-1af4-458b-82d9-621c1a88654a"),
+                            CreatedDate = new DateTime(2023, 10, 6, 18, 29, 32, 470, DateTimeKind.Local).AddTicks(1014),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hình thành thói quen chưa?",
+                            IsDeleted = false,
+                            TargetTime = 60.0,
+                            Token = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("124f4341-4c87-4e5f-ba4d-2481d8d36737"),
+                            CreatedDate = new DateTime(2023, 10, 6, 18, 29, 32, 470, DateTimeKind.Local).AddTicks(1038),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Tập trung hơn nữa nào",
+                            IsDeleted = false,
+                            TargetTime = 90.0,
+                            Token = 6
+                        },
+                        new
+                        {
+                            Id = new Guid("82061293-c9d0-4598-99f1-8dfd8162b999"),
+                            CreatedDate = new DateTime(2023, 10, 6, 18, 29, 32, 470, DateTimeKind.Local).AddTicks(1054),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Chăm chỉ phết",
+                            IsDeleted = false,
+                            TargetTime = 120.0,
+                            Token = 12
+                        },
+                        new
+                        {
+                            Id = new Guid("fd7e66d3-a29b-4da7-bb29-2283536d836a"),
+                            CreatedDate = new DateTime(2023, 10, 6, 18, 29, 32, 470, DateTimeKind.Local).AddTicks(1069),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Thách đấu FSEL",
+                            IsDeleted = false,
+                            TargetTime = 180.0,
+                            Token = 24
+                        });
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.ForbiddenWord", b =>
                 {
                     b.Property<Guid>("Id")

@@ -105,7 +105,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 {
                     allTeacher = allTeacher!.Where(p => p.CourseLevels != null && p.CourseLevels.Contains(request.CourseLevel ?? default)).ToList();
                 }
-                if (request.CsoId.HasValue)
+                if (request.TeacherId.HasValue)
                 {
                     allTeacher = allTeacher.Where(p => p.Id != request.TeacherId).ToList();
                 }

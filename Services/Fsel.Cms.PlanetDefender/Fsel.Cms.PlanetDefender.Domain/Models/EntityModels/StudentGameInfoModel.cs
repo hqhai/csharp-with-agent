@@ -3,6 +3,7 @@
 namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
 {
     using System;
+    using Fsel.Cms.PlanetDefender.Domain.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -10,5 +11,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
     {
         public EnumGameCourseLevel? Level { get; set; }
         public Guid StudentId { get; set; }
+        public EnumGender Gender { get; set; }
     }
 }

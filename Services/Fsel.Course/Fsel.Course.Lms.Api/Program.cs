@@ -93,6 +93,7 @@ builder.Services.AddScoped<IClassForumResultFileRepository, ClassForumResultFile
 builder.Services.AddScoped<IClassForumScoreRepository, ClassForumScoreRepository>();
 builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository>();
 builder.Services.AddScoped<IMockTestScoreRepository, MockTestScoreRepository>();
+builder.Services.AddScoped<IClassForumResultFlagRepository, ClassForumResultFlagRepository>();
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
 
 // Converter

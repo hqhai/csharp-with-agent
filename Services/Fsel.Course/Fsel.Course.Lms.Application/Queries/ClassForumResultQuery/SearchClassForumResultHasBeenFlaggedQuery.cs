@@ -3,13 +3,13 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
-    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
@@ -41,7 +41,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.IsFlagged == true)
+                                    .Include(x => x.ClassForumResultFlags)
+                                    /*.Where(x => x.ClassForumResultFlags != null && x.ClassForumResultFlags.Contains(x.Status = EnumClassForumResultFlagStatus.New))*/
+                                    .Where(x => x.ClassForumResultFlags != null && x.ClassForumResultFlags.Any(x => x.Status == EnumClassForumResultFlagStatus.New))
                                     .Select(x => new ClassForumResultModel
                                     {
                                         Id = x.Id,
@@ -49,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         CreatedUserId = x.CreatedUserId,
                                         CreatedFullName = x.CreatedFullName,
                                         Content = x.Content,
+                                        Status = x.Status,
                                     });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
