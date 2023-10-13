@@ -239,7 +239,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         {
                             Id = new Guid("187c1ce2-23ad-4acc-ba89-649a437c1099"),
                             Code = "WB001",
-                            CreatedDate = new DateTime(2023, 10, 12, 17, 39, 10, 846, DateTimeKind.Local).AddTicks(4139),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "A sword without a costume? Oh no, look, there's a sharp wind around it!",
@@ -252,7 +252,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         {
                             Id = new Guid("9faaead9-d4de-4aa8-8523-5432fa7f313f"),
                             Code = "SW001",
-                            CreatedDate = new DateTime(2023, 10, 12, 17, 39, 10, 846, DateTimeKind.Local).AddTicks(4177),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "What's the use of a broken watch?",
@@ -265,7 +265,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         {
                             Id = new Guid("baecdd2b-39c3-41a5-8240-1a48e37b4f33"),
                             Code = "SH001",
-                            CreatedDate = new DateTime(2023, 10, 12, 17, 39, 10, 846, DateTimeKind.Local).AddTicks(4180),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "This shield is so beautiful! Wish it was here forever",
@@ -278,7 +278,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         {
                             Id = new Guid("54c17216-a173-4ed6-a6e8-ff7062494705"),
                             Code = "SP001",
-                            CreatedDate = new DateTime(2023, 10, 12, 17, 39, 10, 846, DateTimeKind.Local).AddTicks(4183),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "The rescue ship is here!",
@@ -291,7 +291,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         {
                             Id = new Guid("0cf0c6b3-1312-473d-bd2a-15dfa88d6052"),
                             Code = "PU001",
-                            CreatedDate = new DateTime(2023, 10, 12, 17, 39, 10, 846, DateTimeKind.Local).AddTicks(4186),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "This power...It's strange",
@@ -304,7 +304,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         {
                             Id = new Guid("fdc945ba-248e-4db2-96cb-c7d55a7de8c8"),
                             Code = "MG001",
-                            CreatedDate = new DateTime(2023, 10, 12, 17, 39, 10, 846, DateTimeKind.Local).AddTicks(4188),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "With the force of fate, these meteorites need a little help",
@@ -317,7 +317,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         {
                             Id = new Guid("192b995e-9cfa-45ee-9f6f-f6fff5803059"),
                             Code = "GB001",
-                            CreatedDate = new DateTime(2023, 10, 12, 17, 39, 10, 846, DateTimeKind.Local).AddTicks(4190),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "What kind of bomb sticks like glue?",
@@ -330,7 +330,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         {
                             Id = new Guid("12b08f82-9b0b-4a7a-92d2-10e35b9fea4e"),
                             Code = "HI001",
-                            CreatedDate = new DateTime(2023, 10, 12, 17, 39, 10, 846, DateTimeKind.Local).AddTicks(4193),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Whose card is this?",
