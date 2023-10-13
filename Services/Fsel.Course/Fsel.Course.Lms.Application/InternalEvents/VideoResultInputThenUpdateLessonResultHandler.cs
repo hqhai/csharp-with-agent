@@ -19,12 +19,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     public class VideoResultInputThenUpdateLessonResultHandler : BaseInternalLessonResultEventHandler,
         INotificationHandler<EntityChangedEvent<VideoResult>>
     {
-        private readonly FinishOneLessonPublisher _finishOneLessonPublisher;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public VideoResultInputThenUpdateLessonResultHandler(ISystemService systemService, AppSetting appSetting, FinishOneLevelPassPublisher finishOneLevelPassPublisher, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, FinishOneLessonPublisher finishOneLessonPublisher, ILessonResultRepository lessonResultRepository) : base(systemService, appSetting, finishOneLevelPassPublisher, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
+        public VideoResultInputThenUpdateLessonResultHandler(FinishOneLessonPublisher finishOneLessonPublisher, ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, FinishOneLevelPassPublisher finishOneLevelPassPublisher, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(finishOneLessonPublisher, lessonResultRepository, systemService, appSetting, finishOneLevelPassPublisher, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
-            _finishOneLessonPublisher = finishOneLessonPublisher;
             _lessonResultRepository = lessonResultRepository;
         }
 
@@ -40,8 +38,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResult.CorrectTotal = videoResult.CorrectTotal;
                 lessonResult.Percent = NumberHelper.ConvertDoublePercent(videoResult.Percent * 40);
                 lessonResult.SkillScores = skillScores;
-                await _finishOneLessonPublisher.Publish(lessonResult, cancellationToken);
-                await GetLessonResult(lessonResult, cancellationToken);
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
