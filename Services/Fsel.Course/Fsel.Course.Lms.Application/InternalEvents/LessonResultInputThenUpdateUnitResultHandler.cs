@@ -40,28 +40,28 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (unit != null && lessonResult.Status == EnumResultStatus.Done)
             {
                 var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
-                if (lessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count == 0)
+                if (lessonResults.Count == unit.UnitLessons.Count && !unit.UnitSkillMockTests.Any())
                 {
-                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, true, cancellationToken);
+                    await UpdateUnitResultAsync(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, true, cancellationToken);
                 }
-                else if (lessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count > 0)
+                else if (lessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Any())
                 {
-                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, true, cancellationToken).ConfigureAwait(false);
-                    await UpdateTheNextLesson(unit, lessonResult, cancellationToken).ConfigureAwait(false);
+                    await UpdateUnitResultAsync(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, true, cancellationToken).ConfigureAwait(false);
+                    await UpdateTheNextLessonAsync(unit, lessonResult, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
                     var isCheck = lessonResults.Any(x => x.Status == EnumResultStatus.New);
                     if (!isCheck)
                     {
-                        await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, false, cancellationToken).ConfigureAwait(false);
-                        await UpdateTheNextLesson(unit, lessonResult, cancellationToken).ConfigureAwait(false);
+                        await UpdateUnitResultAsync(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, false, cancellationToken).ConfigureAwait(false);
+                        await UpdateTheNextLessonAsync(unit, lessonResult, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
         }
 
-        private async Task UpdateTheNextLesson(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
+        private async Task UpdateTheNextLessonAsync(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(unit);
             var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;
@@ -70,21 +70,21 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (lesson != null)
             {
                 var lessonResultNext = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.LessonId == lesson.Id, cancellationToken);
-                if (lessonResultNext != null)
+                if (lessonResultNext != null && lessonResultNext.Status == EnumResultStatus.Unfinished)
                 {
                     lessonResultNext.Status = EnumResultStatus.New;
                     _lessonResultRepository.Update(lessonResultNext);
-                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
             else if (unit.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts && mockTestId.HasValue)
             {
                 var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.MockTestId == mockTestId.Value, cancellationToken);
-                if (mockTestResult != null)
+                if (mockTestResult != null && mockTestResult.Status == EnumResultStatus.Unfinished)
                 {
                     mockTestResult.Status = EnumResultStatus.New;
                     _mockTestResultRepository.Update(mockTestResult);
-                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
         }

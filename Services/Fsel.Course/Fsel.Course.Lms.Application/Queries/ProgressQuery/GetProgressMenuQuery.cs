@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).ToList();
 
             var lessonExtraPractices = await _lessonExtraPracticeRepository.Queryable.Include(x => x.ExtraPractice)
-                .ThenInclude(x => x!.ExtraPracticeResults)
+                .ThenInclude(x => x!.ExtraPracticeResults.Where(x => x.StudentId == studentId))
                 .Where(x => lessonIds.Contains(x.LessonId))
                 .ToListAsync(cancellationToken);
             var numberOfPracticesDone = lessonExtraPractices.Select(x => x.ExtraPractice)

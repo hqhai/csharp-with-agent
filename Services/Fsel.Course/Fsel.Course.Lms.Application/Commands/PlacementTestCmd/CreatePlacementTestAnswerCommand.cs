@@ -19,7 +19,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
-    using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
@@ -229,40 +228,40 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             {
                 #region Pilot
 
-                if (currentLevel.HasValue)
-                {
-                    Random random = new Random();
-                    var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value && x.Status == EnumCourseStatus.Active).ToListAsync(cancellationToken);
-                    var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();
-                    if (course == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
-                        return methodResult;
-                    }
-                    await _orderService.CreateOrder(new CreateOrderCommandModel
-                    {
-                        Address = "Viet Nam",
-                        Country = "Viet Nam",
-                        CourseId = course.Id,
-                        CourseLevel = currentLevel.Value,
-                        FullName = student?.Human?.FullName,
-                        PaymentMethod = EnumPaymentMethodStatus.Card,
-                        CodeCourse = course.Code,
-                        UserId = _authContext.CurrentUserId
-                    }).ConfigureAwait(false);
-                    //CreateOrderQueueModel createOrderQueueModel = new CreateOrderQueueModel
-                    //{
-                    //    Address = "Viet Nam",
-                    //    Country = "Viet Nam",
-                    //    CourseId = course.Id,
-                    //    CourseLevel = currentLevel.Value,
-                    //    FullName = student?.Human?.FullName,
-                    //    PaymentMethod = EnumPaymentMethodStatus.Card,
-                    //    CodeCourse = course.Code,
-                    //    UserId = _authContext.CurrentUserId
-                    //};
-                    //await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
-                }
+                //if (currentLevel.HasValue)
+                //{
+                //    Random random = new Random();
+                //    var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value && x.Status == EnumCourseStatus.Active).ToListAsync(cancellationToken);
+                //    var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();
+                //    if (course == null)
+                //    {
+                //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                //        return methodResult;
+                //    }
+                //    await _orderService.CreateOrder(new CreateOrderCommandModel
+                //    {
+                //        Address = "Viet Nam",
+                //        Country = "Viet Nam",
+                //        CourseId = course.Id,
+                //        CourseLevel = currentLevel.Value,
+                //        FullName = student?.Human?.FullName,
+                //        PaymentMethod = EnumPaymentMethodStatus.Card,
+                //        CodeCourse = course.Code,
+                //        UserId = _authContext.CurrentUserId
+                //    }).ConfigureAwait(false);
+                //    //CreateOrderQueueModel createOrderQueueModel = new CreateOrderQueueModel
+                //    //{
+                //    //    Address = "Viet Nam",
+                //    //    Country = "Viet Nam",
+                //    //    CourseId = course.Id,
+                //    //    CourseLevel = currentLevel.Value,
+                //    //    FullName = student?.Human?.FullName,
+                //    //    PaymentMethod = EnumPaymentMethodStatus.Card,
+                //    //    CodeCourse = course.Code,
+                //    //    UserId = _authContext.CurrentUserId
+                //    //};
+                //    //await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
+                //}
 
                 #endregion Pilot
             }
