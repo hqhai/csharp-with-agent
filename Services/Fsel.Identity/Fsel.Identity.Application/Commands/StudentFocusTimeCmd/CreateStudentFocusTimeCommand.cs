@@ -54,7 +54,14 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             var studentFocusTime = _studentFocusTimeRepository.Queryable.FirstOrDefault(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
 
             var systemConfig = await _systemService.GetFocusTimeConfig();
+            var systemConfigResult = systemConfig?.Content?.Result;
+            if (systemConfigResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
 
+            var defaultTargetTime = systemConfigResult.OrderBy(x => x.Token).FirstOrDefault()!.TargetTime;
 
             //Thực hiện các hành động lưu xuống database , gửi lên websocket
             await _studentFocusTimeRepository.ExecuteTransactionAsync(async () =>
@@ -62,14 +69,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 if (studentFocusTime == null)
                 {
                     studentFocusTime = _mapper.Map<StudentFocusTime>(request);
-                    var systemConfigResult = systemConfig?.Content?.Result;
-                    if (systemConfigResult == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                        return methodResult;
-                    }
-
-                    var defaultTargetTime = systemConfigResult.OrderBy(x => x.Token).FirstOrDefault()!.TargetTime;
                     studentFocusTime.TargetTime = defaultTargetTime;
                     studentFocusTime.StudentId = student.Id;
                     studentFocusTime.IsEstablished = false;
@@ -78,14 +77,17 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 }
                 else
                 {
-                    if (!studentFocusTime.IsEstablished && request.TargetTime != 0)
+                    bool confitionChangeTarget = request.TargetTime > defaultTargetTime;
+
+                    if (!studentFocusTime.IsEstablished && confitionChangeTarget)
                     {
                         studentFocusTime.TargetTime = request.TargetTime;
                     }
 
                     var systemConfigMap = systemConfig?.Content?.Result!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
                     studentFocusTime.ExecuteTime += request.ExecuteTime;
-                    studentFocusTime.IsEstablished = true;
+
+                    studentFocusTime.IsEstablished = confitionChangeTarget;
 
                     if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime)
                     {
