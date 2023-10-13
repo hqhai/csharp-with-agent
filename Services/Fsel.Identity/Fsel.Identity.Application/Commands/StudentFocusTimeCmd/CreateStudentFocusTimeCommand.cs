@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentFocusTimeModel> methodResult = new MethodResult<StudentFocusTimeModel>();
 
-            var student = _studentRepository.Queryable.Include(x => x.Human).FirstOrDefault(x => x.Human!.UserId == _authContext.CurrentUserId.ToString());
+            var student = _studentRepository.Queryable.Include(x => x.Human).FirstOrDefault(x => x.Human!.UserId == _authContext.CurrentUserId);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(_authContext.CurrentUserId), _authContext.CurrentUserId);

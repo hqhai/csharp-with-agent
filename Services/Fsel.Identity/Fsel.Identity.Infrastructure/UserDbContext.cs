@@ -37,7 +37,6 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserSettingEntityTypeConfiguration());
             builder.ApplyConfiguration(new PlatformEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserPlatformEntityTypeConfiguration());
-
             builder.ApplyConfiguration(new StudenrRankingEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentFocusTimeEntityTypeConfiguration());
             base.OnModelCreating(builder);

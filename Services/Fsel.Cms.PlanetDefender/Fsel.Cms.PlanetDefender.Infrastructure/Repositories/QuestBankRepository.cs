@@ -8,7 +8,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Repositories
 
     public class QuestBankRepository : BaseRepository<QuestBank>, IQuestBankRepository
     {
-        public QuestBankRepository(CmsPlanetDefenderDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public QuestBankRepository(CmsPlanetDefenderDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }
