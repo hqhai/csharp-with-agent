@@ -83,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var numberOfPostsCreated = classForums.SelectMany(x => x.ClassForumResults)
                                                     .Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded)
                                                     .Count();
-            var logActionResults = await _systemService.GetLogActionsByUserId(_authContext.CurrentUserId);
+            var logActionResults = await _userService.GetDailyStreak(studentId ?? default);
             if (!logActionResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(logActionResults));

@@ -31,29 +31,41 @@ namespace Fsel.Shared.Helpers
 
         public static async Task<(int, bool)> CountContinuousDaysAsync(IList<DateTime>? dates)
         {
-            if (dates != null && dates.Count > 0)
+            if (dates == null || dates.Count == 0)
             {
-                int count = 0;
-                DateTime? previousDate = null;
-                bool isDaysStreakIncrease = true;
-                foreach (var date in dates)
+                return (0, false);
+            }
+            else if (dates.Count == 1)
+            {
+                var difference = DateTime.Now.Date - dates[0].Date;
+                return (difference.Days <= 1 ? 1 : 0, difference.Days <= 1);
+            }
+            else
+            {
+                var sortedDates = dates.OrderByDescending(date => date.Date).ToList();
+                int consecutiveDays = 0;
+
+                foreach (var date in sortedDates)
                 {
-                    if (previousDate == null || (date - previousDate.Value).TotalDays == 1)
+                    var numberOfDays = DateTime.Now.Date - date;
+                    if (numberOfDays.Days == consecutiveDays + 1)
                     {
-                        count++;
-                        isDaysStreakIncrease = true;
+                        consecutiveDays++;
                     }
                     else
                     {
-                        count = 1;
-                        isDaysStreakIncrease = false;
+                        continue;
                     }
-                    previousDate = date;
-                    await Task.Delay(1);
+                    await Task.Delay(0);
                 }
-                return (count, isDaysStreakIncrease);
+                if (DateTime.Now.Date == sortedDates[0].Date)
+                {
+                    consecutiveDays++;
+                }
+                var firstDateDifference = DateTime.Now.Date - sortedDates[0].Date;
+                return (firstDateDifference.Days <= 1 ? consecutiveDays : 0, firstDateDifference.Days <= 1);
             }
-            return (0, false);
         }
+
     }
 }
