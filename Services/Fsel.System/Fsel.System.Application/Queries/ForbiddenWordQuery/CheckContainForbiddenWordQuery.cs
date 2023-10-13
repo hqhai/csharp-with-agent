@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Queries.CheckContainForbiddenWordQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Domain.IRepositories;
     using global::System;
     using global::System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace Fsel.System.Application.Queries.CheckContainForbiddenWordQuery
             MethodResult<IList<String>> methodResult = new MethodResult<IList<String>>();
             ArgumentNullException.ThrowIfNull(request);
             var forbiddenWordQuery = await _forbiddenWordRepository.Queryable
-             .Where(x => (" " + Regex.Replace(request.Word, "<.*?>", string.Empty) + " ").ToLower().Contains(" " + x.Word.ToLower() + " "))
+             .Where(x => (" " + StringHelper.RemoveHTMLTags(request.Word) + " ").ToLower().Contains(" " + x.Word.ToLower() + " "))
              .Select(x => x.Word.ToLower()).Distinct().ToListAsync(cancellationToken: cancellationToken);
             methodResult.Result = forbiddenWordQuery;
             methodResult.StatusCode = StatusCodes.Status200OK;
