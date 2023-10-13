@@ -54,7 +54,14 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             var studentFocusTime = _studentFocusTimeRepository.Queryable.FirstOrDefault(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
 
             var systemConfig = await _systemService.GetFocusTimeConfig();
+            var systemConfigResult = systemConfig?.Content?.Result;
+            if (systemConfigResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
 
+            var defaultTargetTime = systemConfigResult.OrderBy(x => x.Token).FirstOrDefault()!.TargetTime;
 
             //Thực hiện các hành động lưu xuống database , gửi lên websocket
             await _studentFocusTimeRepository.ExecuteTransactionAsync(async () =>
@@ -62,14 +69,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 if (studentFocusTime == null)
                 {
                     studentFocusTime = _mapper.Map<StudentFocusTime>(request);
-                    var systemConfigResult = systemConfig?.Content?.Result;
-                    if (systemConfigResult == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                        return methodResult;
-                    }
-
-                    var defaultTargetTime = systemConfigResult.OrderBy(x => x.Token).FirstOrDefault()!.TargetTime;
                     studentFocusTime.TargetTime = defaultTargetTime;
                     studentFocusTime.StudentId = student.Id;
                     studentFocusTime.IsEstablished = false;
@@ -78,16 +77,19 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 }
                 else
                 {
-                    if (!studentFocusTime.IsEstablished && request.TargetTime != 0)
+                    bool confitionChangeTarget = request.TargetTime > defaultTargetTime;
+
+                    if (!studentFocusTime.IsEstablished && confitionChangeTarget)
                     {
                         studentFocusTime.TargetTime = request.TargetTime;
                     }
 
                     var systemConfigMap = systemConfig?.Content?.Result!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
                     studentFocusTime.ExecuteTime += request.ExecuteTime;
-                    studentFocusTime.IsEstablished = true;
 
-                    if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime)
+                    studentFocusTime.IsEstablished = confitionChangeTarget;
+
+                    if ((studentFocusTime.ExecuteTime / 60) >= systemConfigMap!.TargetTime)
                     {
                         student.NumberOfToken = CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token
                         _studentRepository.Update(student);
@@ -113,7 +115,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             var startDate = currentDate.AddDays(-NUMBER_OF_WEEKDAY).Date; // Ngày bắt đầu từ 7 ngày trước
             var endDate = currentDate.Date;
             var studentFocusTimesCheckQuery = _studentFocusTimeRepository.Queryable
-                                        .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && x.ExecuteTime >= x.TargetTime)
+                                        .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && (x.ExecuteTime / 60) >= x.TargetTime)
                                         .OrderBy(x => x.CreatedDate.Date)
                                         .ToList();
 

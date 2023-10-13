@@ -62,7 +62,7 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
             var startDate = currentDate.AddDays(-NUMBER_OF_WEEKDAY).Date; // Ngày bắt đầu từ 7 ngày trước
             var endDate = currentDate.Date; 
             var studentFocusTimesCheckQuery = _studentFocusTimeRepository.Queryable
-                                        .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && x.ExecuteTime >= x.TargetTime)
+                                        .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && (x.ExecuteTime / 60) >= x.TargetTime)
                                         .OrderBy(x => x.CreatedDate.Date)
                                         .ToList();
             bool hasContinuousData = true;
