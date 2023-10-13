@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = await _unitRepository.GetListModelAsync(studentId, request.CourseId, request.Type);
+            methodResult.Result = await _unitRepository.GetListAsync(studentId, request.CourseId, request.Type);
             return methodResult;
         }
     }
