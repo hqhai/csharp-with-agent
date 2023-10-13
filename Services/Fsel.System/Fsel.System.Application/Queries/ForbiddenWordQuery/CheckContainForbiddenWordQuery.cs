@@ -29,8 +29,9 @@ namespace Fsel.System.Application.Queries.CheckContainForbiddenWordQuery
         {
             MethodResult<IList<String>> methodResult = new MethodResult<IList<String>>();
             ArgumentNullException.ThrowIfNull(request);
+
             var forbiddenWordQuery = await _forbiddenWordRepository.Queryable
-             .Where(x => request.Word.ToLower().Contains(x.Word.ToLower()))
+             .Where(x => request.Word.ToLower().Contains(" "+x.Word.ToLower()+" "))
              .Select(x => x.Word.ToLower()).Distinct().ToListAsync(cancellationToken: cancellationToken);
             methodResult.Result = forbiddenWordQuery;
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -2,6 +2,7 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
 
@@ -19,6 +20,13 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS2),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS3),
         };
+
+        private static Dictionary<EnumCourseLevel, EnumCourseLevel> s_levelMapping = new Dictionary<EnumCourseLevel, EnumCourseLevel>
+            {
+                { EnumCourseLevel.B1Plus, EnumCourseLevel.MS1 },
+                { EnumCourseLevel.B2, EnumCourseLevel.MS2 },
+                { EnumCourseLevel.C1, EnumCourseLevel.MS3 }
+            };
 
         public static EnumCourseType GetEnumCourseType(this EnumCourseLevel courseLevel)
         {
@@ -115,6 +123,55 @@ namespace Fsel.Shared.Helpers
         public static IList<string> GetListCourseLevels(this EnumCourseType? courseType)
         {
             return GetEnumCourseLevels(courseType).Select(x => x.ToString()).ToList();
+        }
+
+        public static object? GetListCourseLevels(this EnumCourseType? courseType, EnumCourseLevel courseLevel)
+        {
+            int index = (int)s_courseTypeLevel.FirstOrDefault(x => x.Key == courseLevel.GetEnumCourseType() && x.Value == courseLevel).Value;
+            var levels = s_courseTypeLevel
+                        .Where((x, i) => i >= index - 1 && i <= index + 1 && x.Key == courseLevel.GetEnumCourseType())
+                        .Select(x => new
+                        {
+                            CourseLevel = x.Value,
+                            LevelName = x.Value.GetDescription()
+                        })
+                        .ToList();
+            if (levels == null || !levels.Any())
+            {
+                return default;
+            }
+            if (courseType == EnumCourseType.Academic)
+            {
+                return levels;
+            }
+            else
+            {
+                var listCourselevel = levels.Select(x => x.CourseLevel).ToList();
+                var courseLevelIELSTs = s_levelMapping.Where(x => listCourselevel.Contains(x.Key)).Select(x => x.Value).ToList();
+                return s_courseTypeLevel.Where(x => x.Key == courseType && courseLevelIELSTs.Contains(x.Value)).Select(x => new
+                {
+                    CourseLevel = x.Value,
+                    LevelName = x.Value.GetDescription()
+                }).ToList();
+            }
+        }
+
+        public static bool IsCheckCourseLevel(this EnumCourseLevel courseLevelSelected, EnumCourseLevel courseLevel)
+        {
+            int index = (int)s_courseTypeLevel.FirstOrDefault(x => x.Key == courseLevel.GetEnumCourseType() && x.Value == courseLevel).Value;
+            var levels = s_courseTypeLevel
+                        .Where((x, i) => i >= index - 1 && i <= index + 1 && x.Key == courseLevel.GetEnumCourseType())
+                        .Select(x => x.Value)
+                        .ToList();
+            if (courseLevel.GetEnumCourseType() == courseLevelSelected.GetEnumCourseType())
+            {
+                return levels.Any(x => x == courseLevelSelected);
+            }
+            else
+            {
+                var courseLevelIELSTs = s_levelMapping.Where(x => levels.Contains(x.Key)).Select(x => x.Value).ToList();
+                return courseLevelIELSTs.Any(x => x == courseLevelSelected);
+            }
         }
     }
 }

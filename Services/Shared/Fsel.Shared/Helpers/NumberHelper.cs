@@ -48,19 +48,19 @@ namespace Fsel.Shared.Helpers
 
         public static double ConvertDoublePercent(double value)
         {
-            double convertedValue = Math.Round(value / 100, 2);
+            double convertedValue = Math.Round(value / 100, 2, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
         public static double ConvertDouble(double value)
         {
-            double convertedValue = Math.Round(value, 2);
+            double convertedValue = Math.Round(value, 2, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
         public static double ConvertDoubleDecimal(double value)
         {
-            double convertedValue = Math.Round(value, 0);
+            double convertedValue = Math.Round(value, 0, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
@@ -72,7 +72,7 @@ namespace Fsel.Shared.Helpers
 
         public static double ConvertPercentDouble(double value)
         {
-            double convertedValue = Math.Round(value * 100, 0);
+            double convertedValue = Math.Round(value * 100, 0, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 

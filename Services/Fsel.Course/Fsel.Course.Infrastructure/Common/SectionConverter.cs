@@ -43,6 +43,24 @@ namespace Fsel.Course.Infrastructure.Common
             return sectionGroupModel;
         }
 
+        public double GetExecutionTime(IList<SectionGroup>? sectionGroups)
+        {
+            if (sectionGroups != null && sectionGroups.Any())
+            {
+                return sectionGroups.Sum(x => x.ExecutionTime);
+            }
+            return default;
+        }
+
+        public long GetTotalQuestion(IList<SectionGroup>? sectionGroups)
+        {
+            if (sectionGroups != null && sectionGroups.Any())
+            {
+                return sectionGroups.Select(x => GetTotalQuestion(x)).Sum();
+            }
+            return default;
+        }
+
         public long GetTotalQuestion(SectionGroup? sectionGroup)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
