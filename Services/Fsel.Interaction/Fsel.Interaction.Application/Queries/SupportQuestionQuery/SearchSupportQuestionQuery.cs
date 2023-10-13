@@ -3,7 +3,6 @@
 namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
 {
     using System;
-    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -13,7 +12,6 @@ namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.SupportQuestions;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -40,6 +38,7 @@ namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+
             var supportQuestionQuery = _supportQuestionRepository.Queryable
                                 .Select(x => new SupportQuestionModel
                                 {
@@ -59,6 +58,10 @@ namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
             if (request.SupportCategoryId != null)
             {
                 supportQuestionQuery = supportQuestionQuery.Where(m => m.SupportCategoryId == request.SupportCategoryId);
+            }
+            if (request.IsFrequent != null)
+            {
+                supportQuestionQuery = supportQuestionQuery.Where(m => m.IsFrequent == request.IsFrequent);
             }
             int totalItem = await supportQuestionQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await supportQuestionQuery

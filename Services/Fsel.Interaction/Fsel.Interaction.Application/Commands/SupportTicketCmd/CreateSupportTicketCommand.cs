@@ -41,6 +41,8 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
             MethodResult<SupportTicketModel> methodResult = new MethodResult<SupportTicketModel>();
 
             SupportTicket supportTicket = _mapper.Map<SupportTicket>(request);
+            supportTicket.Status = EnumSupportTicketStatus.NotSeen;
+            supportTicket.Code = NumberHelper.GenerateCodeNumber(8);
             if (!supportTicket.IsValid())
             {
                 methodResult.AddErrorBadRequest(supportTicket.ErrorMessages);
@@ -60,8 +62,6 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
 
             await _supportTicketRepository.ExecuteTransactionAsync(async () =>
             {
-                supportTicket.Code = NumberHelper.GenerateCodeNumber(8);
-                supportTicket.Status = EnumSupportTicketStatus.NotSeen;
                 supportTicket = _supportTicketRepository.Add(supportTicket);
                 await _supportTicketRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
