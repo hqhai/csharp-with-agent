@@ -19,10 +19,15 @@ namespace Fsel.Course.Infrastructure.Configs
                       v => v.ToString(),
                       v => v.EnumParse<EnumTimeCodeStatus>());
 
-            builder.HasOne(a => a.VideoTimeCodeResult)
+            builder.HasOne(a => a.VideoResult)
+                  .WithMany(b => b.VideoTimeCodeAnswers)
+                  .HasForeignKey(b => b.VideoResultId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.VideoTimeCode)
                           .WithMany(b => b.VideoTimeCodeAnswers)
-                          .HasForeignKey(b => b.VideoTimeCodeResultId)
-                          .OnDelete(DeleteBehavior.SetNull);
+                          .HasForeignKey(b => b.VideoTimeCodeId)
+                          .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(a => a.Exercise)
               .WithMany(b => b.VideoTimeCodeAnswers)
@@ -34,15 +39,10 @@ namespace Fsel.Course.Infrastructure.Configs
                    .HasForeignKey(b => b.QuestionId)
                    .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(a => a.VideoResult)
-                  .WithMany(b => b.VideoTimeCodeAnswers)
-                  .HasForeignKey(b => b.VideoResultId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(a => a.VideoTimeCode)
-                          .WithMany(b => b.VideoTimeCodeAnswers)
-                          .HasForeignKey(b => b.VideoTimeCodeId)
-                          .OnDelete(DeleteBehavior.NoAction);
+            builder.HasOne(a => a.VideoTimeCodeResult)
+                       .WithMany(b => b.VideoTimeCodeAnswers)
+                       .HasForeignKey(b => b.VideoTimeCodeResultId)
+                       .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
