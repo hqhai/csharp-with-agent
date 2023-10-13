@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             methodResult.Result = new LessonsMockTestModel
             {
                 Lessons = await GetLesson(request, studentId, cancellationToken).ConfigureAwait(false),
-                MockTest = await _mockTestRepository.GetIncludeModelAsync(request.CourseId, request.UnitId, studentId).ConfigureAwait(false)
+                MockTest = await _mockTestRepository.GetIncludeAsync(request.CourseId, request.UnitId, studentId).ConfigureAwait(false)
             };
 
             methodResult.StatusCode = StatusCodes.Status200OK;

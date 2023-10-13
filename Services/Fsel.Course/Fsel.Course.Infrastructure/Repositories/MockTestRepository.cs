@@ -100,7 +100,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<MockTestModel?> GetIncludeModelAsync(Guid courseId, Guid unitId, Guid? studentId)
+        public async Task<MockTestModel?> GetIncludeAsync(Guid courseId, Guid unitId, Guid? studentId)
         {
             try
             {

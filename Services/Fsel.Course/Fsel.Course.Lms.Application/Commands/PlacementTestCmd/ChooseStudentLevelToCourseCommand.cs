@@ -18,19 +18,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 {
-    public class ChooseStudentCourseCommand : IRequest<MethodResult<bool>>
+    public class ChooseStudentLevelToCourseCommand : IRequest<MethodResult<bool>>
     {
         public EnumCourseLevel Level { get; set; }
     }
 
-    public class ChooseStudentCourseCommandHandler : IRequestHandler<ChooseStudentCourseCommand, MethodResult<bool>>
+    public class ChooseStudentLevelToCourseCommandHandler : IRequestHandler<ChooseStudentLevelToCourseCommand, MethodResult<bool>>
     {
         private readonly IUserService _userService;
         private readonly IOrderService _orderService;
         private readonly AuthContext _authContext;
         private readonly ICourseRepository _courseRepository;
 
-        public ChooseStudentCourseCommandHandler(IUserService userService, IOrderService orderService, AuthContext authContext, ICourseRepository courseRepository)
+        public ChooseStudentLevelToCourseCommandHandler(IUserService userService, IOrderService orderService, AuthContext authContext, ICourseRepository courseRepository)
         {
             _userService = userService;
             _orderService = orderService;
@@ -38,7 +38,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _courseRepository = courseRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(ChooseStudentCourseCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ChooseStudentLevelToCourseCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();

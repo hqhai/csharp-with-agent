@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [Authorize(Roles = nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ChooseStudentCourse([FromBody] ChooseStudentCourseCommand command)
+        public async Task<IActionResult> ChooseStudentCourse([FromBody] ChooseStudentLevelToCourseCommand command)
         {
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
