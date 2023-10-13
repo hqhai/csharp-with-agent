@@ -82,41 +82,43 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             var query = from baseQ in Queryable
                         join cumt in _courseUnitMockTestRepository.Queryable on baseQ.Id equals cumt.UnitId
-                        where cumt.CourseId == courseId
-                        select baseQ;
+                        join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.UnitId
+                        join ul in _unitLessonRepository.Queryable on baseQ.Id equals ul.UnitId
+                        join l in _lessonRepository.Queryable on ul.LessonId equals l.Id
+                        join lr in _lessonResultRepository.Queryable on baseQ.Id equals lr.UnitId
+                        where cumt.CourseId == courseId && ur.StudentId == studentId && lr.StudentId == studentId
+                        select new
+                        {
+                            Unit = baseQ,
+                            UnitResult = ur,
+                            UnitLesson = ul,
+                            Lesson = l,
+                            LessonResult = lr,
+                        };
             switch (type)
             {
                 case EnumLearnProcessType.LessonVideo:
                     var queryLessonVideo = from baseQ in query
-                                           join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.UnitId
-                                           join ul in _unitLessonRepository.Queryable on baseQ.Id equals ul.UnitId
-                                           join lr in _lessonResultRepository.Queryable on baseQ.Id equals lr.UnitId
-                                           where lr.StudentId == studentId && ur.StudentId == studentId
-                                           group new { ul, lr, ur } by baseQ into g
+                                           group new { baseQ.UnitLesson, baseQ.LessonResult, baseQ.UnitResult } by baseQ.Unit into g
                                            select new
                                            {
                                                Unit = g.Key,
-                                               UnitResult = g.Select(x => x.ur).FirstOrDefault(),
-                                               CountDone = g.Select(x => x.lr).Where(x => x.Status == EnumResultStatus.Done).Count(),
-                                               TotalDone = g.Select(x => x.ul).Count(),
+                                               UnitResult = g.Select(x => x.UnitResult).FirstOrDefault(),
+                                               CountDone = g.Select(x => x.LessonResult).Where(x => x.Status == EnumResultStatus.Done).Count(),
+                                               TotalDone = g.Select(x => x.UnitLesson).Count(),
                                            };
                     var listLessonVideo = await queryLessonVideo.ToListAsync();
                     return listLessonVideo.Select(x => GetUnitModel(x.Unit, x.UnitResult, courseId, x.CountDone, x.TotalDone)).ToList();
 
                 case EnumLearnProcessType.HomeWork:
                     var queryHomeWork = from baseQ in query
-                                        join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.UnitId
-                                        join ul in _unitLessonRepository.Queryable on baseQ.Id equals ul.UnitId
-                                        join l in _lessonRepository.Queryable on ul.LessonId equals l.Id
-                                        join lh in _lessonHomeWorkRepository.Queryable on l.Id equals lh.LessonId
-                                        join lr in _lessonResultRepository.Queryable on baseQ.Id equals lr.UnitId
-                                        join hr in _homeWorkResultRepository.Queryable on lr.Id equals hr.LessonResultId
-                                        where lr.StudentId == studentId && ur.StudentId == studentId
-                                        group new { hr, lh, ur } by baseQ into g
+                                        join lh in _lessonHomeWorkRepository.Queryable on baseQ.Lesson.Id equals lh.LessonId
+                                        join hr in _homeWorkResultRepository.Queryable on baseQ.LessonResult.Id equals hr.LessonResultId
+                                        group new { hr, lh, baseQ.UnitResult } by baseQ.Unit into g
                                         select new
                                         {
                                             Unit = g.Key,
-                                            UnitResult = g.Select(x => x.ur).FirstOrDefault(),
+                                            UnitResult = g.Select(x => x.UnitResult).FirstOrDefault(),
                                             CountDone = g.Select(x => x.hr).Where(x => x.Status == EnumResultStatus.Done).Count(),
                                             TotalDone = g.Select(x => x.lh).Count(),
                                         };
@@ -125,18 +127,13 @@ namespace Fsel.Course.Infrastructure.Repositories
 
                 case EnumLearnProcessType.ClassForum:
                     var queryClassForum = from baseQ in query
-                                          join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.UnitId
-                                          join ul in _unitLessonRepository.Queryable on baseQ.Id equals ul.UnitId
-                                          join l in _lessonRepository.Queryable on ul.LessonId equals l.Id
-                                          join cf in _classForumRepository.Queryable on l.Id equals cf.LessonId
-                                          join lr in _lessonResultRepository.Queryable on baseQ.Id equals lr.UnitId
-                                          join cfr in _classForumResultRepository.Queryable on lr.Id equals cfr.LessonResultId
-                                          where lr.StudentId == studentId && ur.StudentId == studentId
-                                          group new { cfr, cf, ur } by baseQ into g
+                                          join cf in _classForumRepository.Queryable on baseQ.Lesson.Id equals cf.LessonId
+                                          join cfr in _classForumResultRepository.Queryable on baseQ.LessonResult.Id equals cfr.LessonResultId
+                                          group new { cfr, cf, baseQ.UnitResult } by baseQ.Unit into g
                                           select new
                                           {
                                               Unit = g.Key,
-                                              UnitResult = g.Select(x => x.ur).FirstOrDefault(),
+                                              UnitResult = g.Select(x => x.UnitResult).FirstOrDefault(),
                                               CountDone = g.Select(x => x.cfr).Where(x => x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.PendingForGrading).Count(),
                                               TotalDone = g.Select(x => x.cf).Count(),
                                           };
@@ -144,22 +141,17 @@ namespace Fsel.Course.Infrastructure.Repositories
                     return listClassForum.Select(x => GetUnitModel(x.Unit, x.UnitResult, courseId, x.CountDone, x.TotalDone)).ToList();
 
                 case EnumLearnProcessType.UnitTest:
-                    var queryUnitTest = from baseQ in Queryable
-                                        join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.UnitId
-                                        join ul in _unitLessonRepository.Queryable on baseQ.Id equals ul.UnitId
-                                        join l in _lessonRepository.Queryable on ul.LessonId equals l.Id
-                                        join lv in _lessonVideoRepository.Queryable on l.Id equals lv.LessonId
+                    var queryUnitTest = from baseQ in query
+                                        join lv in _lessonVideoRepository.Queryable on baseQ.Lesson.Id equals lv.LessonId
                                         join v in _videoRepository.Queryable on lv.VideoId equals v.Id
                                         join vtc in _videoTimeCodeRepository.Queryable on v.Id equals vtc.VideoId
-                                        join lr in _lessonResultRepository.Queryable on baseQ.Id equals lr.UnitId
-                                        join vr in _videoResultRepository.Queryable on lr.Id equals vr.LessonResultId
+                                        join vr in _videoResultRepository.Queryable on baseQ.LessonResult.Id equals vr.LessonResultId
                                         join vtcr in _videoTimeCodeResultRepository.Queryable on vr.Id equals vtcr.VideoResultId
-                                        where lr.StudentId == studentId && ur.StudentId == studentId
-                                        group new { vtcr, vtc, ur } by baseQ into g
+                                        group new { vtcr, vtc, baseQ.UnitResult } by baseQ.Unit into g
                                         select new
                                         {
                                             Unit = g.Key,
-                                            UnitResult = g.Select(x => x.ur).FirstOrDefault(),
+                                            UnitResult = g.Select(x => x.UnitResult).FirstOrDefault(),
                                             CountDone = g.Select(x => x.vtcr).Where(x => x.Status == EnumResultStatus.Done).Count(),
                                             TotalDone = g.Select(x => x.vtc).Count(),
                                         };
