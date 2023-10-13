@@ -135,23 +135,5 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
-
-        public async Task<List<Video>?> GetListAsync(IList<Guid>? ids, IList<Guid>? videoResultIds)
-        {
-            if ((ids == null || !ids.Any()) || (videoResultIds == null || !videoResultIds.Any()))
-            {
-                return null;
-            }
-            return await Queryable.Include(x => x.VideoTimeCodes)
-                                                             .ThenInclude(x => x.VideoTimeCodeResults.Where(y => videoResultIds.Contains(y.VideoResultId)))
-                                                             .ThenInclude(x => x.VideoTimeCodeAnswers)
-                                                             .Include(x => x.VideoTimeCodes)
-                                                             .ThenInclude(x => x.TimeCodeExercises)
-                                                             .ThenInclude(x => x.Exercise)
-                                                             .ThenInclude(x => x!.ExerciseQuestions)
-                                                             .ThenInclude(x => x.Question)
-                                                             .Where(x => ids.Contains(x.Id))
-                                                             .ToListAsync();
-        }
     }
 }

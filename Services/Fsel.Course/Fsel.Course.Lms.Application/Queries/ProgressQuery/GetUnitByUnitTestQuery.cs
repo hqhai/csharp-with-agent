@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return skillScore;
             }).ToList();
 
-            skillScores.ForEach(x => x.Percent = NumberHelper.ConvertPercentDouble(x.CorrectCount / x.TotalCount));
+            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertPercentDouble(x.CorrectCount / x.TotalCount) : default);
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.WorkingTime = videoTimeCodeResults.Sum(x => GetSecond(x));
             overallScoreReport.CourseSkills = skillScores.Select(x => x.Skill).ToList();

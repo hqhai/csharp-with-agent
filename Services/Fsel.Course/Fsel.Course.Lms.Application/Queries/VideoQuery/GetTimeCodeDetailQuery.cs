@@ -61,8 +61,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             }
             var studentId = studentsResult.Content?.Result?.Id ?? default;
 
-            var videoResult = await _videoResultRepository.Queryable.Include(x => x.VideoTimeCodeResults)
-                        .ThenInclude(x => x.VideoTimeCodeAnswers)
+            var videoResult = await _videoResultRepository.Queryable
                         .Where(x => !request.LessonResultId.HasValue || x.LessonResultId == request.LessonResultId)
                         .FirstOrDefaultAsync(x => x.VideoId == request.VideoId && x.StudentId == studentId, cancellationToken);
             if (videoResult == null)
@@ -70,15 +69,13 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-            var videoTimeCodeResult = videoResult.VideoTimeCodeResults.Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId).FirstOrDefault();
-            var videoTimeCodeResultId = videoTimeCodeResult?.Id;
             var videoTimeCode = await _videoTimeCodeRepository.Queryable
                                     .Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                     .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                     .ThenInclude(x => x.Question)
-                                    .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => videoResult != null && x.VideoResultId == videoResult.Id && (!x.VideoTimeCodeResultId.HasValue || x.VideoTimeCodeResultId == videoTimeCodeResultId)))
+                                    .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => videoResult != null && x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == request.VideoTimeCodeId))
                                 .Where(x => x.Id == request.VideoTimeCodeId && x.VideoId == request.VideoId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
