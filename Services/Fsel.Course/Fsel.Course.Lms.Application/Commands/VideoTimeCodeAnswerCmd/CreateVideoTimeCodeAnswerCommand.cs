@@ -222,15 +222,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     return EnumCurrentStatus.Done;
                 }
-                else
-                {
-                    return EnumCurrentStatus.Process;
-                }
+                return EnumCurrentStatus.Process;
             }
-            else
-            {
-                return EnumCurrentStatus.Done;
-            }
+            return EnumCurrentStatus.Done;
         }
     }
 }
