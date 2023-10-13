@@ -51,7 +51,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                var classnew = await _classRepository.Queryable.Include(x => x.ClassStudents).OrderBy(x => x.CreatedDate)
+                var classnew = await _classRepository.Queryable.Where(p => p.Status == EnumClassStatus.New).Include(x => x.ClassStudents).OrderByDescending(x => x.CreatedDate)
                            .FirstOrDefaultAsync(x => x.CourseId == request.CourseId, cancellationToken);
 
                 if (classnew == null)
