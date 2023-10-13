@@ -87,13 +87,17 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == EnumTimeCodeType.Standalone).ToList();
             var exercises = videoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).ToList();
 
-            var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x => new SkillScores
+            var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x =>
             {
-                Skill = x.Key,
-                CountQuestion = x.SelectMany(x => x!.VideoTimeCodeAnswers).Count(),
-                TotalQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
-                CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
-                TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                var videoResultAnswers = x.SelectMany(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId.HasValue && videoResultIds.Contains(x.VideoResultId.Value)));
+                return new SkillScores
+                {
+                    Skill = x.Key,
+                    CountQuestion = videoResultAnswers.Count(),
+                    TotalQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
+                    CorrectCount = videoResultAnswers.Sum(x => x.CorrectCount),
+                    TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                };
             }).ToList();
             skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertPercentDouble(x.CorrectCount / x.TotalCount) : default);
             overallScoreReport.SkillScores = skillScores;
