@@ -18,7 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
-    //[Permission(role: nameof(EnumRole.Student))]
+    [Permission(role: nameof(EnumRole.Student))]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("execute-list-query")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        //[Permission]
+        [Permission]
         public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
         {
             var result = await _courseRepository.GetListResultAsync<CourseModel>(query);
@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("execute-query")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        //[Permission]
+        [Permission]
         public async Task<IActionResult> Execute([FromBody] BaseQueryModel query)
         {
             var result = await _courseRepository.GetResultAsync<CourseModel>(query);
