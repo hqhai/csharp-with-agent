@@ -5,6 +5,7 @@ using Fsel.Interaction.Application.Queues.Publishers;
 using Fsel.Interaction.Application.Services.CourseServices;
 using Fsel.Interaction.Application.Services.NotificationService;
 using Fsel.Interaction.Application.Services.SenderServices;
+using Fsel.Interaction.Application.Services.SystemService;
 using Fsel.Interaction.Application.Services.TrainingServices;
 using Fsel.Interaction.Application.Services.UserServices;
 using Fsel.Interaction.Domain.IRepositories;
@@ -42,6 +43,7 @@ builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.Training
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
+builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddMassTransit(appSetting);
 
 var app = builder.Build();

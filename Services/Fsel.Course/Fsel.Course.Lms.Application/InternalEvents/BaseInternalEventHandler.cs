@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResults.Select(x => x.Id).ToList(), EnumTimeCodeType.Standalone, default, type);
             var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResults.Select(x => x.Id).ToList(), default, type);
             var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResults.Select(x => x.Id).ToList(), default, type);
-            double percent = percentClassForum + percentHomeWork + percentVideo;
+            var percents = new List<double> { percentClassForum, percentHomeWork, percentVideo };
             List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).ToList();
             if (type == EnumCourseType.Academic)
             {
@@ -107,10 +107,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 var (finalTestSkillScores, percentFinalTest) = await GetFinalTestSkillScore(finalTestId, studentId);
                 mergedSkillScores = mergedSkillScores.Concat(skillSkillScores).Concat(unitSkillScores).Concat(finalTestSkillScores).ToList();
-                percent = percent + percentUnitSkill + percentSkill + percentFinalTest;
+                percents.AddRange(new List<double> { percentUnitSkill, percentSkill, percentFinalTest });
             }
             List<SkillScores> groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
-            return (groupedSkillScores, percent);
+            return (groupedSkillScores, percents.Sum());
         }
 
         public async Task<(List<SkillScores>, double)> GetVideoSkillScores(IList<Guid>? lessonResultIds, EnumTimeCodeType type, int percentSkill = default, EnumCourseType? courseType = null)
@@ -131,9 +131,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     {
                         if (x.Skill == EnumCourseSkill.Writing || x.Skill == EnumCourseSkill.Speaking)
                         {
-                            return NumberHelper.ConvertDoublePercent(x.Percent * PercentVideoIELSTWS);
+                            return NumberHelper.ConvertDoubleDecimal(x.Percent * PercentVideoIELSTWS);
                         }
-                        return NumberHelper.ConvertDoublePercent(x.Percent * PercentVideoIELST);
+                        return NumberHelper.ConvertDoubleDecimal(x.Percent * PercentVideoIELST);
                     })) : default);
                 }
             }
@@ -145,19 +145,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             List<SkillScores> skillScores = new List<SkillScores>();
             var classForumResults = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).Where(x => x.Status == EnumClassForumResultStatus.Graded && lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
-            if (classForumResults != null)
+            if (classForumResults != null && classForumResults.Any())
             {
-                skillScores = classForumResults.Select(x =>
-                {
-                    SkillScores skillScore = new SkillScores();
-                    skillScore.Skill = x.ClassForum!.CourseSkill;
-                    skillScore.TotalQuestion = 1;
-                    skillScore.CountQuestion = 1;
-                    skillScore.TotalCount = TotalScoreClassForum;
-                    skillScore.CorrectCount = x.ClassForumScores.Sum(x => x.Score);
-                    skillScore.Percent = NumberHelper.ConvertPercentDouble((double)x.ClassForumScores.Sum(x => x.Score) / TotalScoreClassForum);
-                    return skillScore;
-                }).ToList().GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
+                skillScores = classForumResults.Select(x => GetSkillScores(x)).ToList().GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (courseType != null && courseType == EnumCourseType.Academic)
                 {
                     return (skillScores, GetDoublePercent(skillScores, PercentClassForumAcademic));
@@ -168,6 +158,20 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
             }
             return (skillScores, GetDoublePercentUnit(skillScores, percentSkill));
+        }
+
+        public SkillScores GetSkillScores(ClassForumResult classForumResult)
+        {
+            ArgumentNullException.ThrowIfNull(classForumResult);
+            return new SkillScores
+            {
+                Skill = classForumResult.ClassForum?.CourseSkill ?? default,
+                TotalQuestion = 1,
+                CountQuestion = 1,
+                TotalCount = TotalScoreClassForum,
+                CorrectCount = classForumResult.ClassForumScores.Sum(x => x.Score),
+                Percent = NumberHelper.ConvertPercentDouble((double)classForumResult.ClassForumScores.Sum(x => x.Score) / TotalScoreClassForum)
+            };
         }
 
         public async Task<(List<SkillScores>, double)> GetHomeWordsSkillScores(IList<Guid>? lessonResultIds, int percentSkill = default, EnumCourseType? courseType = null)
@@ -191,7 +195,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     return (skillScores, GetDoublePercentUnit(skillScores, percentSkill));
                 }
             }
-            return (skillScores, 0);
+            return (skillScores, default);
         }
 
         private static double GetDoublePercent(IList<SkillScores>? skillScores, int percentOccupy, int numberOfElements = default)

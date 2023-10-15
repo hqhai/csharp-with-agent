@@ -48,5 +48,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/cso/get-by-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCSOById([FromRoute] Guid id);
+
+        [Get("/student-daily-streak/get-daily-streak/{id}")]
+        Task<IApiResponse<MethodResult<DailyStreakModel>>> GetDailyStreak([FromRoute] Guid id);
     }
 }

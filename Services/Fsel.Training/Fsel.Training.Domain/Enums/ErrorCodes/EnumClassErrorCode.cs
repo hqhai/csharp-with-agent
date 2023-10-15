@@ -62,7 +62,12 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// LiveTimeFrame Null Or LiveDays Null
         /// </summary>
-        LiveTimeFrameNullOrLiveDaysNull
+        LiveTimeFrameNullOrLiveDaysNull,
+
+        /// <summary>
+        /// Orders Not Approved
+        /// </summary>
+        OrdersNotApproved
 
 ,
     }
