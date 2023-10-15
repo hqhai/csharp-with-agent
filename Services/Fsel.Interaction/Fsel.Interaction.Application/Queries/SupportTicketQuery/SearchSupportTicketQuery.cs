@@ -67,6 +67,10 @@ namespace Fsel.Interaction.Application.Queries.SupportTicketQuery
             {
                 supportTicketQuery = supportTicketQuery.Where(m => m.SupportQuestionId == request.SupportQuestionId);
             }
+            if (request.Status != null)
+            {
+                supportTicketQuery = supportTicketQuery.Where(m => m.Status == request.Status);
+            }
             int totalItem = await supportTicketQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await supportTicketQuery
                     .ApplySortAndPaging(request)
