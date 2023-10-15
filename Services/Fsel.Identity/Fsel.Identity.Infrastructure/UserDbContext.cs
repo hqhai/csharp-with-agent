@@ -24,6 +24,7 @@ namespace Fsel.Identity.Infrastructure
             ArgumentNullException.ThrowIfNull(builder);
 
             SeedPlatforms(builder);
+            SeedRoles(builder);
 
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
@@ -91,17 +92,15 @@ namespace Fsel.Identity.Infrastructure
             }
         }
 
-        //private static void SeedRoles(ModelBuilder builder)
-        //{
-        //    builder.Entity<Role>().HasData
-        //        (
-        //            new Role() { Name = EnumRole.MasterAdmin.ToString(), NormalizedName = EnumRole.MasterAdmin.ToString() },
-        //            new Role() { Name = EnumRole.Admin.ToString(), NormalizedName = EnumRole.Admin.ToString() },
-        //            new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.CSO.ToString() },
-        //            new Role() { Name = EnumRole.Teacher.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
-        //            new Role() { Name = EnumRole.Parent.ToString(), NormalizedName = EnumRole.Parent.ToString() },
-        //            new Role() { Name = EnumRole.Student.ToString(), NormalizedName = EnumRole.Student.ToString() }
-        //        );
-        //}
+        private static void SeedRoles(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.RoleFileName);
+            var roles = ConvertHelper.DeserializeFromFilePath<IList<Role>>(path);
+            if (roles != null)
+            {
+                ArgumentNullException.ThrowIfNull(roles);
+                builder.Entity<Role>().HasData(roles);
+            }
+        }
     }
 }

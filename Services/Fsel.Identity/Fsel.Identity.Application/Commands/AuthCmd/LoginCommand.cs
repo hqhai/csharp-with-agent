@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Linq;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Domain.Entities;
@@ -10,9 +9,7 @@ using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using UserManager = Fsel.Core.Base.Managers.UserManager<Fsel.Identity.Domain.Entities.User>;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -22,13 +19,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
     public class LoginCommandHandler : IRequestHandler<LoginCommand, MethodResult<TokenModel>>
     {
-        private readonly UserManager _userManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly Microsoft.AspNetCore.Identity.SignInManager<User> _signInManager;
         private readonly IMediator _mediator;
         private readonly IPlatformRepository _platformRepository;
 
-        public LoginCommandHandler(UserManager userManager,
-            SignInManager<User> signInManager,
+        public LoginCommandHandler(UserManager<User> userManager,
+            Microsoft.AspNetCore.Identity.SignInManager<User> signInManager,
             IMediator mediator,
             IPlatformRepository platformRepository)
         {
