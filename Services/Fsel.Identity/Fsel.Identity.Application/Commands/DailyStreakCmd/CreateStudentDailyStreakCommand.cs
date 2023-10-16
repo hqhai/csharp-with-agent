@@ -47,8 +47,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             var isStudentDate = student.StudentDailyStreaks.Any(x => x.DailyDate.Date == date.Date);
             if (isStudentDate)
             {
-                methodResult.Result = false;
-                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isStudentDate));
                 return methodResult;
             }
             var studentDailyStreak = new StudentDailyStreak
