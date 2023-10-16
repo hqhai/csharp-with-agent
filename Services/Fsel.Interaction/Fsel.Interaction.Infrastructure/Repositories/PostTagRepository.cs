@@ -8,7 +8,7 @@ namespace Fsel.Interaction.Infrastructure.Repositories
 
     public class PostTagRepository : BaseRepository<PostTag>, IPostTagRepository
     {
-        public PostTagRepository(InteractionDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public PostTagRepository(InteractionDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

@@ -35,7 +35,7 @@ namespace Fsel.Identity.Domain.Entities
         public EnumGender? Gender { get; set; }
 
         public virtual User? User { get; set; }
-        public string? UserId { get; set; }
+        public Guid UserId { get; set; }
 
         public Parent? Parent { get; set; }
         public CSO? CSO { get; set; }

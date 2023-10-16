@@ -8,7 +8,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class StudentFocusTimeRepository : BaseRepository<StudentFocusTime>, IStudentFocusTimeRepository
     {
-        public StudentFocusTimeRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public StudentFocusTimeRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

@@ -8,7 +8,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class TeacherBankAccountRepository : BaseRepository<TeacherBankAccount>, ITeacherBankAccountRepository
     {
-        public TeacherBankAccountRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public TeacherBankAccountRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

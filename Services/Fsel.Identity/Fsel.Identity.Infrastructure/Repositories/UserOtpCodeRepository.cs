@@ -8,7 +8,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class UserOtpCodeRepository : BaseRepository<UserOtpCode>, IUserOtpCodeRepository
     {
-        public UserOtpCodeRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public UserOtpCodeRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

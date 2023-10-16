@@ -8,7 +8,7 @@ namespace Fsel.Identity.Domain.Entities
 
     public class UserSetting : Entity
     {
-        public string? UserId { get; set; }
+        public Guid? UserId { get; set; }
 
         public bool NotifiGame { get; set; }
 

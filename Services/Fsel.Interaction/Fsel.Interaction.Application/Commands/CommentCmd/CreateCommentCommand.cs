@@ -53,7 +53,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             MethodResult<CommentModel> methodResult = new MethodResult<CommentModel>();
             Comment comment = _mapper.Map<Comment>(request);
             // Check từ khoá cấm
-            var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
+             var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
             var forbiddenWord = listForbiddenWordResult.Content?.Result;
             if (forbiddenWord.Any())
             {

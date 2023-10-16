@@ -1,0 +1,65 @@
+[
+  {
+    "id": "069ae2a9-2729-4905-a8fa-c6c9f9172d1d",
+    "name": "Student",
+    "normalizedName": "Student",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  },
+  {
+    "id": "1eeba88e-ed0c-48c4-8d7e-a17c5a2cc3fe",
+    "name": "Teacher",
+    "normalizedName": "Teacher",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  },
+  {
+    "id": "24ce207d-8732-4a32-83ef-c5f05805f124",
+    "name": "Parent",
+    "normalizedName": "Parent",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  },
+  {
+    "id": "4cfaa242-a625-4e02-86d9-862d48a413c8",
+    "name": "TeacherLive",
+    "normalizedName": "TeacherLive",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  },
+  {
+    "id": "65ff6784-21d7-4986-8394-681cf711a4f7",
+    "name": "Moderator",
+    "normalizedName": "Moderator",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  },
+  {
+    "id": "69976022-5dbb-4292-bab6-e94b6701061e",
+    "name": "Admin",
+    "normalizedName": "Admin",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  },
+  {
+    "id": "8d89a29a-b40a-4045-b0ed-679d7a5ff990",
+    "name": "CSO",
+    "normalizedName": "CSO",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  },
+  {
+    "id": "c8c28631-0bc0-4166-b062-4aff0d38e70c",
+    "name": "MasterAdmin",
+    "normalizedName": "MasterAdmin",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  },
+  {
+    "id": "7753a049-ba55-4901-bf6a-ae65ff9ac8fc",
+    "name": "Guest",
+    "normalizedName": "Guest",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  }
+]

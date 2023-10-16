@@ -7,15 +7,14 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class CreateStudentByParentCommand : CreateStudentByParentCommandModel, IRequest<MethodResult<UserModel>>
@@ -62,7 +61,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
             var parent = await _parentRepository.Queryable.Include(x => x.Human)
                                                 .Include(x => x.ParentStudents.Where(n => !n.IsDeleted))
-                                                .FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId.ToString(), cancellationToken);
+                                                .FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId, cancellationToken);
 
             if (parent == null)
             {

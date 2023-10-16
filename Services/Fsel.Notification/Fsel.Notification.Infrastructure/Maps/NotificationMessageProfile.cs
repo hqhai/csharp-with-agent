@@ -7,12 +7,14 @@ namespace Fsel.Notification.Infrastructure.Maps
     using Fsel.Notification.Domain.Model.CommandModels.Notification;
     using Fsel.Notification.Domain.Model.EntityModels;
     using Fsel.Core.Extensions;
+    using Fsel.Common.Models;
 
     public class NotificationMessageProfile : Profile
     {
         public NotificationMessageProfile()
         {
             CreateMap<NotificationMessage, NotificationMessageModel>().IgnoreAllNonExisting();
+            CreateMap<NotificationMessage, OneSignalMessageModel>().IgnoreAllNonExisting();
             CreateMap<CreateNotificationCommandModel, NotificationMessage>().IgnoreAllNonExisting();
         }
     }
