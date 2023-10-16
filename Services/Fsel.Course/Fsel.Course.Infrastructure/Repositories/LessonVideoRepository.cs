@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class LessonVideoRepository : BaseRepository<LessonVideo>, ILessonVideoRepository
     {
-        public LessonVideoRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public LessonVideoRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

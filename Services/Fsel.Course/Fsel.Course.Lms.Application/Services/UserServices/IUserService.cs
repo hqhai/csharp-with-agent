@@ -6,12 +6,19 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface IUserService
     {
+        [Post("/student/execute-list-query")]
+        Task<IApiResponse<MethodResult<StudentModel>>> ExecuteListQueryAsync([Body] BaseQueryModel query);
+
+        [Post("/student/execute-query")]
+        Task<IApiResponse<MethodResult<StudentModel>>> ExecuteQueryAsync([Body] BaseQueryModel query);
+
         [Get("/student/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 

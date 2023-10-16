@@ -144,13 +144,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Notification.Domain", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.CMS.PlanetDefender", "Fsel.CMS.PlanetDefender", "{50DA47A2-4089-49C6-B722-BEF748FCE4BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.CMS.PlanetDefender.Api", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Api\Fsel.Cms.PlanetDefender.Api.csproj", "{76F333BF-314F-4B86-AA27-490C3663A6A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Cms.PlanetDefender.Api", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Api\Fsel.Cms.PlanetDefender.Api.csproj", "{76F333BF-314F-4B86-AA27-490C3663A6A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.CMS.PlanetDefender.Application", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Application\Fsel.Cms.PlanetDefender.Application.csproj", "{696BD951-6A69-4C6B-8DB6-70BD949407A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Cms.PlanetDefender.Application", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Application\Fsel.Cms.PlanetDefender.Application.csproj", "{696BD951-6A69-4C6B-8DB6-70BD949407A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.CMS.PlanetDefender.Domain", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Domain\Fsel.Cms.PlanetDefender.Domain.csproj", "{6E49E475-F589-425C-93CC-A00E041B5DBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Cms.PlanetDefender.Domain", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Domain\Fsel.Cms.PlanetDefender.Domain.csproj", "{6E49E475-F589-425C-93CC-A00E041B5DBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.CMS.PlanetDefender.Infrastructure", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Infrastructure\Fsel.Cms.PlanetDefender.Infrastructure.csproj", "{2A6B8E1E-085F-418A-B645-1B9823AADE17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Cms.PlanetDefender.Infrastructure", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Infrastructure\Fsel.Cms.PlanetDefender.Infrastructure.csproj", "{2A6B8E1E-085F-418A-B645-1B9823AADE17}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
