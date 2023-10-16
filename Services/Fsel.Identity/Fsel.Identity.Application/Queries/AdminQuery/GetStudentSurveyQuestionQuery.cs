@@ -4,13 +4,13 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class GetStudentSurveyQuestionQuery : IRequest<MethodResult<IList<StudentSurveyQuestionModel>>>

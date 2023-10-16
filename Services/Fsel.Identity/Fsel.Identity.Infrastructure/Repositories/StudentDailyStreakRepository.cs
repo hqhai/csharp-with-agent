@@ -8,7 +8,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class StudentDailyStreakRepository : BaseRepository<StudentDailyStreak>, IStudentDailyStreakRepository
     {
-        public StudentDailyStreakRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public StudentDailyStreakRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

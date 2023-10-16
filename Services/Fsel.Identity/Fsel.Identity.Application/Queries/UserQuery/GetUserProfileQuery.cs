@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.TrainingService;
@@ -15,7 +16,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class GetUserProfileQuery : IRequest<MethodResult<UserProfileModel>>
@@ -60,21 +60,21 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.CSO)
-                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString())
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Teacher)
                                                    .ThenInclude(x => x!.TeacherBankAccounts)
-                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
-                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 var student = userView?.Human?.Student;
                 if (student != null && student.ParentStudents != null && student.ParentStudents.Count > 0)
                 {
@@ -83,7 +83,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                   .ThenInclude(x => x!.ParentStudents)
                                                   .ThenInclude(x => x!.Parent)
                                                   .ThenInclude(x => x!.Human)
-                                                  .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+                                                  .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Parent.ToString())
@@ -91,7 +91,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Parent)
                                                    .ThenInclude(x => x!.ParentStudents)
-                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 var parentStudents = userView?.Human?.Parent?.ParentStudents;
                 if (parentStudents != null && parentStudents.Count > 0)
                 {
@@ -101,12 +101,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                                       .ThenInclude(x => x.Student)
                                                                       .ThenInclude(x => x!.Human)
                                                                       .ThenInclude(x => x!.User)
-                                                                      .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+                                                                      .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Moderator.ToString() || userRoles.FirstOrDefault() == EnumRole.MasterAdmin.ToString() || userRoles.FirstOrDefault() == EnumRole.Admin.ToString())
             {
-                userView = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+                userView = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             }
 
             var userModel = _mapper.Map<UserProfileModel>(userView ?? user);

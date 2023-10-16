@@ -5,6 +5,7 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Domain.Entities;
@@ -18,7 +19,6 @@ using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
 using EnumAuthErrorCode = Fsel.Identity.Domain.Enums.ErrorCodes.EnumAuthErrorCode;
@@ -119,7 +119,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 var role = await _roleManager.FindByNameAsync(request.Role.ToString() ?? string.Empty);
                 var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
-                IdentityResult result;
+                Microsoft.AspNetCore.Identity.IdentityResult result;
                 user = new();
                 _mapper.Map(request, user);
                 user.UserName = request.Email;
