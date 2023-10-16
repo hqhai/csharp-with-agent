@@ -3,32 +3,32 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Fsel.Identity.Infrastructure.Migrations
+namespace Fsel.Interaction.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Update_StudentTable_ClassId : Migration
+    public partial class Update_CustomerSurveyTable_UserIdField : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<Guid>(
-                name: "ClassId",
-                table: "Students",
+                name: "UserId",
+                table: "CustomerSurveys",
                 type: "uniqueidentifier",
                 nullable: true,
-                oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<Guid>(
-                name: "ClassId",
-                table: "Students",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
+            migrationBuilder.AlterColumn<string>(
+                name: "UserId",
+                table: "CustomerSurveys",
+                type: "nvarchar(max)",
+                nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uniqueidentifier",
                 oldNullable: true);

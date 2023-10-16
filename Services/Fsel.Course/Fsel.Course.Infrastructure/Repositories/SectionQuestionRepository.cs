@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class SectionQuestionRepository : BaseRepository<SectionQuestion>, ISectionQuestionRepository
     {
-        public SectionQuestionRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public SectionQuestionRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

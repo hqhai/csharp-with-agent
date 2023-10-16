@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
 
     public class GetCsoByUserIdsQuery : IRequest<MethodResult<IList<CSOModel>>>
     {
-        public IList<string>? UserIds { get; set; }
+        public IList<Guid>? UserIds { get; set; }
     }
 
     public class GetCsoByUserIdsQueryHandler : IRequestHandler<GetCsoByUserIdsQuery, MethodResult<IList<CSOModel>>>

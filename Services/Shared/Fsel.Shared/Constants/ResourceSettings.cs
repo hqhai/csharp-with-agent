@@ -10,6 +10,7 @@ namespace Fsel.Shared.Constants
         public const string GameCenterFileName = "Resources//GameCenterConfig.json";
         public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
         public const string PlatformFileName = "Resources//Platform.json";
+        public const string RoleFileName = "Resources//Role.json";
         public const string ZMatter = "Resources//ZMatter.json";
     }
 }

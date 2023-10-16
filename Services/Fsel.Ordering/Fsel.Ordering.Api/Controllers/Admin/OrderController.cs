@@ -17,7 +17,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/order")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class OrderController : ControllerBase
     {
         private readonly IMediator _mediator;

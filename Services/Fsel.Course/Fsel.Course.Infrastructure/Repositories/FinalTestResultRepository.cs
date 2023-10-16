@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class FinalTestResultRepository : BaseRepository<FinalTestResult>, IFinalTestResultRepository
     {
-        public FinalTestResultRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public FinalTestResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

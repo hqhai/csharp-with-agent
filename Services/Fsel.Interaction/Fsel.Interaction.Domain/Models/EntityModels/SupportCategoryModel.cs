@@ -13,5 +13,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public string? IconPath { get; set; }
 
         public bool IsActive { get; set; }
+        public int NumberOfQuestion { get; set; }
     }
 }

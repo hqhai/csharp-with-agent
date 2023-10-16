@@ -5,13 +5,13 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Domain.Models.QueryModels.Students;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class GetStudentsInPlatformQuery : GetStudentInPlatformQueryModel, IRequest<MethodResult<IList<StudentInPlatformModel>>>
