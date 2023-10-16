@@ -85,7 +85,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                     }
 
                     var systemConfigMap = systemConfig?.Content?.Result!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
-                    studentFocusTime.ExecuteTime += request.ExecuteTime;
+                    studentFocusTime.ExecuteTime = request.ExecuteTime;
 
                     studentFocusTime.IsEstablished = confitionChangeTarget;
 
