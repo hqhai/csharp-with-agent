@@ -2,13 +2,14 @@
 
 namespace Fsel.Cms.PlanetDefender.Infrastructure.Repositories
 {
+    using AutoMapper;
     using Fsel.Cms.PlanetDefender.Domain.Entities;
     using Fsel.Cms.PlanetDefender.Domain.IRepositories;
     using Fsel.Core.Base;
 
     public class ZMatterRepository : BaseRepository<ZMatter>, IZMatterRepository
     {
-        public ZMatterRepository(CmsPlanetDefenderDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public ZMatterRepository(CmsPlanetDefenderDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }
