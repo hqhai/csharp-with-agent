@@ -52,7 +52,7 @@ namespace Fsel.Interaction.Api.Controllers
         [HttpGet("{userId}")]
         [ProducesResponseType(typeof(MethodResult<IList<SurveyQuestionInfoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SurveyQuestionsByUserId([FromRoute] string userId)
+        public async Task<IActionResult> SurveyQuestionsByUserId([FromRoute] Guid userId)
         {
             MethodResult<IList<SurveyQuestionInfoModel>> queryResult = await _mediator.Send(new GetSurveyQuestionsByUserIdQuery { Id = userId }).ConfigureAwait(false);
             return queryResult.GetActionResult();

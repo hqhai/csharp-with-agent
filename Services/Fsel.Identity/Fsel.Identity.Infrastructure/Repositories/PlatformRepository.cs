@@ -11,7 +11,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class PlatformRepository : BaseRepository<Platform>, IPlatformRepository
     {
-        public PlatformRepository(UserDbContext userDbContext, AuthContext authContext) : base(userDbContext, authContext)
+        public PlatformRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 

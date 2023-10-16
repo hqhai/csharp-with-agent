@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class PlacementTestSectionRepository : BaseRepository<PlacementTestSection>, IPlacementTestSectionRepository
     {
-        public PlacementTestSectionRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public PlacementTestSectionRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

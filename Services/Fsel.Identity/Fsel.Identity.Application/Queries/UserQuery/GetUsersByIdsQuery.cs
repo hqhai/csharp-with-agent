@@ -37,7 +37,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 return methodResult;
             }
-            var humans = await _humanRepository.Queryable.Where(p => request.UserIds.Contains(p.UserId ?? string.Empty)).ToListAsync(cancellationToken);
+            var humans = await _humanRepository.Queryable.Where(p => request.UserIds.Contains(p.UserId)).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<HumanModel>>(humans);
             return methodResult;
         }

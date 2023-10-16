@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Domain.Entities;
@@ -12,7 +13,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class UpdateReferralCodeStudentCommand : UpdateReferralCodeStudentCommandModel, IRequest<MethodResult<bool>>
@@ -47,7 +47,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNotExistByCode));
                 return methodResult;
             }
-            var userReferralResult = await _orderService.CreateUserReferralAsync(new CreateUserReferralCommandModel { SenderId = new Guid(userReferral.Id), ReceiverId = request.UserId });
+            var userReferralResult = await _orderService.CreateUserReferralAsync(new CreateUserReferralCommandModel { SenderId = userReferral.Id, ReceiverId = request.UserId });
             if (!userReferralResult.IsSuccessStatusCode)
             {
                 methodResult.AddError(userReferralResult.Error);
