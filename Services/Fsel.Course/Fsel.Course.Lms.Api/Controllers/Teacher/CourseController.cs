@@ -27,7 +27,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
         /// <summary>
         /// Get Course
         /// </summary>
-        [Authorize(Roles = nameof(EnumRole.Teacher))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
         [HttpGet("get-course-by-level")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
         /// <summary>
         /// Get course contain class forum
         /// </summary>
-        [Authorize(Roles = nameof(EnumRole.Teacher))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
         [HttpGet("list-courses-contain-class-forum")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
         /// Get course contain mock test
         /// </summary>
 
-        [Authorize(Roles = nameof(EnumRole.Teacher))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
         [HttpGet("list-courses-contain-mock-test")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

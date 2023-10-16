@@ -55,7 +55,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("save")]
         [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize(Roles = nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Save([FromBody] SaveFeatureAccessTimeCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -70,7 +70,7 @@ namespace Fsel.System.Api.Controllers
         [HttpGet("access-time-chart")]
         [ProducesResponseType(typeof(MethodResult<IList<FeatureAcessTimeChartModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize(Roles = nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> GetStudentFeatureAccessTime([FromQuery] GetFeatureAccessTimeChartQuery query)
         {
             MethodResult<IList<FeatureAcessTimeChartModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);

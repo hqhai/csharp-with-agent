@@ -16,7 +16,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/mock-test")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class MockTestController : ControllerBase
     {
         private readonly IMediator _mediator;
