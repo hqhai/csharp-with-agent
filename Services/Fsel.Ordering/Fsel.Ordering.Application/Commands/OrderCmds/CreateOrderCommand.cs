@@ -39,6 +39,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
         private readonly AuthContext _authContext;
+
         public CreateOrderCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
             IMediator mediator,
@@ -78,7 +79,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             }
             var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id, UserId = request.UserId }, cancellationToken).ConfigureAwait(false);
             var code = codeSend.Result?.Code;
-            if (await _orderRepository.Queryable.AnyAsync(x => x.UserId == request.UserId && x.Status != EnumOrderStatus.Reject && x.CreatedDate.AddDays(14) < DateTime.Now, cancellationToken))
+            if (await _orderRepository.Queryable.AnyAsync(x => x.UserId == request.UserId && x.Status != EnumOrderStatus.Reject && x.CreatedDate.AddDays(14) > DateTime.Now, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.CourseLevel));
                 return methodResult;

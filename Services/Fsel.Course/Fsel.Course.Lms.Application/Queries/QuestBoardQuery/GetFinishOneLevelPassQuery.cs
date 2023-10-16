@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 return methodResult;
             }
 
-            var orderResult = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = request.CurrentUserId });
+            var orderResult = await _orderService.IsCheckStatusPayment(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = request.CurrentUserId });
             if (!orderResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));

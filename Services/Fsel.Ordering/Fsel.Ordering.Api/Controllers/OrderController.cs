@@ -4,10 +4,12 @@ namespace Fsel.Ordering.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Ordering.Application.Commands.OrderCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -41,7 +43,20 @@ namespace Fsel.Ordering.Api.Controllers
         [HttpGet("is-status-payment")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> IsCheckStatusUser([FromQuery] GetStatusOrderByUserQuery query)
+        public async Task<IActionResult> CheckStatusActive([FromQuery] GetStatusOrderByUserQuery query)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Status User New
+        /// </summary>
+        [HttpGet("is-status-new")]
+        [Permission(role: nameof(EnumRole.Student))]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckStatusNew([FromQuery] GetOrderNewByUserQuery query)
         {
             MethodResult<bool> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

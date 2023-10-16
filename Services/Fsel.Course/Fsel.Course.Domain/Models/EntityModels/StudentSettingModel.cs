@@ -14,5 +14,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int ModuleNumber { get; set; }
         public bool IsLockPT { get; set; }
         public bool IsLockOrder { get; set; }
+        public bool IsOrderNew { get; set; }
     }
 }

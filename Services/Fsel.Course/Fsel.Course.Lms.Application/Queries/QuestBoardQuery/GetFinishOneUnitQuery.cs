@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 return methodResult;
             }
 
-            var orderResult = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = request.CurrentUserId });
+            var orderResult = await _orderService.IsCheckStatusPayment(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = request.CurrentUserId });
             if (!orderResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
@@ -84,7 +84,6 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == request.StudentId && x.CourseId == course.Id && x.Status == EnumResultStatus.Process, cancellationToken);
             if (unitResult == null)
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }

@@ -70,6 +70,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
                 settingStudentModel.IsLockPT = isLock;
                 settingStudentModel.StartPTLevel = placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault() == null ? student.CourseLevel : placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault()?.Level.GetCourseLevelByPlacementTestLevel();
+                var isLockOrderNew = await _orderService.IsCheckStatusNew();
+                if (!isLockOrderNew.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(isLockOrderNew));
+                    return methodResult;
+                }
+                settingStudentModel.IsOrderNew = isLockOrderNew?.Content?.Result ?? default;
                 var classResult = await _trainingService.GetClassByStudentId(student.Id);
                 if (!classResult.IsSuccessStatusCode)
                 {
@@ -84,10 +91,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                     return methodResult;
                 }
 
-                var isLockOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
+                var isLockOrder = await _orderService.IsCheckStatusPayment(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
                 if (!isLockOrder.IsSuccessStatusCode)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isLockOrder));
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(isLockOrder));
                     return methodResult;
                 }
                 settingStudentModel.IsLockOrder = isLockOrder?.Content?.Result ?? default;
