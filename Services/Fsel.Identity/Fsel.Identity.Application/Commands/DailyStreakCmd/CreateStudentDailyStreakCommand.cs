@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     using System;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Models.ShareModels;
@@ -19,10 +20,12 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     public class CreateStudentDailyStreakCommandHandler : IRequestHandler<CreateStudentDailyStreakCommand, MethodResult<bool>>
     {
         private readonly IStudentRepository _studentRepository;
+        private readonly AuthContext _authContext;
 
-        public CreateStudentDailyStreakCommandHandler(IStudentRepository studentRepository)
+        public CreateStudentDailyStreakCommandHandler(IStudentRepository studentRepository, AuthContext authContext)
         {
             _studentRepository = studentRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateStudentDailyStreakCommand request, CancellationToken cancellationToken)
@@ -30,8 +33,8 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks)
-                                                  .FirstOrDefaultAsync(x => x.Id == request.StudentId, cancellationToken: cancellationToken);
+            var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks).Include(x => x.Human)
+                                                  .FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId, cancellationToken: cancellationToken);
 
             if (student == null)
             {
@@ -52,7 +55,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             }
             var studentDailyStreak = new StudentDailyStreak
             {
-                StudentId = request.StudentId,
+                StudentId = student.Id,
                 DailyDate = date,
                 IsUseShield = request.IsUseShield,
             };
