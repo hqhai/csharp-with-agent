@@ -16,7 +16,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/final-test")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class FinalTestController : ControllerBase
     {
         private readonly IMediator _mediator;

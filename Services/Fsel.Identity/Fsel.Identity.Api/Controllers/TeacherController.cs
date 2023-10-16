@@ -66,7 +66,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize]
+        [Common.Attributes.Permission]
         public async Task<IActionResult> SearchTeacher([FromQuery] SearchTeacherQuery query)
         {
             MethodResult<PagingItemsModel<TeacherModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);

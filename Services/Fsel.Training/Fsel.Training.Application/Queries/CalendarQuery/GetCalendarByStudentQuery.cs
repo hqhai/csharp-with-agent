@@ -87,7 +87,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                             Note = x.Note,
                             Status = x.Status,
                             ClassId = x.ClassId,
-                            Class = _mapper.Map<ClassModel>(x.Class)
+                            CourseId = x.Class!.CourseId,
+                            ClassCode = x.Class!.Code,
                         });
 
             var lists = await query.OrderBy(x => x.LiveDate)
@@ -95,8 +96,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var coursesReq = _courseService.GetCourseByIdsFromTeacherAsync(lists.Select(x => x.Class!.CourseId).ToList());
-            var teachersReq = _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).ToList() });
+            var coursesReq = _courseService.GetCourseByIdsFromTeacherAsync(lists.Select(x => x.CourseId ?? default).Distinct().ToList());
+            var teachersReq = _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).Distinct().ToList() });
             var liveTimeFramesReq = _systemService.GetLiveTimeFramesAsync();
             await Task.WhenAll(coursesReq, teachersReq, liveTimeFramesReq);
 
@@ -113,9 +114,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                 var teacher = teachers?.FirstOrDefault(x => x.Id == item.TeacherId);
                 item.TeacherName = teacher?.Human?.FullName;
                 item.TeacherAvatar = teacher?.Human?.AvatarPath;
-
-                var course = courses?.FirstOrDefault(x => x.Id == item.Class?.CourseId);
-                item.Class!.CourseLevel = course?.CourseLevel;
+                var course = courses?.FirstOrDefault(x => x.Id == item.CourseId);
+                item.CourseLevel = course?.CourseLevel;
 
                 var liveTimeFrame = liveTimeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
                 if (liveTimeFrame != null)
