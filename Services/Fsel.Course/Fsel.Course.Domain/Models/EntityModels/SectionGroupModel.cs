@@ -10,8 +10,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double ExecutionTime { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
         public long TotalQuestion { get; set; }
-        public EnumCurrentStatus CurrentStatus { get; set; }
         public IList<SectionModel>? Sections { get; set; }
         public IList<MockTestScoreModel>? MockTestScores { get; set; }
+        public SectionGroupResultModel? SectionGroupResult { get; set; }
     }
 }
