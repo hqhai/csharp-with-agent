@@ -18,10 +18,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionGroupByMockTestIdQuery, MethodResult<IList<SectionGroupModel>>>
     {
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly AuthContext _authContext;
 
         public GetSectionBySectionGroupIdQueryHandler(ISectionGroupRepository sectionGroupRepository, AuthContext authContext)
         {
             _sectionGroupRepository = sectionGroupRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<IList<SectionGroupModel>>> Handle(GetSectionGroupByMockTestIdQuery request, CancellationToken cancellationToken)
