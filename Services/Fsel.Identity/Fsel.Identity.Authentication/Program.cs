@@ -13,7 +13,6 @@ using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
-using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
@@ -22,9 +21,7 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationIdentity(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
-builder.Services.AddIdentity<User, Role>()
-        .AddEntityFrameworkStores<UserDbContext>()
-        .AddDefaultTokenProviders();
+builder.AddIdentity<User, Role, UserDbContext>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();

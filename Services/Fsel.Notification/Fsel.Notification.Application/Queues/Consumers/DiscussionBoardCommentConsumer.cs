@@ -18,8 +18,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
         {
             var dataReceipt = context?.Message;
 
-
-
             if (dataReceipt != null)
             {
                 await _mediator.Send(new CreateNotificationCommand()).ConfigureAwait(false);

@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -33,6 +34,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IMockTestRepository _mockTestRepository;
+        private readonly SectionConverter _sectionConverter;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly AuthContext _authContext;
@@ -40,6 +43,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         public GetLessonQueryHandler(ILessonRepository lessonRepository,
             AuthContext authContext,
             IMapper mapper,
+            IMockTestRepository mockTestRepository,
+            SectionConverter sectionConverter,
             IMockTestResultRepository mockTestResultRepository,
             ILessonResultRepository lessonResultRepository,
             IUserService userService,
@@ -47,6 +52,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         {
             _lessonRepository = lessonRepository;
             _mapper = mapper;
+            _mockTestRepository = mockTestRepository;
+            _sectionConverter = sectionConverter;
             _mockTestResultRepository = mockTestResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _authContext = authContext;
@@ -71,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             methodResult.Result = new LessonsMockTestModel
             {
                 Lessons = await GetLesson(request, studentId, cancellationToken).ConfigureAwait(false),
-                MockTest = await GetMockTest(request, studentId, cancellationToken).ConfigureAwait(false)
+                MockTest = await _mockTestRepository.GetIncludeAsync(request.CourseId, request.UnitId, studentId).ConfigureAwait(false)
             };
 
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -166,47 +173,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 }
             }
             return lessons;
-        }
-
-        private async Task<MockTestModel?> GetMockTest(GetLessonQuery request, Guid? studentId, CancellationToken cancellationToken)
-        {
-            var unit = await _unitRepository.Queryable
-                              .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
-                              .ThenInclude(x => x.MockTest)
-                              .ThenInclude(x => x!.MockTestSections.Where(y => !y.IsDeleted))
-                              .ThenInclude(x => x.SectionGroup)
-                               .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
-                              .ThenInclude(x => x.MockTest)
-                              .ThenInclude(x => x.MockTestResults.Where(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId))
-                              .Where(x => x.Id == request.UnitId)
-                              .AsNoTracking()
-                              .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-            if (unit == null)
-            {
-                return null;
-            }
-            var mockTest = unit.UnitSkillMockTests.Select(x => x.MockTest)
-                                    .Select(x =>
-                                    {
-                                        var sectionGroups = x.MockTestSections.Select(x => x.SectionGroup).ToList();
-                                        var totalQuestion = sectionGroups.SelectMany(x => x!.Sections).SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Select(x => x!.CorrectTotal).Sum();
-                                        var mockTestResult = x.MockTestResults.FirstOrDefault(y => y.MockTestId == x.Id && y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId);
-                                        var mockTest = new MockTestModel
-                                        {
-                                            Id = x!.Id,
-                                            Name = x.Name,
-                                            TotalQuestion = totalQuestion,
-                                            SectionGroups = sectionGroups.OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
-                                            {
-                                                Id = x!.Id,
-                                                CourseSkill = x.CourseSkill,
-                                                ExecutionTime = x!.ExecutionTime,
-                                            }).ToList(),
-                                            MockTestResult = _mapper.Map<MockTestResultModel>(mockTestResult),
-                                        };
-                                        return mockTest;
-                                    }).FirstOrDefault();
-            return mockTest;
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Fsel.Training.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class ActiveClassCommand : BaseCommandModel, IRequest<MethodResult<bool>>
     {
@@ -25,6 +26,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         private readonly IClassRepository _classRepository;
         private readonly ISystemService _systemService;
         private readonly IOrderService _orderService;
+
         public ActiveClassCommandHandler(IClassRepository classRepository, ISystemService systemService, IOrderService orderService)
         {
             _classRepository = classRepository;
@@ -37,7 +39,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var classes = await _classRepository.GetByIdAsync(request.Id);
+            var classes = await _classRepository.Queryable.Include(p => p.ClassStudents).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (classes == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
@@ -46,6 +48,11 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             if (classes.Status != EnumClassStatus.New)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.StatusOfClassIsNotNew));
+                return methodResult;
+            }
+            if (classes.ClassStudents.Any(p => !p.IsActive))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.OrdersNotApproved));
                 return methodResult;
             }
             var packagesResult = await _orderService.GetPackages();

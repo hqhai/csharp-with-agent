@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Managers;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Domain.Entities;
@@ -12,7 +13,6 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class SearchStudentLessonCommentQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentLessonCommentModel>>>

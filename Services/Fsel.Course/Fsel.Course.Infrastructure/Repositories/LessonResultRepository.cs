@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class LessonResultRepository : BaseRepository<LessonResult>, ILessonResultRepository
     {
-        public LessonResultRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public LessonResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 

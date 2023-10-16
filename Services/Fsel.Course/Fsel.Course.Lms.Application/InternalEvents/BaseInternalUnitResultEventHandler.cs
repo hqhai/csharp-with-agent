@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _finishOneUnitPublisher = finishOneUnitPublisher;
         }
 
-        public async Task UpdateUnit(IList<Guid>? lessonResultIds, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
+        public async Task UpdateUnitResultAsync(IList<Guid>? lessonResultIds, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
 
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
@@ -44,17 +44,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unit.Id && x.StudentId == studentId && x.CourseId == courseId, cancellationToken);
             if (unit != null && unitResult != null)
             {
-                var (groupedSkillScores, percent) = await GetUnitSkillScores(lessonResultIds);
-                unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);
-                unitResult.CorrectTotal = (int)groupedSkillScores.Sum(x => x.TotalCount);
+                var (skillScores, percent) = await GetUnitSkillScores(lessonResultIds);
                 if (isDone)
                 {
                     unitResult.Status = EnumResultStatus.Done;
-                    await SendStudentCompleteUnit(studentId, unit, courseId, groupedSkillScores, percent, cancellationToken);
+                    await _finishOneUnitPublisher.Publish(unitResult, cancellationToken);
+                    await SendStudentCompleteUnit(studentId, unit, courseId, skillScores, percent, cancellationToken);
                 }
+                unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
                 unitResult.Percent = percent;
-                unitResult.SkillScores = groupedSkillScores;
-                await _finishOneUnitPublisher.Publish(unitResult, cancellationToken);
+                unitResult.SkillScores = skillScores;
                 _unitResultRepository.Update(unitResult);
                 await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -78,12 +78,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, PercentOccupyClassForum);
             List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).Concat(skillTestSkillScores).Concat(unitTestSkillScores).ToList();
             List<SkillScores> groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
-            var percent = percentClassForum + percentHomeWork + percentSkillTest + percentUnitTest + percentVideo;
-            return (groupedSkillScores, percent);
+            var percents = new List<double> { percentClassForum, percentHomeWork, percentSkillTest, percentUnitTest, percentVideo };
+            return (groupedSkillScores, (int)percents.Sum());
         }
 
-        private async Task SendStudentCompleteUnit(Guid studentId, Domain.Entities.Unit unit, Guid courseId, List<SkillScores> groupedSkillScores, double percent, CancellationToken cancellationToken)
+        private async Task SendStudentCompleteUnit(Guid studentId, Domain.Entities.Unit? unit, Guid courseId, List<SkillScores> groupedSkillScores, double percent, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(unit);
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
             var student = studentResult.Content?.Result?.FirstOrDefault();
             var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.FirstOrDefaultAsync(p => p.UnitId == unit.Id && courseId == p.CourseId, cancellationToken);

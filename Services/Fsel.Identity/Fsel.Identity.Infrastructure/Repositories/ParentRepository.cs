@@ -8,7 +8,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class ParentRepository : BaseRepository<Parent>, IParentRepository
     {
-        public ParentRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public ParentRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

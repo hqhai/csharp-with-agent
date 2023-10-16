@@ -47,6 +47,7 @@ namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
                                     CreatedDate = x.CreatedDate,
                                     IconPath = x.IconPath,
                                     IsActive = x.IsActive,
+                                    NumberOfQuestion = x.SupportQuestions.Count
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {

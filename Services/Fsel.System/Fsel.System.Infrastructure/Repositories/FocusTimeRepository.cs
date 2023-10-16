@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class FocusTimeRepository : BaseRepository<FocusTimeConfig>, IFocusTimeConfigRepository
     {
-        public FocusTimeRepository(SystemDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public FocusTimeRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

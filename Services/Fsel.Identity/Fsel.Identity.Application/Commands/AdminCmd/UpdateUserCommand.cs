@@ -5,13 +5,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class UpdateUserCommand : UpdateUserCommandModel, IRequest<MethodResult<UserModel>>
@@ -47,7 +47,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             if (userRoles.Contains(EnumRoleRegisterWithAdmin.Teacher.ToString()))
             {
                 user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Teacher).ThenInclude(x => x!.TeacherBankAccounts)
-                                                        .FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
+                                                        .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
                 if (user == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -61,7 +61,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
             else if (role == EnumRoleRegisterWithAdmin.CSO.ToString())
             {
-                user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.CSO).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
+                user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.CSO).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
                 if (user == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -71,7 +71,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
             else if (role == EnumRoleRegisterWithAdmin.Moderator.ToString())
             {
-                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
+                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
                 if (user == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));

@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/teacher/unit")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Teacher))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
     public class UnitController : ControllerBase
     {
         private readonly IMediator _mediator;

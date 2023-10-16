@@ -8,7 +8,7 @@ namespace Fsel.Interaction.Infrastructure.Repositories
 
     public class SupportTicketRepository : BaseRepository<SupportTicket>, ISupportTicketRepository
     {
-        public SupportTicketRepository(InteractionDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public SupportTicketRepository(InteractionDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

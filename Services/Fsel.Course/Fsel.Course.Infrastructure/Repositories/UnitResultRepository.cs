@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class UnitResultRepository : BaseRepository<UnitResult>, IUnitResultRepository
     {
-        public UnitResultRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public UnitResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

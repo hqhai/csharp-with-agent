@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.TrainingService;
@@ -22,7 +23,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using OtpNet;
 

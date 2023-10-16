@@ -8,7 +8,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class HumanRepository : BaseRepository<Human>, IHumanRepository
     {
-        public HumanRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public HumanRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

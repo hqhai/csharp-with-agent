@@ -13,5 +13,10 @@ namespace Fsel.Interaction.Domain.Enums.ErrorCodes
         /// Support category id  not exist
         /// </summary>
         SupportCategoryIdNotExist,
+
+        /// <summary>
+        /// Support question is Frequent and active
+        /// </summary>
+        SupportQuestionHaveOver10FrequentQuesions,
     }
 }

@@ -16,6 +16,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
+    using UserManager = Core.Base.Managers.UserManager<Domain.Entities.User>;
 
     public class CreateGuestAccountCommand : CreateGuestAccountCommandModel, IRequest<MethodResult<TokenModel>>
     {
@@ -23,13 +24,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
     public class CreateGuestAccountCommandHandler : IRequestHandler<CreateGuestAccountCommand, MethodResult<TokenModel>>
     {
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager _userManager;
         private readonly IPlatformRepository _platformRepository;
         private readonly SignInManager<User> _signInManager;
         private readonly IMediator _mediator;
         private const string DefaultPassword = "Hello.123";
 
-        public CreateGuestAccountCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, SignInManager<User> signInManager, IMediator mediator)
+        public CreateGuestAccountCommandHandler(UserManager userManager, IPlatformRepository platformRepository, SignInManager<User> signInManager, IMediator mediator)
         {
             _userManager = userManager;
             _platformRepository = platformRepository;

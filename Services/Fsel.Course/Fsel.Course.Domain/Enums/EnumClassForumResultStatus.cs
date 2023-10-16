@@ -9,5 +9,6 @@ namespace Fsel.Course.Domain.Enums
         PendingForGrading,
         Graded,
         Draft
+        
     }
 }

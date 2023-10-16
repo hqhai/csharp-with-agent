@@ -41,7 +41,7 @@ namespace Fsel.Notification.Application.Queries
 
             var notificationQuery = _notificationsRepository.Queryable.Include(x => x.NotificationType)
                                                                       .Where(x => x.UserId == _authContext.CurrentUserId);
-            var notificationSenderIds = await notificationQuery.Where(p => p.SenderId.HasValue).Select(x => x.SenderId.ToString() ?? string.Empty).Distinct().ToListAsync(cancellationToken);
+            var notificationSenderIds = await notificationQuery.Where(p => p.SenderId.HasValue).Select(x => x.SenderId ?? default).Distinct().ToListAsync(cancellationToken);
 
             var listSender = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = notificationSenderIds });
 
@@ -66,7 +66,7 @@ namespace Fsel.Notification.Application.Queries
             {
                 foreach (var notify in lists)
                 {
-                    notify.AvatarPath = listSenderInfo.FirstOrDefault(x => notify.SenderId.HasValue && x.UserId == notify.SenderId.ToString())?.AvatarPath;
+                    notify.AvatarPath = listSenderInfo.FirstOrDefault(x => notify.SenderId.HasValue && x.UserId == notify.SenderId)?.AvatarPath;
                 }
             }
 

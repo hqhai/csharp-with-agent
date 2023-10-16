@@ -6,6 +6,6 @@ namespace Fsel.Identity.Domain.IRepositories
 
     public interface IUserRoleRepository
     {
-        IQueryable<IdentityUserRole<string>> GetQuery();
+        IQueryable<IdentityUserRole<Guid>> GetQuery();
     }
 }
