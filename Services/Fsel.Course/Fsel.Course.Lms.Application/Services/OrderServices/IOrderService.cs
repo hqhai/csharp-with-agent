@@ -4,7 +4,7 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
 {
     using Fsel.Common.ActionResults;
     using Fsel.Course.Lms.Application.Services.OrderServices.Model;
-    using Microsoft.AspNetCore.Mvc;
+    using Fsel.Shared.Enums;
     using Refit;
 
     public interface IOrderService
@@ -12,11 +12,8 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
         [Get("/package")]
         Task<IApiResponse<MethodResult<IList<PackageModel>>>> GetPackages();
 
-        [Get("/order/is-status-payment")]
-        Task<IApiResponse<MethodResult<bool>>> IsCheckStatusPayment([FromQuery] IsCheckPaymentStatusByUserModel query);
-
-        [Get("/order/is-status-new")]
-        Task<IApiResponse<MethodResult<bool>>> IsCheckStatusNew();
+        [Get("/order/get-status")]
+        Task<IApiResponse<MethodResult<EnumOrderStatus?>>> GetStatusAsync([Query] GetStatusByUserCommandModel command);
 
         [Post("/order")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);

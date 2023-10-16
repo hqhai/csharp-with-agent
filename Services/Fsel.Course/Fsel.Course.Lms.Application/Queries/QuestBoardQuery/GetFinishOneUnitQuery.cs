@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -62,16 +63,16 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 return methodResult;
             }
 
-            var orderResult = await _orderService.IsCheckStatusPayment(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = request.CurrentUserId });
+            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = request.CurrentUserId });
             if (!orderResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
                 return methodResult;
             }
-            var isCheckUserOrder = orderResult?.Content?.Result ?? default;
-            if (!isCheckUserOrder)
+            var status = orderResult?.Content?.Result ?? default;
+            if (status != EnumOrderStatus.Payment)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isCheckUserOrder));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(status));
                 return methodResult;
             }
             var course = await _courseRepository.GetByIdAsync(@class.CourseId);

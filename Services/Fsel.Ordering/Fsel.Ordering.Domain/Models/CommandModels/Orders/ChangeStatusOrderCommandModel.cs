@@ -3,7 +3,7 @@
 namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
 {
     using System;
-    using Fsel.Ordering.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class ChangeStatusOrderCommandModel
     {

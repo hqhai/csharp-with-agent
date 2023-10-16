@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -75,14 +76,14 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var orderResult = await _orderService.IsCheckStatusPayment(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
+            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
             if (!orderResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
                 return methodResult;
             }
-            var isCheckUserOrder = orderResult?.Content?.Result ?? default;
-            if (!isCheckUserOrder)
+            var status = orderResult?.Content?.Result ?? default;
+            if (status != EnumOrderStatus.Payment)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;

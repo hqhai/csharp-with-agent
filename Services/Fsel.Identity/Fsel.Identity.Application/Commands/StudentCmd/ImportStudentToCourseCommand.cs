@@ -20,7 +20,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -128,6 +127,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     user.EmailConfirmed = true;
 
                     #region Add Platform to User
+
                     var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
                     if (platform != null)
                     {
@@ -136,7 +136,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             PlatformId = platform.Id
                         });
                     }
-                    #endregion
+
+                    #endregion Add Platform to User
 
                     identityResult = await _userManager.CreateAsync(user, DefaultPassword);
                     if (!identityResult.Succeeded)
