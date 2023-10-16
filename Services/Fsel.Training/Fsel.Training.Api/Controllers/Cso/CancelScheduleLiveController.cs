@@ -17,7 +17,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/cancel-schedule")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.CSO))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.CSO))]
     public class CancelScheduleLiveController : ControllerBase
     {
         private readonly IMediator _mediator;

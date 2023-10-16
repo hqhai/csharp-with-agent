@@ -32,7 +32,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("change-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize]
+        [Common.Attributes.Permission]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -42,7 +42,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update profile user
         /// </summary>
-        [Authorize]
+        [Common.Attributes.Permission]
         [HttpPut("update-profile-user")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -67,7 +67,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get User Profile
         /// </summary>
-        [Authorize]
+        [Common.Attributes.Permission]
         [HttpGet("get-user-profile")]
         [ProducesResponseType(typeof(MethodResult<UserProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

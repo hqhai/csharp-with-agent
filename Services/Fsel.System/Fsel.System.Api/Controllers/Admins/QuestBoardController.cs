@@ -17,7 +17,7 @@ namespace Fsel.System.Api.Controllers.Admins
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/quest-board")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class QuestBoardController : ControllerBase
     {
         private readonly IMediator _mediator;
