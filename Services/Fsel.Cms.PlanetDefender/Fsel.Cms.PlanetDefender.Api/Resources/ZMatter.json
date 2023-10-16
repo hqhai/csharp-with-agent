@@ -1,0 +1,74 @@
+[
+  {
+    "id": "187c1ce2-23ad-4acc-ba89-649a437c1099",
+    "createdDate": "2023-07-21",
+    "isActive": false,
+    "name": "Wind Blade",
+    "code": "WB001",
+    "description": "A sword without a costume? Oh no, look, there's a sharp wind around it!",
+    "usage": "Push 1 meteor, reset meteor duration to maximum"
+  },
+  {
+    "id": "9faaead9-d4de-4aa8-8523-5432fa7f313f",
+    "createdDate": "2023-07-21",
+    "isActive": false,
+    "name": "Stop Watch",
+    "code": "SW001",
+    "description": "What's the use of a broken watch?",
+    "usage": "Freeze time within X seconds"
+  },
+  {
+    "id": "baecdd2b-39c3-41a5-8240-1a48e37b4f33",
+    "createdDate": "2023-07-21",
+    "isActive": false,
+    "name": "Shield",
+    "code": "SH001",
+    "description": "This shield is so beautiful! Wish it was here forever",
+    "usage": "Quantum shield, helps the spacecraft block 1 damage"
+  },
+  {
+    "id": "54c17216-a173-4ed6-a6e8-ff7062494705",
+    "createdDate": "2023-07-21",
+    "isActive": false,
+    "name": "Supply Kit",
+    "code": "SP001",
+    "description": "The rescue ship is here!",
+    "usage": "Use immediately restores 10% of maximum health (Full will restore shield)"
+  },
+  {
+    "id": "0cf0c6b3-1312-473d-bd2a-15dfa88d6052",
+    "createdDate": "2023-07-21",
+    "isActive": false,
+    "name": "Power Up",
+    "code": "PU001",
+    "description": "This power...It's strange",
+    "usage": "Restores 20% rage"
+  },
+  {
+    "id": "fdc945ba-248e-4db2-96cb-c7d55a7de8c8",
+    "createdDate": "2023-07-21",
+    "isActive": false,
+    "name": "Magnetic",
+    "code": "MG001",
+    "description": "With the force of fate, these meteorites need a little help",
+    "usage": "Creates a link between 2 meteorites, answering 1 meteorite correctly will destroy both meteorites (If 1 meteorite answers incorrectly, you can still answer the remaining question to destroy both)"
+  },
+  {
+    "id": "192b995e-9cfa-45ee-9f6f-f6fff5803059",
+    "createdDate": "2023-07-21",
+    "isActive": false,
+    "name": "Gum Bomp",
+    "code": "GB001",
+    "description": "What kind of bomb sticks like glue?",
+    "usage": "Place the bomb in one location, when the meteorite sticks it will explode, causing the meteorite to stand still for 2 seconds"
+  },
+  {
+    "id": "12b08f82-9b0b-4a7a-92d2-10e35b9fea4e",
+    "createdDate": "2023-07-21",
+    "isActive": false,
+    "name": "Hacker ID",
+    "code": "HI001",
+    "description": "Whose card is this?",
+    "usage": "Only use when answering a question, immediately display the answer and answer"
+  }
+]
