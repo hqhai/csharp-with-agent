@@ -99,16 +99,6 @@ namespace Fsel.Shared.Constants
             }
         }
 
-        public static class SystemQueue
-        {
-            public const string KeyQueue = nameof(SystemQueue);
-
-            public static class NameQueue
-            {
-                public const string CreateStudentDailyStreak = $"{KeyQueue}_CreateStudentDailyStreak";
-            }
-        }
-
         public static class NotificationQueue
         {
             public const string KeyQueue = nameof(NotificationQueue);
