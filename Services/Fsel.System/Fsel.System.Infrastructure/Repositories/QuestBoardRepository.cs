@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class QuestBoardRepository : BaseRepository<QuestBoard>, IQuestBoardRepository
     {
-        public QuestBoardRepository(SystemDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public QuestBoardRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

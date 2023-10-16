@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Api.Controllers
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/lesson")]
-    [Authorize(Roles = nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     [ApiController]
     public class LessonController : ControllerBase
     {

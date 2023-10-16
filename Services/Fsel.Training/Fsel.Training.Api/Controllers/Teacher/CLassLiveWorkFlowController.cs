@@ -16,7 +16,7 @@ namespace Fsel.Training.Api.Controllers.Teacher
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/teacher/class-live-work")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Teacher))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
     public class CLassLiveWorkFlowController : ControllerBase
     {
         private readonly IMediator _mediator;

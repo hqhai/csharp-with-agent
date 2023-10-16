@@ -18,7 +18,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         private readonly SectionConverter _sectionConverter;
         private readonly IMapper _mapper;
 
-        public MockTestRepository(CourseDbContext dbContext, AuthContext authContext, SectionConverter sectionConverter, IMapper mapper) : base(dbContext, authContext)
+        public MockTestRepository(CourseDbContext dbContext, AuthContext authContext, SectionConverter sectionConverter, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
             _sectionConverter = sectionConverter;
             _mapper = mapper;

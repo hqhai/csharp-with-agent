@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class SectionGroupRepository : BaseRepository<SectionGroup>, ISectionGroupRepository
     {
-        public SectionGroupRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public SectionGroupRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

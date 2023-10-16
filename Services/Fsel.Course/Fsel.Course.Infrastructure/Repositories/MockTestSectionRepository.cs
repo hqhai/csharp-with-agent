@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class MockTestSectionRepository : BaseRepository<MockTestSection>, IMockTestSectionRepository
     {
-        public MockTestSectionRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public MockTestSectionRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

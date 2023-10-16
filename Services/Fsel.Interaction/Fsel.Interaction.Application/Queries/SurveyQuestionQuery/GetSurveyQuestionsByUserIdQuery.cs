@@ -11,7 +11,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
     public class GetSurveyQuestionsByUserIdQuery : IRequest<MethodResult<IList<SurveyQuestionInfoModel>>>
     {
-        public string? Id { get; set; }
+        public Guid? Id { get; set; }
     }
 
     public class GetSurveyQuestionsByUserIdQueryHandler : IRequestHandler<GetSurveyQuestionsByUserIdQuery, MethodResult<IList<SurveyQuestionInfoModel>>>

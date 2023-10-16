@@ -22,7 +22,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public string? Icon { get; set; }
 
-        public IList<string>? UserIds { get; set; }
+        public IList<Guid>? UserIds { get; set; }
 
         public IList<EnumRole>? Roles { get; set; }
 

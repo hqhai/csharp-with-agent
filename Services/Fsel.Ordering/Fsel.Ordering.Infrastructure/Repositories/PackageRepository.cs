@@ -8,7 +8,7 @@ namespace Fsel.Ordering.Infrastructure.Repositories
 
     public class PackageRepository : BaseRepository<Package>, IPackageRepository
     {
-        public PackageRepository(OrderingDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public PackageRepository(OrderingDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }
