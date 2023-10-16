@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
+namespace Fsel.Identity.Application.Services.OrderService.Model
 {
-    public class GetOrderStatusByUserModel
+    public class GetStatusByUserCommandModel
     {
         public Guid? UserId { get; set; }
         public Guid? CourseId { get; set; }
