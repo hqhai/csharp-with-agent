@@ -4,10 +4,13 @@ namespace Fsel.Ordering.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Ordering.Application.Commands.OrderCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
+    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -38,12 +41,12 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Check Status User
         /// </summary>
-        [HttpGet("is-status-payment")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-status")]
+        [ProducesResponseType(typeof(MethodResult<EnumOrderStatus?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> IsCheckStatusUser([FromQuery] GetStatusOrderByUserQuery query)
+        public async Task<IActionResult> GetStatus([FromQuery] GetStatusOrderByUserQuery query)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<EnumOrderStatus?> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
