@@ -1,0 +1,44 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Infrastructure.Configs
+{
+    using System;
+    using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+    public class SectionGroupResultEntityTypeConfiguration : IEntityTypeConfiguration<SectionGroupResult>
+    {
+        public void Configure(EntityTypeBuilder<SectionGroupResult> builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            builder.Property(e => e.Status)
+                     .HasMaxLength(100)
+                     .HasConversion(
+                         v => v.ToString(),
+                         v => v.EnumParse<EnumResultStatus>());
+
+            builder.HasOne(a => a.SectionGroup)
+                .WithMany(b => b.SectionGroupResults)
+                .HasForeignKey(b => b.SectionGroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.MockTestResult)
+              .WithMany(b => b.SectionGroupResults)
+              .HasForeignKey(b => b.MockTestResultId)
+              .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(a => a.FinalTestResult)
+             .WithMany(b => b.SectionGroupResults)
+             .HasForeignKey(b => b.FinalTestResultId)
+             .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(a => a.ExtraPracticeResult)
+            .WithMany(b => b.SectionGroupResults)
+            .HasForeignKey(b => b.ExtraPracticeResultId)
+            .OnDelete(DeleteBehavior.SetNull);
+        }
+    }
+}

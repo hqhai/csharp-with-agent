@@ -3,8 +3,9 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
-    public class SectionModel : BaseModel
+    public class SectionDetailModel : BaseModel
     {
         public string? Name { get; set; }
         public string? MediaPost { get; set; }
@@ -12,11 +13,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? VideoFilePath { get; set; }
         public string? SubFilePath { get; set; }
         public int DisplayOrder { get; set; }
-        public IList<SectionPartModel>? SectionParts { get; set; }
-        public IList<SectionQuestionModel>? SectionQuestions { get; set; }
+        public Guid QuestionId { get; set; }
+        public Guid SectionTimeCodeId { get; set; }
+        public EnumCurrentStatus Status { get; set; }
+        public IList<Guid>? QuestionIds { get; set; }
         public IList<SectionTimeCodeModel>? SectionTimeCodes { get; set; }
-        public IList<QuestionModel>? Questions { get; set; }
-        public ExtraPracticeAnswerModel? ExtraPracticeAnswer { get; set; }
-        public MockTestAnswerModel? MockTestAnswer { get; set; }
     }
 }
