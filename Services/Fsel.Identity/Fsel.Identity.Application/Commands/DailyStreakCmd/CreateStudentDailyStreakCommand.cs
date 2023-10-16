@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 {
     using System;
+    using System.Text.Json.Serialization;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -14,7 +15,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     using Microsoft.EntityFrameworkCore;
 
     public class CreateStudentDailyStreakCommand : CreateStudentDailyStreakQueueModel, IRequest<MethodResult<bool>>
-    {
+    {      
     }
 
     public class CreateStudentDailyStreakCommandHandler : IRequestHandler<CreateStudentDailyStreakCommand, MethodResult<bool>>
@@ -35,6 +36,11 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 
             var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks).Include(x => x.Human)
                                                   .FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId, cancellationToken: cancellationToken);
+            if (request.StudentId.HasValue)
+            {
+                student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks)
+                                                  .FirstOrDefaultAsync(x => x.Id == request.StudentId, cancellationToken: cancellationToken);
+            }
 
             if (student == null)
             {
