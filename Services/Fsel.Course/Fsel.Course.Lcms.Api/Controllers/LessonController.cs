@@ -17,7 +17,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/lesson")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class LessonController : ControllerBase
     {
         private readonly IMediator _mediator;
