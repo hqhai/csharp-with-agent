@@ -16,8 +16,8 @@ namespace Fsel.System.Domain.Models.EntityModels
         public Guid? PlatformId { get; set; }
         public Guid? WordCategoryId { get; set; }
         public string? PlatformName { get; set; }
-        public string? WordCategory { get; set; }
         public IList<GameVocabularyTypeModel>? GameVocabularyTypes { get; set; }
+        public GameTopicModel? GameTopic { get; set; }
     }
 
     public class GameVocabularyTypeModel : BaseModel

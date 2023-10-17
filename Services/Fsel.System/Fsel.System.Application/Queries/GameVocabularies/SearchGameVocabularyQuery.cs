@@ -40,21 +40,7 @@ namespace Fsel.System.Application.Queries.GameVocabularies
                 return methodResult;
             }
 
-            var query = _gameVocabularyRepository.Queryable.Include(t => t.GameTopic).Include(x => x.GameVocabularyTypes).Select(p => new GameVocabularyModel
-            {
-                Id = p.Id,
-                CreatedDate = p.CreatedDate,
-                Code = p.Code,
-                Key = p.Key,
-                CefrLevel = p.CefrLevel,
-                CourseLevel = p.CourseLevel,
-                UnitOrder = p.UnitOrder,
-                PartSpeech = p.PartSpeech,
-                PlatformId = p.PlatformId,
-                WordCategoryId = p.WordCategoryId,
-                WordCategory = p.GameTopic == null ? null : p.GameTopic.Value,
-                GameVocabularyTypes = p.GameVocabularyTypes == null ? null : _mapper.Map<IList<GameVocabularyTypeModel>>(p.GameVocabularyTypes),
-            });
+            var query = _gameVocabularyRepository.Queryable.Include(t => t.GameTopic).Include(x => x.GameVocabularyTypes).AsQueryable();
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(p => (p.Key ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
@@ -87,6 +73,7 @@ namespace Fsel.System.Application.Queries.GameVocabularies
             var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
+                    .Select(p => _mapper.Map<GameVocabularyModel>(p))
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
