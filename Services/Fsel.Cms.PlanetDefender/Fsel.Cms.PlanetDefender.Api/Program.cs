@@ -20,6 +20,8 @@ builder.AddDbContexts<CmsPlanetDefenderDbContext>();
 builder.Services.AddScoped<IStudentGameInfoRepository, StudentGameInfoRepository>();
 builder.Services.AddScoped<IQuestBankRepository, QuestBankRepository>();
 builder.Services.AddScoped<IZMatterRepository, ZMatterRepository>();
+builder.Services.AddScoped<IGameplayTimeConfigRepository, GameplayTimeConfigRepository>();
+builder.Services.AddScoped<IGameplayRuleConfigRepository, GameplayRuleConfigRepository>();
 
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
