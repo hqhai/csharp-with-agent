@@ -3,11 +3,7 @@
 using AutoMapper;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Shared.Enums;
-using Fsel.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Infrastructure.Repositories
@@ -15,38 +11,10 @@ namespace Fsel.Course.Infrastructure.Repositories
     public class UnitRepository : BaseRepository<Unit>, IUnitRepository
     {
         private readonly IMapper _mapper;
-        private readonly IVideoRepository _videoRepository;
-        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
-        private readonly IVideoResultRepository _videoResultRepository;
-        private readonly ILessonVideoRepository _lessonVideoRepository;
-        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
-        private readonly IClassForumResultRepository _classForumResultRepository;
-        private readonly IClassForumRepository _classForumRepository;
-        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
-        private readonly ILessonHomeWorkRepository _lessonHomeWorkRepository;
-        private readonly IUnitLessonRepository _unitLessonRepository;
-        private readonly ILessonRepository _lessonRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IUnitResultRepository _unitResultRepository;
-        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
-        public UnitRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper, IVideoRepository videoRepository, IVideoTimeCodeRepository videoTimeCodeRepository, IVideoResultRepository videoResultRepository, ILessonVideoRepository lessonVideoRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, IHomeWorkResultRepository homeWorkResultRepository, ILessonHomeWorkRepository lessonHomeWorkRepository, IUnitLessonRepository unitLessonRepository, ILessonRepository lessonRepository, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository) : base(dbContext, authContext, mapper)
+        public UnitRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
         {
             _mapper = mapper;
-            _videoRepository = videoRepository;
-            _videoTimeCodeRepository = videoTimeCodeRepository;
-            _videoResultRepository = videoResultRepository;
-            _lessonVideoRepository = lessonVideoRepository;
-            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
-            _classForumResultRepository = classForumResultRepository;
-            _classForumRepository = classForumRepository;
-            _homeWorkResultRepository = homeWorkResultRepository;
-            _lessonHomeWorkRepository = lessonHomeWorkRepository;
-            _unitLessonRepository = unitLessonRepository;
-            _lessonRepository = lessonRepository;
-            _lessonResultRepository = lessonResultRepository;
-            _unitResultRepository = unitResultRepository;
-            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public override async Task<Unit?> GetIncludeByIdAsync(Guid id, int? siteId = null)
@@ -76,114 +44,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return null;
             }
             return await Queryable.Include(x => x.UnitSkillMockTests).Include(x => x.UnitLessons).Where(x => ids.Contains(x.Id)).ToListAsync();
-        }
-
-        public async Task<IList<UnitModel>> GetListAsync(Guid? studentId, Guid courseId, EnumLearnProcessType type)
-        {
-            var query = from baseQ in Queryable
-                        join cumt in _courseUnitMockTestRepository.Queryable on baseQ.Id equals cumt.UnitId
-                        join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.UnitId
-                        join ul in _unitLessonRepository.Queryable on baseQ.Id equals ul.UnitId
-                        join l in _lessonRepository.Queryable on ul.LessonId equals l.Id
-                        join lr in _lessonResultRepository.Queryable on baseQ.Id equals lr.UnitId
-                        where cumt.CourseId == courseId && ur.StudentId == studentId && lr.StudentId == studentId
-                        select new
-                        {
-                            Unit = baseQ,
-                            UnitResult = ur,
-                            UnitLesson = ul,
-                            Lesson = l,
-                            LessonResult = lr,
-                        };
-            switch (type)
-            {
-                case EnumLearnProcessType.LessonVideo:
-                    var queryLessonVideo = from baseQ in query
-                                           group new { baseQ.UnitLesson, baseQ.LessonResult, baseQ.UnitResult } by baseQ.Unit into g
-                                           select new
-                                           {
-                                               Unit = g.Key,
-                                               UnitResult = g.Select(x => x.UnitResult).FirstOrDefault(),
-                                               CountDone = g.Select(x => x.LessonResult).Where(x => x.Status == EnumResultStatus.Done).Count(),
-                                               TotalDone = g.Select(x => x.UnitLesson).Count(),
-                                           };
-                    var listLessonVideo = await queryLessonVideo.ToListAsync();
-                    return listLessonVideo.Select(x => GetUnitModel(x.Unit, x.UnitResult, courseId, x.CountDone, x.TotalDone)).ToList();
-
-                case EnumLearnProcessType.HomeWork:
-                    var queryHomeWork = from baseQ in query
-                                        join lh in _lessonHomeWorkRepository.Queryable on baseQ.Lesson.Id equals lh.LessonId
-                                        join hr in _homeWorkResultRepository.Queryable on baseQ.LessonResult.Id equals hr.LessonResultId
-                                        group new { hr, lh, baseQ.UnitResult } by baseQ.Unit into g
-                                        select new
-                                        {
-                                            Unit = g.Key,
-                                            UnitResult = g.Select(x => x.UnitResult).FirstOrDefault(),
-                                            CountDone = g.Select(x => x.hr).Where(x => x.Status == EnumResultStatus.Done).Count(),
-                                            TotalDone = g.Select(x => x.lh).Count(),
-                                        };
-                    var listHomeWork = await queryHomeWork.ToListAsync();
-                    return listHomeWork.Select(x => GetUnitModel(x.Unit, x.UnitResult, courseId, x.CountDone, x.TotalDone)).ToList();
-
-                case EnumLearnProcessType.ClassForum:
-                    var queryClassForum = from baseQ in query
-                                          join cf in _classForumRepository.Queryable on baseQ.Lesson.Id equals cf.LessonId
-                                          join cfr in _classForumResultRepository.Queryable on baseQ.LessonResult.Id equals cfr.LessonResultId
-                                          group new { cfr, cf, baseQ.UnitResult } by baseQ.Unit into g
-                                          select new
-                                          {
-                                              Unit = g.Key,
-                                              UnitResult = g.Select(x => x.UnitResult).FirstOrDefault(),
-                                              CountDone = g.Select(x => x.cfr).Where(x => x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.PendingForGrading).Count(),
-                                              TotalDone = g.Select(x => x.cf).Count(),
-                                          };
-                    var listClassForum = await queryClassForum.ToListAsync();
-                    return listClassForum.Select(x => GetUnitModel(x.Unit, x.UnitResult, courseId, x.CountDone, x.TotalDone)).ToList();
-
-                case EnumLearnProcessType.UnitTest:
-                    var queryUnitTest = from baseQ in query
-                                        join lv in _lessonVideoRepository.Queryable on baseQ.Lesson.Id equals lv.LessonId
-                                        join v in _videoRepository.Queryable on lv.VideoId equals v.Id
-                                        join vtc in _videoTimeCodeRepository.Queryable on v.Id equals vtc.VideoId
-                                        join vr in _videoResultRepository.Queryable on baseQ.LessonResult.Id equals vr.LessonResultId
-                                        join vtcr in _videoTimeCodeResultRepository.Queryable on vr.Id equals vtcr.VideoResultId
-                                        group new { vtcr, vtc, baseQ.UnitResult } by baseQ.Unit into g
-                                        select new
-                                        {
-                                            Unit = g.Key,
-                                            UnitResult = g.Select(x => x.UnitResult).FirstOrDefault(),
-                                            CountDone = g.Select(x => x.vtcr).Where(x => x.Status == EnumResultStatus.Done).Count(),
-                                            TotalDone = g.Select(x => x.vtc).Count(),
-                                        };
-                    var list = await queryUnitTest.ToListAsync();
-                    return list.Select(x => GetUnitModel(x.Unit, x.UnitResult, courseId, x.CountDone, x.TotalDone)).ToList();
-
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        private UnitModel GetUnitModel(Unit x, UnitResult unitResult, Guid courseId, double totalDone, double countDone)
-        {
-            var displayOrder = x.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == courseId && y.UnitId == x.Id)?.DisplayOrder ?? default;
-            var unitModel = new UnitModel
-            {
-                Id = x.Id,
-                Code = x.Code,
-                CourseLevel = x.CourseLevel,
-                CreatedDate = x.CreatedDate,
-                CreatedFullName = x.CreatedFullName,
-                CreatedUserId = x.CreatedUserId,
-                IsActive = x.CourseUnitMockTests.Any(),
-                Name = x.Name,
-                DisplayOrder = displayOrder,
-                UpdatedDate = x.UpdatedDate,
-                UpdatedFullName = x.UpdatedFullName,
-                UpdatedUserId = x.UpdatedUserId,
-                UnitResult = _mapper.Map<UnitResultModel>(unitResult),
-                Percent = totalDone > 0 ? NumberHelper.ConvertPercentDouble(countDone / totalDone) : default,
-            };
-            return unitModel;
         }
 
         public async Task<bool> IsUnitUsed(Guid id)

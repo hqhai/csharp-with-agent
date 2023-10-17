@@ -13,19 +13,11 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoRepository : BaseRepository<Video>, IVideoRepository
     {
-        private readonly ILessonVideoRepository _lessonVideoRepository;
         private readonly ILessonRepository _lessonRepository;
-        private readonly IUnitLessonRepository _unitLessonRepository;
-        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
-        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
 
-        public VideoRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper, ILessonVideoRepository lessonVideoRepository, ILessonRepository lessonRepository, IUnitLessonRepository unitLessonRepository, IVideoTimeCodeRepository videoTimeCodeRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository) : base(dbContext, authContext, mapper)
+        public VideoRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper, ILessonRepository lessonRepository) : base(dbContext, authContext, mapper)
         {
-            _lessonVideoRepository = lessonVideoRepository;
             _lessonRepository = lessonRepository;
-            _unitLessonRepository = unitLessonRepository;
-            _videoTimeCodeRepository = videoTimeCodeRepository;
-            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
         }
 
         public async Task<bool> IsVideoUsed(Guid? id)
