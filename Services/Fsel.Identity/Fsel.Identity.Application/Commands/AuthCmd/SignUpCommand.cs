@@ -70,7 +70,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 user = await _userManager.FindByEmailAsync(request.Email);
                 if (user != null && user.EmailConfirmed)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
                     return methodResult;
                 }
                 else
@@ -133,7 +133,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
                                 if (!result.Succeeded)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(request.Password), request.Password);
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(request.Password), request.Password);
                                     return methodResult;
                                 }
                                 await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);
@@ -207,7 +207,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         }
                         catch
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.SendAuthErorr));
+                            methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
                             scope.Dispose();
                         }
                     }
@@ -218,7 +218,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
                 if (user != null && user.EmailConfirmed)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
                     return methodResult;
                 }
             }

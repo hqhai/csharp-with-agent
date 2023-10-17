@@ -96,7 +96,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     var result = await _userManager.CreateAsync(user, DefaultPassword ?? string.Empty);
                     if (!result.Succeeded)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate));
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
                         return methodResult;
                     }
                     await _userManager.AddToRoleAsync(user, EnumRole.Guest.ToString());
@@ -109,7 +109,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     if (!result.Succeeded)
                     {
                         methodResult.AddError(
-                            StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(user.UserName), user.UserName), new Error(nameof(DefaultPassword), DefaultPassword));
+                            StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(user.UserName), user.UserName), new Error(nameof(DefaultPassword), DefaultPassword));
                         return methodResult;
                     }
                     var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
@@ -122,7 +122,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 }
                 catch
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.SignUpFail));
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SignUpFail));
                     scope.Dispose();
                 }
                 return methodResult;
