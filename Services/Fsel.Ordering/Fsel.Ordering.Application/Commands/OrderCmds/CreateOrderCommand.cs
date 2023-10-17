@@ -78,13 +78,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             }
             var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id, UserId = request.UserId }, cancellationToken).ConfigureAwait(false);
             var code = codeSend.Result?.Code;
-            if (await _orderRepository.Queryable.AnyAsync(x => x.UserId == request.UserId && x.Status != EnumOrderStatus.Reject && x.CreatedDate.AddDays(14) > DateTime.Now, cancellationToken))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.CourseLevel));
-                return methodResult;
-            }
 
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code || (x.Status == EnumOrderStatus.New && x.UserId == request.UserId), cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
                 return methodResult;

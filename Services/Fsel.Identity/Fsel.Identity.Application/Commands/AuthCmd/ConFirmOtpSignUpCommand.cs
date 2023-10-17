@@ -80,7 +80,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(Domain.Enums.ErrorCodes.EnumAuthErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
+                methodResult.AddErrorBadRequest(nameof(Domain.Enums.ErrorCodes.EnumAuthUserErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
                 return methodResult;
             }
 

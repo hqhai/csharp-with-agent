@@ -24,7 +24,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using EnumAuthErrorCode = Domain.Enums.ErrorCodes.EnumAuthErrorCode;
+    using EnumAuthUserErrorCode = Domain.Enums.ErrorCodes.EnumAuthUserErrorCode;
 
     public class ImportStudentToCourseCommand : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
@@ -142,7 +142,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     identityResult = await _userManager.CreateAsync(user, DefaultPassword);
                     if (!identityResult.Succeeded)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate));
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
                         return methodResult;
                     }
                     await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
