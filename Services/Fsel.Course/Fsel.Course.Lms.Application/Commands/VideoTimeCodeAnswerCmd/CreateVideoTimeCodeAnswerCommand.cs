@@ -128,28 +128,25 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     answer = new VideoTimeCodeAnswer
                     {
                         Answer = answerConfig ?? item.Answer,
+                        VideoTimeCodeId = videoTimeCodeId,
                         ExerciseId = exerciseId,
                         QuestionId = question.Id,
                         VideoTimeCodeResultId = videoTimeCodeResult.Id,
-                        VideoTimeCodeId = videoTimeCodeId,
                         VideoResultId = videoResult.Id,
                         CorrectCount = question.Ungraded ? default : correctCount,
-                        Status = videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone ? EnumTimeCodeStatus.Done : EnumTimeCodeStatus.Process
+                        Status = GetEnumTimeCodeType(videoTimeCode.TimeCodeType, correctCount, question.CorrectTotal)
                     };
+
                     videoTimeCodeAnswers.Add(answer);
                 }
-                else if (answer.Status == EnumTimeCodeStatus.Process)
+                else
                 {
                     answer.Answer = answerConfig ?? item.Answer;
-                    answer.CorrectCount = question.Ungraded ? default : correctCount;
                     answer.Status = EnumTimeCodeStatus.Done;
+                    answer.CorrectCount = question.Ungraded ? default : correctCount;
                     updateVideoTimeCodeAnswers.Add(answer);
                 }
-                else if (answer.Status == EnumTimeCodeStatus.Done)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
-                    return methodResult;
-                }
+
                 skillScores.Add(new SkillScores
                 {
                     Skill = exercise?.CourseSkill ?? default,
@@ -159,15 +156,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     TotalQuestion = 1,
                 });
             }
-            skillScores = skillScores.GroupBy(x => x.Skill).Select(x => new SkillScores
-            {
-                Skill = x.Key,
-                CorrectCount = x.Sum(x => x.CorrectCount),
-                TotalCount = x.Sum(x => x.TotalCount),
-                CountQuestion = x.Sum(x => x.CountQuestion),
-                TotalQuestion = x.Sum(x => x.TotalQuestion),
-                Percent = x.Sum(x => x.CorrectCount).GetPercent(x.Sum(x => x.TotalCount))
-            }).ToList();
+            skillScores = GetSkillScores(skillScores);
             videoTimeCodeResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             videoTimeCodeResult.Percent = skillScores.Sum(x => x.CorrectCount).GetPercent(skillScores.Sum(x => x.TotalCount));
@@ -177,14 +166,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 if (videoTimeCode?.TimeCodeType == EnumTimeCodeType.UnitTest)
                 {
                     await _finishOneUnitTestPublisher.Publish(videoResult, cancellationToken);
-                    videoTimeCodeResult.Status = EnumResultStatus.Done;
                 }
 
                 if (videoTimeCodeAnswers.Any())
                 {
                     if (videoTimeCode?.TimeCodeType != EnumTimeCodeType.Standalone || skillScores.Sum(x => x.TotalCount) == videoTimeCodeAnswers.Sum(x => x.CorrectCount))
                     {
-                        videoTimeCodeAnswers.ForEach(x => x.Status = EnumTimeCodeStatus.Done);
                         videoTimeCodeResult.Status = EnumResultStatus.Done;
                     }
 
@@ -216,6 +203,20 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             return methodResult;
         }
 
+        private static List<SkillScores> GetSkillScores(IList<SkillScores> skillScores)
+        {
+            ArgumentNullException.ThrowIfNull(skillScores);
+            return skillScores.GroupBy(x => x.Skill).Select(x => new SkillScores
+            {
+                Skill = x.Key,
+                CorrectCount = x.Sum(x => x.CorrectCount),
+                TotalCount = x.Sum(x => x.TotalCount),
+                CountQuestion = x.Sum(x => x.CountQuestion),
+                TotalQuestion = x.Sum(x => x.TotalQuestion),
+                Percent = x.Sum(x => x.CorrectCount).GetPercent(x.Sum(x => x.TotalCount))
+            }).ToList();
+        }
+
         private async Task<VideoTimeCodeResult> GetVideoTimeCodeResultAsync(VideoResult videoResult, Guid videoTimeCodeId)
         {
             var videoTimeCodeResult = videoResult.VideoTimeCodeResults.Where(x => x.VideoTimeCodeId == videoTimeCodeId && x.VideoResultId == videoResult.Id).FirstOrDefault();
@@ -231,6 +232,19 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
             return videoTimeCodeResult;
+        }
+
+        private static EnumTimeCodeStatus GetEnumTimeCodeType(EnumTimeCodeType? timeCodeType, int correctCount, int correctTotal)
+        {
+            if (timeCodeType == EnumTimeCodeType.Standalone)
+            {
+                if (correctCount == correctTotal)
+                {
+                    return EnumTimeCodeStatus.Done;
+                }
+                return EnumTimeCodeStatus.Process;
+            }
+            return EnumTimeCodeStatus.Done;
         }
 
         private async Task<(IList<Question>?, VideoTimeCode?)> GetQuestionsAndVideoTimeCodeAsyns(IList<Guid> questionIds)
