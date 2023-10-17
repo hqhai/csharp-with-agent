@@ -38,17 +38,9 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
             #endregion pilot
 
-            if (request.ClassId.HasValue)
-            {
-                query = query.Where(x => x.ClassId == request.ClassId);
-            }
             if (request.CourseId.HasValue)
             {
                 query = query.Where(x => x.CourseId == request.CourseId);
-            }
-            if (request.PackageId.HasValue)
-            {
-                query = query.Where(x => x.PackageId == request.PackageId);
             }
             var order = await query.FirstOrDefaultAsync(cancellationToken);
             methodResult.Result = order?.Status;
