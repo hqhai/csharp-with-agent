@@ -119,7 +119,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                             if (classLives != null && classLives.Count > 0)
                             {
                                 classLiveCalendars = classLives.Where(classLive => liveTimeFrames?.FirstOrDefault(x => x.Id == classLive.LiveTimeFrameId)?.StartTime != null &&
-                                           classLive.LiveDate.Date.AddHours(liveTimeFrames.First(x => x.Id == classLive.LiveTimeFrameId)?.StartTime ?? default) > DateTime.Now
+                                           classLive.LiveDate.Date.AddHours(liveTimeFrames.First(x => x.Id == classLive.LiveTimeFrameId)?.StartTime ?? default) > DateTime.UtcNow
                                        ).Select(x =>
                                        {
                                            x.TeacherId = @class.TeacherId;
