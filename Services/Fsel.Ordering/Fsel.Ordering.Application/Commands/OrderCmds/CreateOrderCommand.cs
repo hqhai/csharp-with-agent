@@ -80,7 +80,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             var code = codeSend.Result?.Code;
             if (await _orderRepository.Queryable.AnyAsync(x => x.UserId == request.UserId && x.Status != EnumOrderStatus.Reject && x.CreatedDate.AddDays(14) > DateTime.Now, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.CourseLevel));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.UserId));
                 return methodResult;
             }
 
