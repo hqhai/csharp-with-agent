@@ -9,7 +9,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class CSORepository : BaseRepository<CSO>, ICSORepository
     {
-        public CSORepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public CSORepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 
@@ -19,7 +19,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
             {
                 return await Queryable
                 .Include(x => x.Human)
-                .FirstOrDefaultAsync(x => x.Human!.UserId == userId.ToString());
+                .FirstOrDefaultAsync(x => x.Human!.UserId == userId);
             }
             catch (Exception)
             {

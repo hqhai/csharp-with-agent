@@ -15,7 +15,6 @@ using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
-using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,9 +25,7 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
-builder.Services.AddIdentity<User, Role>()
-        .AddEntityFrameworkStores<UserDbContext>()
-        .AddDefaultTokenProviders();
+builder.AddIdentity<User, Role, UserDbContext>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
@@ -59,7 +56,6 @@ builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiU
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.SystemQueue.NameQueue.CreateStudentDailyStreak, typeof(CreateStudentDailyStreakConsumer) },
     { QueueSettings.UserQueue.NameQueue.SyncStudentShieldEveryDay, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
     { QueueSettings.UserQueue.NameQueue.UpdateStudentsDailyStreak, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
     { QueueSettings.UserQueue.NameQueue.LeaderBoard, typeof(LeaderBoardConsumer) }

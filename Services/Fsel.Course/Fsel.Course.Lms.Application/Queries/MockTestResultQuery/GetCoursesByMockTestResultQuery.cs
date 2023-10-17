@@ -30,7 +30,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<CourseModel>> methodResult = new MethodResult<IList<CourseModel>>();
-
             var mockTestResults = await _mockTestResultRepository.Queryable.Include(x => x.Course).ToListAsync(cancellationToken);
             List<Course> courses = mockTestResults.Select(x => x.Course ?? new Course()).ToList();
             methodResult.Result = _mapper.Map<IList<CourseModel>>(courses);

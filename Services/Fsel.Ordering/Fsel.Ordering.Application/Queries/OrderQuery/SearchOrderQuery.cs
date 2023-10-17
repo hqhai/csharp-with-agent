@@ -8,10 +8,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.CourseService;
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Ordering.Domain.Models.QueryModels.Oders;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

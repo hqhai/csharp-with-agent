@@ -12,12 +12,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Application.Services.UserService.Models;
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -76,16 +74,18 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+
             var classes = await _trainingService.GetNewClassByStudentId(student.Content!.Result!.Id);
             if (!classes.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
+                methodResult.AddError(classes.Error);
                 return methodResult;
             }
+
             var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { order.CourseId });
             if (!courseResults.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError), nameof(courseResults));
+                methodResult.AddError(courseResults.Error);
                 return methodResult;
             }
             var package = await _packageRepository.GetByIdAsync(order.PackageId);

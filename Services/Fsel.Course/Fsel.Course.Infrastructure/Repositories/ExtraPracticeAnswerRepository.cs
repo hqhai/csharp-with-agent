@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class ExtraPracticeAnswerRepository : BaseRepository<ExtraPracticeAnswer>, IExtraPracticeAnswerRepository
     {
-        public ExtraPracticeAnswerRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public ExtraPracticeAnswerRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

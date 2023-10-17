@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             var listForbiddenWordResultContent = await _systemService.CheckContainForbiddenWord(request.Content);
             var listForbiddenWordResultWordContent = await _systemService.CheckContainForbiddenWord(request.WordContent);
             var containsForbiddenWord = (listForbiddenWordResultContent.Content?.Result ?? Enumerable.Empty<string>())
-             .Concat(listForbiddenWordResultWordContent.Content?.Result ?? Enumerable.Empty<string>())
+             .Concat(listForbiddenWordResultWordContent.Content?.Result ?? Enumerable.Empty<string>()).Distinct()
              .ToList();
 
             if (containsForbiddenWord.Any())

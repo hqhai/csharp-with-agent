@@ -7,7 +7,6 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -60,7 +59,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             }
 
             CultureInfo culture = new CultureInfo("en-US");
-            string formattedDate = DateTime.Now.ToString("ddMMyyyy", culture);
+            string formattedDate = DateTime.Now.ToString("ddMMyyyyHHmm", culture);
             var code = $"{request.CourseLevel.GetEnumCourseType()}{formattedDate}{package.Code.ToString()!.Substring(0, 1)}{student.Content?.Result?.Human?.Code}";
             order.Code = code;
             order.Package = _mapper.Map<PackageModel>(package);

@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
@@ -15,7 +16,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class ConfirmOtpSignUpCommand : ConfirmOTPCommandModel, IRequest<MethodResult<ConfirmOtpModel>>

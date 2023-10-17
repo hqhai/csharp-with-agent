@@ -9,7 +9,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class StudentRepository : BaseRepository<Student>, IStudentRepository
     {
-        public StudentRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public StudentRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 

@@ -191,7 +191,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
                     await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                else if (updateVideoTimeCodeAnswers.Count > 0)
+                else if (updateVideoTimeCodeAnswers.Any())
                 {
                     videoTimeCodeResult.Status = EnumResultStatus.Done;
                     _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
