@@ -4,6 +4,7 @@ using Fsel.Cms.PlanetDefender.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 {
     [DbContext(typeof(CmsPlanetDefenderDbContext))]
-    partial class CmsPlanetDefenderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231017062759_AddTableWheelOfBuff")]
+    partial class AddTableWheelOfBuff
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

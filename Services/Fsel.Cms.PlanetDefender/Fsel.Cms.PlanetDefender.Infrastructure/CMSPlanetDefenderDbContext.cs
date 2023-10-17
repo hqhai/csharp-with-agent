@@ -3,7 +3,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
     using Fsel.Cms.PlanetDefender.Domain.Entities;
     using Fsel.Cms.PlanetDefender.Infrastructure.Configs;
     using Fsel.Common.Constants;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -17,12 +19,15 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
+            SeedWheelOfBuff(modelBuilder);
             modelBuilder.ApplyConfiguration(new StudentGameInfoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new WheelOfBuffEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<StudentGameInfo> StudentGameInfos { get; set; }
         public DbSet<QuestBank> QuestBanks { get; set; }
+        public DbSet<WheelOfBuff> WheelOfBuffs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -37,6 +42,13 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
                     configuration.GetConnectionString(Settings.DefaultConnection),
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
+        }
+        private static void SeedWheelOfBuff(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,ResourceSettings.WheelOfBuffType);
+            var wheelOfBuffConfigs = ConvertHelper.DeserializeFromFilePath<IList<WheelOfBuff>>(path);
+            ArgumentNullException.ThrowIfNull(wheelOfBuffConfigs);
+            builder.Entity<WheelOfBuff>().HasData(wheelOfBuffConfigs);
         }
     }
 }
