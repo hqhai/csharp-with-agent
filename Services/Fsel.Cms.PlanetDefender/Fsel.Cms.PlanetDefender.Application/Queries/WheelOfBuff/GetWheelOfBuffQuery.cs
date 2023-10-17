@@ -11,6 +11,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.WheelOfBuff
     using Fsel.Cms.PlanetDefender.Domain.IRepositories;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,12 +32,13 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.WheelOfBuff
         {
             MethodResult<IList<WheelOfBuffModel>> methodResult = new MethodResult<IList<WheelOfBuffModel>>();
             ArgumentNullException.ThrowIfNull(request);
-            var WheelOfBuff = await _wheelOfBuffRepository.Queryable.Select(x=>new WheelOfBuffModel
+            var wheelOfBuffs = await _wheelOfBuffRepository.Queryable.Select(x=>new WheelOfBuffModel
             {
+                Id = x.Id,
                 IsActive=x.IsActive,
-                Name = EnumWheelOfBuffHelper.GetDescription(x.Type)
+                Name = EnumHelper.GetDescription(x.Type)
             }).ToListAsync(cancellationToken);
-            methodResult.Result = WheelOfBuff;
+            methodResult.Result = wheelOfBuffs;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
 

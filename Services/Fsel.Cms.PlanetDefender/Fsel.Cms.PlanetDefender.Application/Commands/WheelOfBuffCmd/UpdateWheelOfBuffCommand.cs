@@ -35,20 +35,20 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.WheelOfBuffCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<WheelOfBuff>> methodResult = new MethodResult<IList<WheelOfBuff>>();
-            IList<WheelOfBuff> wheelOfBuff = (await _wheelOfBuffRepository.Queryable.Select(p => new WheelOfBuff
+            IList<WheelOfBuff> wheelOfBuffs = (await _wheelOfBuffRepository.Queryable.Select(p => new WheelOfBuff
             {
                 Id = p.Id,
                 IsActive = p.IsActive,
                 Type = p.Type
             }).ToListAsync(cancellationToken)).ToList();
 
-            _mapper.Map(request.WheelOfBuffCommandModels, wheelOfBuff);
+            _mapper.Map(request.WheelOfBuffCommandModels, wheelOfBuffs);
             await _wheelOfBuffRepository.ExecuteTransactionAsync(async () =>
             {
-                _wheelOfBuffRepository.UpdateList(wheelOfBuff);
+                _wheelOfBuffRepository.UpdateList(wheelOfBuffs);
                 await _wheelOfBuffRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = wheelOfBuff;
+                methodResult.Result = wheelOfBuffs;
                 return methodResult;
             });
 
