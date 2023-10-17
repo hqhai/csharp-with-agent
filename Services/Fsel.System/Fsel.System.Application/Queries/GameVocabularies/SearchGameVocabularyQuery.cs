@@ -2,6 +2,7 @@
 
 namespace Fsel.System.Application.Queries.GameVocabularies
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -9,7 +10,6 @@ namespace Fsel.System.Application.Queries.GameVocabularies
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels;
-    using global::System.Globalization;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -22,11 +22,12 @@ namespace Fsel.System.Application.Queries.GameVocabularies
     {
         private readonly IGameVocabularyRepository _gameVocabularyRepository;
         private readonly IUserService _userService;
-
-        public SearchGameVocabularyQueryHandler(IGameVocabularyRepository gameVocabularyRepository, IUserService userService)
+        private readonly IMapper _mapper;
+        public SearchGameVocabularyQueryHandler(IGameVocabularyRepository gameVocabularyRepository, IUserService userService, IMapper mapper)
         {
             _gameVocabularyRepository = gameVocabularyRepository;
             _userService = userService;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<GameVocabularyModel>>> Handle(SearchGameVocabularyQuery request, CancellationToken cancellationToken)
@@ -39,7 +40,7 @@ namespace Fsel.System.Application.Queries.GameVocabularies
                 return methodResult;
             }
 
-            var query = _gameVocabularyRepository.Queryable.Include(t => t.GameTopic).Select(p => new GameVocabularyModel
+            var query = _gameVocabularyRepository.Queryable.Include(t => t.GameTopic).Include(x => x.GameVocabularyTypes).Select(p => new GameVocabularyModel
             {
                 Id = p.Id,
                 CreatedDate = p.CreatedDate,
@@ -48,21 +49,11 @@ namespace Fsel.System.Application.Queries.GameVocabularies
                 CefrLevel = p.CefrLevel,
                 CourseLevel = p.CourseLevel,
                 UnitOrder = p.UnitOrder,
-                AlternateSpelling = p.AlternateSpelling,
-                AlternateSpellingStr = p.AlternateSpellingStr,
-                UsEquivalent = p.UsEquivalent,
                 PartSpeech = p.PartSpeech,
-                Definition = p.Definition,
-                Hint = p.Hint,
-                ExampleSentence = p.ExampleSentence,
-                ImagePath = p.ImagePath,
-                AudioPath = p.AudioPath,
-                Synonym = p.Synonym,
-                Antonym = p.Antonym,
-                PhoneticTranscription = p.PhoneticTranscription,
                 PlatformId = p.PlatformId,
                 WordCategoryId = p.WordCategoryId,
-                WordCategory = p.GameTopic == null ? null : p.GameTopic.Value
+                WordCategory = p.GameTopic == null ? null : p.GameTopic.Value,
+                GameVocabularyTypes = p.GameVocabularyTypes == null ? null : _mapper.Map<IList<GameVocabularyTypeModel>>(p.GameVocabularyTypes),
             });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
