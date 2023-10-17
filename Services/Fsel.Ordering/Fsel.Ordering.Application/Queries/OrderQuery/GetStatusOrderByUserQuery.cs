@@ -34,7 +34,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
             #region pilot
 
-            var query = _orderRepository.Queryable.Where(x => (!request.UserId.HasValue || x.UserId == request.UserId) || x.UserId == _authContext.CurrentUserId);
+            var query = _orderRepository.Queryable.Where(x => ((!request.UserId.HasValue || x.UserId == request.UserId) || x.UserId == _authContext.CurrentUserId) && x.Status != EnumOrderStatus.Reject);
 
             #endregion pilot
 
