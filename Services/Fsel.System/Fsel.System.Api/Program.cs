@@ -3,7 +3,6 @@
 using Fsel.Core.Extensions;
 using Fsel.Shared.Constants;
 using Fsel.System.Application.Queues.Consumers;
-using Fsel.System.Application.Queues.Publishers;
 using Fsel.System.Application.Services.CourseServices;
 using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.UserServices;
@@ -33,13 +32,13 @@ builder.Services.AddScoped<IFeatureAccessTimeRepository, FeatureAccessTimeReposi
 builder.Services.AddScoped<IQuestBoardStudentRepository, QuestBoardStudentRepository>();
 builder.Services.AddScoped<IGameTopicRepository, GameTopicRepository>();
 builder.Services.AddScoped<IGameVocabularyRepository, GameVocabularyRepository>();
+builder.Services.AddScoped<IGameVocabularyTypeRepository, GameVocabularyTypeRepository>();
 builder.Services.AddScoped<IFocusTimeConfigRepository, FocusTimeRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 
-builder.Services.AddScoped<CreateStudentDailyStreakPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {

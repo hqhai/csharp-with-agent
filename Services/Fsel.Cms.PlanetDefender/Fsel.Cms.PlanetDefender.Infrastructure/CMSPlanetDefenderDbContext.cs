@@ -20,6 +20,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             SeedWheelOfBuff(modelBuilder);
+            SeedZMatter(modelBuilder);
             modelBuilder.ApplyConfiguration(new StudentGameInfoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new WheelOfBuffEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
@@ -27,6 +28,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
 
         public DbSet<StudentGameInfo> StudentGameInfos { get; set; }
         public DbSet<QuestBank> QuestBanks { get; set; }
+        public DbSet<ZMatter> ZMatters { get; set; }
         public DbSet<WheelOfBuff> WheelOfBuffs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -42,6 +44,14 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
                     configuration.GetConnectionString(Settings.DefaultConnection),
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
+        }
+
+        private static void SeedZMatter(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ZMatter);
+            var zMatters = ConvertHelper.DeserializeFromFilePath<IList<ZMatter>>(path);
+            ArgumentNullException.ThrowIfNull(zMatters);
+            builder.Entity<ZMatter>().HasData(zMatters);
         }
         private static void SeedWheelOfBuff(ModelBuilder builder)
         {

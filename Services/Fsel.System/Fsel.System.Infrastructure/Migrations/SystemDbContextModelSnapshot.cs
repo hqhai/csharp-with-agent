@@ -437,18 +437,6 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("AlternateSpellingStr")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Antonym")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("AudioPath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<string>("CefrLevel")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -478,10 +466,6 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
-                    b.Property<string>("Definition")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(109);
@@ -494,18 +478,6 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
-
-                    b.Property<string>("ExampleSentence")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Hint")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ImagePath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -520,16 +492,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("PhoneticTranscription")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<Guid?>("PlatformId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Synonym")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("UnitOrder")
                         .IsRequired()
@@ -549,10 +513,6 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<string>("UsEquivalent")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<Guid?>("WordCategoryId")
                         .HasColumnType("uniqueidentifier");
 
@@ -561,6 +521,76 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasIndex("WordCategoryId");
 
                     b.ToTable("GameVocabularies");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.GameVocabularyType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("GameVocabType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("GameVocabularyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("QuestionContent")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameVocabularyId");
+
+                    b.ToTable("GameVocabularyTypes");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.LiveTimeFrame", b =>
@@ -1159,6 +1189,17 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Navigation("GameTopic");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.GameVocabularyType", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.GameVocabulary", "GameVocabulary")
+                        .WithMany("GameVocabularyTypes")
+                        .HasForeignKey("GameVocabularyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GameVocabulary");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardStudent", b =>
                 {
                     b.HasOne("Fsel.System.Domain.Entities.QuestBoard", "QuestBoard")
@@ -1173,6 +1214,11 @@ namespace Fsel.System.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.System.Domain.Entities.GameTopic", b =>
                 {
                     b.Navigation("GameVocabularies");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.GameVocabulary", b =>
+                {
+                    b.Navigation("GameVocabularyTypes");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoard", b =>

@@ -60,7 +60,7 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
             //Check xem học sinh có học liên tiếp trong 7 ngày hay không 
             var currentDate = DateTime.UtcNow.Date;
             var startDate = currentDate.AddDays(-NUMBER_OF_WEEKDAY).Date; // Ngày bắt đầu từ 7 ngày trước
-            var endDate = currentDate.Date; 
+            var endDate = currentDate.Date;
             var studentFocusTimesCheckQuery = _studentFocusTimeRepository.Queryable
                                         .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && x.ExecuteTime >= x.TargetTime)
                                         .OrderBy(x => x.CreatedDate.Date)
@@ -79,8 +79,11 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
                 }
             }
             studentFocusTime = _mapper.Map<StudentFocusTimeModel>(studentFocusTimesQuery.FirstOrDefault());
-            studentFocusTime.StudentId = student.Id;
-            studentFocusTime.IsWeekStreak = hasContinuousData;
+            if (studentFocusTime != null)
+            {
+                studentFocusTime.StudentId = student.Id;
+                studentFocusTime.IsWeekStreak = hasContinuousData;
+            }
 
             methodResult.Result = studentFocusTime;
             methodResult.StatusCode = StatusCodes.Status200OK;

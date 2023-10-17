@@ -64,7 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            await _orderService.CreateOrder(new CreateOrderCommandModel
+            var orderResult = await _orderService.CreateOrder(new CreateOrderCommandModel
             {
                 Address = "Viet Nam",
                 Country = "Viet Nam",
@@ -74,7 +74,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 PaymentMethod = EnumPaymentMethodStatus.Card,
                 CodeCourse = course.Code,
                 UserId = _authContext.CurrentUserId
-            }).ConfigureAwait(false);
+            });
+            if (!orderResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(orderResult.Error);
+                return methodResult;
+            }
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

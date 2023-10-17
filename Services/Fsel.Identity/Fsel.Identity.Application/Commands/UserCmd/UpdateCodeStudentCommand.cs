@@ -63,7 +63,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
 
             var stt = await _studentRepository.Queryable.CountAsync(cancellationToken);
-            var currentDate = DateTime.Now;
+            var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
             var lastDigitOfYear = currentDate.Year % 10;
             var lastOfBirthDay = request.Birthday!.Value.Year % 100;

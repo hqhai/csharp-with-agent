@@ -10,7 +10,7 @@ using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.OrderService;
-using Fsel.Identity.Application.Services.OrderServices.Model;
+using Fsel.Identity.Application.Services.OrderService.Model;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
@@ -91,7 +91,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 _appSetting.Jwt?.Issuer ?? string.Empty,
                 _appSetting.Jwt?.Audience ?? string.Empty,
                 authClaims,
-                expires: DateTime.Now.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
+                expires: DateTime.UtcNow.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
                 signingCredentials: signin
                 );
 
@@ -105,7 +105,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 RefreshToken = refreshToken,
                 LoginProvider = JwtBearerDefaults.AuthenticationScheme,
                 UserId = user.Id,
-                RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
+                RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
             });
 
             var tokenLogin = new TokenModel
@@ -130,9 +130,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 tokenLogin.IsPlacementTest = isPlacementTest?.Content?.Result;
                 if (@class != null)
                 {
-                    var isOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { CourseId = @class.CourseId, ClassId = @class.Id, PackageId = @class.PackageId, UserId = request.Id ?? default });
+                    var order = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, ClassId = @class.Id, PackageId = @class.PackageId, UserId = request.Id });
+
                     tokenLogin.ClassCode = @class.Code;
-                    tokenLogin.IsOrder = isOrder?.Content?.Result;
+                    tokenLogin.IsOrder = order?.Content?.Result == EnumOrderStatus.Payment;
                 }
                 if (isSurvey.IsSuccessStatusCode)
                 {
