@@ -46,10 +46,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             {
                 query = query.Where(x => x.CourseId == request.CourseId);
             }
-            if (request.PackageId.HasValue)
-            {
-                query = query.Where(x => x.PackageId == request.PackageId);
-            }
+            //if (request.PackageId.HasValue)
+            //{
+            //    query = query.Where(x => x.PackageId == request.PackageId);
+            //}
             var order = await query.FirstOrDefaultAsync(cancellationToken);
             methodResult.Result = order?.Status;
             methodResult.StatusCode = StatusCodes.Status200OK;
