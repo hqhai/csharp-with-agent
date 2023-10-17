@@ -131,8 +131,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 var classForumResultCurrentStudent = classForumResults.FirstOrDefault(x => x.ClassForumId == classForum.Id && x.LessonResultId == request.LessonResultId);
                 classForumByStudentModel.ClassForumResultCurrentStudent = classForumResultCurrentStudent;
 
-                var test = _classForumResultRandomRepository.Queryable.Include(x => x.ClassForumResult).ToList();
-                var classForumResultRandom = _classForumResultRandomRepository.Queryable.Include(x => x.ClassForumResult).Where(x => x.ClassForumId == classForumResultCurrentStudent!.ClassForumId && x.ClassId == student.ClassId).ToList();
+                var classForumResultRandom = _classForumResultRandomRepository.Queryable.Where(x => x.ClassForumId == classForumResultCurrentStudent!.ClassForumId && x.ClassId == student.ClassId).ToList();
 
 
                 // Lấy list Random, nếu chưa có thì tạo list random và lưu xuống DB, lần sau call API sẽ lấy list Random được khởi tạo ban đầu
