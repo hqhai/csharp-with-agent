@@ -52,7 +52,7 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
                 return methodResult;
             }
             var teacherId = teacher.Content?.Result?.Id;
-            if (request.StartDate < DateTime.Now.Date)
+            if (request.StartDate < DateTime.UtcNow.Date)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateBiggerThanDateNow));
                 return methodResult;

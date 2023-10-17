@@ -82,5 +82,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<DailyStreakModel> commandResult = await _mediator.Send(new GetDailyStreakByUserIdQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Create a daily streak
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] CreateStudentDailyStreakCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

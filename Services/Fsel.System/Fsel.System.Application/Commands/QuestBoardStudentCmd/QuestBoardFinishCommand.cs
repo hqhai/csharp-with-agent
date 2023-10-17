@@ -4,7 +4,6 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.Interfaces;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
@@ -42,7 +41,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                                 .Where(x => x.QuestBoard != null && x.QuestBoard.Category == request.QuestBoardCategory && x.QuestBoard.Type == request.QuestBoardType)
                                 .FirstOrDefaultAsync(x => x.Status == EnumQuestBoardStudentStatus.Process && x.StudentId == request.StudentId, cancellationToken);
             var questBoard = questBoardStudent?.QuestBoard;
-            var date = DateTime.Now;
+            var date = DateTime.UtcNow;
             if (questBoardStudent == null || (questBoard != null && (questBoard.StartDate >= date || questBoard.EndDate < date)))
             {
                 methodResult.Result = false;
@@ -58,19 +57,6 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                 methodResult.Result = true;
                 return methodResult;
             });
-            if (request.QuestBoardType == EnumQuestBoardType.DailyQuests)
-            {
-                var questBoards = await _questBoardRepository.Queryable.Where(x => x.Type == request.QuestBoardType).ToListAsync(cancellationToken);
-                var questBoardIds = questBoards.Select(x => x.Id).ToList();
-                var questBoardStudents = await _questBoardStudentRepository.Queryable.Where(x => x.UpdatedDate.HasValue && x.UpdatedDate.Value.Date == date.Date && questBoardIds.Contains(x.QuestBoardId)).ToListAsync(cancellationToken);
-                if (questBoardStudents.Count == questBoards.Count)
-                {
-                    await _queueProvider.Publish(QueueSettings.SystemQueue.NameQueue.CreateStudentDailyStreak, new CreateStudentDailyStreakQueueModel
-                    {
-                        StudentId = request.StudentId,
-                    }, cancellationToken);
-                }
-            }
 
             return methodResult;
         }

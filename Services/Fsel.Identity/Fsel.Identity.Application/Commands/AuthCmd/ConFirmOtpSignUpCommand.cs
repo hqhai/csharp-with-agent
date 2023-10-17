@@ -78,9 +78,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
+            if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(Domain.Enums.ErrorCodes.EnumAuthErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
+                methodResult.AddErrorBadRequest(nameof(Domain.Enums.ErrorCodes.EnumAuthUserErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
                 return methodResult;
             }
 
@@ -117,7 +117,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             Human human = _mapper.Map<Human>(request);
             human.UserId = user.Id;
-            var currentDate = DateTime.Now;
+            var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
 
             if (roles.Contains(EnumRoleRegister.Student.ToString()))

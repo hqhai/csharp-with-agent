@@ -48,7 +48,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                                         EndDate = x.EndDate,
                                         CustomerTypes = x.CustomerTypes,
                                         CreatedDate = x.CreatedDate,
-                                        IsActive = (x.IsActive == null ? (x.StartDate <= DateTime.Now && DateTime.Now <= x.EndDate) : x.IsActive),
+                                        IsActive = (x.IsActive == null ? (x.StartDate <= DateTime.UtcNow && DateTime.UtcNow <= x.EndDate) : x.IsActive),
                                         ContentFilePath = x.ContentFilePath,
                                         CourseLevels = x.CourseLevels,
                                         CreatedFullName = x.CreatedFullName,

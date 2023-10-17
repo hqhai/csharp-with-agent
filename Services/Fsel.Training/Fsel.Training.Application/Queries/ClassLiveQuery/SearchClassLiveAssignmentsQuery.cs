@@ -111,7 +111,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                     item.CourseLevel = courses?.FirstOrDefault(x => x.Id == item.CourseId)?.CourseLevel ?? default;
                     item.StartTime = liveTimeFrame?.StartTime ?? default;
                     item.EndTime = liveTimeFrame?.EndTime ?? default;
-                    item.IsStatus = item.StartDate!.Value.Date.AddDays(-1) > DateTime.Now.Date;
+                    item.IsStatus = item.StartDate!.Value.Date.AddDays(-1) > DateTime.UtcNow.Date;
                 }
             }
 

@@ -70,6 +70,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
                 settingStudentModel.IsLockPT = isLock;
                 settingStudentModel.StartPTLevel = placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault() == null ? student.CourseLevel : placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault()?.Level.GetCourseLevelByPlacementTestLevel();
+                var status = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel());
+                if (!status.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
+                    return methodResult;
+                }
+                settingStudentModel.Status = status?.Content?.Result;
                 var classResult = await _trainingService.GetClassByStudentId(student.Id);
                 if (!classResult.IsSuccessStatusCode)
                 {
@@ -84,13 +91,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                     return methodResult;
                 }
 
-                var isLockOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
-                if (!isLockOrder.IsSuccessStatusCode)
+                status = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
+                if (!status.IsSuccessStatusCode)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isLockOrder));
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
                     return methodResult;
                 }
-                settingStudentModel.IsLockOrder = isLockOrder?.Content?.Result ?? default;
+                settingStudentModel.Status = status?.Content?.Result ?? default;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

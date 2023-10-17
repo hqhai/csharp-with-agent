@@ -234,7 +234,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                     item.LikeNumber = action?.LikeNumber;
                     item.IsLiked = action?.IsLiked;
                     item.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == item.Id);
-                    item.CourseLevel = student.CourseLevel!;
+                    item.CourseLevel = student?.CourseLevel ?? default;
                 }
             }
 
