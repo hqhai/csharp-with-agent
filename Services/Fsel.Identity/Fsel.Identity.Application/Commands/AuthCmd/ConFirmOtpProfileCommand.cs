@@ -54,13 +54,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
                 if (userOtpCode == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.OTP), request.OTP);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.OTP), request.OTP);
                     return methodResult;
                 }
 
                 if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
                     return methodResult;
                 }
 
