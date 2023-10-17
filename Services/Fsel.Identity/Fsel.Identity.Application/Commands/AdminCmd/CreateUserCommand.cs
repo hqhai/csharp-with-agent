@@ -161,7 +161,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                         UserId = user.Id,
                         OTPCode = otp,
                         Status = EnumOtpCodeStatus.New,
-                        ExpiredTime = DateTime.Now.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
+                        ExpiredTime = DateTime.UtcNow.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
                     };
                     _userOtpCodeRepository.Add(userOtpCode);
                     await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

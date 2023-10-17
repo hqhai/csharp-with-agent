@@ -93,7 +93,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                     break;
 
                 case EnumPostType.Trending:
-                    var date7DaysAgo = DateTime.Now.AddDays(-7);
+                    var date7DaysAgo = DateTime.UtcNow.AddDays(-7);
                     //sortedQuery = from post in postQuery
                     //              join interaction in _interactionActionRepository.Queryable
                     //              on post.Id equals interaction.ObjectId

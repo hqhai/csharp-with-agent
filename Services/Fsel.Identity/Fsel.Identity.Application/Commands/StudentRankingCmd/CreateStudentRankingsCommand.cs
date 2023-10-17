@@ -186,7 +186,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             {
                 var studentData = dailyStreaks.Where(s => s.StudentId == studentId).ToList();
                 int streak = 0;
-                DateTime currentDate = DateTime.Now.Date;
+                DateTime currentDate = DateTime.UtcNow.Date;
 
                 // Kiểm tra bản ghi gần nhất với currentDate
                 var nearestRecord = studentData.FirstOrDefault();

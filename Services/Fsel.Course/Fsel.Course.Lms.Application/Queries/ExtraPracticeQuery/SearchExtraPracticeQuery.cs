@@ -137,7 +137,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         break;
 
                     case EnumSortFilter.TrendingNow:
-                        DateTime currentDate = DateTime.Now; // Lấy thời gian hiện tại từ hệ thống
+                        DateTime currentDate = DateTime.UtcNow; // Lấy thời gian hiện tại từ hệ thống
                         DayOfWeek currentDayOfWeek = currentDate.DayOfWeek;
                         DateTime startDate = currentDate.AddDays(-(int)currentDayOfWeek); // Ngày đầu tiên của tuần
                         DateTime endDate = startDate.AddDays(6); // Ngày cuối cùng của tuần

@@ -62,10 +62,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
             var userOtpCode = await _userOtpCodeRepository.Queryable
                                   .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
-            if (userOtpCode != null && DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
+            if (userOtpCode != null && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
                 userOtpCode.OTPCode = GetRandomCode();
-                userOtpCode.ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime);
+                userOtpCode.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
                 _userOtpCodeRepository.Update(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -77,7 +77,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     UserId = user.Id,
                     OTPCode = otp,
                     Status = EnumOtpCodeStatus.New,
-                    ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime)
+                    ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime)
                 };
                 _userOtpCodeRepository.Add(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
