@@ -131,7 +131,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 var classForumResultCurrentStudent = classForumResults.FirstOrDefault(x => x.ClassForumId == classForum.Id && x.LessonResultId == request.LessonResultId);
                 classForumByStudentModel.ClassForumResultCurrentStudent = classForumResultCurrentStudent;
 
-                var classForumResultRandom = _classForumResultRandomRepository.Queryable.Where(x => x.ClassForumId == classForumResultCurrentStudent!.ClassForumId && x.ClassId == student.ClassId).ToList();
+                var test = _classForumResultRandomRepository.Queryable.Include(x => x.ClassForumResult).ToList();
+                var classForumResultRandom = _classForumResultRandomRepository.Queryable.Include(x => x.ClassForumResult).Where(x => x.ClassForumId == classForumResultCurrentStudent!.ClassForumId && x.ClassId == student.ClassId).ToList();
 
 
                 // Lấy list Random, nếu chưa có thì tạo list random và lưu xuống DB, lần sau call API sẽ lấy list Random được khởi tạo ban đầu
@@ -142,8 +143,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 }
                 else
                 {
-                    var ids = classForumResultRandom.Select(x => x.Id).ToList();
-                    var filterClassForumResult = _classForumResultRepository.Queryable.Where(x => ids.Contains(x.Id)).ToList();
+                    var filterClassForumResult = classForumResultRandom.Select(x => x.ClassForumResult).ToList();
                     listRandom = _mapper.Map<IList<ClassForumResultModel>>(filterClassForumResult);
                 }
 
