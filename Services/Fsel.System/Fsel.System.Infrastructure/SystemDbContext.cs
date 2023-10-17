@@ -31,6 +31,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new FeatureAccessTimeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new GameTopicEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameVocabularyEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameVocabularyTypeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FocusTimeConfigEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
@@ -47,6 +48,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<QuestBoardConfig> QuestBoardConfigs { get; set; }
         public DbSet<GameTopic> GameTopics { get; set; }
         public DbSet<GameVocabulary> GameVocabularies { get; set; }
+        public DbSet<GameVocabularyType> GameVocabularyTypes { get; set; }
         public DbSet<FocusTimeConfig> FocusTimeConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

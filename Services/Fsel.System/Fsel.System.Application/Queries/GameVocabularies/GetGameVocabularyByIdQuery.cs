@@ -9,6 +9,7 @@ namespace Fsel.System.Application.Queries.GameVocabularies
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetGameVocabularyByIdQuery : IRequest<MethodResult<GameVocabularyModel>>
     {
@@ -29,7 +30,7 @@ namespace Fsel.System.Application.Queries.GameVocabularies
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<GameVocabularyModel> methodResult = new MethodResult<GameVocabularyModel>();
 
-            var gameVocabulary = await _gameVocabularyRepository.GetByIdAsync(request.Id);
+            var gameVocabulary = await _gameVocabularyRepository.GetIncludeByIdAsync(request.Id);
             if (gameVocabulary == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.GameVocabularyNotExist));
