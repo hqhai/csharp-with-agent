@@ -38,9 +38,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultFlagCmd
             MethodResult<ClassForumResultFlagModel> methodResult = new MethodResult<ClassForumResultFlagModel>();
             ClassForumResultFlag classForumResultFlag = _mapper.Map<ClassForumResultFlag>(request);
 
-            if (classForumResultFlag.ClassForumResult?.Status == EnumClassForumResultStatus.Graded)
+            if (classForumResultFlag.ClassForumResult?.Status == EnumClassForumResultStatus.Graded || classForumResultFlag.ClassForumResult?.Status == EnumClassForumResultStatus.PendingForGrading)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotPendingForGradingOrGraded));
                 return methodResult;
             }
 
