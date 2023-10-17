@@ -58,7 +58,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
 
-                if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
+                if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
                     return methodResult;

@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 methodResult.Result = null;
                 return methodResult;
             }
-            DateTime currentDate = DateTime.Now;
+            DateTime currentDate = DateTime.UtcNow;
             VideoResult? videoResult = default;
             if (!request.EndDate.HasValue)
             {

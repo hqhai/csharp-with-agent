@@ -68,7 +68,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var checkExpireDate = long.TryParse(tokenValidationResult.ClaimsIdentity.Claims.FirstOrDefault(x => x.Type == JwtClaimNames.Exp)?.Value, out long utcExpireDate);
 
             var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
-            if (!checkExpireDate || expireDate < DateTime.Now)
+            if (!checkExpireDate || expireDate < DateTime.UtcNow)
             {
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccessTokenNotYetExpired));
                 return methodResult;
@@ -81,7 +81,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     nameof(request.RefreshToken), request.RefreshToken);
                 return methodResult;
             }
-            else if (refreshToken.RefreshTokenExpiryTime == null || refreshToken.RefreshTokenExpiryTime.Value <= DateTime.Now)
+            else if (refreshToken.RefreshTokenExpiryTime == null || refreshToken.RefreshTokenExpiryTime.Value <= DateTime.UtcNow)
             {
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.RefreshTokenExpired));
             }
