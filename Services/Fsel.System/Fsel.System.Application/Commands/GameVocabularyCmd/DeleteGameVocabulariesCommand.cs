@@ -33,7 +33,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                 return methodResult;
             }
 
-            var gameVocabularies = await _gameVocabularyRepository.Queryable.Where(p => request.Ids.Contains(p.Id)).ToListAsync(cancellationToken);
+            var gameVocabularies = await _gameVocabularyRepository.Queryable.Where(p => request.Ids.Contains(p.Id)).Include(x => x.GameVocabularyTypes).ToListAsync(cancellationToken);
             if (gameVocabularies == null || gameVocabularies.Count != request.Ids.Count)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.GameVocabularyNotExist));
