@@ -429,17 +429,10 @@ namespace Fsel.Course.Infrastructure.Common
             foreach (var item in videoTimeCodes)
             {
                 var indexTimeCode = videoTimeCodes.IndexOf(item);
-
-                videoTimeCodeModels.Add(new VideoTimeCodeModel
-                {
-                    Id = item.Id,
-                    TotalCount = GetTotalQuestion(item),
-                    DisplayTime = item.DisplayTime,
-                    ExecutionTime = item.ExecutionTime,
-                    TimeCodeType = item.TimeCodeType,
-                    VideoId = item.VideoId,
-                    Status = GetTimeCodeStatus(indexProcess, indexTimeCode)
-                });
+                var videoTimeCode = _mapper.Map<VideoTimeCodeModel>(item);
+                videoTimeCode.TotalCount = GetTotalQuestion(item);
+                videoTimeCode.Status = GetTimeCodeStatus(indexProcess, indexTimeCode);
+                videoTimeCodeModels.Add(videoTimeCode);
             }
             return videoTimeCodeModels;
         }
@@ -447,20 +440,14 @@ namespace Fsel.Course.Infrastructure.Common
         public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode? videoTimeCode)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
-            return new VideoTimeCodeModel
-            {
-                Id = videoTimeCode.Id,
-                TotalCount = GetTotalQuestion(videoTimeCode),
-                DisplayTime = videoTimeCode.DisplayTime,
-                ExecutionTime = videoTimeCode.ExecutionTime,
-                TimeCodeType = videoTimeCode.TimeCodeType,
-                VideoId = videoTimeCode.VideoId,
-                Ungraded = GetUngraded(videoTimeCode),
-                CorrectCount = GetCorrectCount(videoTimeCode),
-                CorrectTotal = GetCorrectTotal(videoTimeCode),
-                Status = GetTimeCodeStatus(videoTimeCode),
-                Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n)).ToList(),
-            };
+            var timeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode);
+            timeCode.TotalCount = GetTotalQuestion(videoTimeCode);
+            timeCode.Ungraded = GetUngraded(videoTimeCode);
+            timeCode.CorrectCount = GetCorrectCount(videoTimeCode);
+            timeCode.CorrectTotal = GetCorrectTotal(videoTimeCode);
+            timeCode.Status = GetTimeCodeStatus(videoTimeCode);
+            timeCode.Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n)).ToList();
+            return timeCode;
         }
 
         public IList<VideoTimeCodeModel> GetVideoTimeCodes(Video? video, Guid videoResultId)
@@ -482,30 +469,19 @@ namespace Fsel.Course.Infrastructure.Common
         private ExerciseModel GetExercise(Exercise? n)
         {
             ArgumentNullException.ThrowIfNull(n);
-            return new ExerciseModel
-            {
-                Id = n.Id,
-                MediaPost = n.MediaPost,
-                Name = n.Name,
-                CourseSkill = n.CourseSkill,
-                Questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m)).ToList()
-            };
+            var exerciseModel = _mapper.Map<ExerciseModel>(n);
+            exerciseModel.Questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m)).ToList();
+            return exerciseModel;
         }
 
         private QuestionModel GetQuestion(Question? question)
         {
             ArgumentNullException.ThrowIfNull(question);
             var isCheck = question.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumTimeCodeStatus.Done;
-            return new QuestionModel
-            {
-                Id = question.Id,
-                QuestionType = question.QuestionType,
-                CorrectTotal = question.CorrectTotal,
-                Explanation = question.Explanation,
-                Ungraded = question.Ungraded,
-                Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1,
-                ResultAnswer = _mapper.Map<AnswerModel>(question.VideoTimeCodeAnswers.FirstOrDefault())
-            };
+            var questionModel = _mapper.Map<QuestionModel>(question);
+            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
+            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(question.VideoTimeCodeAnswers.FirstOrDefault());
+            return questionModel;
         }
 
         private static EnumTimeCodeStatus GetTimeCodeStatus(VideoTimeCode? videoTimeCode)

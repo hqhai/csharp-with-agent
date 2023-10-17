@@ -180,7 +180,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     videoTimeCodeResult.Status = EnumResultStatus.Done;
                 }
 
-                if (videoTimeCodeAnswers.Count > 0)
+                if (videoTimeCodeAnswers.Any())
                 {
                     if (videoTimeCode?.TimeCodeType != EnumTimeCodeType.Standalone || skillScores.Sum(x => x.TotalCount) == videoTimeCodeAnswers.Sum(x => x.CorrectCount))
                     {
@@ -208,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 .ThenInclude(x => x.Exercise)
                 .ThenInclude(x => x!.ExerciseQuestions)
                 .ThenInclude(x => x.Question)
-                .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoTimeCodeResultId == videoResult.Id))
+                .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                 .FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId, cancellationToken);
             var videoTimeCodeModel = _videoConverter.GetVideoTimeCode(videoTimeCode);
             methodResult.Result = videoTimeCodeModel;
@@ -225,6 +225,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     VideoResultId = videoResult.Id,
                     VideoTimeCodeId = videoTimeCodeId,
+                    StudentId = videoResult.StudentId
                 };
                 videoTimeCodeResult = _videoTimeCodeResultRepository.Add(videoTimeCodeResult);
                 await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);

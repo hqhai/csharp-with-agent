@@ -44,6 +44,10 @@ namespace Fsel.Identity.Application.Queries.DailyStreakQuery
                 return methodResult;
             }
             var years = await _studentDailyStreakRepository.Queryable.Where(x => x.StudentId == student.Id).GroupBy(x => x.DailyDate.Year).Select(x => x.Key).ToListAsync(cancellationToken);
+            if (!years.Any())
+            {
+                years.Add(DateTime.UtcNow.Year);
+            }
             methodResult.Result = years;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
