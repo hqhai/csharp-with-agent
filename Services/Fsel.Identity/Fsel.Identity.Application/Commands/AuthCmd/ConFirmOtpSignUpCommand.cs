@@ -59,11 +59,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 user = await _userManager.FindByEmailAsync(request.Email);
             }
-            else
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
-                return methodResult;
-            }
 
             if (user == null)
             {
@@ -71,10 +66,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
             var userOtpCode = await _userOtpCodeRepository.Queryable
-                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
+                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && x.OTPCode == request.OTP, cancellationToken);
             if (userOtpCode == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email));
                 return methodResult;
             }
 
@@ -93,6 +88,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var roles = await _userManager.GetRolesAsync(user);
 
             var human = await CreateHuman(request, roles, user);
+            if (!human.IsValid())
+            {
+                methodResult.AddError(human.ErrorMessages);
+                return methodResult;
+            }
             await _humanRepository.ExecuteTransactionAsync(async () =>
             {
                 human = _humanRepository.Add(human);

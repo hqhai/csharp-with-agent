@@ -13,6 +13,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
@@ -26,6 +27,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class SendOtpProfileCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
+
         public string? PhoneNumber { get; set; }
     }
 
@@ -54,12 +56,23 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+            if (!string.IsNullOrEmpty(request.Email) && !request.Email.IsValidEmail())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                return methodResult;
+            }
+            if (!string.IsNullOrEmpty(request.PhoneNumber) && !request.PhoneNumber.IsValidPhoneNumber())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
+                return methodResult;
+            }
             var user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
+
             var userOtpCode = await _userOtpCodeRepository.Queryable
                                   .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
             if (userOtpCode != null && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)

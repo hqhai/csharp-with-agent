@@ -3,6 +3,7 @@
 namespace Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys
 {
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Attributes;
 
     public class CreateCustomerSurveyCommandModel
     {
@@ -12,7 +13,7 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys
 
         public bool? IsPilot { get; set; }
 
-        [EmailAddress]
+        [EmailValid]
         public string? Email { get; set; }
     }
 

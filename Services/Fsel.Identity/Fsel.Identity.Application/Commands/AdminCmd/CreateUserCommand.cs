@@ -75,6 +75,16 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region validate
 
+            if (!string.IsNullOrEmpty(request.Email) && !request.Email.IsValidEmail())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                return methodResult;
+            }
+            if (!string.IsNullOrEmpty(request.PhoneNumber) && !request.PhoneNumber.IsValidPhoneNumber())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
+                return methodResult;
+            }
             if (request.Role == EnumRoleRegisterWithAdmin.CSO)
             {
                 if (request.PackageIds == null || request.PackageIds.Count == 0)
@@ -125,6 +135,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 user.UserName = request.Email;
 
                 #region Add Platform to User
+
                 var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
                 if (platform != null)
                 {
@@ -133,7 +144,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                         PlatformId = platform.Id
                     });
                 }
-                #endregion
+
+                #endregion Add Platform to User
 
                 result = await _userManager.CreateAsync(user, newPassword);
                 if (!result.Succeeded)
