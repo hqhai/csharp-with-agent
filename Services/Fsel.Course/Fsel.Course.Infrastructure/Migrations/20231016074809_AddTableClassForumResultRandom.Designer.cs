@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231016074809_AddTableClassForumResultRandom")]
+    partial class AddTableClassForumResultRandom
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -451,7 +454,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("ClassForumResultId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ClassId")
+                    b.Property<Guid>("ClassId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
@@ -499,10 +502,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClassForumId");
-
-                    b.HasIndex("ClassForumResultId");
 
                     b.ToTable("ClassForumResultRandoms");
                 });
@@ -4713,25 +4712,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("ClassForumResult");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumResultRandom", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.ClassForum", "ClassForum")
-                        .WithMany("ClassForumResultRandoms")
-                        .HasForeignKey("ClassForumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Fsel.Course.Domain.Entities.ClassForumResult", "ClassForumResult")
-                        .WithMany("ClassForumResultRandoms")
-                        .HasForeignKey("ClassForumResultId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ClassForum");
-
-                    b.Navigation("ClassForumResult");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumScore", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.ClassForumResult", "ClassForumResult")
@@ -5514,8 +5494,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                 {
                     b.Navigation("ClassForumFiles");
 
-                    b.Navigation("ClassForumResultRandoms");
-
                     b.Navigation("ClassForumResults");
                 });
 
@@ -5524,8 +5502,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("ClassForumResultFiles");
 
                     b.Navigation("ClassForumResultFlags");
-
-                    b.Navigation("ClassForumResultRandoms");
 
                     b.Navigation("ClassForumScores");
                 });
