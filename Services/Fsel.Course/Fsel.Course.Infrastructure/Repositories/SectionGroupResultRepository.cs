@@ -2,13 +2,14 @@
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
+    using AutoMapper;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
 
     public class SectionGroupResultRepository : BaseRepository<SectionGroupResult>, ISectionGroupResultRepository
     {
-        public SectionGroupResultRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public SectionGroupResultRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

@@ -80,7 +80,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         {
                                             Skill = n.Key,
                                             MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).ToList())
-
                                         })
                                     }).FirstOrDefaultAsync(cancellationToken);
 
