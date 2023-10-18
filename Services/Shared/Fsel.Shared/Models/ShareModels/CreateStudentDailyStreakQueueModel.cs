@@ -7,7 +7,8 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class CreateStudentDailyStreakQueueModel
     {
-        public Guid StudentId { get; set; }
+        [JsonIgnore]
+        public Guid? StudentId { get; set; }
 
         [JsonIgnore]
         public bool IsUseShield { get; set; }

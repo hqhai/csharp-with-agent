@@ -63,28 +63,28 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.LiveTimeFrameNullOrLiveDaysNull));
                 return methodResult;
             }
+
+            List<Guid> courseIds = new List<Guid>();
+            courseIds.Add(classes.CourseId);
+
+            var courseTimeConfigResult = await _systemService.GetCourseTimeConfigByCourseId(courseIds);
+            if (!courseTimeConfigResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(courseTimeConfigResult.Error);
+                return methodResult;
+            }
+            var courseTimeConfig = courseTimeConfigResult.Content?.Result;
+            var endTime = courseTimeConfig!.FirstOrDefault(p => p.CourseId == classes.CourseId);
+            if (endTime == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseTimeNotInstalled));
+                return methodResult;
+            }
             if (package?.Code == EnumPackageCode.PREMIUM)
             {
-                List<Guid> courseIds = new List<Guid>();
-                courseIds.Add(classes.CourseId);
-                var courseTimeConfigResult = await _systemService.GetCourseTimeConfigByCourseId(courseIds);
-                if (!courseTimeConfigResult.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(courseTimeConfigResult.Error);
-                    return methodResult;
-                }
-                var courseTimeConfig = courseTimeConfigResult.Content?.Result;
-                var endTime = courseTimeConfig!.FirstOrDefault(p => p.CourseId == classes.CourseId);
-                if (endTime == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseTimeNotInstalled));
-                    return methodResult;
-                }
-                classes.StartDate = DateTime.Now;
-                classes.EndDate = DateTime.Now.AddMonths(endTime.DurationMonth);
                 if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
                 {
-                    for (DateTime date = DateTime.Now; date <= classes.EndDate; date = date.AddDays(1))
+                    for (DateTime date = DateTime.UtcNow; date <= classes.EndDate; date = date.AddDays(1))
                     {
                         if (classes.LiveDays!.Contains(date.DayOfWeek))
                         {
@@ -104,6 +104,8 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
+                classes.StartDate = DateTime.UtcNow;
+                classes.EndDate = DateTime.UtcNow.AddMonths(endTime.DurationMonth);
                 classes.Status = EnumClassStatus.Active;
                 _classRepository.Update(classes);
                 await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

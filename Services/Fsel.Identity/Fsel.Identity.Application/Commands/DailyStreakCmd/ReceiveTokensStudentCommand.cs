@@ -48,7 +48,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 return methodResult;
             }
 
-            var date = DateTime.Now.Date;
+            var date = DateTime.UtcNow.Date;
             studentDailyStreak.IsGiftReceive = true;
             student.NumberOfToken += studentDailyStreak.LevelOfGift.HasValue ? studentDailyStreak.LevelOfGift.Value.GetNumberToken() : default;
             await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>

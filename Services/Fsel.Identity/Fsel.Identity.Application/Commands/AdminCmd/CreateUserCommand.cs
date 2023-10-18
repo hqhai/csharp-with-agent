@@ -21,7 +21,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
-using EnumAuthErrorCode = Fsel.Identity.Domain.Enums.ErrorCodes.EnumAuthErrorCode;
+using EnumAuthUserErrorCode = Fsel.Identity.Domain.Enums.ErrorCodes.EnumAuthUserErrorCode;
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
@@ -90,7 +90,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     var isCheck = request.PackageIds.All(x => packages.Select(y => y.Id).Contains(x));
                     if (!isCheck)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.PackageIdsEnteredIsIncorrect));
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PackageIdsEnteredIsIncorrect));
                         return methodResult;
                     }
                 }
@@ -112,7 +112,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var user = await _userManager.FindByEmailAsync(request.Email!);
             if (user != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
                 return methodResult;
             }
             else
@@ -138,7 +138,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 result = await _userManager.CreateAsync(user, newPassword);
                 if (!result.Succeeded)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
                     return methodResult;
                 }
                 var human = await CreateHuman(request, user);
@@ -161,7 +161,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                         UserId = user.Id,
                         OTPCode = otp,
                         Status = EnumOtpCodeStatus.New,
-                        ExpiredTime = DateTime.Now.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
+                        ExpiredTime = DateTime.UtcNow.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
                     };
                     _userOtpCodeRepository.Add(userOtpCode);
                     await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

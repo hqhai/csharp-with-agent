@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
                 var csoId = csoResults.Content?.Result?.Id;
-                if (classForumResult.CheckStartDate.HasValue && classForumResult.CheckStartDate.Value.AddMinutes(30) < DateTime.Now)
+                if (classForumResult.CheckStartDate.HasValue && classForumResult.CheckStartDate.Value.AddMinutes(30) < DateTime.UtcNow)
                 {
                     classForumResult.CheckCsoId = null;
                     classForumResult.CheckStartDate = null;
@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     if (classForumResult.CheckCsoId == null)
                     {
                         classForumResult.CheckCsoId = csoId;
-                        classForumResult.CheckStartDate = DateTime.Now;
+                        classForumResult.CheckStartDate = DateTime.UtcNow;
                     }
                 }
             }
@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
                 var teacherId = teacherResult.Content?.Result?.Id;
-                if (classForumResult.GradingStartDate.HasValue && classForumResult.GradingStartDate.Value.AddMinutes(30) < DateTime.Now)
+                if (classForumResult.GradingStartDate.HasValue && classForumResult.GradingStartDate.Value.AddMinutes(30) < DateTime.UtcNow)
                 {
                     classForumResult.GradingTeacherId = null;
                     classForumResult.GradingStartDate = null;
@@ -98,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     if (classForumResult.GradingTeacherId == null)
                     {
                         classForumResult.GradingTeacherId = teacherId;
-                        classForumResult.GradingStartDate = DateTime.Now;
+                        classForumResult.GradingStartDate = DateTime.UtcNow;
                     }
                 }
             }

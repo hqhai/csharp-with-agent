@@ -37,7 +37,7 @@ namespace Fsel.Shared.Helpers
             }
             else if (dates.Count == 1)
             {
-                var difference = DateTime.Now.Date - dates[0].Date;
+                var difference = DateTime.UtcNow.Date - dates[0].Date;
                 return (difference.Days <= 1 ? 1 : 0, difference.Days <= 1);
             }
             else
@@ -47,7 +47,7 @@ namespace Fsel.Shared.Helpers
 
                 foreach (var date in sortedDates)
                 {
-                    var numberOfDays = DateTime.Now.Date - date;
+                    var numberOfDays = DateTime.UtcNow.Date - date;
                     if (numberOfDays.Days == consecutiveDays + 1)
                     {
                         consecutiveDays++;
@@ -58,11 +58,11 @@ namespace Fsel.Shared.Helpers
                     }
                     await Task.Delay(0);
                 }
-                if (DateTime.Now.Date == sortedDates[0].Date)
+                if (DateTime.UtcNow.Date == sortedDates[0].Date)
                 {
                     consecutiveDays++;
                 }
-                var firstDateDifference = DateTime.Now.Date - sortedDates[0].Date;
+                var firstDateDifference = DateTime.UtcNow.Date - sortedDates[0].Date;
                 return (firstDateDifference.Days <= 1 ? consecutiveDays : 0, firstDateDifference.Days <= 1);
             }
         }
