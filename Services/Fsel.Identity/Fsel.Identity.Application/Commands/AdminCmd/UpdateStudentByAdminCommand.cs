@@ -68,19 +68,22 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var methodResult = new MethodResult<StudentModel>();
 
             var user = await _userManager.Users.Include(x => x.Human)
-                                                 .ThenInclude(x => x!.Student)
-                                                 .ThenInclude(x => x!.ParentStudents)
-                                                 .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.Id, cancellationToken);
+                                                         .ThenInclude(x => x!.Student)
+                                                         .ThenInclude(x => x!.ParentStudents)
+                                                         .ThenInclude(x => x.Parent)
+                                                         .ThenInclude(x => x!.Human)
+                                                         .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.Id, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
+            var isCheckEmail = !string.IsNullOrEmpty(request.PhoneNumber) && user.Email != request.Email;
+            var isCheckPhone = !string.IsNullOrEmpty(request.PhoneNumber) && user.PhoneNumber != request.PhoneNumber;
 
-            #region Update User
+            #region Validate User
 
             var student = user.Human?.Student;
-
             _mapper.Map(request, user);
             _mapper.Map(request, user.Human);
             student = _mapper.Map(request, user.Human?.Student);
@@ -96,32 +99,22 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
 
-            #endregion Update User
+            #endregion Validate User
 
-            #region Update Parent
+            #region Save Parent
 
-            var userResult = await SaveParent(request, student, cancellationToken);
+            var humanParent = student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
+            var userResult = await SaveParent(request, student, humanParent, cancellationToken);
             if (!userResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(userResult.ErrorMessages);
                 return methodResult;
             }
-            if (userResult.Result != null)
-            {
-                user = userResult.Result;
-            }
-            if (user == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
-                return methodResult;
-            }
 
-            #endregion Update Parent
+            #endregion Save Parent
 
-            #region validate Send OTP
+            #region validate and Send OTP
 
-            var isCheckEmail = user.Email != request.Email;
-            var isCheckPhone = user.PhoneNumber != request.PhoneNumber;
             if (isCheckEmail || isCheckPhone)
             {
                 user.EmailConfirmed = false;
@@ -153,7 +146,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 var sendResult = new MethodResult<bool>();
                 if (isCheckEmail)
                 {
-                    sendResult = await _mediator.Send(new SenderCommand { Email = request.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
+                    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
                 }
                 else if (isCheckPhone)
                 {
@@ -167,7 +160,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
             }
 
-            #endregion validate Send OTP
+            #endregion validate and Send OTP
 
             await _userManager.UpdateAsync(user).ConfigureAwait(false);
             _humanRepository.Update(user.Human ?? new Human());
@@ -180,9 +173,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private async Task<StudentModel> GetUser(User user, Student? student)
         {
             var userModel = _mapper.Map<StudentModel>(user);
-            var parentStudent = student?.ParentStudents?.FirstOrDefault();
             _mapper.Map(user.Human, userModel.Human);
             _mapper.Map(student, userModel);
+            var parentStudent = student?.ParentStudents?.FirstOrDefault();
             if (parentStudent != null && parentStudent.Parent != null)
             {
                 userModel.Parent = _mapper.Map<ParentProfileModel>(parentStudent.Parent.Human);
@@ -192,7 +185,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var @class = classStudent?.Content?.Result;
             if (@class != null)
             {
-                userModel.CodeClass = classStudent?.Content?.Result?.Code;
+                userModel.CodeClass = @class.Code;
                 var package = await _orderService.GetPackages();
                 if (package.IsSuccessStatusCode)
                 {
@@ -202,99 +195,106 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             return userModel;
         }
 
-        public async Task<MethodResult<User>> SaveParent(UpdateStudentByAdminCommand request, Student? student, CancellationToken cancellationToken)
+        public async Task<VoidMethodResult> SaveParent(UpdateStudentByAdminCommand request, Student? student, Human? human, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(student);
-            var methodResult = new MethodResult<User>();
-            if (request.Parent != null)
+            var methodResult = new VoidMethodResult();
+            if (request.Parent == null)
             {
-                if (student.ParentStudents == null || student.ParentStudents.Count == 0)
-                {
-                    Human human = _mapper.Map<Human>(request.Parent);
-                    human.Parent = _mapper.Map<Parent>(request.Parent);
-                    human.Parent.ParentStudents.Add(new ParentStudent
-                    {
-                        Student = student
-                    });
-                    var method = await Validate(human, cancellationToken);
-                    if (!method.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(method.ErrorMessages);
-                        return methodResult;
-                    }
-                    _humanRepository.Add(human);
-                    await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    var user = await _userManager.Users.Include(x => x.Human)
-                                                 .ThenInclude(x => x!.Student)
-                                                 .ThenInclude(x => x!.ParentStudents)
-                                                 .ThenInclude(x => x.Parent)
-                                                 .ThenInclude(x => x!.Human)
-                                                 .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.Id, cancellationToken);
-                    var human = user?.Human?.Student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
-
-                    if (human != null)
-                    {
-                        _mapper.Map(request.Parent, human);
-                        _mapper.Map(request.Parent, human.Parent);
-                        var method = await Validate(human, cancellationToken);
-                        if (!method.IsOK)
-                        {
-                            methodResult.AddErrorBadRequest(method.ErrorMessages);
-                            return methodResult;
-                        }
-                        _humanRepository.Update(human);
-                        await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                    methodResult.Result = user;
-                }
+                return methodResult;
             }
-
+            if (student.ParentStudents == null || !student.ParentStudents.Any())
+            {
+                human = _mapper.Map<Human>(request.Parent);
+                human.Parent = _mapper.Map<Parent>(request.Parent);
+                human.Parent.ParentStudents.Add(new ParentStudent { Student = student });
+                var validation = await ValidateAndHandleErrors(human, methodResult, cancellationToken);
+                if (!validation)
+                {
+                    return methodResult;
+                }
+                _humanRepository.Add(human);
+            }
+            else if (human != null)
+            {
+                _mapper.Map(request.Parent, human);
+                _mapper.Map(request.Parent, human.Parent);
+                var validation = await ValidateAndHandleErrors(human, methodResult, cancellationToken);
+                if (!validation)
+                {
+                    return methodResult;
+                }
+                _humanRepository.Update(human);
+            }
+            await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             return methodResult;
+        }
+
+        private async Task<bool> ValidateAndHandleErrors(Human human, VoidMethodResult methodResult, CancellationToken cancellationToken)
+        {
+            var method = await Validate(human, cancellationToken);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return false;
+            }
+            return true;
         }
 
         public async Task<VoidMethodResult> Validate(Human? human, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(human);
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var humanOther = await _humanRepository.Queryable.Where(x => x.Email == human.Email && x.Id != human.Id).FirstOrDefaultAsync(cancellationToken);
-            if (humanOther != null)
+            var methodResult = new VoidMethodResult();
+            if (!string.IsNullOrEmpty(human.Email))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(human.Email));
-                return methodResult;
+                var emailCheck = await CheckDuplicateAsync(human.Email, human.Id, nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(human.Email), cancellationToken);
+                if (emailCheck != null)
+                {
+                    return emailCheck;
+                }
+            }
+            if (!string.IsNullOrEmpty(human.PhoneNumber))
+            {
+                var phoneNumberCheck = await CheckDuplicateAsync(human.PhoneNumber, human.Id, nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(human.PhoneNumber), cancellationToken);
+                if (phoneNumberCheck != null)
+                {
+                    return phoneNumberCheck;
+                }
             }
 
-            humanOther = await _humanRepository.Queryable.Where(x => x.PhoneNumber == human.PhoneNumber && x.Id != human.Id).FirstOrDefaultAsync(cancellationToken);
-            if (humanOther != null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(human.PhoneNumber));
-                return methodResult;
-            }
             if (!human.IsValid())
             {
                 methodResult.AddErrorBadRequest(human.ErrorMessages);
+            }
+
+            if (human.Parent != null && !human.Parent.IsValid())
+            {
+                methodResult.AddErrorBadRequest(human.Parent.ErrorMessages);
+            }
+
+            if (human.Student != null && !human.Student.IsValid())
+            {
+                methodResult.AddErrorBadRequest(human.Student.ErrorMessages);
+            }
+
+            return methodResult;
+        }
+
+        private async Task<VoidMethodResult?> CheckDuplicateAsync(string? fieldValue, Guid? currentId, string errorCode, string fieldName, CancellationToken cancellationToken)
+        {
+            var humanOther = await _humanRepository.Queryable
+                .Where(x => (x.Email == fieldValue || x.PhoneNumber == fieldValue) && x.Id != currentId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (humanOther != null)
+            {
+                var methodResult = new VoidMethodResult();
+                methodResult.AddErrorBadRequest(errorCode, fieldName);
                 return methodResult;
             }
-            if (human.Parent != null)
-            {
-                if (!human.Parent.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(human.Parent.ErrorMessages);
-                    return methodResult;
-                }
-            }
-            if (human.Student != null)
-            {
-                if (!human.Student.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(human.Student.ErrorMessages);
-                    return methodResult;
-                }
-            }
-            return methodResult;
+
+            return null;
         }
     }
 }
