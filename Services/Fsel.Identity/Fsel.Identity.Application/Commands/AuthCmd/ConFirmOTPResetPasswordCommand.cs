@@ -85,6 +85,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var roles = await _userManager.GetRolesAsync(user);
 
                 var human = await CreateHuman(roles, user);
+                if (!human.IsValid())
+                {
+                    methodResult.AddError(human.ErrorMessages);
+                    return methodResult;
+                }
                 await _humanRepository.ExecuteTransactionAsync(async () =>
                 {
                     human = _humanRepository.Add(human);

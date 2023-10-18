@@ -411,7 +411,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         {
                             Id = new Guid("c9c55ef5-01e0-4fa6-b68a-3aaea1089548"),
                             Code = "LCMS",
-                            CreatedDate = new DateTime(2023, 10, 17, 10, 49, 48, 284, DateTimeKind.Utc).AddTicks(8941),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "",
@@ -423,7 +423,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         {
                             Id = new Guid("856818e6-9e20-43d8-964f-5dab2ba1a355"),
                             Code = "LMS",
-                            CreatedDate = new DateTime(2023, 10, 17, 10, 49, 48, 284, DateTimeKind.Utc).AddTicks(9238),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "",
@@ -435,7 +435,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         {
                             Id = new Guid("f144a094-3f49-4ca8-8f1e-7234289dd1a5"),
                             Code = "PlanetDefender",
-                            CreatedDate = new DateTime(2023, 10, 17, 10, 49, 48, 284, DateTimeKind.Utc).AddTicks(9289),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "",
@@ -520,6 +520,98 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("069ae2a9-2729-4905-a8fa-c6c9f9172d1d"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Student",
+                            NormalizedName = "Student"
+                        },
+                        new
+                        {
+                            Id = new Guid("1eeba88e-ed0c-48c4-8d7e-a17c5a2cc3fe"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Teacher",
+                            NormalizedName = "Teacher"
+                        },
+                        new
+                        {
+                            Id = new Guid("24ce207d-8732-4a32-83ef-c5f05805f124"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Parent",
+                            NormalizedName = "Parent"
+                        },
+                        new
+                        {
+                            Id = new Guid("4cfaa242-a625-4e02-86d9-862d48a413c8"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "TeacherLive",
+                            NormalizedName = "TeacherLive"
+                        },
+                        new
+                        {
+                            Id = new Guid("65ff6784-21d7-4986-8394-681cf711a4f7"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Moderator",
+                            NormalizedName = "Moderator"
+                        },
+                        new
+                        {
+                            Id = new Guid("69976022-5dbb-4292-bab6-e94b6701061e"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Admin",
+                            NormalizedName = "Admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("8d89a29a-b40a-4045-b0ed-679d7a5ff990"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "CSO",
+                            NormalizedName = "CSO"
+                        },
+                        new
+                        {
+                            Id = new Guid("c8c28631-0bc0-4166-b062-4aff0d38e70c"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "MasterAdmin",
+                            NormalizedName = "MasterAdmin"
+                        },
+                        new
+                        {
+                            Id = new Guid("7753a049-ba55-4901-bf6a-ae65ff9ac8fc"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Guest",
+                            NormalizedName = "Guest"
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Student", b =>

@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
                 return methodResult;
             }
-            if (!string.IsNullOrEmpty(request.Email) && !request.Email.IsValidEmail())
+            if (!request.Email.IsValidEmail())
             {
                 methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                 return methodResult;

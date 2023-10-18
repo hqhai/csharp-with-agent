@@ -5,7 +5,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
@@ -47,16 +46,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             var methodResult = new MethodResult<bool>();
-            if (!string.IsNullOrEmpty(request.Email) && !request.Email.IsValidEmail())
-            {
-                methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
-                return methodResult;
-            }
-            if (!string.IsNullOrEmpty(request.PhoneNumber) && !request.PhoneNumber.IsValidPhoneNumber())
-            {
-                methodResult.AddError(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
-                return methodResult;
-            }
             var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);
             if (user != null)
             {
@@ -73,6 +62,28 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             if (user != null)
             {
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    user.Email = request.Email;
+                    user.Human!.Email = request.Email;
+                }
+                else if (!string.IsNullOrEmpty(request.PhoneNumber))
+                {
+                    user.PhoneNumber = request.PhoneNumber;
+                    user.Human!.PhoneNumber = request.PhoneNumber;
+                }
+                if (!user.Human!.IsValid())
+                {
+                    methodResult.AddError(user.Human.ErrorMessages);
+                    return methodResult;
+                }
+                if (!user.IsValid())
+                {
+                    methodResult.AddError(user.ErrorMessages);
+                    return methodResult;
+                }
+
+                await _userManager.UpdateAsync(user);
                 var userOtpCode = await _userOtpCodeRepository.Queryable
                         .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
                 if (userOtpCode == null)
@@ -90,23 +101,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 userOtpCode.Status = EnumOtpCodeStatus.Verified;
                 _userOtpCodeRepository.Update(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                if (!string.IsNullOrEmpty(request.Email))
-                {
-                    user.Email = request.Email;
-                    user.Human!.Email = request.Email;
-                }
-                else if (!string.IsNullOrEmpty(request.PhoneNumber))
-                {
-                    user.PhoneNumber = request.PhoneNumber;
-                    user.Human!.PhoneNumber = request.PhoneNumber;
-                }
-                if (!user.IsValid())
-                {
-                    methodResult.AddError(user.ErrorMessages);
-                    return methodResult;
-                }
-                await _userManager.UpdateAsync(user);
             }
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;

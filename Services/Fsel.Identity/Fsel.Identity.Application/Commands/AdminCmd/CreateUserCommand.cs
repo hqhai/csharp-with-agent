@@ -148,6 +148,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
             var human = await CreateHuman(request, user);
+            if (!human.IsValid())
+            {
+                methodResult.AddErrorBadRequest(human.ErrorMessages);
+                return methodResult;
+            }
             human = _humanRepository.Add(human);
             await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             await _userManager.AddToRoleAsync(user, request.Role.ToString());
