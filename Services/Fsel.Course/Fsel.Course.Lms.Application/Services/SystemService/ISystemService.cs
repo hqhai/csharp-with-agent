@@ -10,6 +10,9 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
     public interface ISystemService
     {
+        [Post("/course-time-config/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<CourseTimeConfigModel>>>> CourseTimeConfigQueryAsync([Body] BaseQueryModel query);
+
         [Get("/course-time-config")]
         Task<IApiResponse<MethodResult<PagingItemsModel<CourseTimeConfigModel>>>> GetCourseTimeConfigAsync();
 

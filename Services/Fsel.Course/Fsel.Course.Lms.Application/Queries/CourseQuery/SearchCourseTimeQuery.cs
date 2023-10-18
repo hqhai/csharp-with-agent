@@ -6,11 +6,13 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Models;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -62,14 +64,23 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var courseTimeResult = await _systemService.GetCourseTimeConfigAsync();
+            var courseTimeResult = await _systemService.CourseTimeConfigQueryAsync(new BaseQueryModel
+            {
+                Filters = new List<GenericFilterModel>
+                {
+                    new GenericFilterModel
+                    {
+                        Property = nameof(CourseTimeConfigModel.CourseId),
+                        Value = lists.Select(x => x.Id).ToArray(),
+                        Operator = Common.Enums.EnumFilterOperator.In
+                    }
+                }
+            });
             var courseTimes = courseTimeResult.Content?.Result;
             foreach (var item in lists)
             {
-                /*item.DurationMonth = courseTimes?.Where(x => x.CourseId == lists.Select(x => x.Id).FirstOrDefault()).Select(x => x.DurationMonth).FirstOrDefault();
-                item.EnrollmentWeek = courseTimes?.Select(x => x.EnrollmentWeek).FirstOrDefault();*/
-                item.DurationMonth = courseTimes?.Items?.FirstOrDefault(x => x.CourseId == item.Id)?.DurationMonth;
-                item.EnrollmentWeek = courseTimes?.Items?.FirstOrDefault(x => x.CourseId == item.Id)?.EnrollmentWeek;
+                item.DurationMonth = courseTimes?.Where(x => x.CourseId == item.Id).Select(x => x.DurationMonth).FirstOrDefault();
+                item.EnrollmentWeek = courseTimes?.Where(x => x.CourseId == item.Id).Select(x => x.EnrollmentWeek).FirstOrDefault();
             }
             methodResult.Result = new PagingItemsModel<CourseSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
