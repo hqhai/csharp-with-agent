@@ -4,13 +4,10 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -18,7 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
     public class GetQuestionByIdQuery : IRequest<MethodResult<QuestionModel>>
     {
-        public Guid ObjectId { get; set; }
+        public Guid ObjectResultId { get; set; }
         public Guid QuestionId { get; set; }
         public EnumTestResult Result { get; set; }
     }
@@ -31,10 +28,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
-        private readonly IUserService _userService;
-        private readonly AuthContext _authContext;
 
-        public GetQuestionByIdQueryHandler(IQuestionRepository questionRepository, IFinalTestResultRepository finalTestResultRepository, IExtraPracticeResultRepository extraPracticeResultRepository, IMockTestResultRepository mockTestResultRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, IUserService userService, AuthContext authContext)
+        public GetQuestionByIdQueryHandler(IQuestionRepository questionRepository, IFinalTestResultRepository finalTestResultRepository, IExtraPracticeResultRepository extraPracticeResultRepository, IMockTestResultRepository mockTestResultRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper)
         {
             _questionRepository = questionRepository;
             _finalTestResultRepository = finalTestResultRepository;
@@ -42,47 +37,38 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             _mockTestResultRepository = mockTestResultRepository;
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
-            _userService = userService;
-            _authContext = authContext;
         }
 
         public async Task<MethodResult<QuestionModel>> Handle(GetQuestionByIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<QuestionModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult?.Content?.Result;
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = await GetQuestionAsync(request, student?.Id);
+            methodResult.Result = await GetQuestionAsync(request);
             return methodResult;
         }
 
-        private async Task<QuestionModel?> GetQuestionAsync(GetQuestionByIdQuery request, Guid? studentId)
+        private async Task<QuestionModel?> GetQuestionAsync(GetQuestionByIdQuery request)
         {
             switch (request.Result)
             {
                 case EnumTestResult.MockTest:
-                    return await GetQuestionByMockTest(request, studentId);
+                    return await GetQuestionByMockTest(request);
 
                 case EnumTestResult.FinalTest:
-                    return await GetQuestionByFinalTest(request, studentId);
+                    return await GetQuestionByFinalTest(request);
 
                 case EnumTestResult.ExtraPratice:
-                    return await GetQuestionByExtraPratice(request, studentId);
+                    return await GetQuestionByExtraPratice(request);
 
                 default:
                     throw new InvalidOperationException();
             }
         }
 
-        private async Task<QuestionModel?> GetQuestionByMockTest(GetQuestionByIdQuery request, Guid? studentId)
+        private async Task<QuestionModel?> GetQuestionByMockTest(GetQuestionByIdQuery request)
         {
-            var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.MockTestId == request.ObjectId && x.StudentId == studentId).FirstOrDefaultAsync();
+            var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.MockTestId == request.ObjectResultId).FirstOrDefaultAsync();
 
             var question = await _questionRepository.Queryable.Include(x => x.SectionQuestions)
                                         .ThenInclude(x => x.MockTestAnswers.Where(x => mockTestResult != null && x.MockTestResultId == mockTestResult.Id))
@@ -97,9 +83,9 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             return questionModel;
         }
 
-        private async Task<QuestionModel?> GetQuestionByExtraPratice(GetQuestionByIdQuery request, Guid? studentId)
+        private async Task<QuestionModel?> GetQuestionByExtraPratice(GetQuestionByIdQuery request)
         {
-            var extraPracticeResult = await _extraPracticeResultRepository.Queryable.Where(x => x.ExtraPracticeId == request.ObjectId && x.StudentId == studentId).FirstOrDefaultAsync();
+            var extraPracticeResult = await _extraPracticeResultRepository.Queryable.Where(x => x.ExtraPracticeId == request.ObjectResultId).FirstOrDefaultAsync();
 
             var question = await _questionRepository.Queryable.Include(x => x.ExtraPracticeAnswers.Where(x => extraPracticeResult != null && x.ExtraPracticeResultId == extraPracticeResult.Id))
                                                               .FirstOrDefaultAsync(x => x.Id == request.QuestionId);
@@ -113,9 +99,9 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             return questionModel;
         }
 
-        private async Task<QuestionModel?> GetQuestionByFinalTest(GetQuestionByIdQuery request, Guid? studentId)
+        private async Task<QuestionModel?> GetQuestionByFinalTest(GetQuestionByIdQuery request)
         {
-            var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.FinalTestId == request.ObjectId && x.StudentId == studentId).FirstOrDefaultAsync();
+            var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.FinalTestId == request.ObjectResultId).FirstOrDefaultAsync();
 
             var question = await _questionRepository.Queryable.Include(x => x.SectionQuestions)
                                 .ThenInclude(x => x.FinalTestAnswers.Where(x => finalTestResult != null && x.FinalTestResultId == finalTestResult.Id))
