@@ -75,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             var teacherId = teacherResult.Content?.Result?.Id;
 
-            if (mockTestResult.GradingStartDate.HasValue && mockTestResult.GradingStartDate.Value.AddMinutes(30) < DateTime.Now)
+            if (mockTestResult.GradingStartDate.HasValue && mockTestResult.GradingStartDate.Value.AddMinutes(30) < DateTime.UtcNow)
             {
                 mockTestResult.GradingTeacherId = null;
                 mockTestResult.GradingStartDate = null;
@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 if (mockTestResult.GradingTeacherId == null)
                 {
                     mockTestResult.GradingTeacherId = teacherId;
-                    mockTestResult.GradingStartDate = DateTime.Now;
+                    mockTestResult.GradingStartDate = DateTime.UtcNow;
                 }
             }
             var mockTestModel = new MockTestModel

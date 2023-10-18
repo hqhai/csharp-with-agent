@@ -2,10 +2,11 @@
 
 namespace Fsel.Cms.PlanetDefender.Domain.IRepositories
 {
+
     using Fsel.Cms.PlanetDefender.Domain.Entities;
     using Fsel.Core.Base.Interfaces;
 
-    public interface IQuestBankRepository : IRepository<QuestBank>
+    public interface IWheelOfBuffRepository : IRepository<WheelOfBuff>
     {
     }
 }

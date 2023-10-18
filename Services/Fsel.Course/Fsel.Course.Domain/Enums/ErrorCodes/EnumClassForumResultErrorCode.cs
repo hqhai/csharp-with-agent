@@ -49,6 +49,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Contains Forbidden Keywords
         /// </summary>
-        ContainsForbiddenKeywords
+        ContainsForbiddenKeywords,
+        /// <summary>
+        /// Class Forum result Status not pendding For Grading or Graded
+        /// </summary>
+        ClassForumResultStatusNotPendingForGradingOrGraded,
     }
 }

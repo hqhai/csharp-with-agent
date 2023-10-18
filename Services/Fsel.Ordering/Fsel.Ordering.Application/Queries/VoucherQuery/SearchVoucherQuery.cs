@@ -49,7 +49,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                                 EndDate = x.EndDate,
                                 CustomerTypes = x.CustomerTypes,
                                 CreatedDate = x.CreatedDate,
-                                IsActive = (x.StartDate <= DateTime.Now && DateTime.Now <= x.EndDate),
+                                IsActive = (x.StartDate <= DateTime.UtcNow && DateTime.UtcNow <= x.EndDate),
                             });
             if (!string.IsNullOrEmpty(request.Keyword))
             {

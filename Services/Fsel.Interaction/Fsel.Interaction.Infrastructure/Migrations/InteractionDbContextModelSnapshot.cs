@@ -680,8 +680,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -730,7 +729,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("OtherProblem")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
