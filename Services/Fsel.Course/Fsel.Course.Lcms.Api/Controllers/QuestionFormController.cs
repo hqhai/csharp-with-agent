@@ -17,7 +17,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/question-form")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class QuestionFormController : ControllerBase
     {
         private readonly IMediator _mediator;

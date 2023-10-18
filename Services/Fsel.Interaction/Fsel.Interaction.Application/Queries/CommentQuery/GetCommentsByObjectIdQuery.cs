@@ -10,6 +10,8 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.IRepositories;
@@ -19,7 +21,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetCommentsByObjectIdQuery : IRequest<MethodResult<IList<CommentModel>>>
+    public class GetCommentsByObjectIdQuery : BaseQueryModel, IRequest<MethodResult<IList<CommentModel>>>
     {
         public Guid ObjectId { get; set; }
 
@@ -53,12 +55,12 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
 
             MethodResult<IList<CommentModel>> methodResult = new MethodResult<IList<CommentModel>>();
 
-            methodResult.Result = await GetCommentsByObjectIdAsync(request.ObjectId, request.Filter);
+            methodResult.Result = await GetCommentsByObjectIdAsync(request.ObjectId, request.Filter, request);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        public async Task<IList<CommentModel>?> GetCommentsByObjectIdAsync(Guid objectId, EnumCommentFilter? filter = null)
+        public async Task<IList<CommentModel>?> GetCommentsByObjectIdAsync(Guid objectId, EnumCommentFilter? filter = null, GetCommentsByObjectIdQuery? request = null)
         {
             var commentQuery = from c in _commentRepository.Queryable
                                join ca in _interactionActionRepository.Queryable on c.Id equals ca.ObjectId into caJ
@@ -68,7 +70,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                                select commentG.Key;
 
             var comments = await commentQuery.ToListAsync();
-            var userResult = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = comments.Select(x => x.UserId.ToString()).ToList() });
+            var userResult = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = comments.Select(x => x.UserId).ToList() });
 
             var results = new List<CommentModel>();
             if (comments != null && comments.Count > 0)
@@ -77,9 +79,9 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                 foreach (var item in commentModels)
                 {
                     var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Id && x.Type == EnumInteractionActionType.Like).ToList();
-                    item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId.ToString())?.AvatarPath;
-                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId.ToString())?.FullName;
-                    item.Comments = await GetCommentsByObjectIdAsync(item.Id);
+                    item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId)?.AvatarPath;
+                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId)?.FullName;
+                    item.Comments = await GetCommentsByObjectIdAsync(item.Id, filter);
                     item.CommentNumber = item.Comments?.Count ?? default;
                     item.LikeNumber = actionLikes.Count;
                     item.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
@@ -98,7 +100,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                         break;
 
                     case EnumCommentFilter.MostPopular:
-                        results = results.OrderByDescending(x => x.LikeNumber).ToList();
+                        results = results.OrderByDescending(x => x.LikeNumber).ApplyPaging(request).ToList();
                         break;
 
                     case EnumCommentFilter.AllComment:

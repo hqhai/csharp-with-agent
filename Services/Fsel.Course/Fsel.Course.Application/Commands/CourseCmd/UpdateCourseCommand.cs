@@ -5,12 +5,12 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.UserServices.Models;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Courses;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -74,6 +74,19 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             }
 
             #endregion Validation
+
+            course.CourseUnitMockTests.ForEach(x =>
+            {
+                var query = course.CourseUnitMockTests.OrderBy(n => n.DisplayOrder);
+                if (x.UnitId != null)
+                {
+                    x.Number = query.Where(n => n.UnitId != null).ToList().IndexOf(x) + 1;
+                }
+                else if (x.MockTestId != null)
+                {
+                    x.Number = query.Where(n => n.MockTestId != null).ToList().IndexOf(x) + 1;
+                }
+            });
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {

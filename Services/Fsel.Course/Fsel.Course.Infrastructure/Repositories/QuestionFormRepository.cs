@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class QuestionFormRepository : BaseRepository<QuestionForm>, IQuestionFormRepository
     {
-        public QuestionFormRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public QuestionFormRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

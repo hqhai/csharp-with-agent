@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.FeatureAccessTimes;
@@ -37,25 +38,21 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
             await _featureAccessTimeRepository.ExecuteTransactionAsync(async () =>
             {
-                var featureAccessTime = await _featureAccessTimeRepository.Queryable.FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && x.ObjectId == request.ObjectId && x.EnumFeature == request.EnumFeature, cancellationToken);
+                var featureAccessTime = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && (x.ObjectId == request.ObjectId || x.EnumFeature == EnumFeature.Other) && x.EnumFeature == request.EnumFeature, cancellationToken);
 
                 if (featureAccessTime == null)
                 {
-                    featureAccessTime = _mapper.Map<FeatureAccessTime>(request);
-                    featureAccessTime.Visit = 1;
-                    featureAccessTime.LastVisited = DateTime.Now;
-                    featureAccessTime = _featureAccessTimeRepository.Add(featureAccessTime);
+                    featureAccessTime = AddNewFeatureAccessTime(request);
                 }
-                else
+                else if (featureAccessTime != null && !IsSameRangeHour(featureAccessTime))
                 {
-                    if (request.AccessTime == null)
-                    {
-                        featureAccessTime.Visit += 1;
-                    }
-                    featureAccessTime.AccessTime += request.AccessTime ?? default;
-                    featureAccessTime.LastVisited = DateTime.Now;
-                    featureAccessTime = _featureAccessTimeRepository.Update(featureAccessTime);
+                    featureAccessTime = AddNewFeatureAccessTime(request);
                 }
+                else if (featureAccessTime != null && IsSameRangeHour(featureAccessTime))
+                {
+                    featureAccessTime = UpdateExistingFeatureAccessTime(featureAccessTime, request);
+                }
+
                 await _featureAccessTimeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
@@ -65,5 +62,44 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
             return methodResult;
         }
+
+        private FeatureAccessTime AddNewFeatureAccessTime(SaveFeatureAccessTimeCommand request)
+        {
+            var featureAccessTime = _mapper.Map<FeatureAccessTime>(request);
+            featureAccessTime.Visit = 1;
+            featureAccessTime.LastVisited = DateTime.UtcNow;
+            return _featureAccessTimeRepository.Add(featureAccessTime);
+        }
+
+        private FeatureAccessTime UpdateExistingFeatureAccessTime(FeatureAccessTime featureAccessTime, SaveFeatureAccessTimeCommand request)
+        {
+            if (request.AccessTime == null)
+            {
+                featureAccessTime.Visit += 1;
+            }
+            featureAccessTime.AccessTime += request.AccessTime ?? default;
+            featureAccessTime.LastVisited = DateTime.UtcNow;
+
+            return _featureAccessTimeRepository.Update(featureAccessTime);
+        }
+
+
+
+        private static bool IsSameRangeHour(FeatureAccessTime featureAccessTime)
+        {
+            bool isValid = false;
+            var now = DateTime.UtcNow;
+            var lastVisited = featureAccessTime.LastVisited;
+
+            if (lastVisited!.Value.Year == now.Year
+                       && lastVisited!.Value.Month == now.Month
+                       && lastVisited!.Value.Day == now.Day
+                       && lastVisited!.Value.Hour == now.Hour)
+            {
+                isValid = true;
+            }
+            return isValid;
+        }
+
     }
 }

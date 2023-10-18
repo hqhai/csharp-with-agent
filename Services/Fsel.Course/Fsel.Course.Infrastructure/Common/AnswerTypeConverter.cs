@@ -3,7 +3,6 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using System;
-    using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
@@ -183,8 +182,8 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool IsShortAnswer(string question, string answer)
         {
-            string q = " " + question.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
-            string a = " " + answer.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            string q = " " + question.Trim().ToLower().Replace('’', '\'').ToString() + " ";
+            string a = " " + answer.Trim().ToLower().Replace('’', '\'').ToString() + " ";
             return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -194,18 +193,6 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
             int number = 0;
 
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0)
-            {
-                if (dataQuestion.Contents.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
-                {
-                    dataAnswer.IsExact = true;
-                    number++;
-                }
-                else
-                {
-                    dataAnswer.IsExact = false;
-                }
-            }
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Content != null && dataQuestion.Content.Count > 0)
             {
                 if (dataQuestion.Content.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
@@ -258,13 +245,13 @@ namespace Fsel.Course.Infrastructure.Common
                 string[] questionWords = words[index].Split('|');
                 foreach (var item in questionWords)
                 {
-                    if (word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == item.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
+                    if (word.Trim().ToLower().Replace('’', '\'') == item.Trim().ToLower().Replace('’', '\''))
                     {
                         return true;
                     }
                 }
             }
-            else if (words[index].Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
+            else if (words[index].Trim().ToLower().Replace('’', '\'') == word.Trim().ToLower().Replace('’', '\''))
             {
                 return true;
             }

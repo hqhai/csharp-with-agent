@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
+    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -52,8 +53,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var mockTestResultQuery = _mockTestResultRepository.Queryable.Include(x => x.MockTest)
                                                                         .ThenInclude(x => x!.MockTestSections)
                                                                         .ThenInclude(x => x!.SectionGroup)
+                                                                        .Include(x => x.MockTest)
+                                                                        .ThenInclude(x => x!.MockTestResults)
+                                                                        .ThenInclude(x => x.Course)
+                                                                        .ThenInclude(x => x!.CourseUnitMockTests)
                                                                         .Include(x => x.MockTestScores)
-                                                                        .Where(x => x.Status == EnumResultStatus.Done && x.MockTestScores.Count == 0 && (x.GradingTeacherId == null || x.GradingTeacherId == teacherId))
+                                                                        .Where(x => x.Status == EnumResultStatus.Done && !x.MockTestScores.Any() && (x.GradingTeacherId == null || x.GradingTeacherId == teacherId))
                                                                         .AsNoTracking()
                                                                         .Select(x => new MockTestResultSearchModel
                                                                         {
@@ -66,12 +71,14 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                             CreatedUserId = x.CreatedUserId,
                                                                             Type = x.MockTest!.MockTestType,
                                                                             CourseSkill = x.MockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault(),
+                                                                            UnitDisplayOrder = x.MockTest.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
+                                                                            CourseCode = x.MockTest.MockTestResults.Select(x => x.Course!.Code).FirstOrDefault(),
                                                                         });
             mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing || x.Type == EnumMockTestType.FullMockTest);
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                mockTestResultQuery = mockTestResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).Contains(request.Keyword));
+                mockTestResultQuery = mockTestResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.MockTestFilter != null)
@@ -91,9 +98,14 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                         break;
                 }
             }
-            if (request.CourseIds != null && request.CourseIds.Count > 0)
+
+            if (request.UnitDisplayOrder != null)
             {
-                mockTestResultQuery = mockTestResultQuery.Where(m => request.CourseIds.Contains(m.CourseId));
+                mockTestResultQuery = mockTestResultQuery.Where(m => m.UnitDisplayOrder == request.UnitDisplayOrder);
+            }
+            if (request.CourseId != null)
+            {
+                mockTestResultQuery = mockTestResultQuery.Where(m => m.CourseId == request.CourseId);
             }
 
             int totalItem = await mockTestResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -102,32 +114,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var courses = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests)
-                                                        .ThenInclude(x => x.Unit)
-                                                        .ThenInclude(x => x!.UnitSkillMockTests)
-                                                        .Include(x => x.CourseUnitMockTests)
-                                                        .Where(x => lists.Select(y => y.CourseId).Contains(x.Id))
-                                                        .ToListAsync(cancellationToken: cancellationToken);
+
             foreach (var item in lists)
             {
-                var course = courses.FirstOrDefault(x => x.Id == item.CourseId);
-                if (course != null)
+                if (item.Type == EnumMockTestType.SkillMockTest)
                 {
-                    item.CourseName = course.Name;
-                    if (item.Type == EnumMockTestType.SkillMockTest)
-                    {
-                        var courseUnitMockTest = course.CourseUnitMockTests.FirstOrDefault(x => x.Unit != null && x!.UnitId == item.UnitId);
-                        if (courseUnitMockTest != null && courseUnitMockTest.Unit != null && courseUnitMockTest.Unit.UnitSkillMockTests.FirstOrDefault(x => x.MockTestId == item.MockTestId) != null)
-                        {
-                            item.UnitName = courseUnitMockTest.Unit.Name;
-                            item.PostArea = "U" + courseUnitMockTest.DisplayOrder + "_" + course.Name;
-                        }
-                    }
-                    else
-                    {
-                        var number = course.CourseUnitMockTests.FirstOrDefault(x => x.MockTestId == item.MockTestId)?.DisplayOrder;
-                        item.PostArea = "FM" + number + "_" + course.Name;
-                    }
+                    item.PostArea = "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
+                }
+                else
+                {
+                    item.PostArea = "FM" + item.UnitDisplayOrder + "_" + item.CourseCode;
                 }
             }
 

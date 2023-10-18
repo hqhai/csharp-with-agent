@@ -72,13 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
             var teachers = teacherResults.Content?.Result;
-            if (teachers == null || !teachers.Any())
-            {
-                methodResult.Result = default;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-            var query = teachers.OrderBy(x => x.CreatedDate).Select(x => new ReviewTeacherRatingSearchModel
+            var query = teachers?.OrderBy(x => x.CreatedDate).Select(x => new ReviewTeacherRatingSearchModel
             {
                 Id = x.Id,
                 Code = x.Human!.Code,
@@ -88,39 +82,42 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName != null && m.FullName.Contains(request.Keyword, StringComparison.CurrentCulture))).ToList();
+                query = query?.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())).ToList();
             }
-            foreach (var item in query)
+            if (query != null && query.Any())
             {
-                var listVideo = videos.Where(x => x.TeacherId == item.Id).ToList();
-                var videoResults = listVideo.Where(x => x.VideoResults.Count > 0).SelectMany(x => x.VideoResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
-                mockTestResultIds = mockTestResults.Where(x => x.GradingTeacherId == item.Id).Select(x => x.Id).ToList();
-                classForumResultIds = classForumResults.Where(x => x.GradingTeacherId == item.Id).Select(x => x.Id).ToList();
-                var mockTestFeedbacks = feedbackMockTestResults.Where(x => mockTestResultIds.Contains(x.ObjectId));
-                var classForumFeedbacks = feedbackClassForumResults.Where(x => classForumResultIds.Contains(x.ObjectId));
+                foreach (var item in query)
+                {
+                    var listVideo = videos.Where(x => x.TeacherId == item.Id).ToList();
+                    var videoResults = listVideo.Where(x => x.VideoResults.Count > 0).SelectMany(x => x.VideoResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
+                    mockTestResultIds = mockTestResults.Where(x => x.GradingTeacherId == item.Id).Select(x => x.Id).ToList();
+                    classForumResultIds = classForumResults.Where(x => x.GradingTeacherId == item.Id).Select(x => x.Id).ToList();
+                    var mockTestFeedbacks = feedbackMockTestResults.Where(x => mockTestResultIds.Contains(x.ObjectId));
+                    var classForumFeedbacks = feedbackClassForumResults.Where(x => classForumResultIds.Contains(x.ObjectId));
 
-                var stars = new List<double>();
-                if (videoResults.Any())
-                {
-                    stars.Add(NumberHelper.ConvertDoubleDecimal(videoResults.Average(x => x.NumberOfStars)));
+                    var stars = new List<double>();
+                    if (videoResults.Any())
+                    {
+                        stars.Add(videoResults.Average(x => x.NumberOfStars));
+                    }
+                    if (classForumFeedbacks.Any())
+                    {
+                        stars.Add(classForumFeedbacks.Average(x => x.FeedBackStars ?? default));
+                    }
+                    if (mockTestFeedbacks.Any())
+                    {
+                        stars.Add(mockTestFeedbacks.Average(x => x.FeedBackStars ?? default));
+                    }
+                    item.Stars = stars.Any() ? NumberHelper.ConvertRound(stars.Average()) : default;
                 }
-                if (classForumFeedbacks.Any())
+                if (request.NumberOfStars != null)
                 {
-                    stars.Add(NumberHelper.ConvertDoubleDecimal(classForumFeedbacks.Average(x => x.FeedBackStars ?? default)));
+                    query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
                 }
-                if (mockTestFeedbacks.Any())
-                {
-                    stars.Add(NumberHelper.ConvertDoubleDecimal(mockTestFeedbacks.Average(x => x.FeedBackStars ?? default)));
-                }
-                item.Stars = stars.Any() ? NumberHelper.ConvertDoubleDecimal(stars.Average()) : default;
             }
 
-            if (request.NumberOfStars != null)
-            {
-                query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
-            }
-            int totalItem = query.Count;
-            var lists = query.ApplySortAndPaging(request).ToList();
+            int totalItem = query?.Count ?? default;
+            var lists = query?.ApplySortAndPaging(request).ToList();
             methodResult.Result = new PagingItemsModel<ReviewTeacherRatingSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

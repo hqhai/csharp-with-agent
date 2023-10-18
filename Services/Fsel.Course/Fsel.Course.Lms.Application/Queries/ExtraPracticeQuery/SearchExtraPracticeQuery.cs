@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
 {
+    using System.Globalization;
     using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -15,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     using Fsel.Course.Domain.Models.QueryModels.ExtraPractices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -92,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                extraPracticeQuery = extraPracticeQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                extraPracticeQuery = extraPracticeQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.Types != null && request.Types.Count > 0)
@@ -135,7 +137,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         break;
 
                     case EnumSortFilter.TrendingNow:
-                        DateTime currentDate = DateTime.Now; // Lấy thời gian hiện tại từ hệ thống
+                        DateTime currentDate = DateTime.UtcNow; // Lấy thời gian hiện tại từ hệ thống
                         DayOfWeek currentDayOfWeek = currentDate.DayOfWeek;
                         DateTime startDate = currentDate.AddDays(-(int)currentDayOfWeek); // Ngày đầu tiên của tuần
                         DateTime endDate = startDate.AddDays(6); // Ngày cuối cùng của tuần

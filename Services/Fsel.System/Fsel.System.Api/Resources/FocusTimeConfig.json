@@ -1,0 +1,37 @@
+[
+  {
+    "id": "0A7B57F3-C964-4F1B-8986-DF1579C5D08B",
+    "targetTime": 1800,
+    "description": "Bắt đầu nhẹ nhàng",
+    "token": 1,
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "9B4FA7B6-1AF4-458B-82D9-621C1A88654A",
+    "targetTime": 3600,
+    "description": "Hình thành thói quen chưa?",
+    "token": 3,
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "124F4341-4C87-4E5F-BA4D-2481D8D36737",
+    "targetTime": 5400,
+    "description": "Tập trung hơn nữa nào",
+    "token": 6,
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "82061293-C9D0-4598-99F1-8DFD8162B999",
+    "targetTime": 7200,
+    "description": "Chăm chỉ phết",
+    "token": 12,
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "FD7E66D3-A29B-4DA7-BB29-2283536D836A",
+    "targetTime": 10800,
+    "description": "Thách đấu FSEL",
+    "token": 24,
+    "createdDate": "2023-07-21"
+  }
+]

@@ -8,6 +8,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
@@ -97,7 +98,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                 .AsEnumerable();
             var query = a1.Union(a2);
             int totalItem = query.Count();
-            var lists = query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var lists = query.ApplySortAndPaging(request).ToList();
             var courseIds = lists.Select(x => x.CourseId).ToList();
             var courseResults = await _courseService.GetListCourseByIds(courseIds);
             var courses = courseResults.Content?.Result;
@@ -110,7 +111,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                     item.CourseLevel = courses?.FirstOrDefault(x => x.Id == item.CourseId)?.CourseLevel ?? default;
                     item.StartTime = liveTimeFrame?.StartTime ?? default;
                     item.EndTime = liveTimeFrame?.EndTime ?? default;
-                    item.IsStatus = item.StartDate!.Value.Date.AddDays(-1) > DateTime.Now.Date;
+                    item.IsStatus = item.StartDate!.Value.Date.AddDays(-1) > DateTime.UtcNow.Date;
                 }
             }
 

@@ -20,6 +20,8 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
     public class GetCurrentUnitIndicatorQuery : IRequest<MethodResult<IList<SkillScores>>>
     {
         public Guid CourseId { get; set; }
+
+        public Guid? UnitId { get; set; }
     }
 
     public class GetCurrentUnitIndicatorQueryHandler : IRequestHandler<GetCurrentUnitIndicatorQuery, MethodResult<IList<SkillScores>>>
@@ -54,7 +56,8 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 
             var currentUnitIndicator = await _unitResultRepository
                               .Queryable
-                              .Where(x => x.CourseId == request.CourseId && x.Status == EnumResultStatus.Done && x.StudentId == studentId)
+                              .Where(x => x.CourseId == request.CourseId && x.Status == EnumResultStatus.Done && x.StudentId == studentId
+                                && (request.UnitId == null || x.UnitId == request.UnitId))
                               .Select(x => new
                               {
                                   UnitResult = x,

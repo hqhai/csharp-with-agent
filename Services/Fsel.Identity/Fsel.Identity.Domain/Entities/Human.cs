@@ -26,7 +26,7 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Address { get; set; }
 
-        [EmailAddress]
+        [EmailValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Email { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -35,7 +35,7 @@ namespace Fsel.Identity.Domain.Entities
         public EnumGender? Gender { get; set; }
 
         public virtual User? User { get; set; }
-        public string? UserId { get; set; }
+        public Guid? UserId { get; set; }
 
         public Parent? Parent { get; set; }
         public CSO? CSO { get; set; }

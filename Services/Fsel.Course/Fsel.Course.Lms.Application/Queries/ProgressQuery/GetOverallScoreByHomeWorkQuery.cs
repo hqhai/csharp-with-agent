@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -100,15 +101,25 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 }
             }
 
-            var skillScores = homeWorkLessons.GroupBy(x => x.CourseSkill).Select(x => new SkillScores
+            var skillScores = homeWorkLessons.GroupBy(x => x.CourseSkill).Select(x =>
             {
-                Skill = x.Key,
-                CountQuestion = x.SelectMany(x => x.HomeWorkResults).SelectMany(x => x.HomeWorkAnswers).Count(),
-                TotalQuestion = x.SelectMany(x => x.HomeWorkQuestions).Select(x => x.Question).Count(),
-                CorrectCount = x.SelectMany(x => x.HomeWorkResults).SelectMany(x => x.HomeWorkAnswers).Sum(x => x.CorrectCount),
-                TotalCount = x.SelectMany(x => x.HomeWorkQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                var homeWorkResults = x.SelectMany(x => x.HomeWorkResults).Distinct().ToList();
+                var questions = x.SelectMany(x => x.HomeWorkQuestions).Select(x => x.Question!).ToList();
+
+                var countQuestion = homeWorkResults.SelectMany(x => x.HomeWorkAnswers).Count();
+                var totalQuestion = questions.Count;
+                var correctCount = homeWorkResults.SelectMany(x => x.HomeWorkAnswers).Sum(x => x.CorrectCount);
+                var totalCount = questions.Sum(x => x!.CorrectTotal);
+                return new SkillScores
+                {
+                    Skill = x.Key,
+                    CountQuestion = countQuestion,
+                    TotalQuestion = totalQuestion,
+                    CorrectCount = correctCount,
+                    TotalCount = totalCount,
+                };
             }).ToList();
-            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? x.CorrectCount / x.TotalCount : default);
+            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertPercentDouble(x.CorrectCount / x.TotalCount) : default);
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CountQuestion = overallScoreReport.SkillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = overallScoreReport.SkillScores.Sum(x => x.TotalQuestion);

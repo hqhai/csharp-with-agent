@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentsByIdsQuery : IRequest<MethodResult<List<StudentModel>>>
     {
-        public IList<string>? Ids { get; set; }
+        public IList<Guid>? Ids { get; set; }
     }
 
     public class GetStudentsByIdsQueryHandler : IRequestHandler<GetStudentsByIdsQuery, MethodResult<List<StudentModel>>>
@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
 
-            var humans = await _humanRepository.Queryable.Where(p => request.Ids.Contains(p.UserId!)).Select(p => p.Id).ToListAsync(cancellationToken);
+            var humans = await _humanRepository.Queryable.Where(p => p.UserId.HasValue && request.Ids.Contains(p.UserId.Value)).Select(p => p.Id).ToListAsync(cancellationToken);
             var students = await _studentRepository.Queryable.Include(h => h.Human).Select(p => new StudentModel
             {
                 Id = p.Id,

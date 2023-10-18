@@ -89,10 +89,24 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Update a Support Question
         /// </summary>
-        [HttpPut("update-status/{id}")]
+        [HttpPut("update-status-active/{id}")]
         [ProducesResponseType(typeof(MethodResult<SupportQuestionModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateStatus([FromRoute] Guid id, [FromBody] UpdateStatusSupportQuestionCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
+            MethodResult<SupportQuestionModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update a Support Question
+        /// </summary>
+        [HttpPut("update-frequent-status/{id}")]
+        [ProducesResponseType(typeof(MethodResult<SupportQuestionModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStatus([FromRoute] Guid id, [FromBody] UpdateFrequentStatusSupportQuestionCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;

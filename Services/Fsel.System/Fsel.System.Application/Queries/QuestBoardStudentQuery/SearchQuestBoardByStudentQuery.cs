@@ -6,6 +6,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.System.Application.Services.CourseServices;
@@ -87,7 +88,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
                                          StartDate = baseQ.StartDate,
                                          EndDate = baseQ.EndDate ?? null,
                                          NumberOfStars = baseQ.NumberOfStars,
-                                         Status = baseQ.QuestBoardStudents.Any(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id && x.CreatedDate.Date == DateTime.Now.Date) ? baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id && x.CreatedDate.Date == DateTime.Now.Date)!.Status : null,
+                                         Status = baseQ.QuestBoardStudents.Any(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id && x.CreatedDate.Date == DateTime.UtcNow.Date) ? baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id && x.CreatedDate.Date == DateTime.UtcNow.Date)!.Status : null,
                                      }).ToListAsync(cancellationToken);
 
             questBoards = questBoards.Where(baseQ => baseQ.PackageIds != null && baseQ.PackageIds.Count > 0 && baseQ.PackageIds.Any(x => x == student.PackageId)).ToList();
@@ -121,7 +122,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
             }
 
             int totalItem = questBoards.Count;
-            var lists = questBoards.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var lists = questBoards.ApplySortAndPaging(request).ToList();
             switch (request.Type)
             {
                 case EnumQuestBoardType.MainQuests:

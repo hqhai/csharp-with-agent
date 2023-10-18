@@ -68,29 +68,31 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var courseUnitMockTests = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
             if (courseUnitMockTests == null || !courseUnitMockTests.Any())
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
             if (course.CourseType == EnumCourseType.Academic)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var mockTestIds = courseUnitMockTests.Where(x => x.MockTestId != null).Select(x => x.MockTestId ?? default).ToList();
+
+            var mockTestResults = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).Where(x => mockTestIds.Contains(x.MockTestId) && x.CourseId == request.CourseId && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
             var featureAccessTimes = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
                 UserId = userId ?? default,
-                FeatureAccessTimes = mockTestIds.Select(x => new FeatureAccessTimeQueryModel
+                FeatureAccessTimes = mockTestResults.Select(x => x.Id).Select(x => new FeatureAccessTimeQueryModel
                 {
                     UserId = userId ?? default,
                     ObjectId = x,
@@ -99,7 +101,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 }).ToList(),
             });
             var featureAccessTimeTest = featureAccessTimes?.Content?.Result?.ToList();
-            var mockTestResults = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).Where(x => mockTestIds.Contains(x.MockTestId) && x.CourseId == request.CourseId && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
             foreach (var item in mockTestResults)
             {
                 UnitStudentProgressModel mockTestProgress = new UnitStudentProgressModel();

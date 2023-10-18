@@ -101,7 +101,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("get-by-user-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetByIds([FromBody] IList<string> ids)
+        public async Task<IActionResult> GetByIds([FromBody] IList<Guid> ids)
         {
             MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByUserIdsQuery { UserIds = ids }).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -147,6 +147,18 @@ namespace Fsel.Identity.Api.Controllers
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "import-student-to-course.xlsx");
+        }
+
+        /// <summary>
+        /// Update Referral Code
+        /// </summary>
+        [HttpPut("update-referral-code")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateReferralCode([FromBody] UpdateReferralCodeStudentCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

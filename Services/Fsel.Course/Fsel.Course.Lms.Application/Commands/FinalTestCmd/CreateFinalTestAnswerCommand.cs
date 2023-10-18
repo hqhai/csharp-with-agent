@@ -178,7 +178,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     CorrectCount = count,
                     CountQuestion = item.Answers.Count,
                     TotalQuestion = questions.Count,
-                    Percent = totalCount > 0 ? NumberHelper.ConvertPercentDouble(count / totalCount) : default
+                    Percent = totalCount > 0 ? NumberHelper.ConvertPercentDouble((double)count / totalCount) : default
                 }
                 );
             }

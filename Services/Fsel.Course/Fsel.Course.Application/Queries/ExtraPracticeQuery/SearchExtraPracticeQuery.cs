@@ -3,6 +3,7 @@
 namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -11,6 +12,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ExtraPractices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -51,7 +53,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
                                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                extraPracticeQuery = extraPracticeQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                extraPracticeQuery = extraPracticeQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.CourseLevel != null)
             {

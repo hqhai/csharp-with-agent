@@ -6,15 +6,19 @@ namespace Fsel.Shared.Helpers
     {
         public static double RoundNumberDouble(double number)
         {
+            if (number < 0)
+            {
+                number *= 100;
+            }
             double decimalPart = number % 1;
 
             if (decimalPart == 0.25)
             {
-                return Math.Floor(number) + 0.5;
+                return Math.Floor(number);
             }
             else if (decimalPart == 0.75)
             {
-                return Math.Ceiling(number);
+                return Math.Floor(number) + 0.5;
             }
             else
             {
@@ -48,25 +52,25 @@ namespace Fsel.Shared.Helpers
 
         public static double ConvertDoublePercent(double value)
         {
-            double convertedValue = Math.Round(value / 100, 2);
+            double convertedValue = Math.Round(value / 100, 2, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
         public static double ConvertDouble(double value)
         {
-            double convertedValue = Math.Round(value, 2);
+            double convertedValue = Math.Round(value, 2, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
-        public static double ConvertDoubleDecimal(double value)
+        public static double ConvertRound(double value)
         {
-            double convertedValue = Math.Round(value, 0);
+            double convertedValue = Math.Round(value, 0, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
         public static double ConvertPercentDouble(double value)
         {
-            double convertedValue = Math.Round(value * 100, 0);
+            double convertedValue = Math.Round(value * 100, 0, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
     }

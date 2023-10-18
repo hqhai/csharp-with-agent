@@ -8,6 +8,7 @@ namespace Fsel.System.Application.Querys.ForbiddenWordQuery
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels;
+    using global::System.Globalization;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -44,7 +45,7 @@ namespace Fsel.System.Application.Querys.ForbiddenWordQuery
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                forbiddenWordQuery = forbiddenWordQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Word ?? string.Empty).Contains(request.Keyword));
+                forbiddenWordQuery = forbiddenWordQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Word ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             int totalItem = await forbiddenWordQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await forbiddenWordQuery

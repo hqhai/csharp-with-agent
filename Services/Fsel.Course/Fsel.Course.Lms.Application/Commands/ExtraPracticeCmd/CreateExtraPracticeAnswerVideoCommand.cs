@@ -18,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -35,7 +36,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
-        private readonly IExtraPracticeExerciseResultRepository _extraPracticeExerciseResultRepository;
 
         public CreateExtraPracticeAnswerVideoCommandHandler(AuthContext authContext
             , IUserService userService
@@ -43,8 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
             , AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
-            , IExtraPracticeResultRepository extraPracticeResultRepository
-            , IExtraPracticeExerciseResultRepository extraPracticeExerciseResultRepository)
+            , IExtraPracticeResultRepository extraPracticeResultRepository)
         {
             _authContext = authContext;
             _userService = userService;
@@ -53,7 +52,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
-            _extraPracticeExerciseResultRepository = extraPracticeExerciseResultRepository;
         }
 
         public async Task<MethodResult<ExtraPracticeResultModel>> Handle(CreateExtraPracticeAnswerVideoCommand request, CancellationToken cancellationToken)
@@ -66,7 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), _authContext.CurrentUserId);
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -92,104 +90,96 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 
             #endregion xoa cau tra loi
 
+            var updateExtraPracticeAnswers = new List<ExtraPracticeAnswer>();
             var extraPracticeAnswers = new List<ExtraPracticeAnswer>();
             if (request.Answers != null && request.Answers.Count != 0)
             {
                 var questionIds = request.Answers.Where(x => x.QuestionId != null).Select(x => x.QuestionId ?? default).ToList();
                 var questions = await _questionRepository.GetIncludeTimeCodeByIdAsync(questionIds);
-                var method = await AddExtraPracticeResult(extraPracticeResult, questions, request, cancellationToken);
-                if (!method.IsOK)
+                int correctCountStudent = 0;
+                int correctTotal = 0;
+                foreach (var item in request.Answers)
                 {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                    return methodResult;
+                    if (item.QuestionId != null)
+                    {
+                        var question = questions?.FirstOrDefault(x => x.Id == item.QuestionId);
+                        if (question == null)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.QuestionId), item.QuestionId);
+                            return methodResult;
+                        }
+                        else if (question.Config == null)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), question);
+                            return methodResult;
+                        }
+                        var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
+                        var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
+                        var currenVideoTimeCodeId = videoTimeCodeQuestion?.Id;
+                        extraPracticeResult.CurrentVideoTimeCodeId = currenVideoTimeCodeId;
+
+                        var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable
+                                       .FirstOrDefaultAsync(x => x.QuestionId == item.QuestionId && x.ExtraPracticeResultId == extraPracticeResult.Id && x.VideoTimeCodeId == currenVideoTimeCodeId, cancellationToken);
+
+                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                        if (answerConfig == null && !string.IsNullOrEmpty(item.Answer?.ToString()))
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
+                            return methodResult;
+                        }
+                        correctTotal += question.CorrectTotal;
+                        correctCountStudent += correctCount;
+                        if (extraPracticeAnswer == null && videoTimeCodeQuestion != null)
+                        {
+                            extraPracticeAnswer = new ExtraPracticeAnswer
+                            {
+                                Answer = answerConfig,
+                                CorrectCount = correctCount,
+                                VideoTimeCodeId = currenVideoTimeCodeId,
+                                ExtraPracticeResultId = extraPracticeResult.Id,
+                                QuestionId = item.QuestionId,
+                                Status = videoTimeCodeQuestion.TimeCodeType != EnumTimeCodeType.Standalone ? EnumCurrentStatus.Done : EnumCurrentStatus.Process
+                            };
+                            extraPracticeAnswers.Add(extraPracticeAnswer);
+                        }
+                        else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumCurrentStatus.Process)
+                        {
+                            extraPracticeAnswer.Answer = answerConfig;
+                            extraPracticeAnswer.CorrectCount = question.Ungraded ? default : correctCount;
+                            extraPracticeAnswer.Status = EnumCurrentStatus.Done;
+                            updateExtraPracticeAnswers.Add(extraPracticeAnswer);
+                        }
+                        else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumCurrentStatus.Done)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
+                            return methodResult;
+                        }
+                    }
                 }
-                if (extraPracticeResult.Status == EnumResultStatus.Done)
+                if (correctTotal == correctCountStudent && extraPracticeAnswers.All(x => x.Status == EnumCurrentStatus.Process))
                 {
-                    extraPracticeResult.CorrectCount = 0;
-                    extraPracticeResult.Status = EnumResultStatus.Process;
-                    extraPracticeResult.Percent = 0;
-                }
-                extraPracticeResult.CorrectCount = extraPracticeResult.ExtraPracticeAnswers.Sum(x => x.CorrectCount);
-                if (request.IsActive)
-                {
-                    extraPracticeResult.Status = EnumResultStatus.Done;
-                    extraPracticeResult.Percent = 100;
-                }
-                else
-                {
-                    extraPracticeResult.Status = EnumResultStatus.Process;
+                    extraPracticeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
                 }
             }
             await _extraPracticeResultRepository.ExecuteTransactionAsync(async () =>
             {
+                if (extraPracticeAnswers.Count > 0)
+                {
+                    await _extraPracticeAnswerRepository.AddList(extraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else if (updateExtraPracticeAnswers.Count > 0)
+                {
+                    _extraPracticeAnswerRepository.UpdateList(updateExtraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+
                 _extraPracticeResultRepository.Update(extraPracticeResult);
                 await _extraPracticeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.Result = _mapper.Map<ExtraPracticeResultModel>(extraPracticeResult);
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
-            return methodResult;
-        }
-
-        public async Task<VoidMethodResult> AddExtraPracticeResult(dynamic extraPracticeResult, IList<Question>? questions, CreateExtraPracticeAnswerVideoCommand? request, CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(request.Answers);
-            ArgumentNullException.ThrowIfNull(questions);
-            VoidMethodResult methodResult = new VoidMethodResult();
-            foreach (var item in request.Answers)
-            {
-                if (item.QuestionId != null)
-                {
-                    var question = await _questionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.QuestionId, cancellationToken);
-                    if (question == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.QuestionId), item.QuestionId);
-                        return methodResult;
-                    }
-                    else if (question.Config == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), question);
-                        return methodResult;
-                    }
-                    var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
-                    var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
-                    extraPracticeResult.CurrentVideoTimeCodeId = videoTimeCodeQuestion?.Id;
-                    var method = await AddTypeExercise(extraPracticeResult, item, question, cancellationToken);
-                    if (!method.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(method.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-            }
-            return methodResult;
-        }
-
-        public async Task<VoidMethodResult> AddTypeExercise(ExtraPracticeResult extraPracticeResult, ExtraPracticeAnswerTypeVideoModel extraPracticeAnswerQuestion, Question question, CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(extraPracticeAnswerQuestion);
-            ArgumentNullException.ThrowIfNull(extraPracticeResult);
-            ArgumentNullException.ThrowIfNull(question);
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable
-                                 .FirstOrDefaultAsync(x => x.QuestionId == extraPracticeAnswerQuestion.QuestionId && x.ExtraPracticeResultId == extraPracticeResult.Id, cancellationToken);
-            if (extraPracticeAnswer == null)
-            {
-                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(extraPracticeAnswerQuestion.Answer, question.Config, question.QuestionType);
-                if (answerConfig == null && !string.IsNullOrEmpty(extraPracticeAnswerQuestion.Answer?.ToString()))
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(extraPracticeAnswerQuestion.Answer), extraPracticeAnswerQuestion.Answer);
-                    return methodResult;
-                }
-                extraPracticeResult.ExtraPracticeAnswers.Add(new ExtraPracticeAnswer
-                {
-                    Answer = answerConfig,
-                    CorrectCount = correctCount,
-                    ExtraPracticeResultId = extraPracticeResult.Id,
-                    QuestionId = extraPracticeAnswerQuestion.QuestionId
-                });
-            }
             return methodResult;
         }
     }

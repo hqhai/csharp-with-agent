@@ -15,7 +15,7 @@ namespace Fsel.Identity.Application.Services.InteractionService
         Task<IApiResponse<MethodResult<bool>>> IsSurveyCompleted([FromRoute] Guid id);
 
         [Get("/surveyQuestion/{userId}")]
-        Task<IApiResponse<MethodResult<IList<StudentSurveyQuestionModel>>>> SurveyQuestionsByUserId([FromRoute] string userId);
+        Task<IApiResponse<MethodResult<IList<StudentSurveyQuestionModel>>>> SurveyQuestionsByUserId([FromRoute] Guid userId);
 
         [Post("/customerSurvey")]
         Task<IApiResponse<MethodResult<IList<CustomerSurveyModel>>>> CreateSurvey([FromBody] CreateCustomerSurveyCommandModel model);

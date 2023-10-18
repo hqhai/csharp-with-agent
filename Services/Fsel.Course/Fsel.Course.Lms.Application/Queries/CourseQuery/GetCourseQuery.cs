@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -71,21 +72,19 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var @class = classResult?.Content?.Result;
             if (@class == null)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
-            var orderResult = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
+            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = _authContext.CurrentUserId });
             if (!orderResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
                 return methodResult;
             }
-            var isCheckUserOrder = orderResult?.Content?.Result ?? default;
-            if (!isCheckUserOrder)
+            var status = orderResult?.Content?.Result ?? default;
+            if (status != EnumOrderStatus.Payment)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -96,7 +95,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             if (course == null)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }

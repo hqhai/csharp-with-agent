@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.InteractionService.Models;
@@ -19,13 +20,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
-    using EnumAuthErrorCode = Domain.Enums.ErrorCodes.EnumAuthErrorCode;
+    using EnumAuthUserErrorCode = Domain.Enums.ErrorCodes.EnumAuthUserErrorCode;
 
     public class ImportStudentToCourseCommand : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
@@ -39,8 +38,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IHumanRepository _humanRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IInteractionService _interactionService;
+        private readonly IPlatformRepository _platformRepository;
+        private const string DefaultPassword = "Hello.123";
 
-        public ImportStudentToCourseCommandHandler(IMediator mediator, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService)
+        public ImportStudentToCourseCommandHandler(IMediator mediator, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
         {
             _mediator = mediator;
             _userManager = userManager;
@@ -48,6 +49,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _humanRepository = humanRepository;
             _lmsCourseService = lmsCourseService;
             _interactionService = interactionService;
+            _platformRepository = platformRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ImportStudentToCourseCommand request, CancellationToken cancellationToken)
@@ -117,16 +119,30 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 foreach (var student in result.Datas.ToList())
                 {
-                    IdentityResult identityResult;
+                    Microsoft.AspNetCore.Identity.IdentityResult identityResult;
                     var user = new User();
                     user.UserName = student.Email;
                     user.Email = student.Email;
                     user.FullName = student.Email;
                     user.EmailConfirmed = true;
-                    identityResult = await _userManager.CreateAsync(user, "Hello.123");
+
+                    #region Add Platform to User
+
+                    var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
+                    if (platform != null)
+                    {
+                        user.UserPlatforms.Add(new UserPlatform
+                        {
+                            PlatformId = platform.Id
+                        });
+                    }
+
+                    #endregion Add Platform to User
+
+                    identityResult = await _userManager.CreateAsync(user, DefaultPassword);
                     if (!identityResult.Succeeded)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate));
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
                         return methodResult;
                     }
                     await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
@@ -141,7 +157,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     var course = getCourseByCodeResult.Content?.Result;
 
                     Human human = new Human();
-                    human.UserId = user?.Id;
+                    human.UserId = user!.Id;
                     human.Code = "Admin@123";
                     human.FullName = user?.FullName;
                     human.Student = new Student
@@ -181,7 +197,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         Address = "35 Lac Trung",
                         PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
                         CourseId = course.Id,
-                        UserId = Guid.Parse(user!.Id),
+                        UserId = user!.Id,
                         PackageId = package.Id,
                         CodeCourse = student.CodeCourse
                     });
@@ -206,7 +222,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
                     {
                         Email = student.Email,
-                        UserId = Guid.Parse(user.Id),
+                        UserId = user.Id,
                         Answers = new List<CreateSurveyCommandModel>
                         {
                             new CreateSurveyCommandModel

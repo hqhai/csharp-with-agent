@@ -88,11 +88,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
 
             var questionIds = request.SectionGroups.Where(x => x.Answers != null).SelectMany(x => x.Answers!).Select(x => x.QuestionId ?? default).ToList();
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
-            if (questions == null || questions.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
-                return methodResult;
-            }
             foreach (var item in request.SectionGroups)
             {
                 if (item.Answers != null)
@@ -107,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     double questionCount = 0;
                     foreach (var answer in item.Answers)
                     {
-                        if (answer.QuestionId != null)
+                        if (answer.QuestionId != null && questions != null)
                         {
                             var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
                             if (question == null)
@@ -203,7 +198,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         Scores = count.GetIeltsScore(sectionGroup.CourseSkill),
                         CountQuestion = item.Answers.Count,
                         TotalQuestion = item.Answers.Count,
-                        Percent = (double)questionCount / count * 100
+                        Percent = questionCount > 0 ? NumberHelper.ConvertPercentDouble((double)count / questionCount) : default
                     };
                     skillScores.Add(skillScore);
                 }
@@ -212,6 +207,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                mockTestResult.Percent = (int)skillScores.Sum(x => x.TotalCount) > 0 ? NumberHelper.ConvertPercentDouble(skillScores.Sum(x => x.CorrectCount) / skillScores.Sum(x => x.TotalCount)) : default;
                 mockTestResult.Status = EnumResultStatus.Done;
                 mockTestResult.SkillScores = skillScores;
             }

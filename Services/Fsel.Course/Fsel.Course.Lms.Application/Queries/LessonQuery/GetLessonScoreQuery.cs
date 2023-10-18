@@ -131,6 +131,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                  Skill = skill,
                                  TotalCount = questionQJ != null ? questionQJ.TotalCount : default,
                                  CorrectCount = answerQJ != null ? answerQJ.CorrectCount : default,
+                                 Percent = (questionQJ != null && questionQJ.TotalCount > 0 && answerQJ != null) ? NumberHelper.ConvertPercentDouble((double)answerQJ.CorrectCount / questionQJ.TotalCount) : default
                              };
 
             var scoreTimeCodeQuery = from type in types
@@ -148,6 +149,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                             Skill = skill,
                                                             TotalCount = questionTimeCodeQJ != null ? questionTimeCodeQJ.TotalCount : default,
                                                             CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
+                                                            Percent = (questionTimeCodeQJ.TotalCount > 0 && answerTimeCodeQJ != null) ? NumberHelper.ConvertPercentDouble((double)answerTimeCodeQJ.CorrectCount / questionTimeCodeQJ.TotalCount) : default
                                                         }).ToList()
                                      };
             var timeCodeScores = scoreTimeCodeQuery.ToList();

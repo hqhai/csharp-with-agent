@@ -54,7 +54,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var lesson = await _lessonRepository.GetByIdAsync(request.LessonId);
             if (lesson == null)
             {
-                methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -74,13 +73,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
             query = query.ToList();
             int totalItem = query.Count();
-            var stars = query.Any() ? NumberHelper.ConvertDoubleDecimal(query.Average(x => x.Stars)) : default;
+            var stars = query.Any() ? NumberHelper.ConvertRound(query.Average(x => x.Stars)) : default;
 
             var lists = query.ApplySortAndPaging(request).ToList();
 
             foreach (var item in lists)
             {
-                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+                item.Stars = NumberHelper.ConvertRound(item.Stars);
             }
             methodResult.Result = new ReviewLessonDetailSearchModel { Stars = stars, Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;

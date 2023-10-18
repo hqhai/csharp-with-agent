@@ -3,6 +3,7 @@
 namespace Fsel.Course.Application.Queries.FinalTestQuery
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.FinalTests;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -51,7 +53,7 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
                                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                finalTestQuery = finalTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                finalTestQuery = finalTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.FinalTestLevel != null)
             {

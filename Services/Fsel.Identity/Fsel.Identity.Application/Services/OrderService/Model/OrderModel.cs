@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Application.Services.OrderService.Model
 {
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class OrderModel

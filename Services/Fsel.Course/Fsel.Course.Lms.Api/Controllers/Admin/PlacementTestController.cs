@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/placement-test/admin")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class PlacementTestController : ControllerBase
     {
         private readonly IMediator _mediator;

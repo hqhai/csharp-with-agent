@@ -46,5 +46,13 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Teacher Id Invalid
         /// </summary>
         TeacherInvalid,
+        /// <summary>
+        /// Contains Forbidden Keywords
+        /// </summary>
+        ContainsForbiddenKeywords,
+        /// <summary>
+        /// Class Forum result Status not pendding For Grading or Graded
+        /// </summary>
+        ClassForumResultStatusNotPendingForGradingOrGraded,
     }
 }

@@ -5,8 +5,10 @@ using System.Text;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
@@ -14,7 +16,6 @@ using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
 
@@ -52,7 +53,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
                 return methodResult;
             }
-
+            if (!request.Email.IsValidEmail())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                return methodResult;
+            }
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
@@ -62,7 +67,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var userOtpCode = await _userOtpCodeRepository.Queryable
-                                  .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted, cancellationToken);
+                                  .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
 
             RandomSecureHelper randomSecure = new RandomSecureHelper();
             var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
@@ -73,8 +78,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 {
                     UserId = user.Id,
                     OTPCode = otp,
-                    Status = EnumStatusUser.New,
-                    ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime)
+                    Status = EnumOtpCodeStatus.New,
+                    ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime)
                 };
                 _userOtpCodeRepository.Add(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -82,7 +87,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             else
             {
                 userOtpCode.OTPCode = otp;
-                userOtpCode.ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime);
+                userOtpCode.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
                 _userOtpCodeRepository.Update(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }

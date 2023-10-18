@@ -28,10 +28,10 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get Feature Access Time Detail
         /// </summary>
-        [HttpPost("get-detail")]
+        [HttpGet("get-detail")]
         [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetDetail([FromBody] GetFeatureAccessTimeQuery query)
+        public async Task<IActionResult> GetDetail([FromQuery] GetFeatureAccessTimeQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -55,11 +55,30 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("save")]
         [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize(Roles = nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Save([FromBody] SaveFeatureAccessTimeCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Student Feature Access Time
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpGet("access-time-chart")]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAcessTimeChartModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetStudentFeatureAccessTime([FromQuery] GetFeatureAccessTimeChartQuery query)
+        {
+            MethodResult<IList<FeatureAcessTimeChartModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+
+
+
     }
 }

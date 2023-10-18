@@ -57,7 +57,22 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Class End Date And Start Date Is Null
         /// </summary>
-        ClassEndDateAndStartDateIsNull
+        ClassEndDateAndStartDateIsNull,
+
+        /// <summary>
+        /// LiveTimeFrame Null Or LiveDays Null
+        /// </summary>
+        LiveTimeFrameNullOrLiveDaysNull,
+
+        /// <summary>
+        /// Orders Not Approved
+        /// </summary>
+        OrdersNotApproved,
+
+        /// <summary>
+        /// The course does not exist or has not been activated
+        /// </summary>
+        CourseNotExistOrNotActive
 
 ,
     }

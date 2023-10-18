@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
@@ -17,7 +18,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class UpdateCodeStudentCommand : UpdateCodeStudentCommandModel, IRequest<MethodResult<UserModel>>
@@ -44,7 +44,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == (request.UserId ?? _authContext.CurrentUserId.ToString()), cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == (request.UserId ?? _authContext.CurrentUserId), cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -63,7 +63,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
 
             var stt = await _studentRepository.Queryable.CountAsync(cancellationToken);
-            var currentDate = DateTime.Now;
+            var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
             var lastDigitOfYear = currentDate.Year % 10;
             var lastOfBirthDay = request.Birthday!.Value.Year % 100;

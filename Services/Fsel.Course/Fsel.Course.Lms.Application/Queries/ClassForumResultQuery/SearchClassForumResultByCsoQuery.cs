@@ -99,6 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                    .ThenInclude(x => x!.CourseUnitMockTests)
                                    .Include(x => x.ClassForum)
                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId))
+                                   .OrderByDescending(x => x.CreatedDate)
                                    .Select(x => new ClassForumResultSearchModel
                                    {
                                        Id = x.Id,
@@ -110,29 +111,34 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                        Status = x.Status,
                                        CheckStartDate = x.CheckStartDate,
                                        CourseCode = x.LessonResult!.Course!.Code,
-                                       LessonName = x.ClassForum!.Lesson!.Name, 
+                                       LessonName = x.ClassForum!.Lesson!.Name,
                                        LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
-                                       UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                       UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.Number).FirstOrDefault(),
                                        UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
-                                       TeacherId = x.GradingTeacherId
-                                   });  
+                                       TeacherId = x.GradingTeacherId,
+                                       CourseId = x.LessonResult!.CourseId,
+                                       WordContent = x.WordContent
+                                   });
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).Contains(request.Keyword));
+                classForumResultQuery = classForumResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.TeacherId != null)
             {
                 classForumResultQuery = classForumResultQuery.Where(m => m.TeacherId == request.TeacherId);
             }
-
+            if (request.CourseId != null)
+            {
+                classForumResultQuery = classForumResultQuery.Where(m => m.CourseId == request.CourseId);
+            }
             if (request.LessonName != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => (m.LessonName ?? string.Empty).Contains(request.LessonName));
+                classForumResultQuery = classForumResultQuery.Where(m => (m.LessonName ?? string.Empty).ToLower().Trim().Contains(request.LessonName.ToLower().Trim()));
             }
             if (request.UnitName != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => (m.UnitName ?? string.Empty).Contains(request.UnitName));
+                classForumResultQuery = classForumResultQuery.Where(m => (m.UnitName ?? string.Empty).ToLower().Trim().Contains(request.UnitName.ToLower().Trim()));
             }
             if (request.LessonDisplayOrder != null)
             {
@@ -150,11 +156,15 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     .ConfigureAwait(false);
             foreach (var item in lists)
             {
-                var studentId = item.CreatedUserId;
-                var classResult = await _trainingService.GetClassByStudentId(studentId);
-                if (classResult!.Content!.Result != null)
+                var userId = item.CreatedUserId;
+                var studentResult = await _userService.GetStudentByUserIdAsync(userId);
+                var studentId = studentResult.Content?.Result?.Id;
+
+                var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+                if (classResult.Content?.Result != null)
                 {
-                    item.ClassCode = classResult!.Content!.Result.Code;
+                    item.ClassCode = classResult.Content.Result.Code;
+                    item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
                 }
             }
 

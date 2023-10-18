@@ -12,13 +12,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Application.Services.UserService.Models;
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -33,19 +30,23 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IOrderRepository _orderRepository;
         private readonly ITrainingService _trainingService;
         private readonly IUserService _userService;
+        private readonly IPackageRepository _packageRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly AuthContext _authContext;
+
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
             , IUserService userService
+            , IPackageRepository packageRepository
             , ILmsCourseService lmsCourseService
-            , NotificationMessagePublisher notificationMessagePublisher,
-AuthContext authContext)
+            , NotificationMessagePublisher notificationMessagePublisher
+            , AuthContext authContext)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
             _userService = userService;
+            _packageRepository = packageRepository;
             _lmsCourseService = lmsCourseService;
             _notificationMessagePublisher = notificationMessagePublisher;
             _authContext = authContext;
@@ -73,18 +74,22 @@ AuthContext authContext)
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+
             var classes = await _trainingService.GetNewClassByStudentId(student.Content!.Result!.Id);
             if (!classes.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
+                methodResult.AddError(classes.Error);
                 return methodResult;
             }
+
             var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { order.CourseId });
             if (!courseResults.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError), nameof(courseResults));
+                methodResult.AddError(courseResults.Error);
                 return methodResult;
             }
+            var package = await _packageRepository.GetByIdAsync(order.PackageId);
+            var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
             var course = courseResults.Content?.Result?.FirstOrDefault();
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
@@ -99,12 +104,20 @@ AuthContext authContext)
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
-                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId });
+                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId, NumberOfShield = numberOfShield, CourseLevel = course?.CourseLevel });
                     if (!updateStudentByClass.IsSuccessStatusCode)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
                         return methodResult;
                     }
+
+                    var updateStudentStatusInClass = await _trainingService.UpdateStatusStudentInClass(student.Content!.Result!.Id);
+                    if (!updateStudentStatusInClass.IsSuccessStatusCode)
+                    {
+                        methodResult.AddError(updateStudentStatusInClass.Error);
+                        return methodResult;
+                    }
+
                     await _notificationMessagePublisher.Publish(new NotificationQueueModel
                     {
                         UserId = order.CreatedUserId,
@@ -129,7 +142,9 @@ AuthContext authContext)
                 //        return methodResult;
                 //    }
                 //}
+
                 #region for pilot
+
                 if (orders.Count == 100)
                 {
                     var activeClassResult = await _trainingService.ActiveClass(order.ClassId);
@@ -139,7 +154,9 @@ AuthContext authContext)
                         return methodResult;
                     }
                 }
-                #endregion
+
+                #endregion for pilot
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;

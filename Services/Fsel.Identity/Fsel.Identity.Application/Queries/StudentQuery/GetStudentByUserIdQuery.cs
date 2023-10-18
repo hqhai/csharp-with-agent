@@ -7,7 +7,6 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -36,13 +35,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var methodResult = new MethodResult<StudentModel>();
             var student = await _studentRepository.Queryable
                                         .Include(i => i.Human)
-                                        .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == request.Id.ToString(), cancellationToken);
+                                        .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == request.Id, cancellationToken);
 
-            if (student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
             methodResult.Result = _mapper.Map<StudentModel>(student);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

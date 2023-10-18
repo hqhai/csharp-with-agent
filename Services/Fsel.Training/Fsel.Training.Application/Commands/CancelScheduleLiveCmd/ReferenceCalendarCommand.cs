@@ -80,7 +80,7 @@ namespace Fsel.Training.Application.Commands.CancelScheduleLiveCmd
             }
             else if (classLiveWorkFlow.Status == EnumWorkFlowCancelScheduleStatus.WaitVote.ToString() && classLiveWorkFlow.ClassLiveCalendar != null)
             {
-                if (classLiveWorkFlow.UpdatedDate != null && classLiveWorkFlow.UpdatedDate.Value.AddDays(2) > DateTime.Now)
+                if (classLiveWorkFlow.UpdatedDate != null && classLiveWorkFlow.UpdatedDate.Value.AddDays(2) > DateTime.UtcNow)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.VotingTimeIsNotEnoughForTwoDays));
                     return methodResult;

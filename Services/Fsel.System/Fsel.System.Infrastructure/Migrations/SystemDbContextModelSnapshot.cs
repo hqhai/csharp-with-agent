@@ -97,7 +97,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<long>("AccessTime")
                         .HasColumnType("bigint");
 
-                    b.Property<Guid>("CourseId")
+                    b.Property<Guid?>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
@@ -142,7 +142,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<Guid?>("LessonId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ObjectId")
+                    b.Property<Guid?>("ObjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("UnitId")
@@ -167,6 +167,128 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FeatureAccessTimes");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.FocusTimeConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<double>("TargetTime")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Token")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FocusTimeConfigs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("0a7b57f3-c964-4f1b-8986-df1579c5d08b"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Bắt đầu nhẹ nhàng",
+                            IsDeleted = false,
+                            TargetTime = 1800.0,
+                            Token = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("9b4fa7b6-1af4-458b-82d9-621c1a88654a"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Hình thành thói quen chưa?",
+                            IsDeleted = false,
+                            TargetTime = 3600.0,
+                            Token = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("124f4341-4c87-4e5f-ba4d-2481d8d36737"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Tập trung hơn nữa nào",
+                            IsDeleted = false,
+                            TargetTime = 5400.0,
+                            Token = 6
+                        },
+                        new
+                        {
+                            Id = new Guid("82061293-c9d0-4598-99f1-8dfd8162b999"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Chăm chỉ phết",
+                            IsDeleted = false,
+                            TargetTime = 7200.0,
+                            Token = 12
+                        },
+                        new
+                        {
+                            Id = new Guid("fd7e66d3-a29b-4da7-bb29-2283536d836a"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Thách đấu FSEL",
+                            IsDeleted = false,
+                            TargetTime = 10800.0,
+                            Token = 24
+                        });
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.ForbiddenWord", b =>
@@ -231,6 +353,214 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ForbiddenWords");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.GameTopic", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("CourseLevel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Skill")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UnitOrder")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GameTopics");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.GameVocabulary", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("AlternateSpellingStr")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Antonym")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("AudioPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("CefrLevel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("CourseLevel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<string>("Definition")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("ExampleSentence")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Hint")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ImagePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PartSpeech")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PhoneticTranscription")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("PlatformId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Synonym")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("UnitOrder")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("UsEquivalent")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("WordCategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WordCategoryId");
+
+                    b.ToTable("GameVocabularies");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.LiveTimeFrame", b =>
@@ -540,6 +870,68 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("QuestBoardConfigs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("68bd35d3-c09b-45f3-9a05-0e10691f7c42"),
+                            Category = "FinishOneLesson",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("72933280-e14b-4715-a802-dcd88e031e79"),
+                            Category = "FinishOneHomeworkMiniProject",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("cfce3f4b-66d5-467d-8f57-50a089257bcb"),
+                            Category = "FinishOneUnitTest",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("7b436441-ef2f-4a83-be79-ee5ec5f18355"),
+                            Category = "FinishOneUnit",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("64c0a3a5-849c-412d-86b6-3f5e4809cc84"),
+                            Category = "FinishOneFinalTest",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("bb35cdbf-98a7-4ce7-9b71-f457b386d64c"),
+                            Category = "FinishOneLevelPass",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        });
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardStudent", b =>
@@ -757,6 +1149,16 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("TeachingCosts");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.GameVocabulary", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.GameTopic", "GameTopic")
+                        .WithMany("GameVocabularies")
+                        .HasForeignKey("WordCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("GameTopic");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardStudent", b =>
                 {
                     b.HasOne("Fsel.System.Domain.Entities.QuestBoard", "QuestBoard")
@@ -766,6 +1168,11 @@ namespace Fsel.System.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("QuestBoard");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.GameTopic", b =>
+                {
+                    b.Navigation("GameVocabularies");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoard", b =>

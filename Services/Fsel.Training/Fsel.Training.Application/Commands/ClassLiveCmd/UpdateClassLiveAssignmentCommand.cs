@@ -89,7 +89,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
             {
                 if (item.StartDate.HasValue)
                 {
-                    if (item.StartDate.Value.Date == DateTime.Now.Date.AddDays(1))
+                    if (item.StartDate.Value.Date == DateTime.UtcNow.Date.AddDays(1))
                     {
                         ids.Add(item.Id);
                     }
@@ -103,9 +103,9 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                 {
                     classes.ForEach(x =>
                     {
-                        if (x.Status == EnumStatusClass.Active)
+                        if (x.Status == EnumClassStatus.Active)
                         {
-                            var classLiveCalendars = x.ClassLiveCalendars.Where(classLive => classLive.LiveDate.Date > DateTime.Now)
+                            var classLiveCalendars = x.ClassLiveCalendars.Where(classLive => classLive.LiveDate.Date > DateTime.UtcNow)
                                          .Select(classLive =>
                                          {
                                              classLive.TeacherId = x.TeacherId;

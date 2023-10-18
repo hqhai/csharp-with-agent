@@ -19,6 +19,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using MassTransit.Initializers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Interaction.Application.Services.SystemService;
+    using Fsel.Interaction.Domain.Enums.ErrorCodes;
+    using Microsoft.Extensions.Logging;
 
     public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<CommentModel>>
     {
@@ -32,8 +35,11 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly NotificationMessagePublisher _classForumCommentPublisher;
         private readonly AuthContext _authContext;
         private readonly ICourseService _courseService;
+        private readonly ISystemService _systemService;
+        private readonly ILogger<CreateCommentCommand> _logger;
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService)
+
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, ILogger<CreateCommentCommand> logger)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
@@ -41,6 +47,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _discussionBoardCommentPublisher = discussionBoardCommentPublisher;
             _classForumCommentPublisher = classForumCommentPublisher;
             _courseService = courseService;
+            _systemService = systemService;
+            _logger = logger;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -48,6 +56,14 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CommentModel> methodResult = new MethodResult<CommentModel>();
             Comment comment = _mapper.Map<Comment>(request);
+            // Check từ khoá cấm
+             var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
+            var forbiddenWord = listForbiddenWordResult.Content?.Result;
+            if (forbiddenWord.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.ContainsForbiddenKeywords), string.Join(", ", forbiddenWord));
+                return methodResult;
+            }
             await _commentRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
             comment.UserId = _authContext.CurrentUserId;
             if (!comment.IsValid())
@@ -88,6 +104,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+                        //Log Action
+                        _logger.LogInformation($"CreateCommentCommandHandler: {model.UserId}");
                         break;
                     case EnumCommentType.ReplyComment:
 
@@ -108,6 +126,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
                         };
+                        //Log Action
+                        _logger.LogInformation($"CreateCommentCommandHandler: {model.UserId}");
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
                 }

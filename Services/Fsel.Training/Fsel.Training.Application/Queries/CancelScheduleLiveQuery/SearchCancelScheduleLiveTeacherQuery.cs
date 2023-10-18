@@ -4,6 +4,7 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -74,7 +75,7 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(p => !string.IsNullOrEmpty(p.ClassName) && p.ClassName.Contains(request.Keyword));
+                query = query.Where(p => (p.ClassName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

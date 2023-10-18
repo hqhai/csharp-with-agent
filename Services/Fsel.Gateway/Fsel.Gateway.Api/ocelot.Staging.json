@@ -29,11 +29,7 @@
           "Host": "user-staging.fsel-staging.svc",
           "Port": 80
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      ]
     },
     // Lcms Course Service
     {
@@ -47,11 +43,7 @@
           "Host": "lcmsapi-staging.fsel-staging.svc",
           "Port": 80
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      ]
     },
     // Lms Course Service
     {
@@ -65,11 +57,7 @@
           "Host": "lmsapi-staging.fsel-staging.svc",
           "Port": 80
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      ]
     },
     // Storage Service
     {

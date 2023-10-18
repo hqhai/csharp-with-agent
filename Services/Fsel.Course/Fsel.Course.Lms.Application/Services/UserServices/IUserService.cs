@@ -6,12 +6,19 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface IUserService
     {
+        [Post("/student/execute-list-query")]
+        Task<IApiResponse<MethodResult<StudentModel>>> ExecuteListQueryAsync([Body] BaseQueryModel query);
+
+        [Post("/student/execute-query")]
+        Task<IApiResponse<MethodResult<StudentModel>>> ExecuteQueryAsync([Body] BaseQueryModel query);
+
         [Get("/student/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 
@@ -38,5 +45,11 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/cso/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCSOByUserId([FromRoute] Guid id);
+
+        [Get("/cso/get-by-id/{id}")]
+        Task<IApiResponse<MethodResult<CSOModel>>> GetCSOById([FromRoute] Guid id);
+
+        [Get("/student-daily-streak/get-daily-streak/{id}")]
+        Task<IApiResponse<MethodResult<DailyStreakModel>>> GetDailyStreak([FromRoute] Guid id);
     }
 }

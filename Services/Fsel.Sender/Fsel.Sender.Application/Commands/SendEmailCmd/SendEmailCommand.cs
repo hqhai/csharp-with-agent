@@ -62,25 +62,25 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress(SenderSettings.HostName, _appSetting?.Smtp?.From ?? string.Empty));
 
-            if (message.ToEmails != null && message.ToEmails.IsValidEmail())
+            if (message.ToEmails != null)
             {
-                foreach (var item in message.ToEmails)
+                foreach (var item in message.ToEmails.Where(x => x.IsValidEmail()))
                 {
                     emailMessage.To.Add(new MailboxAddress(item, item));
                 }
             }
 
-            if (message.BccEmails != null && message.BccEmails.IsValidEmail())
+            if (message.BccEmails != null)
             {
-                foreach (var item in message.BccEmails)
+                foreach (var item in message.BccEmails.Where(x => x.IsValidEmail()))
                 {
                     emailMessage.Bcc.Add(new MailboxAddress(item, item));
                 }
             }
 
-            if (message.CcEmails != null && message.CcEmails.IsValidEmail())
+            if (message.CcEmails != null)
             {
-                foreach (var item in message.CcEmails)
+                foreach (var item in message.CcEmails.Where(x => x.IsValidEmail()))
                 {
                     emailMessage.Cc.Add(new MailboxAddress(item, item));
                 }

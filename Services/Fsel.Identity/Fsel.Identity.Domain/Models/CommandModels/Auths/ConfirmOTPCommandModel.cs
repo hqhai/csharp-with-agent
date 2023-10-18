@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 {
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Attributes;
 
     public class ConfirmOTPCommandModel
     {
@@ -11,7 +12,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 
         public string? PhoneNumber { get; set; }
 
-        [EmailAddress]
+        [EmailValid]
         public string? Email { get; set; }
 
         [Required]

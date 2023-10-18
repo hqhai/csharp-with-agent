@@ -6,8 +6,8 @@ using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Identity.Application.Services.OrderService;
-using Fsel.Identity.Application.Services.OrderService.Model;
+using Fsel.Core.Base.Managers;
+using Fsel.Identity.Application.Commands.StudentCmd;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -17,11 +17,9 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
-using Fsel.Shared.Enums.ErrorCodes;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
 
@@ -37,25 +35,25 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
-        private readonly IOrderService _orderService;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
             IMediator mediator,
-            IOrderService orderService,
             IUserOtpCodeRepository userOtpCodeRepository,
-            AppSetting appSetting)
+            AppSetting appSetting,
+            IPlatformRepository platformRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
             _mediator = mediator;
-            _orderService = orderService;
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
+            _platformRepository = platformRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -63,12 +61,21 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
             User? user = null;
+            if (!string.IsNullOrEmpty(request.PhoneNumber))
+            {
+                user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
+                if (user != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+            }
             if (!string.IsNullOrEmpty(request.Email))
             {
                 user = await _userManager.FindByEmailAsync(request.Email);
                 if (user != null && user.EmailConfirmed)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
                     return methodResult;
                 }
                 else
@@ -89,13 +96,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 await _roleManager.CreateAsync(role);
                             }
 
-                            IdentityResult result;
+                            Microsoft.AspNetCore.Identity.IdentityResult result;
                             if (user != null)
                             {
                                 var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
                                 user.PasswordHash = hashPassword;
                                 _mapper.Map(request, user);
                                 user.UserName = request.Email;
+                                if (!user.IsValid())
+                                {
+                                    methodResult.AddErrorBadRequest(user.ErrorMessages);
+                                    return methodResult;
+                                }
                                 result = await _userManager.UpdateAsync(user);
                             }
                             else
@@ -103,35 +115,49 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 user = new();
                                 _mapper.Map(request, user);
                                 user.UserName = request.Email;
+                                if (!user.IsValid())
+                                {
+                                    methodResult.AddErrorBadRequest(user.ErrorMessages);
+                                    return methodResult;
+                                }
+
+                                #region Add Platform to User
+
+                                request.PlatformCode ??= EnumPlatformCode.LMS;
+                                var platform = await _platformRepository.GetPlatformAsync(request.PlatformCode.Value, cancellationToken);
+                                if (platform != null)
+                                {
+                                    user.UserPlatforms.Add(new UserPlatform
+                                    {
+                                        PlatformId = platform.Id
+                                    });
+                                }
+
+                                #endregion Add Platform to User
+
                                 result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
+                                if (!result.Succeeded)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(request.Password), request.Password);
+                                    return methodResult;
+                                }
+                                await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);
+
                                 if (!string.IsNullOrEmpty(request.ReferralCode))
                                 {
-                                    var userReferral = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Human!.Code == request.ReferralCode, cancellationToken);
-                                    if (userReferral == null)
+                                    var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
+                                    if (!updateReferralCodeResult.IsOK)
                                     {
-                                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNotExistByCode));
-                                        return methodResult;
-                                    }
-                                    var userReferralResult = await _orderService.CreateUserReferralAsync(new CreateUserReferralCommandModel { SenderId = new Guid(userReferral.Id), ReceiverId = new Guid(user.Id) });
-                                    if (!userReferralResult.IsSuccessStatusCode)
-                                    {
-                                        methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
+                                        methodResult.AddError(updateReferralCodeResult.ErrorMessages);
                                         return methodResult;
                                     }
                                 }
                             }
 
-                            if (!result.Succeeded)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(request.Password), request.Password);
-                                return methodResult;
-                            }
-                            await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);
-
                             #region Send Code OTP
 
                             var userOtpCode = await _userOtpCodeRepository.Queryable
-                                    .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted, cancellationToken);
+                                    .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
 
                             RandomSecureHelper randomSecure = new RandomSecureHelper();
                             var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
@@ -142,8 +168,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 {
                                     UserId = user.Id,
                                     OTPCode = otp,
-                                    Status = EnumStatusUser.New,
-                                    ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime)
+                                    Status = EnumOtpCodeStatus.New,
+                                    ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime)
                                 };
                                 _userOtpCodeRepository.Add(userOtpCode);
                                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -151,7 +177,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             else
                             {
                                 userOtpCode.OTPCode = otp;
-                                userOtpCode.ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime);
+                                userOtpCode.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
                                 _userOtpCodeRepository.Update(userOtpCode);
                                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                             }
@@ -186,7 +212,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         }
                         catch
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.SendAuthErorr));
+                            methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
                             scope.Dispose();
                         }
                     }
@@ -197,7 +223,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
                 if (user != null && user.EmailConfirmed)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
                     return methodResult;
                 }
             }

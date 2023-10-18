@@ -20,6 +20,7 @@ namespace Fsel.Notification.Application.Commands
     using Microsoft.EntityFrameworkCore;
     using Fsel.Common.Models;
     using Fsel.Core.Base.Interfaces;
+    using Microsoft.Extensions.Logging;
 
     public class CreateNotificationCommand : CreateNotificationCommandModel, IRequest<MethodResult<NotificationMessageModel>>
     {
@@ -34,8 +35,9 @@ namespace Fsel.Notification.Application.Commands
         private readonly IUserService _userService;
         private readonly INotificationRemindRepository _notificationRemindRepository;
         private readonly IOneSignalProvider _oneSignalProvider;
+        private readonly ILogger<CreateNotificationCommandHandler> _logger;
 
-        public CreateNotificationCommandHandler(INotificationsRepository notificationsRepository, IMapper mapper, INotificationTypeRepository notificationTypeRepository, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, INotificationRemindRepository notificationRemindRepository, IOneSignalProvider oneSignalProvider)
+        public CreateNotificationCommandHandler(INotificationsRepository notificationsRepository, IMapper mapper, INotificationTypeRepository notificationTypeRepository, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, INotificationRemindRepository notificationRemindRepository, IOneSignalProvider oneSignalProvider, ILogger<CreateNotificationCommandHandler> logger)
         {
             _notificationsRepository = notificationsRepository;
             _mapper = mapper;
@@ -44,6 +46,7 @@ namespace Fsel.Notification.Application.Commands
             _userService = userService;
             _notificationRemindRepository = notificationRemindRepository;
             _oneSignalProvider = oneSignalProvider;
+            _logger = logger;
         }
 
         public async Task<MethodResult<NotificationMessageModel>> Handle(CreateNotificationCommand request, CancellationToken cancellationToken)
@@ -56,19 +59,19 @@ namespace Fsel.Notification.Application.Commands
             NotificationMessage notificationNew = _mapper.Map<NotificationMessage>(request);
 
             // check null data
-            var notificationTypeResult = request.NotificationTypeId != Guid.Empty ? await _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId) : null;
-            if (notificationTypeResult == null)
+            var notificationType = await _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId);
+            if (notificationType == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NotificationTypeId), request.NotificationTypeId);
                 return methodResult;
             }
 
             //list User bị tắt thông báo
-            var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId.ToString()).ToListAsync(cancellationToken);
+            var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId).ToListAsync(cancellationToken);
 
             // Handle list UserId
             GetUsersByRoleQueryModel roleQuery = new GetUsersByRoleQueryModel();
-            List<string> listUserId = new List<string>();
+            List<Guid> listUserId = new List<Guid>();
             if (request.Roles != null)
             {
                 foreach (var item in request.Roles)
@@ -78,7 +81,7 @@ namespace Fsel.Notification.Application.Commands
                     if (user.Content?.Result != null)
                     {
                         var users = user.Content.Result;
-                        listUserId.AddRange(users.Select(u => u.Id.ToString()));
+                        listUserId.AddRange(users.Select(u => u.Id));
                     }
                 }
 
@@ -94,7 +97,7 @@ namespace Fsel.Notification.Application.Commands
                 foreach (var item in listUserId)
                 {
                     NotificationMessage notificationElement = _mapper.Map<NotificationMessage>(request);
-                    notificationElement.UserId = new Guid(item);
+                    notificationElement.UserId = item;
                     listNotificationMessage.Add(notificationElement);
                 }
             }
@@ -104,6 +107,7 @@ namespace Fsel.Notification.Application.Commands
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
                 //Save into Database
+                _logger.LogInformation("CreateNotificationCommandHandler:Starting Insert To Database");
                 if (listNotificationMessage.Count > 0)
                 {
                     await _notificationsRepository.AddList(listNotificationMessage);
@@ -112,6 +116,8 @@ namespace Fsel.Notification.Application.Commands
                 {
                     notificationNew = _notificationsRepository.Add(notificationNew);
                 }
+
+                _logger.LogInformation("CreateNotificationCommandHandler:Ending Save To Database");
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 string avatarPath = string.Empty;
@@ -124,12 +130,21 @@ namespace Fsel.Notification.Application.Commands
 
                 //Push notification to onesignal
                 var oneSignalMessage = _mapper.Map<OneSignalMessageModel>(notificationNew);
+                oneSignalMessage.UserIds = listUserId;
+                oneSignalMessage.AvatarPath = avatarPath;
+                oneSignalMessage.Data = new
+                {
+                    notificationType.Type,
+                    notificationType.Content
+                };
                 await _oneSignalProvider.CreateNotificationAsync(oneSignalMessage, cancellationToken);
 
-                //Push notification
+                //Push notification to websocket
                 var notificationRealTime = _mapper.Map<NotificationMessageModel>(notificationNew);
                 notificationRealTime.UserIds = listUserId;
                 notificationRealTime.AvatarPath = avatarPath;
+                notificationRealTime.Type = notificationType.Type;
+                notificationRealTime.Content = notificationType.Content;
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
 

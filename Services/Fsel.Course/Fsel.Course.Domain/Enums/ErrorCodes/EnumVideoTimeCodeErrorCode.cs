@@ -8,5 +8,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Number of DisplayTime >1
         /// </summary>
         DisplayTimeGreaterThan1,
+
+        /// <summary>
+        /// Video Time Code Previous Not Done
+        /// </summary>
+        VideoTimeCodePreviousNotDone
     }
 }

@@ -2,8 +2,10 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
+    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.StudentProgress;
@@ -69,11 +71,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 studentProgressModel.Level = courseResult.CourseLevel ?? default;
                 studentProgressModel.CourseType = courseResult.CourseType ?? default;
                 studentProgressModel.CourseId = courseResult.CourseId;
+                studentProgressModel.CreatedDate = courseResult.CreatedDate ?? default;
                 studentProgress.Add(studentProgressModel);
             }
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).Contains(request.Keyword, StringComparison.CurrentCulture)).ToList();
+                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())).ToList();
             }
 
             if (request.CourseType != null)
@@ -87,8 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             int totalItem = studentProgress.Count;
-            var studentProgressOrder = request.IsSortDesc ? studentProgress.OrderByDescending(m => m.FullName) : studentProgress.OrderBy(m => m.FullName);
-            var lists = studentProgressOrder.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var lists = studentProgress.ApplySortAndPaging(request).ToList();
             foreach (var item in lists)
             {
                 var courseResult = courseResults.FirstOrDefault(x => x.CourseId == item.CourseId && x.StudentId == item.StudentId);

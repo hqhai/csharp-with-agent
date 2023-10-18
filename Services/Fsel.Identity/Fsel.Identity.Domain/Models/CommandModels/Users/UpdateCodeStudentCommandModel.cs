@@ -7,7 +7,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
 
     public class UpdateCodeStudentCommandModel
     {
-        public string? UserId { get; set; }
+        public Guid? UserId { get; set; }
         public EnumGender Gender { get; set; }
         public DateTime? Birthday { get; set; }
         public int? YearBirthday { get; set; }

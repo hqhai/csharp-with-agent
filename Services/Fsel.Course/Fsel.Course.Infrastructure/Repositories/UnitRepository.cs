@@ -3,13 +3,14 @@
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class UnitRepository : BaseRepository<Unit>, IUnitRepository
     {
-        public UnitRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public UnitRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 
@@ -40,6 +41,49 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return null;
             }
             return await Queryable.Include(x => x.UnitSkillMockTests).Include(x => x.UnitLessons).Where(x => ids.Contains(x.Id)).ToListAsync();
+        }
+
+        public async Task<List<Unit>?> GetListAsync(Guid? studentId, Guid courseId, EnumLearnProcessType type)
+        {
+            var query = Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
+                               .Include(x => x.CourseUnitMockTests)
+                               .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == courseId));
+            if (type == EnumLearnProcessType.LessonVideo)
+            {
+                return await query.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson)
+                               .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
+                               .AsNoTracking()
+                               .ToListAsync();
+            }
+            else if (type == EnumLearnProcessType.HomeWork)
+            {
+                return await query.Include(x => x.UnitLessons)
+                                    .ThenInclude(x => x.Lesson)
+                                    .ThenInclude(x => x!.LessonHomeWorks)
+                                    .ThenInclude(x => x.HomeWork)
+                                .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
+                                .ThenInclude(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
+                                .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == courseId))
+                                .AsNoTracking()
+                                .ToListAsync();
+            }
+            else if (type == EnumLearnProcessType.ClassForum)
+            {
+                return await query.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson).ThenInclude(x => x!.ClassForum)
+                              .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
+                              .ThenInclude(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
+                              .AsNoTracking()
+                              .ToListAsync();
+            }
+            else
+            {
+                return await query.Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
+                               .Include(x => x.UnitLessons)
+                               .ThenInclude(x => x.Lesson)
+                               .ThenInclude(x => x!.LessonVideos)
+                               .AsNoTracking()
+                               .ToListAsync();
+            }
         }
 
         public async Task<bool> IsUnitUsed(Guid id)

@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
@@ -40,7 +41,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.IsFlagged == true)
+                                    .Include(x => x.ClassForumResultFlags)
+                                    /*.Where(x => x.ClassForumResultFlags != null && x.ClassForumResultFlags.Contains(x.Status = EnumClassForumResultFlagStatus.New))*/
+                                    .Where(x => x.ClassForumResultFlags != null && x.ClassForumResultFlags.Any(x => x.Status == EnumClassForumResultFlagStatus.New))
                                     .Select(x => new ClassForumResultModel
                                     {
                                         Id = x.Id,
@@ -48,10 +51,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         CreatedUserId = x.CreatedUserId,
                                         CreatedFullName = x.CreatedFullName,
                                         Content = x.Content,
+                                        Status = x.Status,
                                     });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).Contains(request.Keyword));
+                classForumResultQuery = classForumResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classForumResultQuery

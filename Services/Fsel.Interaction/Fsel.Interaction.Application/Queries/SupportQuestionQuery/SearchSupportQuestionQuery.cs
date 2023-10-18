@@ -38,6 +38,7 @@ namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+
             var supportQuestionQuery = _supportQuestionRepository.Queryable
                                 .Select(x => new SupportQuestionModel
                                 {
@@ -51,12 +52,16 @@ namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                supportQuestionQuery = supportQuestionQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                supportQuestionQuery = supportQuestionQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.SupportCategoryId != null)
             {
                 supportQuestionQuery = supportQuestionQuery.Where(m => m.SupportCategoryId == request.SupportCategoryId);
+            }
+            if (request.IsFrequent != null)
+            {
+                supportQuestionQuery = supportQuestionQuery.Where(m => m.IsFrequent == request.IsFrequent);
             }
             int totalItem = await supportQuestionQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await supportQuestionQuery

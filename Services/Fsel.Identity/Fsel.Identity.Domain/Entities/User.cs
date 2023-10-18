@@ -2,11 +2,11 @@
 
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
-using Microsoft.AspNetCore.Identity;
+using Fsel.Core.Entities;
 
 namespace Fsel.Identity.Domain.Entities
 {
-    public class User : IdentityUser
+    public class User : UserEntity
     {
         [Required]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -17,5 +17,7 @@ namespace Fsel.Identity.Domain.Entities
         public virtual ICollection<UserOtpCode> UserOtpCodes { get; set; } = new List<UserOtpCode>();
 
         public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
+
+        public virtual ICollection<UserPlatform> UserPlatforms { get; set; } = new List<UserPlatform>();
     }
 }

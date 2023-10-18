@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
 
     public class GetCsoByUserIdsQuery : IRequest<MethodResult<IList<CSOModel>>>
     {
-        public IList<string>? UserIds { get; set; }
+        public IList<Guid>? UserIds { get; set; }
     }
 
     public class GetCsoByUserIdsQueryHandler : IRequestHandler<GetCsoByUserIdsQuery, MethodResult<IList<CSOModel>>>
@@ -35,10 +35,13 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
             ArgumentNullException.ThrowIfNull(request);
 
             var methodResult = new MethodResult<IList<CSOModel>>();
-
-            var cso = await _csoRepository.Queryable.Include(x => x.Human).Where(x => request.UserIds!.Contains(x.Human!.UserId!))
-
-                .ToListAsync(cancellationToken);
+            if (request.UserIds == null || !request.UserIds.Any())
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+            var cso = await _csoRepository.Queryable.Include(x => x.Human).Where(x => x.Human != null && x.Human.UserId.HasValue && request.UserIds.Contains(x.Human.UserId.Value))
+                            .ToListAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<CSOModel>>(cso);
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentByUserIdsQuery : IRequest<MethodResult<IList<StudentModel>>>
     {
-        public IList<string>? UserIds { get; set; }
+        public IList<Guid>? UserIds { get; set; }
     }
 
     public class GetStudentByUserIdsQueryHandler : IRequestHandler<GetStudentByUserIdsQuery, MethodResult<IList<StudentModel>>>
@@ -34,10 +34,14 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<StudentModel>> methodResult = new MethodResult<IList<StudentModel>>();
-
+            if (request.UserIds == null || !request.UserIds.Any())
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
             var students = await _studentRepository.Queryable
                                         .Include(i => i.Human)
-                                        .Where(i => i.Human != null && request.UserIds!.Contains(i.Human.UserId!))
+                                        .Where(i => i.Human != null && i.Human.UserId.HasValue && request.UserIds.Contains(i.Human.UserId.Value))
                                         .Select(x => new StudentModel
                                         {
                                             Id = x.Id,
@@ -48,12 +52,6 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                                             School = x.School,
                                             Human = _mapper.Map<HumanProfileModel>(x.Human)
                                         }).ToListAsync(cancellationToken);
-
-            /*if (students == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentsNotExist));
-                return methodResult;
-            }*/
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

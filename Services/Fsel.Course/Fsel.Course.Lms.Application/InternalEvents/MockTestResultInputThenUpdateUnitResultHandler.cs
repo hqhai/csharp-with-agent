@@ -2,32 +2,41 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using System.Linq.Dynamic.Core;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Core.Applications.InternalEvents;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
     public class MockTestResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<MockTestResult>>
     {
-        public MockTestResultInputThenUpdateUnitResultHandler(IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
+        private readonly IMockTestRepository _mockTestRepository;
+
+        public MockTestResultInputThenUpdateUnitResultHandler(ISystemService systemService, AppSetting appSetting, FinishOneLevelPassPublisher finishOneLevelPassPublisher, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, ITrainingService trainingService, FinishOneUnitPublisher finishOneUnitPublisher, IMockTestRepository mockTestRepository) : base(systemService, appSetting, finishOneLevelPassPublisher, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, trainingService, finishOneUnitPublisher)
         {
+            _mockTestRepository = mockTestRepository;
         }
 
         public async Task Handle(EntityChangedEvent<MockTestResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
             var mockTestResult = notification.Data;
-            var mockTest = await _mockTestRepository.GetByIdAsync(mockTestResult.MockTestId);
+            var mockTest = await _mockTestRepository.Queryable.Where(x => x.Id == mockTestResult.MockTestId).FirstOrDefaultAsync(cancellationToken);
 
             if (mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && mockTestResult.Status == EnumResultStatus.Done)
             {
                 var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
+                                                   .Include(x => x.UnitResults.Where(x => x.UnitId == mockTestResult.UnitId && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId))
                                                    .Include(x => x.LessonResults.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId))
                                                    .FirstOrDefaultAsync(x => x.Id == mockTestResult.UnitId, cancellationToken);
                 if (unit != null)
@@ -36,7 +45,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == mockTestResult.UnitId && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId, cancellationToken);
                     if (unitResult != null && unit.LessonResults.Count == unit.UnitLessons.Count)
                     {
-                        await UpdateUnit(lessonResulIds, unit, mockTestResult.CourseId, mockTestResult.StudentId, true, cancellationToken);
+                        await UpdateUnitResultAsync(lessonResulIds, unit, mockTestResult.CourseId, mockTestResult.StudentId, true, cancellationToken);
                     }
                 }
             }
