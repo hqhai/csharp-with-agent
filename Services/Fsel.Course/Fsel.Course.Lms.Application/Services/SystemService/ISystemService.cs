@@ -3,14 +3,18 @@
 namespace Fsel.Course.Lms.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface ISystemService
     {
-        [Post("/course-time-config")]
-        Task<IApiResponse<MethodResult<IList<CourseTimeConfigModel>>>> GetCourseTimeConfigAsync([Body] IList<Guid> courseIds);
+        [Post("/course-time-config/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<CourseTimeConfigModel>>>> CourseTimeConfigQueryAsync([Body] BaseQueryModel query);
+
+        [Get("/course-time-config")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<CourseTimeConfigModel>>>> GetCourseTimeConfigAsync();
 
         [Get("/log-action/{userId}")]
         Task<IApiResponse<MethodResult<LogActionDaysModel>>> GetLogActionsByUserId([FromRoute] Guid userId);

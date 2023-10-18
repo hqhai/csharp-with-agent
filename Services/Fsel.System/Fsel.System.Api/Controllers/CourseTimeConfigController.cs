@@ -3,10 +3,12 @@
 namespace Fsel.System.Api.Controllers
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Commands.CourseTimeConfigCmd;
     using Fsel.System.Application.Querys.CourseTimeConfigQuery;
+    using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
@@ -18,10 +20,26 @@ namespace Fsel.System.Api.Controllers
     public class CourseTimeConfigController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ICourseTimeConfigRepository _courseTimeConfigRepository;
 
-        public CourseTimeConfigController(IMediator mediator)
+        public CourseTimeConfigController(IMediator mediator, ICourseTimeConfigRepository courseTimeConfigRepository)
         {
             _mediator = mediator;
+            _courseTimeConfigRepository = courseTimeConfigRepository;
+        }
+
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpPost("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseTimeConfigModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
+        {
+            var result = await _courseTimeConfigRepository.GetListResultAsync<CourseTimeConfigModel>(query);
+            return result.GetActionResult();
         }
 
         /// <summary>
