@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
+            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = _authContext.CurrentUserId });
             if (!orderResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));

@@ -130,7 +130,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 tokenLogin.IsPlacementTest = isPlacementTest?.Content?.Result;
                 if (@class != null)
                 {
-                    var order = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, ClassId = @class.Id, PackageId = @class.PackageId, UserId = request.Id });
+                    var order = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = request.Id });
 
                     tokenLogin.ClassCode = @class.Code;
                     tokenLogin.IsOrder = order?.Content?.Result == EnumOrderStatus.Payment;
