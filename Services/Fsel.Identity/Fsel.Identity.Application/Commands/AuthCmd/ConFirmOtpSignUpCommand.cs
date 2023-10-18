@@ -7,9 +7,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Auths;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -54,6 +56,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             MethodResult<ConfirmOtpModel> methodResult = new MethodResult<ConfirmOtpModel>();
+            if (!string.IsNullOrEmpty(request.Email) && !request.Email.IsValidEmail())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                return methodResult;
+            }
+            if (!string.IsNullOrEmpty(request.PhoneNumber) && !request.PhoneNumber.IsValidPhoneNumber())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
+                return methodResult;
+            }
+
             User? user = new User();
             if (!string.IsNullOrEmpty(request.Email))
             {

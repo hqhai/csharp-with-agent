@@ -8,6 +8,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
@@ -52,7 +53,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
                 return methodResult;
             }
-
+            if (!string.IsNullOrEmpty(request.Email) && !request.Email.IsValidEmail())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                return methodResult;
+            }
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {

@@ -67,6 +67,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             User? user = null;
             if (!string.IsNullOrEmpty(request.Email))
             {
+                user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
+                if (user != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+
                 user = await _userManager.FindByEmailAsync(request.Email);
                 if (user != null && user.EmailConfirmed)
                 {

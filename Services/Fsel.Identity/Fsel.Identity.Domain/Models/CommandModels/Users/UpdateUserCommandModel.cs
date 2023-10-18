@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Users
 {
-    using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Domain.Models.CommandModels.TeacherBankAccount;
 
@@ -10,8 +9,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
     {
         public string? AvatarPath { get; set; }
         public DateTime? Birthday { get; set; }
-
-        [Phone]
         public string? PhoneNumber { get; set; }
 
         public string? FullName { get; set; }

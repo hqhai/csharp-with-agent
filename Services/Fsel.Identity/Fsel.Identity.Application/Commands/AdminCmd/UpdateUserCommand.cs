@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -34,8 +35,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            var user = await _userManager.FindByIdAsync(request.Id.ToString());
-
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber && x.Id != request.Id, cancellationToken: cancellationToken);
+            if (user != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                return methodResult;
+            }
+            user = await _userManager.FindByIdAsync(request.Id.ToString());
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -100,12 +106,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _mapper.Map(request, user.Human);
             if (!user.IsValid())
             {
-                methodResult.AddErrorBadRequest(user.Human?.CSO?.ErrorMessages);
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
                 return methodResult;
             }
             if (!user.Human!.IsValid())
             {
-                methodResult.AddErrorBadRequest(user.Human?.CSO?.ErrorMessages);
+                methodResult.AddErrorBadRequest(user.Human?.ErrorMessages);
                 return methodResult;
             }
             await _userManager.UpdateAsync(user);

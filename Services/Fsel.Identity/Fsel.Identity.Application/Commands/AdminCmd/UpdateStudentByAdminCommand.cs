@@ -69,47 +69,39 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region Validate Email and PhoneNumber
 
-            if (!string.IsNullOrEmpty(request.Email) && !request.Email.IsValidEmail())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
-                return methodResult;
-            }
-
-            if (!string.IsNullOrEmpty(request.PhoneNumber) && !request.PhoneNumber.IsValidPhoneNumber())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
-                return methodResult;
-            }
-            if (request.Parent != null && !string.IsNullOrEmpty(request.Parent.Email) && !request.Parent.Email.IsValidEmail())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
-                return methodResult;
-            }
-            if (request.Parent != null && !string.IsNullOrEmpty(request.Parent.PhoneNumber) && !request.Parent.PhoneNumber.IsValidPhoneNumber())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.Parent.PhoneNumber));
-                return methodResult;
-            }
-
-            #endregion Validate Email and PhoneNumber
-
             var userView = await _userManager.Users.Include(x => x.Human)
-                                                  .ThenInclude(x => x!.Student)
-                                                  .ThenInclude(x => x!.ParentStudents)
-                                                  .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.Id, cancellationToken);
+                                                 .ThenInclude(x => x!.Student)
+                                                 .ThenInclude(x => x!.ParentStudents)
+                                                 .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.Id, cancellationToken);
             if (userView == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
                 return methodResult;
             }
+
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email && x.Id != userView.Id, cancellationToken: cancellationToken);
+            if (user != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
+                return methodResult;
+            }
+            user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber && x.Id != userView.Id, cancellationToken: cancellationToken);
+            if (user != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                return methodResult;
+            }
+
+            #endregion Validate Email and PhoneNumber
+
             var student = userView.Human?.Student;
 
             #region Update Parent
 
-            var user = await SaveParent(request, student, cancellationToken);
-            if (user.Result != null)
+            var userResult = await SaveParent(request, student, cancellationToken);
+            if (userResult.Result != null)
             {
-                userView = user.Result;
+                userView = userResult.Result;
             }
             if (userView == null)
             {
