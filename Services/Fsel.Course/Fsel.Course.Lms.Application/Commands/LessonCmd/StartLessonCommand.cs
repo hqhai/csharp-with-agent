@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
     using Fsel.Course.Domain.Models.CommandModels.Lessons;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;

@@ -128,5 +128,15 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// User is not on any platform
         /// </summary>
         UserIsNotOnAnyPlatform,
+
+        /// <summary>
+        /// Email is not valid
+        /// </summary>
+        EmailIsNotValid,
+
+        /// <summary>
+        /// PhoneNumber is not valid
+        /// </summary>
+        PhoneNumberIsNotValid,
     }
 }

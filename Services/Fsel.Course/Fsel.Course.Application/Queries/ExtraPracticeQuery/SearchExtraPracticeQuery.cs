@@ -53,7 +53,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
                                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                extraPracticeQuery = extraPracticeQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                extraPracticeQuery = extraPracticeQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.CourseLevel != null)
             {
