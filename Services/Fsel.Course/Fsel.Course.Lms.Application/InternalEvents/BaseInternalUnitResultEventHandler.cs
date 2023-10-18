@@ -108,12 +108,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 UnitNumber = unitNumber.ToString(),
                 UnitName = unitName,
                 AccessLink = _appSetting.ResourceContent?.LmsWebsiteUrl,
-                CsoPhonenumber = csoPhonenumber
+                CsoPhonenumber = csoPhonenumber,
+                Scores = string.Join("", groupedSkillScores.Select(item => $"<li style=\"line-height: 1.5rem\">{item.Skill}: {item.Percent}%</li>"))
             };
-            foreach (var item in groupedSkillScores)
-            {
-                parameter.Scores += ($"<li style=\"line-height: 1.5rem\">{item.Skill}: {item.Percent}%</li>");
-            }
             return parameter;
         }
     }
