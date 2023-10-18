@@ -117,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             }
 
             mockTestResult.SkillScores = skillScores;
-            mockTestResult.Percent = NumberHelper.ConvertRatingToDouble(mockTestResult.SkillScores?.Average(x => x.Percent) ?? default);
+            mockTestResult.Percent = NumberHelper.ConvertRound(mockTestResult.SkillScores?.Average(x => x.Percent) ?? default);
             mockTestResult.MockTestScores = mockTestScores;
             mockTestResult.GradingTeacherId = teacherId;
 
