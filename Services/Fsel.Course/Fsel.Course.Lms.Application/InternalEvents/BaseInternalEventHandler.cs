@@ -131,9 +131,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     {
                         if (x.Skill == EnumCourseSkill.Writing || x.Skill == EnumCourseSkill.Speaking)
                         {
-                            return NumberHelper.ConvertDoubleDecimal(x.Percent * PercentVideoIELSTWS);
+                            return NumberHelper.ConvertRatingToDouble(x.Percent * PercentVideoIELSTWS);
                         }
-                        return NumberHelper.ConvertDoubleDecimal(x.Percent * PercentVideoIELST);
+                        return NumberHelper.ConvertRatingToDouble(x.Percent * PercentVideoIELST);
                     })) : default);
                 }
             }

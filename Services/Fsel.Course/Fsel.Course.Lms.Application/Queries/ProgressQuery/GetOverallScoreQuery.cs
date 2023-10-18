@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             Scores = x.Average(x => x.Scores),
                             CountQuestion = x.Sum(x => x.CountQuestion),
                             TotalQuestion = x.Sum(x => x.TotalQuestion),
-                            Percent = NumberHelper.ConvertDoubleDecimal(x.Average(x => x.Percent))
+                            Percent = NumberHelper.ConvertRatingToDouble(x.Average(x => x.Percent))
                         }).ToList();
                     overallScoreModel.IsPlacement = false;
                     overallScoreModel.Percent = unitResults.Average(x => x.Percent);
