@@ -6,7 +6,5 @@ namespace Fsel.Identity.Application.Services.OrderService.Model
     {
         public Guid? UserId { get; set; }
         public Guid? CourseId { get; set; }
-        public Guid? ClassId { get; set; }
-        public Guid? PackageId { get; set; }
     }
 }
