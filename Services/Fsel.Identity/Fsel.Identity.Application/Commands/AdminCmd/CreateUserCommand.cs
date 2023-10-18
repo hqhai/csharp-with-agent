@@ -106,88 +106,98 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseTypes), nameof(request.LiveCourseTypes));
                 return methodResult;
             }
-
-            #endregion validate
-
             var user = await _userManager.FindByEmailAsync(request.Email!);
             if (user != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
                 return methodResult;
             }
-            else
+            user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
+            if (user != null)
             {
-                var role = await _roleManager.FindByNameAsync(request.Role.ToString() ?? string.Empty);
-                var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
-                Microsoft.AspNetCore.Identity.IdentityResult result;
-                user = new();
-                _mapper.Map(request, user);
-                user.UserName = request.Email;
-
-                #region Add Platform to User
-                var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
-                if (platform != null)
-                {
-                    user.UserPlatforms.Add(new UserPlatform
-                    {
-                        PlatformId = platform.Id
-                    });
-                }
-                #endregion
-
-                result = await _userManager.CreateAsync(user, newPassword);
-                if (!result.Succeeded)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
-                    return methodResult;
-                }
-                var human = await CreateHuman(request, user);
-                human = _humanRepository.Add(human);
-                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                await _userManager.AddToRoleAsync(user, request.Role.ToString());
-
-                #region Send Code OTP
-
-                var userOtpCode = await _userOtpCodeRepository.Queryable
-                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
-
-                var randomSecure = new RandomSecureHelper();
-                var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-                var otp = totp.ComputeTotp();
-                if (userOtpCode == null)
-                {
-                    userOtpCode = new UserOtpCode
-                    {
-                        UserId = user.Id,
-                        OTPCode = otp,
-                        Status = EnumOtpCodeStatus.New,
-                        ExpiredTime = DateTime.UtcNow.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
-                    };
-                    _userOtpCodeRepository.Add(userOtpCode);
-                    await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
-
-                var param = new SendOtpTemplateModel
-                {
-                    OtpCode = otp,
-                    AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp),
-                    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
-                };
-                var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
-                var sendResult = new MethodResult<bool>();
-                if (!string.IsNullOrEmpty(request.Email))
-                {
-                    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
-                }
-
-                if (!sendResult.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
-                    return methodResult;
-                }
-
-                #endregion Send Code OTP
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                return methodResult;
             }
+
+            #endregion validate
+
+            var role = await _roleManager.FindByNameAsync(request.Role.ToString() ?? string.Empty);
+            var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
+            Microsoft.AspNetCore.Identity.IdentityResult result;
+            user = new();
+            _mapper.Map(request, user);
+            user.UserName = request.Email;
+
+            #region Add Platform to User
+
+            var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
+            if (platform != null)
+            {
+                user.UserPlatforms.Add(new UserPlatform
+                {
+                    PlatformId = platform.Id
+                });
+            }
+
+            #endregion Add Platform to User
+
+            result = await _userManager.CreateAsync(user, newPassword);
+            if (!result.Succeeded)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
+                return methodResult;
+            }
+            var human = await CreateHuman(request, user);
+            if (!human.IsValid())
+            {
+                methodResult.AddErrorBadRequest(human.ErrorMessages);
+                return methodResult;
+            }
+            human = _humanRepository.Add(human);
+            await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _userManager.AddToRoleAsync(user, request.Role.ToString());
+
+            #region Send Code OTP
+
+            var userOtpCode = await _userOtpCodeRepository.Queryable
+                    .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
+
+            var randomSecure = new RandomSecureHelper();
+            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
+            var otp = totp.ComputeTotp();
+            if (userOtpCode == null)
+            {
+                userOtpCode = new UserOtpCode
+                {
+                    UserId = user.Id,
+                    OTPCode = otp,
+                    Status = EnumOtpCodeStatus.New,
+                    ExpiredTime = DateTime.UtcNow.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
+                };
+                _userOtpCodeRepository.Add(userOtpCode);
+                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            var param = new SendOtpTemplateModel
+            {
+                OtpCode = otp,
+                AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp),
+                OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
+            };
+            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
+            var sendResult = new MethodResult<bool>();
+            if (!string.IsNullOrEmpty(request.Email))
+            {
+                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
+            }
+
+            if (!sendResult.IsOK)
+            {
+                methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
+                return methodResult;
+            }
+
+            #endregion Send Code OTP
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);

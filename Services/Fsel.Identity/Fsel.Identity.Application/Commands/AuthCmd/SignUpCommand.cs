@@ -8,7 +8,6 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.StudentCmd;
-using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -36,7 +35,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
-        private readonly IOrderService _orderService;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
@@ -45,7 +43,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             RoleManager<Role> roleManager,
             IMapper mapper,
             IMediator mediator,
-            IOrderService orderService,
             IUserOtpCodeRepository userOtpCodeRepository,
             AppSetting appSetting,
             IPlatformRepository platformRepository)
@@ -54,7 +51,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _roleManager = roleManager;
             _mapper = mapper;
             _mediator = mediator;
-            _orderService = orderService;
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
             _platformRepository = platformRepository;
@@ -67,6 +63,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             User? user = null;
             if (!string.IsNullOrEmpty(request.Email))
             {
+                user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
+                if (user != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+
                 user = await _userManager.FindByEmailAsync(request.Email);
                 if (user != null && user.EmailConfirmed)
                 {
