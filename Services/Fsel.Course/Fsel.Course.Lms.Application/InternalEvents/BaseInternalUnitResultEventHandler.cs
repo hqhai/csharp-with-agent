@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 {
     using System.Globalization;
     using System.Threading;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -90,25 +91,30 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.FirstOrDefaultAsync(p => p.UnitId == unit.Id && courseId == p.CourseId, cancellationToken);
             var @class = await _trainingService.GetClassByStudentId(studentId);
             var cso = await _userService.GetCSOById(@class.Content?.Result?.CsoId ?? default);
-            var scores = new SendStudentCompleteUnitModel
-            {
-                StudentName = student?.Human?.FullName,
-                UnitNumber = courseUnitMockTest?.Number.ToString(CultureInfo.CurrentCulture),
-                UnitName = unit.Name,
-                AccessLink = _appSetting.ResourceContent?.LmsWebsiteUrl,
-                CsoPhonenumber = cso.Content?.Result?.Human?.PhoneNumber
-            };
-            foreach (var item in groupedSkillScores)
-            {
-                scores.Scores += ($"<li style=\"line-height: 1.5rem\">{item.Skill}: {item.Percent}%</li>");
-            }
             var sendResult = await _mediator.Send(new SenderCommand
             {
                 Email = student?.Human?.Email,
                 Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteUnit, courseUnitMockTest?.Number.ToString(CultureInfo.CurrentCulture)),
-                Params = scores,
+                Params = GetParameter(student?.Human?.FullName, courseUnitMockTest?.Number, unit.Name, cso.Content?.Result?.Human?.PhoneNumber, groupedSkillScores),
                 Template = percent >= 60 ? EnumSenderTemplate.SendStudentCompleteUnitGood : EnumSenderTemplate.SendStudentCompleteUnitWeak
             }, cancellationToken).ConfigureAwait(false);
+        }
+
+        private SendStudentCompleteUnitModel GetParameter(string? fullName, int? unitNumber, string? unitName, string? csoPhonenumber, List<SkillScores> groupedSkillScores)
+        {
+            var parameter = new SendStudentCompleteUnitModel
+            {
+                StudentName = fullName,
+                UnitNumber = unitNumber.ToString(),
+                UnitName = unitName,
+                AccessLink = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                CsoPhonenumber = csoPhonenumber
+            };
+            foreach (var item in groupedSkillScores)
+            {
+                parameter.Scores += ($"<li style=\"line-height: 1.5rem\">{item.Skill}: {item.Percent}%</li>");
+            }
+            return parameter;
         }
     }
 }
