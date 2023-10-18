@@ -67,7 +67,12 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Orders Not Approved
         /// </summary>
-        OrdersNotApproved
+        OrdersNotApproved,
+
+        /// <summary>
+        /// The course does not exist or has not been activated
+        /// </summary>
+        CourseNotExistOrNotActive
 
 ,
     }
