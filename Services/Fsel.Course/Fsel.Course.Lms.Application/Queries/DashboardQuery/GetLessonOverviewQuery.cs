@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -77,7 +78,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var @class = classResult?.Content?.Result;
             if (@class == null)
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -85,7 +85,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var course = await GetCourse(@class.CourseId, cancellationToken);
             if (course == null)
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
