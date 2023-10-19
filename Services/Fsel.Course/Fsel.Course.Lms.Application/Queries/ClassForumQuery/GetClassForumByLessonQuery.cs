@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                                    .Include(x => x.ClassForumFiles)
                                    .Include(x => x.ClassForumResults!.OrderBy(x => x.CreatedDate))
                                    .ThenInclude(x => x.ClassForumResultFiles)
-                                   .Where(x => x.ClassForumResults!.Any(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded))
+                                   .Where(x => x.ClassForumResults.Any(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded))
                                    .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
 
             var classForm = _mapper.Map<ClassForumModel>(classForumQuery);
