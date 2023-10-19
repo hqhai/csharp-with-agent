@@ -40,7 +40,7 @@ namespace Fsel.System.Application.Queries.GameVocabularies
                 return methodResult;
             }
 
-            var query = _gameVocabularyRepository.Queryable.Include(t => t.GameTopic).Include(x => x.GameVocabularyTypes).AsQueryable();
+            var query = _gameVocabularyRepository.Queryable.Include(t => t.GameTopic).Include(x => x.GameVocabularyTypes).Include(p => p.GameVocabularyPlatforms).AsQueryable();
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(p => (p.Key ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
@@ -61,10 +61,6 @@ namespace Fsel.System.Application.Queries.GameVocabularies
             {
                 query = query.Where(p => p.PartSpeech == request.PartSpeech);
             }
-            if (request.PlatformId.HasValue)
-            {
-                query = query.Where(p => p.PlatformId == request.PlatformId);
-            }
             if (request.GameVocabularyIds != null)
             {
                 query = query.Where(p => request.GameVocabularyIds.Contains(p.Id));
@@ -77,15 +73,14 @@ namespace Fsel.System.Application.Queries.GameVocabularies
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var platformsResult = await _userService.GetAllPlatform();
+            var platformsResult = await _userService.GetPlatformsQueryAsync(new BaseQueryModel { });
             if (!platformsResult.IsSuccessStatusCode || platformsResult.Content?.Result == null)
             {
                 methodResult.AddError(platformsResult.Error);
                 return methodResult;
             }
             var platforms = platformsResult.Content.Result;
-
-            lists.ForEach(p =>
+            lists.Where(p => p.GameVocabularyPlatforms != null).SelectMany(p => p.GameVocabularyPlatforms!).ForEach(p =>
             {
                 p.PlatformName = platforms.FirstOrDefault(x => x.Id == p.PlatformId)?.Name;
             });

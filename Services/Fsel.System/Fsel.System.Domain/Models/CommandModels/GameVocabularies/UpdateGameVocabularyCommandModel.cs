@@ -14,7 +14,6 @@ namespace Fsel.System.Domain.Models.CommandModels.GameVocabularies
         public EnumGameCourseLevel CourseLevel { get; set; }
         public EnumUnitNumber UnitOrder { get; set; }
         public EnumPartSpeech? PartSpeech { get; set; }
-        public Guid? PlatformId { get; set; }
         public Guid? WordCategoryId { get; set; }
         public IList<UpdateGameVocabularyTypeCommandModel>? GameVocabularyTypeModels { get; set;}
     }
