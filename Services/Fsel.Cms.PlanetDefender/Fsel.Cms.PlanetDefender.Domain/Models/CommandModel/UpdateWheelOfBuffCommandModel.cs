@@ -4,8 +4,8 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.CommandModel
 {
     using System.Collections.Generic;
 
-    public class MassUploadQuestBankCommandModel
+    public class UpdateWheelOfBuffCommandModel
     {
-        public IList<Guid>? GameVocabularyIds { get; set; }
+        public IList<WheelOfBuffCommandModel>? WheelOfBuffCommandModels { get; set; }
     }
 }

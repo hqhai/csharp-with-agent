@@ -3,18 +3,12 @@
 namespace Fsel.Cms.PlanetDefender.Application.Commands.ZMatterCmd
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
-    using Fsel.Cms.PlanetDefender.Application.Commands.QuestBankCmd;
-    using Fsel.Cms.PlanetDefender.Domain.Entities;
     using Fsel.Cms.PlanetDefender.Domain.IRepositories;
     using Fsel.Cms.PlanetDefender.Domain.Models.CommandModel;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
-    using Fsel.Cms.PlanetDefender.Infrastructure.Repositories;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using MediatR;
@@ -23,6 +17,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.ZMatterCmd
     public class UpdateStatusZMatterCommand : UpdateStatusZMatterCommandModel, IRequest<MethodResult<ZMatterModel>>
     {
     }
+
     public class UpdateStatusZMatterCommandHandler : IRequestHandler<UpdateStatusZMatterCommand, MethodResult<ZMatterModel>>
     {
         private readonly IMapper _mapper;
@@ -46,7 +41,6 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.ZMatterCmd
                 return methodResult;
             }
             _mapper.Map(request, zMatter);
-
 
             await _zMatterRepository.ExecuteTransactionAsync(async () =>
             {

@@ -2,13 +2,11 @@
 
 namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
 {
-    using System;
-    using Fsel.Core.Base.BaseModels;
 
-    public class QuestBankModel : BaseModel
+    public class WheelOfBuffModel
     {
-        public Guid GameVocabularyId { get; set; }
-
+        public Guid Id { get; set; }
         public bool IsActive { get; set; }
+        public string? Name { get; set; }
     }
 }

@@ -2,13 +2,14 @@
 
 namespace Fsel.Cms.PlanetDefender.Domain.Entities
 {
-    using System;
+    using Fsel.Cms.PlanetDefender.Domain.Enums;
     using Fsel.Core.Entities;
 
-    public class QuestBank : Entity
+    public class WheelOfBuff : Entity
     {
-        public Guid GameVocabularyId { get; set; }
+        public EnumWheelOfBuffType Type { get; set; }
 
         public bool IsActive { get; set; }
+
     }
 }

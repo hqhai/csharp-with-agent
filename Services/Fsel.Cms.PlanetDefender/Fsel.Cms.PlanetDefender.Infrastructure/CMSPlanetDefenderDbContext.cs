@@ -19,14 +19,20 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
+            SeedWheelOfBuff(modelBuilder);
             SeedZMatter(modelBuilder);
+            SeedGameplayRuleConfigs(modelBuilder);
             modelBuilder.ApplyConfiguration(new StudentGameInfoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new WheelOfBuffEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameplayTimeConfigEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<StudentGameInfo> StudentGameInfos { get; set; }
-        public DbSet<QuestBank> QuestBanks { get; set; }
         public DbSet<ZMatter> ZMatters { get; set; }
+        public DbSet<GameplayTimeConfig> GameplayTimeConfigs { get; set; }
+        public DbSet<GameplayRuleConfig> GameplayRuleConfigs { get; set; }
+        public DbSet<WheelOfBuff> WheelOfBuffs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -49,6 +55,22 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             var zMatters = ConvertHelper.DeserializeFromFilePath<IList<ZMatter>>(path);
             ArgumentNullException.ThrowIfNull(zMatters);
             builder.Entity<ZMatter>().HasData(zMatters);
+        }
+
+        private static void SeedGameplayRuleConfigs(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.GameplayRuleConfig);
+            var gameplayRuleConfigs = ConvertHelper.DeserializeFromFilePath<IList<GameplayRuleConfig>>(path);
+            ArgumentNullException.ThrowIfNull(gameplayRuleConfigs);
+            builder.Entity<GameplayRuleConfig>().HasData(gameplayRuleConfigs);
+        }
+
+        private static void SeedWheelOfBuff(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,ResourceSettings.WheelOfBuffType);
+            var wheelOfBuffConfigs = ConvertHelper.DeserializeFromFilePath<IList<WheelOfBuff>>(path);
+            ArgumentNullException.ThrowIfNull(wheelOfBuffConfigs);
+            builder.Entity<WheelOfBuff>().HasData(wheelOfBuffConfigs);
         }
     }
 }
