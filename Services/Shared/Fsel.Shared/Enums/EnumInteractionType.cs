@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumCommentType
+    public enum EnumInteractionType
     {
         ClassForum,
         DiscussionBoard,
