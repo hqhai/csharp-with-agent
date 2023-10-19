@@ -8,6 +8,7 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums;
     using Fsel.Interaction.Domain.IRepositories;
@@ -25,11 +26,13 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     {
         private readonly IFlagRepository _flagRepository;
         private readonly IMapper _mapper;
+        private AuthContext _authContext;
 
-        public RateFlagCommandHandler(IFlagRepository flagRepository, IMapper mapper)
+        public RateFlagCommandHandler(IFlagRepository flagRepository, IMapper mapper, AuthContext authContext)
         {
             _flagRepository = flagRepository;
             _mapper = mapper;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<FlagModel>> Handle(RateFlagCommand request, CancellationToken cancellationToken)
@@ -39,7 +42,7 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
 
             Flag flag = _mapper.Map<Flag>(request);
 
-            var isExistFlag = await _flagRepository.Queryable.AnyAsync(x => x.ObjectId == request.ObjectId && x.Type == request.Type, cancellationToken);
+            var isExistFlag = await _flagRepository.Queryable.AnyAsync(x => x.CreatedUserId == _authContext.CurrentUserId && x.Type == request.Type, cancellationToken);
             if (isExistFlag)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isExistFlag));
