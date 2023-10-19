@@ -19,9 +19,9 @@ namespace Fsel.System.Domain.Entities
         public EnumGameCourseLevel CourseLevel { get; set; }
         public EnumUnitNumber UnitOrder { get; set; }
         public EnumPartSpeech? PartSpeech { get; set; }
-        public Guid? PlatformId { get; set; }
         public Guid? WordCategoryId { get; set; }
         public GameTopic? GameTopic { get; set; }
         public ICollection<GameVocabularyType> GameVocabularyTypes { get; set; } = new List<GameVocabularyType>();
+        public ICollection<GameVocabularyPlatform> GameVocabularyPlatforms { get; set; } = new List<GameVocabularyPlatform>();
     }
 }

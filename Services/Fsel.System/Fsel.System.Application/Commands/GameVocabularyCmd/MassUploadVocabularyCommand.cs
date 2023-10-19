@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
@@ -82,27 +83,16 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                 methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.KeyAlreadyExist));
                 return methodResult;
             }
-
-            var platformIds = request.GameVocabularies.Where(x => x.PlatformId.HasValue).Select(n => n.PlatformId).ToList();
-            if (platformIds.Count > 0)
-            {
-                var platformsResult = await _userService.GetAllPlatform();
-                if (!platformsResult.IsSuccessStatusCode || platformsResult.Content?.Result == null)
-                {
-                    methodResult.AddError(platformsResult.Error);
-                    return methodResult;
-                }
-                var platformEntityIds = platformsResult.Content.Result.Select(p => p.Id).ToList();
-
-                if (platformIds.Any(p => !platformEntityIds.Contains(p!.Value)))
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.PlatformNotExist));
-                    return methodResult;
-                };
-            }
             var countGameVocabulary = await _gameVocabularyRepository.Queryable.CountAsync(cancellationToken);
 
             #endregion Validate
+
+            #region Get all Platform
+
+            var platformsResult = await _userService.GetAllPlatform();
+            var platforms = platformsResult.Content?.Result;
+
+            #endregion Get all Platform
 
             await _gameVocabularyRepository.ExecuteTransactionAsync(async () =>
             {
@@ -127,6 +117,27 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                         methodResult.AddError(item.ErrorMessages);
                         return methodResult;
                     }
+
+                    #region Generate automatic PlatformIds
+
+                    var listEnumGameVocabType = request.GameVocabularies.FirstOrDefault(p => p.Key == item.Key)?.GameVocabularyTypes?.Select(p => p.GameVocabType).ToList();
+                    var platformIds = new List<Guid>();
+                    if (listEnumGameVocabType?.Count > 0)
+                    {
+                        var platformCodes = PlatformCodeHelper.GetEnumPlatformCodes(listEnumGameVocabType);
+                        platformIds = platforms?.Where(p => platformCodes != null && platformCodes.Contains(p.Code)).Select(p => p.Id).Distinct().ToList();
+                    }
+
+                    #endregion Generate automatic PlatformIds
+
+                    #region Create GameVocabularyPlatforms
+
+                    if (platformIds != null && platformIds.Count > 0)
+                    {
+                        platformIds.ForEach(p => { item.GameVocabularyPlatforms.Add(new GameVocabularyPlatform { PlatformId = p }); });
+                    }
+
+                    #endregion Create GameVocabularyPlatforms
                 }
 
                 await _gameVocabularyRepository.AddList(gameVocabularies);

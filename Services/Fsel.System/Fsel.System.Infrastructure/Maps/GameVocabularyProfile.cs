@@ -18,6 +18,7 @@ namespace Fsel.System.Infrastructure.Maps
             CreateMap<UpdateGameVocabularyTypeCommandModel, GameVocabularyType>().ForMember(m => m.GameVocabularyId, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<GameVocabulary, GameVocabularyModel>().IgnoreAllNonExisting();
             CreateMap<GameVocabularyType, GameVocabularyTypeModel>().IgnoreAllNonExisting();
+            CreateMap<GameVocabularyPlatform, GameVocabularyPlatformModel>().IgnoreAllNonExisting();
         }
     }
 }

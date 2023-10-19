@@ -34,6 +34,7 @@ builder.Services.AddScoped<IGameTopicRepository, GameTopicRepository>();
 builder.Services.AddScoped<IGameVocabularyRepository, GameVocabularyRepository>();
 builder.Services.AddScoped<IGameVocabularyTypeRepository, GameVocabularyTypeRepository>();
 builder.Services.AddScoped<IFocusTimeConfigRepository, FocusTimeRepository>();
+builder.Services.AddScoped<IGameVocabularyPlatformRepository, GameVocabularyPlatformRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);

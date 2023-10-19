@@ -4,6 +4,8 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
@@ -11,6 +13,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
     using Fsel.System.Domain.Models.CommandModels.GameVocabularies;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Globalization;
+    using global::System.Linq;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,14 +29,16 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly IGameVocabularyTypeRepository _gameVocabularyTypeRepository;
+        private readonly IGameVocabularyPlatformRepository _gameVocabularyPlatformRepository;
 
-        public UpdateGameVocabularyCommandHandler(IGameVocabularyRepository gameVocabularyRepository, IGameTopicRepository gameTopicRepository, IMapper mapper, IUserService userService, IGameVocabularyTypeRepository gameVocabularyTypeRepository)
+        public UpdateGameVocabularyCommandHandler(IGameVocabularyRepository gameVocabularyRepository, IGameTopicRepository gameTopicRepository, IMapper mapper, IUserService userService, IGameVocabularyTypeRepository gameVocabularyTypeRepository, IGameVocabularyPlatformRepository gameVocabularyPlatformRepository)
         {
             _gameVocabularyRepository = gameVocabularyRepository;
             _gameTopicRepository = gameTopicRepository;
             _mapper = mapper;
             _userService = userService;
             _gameVocabularyTypeRepository = gameVocabularyTypeRepository;
+            _gameVocabularyPlatformRepository = gameVocabularyPlatformRepository;
         }
 
         public async Task<MethodResult<GameVocabularyModel>> Handle(UpdateGameVocabularyCommand request, CancellationToken cancellationToken)
@@ -74,23 +79,37 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                 return methodResult;
             }
 
-            if (request.PlatformId.HasValue)
+            #endregion validate
+
+            #region Get all Platform
+
+            var platformsResult = await _userService.GetAllPlatform();
+            var platforms = platformsResult.Content?.Result;
+            var platformPDId = platforms?.FirstOrDefault(p => p.Code == EnumPlatformCode.PlanetDefender)?.Id;
+
+            #endregion Get all Platform
+
+            #region Generate automatic PlatformIds
+
+            var listEnumGameVocabType = request.GameVocabularyTypeModels?.Select(p => p.GameVocabType).ToList();
+            IList<EnumPlatformCode>? platformCodes = new List<EnumPlatformCode>();
+            var platformIds = new List<Guid>();
+            if (listEnumGameVocabType?.Count > 0)
             {
-                var platformsResult = await _userService.GetAllPlatform();
-                if (!platformsResult.IsSuccessStatusCode || platformsResult.Content?.Result == null)
-                {
-                    methodResult.AddError(platformsResult.Error);
-                    return methodResult;
-                }
-                var platforms = platformsResult.Content.Result;
-                if (!platforms.Any(p => p.Id == request.PlatformId))
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.PlatformNotExist));
-                    return methodResult;
-                }
+                platformCodes = PlatformCodeHelper.GetEnumPlatformCodes(listEnumGameVocabType);
+                platformIds = platforms?.Where(p => platformCodes != null && platformCodes.Contains(p.Code)).Select(p => p.Id).Distinct().ToList();
             }
 
-            #endregion validate
+            #endregion Generate automatic PlatformIds
+
+            #region Get delete and create GameVocabPlatforms
+
+            var gameVocabPlatforms = await _gameVocabularyPlatformRepository.Queryable.Where(p => p.GameVocabularyId == gameVocabulary.Id && p.PlatformId != platformPDId).ToListAsync(cancellationToken);
+
+            var deleteGameVocabPlatforms = gameVocabPlatforms.Where(p => platformIds == null || !platformIds.Contains(p.Id)).ToList();
+            var createGameVocabPlatforms = platformIds?.Where(p => p != platformPDId && !gameVocabPlatforms.Select(x => x.Id).Contains(p)).ToList();
+
+            #endregion Get delete and create GameVocabPlatforms
 
             await _gameVocabularyRepository.ExecuteTransactionAsync(async () =>
             {
@@ -115,6 +134,19 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                 await _gameVocabularyTypeRepository.DeleteListAsync(gameVocabularyTypes);
 
                 #endregion Delete GameVocabularyTypes
+
+                #region Delete and create GameVocabularyPlatforms
+
+                await _gameVocabularyPlatformRepository.DeleteListAsync(deleteGameVocabPlatforms);
+                if (platformIds != null || platformIds?.Count > 0)
+                {
+                    IList<GameVocabularyPlatform> newGameVocabularyPlatforms = new List<GameVocabularyPlatform>();
+                    platformIds.ForEach(p => { newGameVocabularyPlatforms.Add(new GameVocabularyPlatform { PlatformId = p, GameVocabularyId = gameVocabulary.Id }); });
+                    await _gameVocabularyPlatformRepository.AddList(newGameVocabularyPlatforms);
+                }
+                await _gameVocabularyPlatformRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                #endregion Delete and create GameVocabularyPlatforms
 
                 #region Update and create GameVocabularyTypes
 
