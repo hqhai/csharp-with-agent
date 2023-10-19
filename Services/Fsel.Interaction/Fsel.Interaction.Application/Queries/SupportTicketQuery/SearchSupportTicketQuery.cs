@@ -38,6 +38,7 @@ namespace Fsel.Interaction.Application.Queries.SupportTicketQuery
                 return methodResult;
             }
             var supportTicketQuery = _supportTicketRepository.Queryable
+                                .Include(x => x.SupportQuestion)
                                 .Select(x => new SupportTicketModel
                                 {
                                     Id = x.Id,
@@ -54,6 +55,7 @@ namespace Fsel.Interaction.Application.Queries.SupportTicketQuery
                                     SupportQuestionId = x.SupportQuestionId,
                                     SupportCategoryId = x.SupportCategoryId,
                                     CreatedFullName = x.CreatedFullName,
+                                    QuestionName = x.SupportQuestion!.Name
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
