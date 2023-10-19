@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var query = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForum.Id && classStudentIds!.Contains(x.StudentId))
+                .Where(x => x.ClassForumId == classForum.Id && classStudentIds!.Contains(x.StudentId) && x.Status != EnumClassForumResultStatus.Draft && x.Status != EnumClassForumResultStatus.Pending)
                 .OrderBy(x => x.CreatedDate)
                 .ToListAsync(cancellationToken);
 
@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var queryRandomStudent = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForum.Id && !classStudentIds!.Contains(x.StudentId) && x.Status != EnumClassForumResultStatus.Draft)
+                .Where(x => x.ClassForumId == classForum.Id && !classStudentIds!.Contains(x.StudentId) && x.Status != EnumClassForumResultStatus.Draft && x.Status != EnumClassForumResultStatus.Pending)
                 .Skip(skip)
                 .Take(STUDENT_RANDOM_TAKE)
                 .ToListAsync(cancellationToken);
@@ -132,11 +132,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 var classForumResultCurrentStudent = classForumResults.FirstOrDefault(x => x.ClassForumId == classForum.Id && x.LessonResultId == request.LessonResultId);
                 classForumByStudentModel.ClassForumResultCurrentStudent = classForumResultCurrentStudent;
 
-                if (classForumResultCurrentStudent != null && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Draft)
+                if (classForumResultCurrentStudent != null && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Draft && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Pending)
                 {
                     // Lấy bài post học sinh trong lớp
                     var classForumResultAllStudents = classForumResults.Where(x => x.ClassForumId == classForum.Id &&
-                                    x.Status != EnumClassForumResultStatus.Draft &&
                                     x.Id != classForumResultCurrentStudent.Id
                                     ).ToList();
                     classForumByStudentModel.ClassForumResultAllStudents = classForumResultAllStudents;
