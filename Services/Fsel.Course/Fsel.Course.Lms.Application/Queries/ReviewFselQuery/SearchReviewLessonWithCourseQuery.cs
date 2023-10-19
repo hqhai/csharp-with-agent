@@ -95,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 query = query.Where(x => x.CourseLevel == request.CourseLevel);
             }
-            var stars = await query.AnyAsync(cancellationToken) ? NumberHelper.ConvertRatingToDouble(await query.AverageAsync(x => x.Stars, cancellationToken)) : default;
+            var stars = await query.AnyAsync(cancellationToken) ? NumberHelper.ConvertRound(await query.AverageAsync(x => x.Stars, cancellationToken)) : default;
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             foreach (var item in lists)
             {
-                item.Stars = NumberHelper.ConvertRatingToDouble(item.Stars);
+                item.Stars = NumberHelper.ConvertRound(item.Stars);
             }
 
             methodResult.Result = new ReviewLessonWithCourseSearchModel { Stars = stars, PagingItemsModel = new PagingItemsModel<ReviewLessonWithCourseModel>(lists, request, totalItem) };

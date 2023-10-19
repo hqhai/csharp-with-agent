@@ -5,6 +5,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -15,6 +16,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
     public class GetCoursesByLevelQuery : IRequest<MethodResult<List<CourseModel>>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseStatus? Status { get; set; }
     }
 
     public class GetCoursesByLevelQueryHandler : IRequestHandler<GetCoursesByLevelQuery, MethodResult<List<CourseModel>>>
@@ -31,15 +33,15 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<List<CourseModel>> methodResult = new MethodResult<List<CourseModel>>();
 
-            var courses = await _courseRepository.Queryable.Where(p => p.CourseLevel == request.CourseLevel).Select(x => new CourseModel
+            var courses = await _courseRepository.Queryable.Where(p => p.CourseLevel == request.CourseLevel && (!request.Status.HasValue || request.Status == p.Status)).Select(x => new CourseModel
             {
                 Id = x.Id,
                 CourseLevel = x.CourseLevel,
                 Name = x.Name,
                 Code = x.Code,
                 CourseType = x.CourseType,
+                Status = x.Status,
             }).ToListAsync(cancellationToken);
-
             methodResult.Result = courses;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

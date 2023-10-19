@@ -51,6 +51,7 @@ namespace Fsel.System.Application.Querys.CourseTimeConfigQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+            
 
             methodResult.Result = new PagingItemsModel<CourseTimeConfigModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
