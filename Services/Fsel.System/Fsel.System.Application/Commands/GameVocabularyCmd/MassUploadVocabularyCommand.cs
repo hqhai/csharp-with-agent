@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
@@ -113,6 +114,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                             countGameVocabulary++;
                         }
                     }
+                    item.GameVocabularyTypes?.Add(new GameVocabularyType { GameVocabType = EnumGameVocabType.JumbledSpelling, QuestionContent = item.Key });
                     if (!item.IsValid())
                     {
                         methodResult.AddError(item.ErrorMessages);
@@ -121,7 +123,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 
                     #region Generate automatic PlatformIds
 
-                    var listEnumGameVocabType = request.GameVocabularies.FirstOrDefault(p => p.Key == item.Key)?.GameVocabularyTypes?.Select(p => p.GameVocabType).ToList();
+                    var listEnumGameVocabType = item.GameVocabularyTypes?.Select(p => p.GameVocabType).ToList();
                     var platformIds = new List<Guid>();
                     if (listEnumGameVocabType?.Count > 0)
                     {

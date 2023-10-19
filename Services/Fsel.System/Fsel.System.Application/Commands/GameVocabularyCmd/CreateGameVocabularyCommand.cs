@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
@@ -76,6 +77,8 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
             var platforms = platformsResult.Content?.Result;
 
             #endregion Get all Platform
+
+            request.GameVocabularyTypes?.Add(new CreateGameVocabularyTypeCommandModel { GameVocabType = EnumGameVocabType.JumbledSpelling, QuestionContent = request.Key });
 
             #region Generate automatic PlatformIds
 

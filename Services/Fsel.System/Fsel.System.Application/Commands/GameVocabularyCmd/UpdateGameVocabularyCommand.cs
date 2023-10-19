@@ -131,7 +131,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                 #region Delete GameVocabularyTypes
 
                 var gameVocabularyTypeIds = request.GameVocabularyTypeModels?.Where(x => x.Id.HasValue).Select(p => p.Id).ToList();
-                var gameVocabularyTypes = await _gameVocabularyTypeRepository.Queryable.Where(p => p.GameVocabularyId == gameVocabulary.Id && (gameVocabularyTypeIds == null || !gameVocabularyTypeIds.Contains(p.Id))).ToListAsync(cancellationToken);
+                var gameVocabularyTypes = await _gameVocabularyTypeRepository.Queryable.Where(p => p.GameVocabType != EnumGameVocabType.JumbledSpelling && p.GameVocabularyId == gameVocabulary.Id && (gameVocabularyTypeIds == null || !gameVocabularyTypeIds.Contains(p.Id))).ToListAsync(cancellationToken);
                 await _gameVocabularyTypeRepository.DeleteListAsync(gameVocabularyTypes);
 
                 #endregion Delete GameVocabularyTypes

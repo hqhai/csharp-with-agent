@@ -10,7 +10,11 @@ namespace Fsel.Shared.Helpers
     {
         private static IList<KeyValuePair<EnumGameVocabType, EnumPlatformCode>> s_gameVocabType = new List<KeyValuePair<EnumGameVocabType, EnumPlatformCode>>
         {
-            //new KeyValuePair<EnumGameVocabType, EnumPlatformCode>(EnumGameVocabType.Hint, EnumPlatformCode.PlanetDefender),
+            new KeyValuePair<EnumGameVocabType, EnumPlatformCode>(EnumGameVocabType.Hint, EnumPlatformCode.PlanetDefender),
+            new KeyValuePair<EnumGameVocabType, EnumPlatformCode>(EnumGameVocabType.Definition, EnumPlatformCode.PlanetDefender),
+            new KeyValuePair<EnumGameVocabType, EnumPlatformCode>(EnumGameVocabType.Audio, EnumPlatformCode.PlanetDefender),
+            new KeyValuePair<EnumGameVocabType, EnumPlatformCode>(EnumGameVocabType.Image, EnumPlatformCode.PlanetDefender),
+            new KeyValuePair<EnumGameVocabType, EnumPlatformCode>(EnumGameVocabType.JumbledSpelling, EnumPlatformCode.PlanetDefender),
         };
 
         public static IList<EnumPlatformCode>? GetEnumPlatformCodes(this List<EnumGameVocabType> gameVocabType)
@@ -20,7 +24,6 @@ namespace Fsel.Shared.Helpers
             {
                 results.Add(item.Value);
             }
-            results.Add(EnumPlatformCode.PlanetDefender);
             return results.Distinct().ToList();
         }
     }
