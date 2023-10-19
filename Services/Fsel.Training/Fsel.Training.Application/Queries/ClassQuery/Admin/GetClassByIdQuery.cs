@@ -49,7 +49,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 return methodResult;
             }
             var classModel = _mapper.Map<ClassModel>(classes);
-            classModel.NumberOfStudent = await _classStudentRepository.Queryable.Where(p => p.ClassId == classes.Id).CountAsync(cancellationToken);
+            classModel.NumberOfStudent = await _classStudentRepository.Queryable.Where(p => p.ClassId == classes.Id && p.IsActive).CountAsync(cancellationToken);
             var packageResult = await _orderService.GetPackages();
             classModel.PackageCode = packageResult.Content?.Result?.FirstOrDefault(p => p.Id == classModel.PackageId)?.Code;
 
