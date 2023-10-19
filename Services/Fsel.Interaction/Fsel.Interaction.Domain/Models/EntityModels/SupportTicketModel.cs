@@ -28,5 +28,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public Guid? SupportCategoryId { get; set; }
 
         public Guid? SupportQuestionId { get; set; }
+
+        public string? QuestionName { get; set; }
     }
 }
