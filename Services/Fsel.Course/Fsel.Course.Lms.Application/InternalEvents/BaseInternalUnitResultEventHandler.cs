@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 {
     using System.Globalization;
     using System.Threading;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -94,22 +95,23 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 Email = student?.Human?.Email,
                 Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteUnit, courseUnitMockTest?.Number.ToString(CultureInfo.CurrentCulture)),
-                Params = new SendStudentCompleteUnitModel
-                {
-                    StudentName = student?.Human?.FullName,
-                    UnitNumber = courseUnitMockTest?.Number.ToString(CultureInfo.CurrentCulture),
-                    UnitName = unit.Name,
-                    GrammarScore = groupedSkillScores.FirstOrDefault(p => p.Skill == EnumCourseSkill.Grammar)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty,
-                    SpeakingScore = groupedSkillScores.FirstOrDefault(p => p.Skill == EnumCourseSkill.Speaking)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty,
-                    ListeningScore = groupedSkillScores.FirstOrDefault(p => p.Skill == EnumCourseSkill.Listening)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty,
-                    ReadingScore = groupedSkillScores.FirstOrDefault(p => p.Skill == EnumCourseSkill.Reading)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty,
-                    WritingScore = groupedSkillScores.FirstOrDefault(p => p.Skill == EnumCourseSkill.Writing)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty,
-                    VocabularyScore = groupedSkillScores.FirstOrDefault(p => p.Skill == EnumCourseSkill.Vocabulary)?.Percent.ToString(CultureInfo.CurrentCulture) ?? string.Empty,
-                    AccessLink = _appSetting.ResourceContent?.LmsWebsiteUrl,
-                    CsoPhonenumber = cso.Content?.Result?.Human?.PhoneNumber
-                },
+                Params = GetParameter(student?.Human?.FullName, courseUnitMockTest?.Number, unit.Name, cso.Content?.Result?.Human?.PhoneNumber, groupedSkillScores),
                 Template = percent >= 60 ? EnumSenderTemplate.SendStudentCompleteUnitGood : EnumSenderTemplate.SendStudentCompleteUnitWeak
             }, cancellationToken).ConfigureAwait(false);
+        }
+
+        private SendStudentCompleteUnitModel GetParameter(string? fullName, int? unitNumber, string? unitName, string? csoPhonenumber, List<SkillScores> groupedSkillScores)
+        {
+            var parameter = new SendStudentCompleteUnitModel
+            {
+                StudentName = fullName,
+                UnitNumber = unitNumber.ToString(),
+                UnitName = unitName,
+                AccessLink = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                CsoPhonenumber = csoPhonenumber,
+                Scores = string.Join("", groupedSkillScores.Select(item => $"<li style=\"line-height: 1.5rem\">{item.Skill}: {item.Percent}%</li>"))
+            };
+            return parameter;
         }
     }
 }

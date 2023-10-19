@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     {
                         stars.Add(mockTestFeedbacks.Average(x => x.FeedBackStars ?? default));
                     }
-                    item.Stars = stars.Any() ? NumberHelper.ConvertRatingToDouble(stars.Average()) : default;
+                    item.Stars = stars.Any() ? NumberHelper.ConvertRound(stars.Average()) : default;
                 }
                 if (request.NumberOfStars != null)
                 {

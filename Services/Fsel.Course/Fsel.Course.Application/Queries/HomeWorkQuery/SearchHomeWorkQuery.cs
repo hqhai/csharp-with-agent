@@ -56,7 +56,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                homeWorkQuery = homeWorkQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.CourseLevel != null)
