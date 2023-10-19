@@ -8,35 +8,62 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<IList<SectionDetailModel>>>
+    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupĐetailModel>>
     {
         public Guid SectionGroupId { get; set; }
+        public Guid MockTestResultId { get; set; }
     }
 
-    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<IList<SectionDetailModel>>>
+    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupĐetailModel>>
     {
         private readonly ISectionRepository _sectionRepository;
+        private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
 
-        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
+        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
         {
             _sectionRepository = sectionRepository;
+            _sectionGroupResultRepository = sectionGroupResultRepository;
+            _mockTestResultRepository = mockTestResultRepository;
+            _authContext = authContext;
+            _userService = userService;
             _mapper = mapper;
             _sectionGroupRepository = sectionGroupRepository;
         }
 
-        public async Task<MethodResult<IList<SectionDetailModel>>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SectionGroupĐetailModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<SectionDetailModel>>();
+            var methodResult = new MethodResult<SectionGroupĐetailModel>();
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult?.Content?.Result;
+            var studentId = student?.Id ?? default;
+
+            var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
+            if (mockTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                return methodResult;
+            }
             var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
             if (sectionGroup == null)
             {
@@ -46,9 +73,23 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
 
             var sections = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
 
+            var sectonGroupDetail = _mapper.Map<SectionGroupĐetailModel>(sectionGroup);
+            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId));
+            sectonGroupDetail.Sections = GetSections(sections, sectionGroup.CourseSkill);
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = GetSections(sections, sectionGroup.CourseSkill);
+            methodResult.Result = sectonGroupDetail;
             return methodResult;
+        }
+
+        private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, Guid studentId)
+        {
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
+            if (sectionGroupResult == null)
+            {
+                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId });
+                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            }
+            return sectionGroupResult;
         }
 
         private IList<SectionDetailModel> GetSections(IList<Section> sections, EnumCourseSkill skill)
@@ -62,12 +103,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             var sectionDetail = _mapper.Map<SectionDetailModel>(section);
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
             {
+                sectionDetail.QuestionIds = section.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.QuestionId ?? default).ToList();
             }
-            else if (skill == EnumCourseSkill.Writing)
+            else if (skill == EnumCourseSkill.Speaking)
             {
-            }
-            else
-            {
+                sectionDetail.SectionTimeCodes = _mapper.Map<IList<SectionTimeCodeModel>>(section.SectionTimeCodes.ToList());
             }
             return sectionDetail;
         }

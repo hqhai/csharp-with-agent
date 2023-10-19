@@ -198,7 +198,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     {
                         Skill = item.Skill,
                         CountQuestion = countQuestion,
-                        Scores = percent.GetIeltsScore(item.Skill),
+                        Scores = percent.GetIeltsScorePT(item.Skill),
                         TotalQuestion = questions.Count,
                         TotalCount = questions.Sum(x => x.CorrectTotal),
                         CorrectCount = count,
@@ -206,7 +206,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     };
                     if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
                     {
-                        skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(skillScore.Skill);
+                        skillScore.Scores = skillScore.CorrectCount.GetIeltsScorePT(skillScore.Skill);
                     }
                     skillScores.Add(skillScore);
                 }

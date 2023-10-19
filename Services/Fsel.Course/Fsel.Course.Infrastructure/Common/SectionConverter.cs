@@ -52,6 +52,15 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
+        public IList<EnumCourseSkill>? GetCourseSkill(IList<SectionGroup>? sectionGroups)
+        {
+            if (sectionGroups != null && sectionGroups.Any())
+            {
+                return sectionGroups.Select(x => x.CourseSkill).ToList();
+            }
+            return default;
+        }
+
         public long GetTotalQuestion(IList<SectionGroup>? sectionGroups)
         {
             if (sectionGroups != null && sectionGroups.Any())
@@ -78,14 +87,14 @@ namespace Fsel.Course.Infrastructure.Common
                 var sectionParts = sectionGroup.Sections.SelectMany(x => x.SectionParts).ToList();
                 if (sectionParts.Count > 0)
                 {
-                    return sectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count();
+                    return sectionParts.SelectMany(x => x.SectionQuestions).Count();
                 }
                 else
                 {
                     var sectionQuestions = sectionGroup.Sections.SelectMany(x => x.SectionQuestions).ToList();
                     if (sectionQuestions.Count > 0)
                     {
-                        return sectionGroup.Sections.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count();
+                        return sectionGroup.Sections.SelectMany(x => x.SectionQuestions).Count();
                     }
                     else
                     {

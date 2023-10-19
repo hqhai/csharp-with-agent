@@ -75,10 +75,5 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             }).ToList();
             return mockTestDetail;
         }
-
-        private async Task<IList<SectionGroupModel>> GetSectionGroupsAsync(IList<Guid>? sectionGroupIds, Guid? studentId)
-        {
-            var sectionGroups =
-        }
     }
 }

@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -28,14 +29,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     public class GetMockTestByIdQueryHandler : IRequestHandler<GetMockTestByIdQuery, MethodResult<MockTestModel>>
     {
         private readonly IMockTestRepository _mockTestRepository;
+        private readonly SectionConverter _sectionConverter;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetMockTestByIdQueryHandler(IMockTestRepository mockTestRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetMockTestByIdQueryHandler(IMockTestRepository mockTestRepository, SectionConverter sectionConverter, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _mockTestRepository = mockTestRepository;
+            _sectionConverter = sectionConverter;
             _mockTestResultRepository = mockTestResultRepository;
             _authContext = authContext;
             _userService = userService;
@@ -55,12 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             var student = studentResult?.Content?.Result;
             var studentId = student?.Id ?? default;
 
-            var mockTest = await _mockTestRepository.Queryable
-                                .Include(x => x.MockTestSections)
-                                .ThenInclude(x => x.SectionGroup)
-                                .ThenInclude(x => x!.SectionGroupResults.Where(x => x.StudentId == studentId))
-                                .Where(x => x.Id == request.MockTestId)
-                                .FirstOrDefaultAsync(cancellationToken);
+            var mockTest = await _mockTestRepository.GetAsync(request.MockTestId, studentId);
             if (mockTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
@@ -76,8 +74,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         {
             var mockTestDetail = _mapper.Map<MockTestModel>(mockTest);
             var mockTestResult = await GetMockTestResult(request, studentId);
-            mockTestDetail.MockTestResult = mockTestResult;
             var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
+            mockTestDetail.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
+            mockTestDetail.ExecutionTime = _sectionConverter.GetExecutionTime(sectionGroups);
+            mockTestDetail.MockTestResult = mockTestResult;
+            mockTestDetail.Skills = _sectionConverter.GetCourseSkill(sectionGroups);
             mockTestDetail.SectionGroups = GetSectionGroups(sectionGroups, mockTestResult.Id);
             return mockTestDetail;
         }
@@ -101,32 +102,36 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             var indexProcess = GetIndexProcess(sectionGroups, mockTestResultId);
             return sectionGroups.Select(x =>
             {
+                var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
+                sectionGroup.Sections!.Clear();
+                sectionGroup.Status = GetCurrentStatus(indexProcess, index);
                 sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
                 return sectionGroup;
             }).ToList();
         }
 
-        private static EnumCurrentStatus GetCurrentStatus(int? indexProcess, int indexTimeCode)
+        private static EnumCurrentStatus GetCurrentStatus(int? indexProcess, int index)
         {
-            var timeCodeStatus = EnumCurrentStatus.Lock;
-            if (indexProcess < indexTimeCode)
+            var currentStatus = EnumCurrentStatus.Lock;
+            if (indexProcess < index)
             {
-                return timeCodeStatus;
+                return currentStatus;
             }
-            else if (indexProcess == indexTimeCode)
+            else if (indexProcess == index)
             {
-                timeCodeStatus = EnumCurrentStatus.Process;
+                currentStatus = EnumCurrentStatus.Process;
             }
-            else if (indexProcess > indexTimeCode || indexProcess == null)
+            else if (indexProcess > index || indexProcess == null)
             {
-                timeCodeStatus = EnumCurrentStatus.Done;
+                currentStatus = EnumCurrentStatus.Done;
             }
-            return timeCodeStatus;
+            return currentStatus;
         }
 
         private static int? GetIndexProcess(IList<SectionGroup>? sectionGroups, Guid mockTestResultId)
         {
+            ArgumentNullException.ThrowIfNull(sectionGroups);
             var timeCode = sectionGroups.Where(x => !x.SectionGroupResults.Any() || x.SectionGroupResults.Any(x => x.MockTestResultId == mockTestResultId && x.Status != EnumResultStatus.Done)).FirstOrDefault();
             if (timeCode == null)
             {
