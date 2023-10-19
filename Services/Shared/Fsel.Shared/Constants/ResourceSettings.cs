@@ -14,5 +14,6 @@ namespace Fsel.Shared.Constants
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
 
         public const string ZMatter = "Resources//ZMatter.json";
+        public const string GameplayRuleConfig = "Resources//GameplayRuleConfig.json";
     }
 }
