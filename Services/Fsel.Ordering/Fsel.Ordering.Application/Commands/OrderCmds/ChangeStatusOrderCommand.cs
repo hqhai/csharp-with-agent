@@ -104,7 +104,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
-                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId, NumberOfShield = numberOfShield });
+                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId, NumberOfShield = numberOfShield, CourseLevel = course?.CourseLevel });
                     if (!updateStudentByClass.IsSuccessStatusCode)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));

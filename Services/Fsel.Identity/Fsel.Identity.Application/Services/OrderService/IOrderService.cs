@@ -4,7 +4,7 @@ namespace Fsel.Identity.Application.Services.OrderService
 {
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services.OrderService.Model;
-    using Fsel.Identity.Application.Services.OrderServices.Model;
+    using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -16,8 +16,8 @@ namespace Fsel.Identity.Application.Services.OrderService
         [Post("/user-referral")]
         Task<IApiResponse<MethodResult<bool>>> CreateUserReferralAsync([Body] CreateUserReferralCommandModel command);
 
-        [Get("/order/is-status-payment")]
-        Task<IApiResponse<MethodResult<bool>>> IsCheckStatusUser([FromQuery] IsCheckPaymentStatusByUserModel query);
+        [Get("/order/get-status")]
+        Task<IApiResponse<MethodResult<EnumOrderStatus?>>> GetStatusAsync([FromQuery] GetStatusByUserCommandModel query);
 
         [Post("/order")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);

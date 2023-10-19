@@ -58,7 +58,7 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacher));
                 return methodResult;
             }
-            if (request.StartDate < DateTime.Now.Date)
+            if (request.StartDate < DateTime.UtcNow.Date)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateBiggerThanDateNow));
                 return methodResult;

@@ -7,9 +7,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Auths;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -54,15 +56,21 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             MethodResult<ConfirmOtpModel> methodResult = new MethodResult<ConfirmOtpModel>();
+            if (!string.IsNullOrEmpty(request.Email) && !request.Email.IsValidEmail())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                return methodResult;
+            }
+            if (!string.IsNullOrEmpty(request.PhoneNumber) && !request.PhoneNumber.IsValidPhoneNumber())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
+                return methodResult;
+            }
+
             User? user = new User();
             if (!string.IsNullOrEmpty(request.Email))
             {
                 user = await _userManager.FindByEmailAsync(request.Email);
-            }
-            else
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
-                return methodResult;
             }
 
             if (user == null)
@@ -71,16 +79,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
             var userOtpCode = await _userOtpCodeRepository.Queryable
-                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
+                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && x.OTPCode == request.OTP, cancellationToken);
             if (userOtpCode == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email));
                 return methodResult;
             }
 
-            if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
+            if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(Domain.Enums.ErrorCodes.EnumAuthErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
+                methodResult.AddErrorBadRequest(nameof(Domain.Enums.ErrorCodes.EnumAuthUserErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
                 return methodResult;
             }
 
@@ -93,6 +101,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var roles = await _userManager.GetRolesAsync(user);
 
             var human = await CreateHuman(request, roles, user);
+            if (!human.IsValid())
+            {
+                methodResult.AddError(human.ErrorMessages);
+                return methodResult;
+            }
             await _humanRepository.ExecuteTransactionAsync(async () =>
             {
                 human = _humanRepository.Add(human);
@@ -117,7 +130,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             Human human = _mapper.Map<Human>(request);
             human.UserId = user.Id;
-            var currentDate = DateTime.Now;
+            var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
 
             if (roles.Contains(EnumRoleRegister.Student.ToString()))

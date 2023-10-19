@@ -34,21 +34,13 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
             #region pilot
 
-            var query = _orderRepository.Queryable.Where(x => x.UserId == _authContext.CurrentUserId);
+            var query = _orderRepository.Queryable.Where(x => ((!request.UserId.HasValue || x.UserId == request.UserId) || x.UserId == _authContext.CurrentUserId) && x.Status != EnumOrderStatus.Reject);
 
             #endregion pilot
 
-            if (request.ClassId.HasValue)
-            {
-                query = query.Where(x => x.ClassId == request.ClassId);
-            }
             if (request.CourseId.HasValue)
             {
                 query = query.Where(x => x.CourseId == request.CourseId);
-            }
-            if (request.PackageId.HasValue)
-            {
-                query = query.Where(x => x.PackageId == request.PackageId);
             }
             var order = await query.FirstOrDefaultAsync(cancellationToken);
             methodResult.Result = order?.Status;

@@ -60,7 +60,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase);
                 if (!result)
                 {
-                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.InvalidToken));
+                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.InvalidToken));
                     return methodResult;
                 }
             }
@@ -68,22 +68,22 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var checkExpireDate = long.TryParse(tokenValidationResult.ClaimsIdentity.Claims.FirstOrDefault(x => x.Type == JwtClaimNames.Exp)?.Value, out long utcExpireDate);
 
             var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
-            if (!checkExpireDate || expireDate < DateTime.Now)
+            if (!checkExpireDate || expireDate < DateTime.UtcNow)
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AccessTokenNotYetExpired));
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccessTokenNotYetExpired));
                 return methodResult;
             }
 
             var refreshToken = await _userTokenRepository.GetByRefreshTokenAsync(request.RefreshToken);
             if (refreshToken == null)
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.InvalidToken),
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.InvalidToken),
                     nameof(request.RefreshToken), request.RefreshToken);
                 return methodResult;
             }
-            else if (refreshToken.RefreshTokenExpiryTime == null || refreshToken.RefreshTokenExpiryTime.Value <= DateTime.Now)
+            else if (refreshToken.RefreshTokenExpiryTime == null || refreshToken.RefreshTokenExpiryTime.Value <= DateTime.UtcNow)
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.RefreshTokenExpired));
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.RefreshTokenExpired));
             }
 
             await _userTokenRepository.Remove(refreshToken);

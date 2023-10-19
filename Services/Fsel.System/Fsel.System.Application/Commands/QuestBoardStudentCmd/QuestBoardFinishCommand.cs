@@ -41,7 +41,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                                 .Where(x => x.QuestBoard != null && x.QuestBoard.Category == request.QuestBoardCategory && x.QuestBoard.Type == request.QuestBoardType)
                                 .FirstOrDefaultAsync(x => x.Status == EnumQuestBoardStudentStatus.Process && x.StudentId == request.StudentId, cancellationToken);
             var questBoard = questBoardStudent?.QuestBoard;
-            var date = DateTime.Now;
+            var date = DateTime.UtcNow;
             if (questBoardStudent == null || (questBoard != null && (questBoard.StartDate >= date || questBoard.EndDate < date)))
             {
                 methodResult.Result = false;

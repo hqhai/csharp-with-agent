@@ -69,7 +69,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
+            if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
                 return methodResult;
@@ -85,6 +85,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var roles = await _userManager.GetRolesAsync(user);
 
                 var human = await CreateHuman(roles, user);
+                if (!human.IsValid())
+                {
+                    methodResult.AddError(human.ErrorMessages);
+                    return methodResult;
+                }
                 await _humanRepository.ExecuteTransactionAsync(async () =>
                 {
                     human = _humanRepository.Add(human);
@@ -107,7 +112,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             Human human = _mapper.Map<Human>(user);
             human.UserId = user.Id;
-            var currentDate = DateTime.Now;
+            var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
 
             if (roles.Contains(EnumRoleRegister.Student.ToString()))

@@ -48,7 +48,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 return methodResult;
             }
 
-            var date = request.DailyDate ?? DateTime.Now;
+            var date = request.DailyDate ?? DateTime.UtcNow;
             if (request.IsUseShield)
             {
                 student.NumberOfShield--;

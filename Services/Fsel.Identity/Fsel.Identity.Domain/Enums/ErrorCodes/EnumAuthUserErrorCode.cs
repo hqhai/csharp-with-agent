@@ -2,13 +2,17 @@
 
 namespace Fsel.Identity.Domain.Enums.ErrorCodes
 {
-    public enum EnumAuthErrorCode
+    public enum EnumAuthUserErrorCode
     {
-        /// <summary>
         /// <summary>
         /// Confirm Password cannot empty
         /// </summary>
         ConfirmPasswordNotEmpty,
+
+        /// <summary>
+        /// The new password matches the old password
+        /// </summary>
+        NewPasswordMatchOldPassword,
 
         /// <summary>
         /// User does not exist by code
@@ -124,5 +128,15 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// User is not on any platform
         /// </summary>
         UserIsNotOnAnyPlatform,
+
+        /// <summary>
+        /// Email is not valid
+        /// </summary>
+        EmailIsNotValid,
+
+        /// <summary>
+        /// PhoneNumber is not valid
+        /// </summary>
+        PhoneNumberIsNotValid,
     }
 }
