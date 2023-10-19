@@ -49,8 +49,6 @@ namespace Fsel.Course.Domain.Entities
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
 
-        public ICollection<ClassForumResultFlag> ClassForumResultFlags { get; set; } = new List<ClassForumResultFlag>();
-
         public ICollection<ClassForumResultRandom> ClassForumResultRandoms { get; set; } = new List<ClassForumResultRandom>();
     }
 }

@@ -21,7 +21,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Application.Services.SystemService;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
-    using Microsoft.Extensions.Logging;
 
     public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<CommentModel>>
     {
@@ -36,10 +35,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly AuthContext _authContext;
         private readonly ICourseService _courseService;
         private readonly ISystemService _systemService;
-        private readonly ILogger<CreateCommentCommand> _logger;
 
-
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, ILogger<CreateCommentCommand> logger)
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
@@ -48,7 +45,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _classForumCommentPublisher = classForumCommentPublisher;
             _courseService = courseService;
             _systemService = systemService;
-            _logger = logger;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -79,11 +75,11 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 NotificationQueueModel model = new NotificationQueueModel();
                 switch (request.Type)
                 {
-                    case EnumCommentType.DiscussionBoard:
+                    case EnumInteractionType.DiscussionBoard:
                         await _discussionBoardCommentPublisher.Publish(comment, cancellationToken).ConfigureAwait(false);
 
                         break;
-                    case EnumCommentType.ClassForum:
+                    case EnumInteractionType.ClassForum:
 
                         var postOwner = await _courseService.GetClassForumResultByIdAsync(request.ObjectId).Select(x => x.Content?.Result?.ClassForum?.ClassForumResults?.FirstOrDefault()).ConfigureAwait(false);
 
@@ -104,10 +100,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
-                        //Log Action
-                        _logger.LogInformation($"CreateCommentCommandHandler: {model.UserId}");
                         break;
-                    case EnumCommentType.ReplyComment:
+                    case EnumInteractionType.ReplyComment:
 
                         var commentOwnerId = await _commentRepository.GetByIdAsync(request.ObjectId).Select(x => x!.CreatedUserId).ConfigureAwait(false);
 
@@ -126,8 +120,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
                         };
-                        //Log Action
-                        _logger.LogInformation($"CreateCommentCommandHandler: {model.UserId}");
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
                 }

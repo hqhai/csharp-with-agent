@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Enums
+namespace Fsel.Interaction.Domain.Enums
 {
-    public enum EnumClassForumResultFlagStatus
+    public enum EnumFlagStatus
     {
         New, Approve, Reject
     }
