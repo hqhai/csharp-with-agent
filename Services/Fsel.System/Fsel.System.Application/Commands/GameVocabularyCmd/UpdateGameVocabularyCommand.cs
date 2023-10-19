@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.System.Application.Services.UserServices;
@@ -83,7 +84,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 
             #region Get all Platform
 
-            var platformsResult = await _userService.GetAllPlatform();
+            var platformsResult = await _userService.GetPlatformsQueryAsync(new BaseQueryModel { });
             var platforms = platformsResult.Content?.Result;
             var platformPDId = platforms?.FirstOrDefault(p => p.Code == EnumPlatformCode.PlanetDefender)?.Id;
 

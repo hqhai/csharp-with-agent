@@ -73,7 +73,7 @@ namespace Fsel.System.Application.Queries.GameVocabularies
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var platformsResult = await _userService.GetAllPlatform();
+            var platformsResult = await _userService.GetPlatformsQueryAsync(new BaseQueryModel { });
             if (!platformsResult.IsSuccessStatusCode || platformsResult.Content?.Result == null)
             {
                 methodResult.AddError(platformsResult.Error);

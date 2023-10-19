@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Helpers;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
@@ -71,7 +72,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 
             #region Get all Platform
 
-            var platformsResult = await _userService.GetAllPlatform();
+            var platformsResult = await _userService.GetPlatformsQueryAsync(new BaseQueryModel { });
             var platforms = platformsResult.Content?.Result;
 
             #endregion Get all Platform
