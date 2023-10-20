@@ -12,21 +12,25 @@ namespace Fsel.System.Domain.Models.EntityModels
         public EnumGameCefrLevel CefrLevel { get; set; }
         public EnumGameCourseLevel CourseLevel { get; set; }
         public EnumUnitNumber UnitOrder { get; set; }
-        public string? AlternateSpellingStr { get; set; }
-        public IList<string>? AlternateSpelling { get; set; }
-        public string? UsEquivalent { get; set; }
         public EnumPartSpeech? PartSpeech { get; set; }
-        public string? Definition { get; set; }
-        public string? Hint { get; set; }
-        public string? ExampleSentence { get; set; }
-        public string? ImagePath { get; set; }
-        public string? AudioPath { get; set; }
-        public string? Synonym { get; set; }
-        public string? Antonym { get; set; }
-        public string? PhoneticTranscription { get; set; }
-        public Guid? PlatformId { get; set; }
         public Guid? WordCategoryId { get; set; }
         public string? PlatformName { get; set; }
-        public string? WordCategory { get; set; }
+        public IList<GameVocabularyTypeModel>? GameVocabularyTypes { get; set; }
+        public IList<GameVocabularyPlatformModel>? GameVocabularyPlatforms { get; set; }
+        public GameTopicModel? GameTopic { get; set; }
+    }
+
+    public class GameVocabularyTypeModel : BaseModel
+    {
+        public EnumGameVocabType GameVocabType { get; set; }
+        public string? QuestionContent { get; set; }
+        public IList<string>? AlternateSpelling { get; set; }
+    }
+
+    public class GameVocabularyPlatformModel : BaseModel
+    {
+        public Guid PlatformId { get; set; }
+        public Guid GameVocabularyId { get; set; }
+        public string? PlatformName { get; set; }
     }
 }
