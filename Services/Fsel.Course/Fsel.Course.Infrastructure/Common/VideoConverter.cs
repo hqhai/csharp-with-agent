@@ -14,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Exercises;
     using Fsel.Course.Domain.Models.CommandModels.Videos;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace Fsel.Course.Infrastructure.Common
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IQuestionRepository _questionRepository;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IExerciseRepository _exerciseRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IVideoResultRepository _videoResultRepository;
@@ -33,6 +35,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         public VideoConverter(IVideoRepository videoRepository
             , IQuestionRepository questionRepository
+            , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
             , IExerciseRepository exerciseRepository
             , QuestionTypeConverter questionTypeConverter
             , IVideoResultRepository videoResultRepository
@@ -44,6 +47,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             _videoRepository = videoRepository;
             _questionRepository = questionRepository;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _exerciseRepository = exerciseRepository;
             _questionTypeConverter = questionTypeConverter;
             _videoResultRepository = videoResultRepository;
@@ -258,7 +262,8 @@ namespace Fsel.Course.Infrastructure.Common
             VoidMethodResult methodResult = new VoidMethodResult();
 
             var answerQuery = from baseQ in _videoResultRepository.Queryable
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
@@ -331,7 +336,8 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(videoResult);
             VoidMethodResult methodResult = new VoidMethodResult();
             var answerQuery = from baseQ in _videoResultRepository.Queryable
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
@@ -387,6 +393,137 @@ namespace Fsel.Course.Infrastructure.Common
                              };
             videoResult.VideoSkillScores = scoreQuery.ToList();
             return methodResult;
+        }
+
+        private static bool GetUngraded(VideoTimeCode? videoTimeCode)
+        {
+            return videoTimeCode?.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default;
+        }
+
+        private static int GetCorrectCount(VideoTimeCode? videoTimeCode)
+        {
+            return (videoTimeCode != null && videoTimeCode.VideoTimeCodeAnswers.Any()) ? videoTimeCode.VideoTimeCodeAnswers.Sum(x => x.CorrectCount) : default;
+        }
+
+        private static int GetCorrectTotal(VideoTimeCode? videoTimeCode)
+        {
+            return videoTimeCode?.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal) ?? default;
+        }
+
+        public static int GetTotalQuestion(VideoTimeCode? videoTimeCode)
+        {
+            return videoTimeCode?.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null)
+                                                  .Select(x => x.Exercise)
+                                                  .SelectMany(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted && x.Question != null))
+                                                  .Select(m => m.Question)
+                                                  .Count() ?? default;
+        }
+
+        public IList<VideoTimeCodeModel> GetTimeCodes(Video? video, Guid videoResultId)
+        {
+            ArgumentNullException.ThrowIfNull(video);
+
+            var videoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).ToList();
+            var videoTimeCodeModels = new List<VideoTimeCodeModel>();
+            var indexProcess = GetIndexProcess(videoTimeCodes, videoResultId);
+            foreach (var item in videoTimeCodes)
+            {
+                var indexTimeCode = videoTimeCodes.IndexOf(item);
+                var videoTimeCode = _mapper.Map<VideoTimeCodeModel>(item);
+                videoTimeCode.TotalCount = GetTotalQuestion(item);
+                videoTimeCode.Status = GetTimeCodeStatus(indexProcess, indexTimeCode);
+                videoTimeCodeModels.Add(videoTimeCode);
+            }
+            return videoTimeCodeModels;
+        }
+
+        public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode? videoTimeCode)
+        {
+            ArgumentNullException.ThrowIfNull(videoTimeCode);
+            var timeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode);
+            timeCode.TotalCount = GetTotalQuestion(videoTimeCode);
+            timeCode.Ungraded = GetUngraded(videoTimeCode);
+            timeCode.CorrectCount = GetCorrectCount(videoTimeCode);
+            timeCode.CorrectTotal = GetCorrectTotal(videoTimeCode);
+            timeCode.Status = GetTimeCodeStatus(videoTimeCode);
+            timeCode.Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n)).ToList();
+            return timeCode;
+        }
+
+        public IList<VideoTimeCodeModel> GetVideoTimeCodes(Video? video, Guid videoResultId)
+        {
+            ArgumentNullException.ThrowIfNull(video);
+            var videoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).ToList();
+            var videoTimeCodeModels = new List<VideoTimeCodeModel>();
+            var indexProcess = GetIndexProcess(videoTimeCodes, videoResultId);
+            foreach (var videoTimeCode in videoTimeCodes)
+            {
+                var indexTimeCode = videoTimeCodes.IndexOf(videoTimeCode);
+                var timeCode = GetVideoTimeCode(videoTimeCode);
+                timeCode.Status = GetTimeCodeStatus(indexProcess, indexTimeCode);
+                videoTimeCodeModels.Add(timeCode);
+            }
+            return videoTimeCodeModels;
+        }
+
+        private ExerciseModel GetExercise(Exercise? n)
+        {
+            ArgumentNullException.ThrowIfNull(n);
+            var exerciseModel = _mapper.Map<ExerciseModel>(n);
+            exerciseModel.Questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m)).ToList();
+            return exerciseModel;
+        }
+
+        private QuestionModel GetQuestion(Question? question)
+        {
+            ArgumentNullException.ThrowIfNull(question);
+            var isCheck = question.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumAnswerStatus.Done;
+            var questionModel = _mapper.Map<QuestionModel>(question);
+            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
+            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(question.VideoTimeCodeAnswers.FirstOrDefault());
+            return questionModel;
+        }
+
+        private static EnumResultStatus GetTimeCodeStatus(VideoTimeCode? videoTimeCode)
+        {
+            var status = EnumResultStatus.Process;
+            if (videoTimeCode != null)
+            {
+                if (videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done))
+                {
+                    status = EnumResultStatus.Done;
+                }
+            }
+            return status;
+        }
+
+        private static EnumResultStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
+        {
+            var status = EnumResultStatus.Unfinished;
+            if (indexProcess < indexTimeCode)
+            {
+                return status;
+            }
+            else if (indexProcess == indexTimeCode)
+            {
+                status = EnumResultStatus.Process;
+            }
+            else if (indexProcess > indexTimeCode || indexProcess == null)
+            {
+                status = EnumResultStatus.Done;
+            }
+            return status;
+        }
+
+        private static int? GetIndexProcess(IList<VideoTimeCode>? videoTimeCodes, Guid videoResultId)
+        {
+            ArgumentNullException.ThrowIfNull(videoTimeCodes);
+            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeAnswers.Any() || x.VideoTimeCodeAnswers.Any(x => x.VideoResultId == videoResultId && x.Status != EnumAnswerStatus.Done)).FirstOrDefault();
+            if (timeCode == null)
+            {
+                return null;
+            }
+            return videoTimeCodes.IndexOf(timeCode);
         }
     }
 }

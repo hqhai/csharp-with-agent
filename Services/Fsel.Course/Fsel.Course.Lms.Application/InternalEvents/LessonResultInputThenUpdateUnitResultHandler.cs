@@ -11,8 +11,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Unit = Course.Domain.Entities.Unit;
@@ -46,7 +44,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else if (lessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Any())
                 {
-                    await UpdateUnitResultAsync(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, true, cancellationToken).ConfigureAwait(false);
+                    await UpdateUnitResultAsync(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, false, cancellationToken).ConfigureAwait(false);
                     await UpdateTheNextLessonAsync(unit, lessonResult, cancellationToken).ConfigureAwait(false);
                 }
                 else
@@ -77,7 +75,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
-            else if (unit.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts && mockTestId.HasValue)
+            else if (mockTestId.HasValue)
             {
                 var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.MockTestId == mockTestId.Value, cancellationToken);
                 if (mockTestResult != null && mockTestResult.Status == EnumResultStatus.Unfinished)
