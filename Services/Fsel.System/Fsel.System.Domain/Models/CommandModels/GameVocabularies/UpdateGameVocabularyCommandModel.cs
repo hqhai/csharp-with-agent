@@ -13,18 +13,15 @@ namespace Fsel.System.Domain.Models.CommandModels.GameVocabularies
         public EnumGameCefrLevel CefrLevel { get; set; }
         public EnumGameCourseLevel CourseLevel { get; set; }
         public EnumUnitNumber UnitOrder { get; set; }
-        public string? AlternateSpellingStr { get; set; }
-        public string? UsEquivalent { get; set; }
         public EnumPartSpeech? PartSpeech { get; set; }
-        public string? Definition { get; set; }
-        public string? Hint { get; set; }
-        public string? ExampleSentence { get; set; }
-        public string? ImagePath { get; set; }
-        public string? AudioPath { get; set; }
-        public string? Synonym { get; set; }
-        public string? Antonym { get; set; }
-        public string? PhoneticTranscription { get; set; }
-        public Guid? PlatformId { get; set; }
         public Guid? WordCategoryId { get; set; }
+        public IList<UpdateGameVocabularyTypeCommandModel>? GameVocabularyTypeModels { get; set;}
+    }
+
+    public class UpdateGameVocabularyTypeCommandModel
+    {
+        public Guid? Id { get; set; }
+        public EnumGameVocabType GameVocabType { get; set; }
+        public string? QuestionContent { get; set; }
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
 {
-    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -11,7 +10,6 @@ namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.SupportCategorys;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

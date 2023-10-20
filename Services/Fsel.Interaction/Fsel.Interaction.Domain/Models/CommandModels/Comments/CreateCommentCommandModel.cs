@@ -11,6 +11,6 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.Comments
 
         public string? Content { get; set; }
 
-        public EnumCommentType Type { get; set; }
+        public EnumInteractionType Type { get; set; }
     }
 }
