@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var query = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForum.Id && classStudentIds!.Contains(x.StudentId) && x.Status != EnumClassForumResultStatus.Draft && x.Status != EnumClassForumResultStatus.Pending)
+                .Where(x => x.ClassForumId == classForum.Id && classStudentIds!.Contains(x.StudentId) && x.Status != EnumClassForumResultStatus.Draft)
                 .OrderBy(x => x.CreatedDate)
                 .ToListAsync(cancellationToken);
 
@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 {
                     // Lấy bài post học sinh trong lớp
                     var classForumResultAllStudents = classForumResults.Where(x => x.ClassForumId == classForum.Id &&
-                                    x.Id != classForumResultCurrentStudent.Id
+                                    x.Id != classForumResultCurrentStudent.Id && x.Status != EnumClassForumResultStatus.Pending
                                     ).ToList();
                     classForumByStudentModel.ClassForumResultAllStudents = classForumResultAllStudents;
 
