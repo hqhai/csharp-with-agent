@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Services.UserServices
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Services.UserServices.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -54,7 +55,7 @@ namespace Fsel.System.Application.Services.UserServices
         [Get("/teacher/get-teachers-by-keyword/{keyword}")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeachersByKeyword([FromRoute] string? keyword);
 
-        [Get("/platform")]
-        Task<IApiResponse<MethodResult<IList<PlatformModel>>>> GetAllPlatform();
+        [Post("/platform/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<PlatformModel>>>> GetPlatformsQueryAsync([Body] BaseQueryModel query);
     }
 }

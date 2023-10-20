@@ -364,14 +364,20 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.ToTable("ClassForumResultFiles");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumResultFlag", b =>
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumResultRandom", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<Guid>("ClassForumId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ClassForumResultId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ClassId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
@@ -401,22 +407,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<string>("FeedBack")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FlagIssue")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -433,9 +426,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClassForumId");
+
                     b.HasIndex("ClassForumResultId");
 
-                    b.ToTable("ClassForumResultFlags");
+                    b.ToTable("ClassForumResultRandoms");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumScore", b =>
@@ -4729,13 +4724,21 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("ClassForumResult");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumResultFlag", b =>
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumResultRandom", b =>
                 {
-                    b.HasOne("Fsel.Course.Domain.Entities.ClassForumResult", "ClassForumResult")
-                        .WithMany("ClassForumResultFlags")
-                        .HasForeignKey("ClassForumResultId")
+                    b.HasOne("Fsel.Course.Domain.Entities.ClassForum", "ClassForum")
+                        .WithMany("ClassForumResultRandoms")
+                        .HasForeignKey("ClassForumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Fsel.Course.Domain.Entities.ClassForumResult", "ClassForumResult")
+                        .WithMany("ClassForumResultRandoms")
+                        .HasForeignKey("ClassForumResultId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ClassForum");
 
                     b.Navigation("ClassForumResult");
                 });
@@ -5554,6 +5557,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                 {
                     b.Navigation("ClassForumFiles");
 
+                    b.Navigation("ClassForumResultRandoms");
+
                     b.Navigation("ClassForumResults");
                 });
 
@@ -5561,7 +5566,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 {
                     b.Navigation("ClassForumResultFiles");
 
-                    b.Navigation("ClassForumResultFlags");
+                    b.Navigation("ClassForumResultRandoms");
 
                     b.Navigation("ClassForumScores");
                 });
