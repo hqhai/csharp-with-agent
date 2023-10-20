@@ -42,6 +42,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             var studentInfo = _studentRepository.Queryable.Include(x => x.Human).Where(x => studentIds.Contains(x.Id)).ToList();
             var studentRankingResult = _mapper.Map<List<StudentRankingModel>>(studentRankingsQuery);
 
+
             studentRankingResult.ForEach(x =>
             {
                 var student = studentInfo.FirstOrDefault(s => s.Id == x.StudentId);
@@ -49,6 +50,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 {
                     x.FullName = student.Human?.FullName;
                     x.AvatarPath = student.Human?.AvatarPath;
+                    x.UserId = student.Human!.UserId;
                 }
             });
 
