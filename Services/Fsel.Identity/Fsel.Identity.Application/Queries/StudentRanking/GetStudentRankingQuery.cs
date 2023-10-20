@@ -50,7 +50,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 {
                     x.FullName = student.Human?.FullName;
                     x.AvatarPath = student.Human?.AvatarPath;
-                    x.UserId = student.Human!.UserId;
+                    x.UserId = student.Human?.UserId;
                 }
             });
 

@@ -10,7 +10,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     {
         public Guid StudentId { get; set; }
 
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
+
         public int DailyStreak { get; set; }
 
         public double TotalScore { get; set; }
