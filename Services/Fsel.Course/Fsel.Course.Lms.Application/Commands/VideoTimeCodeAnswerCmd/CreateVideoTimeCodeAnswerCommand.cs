@@ -93,7 +93,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             #region Chặn Time Code Chưa Done
 
             //var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.Id == videoResult.CurrentVideoTimeCodeId).FirstOrDefaultAsync(cancellationToken);
-            //if (videoTimeCode != null && videoTimeCode.Id != videoTimeCodeQuestion?.Id && videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumTimeCodeStatus.Process))
+            //if (videoTimeCode != null && videoTimeCode.Id != videoTimeCodeQuestion?.Id && videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Process))
             //{
             //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodePreviousNotDone));
             //    return methodResult;
@@ -134,7 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         VideoTimeCodeResultId = videoTimeCodeResult.Id,
                         VideoResultId = videoResult.Id,
                         CorrectCount = question.Ungraded ? default : correctCount,
-                        Status = GetEnumTimeCodeType(videoTimeCode.TimeCodeType, correctCount, question.CorrectTotal)
+                        Status = GetAnswerStatus(videoTimeCode.TimeCodeType, correctCount, question.CorrectTotal)
                     };
 
                     videoTimeCodeAnswers.Add(answer);
@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 else
                 {
                     answer.Answer = answerConfig ?? item.Answer;
-                    answer.Status = EnumTimeCodeStatus.Done;
+                    answer.Status = EnumAnswerStatus.Done;
                     answer.CorrectCount = question.Ungraded ? default : correctCount;
                     updateVideoTimeCodeAnswers.Add(answer);
                 }
@@ -234,17 +234,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             return videoTimeCodeResult;
         }
 
-        private static EnumTimeCodeStatus GetEnumTimeCodeType(EnumTimeCodeType? timeCodeType, int correctCount, int correctTotal)
+        private static EnumAnswerStatus GetAnswerStatus(EnumTimeCodeType? timeCodeType, int correctCount, int correctTotal)
         {
             if (timeCodeType == EnumTimeCodeType.Standalone)
             {
                 if (correctCount == correctTotal)
                 {
-                    return EnumTimeCodeStatus.Done;
+                    return EnumAnswerStatus.Done;
                 }
-                return EnumTimeCodeStatus.Process;
+                return EnumAnswerStatus.Process;
             }
-            return EnumTimeCodeStatus.Done;
+            return EnumAnswerStatus.Done;
         }
 
         private async Task<(IList<Question>?, VideoTimeCode?)> GetQuestionsAndVideoTimeCodeAsyns(IList<Guid> questionIds)

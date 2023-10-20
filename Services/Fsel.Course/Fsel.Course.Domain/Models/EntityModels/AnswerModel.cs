@@ -8,6 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public int CorrectCount { get; set; }
         public object? Answer { get; set; }
-        public EnumTimeCodeStatus? Status { get; set; }
+        public EnumAnswerStatus? Status { get; set; }
     }
 }

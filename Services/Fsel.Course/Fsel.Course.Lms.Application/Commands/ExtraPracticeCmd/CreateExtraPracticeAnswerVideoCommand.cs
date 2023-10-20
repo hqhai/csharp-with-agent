@@ -138,27 +138,27 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                                 VideoTimeCodeId = currenVideoTimeCodeId,
                                 ExtraPracticeResultId = extraPracticeResult.Id,
                                 QuestionId = item.QuestionId,
-                                Status = videoTimeCodeQuestion.TimeCodeType != EnumTimeCodeType.Standalone ? EnumTimeCodeStatus.Done : EnumTimeCodeStatus.Process
+                                Status = videoTimeCodeQuestion.TimeCodeType != EnumTimeCodeType.Standalone ? EnumAnswerStatus.Done : EnumAnswerStatus.Process
                             };
                             extraPracticeAnswers.Add(extraPracticeAnswer);
                         }
-                        else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumTimeCodeStatus.Process)
+                        else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumAnswerStatus.Process)
                         {
                             extraPracticeAnswer.Answer = answerConfig;
                             extraPracticeAnswer.CorrectCount = question.Ungraded ? default : correctCount;
-                            extraPracticeAnswer.Status = EnumTimeCodeStatus.Done;
+                            extraPracticeAnswer.Status = EnumAnswerStatus.Done;
                             updateExtraPracticeAnswers.Add(extraPracticeAnswer);
                         }
-                        else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumTimeCodeStatus.Done)
+                        else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumAnswerStatus.Done)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
                             return methodResult;
                         }
                     }
                 }
-                if (correctTotal == correctCountStudent && extraPracticeAnswers.All(x => x.Status == EnumTimeCodeStatus.Process))
+                if (correctTotal == correctCountStudent && extraPracticeAnswers.All(x => x.Status == EnumAnswerStatus.Process))
                 {
-                    extraPracticeAnswers.ForEach(x => x.Status = EnumTimeCodeStatus.Done);
+                    extraPracticeAnswers.ForEach(x => x.Status = EnumAnswerStatus.Done);
                 }
             }
             await _extraPracticeResultRepository.ExecuteTransactionAsync(async () =>

@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumTimeCodeStatus
+    public enum EnumAnswerStatus
     {
         Lock,
         Process,

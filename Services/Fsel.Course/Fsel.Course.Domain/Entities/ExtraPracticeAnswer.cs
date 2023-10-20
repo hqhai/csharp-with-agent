@@ -30,7 +30,7 @@ namespace Fsel.Course.Domain.Entities
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectCount { get; set; }
 
-        public EnumTimeCodeStatus? Status { get; set; }
+        public EnumAnswerStatus? Status { get; set; }
         public Question? Question { get; set; }
         public ExtraPracticeResult? ExtraPracticeResult { get; set; }
         public ExtraPracticeExerciseResult? ExtraPracticeExerciseResult { get; set; }

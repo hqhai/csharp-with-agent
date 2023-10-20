@@ -94,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 ExecutionTime = videoTimeCode.ExecutionTime,
                 TimeCodeType = videoTimeCode.TimeCodeType,
                 VideoId = videoTimeCode.VideoId,
-                Status = (videoTimeCode.ExtraPracticeAnswers.Count > 0 && videoTimeCode.ExtraPracticeAnswers.All(y => y.ExtraPracticeResultId == extraPracticeResult.Id && y.Status == EnumTimeCodeStatus.Done)) ? EnumTimeCodeStatus.Done : EnumTimeCodeStatus.Process,
+                Status = (videoTimeCode.ExtraPracticeAnswers.Count > 0 && videoTimeCode.ExtraPracticeAnswers.All(y => y.ExtraPracticeResultId == extraPracticeResult.Id && y.Status == EnumAnswerStatus.Done)) ? EnumResultStatus.Done : EnumResultStatus.Process,
                 Ungraded = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default,
                 CorrectCount = GetCorrectcount(videoTimeCode),
                 CorrectTotal = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
