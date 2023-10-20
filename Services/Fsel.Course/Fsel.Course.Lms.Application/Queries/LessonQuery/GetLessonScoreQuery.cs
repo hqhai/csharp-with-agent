@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IExerciseRepository _exerciseRepository;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IUserService _userService;
@@ -46,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             IVideoResultRepository videoResultRepository,
             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
             IExerciseRepository exerciseRepository,
+            IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
             IExerciseQuestionRepository exerciseQuestionRepository,
             IQuestionRepository questionRepository,
             IUserService userService)
@@ -58,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _exerciseRepository = exerciseRepository;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _questionRepository = questionRepository;
             _userService = userService;
@@ -85,7 +88,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                             select vr;
 
             var answerQuery = from baseQ in baseQuery
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
