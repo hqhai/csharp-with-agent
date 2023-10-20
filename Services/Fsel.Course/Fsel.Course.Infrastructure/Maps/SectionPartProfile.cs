@@ -15,6 +15,7 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<SectionPart, SectionPartModel>().IgnoreAllNonExisting();
             CreateMap<CreateSectionPartCommandModel, SectionPart>().IgnoreAllNonExisting();
             CreateMap<UpdateSectionPartCommandModel, SectionPart>().IgnoreAllNonExisting();
+            CreateMap<SectionPart, SectionPartDetailModel>().IgnoreAllNonExisting();
         }
     }
 }

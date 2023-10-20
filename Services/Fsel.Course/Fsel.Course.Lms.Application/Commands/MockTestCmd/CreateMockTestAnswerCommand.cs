@@ -135,6 +135,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                 mockTestAnswer = new MockTestAnswer
                                 {
                                     Answer = answerConfig,
+                                    CorrectCount = correctCount,
                                     MockTestResultId = mockTestResult.Id,
                                     SectionQuestionId = sectionQuestionId
                                 };

@@ -181,7 +181,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             sectionGroupResult.CorrectTotal = (int)skillScores.TotalCount;
             sectionGroupResult.Percent = (int)skillScores.TotalCount > 0 ? NumberHelper.ConvertPercentDouble(skillScores.CorrectCount / skillScores.TotalCount) : default;
             sectionGroupResult.Status = EnumResultStatus.Done;
-            sectionGroupResult.SkillScores!.Add(skillScores);
+            if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
+            {
+                sectionGroupResult.SkillScores.Add(skillScores);
+            }
+            else
+            {
+                sectionGroupResult.SkillScores = new List<SkillScores> { skillScores };
+            }
             _sectionGroupResultRepository.Update(sectionGroupResult);
             await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             return sectionGroupResult;
@@ -199,25 +206,36 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 var questionIds = request.Answers.Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
                 questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
+                if (questions == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return methodResult;
+                }
                 anserResult = await CreateAnswer(request, sectionGroup, questions);
             }
             else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
             {
                 var sectionIds = request.Answers.Where(x => x.SectionId.HasValue).Select(x => x.SectionId!.Value).ToList();
                 sections = await _sectionRepository.Queryable.Where(x => sectionIds.Contains(x.Id)).ToListAsync();
+                if (sections == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return methodResult;
+                }
                 anserResult = await CreateAnswer(request, sectionGroup, sections);
             }
             else
             {
                 var sectionTimeCodeIds = request.Answers.Where(x => x.SectionTimeCodeId.HasValue).Select(x => x.SectionTimeCodeId!.Value).ToList();
                 sectionTimeCodes = await _sectionTimeCodeRepository.Queryable.Where(x => sectionTimeCodeIds.Contains(x.Id)).ToListAsync();
+                if (sectionTimeCodes == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                    return methodResult;
+                }
                 anserResult = await CreateAnswer(request, sectionGroup, sectionTimeCodes);
             }
-            if (questions == null || sections == null || sectionTimeCodes == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
+
             if (!anserResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(anserResult.ErrorMessages);
@@ -243,6 +261,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                         return methodResult;
                     }
+                    var sectionQuestionId = question.SectionQuestions.FirstOrDefault()?.Id ?? default;
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (mockTestAnswer == null)
                     {
@@ -252,7 +271,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
                             return methodResult;
                         }
-                        mockTestAnswers.Add(GetMockTestAnswer(answerConfig, correctCount, request));
+                        mockTestAnswers.Add(GetMockTestAnswer(answerConfig, correctCount, request, sectionQuestionId, default));
                     }
                 }
             }
@@ -278,7 +297,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (mockTestAnswer == null)
                     {
-                        mockTestAnswers.Add(GetMockTestAnswer(item.Answer, default, request));
+                        mockTestAnswers.Add(GetMockTestAnswer(item.Answer, default, request, default, section.Id));
                     }
                 }
             }
@@ -304,7 +323,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (mockTestAnswer == null)
                     {
-                        mockTestAnswers.Add(GetMockTestAnswer(item.Answer, default, request));
+                        mockTestAnswers.Add(GetMockTestAnswer(item.Answer, default, request, default, default, sectionTimeCode.Id));
                     }
                 }
             }
@@ -313,14 +332,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             return methodResult;
         }
 
-        private static MockTestAnswer GetMockTestAnswer(object? answer, int correctCount, CreateAnswerBySectionGroupCommand request)
+        private static MockTestAnswer GetMockTestAnswer(object? answer, int correctCount, CreateAnswerBySectionGroupCommand request, Guid? sectionQuestionId, Guid? sectionId, Guid? sectionTimeCodeId = default)
         {
             return new MockTestAnswer
             {
                 Answer = answer,
                 CorrectCount = correctCount,
                 MockTestResultId = request.MockTestResultId,
-                SectionQuestionId = request.SectionGroupId
+                SectionTimeCodeId = sectionTimeCodeId ?? null,
+                SectionId = sectionId ?? null,
+                SectionQuestionId = sectionQuestionId ?? null,
             };
         }
 

@@ -52,7 +52,7 @@ namespace Fsel.Shared.Helpers
 
         public static double ConvertDoublePercent(double value)
         {
-            double convertedValue = Math.Round(value / 100, 2, MidpointRounding.AwayFromZero);
+            double convertedValue = Math.Round(value / 100, 0, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
