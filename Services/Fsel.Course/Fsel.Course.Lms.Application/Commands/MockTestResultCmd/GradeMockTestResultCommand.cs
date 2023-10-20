@@ -7,13 +7,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -80,7 +80,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroups));
                 return methodResult;
             }
-
             IList<MockTestScore> mockTestScores = new List<MockTestScore>();
             foreach (var item in request.MockTestScores)
             {
@@ -100,25 +99,32 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 }
                 mockTestScores.Add(mockTestScore);
             }
+            var skillScores = mockTestResult.SkillScores?.Where(x => !sectionGroups.Select(x => x.CourseSkill).Contains(x.Skill)).ToList();
             foreach (var item in sectionGroups)
             {
-                var skillScore = new SkillScores
+                var listMockTestScore = mockTestScores.Where(x => x.SectionGroupId == item.Id).ToList();
+                var sumScore = listMockTestScore.Sum(x => x.Score);
+                var skillScore = mockTestResult.SkillScores?.FirstOrDefault(x => x.Skill == item.CourseSkill);
+                if (skillScore != null)
                 {
-                    CorrectCount = mockTestScores.Where(x => x.SectionGroupId == item.Id).Sum(x => x.Score),
-                    TotalCount = 36,
-                    Scores = (double)36 / mockTestScores.Where(x => x.SectionGroupId == item.Id).Sum(x => x.Score),
-                    Skill = item.CourseSkill
-                };
-                mockTestResult.SkillScores?.Add(skillScore);
+                    skillScore.CorrectCount = sumScore;
+                    skillScore.TotalCount = 36;
+                    skillScore.Percent = (double)NumberHelper.ConvertPercentDouble((double)sumScore / 36);
+                    skillScore.Scores = (double)NumberHelper.RoundNumberDouble((double)sumScore / listMockTestScore.Count);
+                    skillScore.Skill = item.CourseSkill;
+                    skillScores!.Add(skillScore);
+                }
             }
-            mockTestResult.Percent = mockTestResult.SkillScores?.Average(x => x.CorrectCount / x.TotalCount) ?? default;
+
+            mockTestResult.SkillScores = skillScores;
+            mockTestResult.Percent = NumberHelper.ConvertRound(mockTestResult.SkillScores?.Average(x => x.Percent) ?? default);
             mockTestResult.MockTestScores = mockTestScores;
             mockTestResult.GradingTeacherId = teacherId;
 
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
                 _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<List<MockTestScoreModel>>(mockTestResult.MockTestScores);

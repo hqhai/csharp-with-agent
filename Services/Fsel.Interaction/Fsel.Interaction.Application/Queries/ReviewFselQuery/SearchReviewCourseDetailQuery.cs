@@ -73,13 +73,13 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
             {
                 query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
             }
-            var stars = query.Any() ? NumberHelper.ConvertRatingToDouble(query.Average(x => x.Stars)) : default;
+            var stars = query.Any() ? NumberHelper.ConvertRound(query.Average(x => x.Stars)) : default;
             int totalItem = query.Count;
             var lists = query.ApplySortAndPaging(request).ToList();
 
             foreach (var item in lists)
             {
-                item.Stars = NumberHelper.ConvertRatingToDouble(item.Stars);
+                item.Stars = NumberHelper.ConvertRound(item.Stars);
                 item.Code = course?.Code;
             }
 

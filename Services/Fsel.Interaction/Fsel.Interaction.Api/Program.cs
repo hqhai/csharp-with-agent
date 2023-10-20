@@ -33,6 +33,7 @@ builder.Services.AddScoped<IStudentReviewRepository, StudentReviewRepository>();
 builder.Services.AddScoped<ISupportCategoryRepository, SupportCategoryRepository>();
 builder.Services.AddScoped<ISupportQuestionRepository, SupportQuestionRepository>();
 builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
+builder.Services.AddScoped<IFlagRepository, FlagRepository>();
 builder.Services.AddScoped<DiscussionBoardCommentPublisher>();
 builder.Services.AddScoped<DiscussionBoardLikePublisher>();
 builder.Services.AddScoped<InterationActionPublisher>();

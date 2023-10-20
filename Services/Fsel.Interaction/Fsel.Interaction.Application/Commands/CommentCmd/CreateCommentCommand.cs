@@ -75,11 +75,11 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 NotificationQueueModel model = new NotificationQueueModel();
                 switch (request.Type)
                 {
-                    case EnumCommentType.DiscussionBoard:
+                    case EnumInteractionType.DiscussionBoard:
                         await _discussionBoardCommentPublisher.Publish(comment, cancellationToken).ConfigureAwait(false);
 
                         break;
-                    case EnumCommentType.ClassForum:
+                    case EnumInteractionType.ClassForum:
 
                         var postOwner = await _courseService.GetClassForumResultByIdAsync(request.ObjectId).Select(x => x.Content?.Result?.ClassForum?.ClassForumResults?.FirstOrDefault()).ConfigureAwait(false);
 
@@ -101,7 +101,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
-                    case EnumCommentType.ReplyComment:
+                    case EnumInteractionType.ReplyComment:
 
                         var commentOwnerId = await _commentRepository.GetByIdAsync(request.ObjectId).Select(x => x!.CreatedUserId).ConfigureAwait(false);
 

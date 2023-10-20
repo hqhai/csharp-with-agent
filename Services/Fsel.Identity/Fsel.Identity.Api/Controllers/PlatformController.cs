@@ -4,10 +4,13 @@ namespace Fsel.Identity.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Queries.PlatformQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -18,10 +21,24 @@ namespace Fsel.Identity.Api.Controllers
     public class PlatformController : ControllerBase
     {
         private readonly IMediator _mediator;
-
-        public PlatformController(IMediator mediator)
+        private readonly IPlatformRepository _platformRepository;
+        public PlatformController(IMediator mediator, IPlatformRepository platformRepository)
         {
             _mediator = mediator;
+            _platformRepository = platformRepository;
+        }
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpPost("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<PlatformModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
+        {
+            var result = await _platformRepository.GetListResultAsync<PlatformModel>(query);
+            return result.GetActionResult();
         }
 
         /// <summary>

@@ -91,7 +91,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 _appSetting.Jwt?.Issuer ?? string.Empty,
                 _appSetting.Jwt?.Audience ?? string.Empty,
                 authClaims,
-                expires: DateTime.Now.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
+                expires: DateTime.UtcNow.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
                 signingCredentials: signin
                 );
 
@@ -105,7 +105,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 RefreshToken = refreshToken,
                 LoginProvider = JwtBearerDefaults.AuthenticationScheme,
                 UserId = user.Id,
-                RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
+                RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
             });
 
             var tokenLogin = new TokenModel
@@ -130,7 +130,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 tokenLogin.IsPlacementTest = isPlacementTest?.Content?.Result;
                 if (@class != null)
                 {
-                    var order = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, ClassId = @class.Id, PackageId = @class.PackageId, UserId = request.Id });
+                    var order = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = request.Id });
 
                     tokenLogin.ClassCode = @class.Code;
                     tokenLogin.IsOrder = order?.Content?.Result == EnumOrderStatus.Payment;

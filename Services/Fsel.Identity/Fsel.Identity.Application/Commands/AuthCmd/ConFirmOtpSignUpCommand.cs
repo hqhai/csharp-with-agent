@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
+    using System.ComponentModel.DataAnnotations;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -10,16 +11,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.CommandModels.Auths;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class ConfirmOtpSignUpCommand : ConfirmOTPCommandModel, IRequest<MethodResult<ConfirmOtpModel>>
+    public class ConfirmOtpSignUpCommand : IRequest<MethodResult<ConfirmOtpModel>>
     {
+        [Required]
+        public string? OTP { get; set; }
     }
 
     public class ConfirmOtpSignUpCommandHandler : IRequestHandler<ConfirmOtpSignUpCommand, MethodResult<ConfirmOtpModel>>
@@ -54,33 +57,24 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             MethodResult<ConfirmOtpModel> methodResult = new MethodResult<ConfirmOtpModel>();
-            User? user = new User();
-            if (!string.IsNullOrEmpty(request.Email))
-            {
-                user = await _userManager.FindByEmailAsync(request.Email);
-            }
-            else
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
-                return methodResult;
-            }
 
-            if (user == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
-                return methodResult;
-            }
-            var userOtpCode = await _userOtpCodeRepository.Queryable
-                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
+            var userOtpCode = await _userOtpCodeRepository.Queryable.Include(x => x.User)
+                        .FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.OTPCode == request.OTP, cancellationToken);
             if (userOtpCode == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.OTP));
                 return methodResult;
             }
 
-            if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
+            if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(Domain.Enums.ErrorCodes.EnumAuthErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
+                return methodResult;
+            }
+            var user = userOtpCode.User;
+            if (user == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
 
@@ -92,7 +86,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             await _userManager.ConfirmEmailAsync(user, token);
             var roles = await _userManager.GetRolesAsync(user);
 
-            var human = await CreateHuman(request, roles, user);
+            var human = await CreateHuman(roles, user);
+            if (!human.IsValid())
+            {
+                methodResult.AddError(human.ErrorMessages);
+                return methodResult;
+            }
             await _humanRepository.ExecuteTransactionAsync(async () =>
             {
                 human = _humanRepository.Add(human);
@@ -113,11 +112,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             return methodResult;
         }
 
-        private async Task<Human> CreateHuman(ConfirmOtpSignUpCommand request, IList<string> roles, User user)
+        private async Task<Human> CreateHuman(IList<string> roles, User user)
         {
-            Human human = _mapper.Map<Human>(request);
+            Human human = _mapper.Map<Human>(user);
             human.UserId = user.Id;
-            var currentDate = DateTime.Now;
+            var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
 
             if (roles.Contains(EnumRoleRegister.Student.ToString()))

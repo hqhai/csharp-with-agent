@@ -1,16 +1,19 @@
 using Fsel.Core.Base.Interfaces;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
+using Microsoft.Extensions.Logging;
 
 namespace Fsel.Interaction.Application.Queues.Publishers
 {
     public class NotificationMessagePublisher
     {
         private readonly IQueueProvider _queueProvider;
+        private readonly ILogger<NotificationMessagePublisher> _logger;
 
-        public NotificationMessagePublisher(IQueueProvider queueProvider)
+        public NotificationMessagePublisher(IQueueProvider queueProvider, ILogger<NotificationMessagePublisher> logger)
         {
             _queueProvider = queueProvider;
+            _logger = logger;
         }
 
         public async Task Publish(NotificationQueueModel notification, CancellationToken cancellationToken)
@@ -33,6 +36,7 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 SenderId = notification.SenderId,
             }, cancellationToken);
 
+            _logger.LogInformation($"NotificationMessagePublisher: {notification.UserId}");
         }
     }
 }

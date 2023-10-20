@@ -52,7 +52,6 @@ namespace Fsel.Interaction.Domain.Entities
         /// Nội dung
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Content { get; set; }
 
         /// <summary>
@@ -72,7 +71,6 @@ namespace Fsel.Interaction.Domain.Entities
         /// <summary>
         /// Vấn đề khác
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? OtherProblem { get; set; }
 

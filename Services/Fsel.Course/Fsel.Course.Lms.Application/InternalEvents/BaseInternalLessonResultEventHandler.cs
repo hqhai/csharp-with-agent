@@ -134,7 +134,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             if (skillScores != null && skillScores.Any())
             {
-                return (skillScores.Sum(x => x.CorrectCount), skillScores.Sum(x => x.TotalCount), NumberHelper.ConvertDoubleDecimal(skillScores.Average(x => x.Percent)), skillScores);
+                return (skillScores.Sum(x => x.CorrectCount), skillScores.Sum(x => x.TotalCount), NumberHelper.ConvertRound(skillScores.Average(x => x.Percent)), skillScores);
             }
             else
             {

@@ -46,40 +46,61 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             var methodResult = new MethodResult<bool>();
-            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
-
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);
             if (user != null)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
+                return methodResult;
+            }
+            user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);
+            if (user != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                return methodResult;
+            }
+
+            user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
+            if (user != null)
+            {
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    user.Email = request.Email;
+                    user.Human!.Email = request.Email;
+                }
+                else if (!string.IsNullOrEmpty(request.PhoneNumber))
+                {
+                    user.PhoneNumber = request.PhoneNumber;
+                    user.Human!.PhoneNumber = request.PhoneNumber;
+                }
+                if (!user.Human!.IsValid())
+                {
+                    methodResult.AddError(user.Human.ErrorMessages);
+                    return methodResult;
+                }
+                if (!user.IsValid())
+                {
+                    methodResult.AddError(user.ErrorMessages);
+                    return methodResult;
+                }
+
+                await _userManager.UpdateAsync(user);
                 var userOtpCode = await _userOtpCodeRepository.Queryable
                         .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
                 if (userOtpCode == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.OTP), request.OTP);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.OTP), request.OTP);
                     return methodResult;
                 }
 
-                if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
+                if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
                     return methodResult;
                 }
 
                 userOtpCode.Status = EnumOtpCodeStatus.Verified;
                 _userOtpCodeRepository.Update(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                if (!string.IsNullOrEmpty(request.Email))
-                {
-                    user.Email = request.Email;
-                    user.Human!.Email = request.Email;
-                    await _userManager.UpdateAsync(user);
-                }
-                else if (!string.IsNullOrEmpty(request.PhoneNumber))
-                {
-                    user.PhoneNumber = request.PhoneNumber;
-                    user.Human!.PhoneNumber = request.PhoneNumber;
-                    await _userManager.UpdateAsync(user);
-                }
             }
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;

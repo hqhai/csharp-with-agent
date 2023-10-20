@@ -68,7 +68,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                                     .AsNoTracking()
                                     .AsEnumerable()
                                     .Where(x => timeFrames != null && timeFrames.FirstOrDefault(y => y.Id == x.LiveTimeFrameId) != null &&
-                                    x.LiveDate.Date.AddHours(timeFrames.FirstOrDefault(y => y.Id == x.LiveTimeFrameId)!.EndTime ?? 0) > DateTime.Now)
+                                    x.LiveDate.Date.AddHours(timeFrames.FirstOrDefault(y => y.Id == x.LiveTimeFrameId)!.EndTime ?? 0) > DateTime.UtcNow)
                                     .Select(x => new ClassLiveCalendarSearchModel
                                     {
                                         Id = x.Id,
@@ -93,7 +93,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                 item.StartTime = liveTimeFrame?.StartTime;
                 item.EndTime = liveTimeFrame?.EndTime;
 
-                DateTime dateTime = DateTime.Now;
+                DateTime dateTime = DateTime.UtcNow;
                 var dateTimeNow = dateTime.Date.AddHours(dateTime.Hour).AddMinutes(dateTime.Minute);
 
                 var assignTeacher = item.LiveDate.Date.AddHours(item.StartTime ?? 0);

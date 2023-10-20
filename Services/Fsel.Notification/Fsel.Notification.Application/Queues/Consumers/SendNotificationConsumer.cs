@@ -5,6 +5,7 @@ using Fsel.Shared.Models.ShareModels;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
@@ -12,11 +13,13 @@ namespace Fsel.Notification.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
+        private readonly ILogger<SendNotificationConsumer> _logger;
 
-        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository)
+        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, ILogger<SendNotificationConsumer> logger)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;
+            _logger = logger;
         }
 
         public async Task Consume(ConsumeContext<NotificationQueueModel> context)
@@ -31,6 +34,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
                 string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : notificationType?.TemplateLink!;
 
+                _logger.LogInformation($"SendNotificationConsumer: {dataReceipt.UserId}");
                 CreateNotificationCommand model = new CreateNotificationCommand()
                 {
                     UserId = dataReceipt.UserId ?? default,
@@ -42,6 +46,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     SenderId = dataReceipt.SenderId,
                 };
                 await _mediator.Send(model).ConfigureAwait(false);
+                _logger.LogInformation($"SendNotificationConsumer: Sent {dataReceipt.UserId}");
             }
         }
     }
