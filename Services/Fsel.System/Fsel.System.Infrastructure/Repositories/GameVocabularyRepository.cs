@@ -14,7 +14,7 @@ namespace Fsel.System.Infrastructure.Repositories
         }
         public override async Task<GameVocabulary?> GetIncludeByIdAsync(Guid id, int? siteId = null)
         {
-            return await Queryable.Include(x => x.GameVocabularyTypes).FirstOrDefaultAsync(x => x.Id == id);
+            return await Queryable.Include(x => x.GameVocabularyTypes).Include(p => p.GameVocabularyPlatforms).Include(t => t.GameTopic).FirstOrDefaultAsync(x => x.Id == id);
         }
     }
 }

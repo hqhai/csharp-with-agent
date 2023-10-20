@@ -13,6 +13,7 @@ namespace Fsel.Shared.Enums
         Audio,
         Synonym,
         Antonym,
-        PhoneticTranscription
+        PhoneticTranscription,
+        JumbledSpelling
     }
 }

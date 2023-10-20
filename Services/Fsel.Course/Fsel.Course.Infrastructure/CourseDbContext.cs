@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Course.Infrastructure
 {
-    public class CourseDbContext : BaseDbContext
+    public class CourseDbContext  : BaseDbContext
     {
         public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -78,8 +78,6 @@ namespace Fsel.Course.Infrastructure
         public DbSet<StudentFeedback> StudentFeedbacks { get; set; }
         public DbSet<ClassForumResultRandom> ClassForumResultRandoms { get; set; }
 
-        public DbSet<ClassForumResultFlag> ClassForumResultFlags { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -142,7 +140,6 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ClassForumFileEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumResultFileEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentFeedbackEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ClassForumResultFlagEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumResultRandomEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);

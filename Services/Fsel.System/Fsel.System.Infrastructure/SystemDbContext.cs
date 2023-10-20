@@ -2,7 +2,6 @@ using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Shared.Constants;
-using Fsel.Shared.Enums;
 using Fsel.System.Domain.Entities;
 using Fsel.System.Domain.Entities.Configs;
 using Fsel.System.Infrastructure.Configs;
@@ -33,6 +32,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new GameVocabularyEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameVocabularyTypeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FocusTimeConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameVocabularyPlatformEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -50,6 +50,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<GameVocabulary> GameVocabularies { get; set; }
         public DbSet<GameVocabularyType> GameVocabularyTypes { get; set; }
         public DbSet<FocusTimeConfig> FocusTimeConfigs { get; set; }
+        public DbSet<GameVocabularyPlatform> GameVocabularyPlatforms { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
