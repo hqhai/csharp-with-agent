@@ -20,6 +20,7 @@ namespace Fsel.Notification.Application.Commands
     using Microsoft.EntityFrameworkCore;
     using Fsel.Common.Models;
     using Fsel.Core.Base.Interfaces;
+    using Microsoft.Extensions.Logging;
 
     public class CreateNotificationCommand : CreateNotificationCommandModel, IRequest<MethodResult<NotificationMessageModel>>
     {
@@ -34,8 +35,9 @@ namespace Fsel.Notification.Application.Commands
         private readonly IUserService _userService;
         private readonly INotificationRemindRepository _notificationRemindRepository;
         private readonly IOneSignalProvider _oneSignalProvider;
+        private readonly ILogger<CreateNotificationCommandHandler> _logger;
 
-        public CreateNotificationCommandHandler(INotificationsRepository notificationsRepository, IMapper mapper, INotificationTypeRepository notificationTypeRepository, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, INotificationRemindRepository notificationRemindRepository, IOneSignalProvider oneSignalProvider)
+        public CreateNotificationCommandHandler(INotificationsRepository notificationsRepository, IMapper mapper, INotificationTypeRepository notificationTypeRepository, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, INotificationRemindRepository notificationRemindRepository, IOneSignalProvider oneSignalProvider, ILogger<CreateNotificationCommandHandler> logger)
         {
             _notificationsRepository = notificationsRepository;
             _mapper = mapper;
@@ -44,6 +46,7 @@ namespace Fsel.Notification.Application.Commands
             _userService = userService;
             _notificationRemindRepository = notificationRemindRepository;
             _oneSignalProvider = oneSignalProvider;
+            _logger = logger;
         }
 
         public async Task<MethodResult<NotificationMessageModel>> Handle(CreateNotificationCommand request, CancellationToken cancellationToken)
@@ -104,6 +107,7 @@ namespace Fsel.Notification.Application.Commands
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
                 //Save into Database
+                _logger.LogInformation("CreateNotificationCommandHandler:Starting Insert To Database");
                 if (listNotificationMessage.Count > 0)
                 {
                     await _notificationsRepository.AddList(listNotificationMessage);
@@ -112,6 +116,8 @@ namespace Fsel.Notification.Application.Commands
                 {
                     notificationNew = _notificationsRepository.Add(notificationNew);
                 }
+
+                _logger.LogInformation("CreateNotificationCommandHandler:Ending Save To Database");
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 string avatarPath = string.Empty;

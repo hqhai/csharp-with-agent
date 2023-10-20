@@ -43,5 +43,10 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
         /// Duplicate Keys
         /// </summary>
         DuplicateKeys,
+
+        /// <summary>
+        /// Game Vocabulary Type not exist
+        /// </summary>
+        GameVocabularyTypeNotExist,
     }
 }
