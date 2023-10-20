@@ -4,7 +4,6 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumAnswerStatus
     {
-        Lock,
         Process,
         Done
     }
