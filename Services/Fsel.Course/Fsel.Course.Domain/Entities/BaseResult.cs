@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Helpers;
 
     public class BaseResult : Entity
     {
@@ -24,8 +25,17 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Phần trăm câu trả lời đúng
         /// </summary>
+        private double _percent;
+
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double Percent { get; set; }
+        public double Percent
+        {
+            get
+            {
+                return CorrectTotal > 0 ? NumberHelper.ConvertPercentDouble((double)CorrectCount / CorrectTotal) : _percent;
+            }
+            set { _percent = CorrectTotal > 0 ? NumberHelper.ConvertPercentDouble((double)CorrectCount / CorrectTotal) : value; }
+        }
 
         /// <summary>
         /// Trạng thái

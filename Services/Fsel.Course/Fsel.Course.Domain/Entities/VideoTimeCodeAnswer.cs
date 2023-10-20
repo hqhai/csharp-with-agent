@@ -43,7 +43,9 @@ namespace Fsel.Course.Domain.Entities
         public Guid ExerciseId { get; set; }
 
         public VideoTimeCode? VideoTimeCode { get; set; }
-        public Guid? VideoTimeCodeId { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid VideoTimeCodeId { get; set; }
 
         public VideoResult? VideoResult { get; set; }
         public Guid? VideoResultId { get; set; }
