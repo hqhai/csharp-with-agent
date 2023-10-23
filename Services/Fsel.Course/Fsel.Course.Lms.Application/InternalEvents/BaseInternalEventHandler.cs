@@ -170,7 +170,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CountQuestion = 1,
                 TotalCount = TotalScoreClassForum,
                 CorrectCount = classForumResult.ClassForumScores.Sum(x => x.Score),
-                Percent = NumberHelper.ConvertPercentDouble((double)classForumResult.ClassForumScores.Sum(x => x.Score) / TotalScoreClassForum)
+                Percent = NumberHelper.GetPercent(classForumResult.ClassForumScores.Sum(x => x.Score), TotalScoreClassForum)
             };
         }
 
