@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -105,28 +104,28 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
                 sectionGroup.Sections!.Clear();
-                sectionGroup.Status = GetCurrentStatus(indexProcess, index);
+                sectionGroup.Status = GetResultStatus(indexProcess, index);
                 sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
                 return sectionGroup;
             }).ToList();
         }
 
-        private static EnumCurrentStatus GetCurrentStatus(int? indexProcess, int index)
+        private static EnumResultStatus GetResultStatus(int? indexProcess, int index)
         {
-            var currentStatus = EnumCurrentStatus.Lock;
+            var resultStatus = EnumResultStatus.Unfinished;
             if (indexProcess < index)
             {
-                return currentStatus;
+                return resultStatus;
             }
             else if (indexProcess == index)
             {
-                currentStatus = EnumCurrentStatus.Process;
+                resultStatus = EnumResultStatus.Process;
             }
             else if (indexProcess > index || indexProcess == null)
             {
-                currentStatus = EnumCurrentStatus.Done;
+                resultStatus = EnumResultStatus.Done;
             }
-            return currentStatus;
+            return resultStatus;
         }
 
         private static int? GetIndexProcess(IList<SectionGroup>? sectionGroups, Guid mockTestResultId)

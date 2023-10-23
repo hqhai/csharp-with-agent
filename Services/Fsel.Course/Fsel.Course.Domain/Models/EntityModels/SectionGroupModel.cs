@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class SectionGroupModel : BaseModel
@@ -10,7 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double ExecutionTime { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
         public long TotalQuestion { get; set; }
-        public EnumCurrentStatus Status { get; set; }
+        public EnumResultStatus Status { get; set; }
         public IList<SectionModel>? Sections { get; set; }
         public IList<MockTestScoreModel>? MockTestScores { get; set; }
         public SectionGroupResultModel? SectionGroupResult { get; set; }
