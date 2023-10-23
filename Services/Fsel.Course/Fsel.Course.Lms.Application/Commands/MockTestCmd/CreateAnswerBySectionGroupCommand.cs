@@ -169,7 +169,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             ArgumentNullException.ThrowIfNull(skillScores);
             mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-            mockTestResult.Percent = skillScores.Sum(x => x.TotalCount) > 0 ? NumberHelper.ConvertPercentDouble((double)skillScores.Sum(x => x.CorrectCount) / skillScores.Sum(x => x.TotalCount)) : default;
+            mockTestResult.Percent = NumberHelper.GetPercent(skillScores.Sum(x => x.CorrectCount), skillScores.Sum(x => x.TotalCount));
             mockTestResult.Status = EnumResultStatus.Done;
             mockTestResult.SkillScores = skillScores;
             return mockTestResult;
@@ -179,7 +179,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         {
             sectionGroupResult.CorrectCount = (int)skillScores.CorrectCount;
             sectionGroupResult.CorrectTotal = (int)skillScores.TotalCount;
-            sectionGroupResult.Percent = (int)skillScores.TotalCount > 0 ? NumberHelper.ConvertPercentDouble(skillScores.CorrectCount / skillScores.TotalCount) : default;
+            sectionGroupResult.Percent = NumberHelper.GetPercent(skillScores.CorrectCount, skillScores.TotalCount);
             sectionGroupResult.Status = EnumResultStatus.Done;
             if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
             {
@@ -369,7 +369,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 skillScore.TotalCount = 36;
                 skillScore.TotalQuestion = sectionTimeCodes.Count;
             }
-            skillScore.Percent = skillScore.TotalCount > 0 ? NumberHelper.ConvertPercentDouble((double)skillScore.CorrectCount / skillScore.TotalCount) : default;
+            skillScore.Percent = NumberHelper.GetPercent(skillScore.CorrectCount, skillScore.TotalCount);
             skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(sectionGroup.CourseSkill);
             return skillScore;
         }
