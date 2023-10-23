@@ -44,7 +44,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                 keyColumn: "Id",
                 keyValue: new Guid("d789788a-1ba5-405b-b280-ae92cd3b4fc2"),
                 column: "TemplateLink",
-                value: "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}");
+                value: "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}");
 
             migrationBuilder.UpdateData(
                 table: "NotificationTypes",
