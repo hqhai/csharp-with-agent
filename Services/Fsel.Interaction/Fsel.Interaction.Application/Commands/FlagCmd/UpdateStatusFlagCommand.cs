@@ -9,6 +9,7 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Flags;
     using Fsel.Shared.Enums;
@@ -25,12 +26,14 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
         private readonly IFlagRepository _flagRepository;
         private readonly IMapper _mapper;
         private readonly ICommentRepository _commentRepository;
+        private readonly ICourseService _courseService;
 
-        public UpdateStatusFlagCommandHandler(IFlagRepository flagRepository, IMapper mapper, ICommentRepository commentRepository)
+        public UpdateStatusFlagCommandHandler(IFlagRepository flagRepository, IMapper mapper, ICommentRepository commentRepository, ICourseService courseService)
         {
             _flagRepository = flagRepository;
             _mapper = mapper;
             _commentRepository = commentRepository;
+            _courseService = courseService;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateStatusFlagCommand request, CancellationToken cancellationToken)
@@ -46,7 +49,7 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-
+            var courseResult = _courseService.GetClassForumResultQueryAsync
             foreach (var item in request.ListFlag)
             {
                 var listFlag = flags.Where(x => x.ObjectId == item.ObjectId).ToList();
