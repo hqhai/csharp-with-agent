@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Course.Infrastructure
 {
-    public class CourseDbContext : BaseDbContext
+    public class CourseDbContext  : BaseDbContext
     {
         public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -47,6 +47,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<UnitResult> UnitResults { get; set; }
         public DbSet<CourseResult> CourseResults { get; set; }
         public DbSet<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; }
+        public DbSet<VideoTimeCodeResult> VideoTimeCodeResults { get; set; }
         public DbSet<LessonNote> LessonNotes { get; set; }
         public DbSet<QuestionForm> QuestionForms { get; set; }
         public DbSet<LessonInstruction> LessonInstructions { get; set; }
@@ -76,8 +77,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumResultFile> ClassForumResultFiles { get; set; }
         public DbSet<ClassForumFile> ClassForumFiles { get; set; }
         public DbSet<StudentFeedback> StudentFeedbacks { get; set; }
-
-        public DbSet<ClassForumResultFlag> ClassForumResultFlags { get; set; }
+        public DbSet<ClassForumResultRandom> ClassForumResultRandoms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -114,6 +114,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoTimeCodeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionFormEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonInstructionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkAnswerEntityTypeConfiguration());
@@ -141,7 +142,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ClassForumFileEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumResultFileEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentFeedbackEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ClassForumResultFlagEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumResultRandomEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

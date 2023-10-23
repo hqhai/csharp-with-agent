@@ -11,5 +11,9 @@ namespace Fsel.Shared.Constants
         public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
         public const string PlatformFileName = "Resources//Platform.json";
         public const string RoleFileName = "Resources//Role.json";
+        public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
+
+        public const string ZMatter = "Resources//ZMatter.json";
+        public const string GameplayRuleConfig = "Resources//GameplayRuleConfig.json";
     }
 }

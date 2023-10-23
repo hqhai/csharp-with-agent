@@ -14,7 +14,11 @@ namespace Fsel.System.Infrastructure.Maps
         {
             CreateMap<CreateGameVocabularyCommandModel, GameVocabulary>().IgnoreAllNonExisting();
             CreateMap<UpdateGameVocabularyCommandModel, GameVocabulary>().IgnoreAllNonExisting();
+            CreateMap<CreateGameVocabularyTypeCommandModel, GameVocabularyType>().IgnoreAllNonExisting();
+            CreateMap<UpdateGameVocabularyTypeCommandModel, GameVocabularyType>().ForMember(m => m.GameVocabularyId, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<GameVocabulary, GameVocabularyModel>().IgnoreAllNonExisting();
+            CreateMap<GameVocabularyType, GameVocabularyTypeModel>().IgnoreAllNonExisting();
+            CreateMap<GameVocabularyPlatform, GameVocabularyPlatformModel>().IgnoreAllNonExisting();
         }
     }
 }
