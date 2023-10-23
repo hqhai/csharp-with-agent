@@ -314,7 +314,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 foreach (var item in request.Answers)
                 {
-                    var sectionTimeCode = sectionTimeCodes.FirstOrDefault(x => x.Id == item.SectionId);
+                    var sectionTimeCode = sectionTimeCodes.FirstOrDefault(x => x.Id == item.SectionTimeCodeId);
                     if (sectionTimeCode == null)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCode));
