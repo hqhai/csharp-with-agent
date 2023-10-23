@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Shared.Enums.ErrorCodes
+namespace Fsel.Shared.Enums
 {
     public enum EnumFlagIssue
     {

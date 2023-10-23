@@ -6,15 +6,14 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService.Models
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class FlagModel : BaseModel
+    public class CommentModel : BaseModel
     {
-        public EnumFlagIssue FlagIssue { get; set; }
+        public string? Content { get; set; }
 
-        public string? FeedBack { get; set; }
+        public Guid ObjectId { get; set; }
 
-        public EnumFlagStatus Status { get; set; }
+        public Guid UserId { get; set; }
 
         public EnumInteractionType Type { get; set; }
-        public Guid? ObjectId { get; set; }
     }
 }

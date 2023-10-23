@@ -11,6 +11,7 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Flags;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,18 +24,20 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     {
         private readonly IFlagRepository _flagRepository;
         private readonly IMapper _mapper;
+        private readonly ICommentRepository _commentRepository;
 
-        public UpdateStatusFlagCommandHandler(IFlagRepository flagRepository, IMapper mapper)
+        public UpdateStatusFlagCommandHandler(IFlagRepository flagRepository, IMapper mapper, ICommentRepository commentRepository)
         {
             _flagRepository = flagRepository;
             _mapper = mapper;
+            _commentRepository = commentRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateStatusFlagCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            /*var flags = await _flagRepository.Queryable.Where(x => x.ObjectId == request.ListFlag!.Select(x => x.ObjectId).FirstOrDefault()).ToListAsync(cancellationToken);*/
+
             var objectIds = request.ListFlag!.Select(x => x.ObjectId).ToList();
             var flags = await _flagRepository.Queryable.Where(x => x.ObjectId.HasValue && objectIds.Contains(x.ObjectId.Value)).ToListAsync(cancellationToken);
 
@@ -53,23 +56,25 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
                     return methodResult;
                 }
                 listFlag = flags.Select(x => _mapper.Map(item, x)).ToList();
+
+                var comment = await _commentRepository.Queryable.Where(x => x.ObjectId == item.ObjectId).FirstOrDefaultAsync(cancellationToken);
+                if (comment == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(comment));
+                    return methodResult;
+                }
+                if (listFlag.Select(x => x.Status == EnumFlagStatus.Approve).FirstOrDefault() && flags.Select(x => x.Type == EnumInteractionType.Comment).FirstOrDefault())
+                {
+                    await _commentRepository.DeleteAsync(comment);
+                }
             }
 
-            /* _mapper.Map(request, flags);*/
-
-            /* await _flagRepository.ExecuteTransactionAsync(async () =>
-             {
-                 _flagRepository.UpdateList(flags);
-
-                 await _flagRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                 methodResult.StatusCode = StatusCodes.Status200OK;
-                 *//*methodResult.Result = _mapper.Map<FlagModel>(flags);*//*
-                 methodResult.Result = _mapper.Map<bool>(flags);
-                 return methodResult;
-             });
-
-             return methodResult;*/
             _flagRepository.UpdateList(flags);
+            if (flags.Select(x => x.Status == EnumFlagStatus.Approve).FirstOrDefault() && flags.Select(x => x.Status == EnumFlagStatus.Reject).FirstOrDefault())
+            {
+                await _flagRepository.DeleteListAsync(flags);
+            }
+
             await _flagRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;

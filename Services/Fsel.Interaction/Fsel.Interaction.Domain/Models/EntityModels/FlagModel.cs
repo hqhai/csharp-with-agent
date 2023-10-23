@@ -4,7 +4,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
 
     public class FlagModel : BaseModel
     {

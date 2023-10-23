@@ -10,10 +10,10 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Interaction.Domain.Entities;
-    using Fsel.Interaction.Domain.Enums;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Flags;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

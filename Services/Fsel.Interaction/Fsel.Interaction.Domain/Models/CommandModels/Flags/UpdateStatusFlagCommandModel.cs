@@ -2,7 +2,7 @@
 
 namespace Fsel.Interaction.Domain.Models.CommandModels.Flags
 {
-    using Fsel.Interaction.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class UpdateStatusFlagCommandModel
     {

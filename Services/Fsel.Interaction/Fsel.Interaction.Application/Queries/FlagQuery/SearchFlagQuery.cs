@@ -8,14 +8,11 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Extensions;
-    using Fsel.Interaction.Domain.Enums;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Flags;
+    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class SearchFlagQuery : SearchFlagQueryModel, IRequest<MethodResult<PagingItemsModel<FlagModel>>>
     {

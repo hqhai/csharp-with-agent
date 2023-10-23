@@ -41,12 +41,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            
 
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
-                                    /*.Include(x => x.ClassForumResultFlags)
-                                    .Where(x => x.ClassForumResultFlags != null && x.ClassForumResultFlags.Any(x => x.Status == EnumClassForumResultFlagStatus.New))*/
                                     .Select(x => new ClassForumResultModel
                                     {
                                         Id = x.Id,
@@ -57,7 +54,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         Status = x.Status,
                                     });
 
-            var flagResult = await _interactionService.ExecuteListQueryAsync(classForumResultQuery);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 classForumResultQuery = classForumResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));

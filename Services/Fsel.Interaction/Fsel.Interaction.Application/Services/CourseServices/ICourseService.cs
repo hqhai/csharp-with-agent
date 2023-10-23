@@ -3,6 +3,7 @@
 namespace Fsel.Interaction.Application.Services.CourseServices
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Services.CourseServices.Models;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
@@ -27,5 +28,8 @@ namespace Fsel.Interaction.Application.Services.CourseServices
 
         [Get("/class-forum-result/{id}")]
         Task<IApiResponse<MethodResult<ClassForumResultModel>>> GetClassForumResultByIdAsync([FromRoute] Guid id);
+
+        [Post("/cso/class-forum-result/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<ClassForumResultModel>>>> GetClassForumResultQueryAsync([Body] BaseQueryModel query);
     }
 }
