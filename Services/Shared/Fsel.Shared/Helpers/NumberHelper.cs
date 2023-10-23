@@ -73,5 +73,15 @@ namespace Fsel.Shared.Helpers
             double convertedValue = Math.Round(value * 100, 0, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
+
+        public static double GetPercent(this double correctCount, double correctTotal)
+        {
+            return correctTotal > 0 ? ConvertPercentDouble(correctCount / correctTotal) : default;
+        }
+
+        public static double GetPercent(this int correctCount, int correctTotal)
+        {
+            return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal) : default;
+        }
     }
 }

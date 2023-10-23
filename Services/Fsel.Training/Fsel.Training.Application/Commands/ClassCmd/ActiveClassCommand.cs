@@ -80,11 +80,16 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseTimeNotInstalled));
                 return methodResult;
             }
+            var dateNow = DateTime.UtcNow.Date;
+            classes.StartDate = dateNow;
+            classes.EndDate = dateNow.AddMonths(endTime.DurationMonth);
+            classes.Status = EnumClassStatus.Active;
+
             if (package?.Code == EnumPackageCode.PREMIUM)
             {
                 if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
                 {
-                    for (DateTime date = DateTime.UtcNow; date <= classes.EndDate; date = date.AddDays(1))
+                    for (DateTime date = dateNow; date <= classes.EndDate; date = date.AddDays(1))
                     {
                         if (classes.LiveDays!.Contains(date.DayOfWeek))
                         {
@@ -104,9 +109,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                classes.StartDate = DateTime.UtcNow;
-                classes.EndDate = DateTime.UtcNow.AddMonths(endTime.DurationMonth);
-                classes.Status = EnumClassStatus.Active;
                 _classRepository.Update(classes);
                 await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;

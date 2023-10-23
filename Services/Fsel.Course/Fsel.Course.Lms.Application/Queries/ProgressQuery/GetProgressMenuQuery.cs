@@ -58,7 +58,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var studentId = studentResult?.Content?.Result?.Id;
 
             var units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.CourseId == request.CourseId && x.StudentId == studentId))
+                                                        .Include(x => x.CourseUnitMockTests.Where(x => x.CourseId == request.CourseId))
                                                         .Include(x => x.UnitLessons)
+                                                        .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
                                                         .ToListAsync(cancellationToken);
             if (units == null || units.Count == 0)
             {
@@ -72,11 +74,15 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 .ThenInclude(x => x!.ExtraPracticeResults.Where(x => x.StudentId == studentId))
                 .Where(x => lessonIds.Contains(x.LessonId))
                 .ToListAsync(cancellationToken);
-            var numberOfPracticesDone = lessonExtraPractices.Select(x => x.ExtraPractice)
+            if (lessonExtraPractices.Any())
+            {
+                progressMenu.NumberOfPracticesDone = lessonExtraPractices.Select(x => x.ExtraPractice)
                                                             .Where(x => x!.ExtraPracticeResults.Count > 0)
                                                             .SelectMany(x => x!.ExtraPracticeResults)
                                                             .Where(x => x.Status == EnumResultStatus.Done)
                                                             .Count();
+            }
+
             var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                                                    .Where(x => lessonIds.Contains(x.LessonId))
                                                                    .ToListAsync(cancellationToken);
@@ -98,7 +104,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             progressMenu.NumberOfUnitDone = numberOfUnitDone;
             progressMenu.NumberOfPostsCreated = numberOfPostsCreated;
-            progressMenu.NumberOfPracticesDone = numberOfPracticesDone;
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = progressMenu;
             return methodResult;

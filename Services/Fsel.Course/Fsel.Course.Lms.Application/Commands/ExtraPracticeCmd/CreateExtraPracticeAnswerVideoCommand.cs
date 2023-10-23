@@ -138,27 +138,27 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                                 VideoTimeCodeId = currenVideoTimeCodeId,
                                 ExtraPracticeResultId = extraPracticeResult.Id,
                                 QuestionId = item.QuestionId,
-                                Status = videoTimeCodeQuestion.TimeCodeType != EnumTimeCodeType.Standalone ? EnumCurrentStatus.Done : EnumCurrentStatus.Process
+                                Status = videoTimeCodeQuestion.TimeCodeType != EnumTimeCodeType.Standalone ? EnumAnswerStatus.Done : EnumAnswerStatus.Process
                             };
                             extraPracticeAnswers.Add(extraPracticeAnswer);
                         }
-                        else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumCurrentStatus.Process)
+                        else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumAnswerStatus.Process)
                         {
                             extraPracticeAnswer.Answer = answerConfig;
                             extraPracticeAnswer.CorrectCount = question.Ungraded ? default : correctCount;
-                            extraPracticeAnswer.Status = EnumCurrentStatus.Done;
+                            extraPracticeAnswer.Status = EnumAnswerStatus.Done;
                             updateExtraPracticeAnswers.Add(extraPracticeAnswer);
                         }
-                        else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumCurrentStatus.Done)
+                        else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumAnswerStatus.Done)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
                             return methodResult;
                         }
                     }
                 }
-                if (correctTotal == correctCountStudent && extraPracticeAnswers.All(x => x.Status == EnumCurrentStatus.Process))
+                if (correctTotal == correctCountStudent && extraPracticeAnswers.All(x => x.Status == EnumAnswerStatus.Process))
                 {
-                    extraPracticeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
+                    extraPracticeAnswers.ForEach(x => x.Status = EnumAnswerStatus.Done);
                 }
             }
             await _extraPracticeResultRepository.ExecuteTransactionAsync(async () =>

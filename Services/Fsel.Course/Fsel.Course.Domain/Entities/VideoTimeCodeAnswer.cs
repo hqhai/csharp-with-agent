@@ -30,17 +30,12 @@ namespace Fsel.Course.Domain.Entities
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectCount { get; set; }
 
-        public EnumCurrentStatus Status { get; set; }
+        public EnumAnswerStatus Status { get; set; }
 
         public Question? Question { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid QuestionId { get; set; }
-
-        public VideoResult? VideoResult { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid VideoResultId { get; set; }
 
         public Exercise? Exercise { get; set; }
 
@@ -51,5 +46,11 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid VideoTimeCodeId { get; set; }
+
+        public VideoResult? VideoResult { get; set; }
+        public Guid? VideoResultId { get; set; }
+
+        public VideoTimeCodeResult? VideoTimeCodeResult { get; set; }
+        public Guid? VideoTimeCodeResultId { get; set; }
     }
 }
