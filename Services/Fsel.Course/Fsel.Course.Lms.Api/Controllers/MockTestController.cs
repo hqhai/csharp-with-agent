@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get MockTest
         /// </summary>
-        [HttpGet("mock-test")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<MockTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetMockTestByIdQuery query)

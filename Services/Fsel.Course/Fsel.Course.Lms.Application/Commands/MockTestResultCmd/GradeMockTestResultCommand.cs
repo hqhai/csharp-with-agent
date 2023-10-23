@@ -109,8 +109,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 {
                     skillScore.CorrectCount = sumScore;
                     skillScore.TotalCount = 36;
-                    skillScore.Percent = (double)NumberHelper.ConvertPercentDouble((double)sumScore / 36);
-                    skillScore.Scores = (double)NumberHelper.RoundNumberDouble((double)sumScore / listMockTestScore.Count);
+                    skillScore.Percent = NumberHelper.GetPercent(sumScore, 36);
+                    skillScore.Scores = NumberHelper.GetPercent(sumScore, listMockTestScore.Count);
                     skillScore.Skill = item.CourseSkill;
                     skillScores!.Add(skillScore);
                 }

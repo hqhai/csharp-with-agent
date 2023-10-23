@@ -9,10 +9,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             if (mockTestResult?.SkillScores != null)
             {
-                mockTestResult.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
+                mockTestResult.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores), true);
             }
 
             methodResult.Result = mockTestResult;

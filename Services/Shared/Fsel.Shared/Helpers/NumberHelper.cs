@@ -4,7 +4,7 @@ namespace Fsel.Shared.Helpers
 {
     public static class NumberHelper
     {
-        public static double RoundNumberDouble(double number)
+        public static double RoundNumberDouble(double number, bool isIelts = false)
         {
             if (number < 0)
             {
@@ -12,17 +12,24 @@ namespace Fsel.Shared.Helpers
             }
             double decimalPart = number % 1;
 
-            if (decimalPart == 0.25)
+            if (isIelts)
             {
-                return Math.Floor(number);
-            }
-            else if (decimalPart == 0.75)
-            {
-                return Math.Floor(number) + 0.5;
+                return Math.Round(number, 0, MidpointRounding.AwayFromZero);
             }
             else
             {
-                return Math.Round(number, 1, MidpointRounding.AwayFromZero);
+                if (decimalPart == 0.25)
+                {
+                    return Math.Floor(number);
+                }
+                else if (decimalPart == 0.75)
+                {
+                    return Math.Floor(number) + 0.5;
+                }
+                else
+                {
+                    return Math.Round(number, 0, MidpointRounding.AwayFromZero);
+                }
             }
         }
 
