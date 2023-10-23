@@ -104,6 +104,11 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResult));
                 return methodResult;
             }
+            else if (sectionGroupResult.Status == EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.SectionGroupResultDone), nameof(sectionGroupResult.Status));
+                return methodResult;
+            }
             var answerResult = await CreateAnswerAsync(request, sectionGroup);
             if (!answerResult.IsOK)
             {
@@ -131,14 +136,13 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private async Task UpdateFinalTestResultAsync(FinalTestResult finalTestResult, CancellationToken cancellationToken)
         {
             var numberOfDone = 3;
-            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.MockTestResultId == finalTestResult.Id).ToListAsync(cancellationToken);
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.FinalTestResultId == finalTestResult.Id).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 finalTestResult = GetFinalTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), finalTestResult);
+                _finalTestResultRepository.Update(finalTestResult);
+                await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
-
-            _finalTestResultRepository.Update(finalTestResult);
-            await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private static FinalTestResult GetFinalTestResult(IList<SkillScores>? skillScores, FinalTestResult finalTestResult)

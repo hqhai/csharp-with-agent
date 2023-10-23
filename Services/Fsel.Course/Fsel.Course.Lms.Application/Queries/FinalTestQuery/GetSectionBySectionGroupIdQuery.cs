@@ -104,7 +104,9 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 
         private SectionDetailModel GetSection(Domain.Entities.Section section)
         {
-            return _mapper.Map<SectionDetailModel>(section);
+            var sectionDetail = _mapper.Map<SectionDetailModel>(section);
+            sectionDetail.QuestionIds = section.SectionQuestions.OrderBy(x => x.CreatedDate).Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
+            return sectionDetail;
         }
 
         private async Task<(IList<Domain.Entities.Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
