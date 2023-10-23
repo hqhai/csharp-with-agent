@@ -1,4 +1,5 @@
 using System.Globalization;
+using Fsel.Common.Helpers;
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
 using Fsel.Notification.Infrastructure.ValueSettings;
@@ -42,11 +43,10 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     UserId = dataReceipt.UserId ?? default,
                     ObjectId = dataReceipt.ObjectId,
                     Message = message,
-                    Link = link,
                     Roles = dataReceipt.Roles,
                     NotificationTypeId = notificationType?.Id ?? default,
                     SenderId = dataReceipt.SenderId,
-                    Link = _appSetting.ConstantUrl?.WebsiteDomain?.CombineUrl(link),
+                    Link = _appSetting.ConstantUrl?.LmsWebsiteDomain?.CombineUrl(link),
                 };
                 await _mediator.Send(model).ConfigureAwait(false);
                 _logger.LogInformation($"SendNotificationConsumer: Sent {dataReceipt.UserId}");

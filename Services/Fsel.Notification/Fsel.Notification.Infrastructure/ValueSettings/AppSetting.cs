@@ -16,6 +16,8 @@ namespace Fsel.Notification.Infrastructure.ValueSettings
     }
     public class ConstantUrl
     {
-        public string? WebsiteDomain { get; set; }
+        public string? LmsWebsiteDomain { get; set; }
+        public string? LcmsWebsiteDomain { get; set; }
+        public string? LmsAdminWebsiteDomain { get; set; }
     }
 }
