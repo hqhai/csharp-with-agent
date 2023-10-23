@@ -34,6 +34,7 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 Content = notification.Content,
                 ParamsMessage = notification.ParamsMessage,
                 SenderId = notification.SenderId,
+                ParamsLink = notification.ParamsLink,
             }, cancellationToken);
 
             _logger.LogInformation($"NotificationMessagePublisher: {notification.UserId}");

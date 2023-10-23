@@ -21,6 +21,14 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid StudentId { get; set; }
 
+        #region khoa them
+
+        public Guid? UnitId { get; set; }
+
+        public Guid? CourseId { get; set; }
+
+        #endregion khoa them
+
         public Guid ClassForumId { get; set; }
 
         public int? FeedBackStars { get; set; }
@@ -58,9 +66,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int UnitDisplayOrder { get; set; }
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
-        public IList<string>? FilePaths { get { return ClassForumResultFiles?.Select(x => x.FilePath ?? string.Empty).ToList(); } }
+        public IList<string>? FilePaths
+        { get { return ClassForumResultFiles?.Select(x => x.FilePath ?? string.Empty).ToList(); } }
+
         [JsonIgnore]
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
+
         public IList<ClassForumScoreModel>? ClassForumScores { get; set; }
     }
 }

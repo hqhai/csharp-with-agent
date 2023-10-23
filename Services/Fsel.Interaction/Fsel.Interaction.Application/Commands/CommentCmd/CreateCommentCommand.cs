@@ -53,7 +53,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             MethodResult<CommentModel> methodResult = new MethodResult<CommentModel>();
             Comment comment = _mapper.Map<Comment>(request);
             // Check từ khoá cấm
-             var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
+            var listForbiddenWordResult = await _systemService.CheckContainForbiddenWord(request.Content);
             var forbiddenWord = listForbiddenWordResult.Content?.Result;
             if (forbiddenWord.Any())
             {
@@ -73,6 +73,10 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 NotificationQueueModel model = new NotificationQueueModel();
+
+                var classForumResultResult = await _courseService.GetClassForumResultByIdAsync(request.ObjectId);
+                var classForumResult = classForumResultResult.Content?.Result;
+
                 switch (request.Type)
                 {
                     case EnumInteractionType.DiscussionBoard:
@@ -82,7 +86,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                     case EnumInteractionType.ClassForum:
 
                         var postOwner = await _courseService.GetClassForumResultByIdAsync(request.ObjectId).Select(x => x.Content?.Result?.ClassForum?.ClassForumResults?.FirstOrDefault()).ConfigureAwait(false);
-
                         //Không tìm thấy postOwner và Không thông báo khi comment bài viết của chính mình
                         if (postOwner == null || postOwner!.CreatedUserId == _authContext.CurrentUserId)
                         {
@@ -97,16 +100,17 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             Content = EnumNotificationContent.Comment,
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
+                            ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, classForumResult?.UnitId ?? default, request.ObjectId, comment.Id },
 
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
                     case EnumInteractionType.ReplyComment:
 
-                        var commentOwnerId = await _commentRepository.GetByIdAsync(request.ObjectId).Select(x => x!.CreatedUserId).ConfigureAwait(false);
+                        var commentOwner = await _commentRepository.GetByIdAsync(request.ObjectId).ConfigureAwait(false);
 
                         //Không thông báo khi trả lời bình luận của chính mình
-                        if (commentOwnerId == _authContext.CurrentUserId)
+                        if (commentOwner?.CreatedUserId == _authContext.CurrentUserId)
                         {
                             break;
                         }
@@ -115,10 +119,11 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         {
                             ParamsMessage = new List<object> { _authContext.CurrentUsername ?? string.Empty },
                             ObjectId = request.ObjectId,
-                            UserId = commentOwnerId,
+                            UserId = commentOwner?.CreatedUserId,
                             Content = EnumNotificationContent.ReplyComment,
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
+                            ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, classForumResult?.UnitId ?? default, commentOwner?.ObjectId ?? default, request.ObjectId, comment.Id },
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
