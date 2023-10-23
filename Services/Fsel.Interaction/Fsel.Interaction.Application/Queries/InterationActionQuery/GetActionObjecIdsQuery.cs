@@ -71,8 +71,8 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
                                           ObjectId = objectId,
                                           IsDisable = action != null && action.Datas.Any(x => x.Type == EnumInteractionActionType.Disable && x.UserId == request.UserId),
                                           IsLiked = action != null && action.Datas.Any(x => x.Type == EnumInteractionActionType.Like && x.UserId == request.UserId),
-                                          LikeNumber = action != null ? action.Datas.Count(x => x.Type == EnumInteractionActionType.Like) : 0,
-                                          CommentNumber = comment != null ? comment.Number : 0,
+                                          LikeNumber = action != null ? action.Datas.Count(x => x.Type == EnumInteractionActionType.Like) : default,
+                                          CommentNumber = comment != null ? comment.Number : default,
                                       }
                                   ).ToList();
 
