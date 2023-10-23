@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("create-answer")]
         [ProducesResponseType(typeof(MethodResult<SectionGroupResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateAnswers([FromBody] CreateAnswerBySectionGroupCommand command)
+        public async Task<IActionResult> CreateAnswers([FromBody] CreateFinalTestAnswerBySectionGroupCommand command)
         {
             MethodResult<SectionGroupResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<FinalTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetFinalTestByIdQuery query)
+        public async Task<IActionResult> GetFinalTest([FromQuery] GetFinalTestByIdQuery query)
         {
             MethodResult<FinalTestModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

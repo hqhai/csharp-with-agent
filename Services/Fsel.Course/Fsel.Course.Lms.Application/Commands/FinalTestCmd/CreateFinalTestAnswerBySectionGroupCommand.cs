@@ -26,11 +26,11 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateAnswerBySectionGroupCommand : CreateAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
+    public class CreateFinalTestAnswerBySectionGroupCommand : CreateFinalTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
     {
     }
 
-    public class CreateAnswerBySectionGroupCommandHandler : IRequestHandler<CreateAnswerBySectionGroupCommand, MethodResult<SectionGroupResultModel>>
+    public class CreateFinalTestAnswerBySectionGroupCommandHandler : IRequestHandler<CreateFinalTestAnswerBySectionGroupCommand, MethodResult<SectionGroupResultModel>>
     {
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
 
-        public CreateAnswerBySectionGroupCommandHandler(AnswerTypeConverter answerTypeConverter
+        public CreateFinalTestAnswerBySectionGroupCommandHandler(AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
             , AuthContext authContext
             , IUserService userService
@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<SectionGroupResultModel> methodResult = new MethodResult<SectionGroupResultModel>();
@@ -171,7 +171,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             return sectionGroupResult;
         }
 
-        private async Task<MethodResult<(SkillScores, IList<FinalTestAnswer>)>> CreateAnswerAsync(CreateAnswerBySectionGroupCommand request, SectionGroup sectionGroup)
+        private async Task<MethodResult<(SkillScores, IList<FinalTestAnswer>)>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<(SkillScores, IList<FinalTestAnswer>)>();
@@ -193,7 +193,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             return methodResult;
         }
 
-        private async Task<MethodResult<(SkillScores, IList<FinalTestAnswer>)>> CreateAnswer(CreateAnswerBySectionGroupCommand request, SectionGroup sectionGroup, IList<Question>? questions)
+        private async Task<MethodResult<(SkillScores, IList<FinalTestAnswer>)>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, IList<Question>? questions)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
@@ -227,7 +227,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             return methodResult;
         }
 
-        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateAnswerBySectionGroupCommand request, Guid? sectionQuestionId)
+        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Guid? sectionQuestionId)
         {
             return new FinalTestAnswer
             {
