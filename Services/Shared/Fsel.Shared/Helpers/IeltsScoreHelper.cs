@@ -6,11 +6,9 @@ namespace Fsel.Shared.Helpers
 
     public class IeltsScoreConfig
     {
-        public IeltsScoreConfig(int number, double readingScorePT, double listeningScorePT, double readingScore, double listeningScore)
+        public IeltsScoreConfig(int number, double readingScore, double listeningScore)
         {
             Number = number;
-            ReadingScorePT = readingScorePT;
-            ListeningScorePT = listeningScorePT;
             ReadingScore = readingScore;
             ListeningScore = listeningScore;
         }
@@ -18,55 +16,63 @@ namespace Fsel.Shared.Helpers
         public int Number { get; set; }
         public double ReadingScore { get; set; }
         public double ListeningScore { get; set; }
-        public double ReadingScorePT { get; set; }
-        public double ListeningScorePT { get; set; }
+
+        public double GetReadingScorePT()
+        {
+            return Number >= 27 ? 6.5 : ReadingScore;
+        }
+
+        public double GetListeningScorePT()
+        {
+            return Number >= 27 ? 6.5 : ListeningScore;
+        }
     }
 
     public static class IeltsScoreHelper
     {
         private static IList<IeltsScoreConfig> s_ieltsScoreConfigs = new List<IeltsScoreConfig>
         {
-            new IeltsScoreConfig(0, 0, 0, 0, 0),
-            new IeltsScoreConfig(1, 1, 1, 1, 1),
-            new IeltsScoreConfig(2, 1.5, 1.5, 1.5, 1.5),
-            new IeltsScoreConfig(3, 2, 2, 2, 2),
-            new IeltsScoreConfig(4, 2.5, 2.5, 2.5, 2.5),
-            new IeltsScoreConfig(5, 2.5, 2.5, 2.5, 2.5),
-            new IeltsScoreConfig(6, 3, 2.5, 3, 2.5),
-            new IeltsScoreConfig(7, 3, 2.5, 3, 2.5),
-            new IeltsScoreConfig(8, 3.5, 3, 3.5, 3),
-            new IeltsScoreConfig(9, 3.5, 3.5, 3.5, 3.5),
-            new IeltsScoreConfig(10, 4, 3.5, 4, 3.5),
-            new IeltsScoreConfig(11, 4, 4, 4, 4),
-            new IeltsScoreConfig(12, 4, 4, 4, 4),
-            new IeltsScoreConfig(13, 4.5, 4.5, 4.5, 4.5),
-            new IeltsScoreConfig(14, 4.5, 4.5, 4.5, 4.5),
-            new IeltsScoreConfig(15, 5, 4.5, 5, 4.5),
-            new IeltsScoreConfig(16, 5, 5, 5, 5),
-            new IeltsScoreConfig(17, 5, 5, 5, 5),
-            new IeltsScoreConfig(18, 5, 5.5, 5, 5.5),
-            new IeltsScoreConfig(19, 5.5, 5.5, 5.5, 5.5),
-            new IeltsScoreConfig(20, 5.5, 5.5, 5.5, 5.5),
-            new IeltsScoreConfig(21, 5.5, 5.5, 5.5, 5.5),
-            new IeltsScoreConfig(22, 5.5, 5.5, 5.5, 5.5),
-            new IeltsScoreConfig(23, 6, 6, 6, 6),
-            new IeltsScoreConfig(24, 6, 6, 6, 6),
-            new IeltsScoreConfig(25, 6, 6.5, 6, 6.5),
-            new IeltsScoreConfig(26, 6, 6.5, 6, 6.5),
-            new IeltsScoreConfig(27, 6.5, 6.5, 6.5, 6.5),
-            new IeltsScoreConfig(28, 6.5, 6.5, 6.5, 6.5),
-            new IeltsScoreConfig(29, 6.5, 6.5, 6.5, 6.5),
-            new IeltsScoreConfig(30, 6.5, 6.5, 7, 7),
-            new IeltsScoreConfig(31, 6.5, 6.5, 7, 7),
-            new IeltsScoreConfig(32, 6.5, 6.5, 7, 7.5),
-            new IeltsScoreConfig(33, 6.5, 6.5, 7.5, 7.5),
-            new IeltsScoreConfig(34, 6.5, 6.5, 7.5, 7.5),
-            new IeltsScoreConfig(35, 6.5, 6.5, 8, 8),
-            new IeltsScoreConfig(36, 6.5, 6.5, 8, 8),
-            new IeltsScoreConfig(37, 6.5, 6.5, 8.5, 8.5),
-            new IeltsScoreConfig(38, 6.5, 6.5, 8.5, 8.5),
-            new IeltsScoreConfig(39, 6.5, 6.5, 9, 9),
-            new IeltsScoreConfig(40, 6.5, 6.5, 9, 9),
+            new IeltsScoreConfig(0, 0, 0),
+            new IeltsScoreConfig(1, 1, 1),
+            new IeltsScoreConfig(2, 1.5, 1.5),
+            new IeltsScoreConfig(3, 2, 2),
+            new IeltsScoreConfig(4, 2.5, 2.5),
+            new IeltsScoreConfig(5, 2.5, 2.5),
+            new IeltsScoreConfig(6, 3, 2.5),
+            new IeltsScoreConfig(7, 3, 2.5),
+            new IeltsScoreConfig(8, 3.5, 3),
+            new IeltsScoreConfig(9, 3.5, 3.5),
+            new IeltsScoreConfig(10, 4, 3.5),
+            new IeltsScoreConfig(11, 4, 4),
+            new IeltsScoreConfig(12, 4, 4),
+            new IeltsScoreConfig(13, 4.5, 4.5),
+            new IeltsScoreConfig(14, 4.5, 4.5),
+            new IeltsScoreConfig(15, 5, 4.5),
+            new IeltsScoreConfig(16, 5, 5),
+            new IeltsScoreConfig(17, 5, 5),
+            new IeltsScoreConfig(18, 5, 5.5),
+            new IeltsScoreConfig(19, 5.5, 5.5),
+            new IeltsScoreConfig(20, 5.5, 5.5),
+            new IeltsScoreConfig(21, 5.5, 5.5),
+            new IeltsScoreConfig(22, 5.5, 5.5),
+            new IeltsScoreConfig(23, 6, 6),
+            new IeltsScoreConfig(24, 6, 6),
+            new IeltsScoreConfig(25, 6, 6.5),
+            new IeltsScoreConfig(26, 6, 6.5),
+            new IeltsScoreConfig(27, 6.5, 6.5),
+            new IeltsScoreConfig(28, 6.5, 6.5),
+            new IeltsScoreConfig(29, 6.5, 6.5),
+            new IeltsScoreConfig(30, 7, 7),
+            new IeltsScoreConfig(31, 7, 7),
+            new IeltsScoreConfig(32, 7, 7.5),
+            new IeltsScoreConfig(33, 7.5, 7.5),
+            new IeltsScoreConfig(34, 7.5, 7.5),
+            new IeltsScoreConfig(35, 8, 8),
+            new IeltsScoreConfig(36, 8, 8),
+            new IeltsScoreConfig(37, 8.5, 8.5),
+            new IeltsScoreConfig(38, 8.5, 8.5),
+            new IeltsScoreConfig(39, 9, 9),
+            new IeltsScoreConfig(40, 9, 9),
         };
 
         public static double GetIeltsScorePT(this double number, EnumCourseSkill skill)
@@ -74,7 +80,7 @@ namespace Fsel.Shared.Helpers
             var config = s_ieltsScoreConfigs.OrderBy(x => x.Number).FirstOrDefault(x => x.Number == number);
             if (config != null)
             {
-                return skill == EnumCourseSkill.Listening ? config.ListeningScorePT : config.ReadingScorePT;
+                return skill == EnumCourseSkill.Listening ? config.GetListeningScorePT() : config.GetReadingScorePT();
             }
             return default;
         }
