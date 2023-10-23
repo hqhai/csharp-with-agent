@@ -6,31 +6,6 @@ namespace Fsel.Shared.Helpers
     {
         public static double RoundNumberDouble(double number, bool roundUp = false)
         {
-            //if (number < 0)
-            //{
-            //    number *= 100;
-            //}
-            //double decimalPart = number % 1;
-
-            //if (isIelts)
-            //{
-            //    return Math.Round(number, 0, MidpointRounding.AwayFromZero);
-            //}
-            //else
-            //{
-            //    if (decimalPart == 0.25)
-            //    {
-            //        return Math.Floor(number);
-            //    }
-            //    else if (decimalPart == 0.75)
-            //    {
-            //        return Math.Floor(number) + 0.5;
-            //    }
-            //    else
-            //    {
-            //        return Math.Round(number, 0, MidpointRounding.AwayFromZero);
-            //    }
-            //}
             if (roundUp)
             {
                 return Math.Ceiling(number * 2) / 2;
