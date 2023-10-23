@@ -17,7 +17,7 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
 
     public class GetActionObjecIdsQuery : IRequest<MethodResult<IList<InteractionActionModel>>>
     {
-        public IList<Guid>? ObjectIds { get; set; }
+        public IList<Guid> ObjectIds { get; set; } = new List<Guid>();
         public Guid? UserId { get; set; }
     }
 
@@ -37,6 +37,8 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<IList<InteractionActionModel>> methodResult = new MethodResult<IList<InteractionActionModel>>();
+
+
 
             var actions = await _interactionActionRepository.Queryable
                 .Where(x => request.ObjectIds.Contains(x.ObjectId))
