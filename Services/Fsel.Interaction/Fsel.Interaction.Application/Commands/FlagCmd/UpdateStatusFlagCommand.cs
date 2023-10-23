@@ -3,9 +3,7 @@
 namespace Fsel.Interaction.Application.Commands.FlagCmd
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -13,14 +11,15 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Flags;
-    using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class UpdateStatusFlagCommand : UpdateStatusFlagCommandModel, IRequest<MethodResult<FlagModel>>
+    public class UpdateStatusFlagCommand : UpdateStatusFlagsCommandModel, IRequest<MethodResult<bool>>
     {
     }
-    public class UpdateStatusFlagCommandHandler : IRequestHandler<UpdateStatusFlagCommand, MethodResult<FlagModel>>
+
+    public class UpdateStatusFlagCommandHandler : IRequestHandler<UpdateStatusFlagCommand, MethodResult<bool>>
     {
         private readonly IFlagRepository _flagRepository;
         private readonly IMapper _mapper;
@@ -31,29 +30,49 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<FlagModel>> Handle(UpdateStatusFlagCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(UpdateStatusFlagCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<FlagModel> methodResult = new MethodResult<FlagModel>();
-            var flag = await _flagRepository.GetByIdAsync(request.Id);
+            MethodResult<bool> methodResult = new MethodResult<bool>();
+            /*var flags = await _flagRepository.Queryable.Where(x => x.ObjectId == request.ListFlag!.Select(x => x.ObjectId).FirstOrDefault()).ToListAsync(cancellationToken);*/
+            var objectIds = request.ListFlag!.Select(x => x.ObjectId).ToList();
+            var flags = await _flagRepository.Queryable.Where(x => x.ObjectId.HasValue && objectIds.Contains(x.ObjectId.Value)).ToListAsync(cancellationToken);
 
-            if (flag == null)
+            if (request.ListFlag == null || request.ListFlag.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(flag));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-            _mapper.Map(request, flag);
 
-            await _flagRepository.ExecuteTransactionAsync(async () =>
+            foreach (var item in request.ListFlag)
             {
-                flag = _flagRepository.Update(flag);
+                var listFlag = flags.Where(x => x.ObjectId == item.ObjectId).ToList();
+                if (listFlag == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(listFlag));
+                    return methodResult;
+                }
+                listFlag = flags.Select(x => _mapper.Map(item, x)).ToList();
+            }
 
-                await _flagRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<FlagModel>(flag);
-                return methodResult;
-            });
+            /* _mapper.Map(request, flags);*/
 
+            /* await _flagRepository.ExecuteTransactionAsync(async () =>
+             {
+                 _flagRepository.UpdateList(flags);
+
+                 await _flagRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                 methodResult.StatusCode = StatusCodes.Status200OK;
+                 *//*methodResult.Result = _mapper.Map<FlagModel>(flags);*//*
+                 methodResult.Result = _mapper.Map<bool>(flags);
+                 return methodResult;
+             });
+
+             return methodResult;*/
+            _flagRepository.UpdateList(flags);
+            await _flagRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
+            methodResult.Result = true;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

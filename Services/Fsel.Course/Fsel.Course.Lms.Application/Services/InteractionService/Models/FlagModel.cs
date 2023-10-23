@@ -1,7 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Domain.Models.EntityModels
+namespace Fsel.Course.Lms.Application.Services.InteractionService.Models
 {
+    using System;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;

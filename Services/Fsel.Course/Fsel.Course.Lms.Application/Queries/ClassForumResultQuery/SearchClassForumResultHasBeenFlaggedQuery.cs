@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
+    using Fsel.Course.Lms.Application.Services.InteractionService;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,10 +24,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     public class SearchClassForumResultHasBeenFlaggedQueryHandler : IRequestHandler<SearchClassForumResultHasBeenFlaggedQuery, MethodResult<PagingItemsModel<ClassForumResultModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IInteractionService _interactionService;
 
-        public SearchClassForumResultHasBeenFlaggedQueryHandler(IClassForumResultRepository classForumResultRepository)
+        public SearchClassForumResultHasBeenFlaggedQueryHandler(IClassForumResultRepository classForumResultRepository, IInteractionService interactionService)
         {
             _classForumResultRepository = classForumResultRepository;
+            _interactionService = interactionService;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultModel>>> Handle(SearchClassForumResultHasBeenFlaggedQuery request, CancellationToken cancellationToken)
@@ -38,6 +41,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+            var flagResult = await _interactionService.ExecuteListQueryAsync();
+
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
                                     /*.Include(x => x.ClassForumResultFlags)
