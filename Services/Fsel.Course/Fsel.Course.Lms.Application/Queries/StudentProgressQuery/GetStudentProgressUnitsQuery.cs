@@ -61,14 +61,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var courseUnitMockTests = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
             if (courseUnitMockTests == null || !courseUnitMockTests.Any())
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -129,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
                 unitProgress.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
                 unitProgress.TotalLesson = lessonIds.Count;
-                unitProgress.ProcessPercent = NumberHelper.ConvertPercentDouble((double)currentProgress / progress);
+                unitProgress.ProcessPercent = NumberHelper.GetPercent(currentProgress, progress);
                 if (featureAccessTime != null)
                 {
                     unitProgress.TimeSpent = featureAccessTime.AccessTime;
