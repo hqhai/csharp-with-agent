@@ -101,6 +101,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
                             ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, classForumResult?.UnitId ?? default, request.ObjectId, comment.Id },
+                            PlatformCode = EnumPlatformCode.LMS
 
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
@@ -124,6 +125,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
                             ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, classForumResult?.UnitId ?? default, commentOwner?.ObjectId ?? default, request.ObjectId, comment.Id },
+                            PlatformCode = EnumPlatformCode.LMS
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
