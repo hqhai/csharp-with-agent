@@ -236,7 +236,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     CorrectCount = group.Sum(x => x.CorrectCount),
                     CountQuestion = group.Sum(x => x.CountQuestion),
                     TotalQuestion = group.Sum(x => x.TotalQuestion),
-                    Percent = NumberHelper.ConvertRound(group.Average(x => x.Percent), 2),
+                    Percent = NumberHelper.ConvertRound(group.Average(x => x.Percent)),
                 };
             }
             return new SkillScores();
@@ -253,7 +253,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores.CountQuestion = x.Sum(x => x.CountQuestion);
                 skillScores.TotalCount = x.Sum(x => x.TotalCount);
                 skillScores.CorrectCount = x.Sum(x => x.CorrectCount);
-                skillScores.Percent = x.Sum(x => x.TotalCount) > 0 ? NumberHelper.ConvertPercentDouble(x.Sum(x => x.CorrectCount) / x.Sum(x => x.TotalCount)) : default;
+                skillScores.Percent = NumberHelper.GetPercent(x.Sum(x => x.CorrectCount), x.Sum(x => x.TotalCount));
                 return skillScores;
             };
             return skillScores;
@@ -285,7 +285,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (skillScorePercents.Any())
             {
                 var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                return (skillScoreSkills, NumberHelper.ConvertRound(skillScorePercents.Average(x => x.Item2), 2));
+                return (skillScoreSkills, NumberHelper.ConvertRound(skillScorePercents.Average(x => x.Item2), 1));
             }
 
             return (new List<SkillScores>(), default);
