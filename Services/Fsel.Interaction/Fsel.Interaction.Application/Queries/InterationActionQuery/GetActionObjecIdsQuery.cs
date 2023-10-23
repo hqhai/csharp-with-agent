@@ -39,7 +39,7 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
             MethodResult<IList<InteractionActionModel>> methodResult = new MethodResult<IList<InteractionActionModel>>();
 
             var actions = await _interactionActionRepository.Queryable
-                .Where(x => request.ObjectIds!.Contains(x.ObjectId))
+                .Where(x => request.ObjectIds.Contains(x.ObjectId))
                 .GroupBy(x => x.ObjectId)
                 .Select(x => new
                 {
