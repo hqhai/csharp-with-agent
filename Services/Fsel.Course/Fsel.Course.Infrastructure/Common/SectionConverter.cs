@@ -12,7 +12,6 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Sections;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
-    using static System.Collections.Specialized.BitVector32;
 
     public class SectionConverter
     {
