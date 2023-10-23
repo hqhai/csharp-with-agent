@@ -6,6 +6,10 @@ namespace Fsel.Shared.Helpers
     {
         public static double RoundNumberDouble(double number, bool roundUp = false)
         {
+            if (number < 0)
+            {
+                number *= 100;
+            }
             if (roundUp)
             {
                 return Math.Ceiling(number * 2) / 2;
