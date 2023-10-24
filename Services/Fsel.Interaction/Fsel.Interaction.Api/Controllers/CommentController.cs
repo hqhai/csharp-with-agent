@@ -4,12 +4,9 @@ namespace Fsel.Interaction.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Commands.CommentCmd;
     using Fsel.Interaction.Application.Queries.CommentQuery;
-    using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -20,26 +17,11 @@ namespace Fsel.Interaction.Api.Controllers
     public class CommentController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ICommentRepository _commentRepository;
 
-        public CommentController(IMediator mediator, ICommentRepository commentRepository)
+        public CommentController(IMediator mediator)
         {
             _mediator = mediator;
-            _commentRepository = commentRepository;
         }
-
-       /* /// <summary>
-        /// Execute-list-query
-        /// </summary>
-        [HttpPost("execute-list-query")]
-        [ProducesResponseType(typeof(MethodResult<IList<CommentModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission]
-        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
-        {
-            var result = await _commentRepository.GetListResultAsync<CommentModel>(query);
-            return result.GetActionResult();
-        }*/
 
         /// <summary>
         /// Create action

@@ -69,13 +69,6 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                                where commentG.Key.ObjectId == objectId && !(commentG.Any(x => x.iJG.Type == EnumInteractionActionType.Disable && x.iJG.UserId == _authContext.CurrentUserId))
                                select new { Comment = commentG.Key, IsFlagged = commentG.Select(x => x.fJG).Any(x => x != null), Flagged = commentG.Select(x => x.fJG) };
 
-            /*var commentFlag = from c in _commentRepository.Queryable
-                              join f in _flagRepository.Queryable on c.ObjectId equals f.ObjectId into fJ
-                              from p in fJ.DefaultIfEmpty()
-                              group p by c into commentA
-                              where commentA.Key.Id == objectId && commentA.Any(x => x.Status == EnumFlagStatus.New)
-                              select commentA.Key;*/
-
             var comments = await commentQuery.ToListAsync();
             var userResult = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = comments.Select(x => x.Comment.UserId).ToList() });
 

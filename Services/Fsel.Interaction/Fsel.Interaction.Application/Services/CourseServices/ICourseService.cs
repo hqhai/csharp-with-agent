@@ -27,8 +27,5 @@ namespace Fsel.Interaction.Application.Services.CourseServices
 
         [Get("/class-forum-result/{id}")]
         Task<IApiResponse<MethodResult<ClassForumResultModel>>> GetClassForumResultByIdAsync([FromRoute] Guid id);
-
-        [Post("/cso/class-forum-result/execute-list-query")]
-        Task<IApiResponse<MethodResult<IList<ClassForumResultModel>>>> GetClassForumResultQueryAsync();
     }
 }
