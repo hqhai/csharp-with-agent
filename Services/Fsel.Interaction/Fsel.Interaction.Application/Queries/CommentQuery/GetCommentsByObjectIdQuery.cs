@@ -35,18 +35,16 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly IFlagRepository _flagRepository;
 
-        public GetCommentsByObjectIdQueryHandler(ICommentRepository commentRepository
-            , IInteractionActionRepository interactionActionRepository
-            , IMapper mapper
-            , AuthContext authContext
-            , IUserService userService)
+        public GetCommentsByObjectIdQueryHandler(ICommentRepository commentRepository, IInteractionActionRepository interactionActionRepository, IMapper mapper, AuthContext authContext, IUserService userService, IFlagRepository flagRepository)
         {
             _commentRepository = commentRepository;
             _interactionActionRepository = interactionActionRepository;
             _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
+            _flagRepository = flagRepository;
         }
 
         public async Task<MethodResult<IList<CommentModel>>> Handle(GetCommentsByObjectIdQuery request, CancellationToken cancellationToken)
@@ -63,32 +61,43 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
         public async Task<IList<CommentModel>?> GetCommentsByObjectIdAsync(Guid objectId, EnumCommentFilter? filter = null, GetCommentsByObjectIdQuery? request = null)
         {
             var commentQuery = from c in _commentRepository.Queryable
-                               join ca in _interactionActionRepository.Queryable on c.Id equals ca.ObjectId into caJ
-                               from p in caJ.DefaultIfEmpty()
-                               group p by c into commentG
-                               where commentG.Key.ObjectId == objectId && !(commentG.Any(x => x.Type == EnumInteractionActionType.Disable && x.UserId == _authContext.CurrentUserId))
-                               select commentG.Key;
+                               join ca in _interactionActionRepository.Queryable on c.Id equals ca.ObjectId into iJ
+                               from iJG in iJ.DefaultIfEmpty()
+                               join f in _flagRepository.Queryable.Where(x => x.Status == EnumFlagStatus.New) on c.Id equals f.ObjectId into fJ
+                               from fJG in fJ.DefaultIfEmpty()
+                               group new { iJG, fJG } by c into commentG
+                               where commentG.Key.ObjectId == objectId && !(commentG.Any(x => x.iJG.Type == EnumInteractionActionType.Disable && x.iJG.UserId == _authContext.CurrentUserId))
+                               select new { Comment = commentG.Key, IsFlagged = commentG.Select(x => x.fJG).Any(x => x != null), Flagged = commentG.Select(x => x.fJG) };
+
+            /*var commentFlag = from c in _commentRepository.Queryable
+                              join f in _flagRepository.Queryable on c.ObjectId equals f.ObjectId into fJ
+                              from p in fJ.DefaultIfEmpty()
+                              group p by c into commentA
+                              where commentA.Key.Id == objectId && commentA.Any(x => x.Status == EnumFlagStatus.New)
+                              select commentA.Key;*/
 
             var comments = await commentQuery.ToListAsync();
-            var userResult = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = comments.Select(x => x.UserId).ToList() });
+            var userResult = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = comments.Select(x => x.Comment.UserId).ToList() });
 
             var results = new List<CommentModel>();
             if (comments != null && comments.Count > 0)
             {
-                var commentModels = _mapper.Map<IList<CommentModel>>(comments);
-                foreach (var item in commentModels)
+                foreach (var item in comments)
                 {
-                    var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Id && x.Type == EnumInteractionActionType.Like).ToList();
-                    item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId)?.AvatarPath;
-                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId)?.FullName;
-                    item.Comments = await GetCommentsByObjectIdAsync(item.Id, filter);
-                    item.CommentNumber = item.Comments?.Count ?? default;
-                    item.LikeNumber = actionLikes.Count;
-                    item.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
-                    item.ObjectId = item.ObjectId;
+                    var commentModel = _mapper.Map<CommentModel>(item.Comment);
+                    var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Comment.Id && x.Type == EnumInteractionActionType.Like).ToList();
+                    commentModel.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.Comment.UserId)?.AvatarPath;
+                    commentModel.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.Comment.UserId)?.FullName;
+                    commentModel.Comments = await GetCommentsByObjectIdAsync(item.Comment.Id, filter);
+                    commentModel.CommentNumber = commentModel.Comments?.Count ?? default;
+                    commentModel.LikeNumber = actionLikes.Count;
+                    commentModel.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
+                    commentModel.ObjectId = item.Comment.ObjectId;
+                    commentModel.IsFlagged = item.IsFlagged;
+
+                    results.Add(commentModel);
                 }
 
-                results.AddRange(commentModels);
             }
 
             if (filter.HasValue)

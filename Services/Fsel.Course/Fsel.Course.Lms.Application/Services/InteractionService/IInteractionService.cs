@@ -23,5 +23,9 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
 
         [Post("/comment/execute-list-query")]
         Task<IApiResponse<MethodResult<CommentModel>>> ExecuteListCommentQueryAsync([Body] BaseQueryModel query);
+
+        [Post("/interaction-action/execute-list-query")]
+        Task<IApiResponse<MethodResult<InteractionActionModel>>> ExecuteListActionQueryAsync([Body] BaseQueryModel query);
+
     }
 }

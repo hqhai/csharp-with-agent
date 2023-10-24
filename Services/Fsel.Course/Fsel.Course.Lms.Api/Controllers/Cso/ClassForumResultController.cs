@@ -115,5 +115,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
             MethodResult<PagingItemsModel<ClassForumResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+
+        /// <summary>
+        /// Get Class Forum Result
+        /// </summary>
+        [HttpGet("class-forum-result-flag")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetClassForumResultFlag([FromQuery] GetClassForumResultFlagQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

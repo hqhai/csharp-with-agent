@@ -9,6 +9,7 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Flags;
@@ -27,13 +28,15 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
         private readonly IMapper _mapper;
         private readonly ICommentRepository _commentRepository;
         private readonly ICourseService _courseService;
+        private readonly FlagPublisher _flagPublisher;
 
-        public UpdateStatusFlagCommandHandler(IFlagRepository flagRepository, IMapper mapper, ICommentRepository commentRepository, ICourseService courseService)
+        public UpdateStatusFlagCommandHandler(IFlagRepository flagRepository, IMapper mapper, ICommentRepository commentRepository, ICourseService courseService, FlagPublisher flagPublisher)
         {
             _flagRepository = flagRepository;
             _mapper = mapper;
             _commentRepository = commentRepository;
             _courseService = courseService;
+            _flagPublisher = flagPublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateStatusFlagCommand request, CancellationToken cancellationToken)
@@ -49,7 +52,6 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-            var courseResult = _courseService.GetClassForumResultQueryAsync
             foreach (var item in request.ListFlag)
             {
                 var listFlag = flags.Where(x => x.ObjectId == item.ObjectId).ToList();
@@ -70,13 +72,15 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
                 {
                     await _commentRepository.DeleteAsync(comment);
                 }
+                if (listFlag.Select(x => x.Status == EnumFlagStatus.Approve).FirstOrDefault() && flags.Select(x => x.Type == EnumInteractionType.ClassForum).FirstOrDefault())
+                {
+                    await _flagPublisher.Publish(listFlag, cancellationToken).ConfigureAwait(false);
+                }
             }
 
             _flagRepository.UpdateList(flags);
-            if (flags.Select(x => x.Status == EnumFlagStatus.Approve).FirstOrDefault() && flags.Select(x => x.Status == EnumFlagStatus.Reject).FirstOrDefault())
-            {
-                await _flagRepository.DeleteListAsync(flags);
-            }
+
+            await _flagRepository.DeleteListAsync(flags);
 
             await _flagRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
             methodResult.Result = true;

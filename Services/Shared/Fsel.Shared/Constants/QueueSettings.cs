@@ -75,6 +75,7 @@ namespace Fsel.Shared.Constants
                 public const string OrderCreateNotification = $"{KeyQueue}_OrderCreateNotification";
                 public const string UpdateTeacherGradingInClassForumAndMockTest = $"{KeyQueue}_UpdateTeacherGradingInClassForumAndMockTest";
                 public const string UpdateOcCheckInClassForumResult = $"{KeyQueue}_UpdateOcCheckInClassForumResult";
+                public const string FlagClassForumResult = $"{KeyQueue}_FlagClassForumResult";
             }
         }
 

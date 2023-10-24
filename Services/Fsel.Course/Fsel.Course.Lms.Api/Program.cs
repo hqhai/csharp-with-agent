@@ -127,7 +127,8 @@ builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.LmsQueue.NameQueue.UpdateTeacherGradingInClassForumAndMockTest, typeof(UpdateOcCheckInClassForumResultConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.UpdateOcCheckInClassForumResult, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) }
+    { QueueSettings.LmsQueue.NameQueue.UpdateOcCheckInClassForumResult, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.FlagClassForumResult, typeof(DeleteClassForumFlagConsumer) }
 });
 
 var app = builder.Build();
