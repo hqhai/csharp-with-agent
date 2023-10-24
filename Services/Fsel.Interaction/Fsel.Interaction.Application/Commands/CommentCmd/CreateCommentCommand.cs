@@ -93,7 +93,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         {
                             ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, },
                             ObjectId = request.ObjectId,
-                            UserId = postOwner!.CreatedUserId,
+                            UserId = postOwner!.CreatedUserId,  
                             Content = EnumNotificationContent.Comment,
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,

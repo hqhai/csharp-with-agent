@@ -261,7 +261,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={3}",
                             TemplateMessage = "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
                             Type = "LinkPage"
                         },
@@ -289,7 +289,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}",
                             TemplateMessage = "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
                             Type = "LinkComment"
                         },
