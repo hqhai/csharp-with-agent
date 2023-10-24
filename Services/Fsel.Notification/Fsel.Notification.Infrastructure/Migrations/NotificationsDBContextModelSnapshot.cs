@@ -317,7 +317,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&repCommentId={4}",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}&repCommentId={5}",
                             TemplateMessage = "{0} vừa trả lời bình luận của bạn.",
                             Type = "LinkComment"
                         },

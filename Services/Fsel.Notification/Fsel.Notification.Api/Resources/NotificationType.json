@@ -46,7 +46,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa trả lời bình luận của bạn.",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&repCommentId={4}",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}&repCommentId={5}",
     "createdDate": "2023-08-28"
   },
   {

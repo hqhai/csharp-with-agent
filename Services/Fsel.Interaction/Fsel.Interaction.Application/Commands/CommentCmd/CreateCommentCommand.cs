@@ -7,20 +7,20 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Queues.Publishers;
+    using Fsel.Interaction.Application.Services.CourseServices;
+    using Fsel.Interaction.Application.Services.SystemService;
     using Fsel.Interaction.Domain.Entities;
+    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Comments;
-    using Fsel.Interaction.Application.Queues.Publishers;
-    using MediatR;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
+    using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MassTransit.Initializers;
-    using Fsel.Interaction.Application.Services.CourseServices;
-    using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Interaction.Application.Services.SystemService;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<CommentModel>>
     {
@@ -74,24 +74,24 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                 NotificationQueueModel model = new NotificationQueueModel();
 
-                var classForumResultResult = await _courseService.GetClassForumResultByIdAsync(request.ObjectId);
-                var classForumResult = classForumResultResult.Content?.Result;
-
                 switch (request.Type)
                 {
                     case EnumInteractionType.DiscussionBoard:
                         await _discussionBoardCommentPublisher.Publish(comment, cancellationToken).ConfigureAwait(false);
 
                         break;
-                    case EnumInteractionType.ClassForum:
 
+                    case EnumInteractionType.ClassForum:
                         var postOwner = await _courseService.GetClassForumResultByIdAsync(request.ObjectId).Select(x => x.Content?.Result?.ClassForum?.ClassForumResults?.FirstOrDefault()).ConfigureAwait(false);
+
                         //Không tìm thấy postOwner và Không thông báo khi comment bài viết của chính mình
                         if (postOwner == null || postOwner!.CreatedUserId == _authContext.CurrentUserId)
                         {
                             break;
                         }
 
+                        var classForumResultResult = await _courseService.GetClassForumResultByIdAsync(request.ObjectId);
+                        var classForumResult = classForumResultResult.Content?.Result;
                         model = new NotificationQueueModel()
                         {
                             ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, },
@@ -102,10 +102,10 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             SenderId = _authContext.CurrentUserId,
                             ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, classForumResult?.UnitId ?? default, request.ObjectId, comment.Id },
                             PlatformCode = EnumPlatformCode.LMS
-
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
+
                     case EnumInteractionType.ReplyComment:
 
                         var commentOwner = await _commentRepository.GetByIdAsync(request.ObjectId).ConfigureAwait(false);
@@ -115,6 +115,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         {
                             break;
                         }
+                        var classForumResultOfCommentOwnerResult = await _courseService.GetClassForumResultByIdAsync(commentOwner?.ObjectId ?? default);
+                        var classForumResultOfCommentOwner = classForumResultOfCommentOwnerResult.Content?.Result;
 
                         model = new NotificationQueueModel()
                         {
@@ -124,7 +126,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             Content = EnumNotificationContent.ReplyComment,
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
-                            ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, classForumResult?.UnitId ?? default, commentOwner?.ObjectId ?? default, request.ObjectId, comment.Id },
+                            ParamsLink = new List<object> { classForumResultOfCommentOwner?.UnitId ?? default, classForumResultOfCommentOwner?.CourseId ?? default, classForumResultOfCommentOwner?.UnitId ?? default, commentOwner?.ObjectId ?? default, request.ObjectId, comment.Id },
                             PlatformCode = EnumPlatformCode.LMS
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);

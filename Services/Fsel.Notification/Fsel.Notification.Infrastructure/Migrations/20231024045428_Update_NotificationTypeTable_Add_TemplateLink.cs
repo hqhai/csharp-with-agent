@@ -30,7 +30,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                 keyColumn: "Id",
                 keyValue: new Guid("9e983172-dba2-4ca7-b602-372c011ecb99"),
                 column: "TemplateLink",
-                value: "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&repCommentId={4}");
+                value: "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}&repCommentId={5}");
 
             migrationBuilder.UpdateData(
                 table: "NotificationTypes",
