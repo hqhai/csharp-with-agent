@@ -65,18 +65,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
 
         public IList<ClassForumScoreModel>? ClassForumScores { get; set; }
-
-        public IList<CommentModel>? Comments { get; set; }
-    }
-
-    public class CommentModel
-    {
-        public string? Content { get; set; }
-
-        public Guid ObjectId { get; set; }
-
-        public Guid UserId { get; set; }
-
-        public EnumInteractionType Type { get; set; }
     }
 }
