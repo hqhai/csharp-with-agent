@@ -12,6 +12,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Sections;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using static System.Collections.Specialized.BitVector32;
 
     public class SectionConverter
     {
@@ -52,6 +53,24 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
+        public IList<EnumCourseSkill>? GetCourseSkill(IList<SectionGroup>? sectionGroups)
+        {
+            if (sectionGroups != null && sectionGroups.Any())
+            {
+                return sectionGroups.Select(x => x.CourseSkill).ToList();
+            }
+            return default;
+        }
+
+        public long GetTotalQuestion(IList<Domain.Entities.Section>? sections, EnumCourseSkill courseSkill)
+        {
+            if (sections != null && sections.Any())
+            {
+                return sections.Select(x => GetTotalQuestion(x, courseSkill)).Sum();
+            }
+            return default;
+        }
+
         public long GetTotalQuestion(IList<SectionGroup>? sectionGroups)
         {
             if (sectionGroups != null && sectionGroups.Any())
@@ -78,14 +97,14 @@ namespace Fsel.Course.Infrastructure.Common
                 var sectionParts = sectionGroup.Sections.SelectMany(x => x.SectionParts).ToList();
                 if (sectionParts.Count > 0)
                 {
-                    return sectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count();
+                    return sectionParts.SelectMany(x => x.SectionQuestions).Count();
                 }
                 else
                 {
                     var sectionQuestions = sectionGroup.Sections.SelectMany(x => x.SectionQuestions).ToList();
                     if (sectionQuestions.Count > 0)
                     {
-                        return sectionGroup.Sections.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count();
+                        return sectionGroup.Sections.SelectMany(x => x.SectionQuestions).Count();
                     }
                     else
                     {
@@ -95,7 +114,41 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        public IList<SectionModel>? GetSectionModels(IList<Section>? sections, bool isDisableAnswers = false)
+        public long GetTotalQuestion(Domain.Entities.Section? section, EnumCourseSkill courseSkill)
+        {
+            ArgumentNullException.ThrowIfNull(section);
+
+            if (courseSkill == EnumCourseSkill.Speaking)
+            {
+                return section.SectionTimeCodes.Any() ? section.SectionTimeCodes.Count : 0;
+            }
+            else if (courseSkill == EnumCourseSkill.Writing)
+            {
+                return 1;
+            }
+            else
+            {
+                var sectionParts = section.SectionParts.ToList();
+                if (sectionParts.Any())
+                {
+                    return sectionParts.SelectMany(x => x.SectionQuestions).Count();
+                }
+                else
+                {
+                    var sectionQuestions = section.SectionQuestions.ToList();
+                    if (sectionQuestions.Count > 0)
+                    {
+                        return sectionQuestions.Count;
+                    }
+                    else
+                    {
+                        return default;
+                    }
+                }
+            }
+        }
+
+        public IList<SectionModel>? GetSectionModels(IList<Domain.Entities.Section>? sections, bool isDisableAnswers = false)
         {
             return sections?.OrderBy(x => x.CreatedDate).Select(x => new SectionModel
             {
@@ -201,7 +254,7 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
                 return methodResult;
             }
-            IList<Section> sections = sectionGroup.Sections;
+            IList<Domain.Entities.Section> sections = sectionGroup.Sections;
             foreach (var section in sectionModels)
             {
                 if (section == null)
@@ -209,7 +262,7 @@ namespace Fsel.Course.Infrastructure.Common
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
                     return methodResult;
                 }
-                Section newSection = sections.ElementAt(sectionModels.IndexOf(section));
+                Domain.Entities.Section newSection = sections.ElementAt(sectionModels.IndexOf(section));
                 if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking && sectionGroup.CourseSkill != EnumCourseSkill.Writing)
                 {
                     if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)

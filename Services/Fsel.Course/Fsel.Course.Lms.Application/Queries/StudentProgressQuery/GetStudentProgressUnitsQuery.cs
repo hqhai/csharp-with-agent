@@ -127,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
                 unitProgress.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
                 unitProgress.TotalLesson = lessonIds.Count;
-                unitProgress.ProcessPercent = NumberHelper.ConvertPercentDouble((double)currentProgress / progress);
+                unitProgress.ProcessPercent = NumberHelper.GetPercent(currentProgress, progress);
                 if (featureAccessTime != null)
                 {
                     unitProgress.TimeSpent = featureAccessTime.AccessTime;

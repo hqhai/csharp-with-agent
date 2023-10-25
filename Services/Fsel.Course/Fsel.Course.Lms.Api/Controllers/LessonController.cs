@@ -1,4 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
@@ -10,7 +11,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]

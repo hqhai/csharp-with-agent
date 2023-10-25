@@ -164,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     var totalCountTimeCode = item.SkillScores.Select(x => x.TotalCount).Sum();
                     if (totalCountTimeCode != 0)
                     {
-                        item.Percent = NumberHelper.ConvertPercentDouble((double)correctCountTimeCode / totalCountTimeCode);
+                        item.Percent = NumberHelper.GetPercent(correctCountTimeCode, totalCountTimeCode);
                     }
                 }
             }
@@ -172,7 +172,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var totalCount = scoreQuery.Select(x => x.TotalCount).Sum();
             if (totalCount != 0)
             {
-                lessonScore.Percent = NumberHelper.ConvertPercentDouble((double)correctCount / totalCount);
+                lessonScore.Percent = NumberHelper.GetPercent(correctCount, totalCount);
                 lessonScore.TotalCount = totalCount;
                 lessonScore.CorrectCount = correctCount;
             }
