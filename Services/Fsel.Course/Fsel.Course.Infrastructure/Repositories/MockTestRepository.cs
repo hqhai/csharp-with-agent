@@ -6,7 +6,6 @@ namespace Fsel.Course.Infrastructure.Repositories
     using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
-    using Azure.Core;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
@@ -164,7 +163,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                              .Select(x => x.SectionGroup!).ToList()),
                                            SectionGroups = x.MockTestSections.Where(x => x.SectionGroup != null)
                                              .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
-                                             .Select(x => _sectionConverter.GetSectionGroupModel(x, true)).ToList(),
+                                             .Select(x => _sectionConverter.GetSectionGroup(x)).ToList(),
                                            MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault(y => y.UnitId == unitId && y.CourseId == courseId && y.StudentId == studentId)),
                                        }).FirstOrDefaultAsync();
             }
