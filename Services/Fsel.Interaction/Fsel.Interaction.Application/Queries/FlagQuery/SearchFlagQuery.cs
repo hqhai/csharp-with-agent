@@ -12,6 +12,8 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
     using Fsel.Core.Extensions;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.CourseServices.Models;
+    using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Flags;
@@ -29,12 +31,14 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
         private readonly IFlagRepository _flagRepository;
         private readonly ICommentRepository _commentRepository;
         private readonly ICourseService _courseService;
+        private readonly IUserService _userService;
 
-        public SearchFlagQueryHandler(IFlagRepository flagRepository, ICommentRepository commentRepository, ICourseService courseService)
+        public SearchFlagQueryHandler(IFlagRepository flagRepository, ICommentRepository commentRepository, ICourseService courseService, IUserService userService)
         {
             _flagRepository = flagRepository;
             _commentRepository = commentRepository;
             _courseService = courseService;
+            _userService = userService;
         }
 
         public async Task<MethodResult<PagingItemsModel<FlagModel>>> Handle(SearchFlagQuery request, CancellationToken cancellationToken)
@@ -82,6 +86,20 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
             });
             var classForumResults = classForumResultResult.Content?.Result;
 
+            var studentResult = await _userService.ExecuteListStudentQueryAsync(new BaseQueryModel
+            {
+                Filters = new List<GenericFilterModel>
+                 {
+                     new GenericFilterModel
+                     {
+                         Property = nameof(StudentModel.Id),
+                         Value = classForumResults?.Select(x => x.StudentId).ToList(),
+                         Operator = Common.Enums.EnumFilterOperator.In
+                     }
+                 }
+            });
+            var studentResults = studentResult.Content?.Result;
+
             int totalItem = await flagQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await flagQuery
                     .ApplySortAndPaging(request)
@@ -94,11 +112,13 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                 if (item.Type == EnumInteractionType.ReplyComment)
                 {
                     var comment = comments.Where(x => x.Id == item.ObjectId).FirstOrDefault();
-                    var classforum = classForumResults?.Where(x => x.Id == comment?.ObjectId).FirstOrDefault();
-                    /*var comment = classForumResults?.Where(x => x.Id== comments.Select(x => x.ObjectId).FirstOrDefault()).FirstOrDefault();*/
-                    item.Content = comment?.Content;
-                    item.CreatedUserName = comment?.CreatedFullName;
-                    item.UserId = comment?.CreatedUserId;
+                    var classForumResultId = comment?.ObjectId;
+                    var classforum = classForumResults?.Where(x => x.Id == classForumResultId).FirstOrDefault();
+                    item.Content = classforum?.Content;
+                    item.CreatedUserName = classforum?.CreatedFullName;
+                    item.UserId = classforum?.CreatedUserId;
+                    item.StudentId = classforum?.StudentId;
+                    item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
                 }
 
                 if (item.Type == EnumInteractionType.ClassForum)
@@ -107,6 +127,8 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                     item.Content = classForumResult?.Content;
                     item.CreatedUserName = classForumResult?.CreatedFullName;
                     item.UserId = classForumResult?.CreatedUserId;
+                    item.StudentId = classForumResult?.StudentId;
+                    item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
                 }
             }
             methodResult.Result = new PagingItemsModel<FlagModel>(lists, request, totalItem);
