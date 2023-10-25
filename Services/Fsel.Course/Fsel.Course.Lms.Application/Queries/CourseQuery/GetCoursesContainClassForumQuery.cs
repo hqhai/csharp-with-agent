@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -44,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                     CreatedDate = x.CreatedDate,
                                 }).ApplySort(request).ToListAsync(cancellationToken);
 
-            methodResult.Result = course;
+            methodResult.Result = course.Where(x => x.CourseType == EnumCourseType.Academic).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
