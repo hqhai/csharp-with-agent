@@ -73,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, mockTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.Select(n => n.MockTestAnswers).FirstOrDefault())).ToList();
+            return questions.Select(x => GetQuestion(x, mockTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.MockTestAnswers).FirstOrDefault())).ToList();
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByExtraPratice(GetQuestionByIdsQuery request)
@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, finalTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.Select(n => n.FinalTestAnswers).FirstOrDefault())).ToList();
+            return questions.Select(x => GetQuestion(x, finalTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.FinalTestAnswers).FirstOrDefault())).ToList();
         }
 
         private QuestionModel GetQuestion(Question question, bool isShowAnswer = false, object? answer = null)
