@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             {
                 homeWorkResult.CorrectCount = correctTotal;
                 homeWorkResult.Status = EnumResultStatus.Done;
-                homeWorkResult.Percent = homeWorkResult.CorrectTotal > 0 ? NumberHelper.ConvertPercentDouble((double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal) : 0;
+                homeWorkResult.Percent = NumberHelper.GetPercent(homeWorkResult.CorrectCount, homeWorkResult.CorrectTotal);
                 var skillScores = new SkillScores
                 {
                     Skill = homeWorkResult.HomeWork.CourseSkill,

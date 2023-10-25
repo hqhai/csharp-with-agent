@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
@@ -35,10 +36,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-
+            var videoResult = await _videoResultRepository.Queryable.Include(x => x.VideoTimeCodeResults).Where(x => x.Id == request.VideoResultId).FirstOrDefaultAsync(cancellationToken);
+            if (videoResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
+                return methodResult;
+            }
+            var videoTimeCodeResultIds = videoResult.VideoTimeCodeResults.Select(x => x.Id).ToList();
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => p.VideoResultId == request.VideoResultId).ToListAsync(cancellationToken);
+                var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => videoTimeCodeResultIds.Contains(p.VideoTimeCodeResultId ?? default)).ToListAsync(cancellationToken);
                 if (videoTimeCodeAnswers.Count > 0)
                 {
                     foreach (var item in videoTimeCodeAnswers)

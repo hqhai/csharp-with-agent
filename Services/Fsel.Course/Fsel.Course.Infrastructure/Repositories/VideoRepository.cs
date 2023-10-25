@@ -6,14 +6,18 @@ using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoRepository : BaseRepository<Video>, IVideoRepository
     {
-        public VideoRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        private readonly ILessonRepository _lessonRepository;
+
+        public VideoRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper, ILessonRepository lessonRepository) : base(dbContext, authContext, mapper)
         {
+            _lessonRepository = lessonRepository;
         }
 
         public async Task<bool> IsVideoUsed(Guid? id)
@@ -39,6 +43,20 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 throw;
             }
+        }
+
+        public async Task<double> GetPercent(Guid unitId, Guid? studentId)
+        {
+            var videoIds = await _lessonRepository.Queryable.Include(x => x.LessonVideos).Include(x => x.UnitLessons).Where(x => x.UnitLessons.Any(x => x.UnitId == unitId)).SelectMany(x => x.LessonVideos).Select(x => x.VideoId).ToListAsync();
+
+            var videos = await Queryable.Include(x => x.VideoTimeCodes)
+                                    .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.StudentId == studentId))
+                                 .Include(x => x.LessonVideos)
+                                 .Where(x => videoIds.Contains(x.Id))
+                                 .ToListAsync();
+            var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == EnumTimeCodeType.UnitTest).ToList();
+            var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
+            return NumberHelper.GetPercent(videoTimeCodeResults.Count, videoTimeCodes.Count);
         }
 
         public async Task<VideoModel?> GetIncludeAllAsync(Guid? id)
@@ -134,22 +152,6 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 throw;
             }
-        }
-
-        public async Task<List<Video>?> GetListAsync(IList<Guid>? ids, IList<Guid>? videoResultIds)
-        {
-            if ((ids == null || !ids.Any()) || (videoResultIds == null || !videoResultIds.Any()))
-            {
-                return null;
-            }
-            return await Queryable.Include(x => x.VideoTimeCodes).ThenInclude(x => x.VideoTimeCodeAnswers.Where(y => videoResultIds.Contains(y.VideoResultId)))
-                                                             .Include(x => x.VideoTimeCodes)
-                                                             .ThenInclude(x => x.TimeCodeExercises)
-                                                             .ThenInclude(x => x.Exercise)
-                                                             .ThenInclude(x => x!.ExerciseQuestions)
-                                                             .ThenInclude(x => x.Question)
-                                                             .Where(x => ids.Contains(x.Id))
-                                                             .ToListAsync();
         }
     }
 }

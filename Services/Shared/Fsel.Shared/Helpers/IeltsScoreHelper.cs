@@ -20,6 +20,8 @@ namespace Fsel.Shared.Helpers
 
     public static class IeltsScoreHelper
     {
+        public const double MaxScorePT = 6.5;
+
         private static IList<IeltsScoreConfig> s_ieltsScoreConfigs = new List<IeltsScoreConfig>
         {
             new IeltsScoreConfig(0, 0, 0),
@@ -52,18 +54,24 @@ namespace Fsel.Shared.Helpers
             new IeltsScoreConfig(27, 6.5, 6.5),
             new IeltsScoreConfig(28, 6.5, 6.5),
             new IeltsScoreConfig(29, 6.5, 6.5),
-            new IeltsScoreConfig(30, 6.5, 6.5),
-            new IeltsScoreConfig(31, 6.5, 6.5),
-            new IeltsScoreConfig(32, 6.5, 6.5),
-            new IeltsScoreConfig(33, 6.5, 6.5),
-            new IeltsScoreConfig(34, 6.5, 6.5),
-            new IeltsScoreConfig(35, 6.5, 6.5),
-            new IeltsScoreConfig(36, 6.5, 6.5),
-            new IeltsScoreConfig(37, 6.5, 6.5),
-            new IeltsScoreConfig(38, 6.5, 6.5),
-            new IeltsScoreConfig(39, 6.5, 6.5),
-            new IeltsScoreConfig(40, 6.5, 6.5),
+            new IeltsScoreConfig(30, 7, 7),
+            new IeltsScoreConfig(31, 7, 7),
+            new IeltsScoreConfig(32, 7, 7.5),
+            new IeltsScoreConfig(33, 7.5, 7.5),
+            new IeltsScoreConfig(34, 7.5, 7.5),
+            new IeltsScoreConfig(35, 8, 8),
+            new IeltsScoreConfig(36, 8, 8),
+            new IeltsScoreConfig(37, 8.5, 8.5),
+            new IeltsScoreConfig(38, 8.5, 8.5),
+            new IeltsScoreConfig(39, 9, 9),
+            new IeltsScoreConfig(40, 9, 9),
         };
+
+        public static double GetIeltsScorePT(this double number, EnumCourseSkill skill)
+        {
+            double score = number.GetIeltsScore(skill);
+            return score >= MaxScorePT ? MaxScorePT : score;
+        }
 
         public static double GetIeltsScore(this double number, EnumCourseSkill skill)
         {

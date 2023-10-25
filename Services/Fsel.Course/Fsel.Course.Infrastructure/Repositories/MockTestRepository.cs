@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Repositories
     using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
+    using Azure.Core;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
@@ -93,6 +94,35 @@ namespace Fsel.Course.Infrastructure.Repositories
                                              .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
                                              .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList(),
                                        }).FirstOrDefaultAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<MockTest?> GetAsync(Guid mockTestId, Guid? studentId)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionTimeCodes.Where(y => !y.IsDeleted))
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
+                                       .ThenInclude(x => x.Question)
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup).ThenInclude(x => x!.SectionGroupResults.Where(x => x.StudentId == studentId))
+                                       .Where(x => x.Id == mockTestId)
+                                       .AsNoTracking()
+                                       .FirstOrDefaultAsync();
             }
             catch (Exception)
             {
