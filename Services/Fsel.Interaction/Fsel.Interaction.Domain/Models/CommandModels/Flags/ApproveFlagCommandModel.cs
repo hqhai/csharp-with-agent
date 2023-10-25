@@ -2,11 +2,9 @@
 
 namespace Fsel.Interaction.Domain.Models.CommandModels.Flags
 {
-    using Fsel.Shared.Enums;
-
-    public class UpdateStatusFlagCommandModel
+    public class ApproveFlagCommandModel
     {
         public Guid ObjectId { get; set; }
-        public EnumFlagStatus Status { get; set; }
+        public bool IsApprove { get; set; }
     }
 }

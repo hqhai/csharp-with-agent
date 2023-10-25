@@ -15,5 +15,11 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
         public EnumInteractionType Type { get; set; }
         public Guid? ObjectId { get; set; }
+
+        public string? Content { get; set; }
+
+        public string? CreatedUserName { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 }

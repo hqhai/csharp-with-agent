@@ -10,7 +10,6 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Application.Queues.Publishers;
-    using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Flags;
     using Fsel.Shared.Enums;
@@ -18,41 +17,39 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdateStatusFlagCommand : UpdateStatusFlagsCommandModel, IRequest<MethodResult<bool>>
+    public class ApproveFlagCommand : ApproveFlagsCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class UpdateStatusFlagCommandHandler : IRequestHandler<UpdateStatusFlagCommand, MethodResult<bool>>
+    public class ApproveFlagCommandHandler : IRequestHandler<ApproveFlagCommand, MethodResult<bool>>
     {
         private readonly IFlagRepository _flagRepository;
         private readonly IMapper _mapper;
         private readonly ICommentRepository _commentRepository;
-        private readonly ICourseService _courseService;
-        private readonly FlagPublisher _flagPublisher;
+        private readonly DeleteClassForumByFlagPublisher _flagPublisher;
 
-        public UpdateStatusFlagCommandHandler(IFlagRepository flagRepository, IMapper mapper, ICommentRepository commentRepository, ICourseService courseService, FlagPublisher flagPublisher)
+        public ApproveFlagCommandHandler(IFlagRepository flagRepository, IMapper mapper, ICommentRepository commentRepository, DeleteClassForumByFlagPublisher flagPublisher)
         {
             _flagRepository = flagRepository;
             _mapper = mapper;
             _commentRepository = commentRepository;
-            _courseService = courseService;
             _flagPublisher = flagPublisher;
         }
 
-        public async Task<MethodResult<bool>> Handle(UpdateStatusFlagCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ApproveFlagCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var objectIds = request.ListFlag!.Select(x => x.ObjectId).ToList();
+            var objectIds = request.Flags!.Select(x => x.ObjectId).ToList();
             var flags = await _flagRepository.Queryable.Where(x => x.ObjectId.HasValue && objectIds.Contains(x.ObjectId.Value)).ToListAsync(cancellationToken);
 
-            if (request.ListFlag == null || request.ListFlag.Count == 0)
+            if (request.Flags == null || request.Flags.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-            foreach (var item in request.ListFlag)
+            foreach (var item in request.Flags)
             {
                 var listFlag = flags.Where(x => x.ObjectId == item.ObjectId).ToList();
                 if (listFlag == null)
@@ -63,18 +60,19 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
                 listFlag = flags.Select(x => _mapper.Map(item, x)).ToList();
 
                 var comment = await _commentRepository.Queryable.Where(x => x.ObjectId == item.ObjectId).FirstOrDefaultAsync(cancellationToken);
-                if (comment == null)
+
+                var flag = await _flagRepository.Queryable.Where(x => x.ObjectId == item.ObjectId).FirstOrDefaultAsync(cancellationToken);
+                if (request.Flags.Select(x => x.IsApprove == false).FirstOrDefault() && flags.Select(x => x.Type == EnumInteractionType.ReplyComment).FirstOrDefault())
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(comment));
-                    return methodResult;
+                    flag!.Status = EnumFlagStatus.Reject;
+                    await _commentRepository.DeleteAsync(comment!);
+                    _flagRepository.Update(flag);
                 }
-                if (listFlag.Select(x => x.Status == EnumFlagStatus.Approve).FirstOrDefault() && flags.Select(x => x.Type == EnumInteractionType.Comment).FirstOrDefault())
+                if (request.Flags.Select(x => x.IsApprove).FirstOrDefault() && flags.Select(x => x.Type == EnumInteractionType.ClassForum).FirstOrDefault())
                 {
-                    await _commentRepository.DeleteAsync(comment);
-                }
-                if (listFlag.Select(x => x.Status == EnumFlagStatus.Approve).FirstOrDefault() && flags.Select(x => x.Type == EnumInteractionType.ClassForum).FirstOrDefault())
-                {
+                    flag!.Status = EnumFlagStatus.Approve;
                     await _flagPublisher.Publish(listFlag, cancellationToken).ConfigureAwait(false);
+                    _flagRepository.Update(flag);
                 }
             }
 

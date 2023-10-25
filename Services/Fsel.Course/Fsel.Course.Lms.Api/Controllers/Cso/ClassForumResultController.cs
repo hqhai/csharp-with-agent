@@ -51,17 +51,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
             return commandResult.GetActionResult();
         }
 
-        /// <summary>
-        /// approve flagged class forum
-        /// </summary>
-        [HttpPost("approve-flagged")]
-        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ApproveFlagged([FromBody] ApproveFlaggedClassForumResultCommand command)
-        {
-            MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
 
         /// <summary>
         /// Get Class Forum Result
@@ -88,24 +77,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Search Class forum result
-        /// </summary>
-        [HttpGet("search-by-flagged")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchByFlagged([FromQuery] SearchClassForumResultHasBeenFlaggedQuery query)
-        {
-            MethodResult<PagingItemsModel<ClassForumResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Get Class Forum Result
         /// </summary>
         [HttpGet("class-forum-result-flag")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetClassForumResultFlag([FromQuery] GetClassForumResultFlagQuery query)
+        public async Task<IActionResult> GetClassForumResultFlag([FromQuery] GetClassForumResultByIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

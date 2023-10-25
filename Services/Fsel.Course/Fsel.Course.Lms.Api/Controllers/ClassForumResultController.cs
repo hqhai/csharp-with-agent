@@ -6,6 +6,8 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.ClassForumCmd;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
@@ -20,10 +22,26 @@ namespace Fsel.Course.Lms.Api.Controllers
     public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public ClassForumResultController(IMediator mediator)
+        public ClassForumResultController(IMediator mediator, IClassForumResultRepository classForumResultRepository)
         {
             _mediator = mediator;
+            _classForumResultRepository = classForumResultRepository;
+        }
+
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpPost("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
+        {
+            var result = await _classForumResultRepository.GetListResultAsync<ClassForumResultModel>(query);
+            return result.GetActionResult();
         }
 
         /// <summary>

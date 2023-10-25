@@ -18,12 +18,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetClassForumResultFlagQuery : IRequest<MethodResult<ClassForumResultModel>>
+    public class GetClassForumResultByIdQuery : IRequest<MethodResult<ClassForumResultModel>>
     {
         public Guid ClassForumResultId { get; set; }
     }
 
-    public class GetClassForumResultFlagQueryHandler : IRequestHandler<GetClassForumResultFlagQuery, MethodResult<ClassForumResultModel>>
+    public class GetClassForumResultFlagQueryHandler : IRequestHandler<GetClassForumResultByIdQuery, MethodResult<ClassForumResultModel>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMapper _mapper;
@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _interactionService = interactionService;
         }
 
-        public async Task<MethodResult<ClassForumResultModel>> Handle(GetClassForumResultFlagQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassForumResultModel>> Handle(GetClassForumResultByIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ClassForumResultModel>();

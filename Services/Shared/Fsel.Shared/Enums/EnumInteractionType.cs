@@ -7,6 +7,5 @@ namespace Fsel.Shared.Enums
         ClassForum,
         DiscussionBoard,
         ReplyComment,
-        Comment
     }
 }

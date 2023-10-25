@@ -4,8 +4,8 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.Flags
 {
     using System.Collections.Generic;
 
-    public class UpdateStatusFlagsCommandModel
+    public class ApproveFlagsCommandModel
     {
-        public IList<UpdateStatusFlagCommandModel>? ListFlag { get; set; }
+        public IList<ApproveFlagCommandModel>? Flags { get; set; }
     }
 }

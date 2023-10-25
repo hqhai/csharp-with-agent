@@ -128,7 +128,7 @@ queues: new Dictionary<string, Type>
 {
     { QueueSettings.LmsQueue.NameQueue.UpdateTeacherGradingInClassForumAndMockTest, typeof(UpdateOcCheckInClassForumResultConsumer) },
     { QueueSettings.LmsQueue.NameQueue.UpdateOcCheckInClassForumResult, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.FlagClassForumResult, typeof(DeleteClassForumFlagConsumer) }
+    { QueueSettings.LmsQueue.NameQueue.FlagClassForumResult, typeof(DeleteClassForumByFlagConsumer) }
 });
 
 var app = builder.Build();

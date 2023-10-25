@@ -9,12 +9,12 @@ namespace Fsel.Interaction.Application.Queues.Publishers
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
 
-    public class FlagPublisher
+    public class DeleteClassForumByFlagPublisher
     {
         private readonly IQueueProvider _queueProvider;
         private readonly IFlagRepository _flagRepository;
 
-        public FlagPublisher(IQueueProvider queueProvider, IFlagRepository flagRepository)
+        public DeleteClassForumByFlagPublisher(IQueueProvider queueProvider, IFlagRepository flagRepository)
         {
             _queueProvider = queueProvider;
             _flagRepository = flagRepository;

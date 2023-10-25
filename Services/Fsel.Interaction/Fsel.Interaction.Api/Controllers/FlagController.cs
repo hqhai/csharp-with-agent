@@ -54,7 +54,7 @@ namespace Fsel.Interaction.Api.Controllers
         [HttpPut("update-status")]
         [ProducesResponseType(typeof(MethodResult<FlagModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateStatus([FromBody] UpdateStatusFlagCommand command)
+        public async Task<IActionResult> UpdateStatus([FromBody] ApproveFlagCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);

@@ -8,11 +8,11 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using MassTransit;
     using MediatR;
 
-    public class DeleteClassForumFlagConsumer : IConsumer<FlagQueueModel>
+    public class DeleteClassForumByFlagConsumer : IConsumer<FlagQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public DeleteClassForumFlagConsumer(IMediator mediator)
+        public DeleteClassForumByFlagConsumer(IMediator mediator)
         {
             _mediator = mediator;
         }
