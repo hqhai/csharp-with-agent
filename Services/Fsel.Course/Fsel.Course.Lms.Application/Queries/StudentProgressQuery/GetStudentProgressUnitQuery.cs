@@ -68,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (unit != null)
             {
                 var lessonIds = unit.UnitLessons.Select(x => x.LessonId).ToList();
-                var mockTestId = unit.UnitSkillMockTests.Any() ? unit.UnitSkillMockTests.FirstOrDefault()?.Id : null;
+                var mockTestId = unit.UnitSkillMockTests.Any() ? unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId : null;
                 var (currentProgress, progress) = await GetContentComplete(lessonIds, request, mockTestId);
                 var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, UserId = userId ?? default });
                 var featureAccessTime = featureAccessTimeResult?.Content?.Result;
