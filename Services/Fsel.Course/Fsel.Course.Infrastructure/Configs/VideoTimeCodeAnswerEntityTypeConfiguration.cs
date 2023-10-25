@@ -17,11 +17,12 @@ namespace Fsel.Course.Infrastructure.Configs
                   .HasMaxLength(100)
                   .HasConversion(
                       v => v.ToString(),
-                      v => v.EnumParse<EnumCurrentStatus>());
+                      v => v.EnumParse<EnumAnswerStatus>());
+
             builder.HasOne(a => a.VideoResult)
-              .WithMany(b => b.VideoTimeCodeAnswers)
-              .HasForeignKey(b => b.VideoResultId)
-              .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany(b => b.VideoTimeCodeAnswers)
+                  .HasForeignKey(b => b.VideoResultId)
+                  .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.VideoTimeCode)
                           .WithMany(b => b.VideoTimeCodeAnswers)
@@ -37,6 +38,11 @@ namespace Fsel.Course.Infrastructure.Configs
                    .WithMany(b => b.VideoTimeCodeAnswers)
                    .HasForeignKey(b => b.QuestionId)
                    .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.VideoTimeCodeResult)
+                       .WithMany(b => b.VideoTimeCodeAnswers)
+                       .HasForeignKey(b => b.VideoTimeCodeResultId)
+                       .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

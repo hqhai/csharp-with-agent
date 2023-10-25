@@ -4,52 +4,15 @@ namespace Fsel.Course.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
-    using Fsel.Core.Entities;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
-    using Fsel.Course.Domain.Enums;
 
-    public class LessonResult : Entity
+    public class LessonResult : BaseResultScore
     {
-        /// <summary>
-        /// Phần trăm cẩu trả lời đúng
-        /// </summary>
-        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double Percent { get; set; }
-
-        /// <summary>
-        /// Trạng thái
-        /// </summary>
-        public EnumResultStatus Status { get; set; }
-
         /// <summary>
         /// Lưu ý tóm tắt
         /// </summary>
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SummaryNote { get; set; }
-
-        /// <summary>
-        /// Số câu trả lời đúng của Student
-        /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount { get; set; }
-
-        /// <summary>
-        /// Tổng số câu trả lời đúng
-        /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectTotal { get; set; }
-
-        public string? SkillScoresStr { get; set; }
-
-        [NotMapped]
-        public IList<SkillScores>? SkillScores
-        {
-            get { return ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr); }
-            set { SkillScoresStr = ConvertHelper.Serialize(value); }
-        }
 
         public Course? Course { get; set; }
 
@@ -65,9 +28,6 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid LessonId { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid StudentId { get; set; }
 
         public VideoResult? VideoResult { get; set; }
 

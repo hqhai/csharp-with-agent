@@ -126,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                                     .Where(x => mockTestIds.Contains(x.Id)).ToListAsync();
 
                 var overallScoreReportSkills = mockTests.Select(x => GetOverallScoreReportSkill(x, studentId)).ToList();
-                overallScoreReportByMockTest.Percent = overallScoreReportSkills.Any(x => x.Status == EnumResultStatus.Done) ? NumberHelper.ConvertRound(overallScoreReportSkills.Average(x => x.Percent)) : default;
+                overallScoreReportByMockTest.Percent = NumberHelper.ConvertPercentDouble(overallScoreReportSkills.Count(x => x.Status == EnumResultStatus.Done) / overallScoreReportSkills.Count);
                 overallScoreReportByMockTest.OverallScoreReportSkills = overallScoreReportSkills;
             }
             return overallScoreReportByMockTest;
@@ -139,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return new OverallScoreReportSkillModel
             {
                 Id = mockTestResult?.Id ?? null,
-                Percent = mockTestResult?.Percent ?? default,
+                Percent = NumberHelper.ConvertPercentDouble(mockTestResult?.Status == EnumResultStatus.Done ? 1 : 0),
                 SkillScores = mockTestResult?.SkillScores ?? new List<SkillScores> {
                         new SkillScores { Skill = mockTest.MockTestSections.FirstOrDefault()!.SectionGroup!.CourseSkill },
                 },

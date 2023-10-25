@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public double CountQuestion { get; set; }
         public double TotalQuestion { get; set; }
+        public long WorkingTime { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public IList<EnumCourseSkill>? CourseSkills { get; set; }
     }
