@@ -43,6 +43,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                     Id = x.Id,
                                     Name = x.Name,
                                     CreatedDate = x.CreatedDate,
+                                    CourseType = x.CourseType,
+                                    CourseLevel = x.CourseLevel,
                                 }).ApplySort(request).ToListAsync(cancellationToken);
 
             methodResult.Result = course.Where(x => x.CourseType == EnumCourseType.Academic).ToList();
