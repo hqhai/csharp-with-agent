@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
-using Fsel.Ordering.Application.Queues.Consumers;
 using Fsel.Ordering.Application.Queues.Publishers;
 using Fsel.Ordering.Application.Services.CourseService;
 using Fsel.Ordering.Application.Services.SystemService;
@@ -11,7 +10,6 @@ using Fsel.Ordering.Domain.IRepositories;
 using Fsel.Ordering.Infrastructure;
 using Fsel.Ordering.Infrastructure.Repositories;
 using Fsel.Ordering.Infrastructure.ValueSettings;
-using Fsel.Shared.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,11 +34,6 @@ builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCour
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddMassTransit(appSetting);
-//builder.AddMassTransit(appSetting,
-//queues: new Dictionary<string, Type>
-//{
-//    { QueueSettings.LmsQueue.NameQueue.OrderCreateNotification, typeof(CreateOrderConsumer) }
-//});
 var app = builder.Build();
 app.UseServices();
 app.Run();

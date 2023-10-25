@@ -8,11 +8,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
-    using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
@@ -32,8 +30,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
-        private readonly MediatR.IMediator _mediator;
-        private readonly IUserService _userService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
@@ -41,8 +37,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
         public CreateOrderCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
-            IMediator mediator,
-            IUserService userService,
             NotificationMessagePublisher notificationMessagePublisher,
             ITrainingService trainingService,
             IPackageRepository packageRepository,
@@ -50,8 +44,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
-            _mediator = mediator;
-            _userService = userService;
             _notificationMessagePublisher = notificationMessagePublisher;
             _trainingService = trainingService;
             _packageRepository = packageRepository;
@@ -63,35 +55,21 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<OrderModel> methodResult = new MethodResult<OrderModel>();
 
-            //var package = await _packageRepository.GetByIdAsync(request.PackageId);
-
-            #region Pilot
-
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Code == EnumPackageCode.BASIC, cancellationToken);
-
-            #endregion Pilot
+            var package = await _packageRepository.GetByIdAsync(request.PackageId);
 
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id, UserId = request.UserId }, cancellationToken).ConfigureAwait(false);
-            var code = codeSend.Result?.Code;
 
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code || (x.Status == EnumOrderStatus.New && x.UserId == request.UserId), cancellationToken))
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == request.Code || (x.Status == EnumOrderStatus.New && x.UserId == _authContext.CurrentUserId), cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code));
                 return methodResult;
             }
 
-            //var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { Code = request.CodeClass, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = request.PackageId, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
-
-            #region Pilot
-
-            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { UserId = request.UserId, Code = request.CodeCourse, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = package.Id, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
-
-            #endregion Pilot
+            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { UserId = _authContext.CurrentUserId, Code = request.ClassCode, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = request.PackageId, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
 
             if (!classnew.IsSuccessStatusCode)
             {
@@ -107,9 +85,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             Order order = _mapper.Map<Order>(request);
             order.Status = EnumOrderStatus.New;
-            order.UserId = request.UserId;
-            order.Code = code;
-            order.PackageId = package.Id;
+            order.UserId = _authContext.CurrentUserId;
+            order.Code = request.Code;
             order.Price = package.Price;
             order.DiscountPercent = 5;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
