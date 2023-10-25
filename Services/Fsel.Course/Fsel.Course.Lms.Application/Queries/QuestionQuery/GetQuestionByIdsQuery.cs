@@ -73,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestionByMockTest(x, mockTestResult?.Status == EnumResultStatus.Done)).ToList();
+            return questions.Select(x => GetQuestion(x, mockTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.MockTestAnswers).FirstOrDefault())).ToList();
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByExtraPratice(GetQuestionByIdsQuery request)
@@ -90,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestionByExtraPractice(x, extraPracticeResult?.Status == EnumResultStatus.Done)).ToList();
+            return questions.Select(x => GetQuestion(x, extraPracticeResult?.Status == EnumResultStatus.Done, x.ExtraPracticeAnswers.FirstOrDefault())).ToList();
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByFinalTest(GetQuestionByIdsQuery request)
@@ -108,34 +108,14 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestionByFinalTest(x, finalTestResult?.Status == EnumResultStatus.Done)).ToList();
+            return questions.Select(x => GetQuestion(x, finalTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.FinalTestAnswers).FirstOrDefault())).ToList();
         }
 
-        private QuestionModel GetQuestion(Question question, bool isShowAnswer = false)
+        private QuestionModel GetQuestion(Question question, bool isShowAnswer = false, object? answer = null)
         {
             var questionModel = _mapper.Map<QuestionModel>(question);
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
-            return questionModel;
-        }
-
-        private QuestionModel GetQuestionByMockTest(Question question, bool isShowAnswer = false)
-        {
-            var questionModel = GetQuestion(question, isShowAnswer);
-            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(question.SectionQuestions.SelectMany(x => x.MockTestAnswers).FirstOrDefault());
-            return questionModel;
-        }
-
-        private QuestionModel GetQuestionByFinalTest(Question question, bool isShowAnswer = false)
-        {
-            var questionModel = GetQuestion(question, isShowAnswer);
-            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(question.SectionQuestions.SelectMany(x => x.FinalTestAnswers).FirstOrDefault());
-            return questionModel;
-        }
-
-        private QuestionModel GetQuestionByExtraPractice(Question question, bool isShowAnswer = false)
-        {
-            var questionModel = GetQuestion(question, isShowAnswer);
-            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(question.ExtraPracticeAnswers.FirstOrDefault());
+            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
             return questionModel;
         }
     }
