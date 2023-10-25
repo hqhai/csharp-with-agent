@@ -109,12 +109,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 MockTestResult = mockTest.MockTestResults.Where(x => x.Id == mockTestResult.Id)
                 .Select(x =>
                 {
-                    var result = _mapper.Map<MockTestResultModel>(x);
+                    var result = _mapper.Map<MockTestResultModel>(mockTestResult);
                     result.Scores = x.SkillScores != null ? x.SkillScores.Average(x => x.Scores) : 0;
                     result.UnitDisplayOrder = x.MockTest!.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault();
                     result.CourseCode = x.MockTest.MockTestResults.Select(x => x.Course?.Code).FirstOrDefault();
-                    result.GradingStartDate = mockTestResult.GradingStartDate;
-                    result.GradingTeacherId = mockTestResult.GradingTeacherId;
                     return result;
                 }).FirstOrDefault()
             };
