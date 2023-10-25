@@ -6,9 +6,6 @@ namespace Fsel.Shared.Helpers
 
     public class IeltsScoreConfig
     {
-        public const double MaxScorePT = 6.5;
-        public const int MaxNumberPT = 30;
-
         public IeltsScoreConfig(int number, double readingScore, double listeningScore)
         {
             Number = number;
@@ -23,6 +20,8 @@ namespace Fsel.Shared.Helpers
 
     public static class IeltsScoreHelper
     {
+        public const double MaxScorePT = 6.5;
+
         private static IList<IeltsScoreConfig> s_ieltsScoreConfigs = new List<IeltsScoreConfig>
         {
             new IeltsScoreConfig(0, 0, 0),
@@ -70,13 +69,8 @@ namespace Fsel.Shared.Helpers
 
         public static double GetIeltsScorePT(this double number, EnumCourseSkill skill)
         {
-            var config = s_ieltsScoreConfigs.OrderBy(x => x.Number).FirstOrDefault(x => x.Number == number);
-            if (config != null)
-            {
-                return skill == EnumCourseSkill.Listening ? (number >= IeltsScoreConfig.MaxNumberPT ? IeltsScoreConfig.MaxScorePT : config.ListeningScore)
-               : (number >= IeltsScoreConfig.MaxNumberPT ? IeltsScoreConfig.MaxScorePT : config.ReadingScore);
-            }
-            return default;
+            double score = number.GetIeltsScore(skill);
+            return score >= MaxScorePT ? MaxScorePT : score;
         }
 
         public static double GetIeltsScore(this double number, EnumCourseSkill skill)
