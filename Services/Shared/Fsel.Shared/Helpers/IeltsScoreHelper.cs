@@ -6,6 +6,9 @@ namespace Fsel.Shared.Helpers
 
     public class IeltsScoreConfig
     {
+        public const double MaxScorePT = 6.5;
+        public const int MaxNumberPT = 30;
+
         public IeltsScoreConfig(int number, double readingScore, double listeningScore)
         {
             Number = number;
@@ -16,16 +19,6 @@ namespace Fsel.Shared.Helpers
         public int Number { get; set; }
         public double ReadingScore { get; set; }
         public double ListeningScore { get; set; }
-
-        public double GetReadingScorePT()
-        {
-            return Number >= 27 ? 6.5 : ReadingScore;
-        }
-
-        public double GetListeningScorePT()
-        {
-            return Number >= 27 ? 6.5 : ListeningScore;
-        }
     }
 
     public static class IeltsScoreHelper
@@ -80,7 +73,8 @@ namespace Fsel.Shared.Helpers
             var config = s_ieltsScoreConfigs.OrderBy(x => x.Number).FirstOrDefault(x => x.Number == number);
             if (config != null)
             {
-                return skill == EnumCourseSkill.Listening ? config.GetListeningScorePT() : config.GetReadingScorePT();
+                return skill == EnumCourseSkill.Listening ? (number >= IeltsScoreConfig.MaxNumberPT ? IeltsScoreConfig.MaxScorePT : config.ListeningScore)
+               : (number >= IeltsScoreConfig.MaxNumberPT ? IeltsScoreConfig.MaxScorePT : config.ReadingScore);
             }
             return default;
         }

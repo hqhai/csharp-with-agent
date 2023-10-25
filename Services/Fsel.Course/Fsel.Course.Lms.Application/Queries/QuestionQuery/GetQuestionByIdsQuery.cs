@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -20,7 +19,6 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
     {
         public Guid ObjectResultId { get; set; }
         public IList<Guid>? QuestionIds { get; set; }
-        public EnumTestResult Result { get; set; }
     }
 
     public class GetQuestionByIdQueryHandler : IRequestHandler<GetQuestionByIdsQuery, MethodResult<IList<QuestionModel>>>
@@ -57,27 +55,17 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
         private async Task<IList<QuestionModel>?> GetQuestionAsync(GetQuestionByIdsQuery request)
         {
-            switch (request.Result)
-            {
-                case EnumTestResult.MockTest:
-                    return await GetQuestionByMockTest(request);
-
-                case EnumTestResult.FinalTest:
-                    return await GetQuestionByFinalTest(request);
-
-                case EnumTestResult.ExtraPratice:
-                    return await GetQuestionByExtraPratice(request);
-
-                default:
-                    throw new InvalidOperationException();
-            }
+            return await GetQuestionByMockTest(request) ?? await GetQuestionByFinalTest(request) ?? await GetQuestionByExtraPratice(request);
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByMockTest(GetQuestionByIdsQuery request)
         {
             ArgumentNullException.ThrowIfNull(request.QuestionIds);
             var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.Id == request.ObjectResultId).FirstOrDefaultAsync();
-
+            if (mockTestResult == null)
+            {
+                return default;
+            }
             var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions)
                                         .ThenInclude(x => x.MockTestAnswers.Where(x => mockTestResult != null && x.MockTestResultId == mockTestResult.Id))
                                         .Where(x => request.QuestionIds.Contains(x.Id)).ToListAsync();
@@ -92,7 +80,10 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         {
             ArgumentNullException.ThrowIfNull(request.QuestionIds);
             var extraPracticeResult = await _extraPracticeResultRepository.Queryable.Where(x => x.Id == request.ObjectResultId).FirstOrDefaultAsync();
-
+            if (extraPracticeResult == null)
+            {
+                return default;
+            }
             var questions = await _questionRepository.Queryable.Include(x => x.ExtraPracticeAnswers.Where(x => extraPracticeResult != null && x.ExtraPracticeResultId == extraPracticeResult.Id))
                                                               .Where(x => request.QuestionIds.Contains(x.Id)).ToListAsync();
             if (questions == null || !questions.Any())
@@ -106,7 +97,10 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         {
             ArgumentNullException.ThrowIfNull(request.QuestionIds);
             var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.Id == request.ObjectResultId).FirstOrDefaultAsync();
-
+            if (finalTestResult == null)
+            {
+                return default;
+            }
             var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions)
                                 .ThenInclude(x => x.FinalTestAnswers.Where(x => finalTestResult != null && x.FinalTestResultId == finalTestResult.Id))
                                 .Where(x => request.QuestionIds.Contains(x.Id)).ToListAsync();
