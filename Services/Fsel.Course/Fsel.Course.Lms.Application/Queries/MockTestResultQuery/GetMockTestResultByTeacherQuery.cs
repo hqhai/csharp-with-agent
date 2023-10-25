@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -28,8 +29,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICourseRepository _courseRepository;
+        private readonly IMapper _mapper;
 
-        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService, ICourseRepository courseRepository)
+        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService, ICourseRepository courseRepository, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
@@ -37,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             _authContext = authContext;
             _userService = userService;
             _courseRepository = courseRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(GetMockTestResultByTeacherQuery request, CancellationToken cancellationToken)
@@ -104,24 +107,15 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                          .OrderBy(x => x!.CreatedDate)
                          .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList(),
                 MockTestResult = mockTest.MockTestResults.Where(x => x.Id == mockTestResult.Id)
-                .Select(x => new MockTestResultModel
+                .Select(x =>
                 {
-                    Id = x.Id,
-                    CorrectCount = x.CorrectCount,
-                    CorrectTotal = x.CorrectTotal,
-                    SkillScores = x.SkillScores != null ? x.SkillScores : null,
-                    Scores = x.SkillScores != null ? x.SkillScores.Average(x => x.Scores) : 0,
-                    Percent = x.Percent,
-                    Status = x.Status,
-                    CreatedDate = x.CreatedDate,
-                    MockTestId = x.MockTestId,
-                    StudentId = x.StudentId,
-                    CourseId = x.CourseId,
-                    UnitId = x.UnitId,
-                    GradingStartDate = x.GradingStartDate,
-                    GradingTeacherId = x.GradingTeacherId,
-                    UnitDisplayOrder = x.MockTest!.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
-                    CourseCode = x.MockTest.MockTestResults.Select(x => x.Course?.Code).FirstOrDefault(),
+                    var result = _mapper.Map<MockTestResultModel>(x);
+                    result.Scores = x.SkillScores != null ? x.SkillScores.Average(x => x.Scores) : 0;
+                    result.UnitDisplayOrder = x.MockTest!.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault();
+                    result.CourseCode = x.MockTest.MockTestResults.Select(x => x.Course?.Code).FirstOrDefault();
+                    result.GradingStartDate = mockTestResult.GradingStartDate;
+                    result.GradingTeacherId = mockTestResult.GradingTeacherId;
+                    return result;
                 }).FirstOrDefault()
             };
 
