@@ -131,6 +131,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         Scores = skillScore?.Scores ?? default,
                         Percent = skillScore?.Percent ?? default,
                     };
+                    skillScores.PercentProgress = NumberHelper.GetPercent(skillScores.CountQuestion, skillScores.TotalQuestion);
+
                     if (x.Skill == EnumCourseSkill.Speaking || x.Skill == EnumCourseSkill.Writing)
                     {
                         if (x.MockTestScores.Any() && x.MockTestScores.All(x => x != null))
