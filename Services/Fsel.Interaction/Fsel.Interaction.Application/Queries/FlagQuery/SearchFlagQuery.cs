@@ -66,7 +66,7 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                 flagQuery = flagQuery.Where(m => m.Type == request.Type);
             }
 
-            var comments = await _commentRepository.Queryable.Where(x => flagQuery.Select(x => x.ObjectId).Contains(x.ObjectId)).ToListAsync(cancellationToken);
+            var comments = await _commentRepository.Queryable.Where(x => flagQuery.Select(x => x.ObjectId).Contains(x.Id)).ToListAsync(cancellationToken);
 
             var classForumResultResult = await _courseService.ExecuteListClassForumResultQueryAsync(new BaseQueryModel
             {
@@ -94,9 +94,11 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                 if (item.Type == EnumInteractionType.ReplyComment)
                 {
                     var comment = comments.Where(x => x.Id == item.ObjectId).FirstOrDefault();
+                    var classforum = classForumResults?.Where(x => x.Id == comment?.ObjectId).FirstOrDefault();
+                    /*var comment = classForumResults?.Where(x => x.Id== comments.Select(x => x.ObjectId).FirstOrDefault()).FirstOrDefault();*/
                     item.Content = comment?.Content;
                     item.CreatedUserName = comment?.CreatedFullName;
-                    item.UserId = comment?.UserId;
+                    item.UserId = comment?.CreatedUserId;
                 }
 
                 if (item.Type == EnumInteractionType.ClassForum)
