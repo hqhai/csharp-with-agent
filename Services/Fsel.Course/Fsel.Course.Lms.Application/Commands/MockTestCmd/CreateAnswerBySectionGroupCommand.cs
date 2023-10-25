@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     {
     }
 
-    public class CreateMockTestAnswerBySectionGroupCommandHandler : IRequestHandler<CreateAnswerBySectionGroupCommand, MethodResult<SectionGroupResultModel>>
+    public class CreateAnswerBySectionGroupCommandHandler : IRequestHandler<CreateAnswerBySectionGroupCommand, MethodResult<SectionGroupResultModel>>
     {
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
 
-        public CreateMockTestAnswerBySectionGroupCommandHandler(AnswerTypeConverter answerTypeConverter
+        public CreateAnswerBySectionGroupCommandHandler(AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
             , AuthContext authContext
             , IUserService userService
