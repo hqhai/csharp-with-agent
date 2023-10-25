@@ -13,5 +13,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? UnitId { get; set; }
         public Guid? FinalTestId { get; set; }
         public Guid? MockTestId { get; set; }
+        public bool Status { get; set; }
     }
 }

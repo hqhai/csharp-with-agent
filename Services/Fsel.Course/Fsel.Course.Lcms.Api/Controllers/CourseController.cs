@@ -92,11 +92,11 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get Course
         /// </summary>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<List<CourseUnitMockTestModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<List<CourseUnitMockTestModel>> commandResult = await _mediator.Send(new GetCourseQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
