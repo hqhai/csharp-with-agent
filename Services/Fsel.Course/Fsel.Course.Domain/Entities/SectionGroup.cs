@@ -29,5 +29,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<MockTestSection> MockTestSections { get; set; } = new List<MockTestSection>();
         public ICollection<FinalTestSection> FinalTestSections { get; set; } = new List<FinalTestSection>();
         public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
+        public ICollection<SectionGroupResult> SectionGroupResults { get; set; } = new List<SectionGroupResult>();
     }
 }

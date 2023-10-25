@@ -60,6 +60,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<PlacementTestResult> PlacementTestResults { get; set; }
         public DbSet<Section> Sections { get; set; }
         public DbSet<SectionGroup> SectionGroups { get; set; }
+        public DbSet<SectionGroupResult> SectionGroupResults { get; set; }
         public DbSet<SectionPart> SectionParts { get; set; }
         public DbSet<SectionQuestion> SectionQuestions { get; set; }
         public DbSet<SectionTimeCode> SectionTimeCodes { get; set; }
@@ -126,6 +127,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new PlacementTestResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionGroupEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionGroupResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionPartEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionTimeCodeEntityTypeConfiguration());
