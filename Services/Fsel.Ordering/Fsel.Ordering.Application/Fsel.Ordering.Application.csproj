@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Fsel.Ordering.Infrastructure\Fsel.Ordering.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Queues\Consumers\" />
+  </ItemGroup>
+
 </Project>
