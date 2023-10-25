@@ -26,7 +26,7 @@ namespace Fsel.Interaction.Application.Queues.Publishers
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.FlagClassForumResult, new FlagQueueModel
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.DeleteClassForumByFlag, new DeleteClassForumByFlagQueueModel
             {
                 ObjectIds = models.Where(x => x.ObjectId.HasValue).Select(x => x.ObjectId!.Value).ToList(),
                 Type = models.FirstOrDefault()!.Type,

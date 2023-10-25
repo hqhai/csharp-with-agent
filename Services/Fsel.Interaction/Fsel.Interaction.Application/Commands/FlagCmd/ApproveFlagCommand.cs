@@ -17,7 +17,7 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ApproveFlagCommand : ApproveFlagsCommandModel, IRequest<MethodResult<bool>>
+    public class ApproveFlagCommand : ApproveFlagCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
@@ -41,15 +41,14 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var objectIds = request.Flags!.Select(x => x.ObjectId).ToList();
-            var flags = await _flagRepository.Queryable.Where(x => x.ObjectId.HasValue && objectIds.Contains(x.ObjectId.Value)).ToListAsync(cancellationToken);
+            var flags = await _flagRepository.Queryable.Where(x => x.ObjectId == request.ObjectId).ToListAsync(cancellationToken);
 
-            if (request.Flags == null || request.Flags.Count == 0)
+            if (flags == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(flags));
                 return methodResult;
             }
-            foreach (var item in request.Flags)
+            foreach (var item in flags)
             {
                 var listFlag = flags.Where(x => x.ObjectId == item.ObjectId).ToList();
                 if (listFlag == null)
@@ -62,19 +61,25 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
                 var comment = await _commentRepository.Queryable.Where(x => x.ObjectId == item.ObjectId).FirstOrDefaultAsync(cancellationToken);
 
                 var flag = await _flagRepository.Queryable.Where(x => x.ObjectId == item.ObjectId).FirstOrDefaultAsync(cancellationToken);
-                if (request.Flags.Select(x => x.IsApprove == false).FirstOrDefault() && flags.Select(x => x.Type == EnumInteractionType.ReplyComment).FirstOrDefault())
+                if (request.IsApprove == false && flags.Select(x => x.Type == EnumInteractionType.ReplyComment).FirstOrDefault())
                 {
                     flag!.Status = EnumFlagStatus.Reject;
                     await _commentRepository.DeleteAsync(comment!);
                     _flagRepository.Update(flag);
                 }
-                if (request.Flags.Select(x => x.IsApprove).FirstOrDefault() && flags.Select(x => x.Type == EnumInteractionType.ClassForum).FirstOrDefault())
+                if (request.IsApprove && flags.Select(x => x.Type == EnumInteractionType.ClassForum).FirstOrDefault())
                 {
                     flag!.Status = EnumFlagStatus.Approve;
                     await _flagPublisher.Publish(listFlag, cancellationToken).ConfigureAwait(false);
                     _flagRepository.Update(flag);
                 }
             }
+            /*    var comment = await _commentRepository.Queryable.Where(x => x.ObjectId == request.ObjectId).FirstOrDefaultAsync(cancellationToken);
+                if (request.IsApprove == false && flags.Select(x => x.Type == EnumInteractionType.ReplyComment).FirstOrDefault())
+                {
+                    await _commentRepository.DeleteAsync(comment!);
+                    _flagRepository.Update(flag);
+                }*/
 
             _flagRepository.UpdateList(flags);
 

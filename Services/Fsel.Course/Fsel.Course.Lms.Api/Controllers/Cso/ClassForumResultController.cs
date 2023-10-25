@@ -79,10 +79,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         /// <summary>
         /// Get Class Forum Result
         /// </summary>
-        [HttpGet("class-forum-result-flag")]
+        [HttpGet("flag")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetClassForumResultFlag([FromQuery] GetClassForumResultByIdQuery query)
+        public async Task<IActionResult> GetClassForumResult([FromQuery] GetClassForumResultByIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

@@ -48,7 +48,7 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
             }
 
             var flagQuery = _flagRepository.Queryable
-                              .Where(x => x.Status == EnumFlagStatus.New)
+                              .Where(x => x.Status == EnumFlagStatus.New && x.Type == request.Type)
                               .Select(x => new FlagModel
                               {
                                   Id = x.Id,

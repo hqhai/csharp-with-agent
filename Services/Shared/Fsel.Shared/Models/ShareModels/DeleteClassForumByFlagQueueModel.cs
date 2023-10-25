@@ -5,7 +5,7 @@ namespace Fsel.Shared.Models.ShareModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class FlagQueueModel : BaseModel
+    public class DeleteClassForumByFlagQueueModel : BaseModel
     {
         public EnumFlagIssue FlagIssue { get; set; }
 
