@@ -126,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                                     .Where(x => mockTestIds.Contains(x.Id)).ToListAsync();
 
                 var overallScoreReportSkills = mockTests.Select(x => GetOverallScoreReportSkill(x, studentId)).ToList();
-                overallScoreReportByMockTest.Percent = NumberHelper.ConvertPercentDouble(overallScoreReportSkills.Count(x => x.Status == EnumResultStatus.Done) / overallScoreReportSkills.Count);
+                overallScoreReportByMockTest.Percent = NumberHelper.GetPercent(overallScoreReportSkills.Count(x => x.Status == EnumResultStatus.Done), overallScoreReportSkills.Count);
                 overallScoreReportByMockTest.OverallScoreReportSkills = overallScoreReportSkills;
             }
             return overallScoreReportByMockTest;

@@ -7,6 +7,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// FinalTest Results Done
         /// </summary>
-        FinalTestResultsDone
+        FinalTestResultsDone,
+
+        /// <summary>
+        /// SectionGroupResult Done
+        /// </summary>
+        SectionGroupResultDone,
     }
 }
