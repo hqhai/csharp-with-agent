@@ -127,7 +127,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else if (courseType != null)
                 {
-                    return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Average(x =>
+                    return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Sum(x =>
                     {
                         if (x.Skill == EnumCourseSkill.Writing || x.Skill == EnumCourseSkill.Speaking)
                         {
