@@ -87,7 +87,7 @@ namespace Fsel.Course.Infrastructure.Common
             #endregion validate request
 
             #region validate Unit
-            var listUnit = courseUnitMockTests.Select(x => x.UnitId).ToList();
+            var listUnit = courseUnitMockTests.Where(x=>x.UnitId.HasValue).Select(x => x.UnitId).ToList();
             var unitIds = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
             var unitUnfinished = listUnit.Except(unitIds).ToList();
 
@@ -132,7 +132,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (request.CourseLevel.GetEnumCourseType() == Shared.Enums.EnumCourseType.Ielts)
             {
                 #region validate mockTest
-                var listMocktest = courseUnitMockTests.Select(x => x.MockTestId).ToList();
+                var listMocktest = courseUnitMockTests.Where(x => x.MockTestId.HasValue).Select(x => x.MockTestId).ToList();
                 var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).Distinct().ToList();
                 var mocktestUnfinished = listMocktest.Except(mocktestIds).ToList();
                 if (mocktestIds.Count > 2)
@@ -172,7 +172,7 @@ namespace Fsel.Course.Infrastructure.Common
             else
             {
                 #region validate finalTest
-                var listFinalTest = courseUnitMockTests.Select(x => x.FinalTestId).ToList();
+                var listFinalTest = courseUnitMockTests.Where(x => x.FinalTestId.HasValue).Select(x => x.FinalTestId).ToList();
                 var finalTestIds = request.CourseUnitMockTests.Where(e => e.FinalTestId != null).Select(x => x.FinalTestId).Distinct().ToList();
                 var finalTestUnfinished = listFinalTest.Except(finalTestIds).ToList();
                 if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
