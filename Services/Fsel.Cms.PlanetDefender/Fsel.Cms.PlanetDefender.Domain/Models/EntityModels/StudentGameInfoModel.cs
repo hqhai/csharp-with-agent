@@ -12,5 +12,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
         public EnumGameCourseLevel? Level { get; set; }
         public Guid StudentId { get; set; }
         public EnumGender Gender { get; set; }
+        public string? NickName { get; set; }
     }
 }
