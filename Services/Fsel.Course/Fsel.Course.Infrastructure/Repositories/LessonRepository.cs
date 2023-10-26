@@ -79,7 +79,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             var listDones = lessons.Select(x => new
             {
                 CountDone = x.LessonResults.Where(x => x.Status == EnumResultStatus.Done).Count(),
-                TotalDone = x.UnitLessons.Count
+                TotalDone = 1
             }).ToList();
             return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
         }

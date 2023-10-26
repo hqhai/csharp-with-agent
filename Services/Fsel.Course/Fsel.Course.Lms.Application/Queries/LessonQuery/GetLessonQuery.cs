@@ -39,9 +39,11 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly AuthContext _authContext;
+        private readonly ISectionRepository _sectionRepository;
 
         public GetLessonQueryHandler(ILessonRepository lessonRepository,
             AuthContext authContext,
+            ISectionRepository sectionRepository,
             IMapper mapper,
             IMockTestRepository mockTestRepository,
             SectionConverter sectionConverter,
@@ -57,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             _mockTestResultRepository = mockTestResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _authContext = authContext;
+            _sectionRepository = sectionRepository;
             _userService = userService;
             _unitRepository = unitRepository;
         }
@@ -78,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             methodResult.Result = new LessonsMockTestModel
             {
                 Lessons = await GetLesson(request, studentId, cancellationToken),
-                MockTest = await _mockTestRepository.GetIncludeAsync(request.CourseId, request.UnitId, studentId)
+                MockTest = await GetMockTestAsync(request.CourseId, request.UnitId, studentId)
             };
 
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -97,6 +100,33 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             }
             await UpdateLessonResults(request, studentId, unit, cancellationToken).ConfigureAwait(false);
             await UpdateMockTestResults(request, studentId, unit, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<MockTestModel?> GetMockTestAsync(Guid courseId, Guid unitId, Guid? studentId)
+        {
+            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections)
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections)
+                                       .ThenInclude(x => x.SectionParts)
+                                       .ThenInclude(x => x.SectionQuestions)
+                                       .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
+                                       .Include(x => x.MockTestResults.Where(y => y.UnitId == unitId && y.CourseId == courseId && y.StudentId == studentId))
+                                       .Where(x => x.UnitSkillMockTests.Any(x => x.UnitId == unitId))
+                                       .AsNoTracking()
+                                       .FirstOrDefaultAsync();
+            if (mockTest == null)
+            {
+                return default;
+            }
+            var sectionGroup = mockTest.MockTestSections.Select(x => x.SectionGroup).FirstOrDefault();
+            var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
+            sectionGroupModel.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroup!.Sections.ToList(), sectionGroup!.CourseSkill);
+            var mockTestModel = _mapper.Map<MockTestModel>(mockTest);
+            mockTestModel.TotalQuestion = _sectionConverter.GetTotalQuestion(mockTest.MockTestSections.Select(x => x.SectionGroup!).ToList());
+            mockTestModel.ExecutionTime = _sectionConverter.GetExecutionTime(mockTest.MockTestSections.Select(x => x.SectionGroup!).ToList());
+            mockTestModel.MockTestResult = _mapper.Map<MockTestResultModel>(mockTest.MockTestResults.FirstOrDefault());
+            mockTestModel.SectionGroups = new List<SectionGroupModel> { sectionGroupModel };
+            return mockTestModel;
         }
 
         private async Task UpdateLessonResults(GetLessonQuery request, Guid? studentId, Domain.Entities.Unit unit, CancellationToken cancellationToken)
@@ -163,9 +193,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                                      .Where(x => x.StudentId == studentId && lessonIds.Contains(x.LessonId) && x.UnitId == request.UnitId && x.CourseId == request.CourseId)
                                                                      .AsNoTracking()
                                                                      .ToListAsync(cancellationToken);
-            lessons = lessons.Select(x =>
+            return lessons.Select(x =>
             {
-                var lessonResult = lessonResults.FirstOrDefault(x => x.LessonId == x.Id);
+                var lessonResult = lessonResults.FirstOrDefault(y => y.LessonId == x.Id);
                 if (lessonResult != null)
                 {
                     x.LessonResult = _mapper.Map<LessonResultModel>(lessonResult);
@@ -180,9 +210,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                         x.IsHomeWorkLock = false;
                     }
                 }
+                return x;
             }).ToList();
-
-            return lessons;
         }
     }
 }
