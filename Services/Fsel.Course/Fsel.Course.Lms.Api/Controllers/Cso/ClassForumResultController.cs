@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         /// <summary>
         /// Get Class Forum Result
         /// </summary>
-        [HttpGet("flag")]
+        [HttpGet("get-by-id")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetClassForumResult([FromQuery] GetClassForumResultByIdQuery query)
