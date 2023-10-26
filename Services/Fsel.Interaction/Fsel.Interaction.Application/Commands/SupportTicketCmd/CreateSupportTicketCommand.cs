@@ -54,6 +54,11 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SupportCategoryId), request.SupportCategoryId);
                 return methodResult;
             }
+            if (!await _supportQuestionRepository.AnyAsync(request.SupportQuestionId ?? default) && request.SupportQuestionId != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SupportQuestionId), request.SupportQuestionId);
+                return methodResult;
+            }
 
             await _supportTicketRepository.ExecuteTransactionAsync(async () =>
             {
