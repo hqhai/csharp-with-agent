@@ -55,12 +55,6 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
                 return methodResult;
             }
 
-        /*    if (!await _supportQuestionRepository.AnyAsync(request.SupportQuestionId ?? default))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SupportQuestionId), request.SupportQuestionId);
-                return methodResult;
-            }*/
-
             await _supportTicketRepository.ExecuteTransactionAsync(async () =>
             {
                 supportTicket = _supportTicketRepository.Add(supportTicket);
