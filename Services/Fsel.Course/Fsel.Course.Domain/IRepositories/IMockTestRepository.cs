@@ -16,8 +16,6 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<MockTestModel?> GetIncludeAllAsync(Guid? id);
 
-        Task<MockTestModel?> GetIncludeAsync(Guid courseId, Guid unitId, Guid? studentId);
-
         Task<MockTest?> GetAsync(Guid mockTestId, Guid? studentId);
     }
 }

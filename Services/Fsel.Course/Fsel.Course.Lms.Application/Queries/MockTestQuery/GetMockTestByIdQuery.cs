@@ -103,7 +103,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             {
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
-                sectionGroup.Sections!.Clear();
                 sectionGroup.Status = GetResultStatus(indexProcess, index);
                 sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
                 return sectionGroup;
@@ -131,12 +130,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private static int? GetIndexProcess(IList<SectionGroup>? sectionGroups, Guid mockTestResultId)
         {
             ArgumentNullException.ThrowIfNull(sectionGroups);
-            var timeCode = sectionGroups.Where(x => !x.SectionGroupResults.Any() || x.SectionGroupResults.Any(x => x.MockTestResultId == mockTestResultId && x.Status != EnumResultStatus.Done)).FirstOrDefault();
-            if (timeCode == null)
+            var sectionGroup = sectionGroups.Where(x => !x.SectionGroupResults.Any() || x.SectionGroupResults.Any(x => x.MockTestResultId == mockTestResultId && x.Status != EnumResultStatus.Done)).FirstOrDefault();
+            if (sectionGroup == null)
             {
                 return null;
             }
-            return sectionGroups.IndexOf(timeCode);
+            return sectionGroups.IndexOf(sectionGroup);
         }
     }
 }
