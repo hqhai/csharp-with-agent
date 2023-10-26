@@ -7,7 +7,6 @@ namespace Fsel.System.Application.Queries.ForbiddenWordQuery
     using Fsel.System.Domain.IRepositories;
     using global::System;
     using global::System.Collections.Generic;
-    using global::System.Globalization;
     using global::System.Linq;
     using global::System.Threading.Tasks;
     using MediatR;
@@ -38,7 +37,7 @@ namespace Fsel.System.Application.Queries.ForbiddenWordQuery
             }
 
             var forbiddenWords = await _forbiddenWordRepository.Queryable
-             .Where(x => !string.IsNullOrEmpty(x.Word) && StringHelper.RemoveHTMLTags(request.Word).Trim().ToLower(CultureInfo.InvariantCulture).Contains(x.Word.Trim().ToLower(CultureInfo.InvariantCulture)))
+             .Where(x => !string.IsNullOrEmpty(x.Word) && StringHelper.RemoveHTMLTags(request.Word).Trim().ToLower().Contains(x.Word.Trim().ToLower()))
              .Select(x => x.Word ?? string.Empty).Distinct().ToListAsync(cancellationToken: cancellationToken);
             methodResult.Result = forbiddenWords;
             methodResult.StatusCode = StatusCodes.Status200OK;
