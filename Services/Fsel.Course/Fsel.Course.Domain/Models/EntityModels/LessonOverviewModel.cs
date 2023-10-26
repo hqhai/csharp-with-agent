@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
@@ -19,5 +20,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumResultStatus StatusClassForum { get; set; } = EnumResultStatus.Unfinished;
         public EnumResultStatus StatusVideo { get; set; } = EnumResultStatus.Unfinished;
         public EnumResultStatus StatusHomeWork { get; set; } = EnumResultStatus.Unfinished;
+        public IList<SkillScores>? SkillScores { get; set; }
     }
 }
