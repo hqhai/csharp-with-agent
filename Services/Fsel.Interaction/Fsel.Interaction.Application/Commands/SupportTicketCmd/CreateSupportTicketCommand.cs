@@ -6,6 +6,7 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
@@ -50,15 +51,15 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
             }
             if (!await _supportCategoryRepository.AnyAsync(request.SupportCategoryId ?? default))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportCategoryIdNotExist), nameof(request.SupportCategoryId), request.SupportCategoryId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SupportCategoryId), request.SupportCategoryId);
                 return methodResult;
             }
 
-            if (!await _supportQuestionRepository.AnyAsync(request.SupportQuestionId ?? default))
+        /*    if (!await _supportQuestionRepository.AnyAsync(request.SupportQuestionId ?? default))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportCategoryIdNotExist), nameof(request.SupportCategoryId), request.SupportCategoryId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SupportQuestionId), request.SupportQuestionId);
                 return methodResult;
-            }
+            }*/
 
             await _supportTicketRepository.ExecuteTransactionAsync(async () =>
             {
