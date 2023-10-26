@@ -8,6 +8,6 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 {
     public interface IAmazonS3Service
     {
-        Task<MethodResult<string?>> UploadFileAsync(IFormFile file, EnumFolderType folderType);
+        Task<MethodResult<string?>> UploadFileAsync(IFormFile file, EnumFolderType folderType, bool isResize = false);
     }
 }
