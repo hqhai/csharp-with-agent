@@ -1,18 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Threading;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using static MassTransit.Logging.OperationName;
 
 namespace Fsel.Course.Application.Queries.CourseQuery
 {
@@ -25,18 +21,12 @@ namespace Fsel.Course.Application.Queries.CourseQuery
     {
         private readonly ICourseRepository _courseRepository;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
-        private readonly IUnitResultRepository _unitResultRepository;
-        private readonly IFinalTestResultRepository _finalTestResultRepository;
-        private readonly IMockTestResultRepository _finalTestResultRepositoryMock;
         private readonly IMapper _mapper;
 
-        public GetCourseQueryHandler(ICourseRepository courseRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitResultRepository unitResultRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository finalTestResultRepositoryMock, IMapper mapper)
+        public GetCourseQueryHandler(IMapper mapper, ICourseRepository courseRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _courseRepository = courseRepository;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
-            _unitResultRepository = unitResultRepository;
-            _finalTestResultRepository = finalTestResultRepository;
-            _finalTestResultRepositoryMock = finalTestResultRepositoryMock;
             _mapper = mapper;
         }
 
@@ -44,45 +34,47 @@ namespace Fsel.Course.Application.Queries.CourseQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
-            var course = await _courseRepository.GetIncludeByIdAsync(request.Id);
-            if (course is null)
+
+            var course = await _courseRepository.GetByIdAsync(request.Id);
+            if (course == null)
             {
-                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-
             var courseModel = _mapper.Map<CourseModel>(course);
-            var courseUnitMockTestModels = _mapper.Map<IList<CourseUnitMockTestModel>>(course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList());
-
-            foreach (var courseUnitMockTest in courseUnitMockTestModels)
-            {
-                courseUnitMockTest.Status = await GetStatus(courseUnitMockTest);
-            }
-
-            courseModel.CourseUnitMockTests = courseUnitMockTestModels;
-
+            courseModel.CourseUnitMockTests = await GetCourseUnitMockTestsAsync(course);
             methodResult.Result = courseModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<bool> GetStatus(CourseUnitMockTestModel courseUnitMockTest)
+        private async Task<IList<CourseUnitMockTestModel>> GetCourseUnitMockTestsAsync(Domain.Entities.Course course)
         {
-            if (courseUnitMockTest.UnitId.HasValue)
+            var courseUnitMockTests = await _courseUnitMockTestRepository.Queryable.Include(x => x.FinalTest)
+                                                                        .ThenInclude(x => x.FinalTestResults)
+                                                                        .Include(x => x.Unit)
+                                                                        .ThenInclude(x => x.UnitResults)
+                                                                        .Include(x => x.MockTest)
+                                                                        .ThenInclude(x => x.MockTestResults)
+                                                                        .Where(x => x.CourseId == course.Id)
+                                                                         .ToListAsync();
+            return courseUnitMockTests.Select(x =>
             {
-                return await _unitResultRepository.Queryable.AnyAsync(x => x.UnitId == courseUnitMockTest.UnitId!.Value && x.Status != EnumResultStatus.Unfinished);
-            }
-            else if ( courseUnitMockTest.FinalTestId.HasValue)
-            {
-                return await _finalTestResultRepository.Queryable.AnyAsync(x => x.FinalTestId == courseUnitMockTest.FinalTestId!.Value && x.Status != EnumResultStatus.Unfinished);
-            }
-            else if (courseUnitMockTest.MockTestId.HasValue)
-            {
-                return await _finalTestResultRepositoryMock.Queryable.AnyAsync(x => x.MockTestId == courseUnitMockTest.MockTestId!.Value && x.Status != EnumResultStatus.Unfinished);
-            }
-
-            return false;
+                var courseUnitMockTest = _mapper.Map<CourseUnitMockTestModel>(x);
+                if (courseUnitMockTest.UnitId.HasValue)
+                {
+                    courseUnitMockTest.IsUsed = (x.Unit!.UnitResults.Any() && x.Unit!.UnitResults.Any(x => x.Status != EnumResultStatus.Unfinished));
+                }
+                else if (courseUnitMockTest.MockTestId.HasValue)
+                {
+                    courseUnitMockTest.IsUsed = (x.MockTest!.MockTestResults.Any() && x.MockTest!.MockTestResults.Any(x => x.Status != EnumResultStatus.Unfinished));
+                }
+                if (courseUnitMockTest.FinalTestId.HasValue)
+                {
+                    courseUnitMockTest.IsUsed = (x.FinalTest!.FinalTestResults.Any() && x.FinalTest!.FinalTestResults.Any(x => x.Status != EnumResultStatus.Unfinished));
+                }
+                return courseUnitMockTest;
+            }).ToList();
         }
-
     }
 }

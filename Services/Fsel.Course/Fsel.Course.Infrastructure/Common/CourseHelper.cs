@@ -16,36 +16,45 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Courses;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
-
+    using Fsel.Course.Domain.Entities;
     public class CourseHelper
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
+        private readonly IUnitResultRepository _unitResultRepository;
+        private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IMockTestRepository _mockTestRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
 
         public CourseHelper(ICourseRepository courseRepository
             , IUnitRepository unitRepository
             , IMapper mapper
+            ,IUnitResultRepository unitResultRepository
             , IFinalTestRepository finalTestRepository
+            ,IFinalTestResultRepository finalTestResultRepository
+            , IMockTestResultRepository mockTestResultRepository
             , IMockTestRepository mockTestRepository)
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
             _mapper = mapper;
+            _finalTestResultRepository = finalTestResultRepository;
+            _unitResultRepository = unitResultRepository;
             _finalTestRepository = finalTestRepository;
             _mockTestRepository = mockTestRepository;
+            _mockTestResultRepository = mockTestResultRepository;
         }
-
-        public async Task<VoidMethodResult> Validate(dynamic course, UpdateCourseCommandModel? request)
+        public async Task<VoidMethodResult> Validate(Course course, UpdateCourseCommandModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            if (!course.IsValid())
+            var courseUnitMockTests = course.CourseUnitMockTests.ToList();
+            if(courseUnitMockTests == null)
             {
-                methodResult.AddErrorBadRequest(course.ErrorMessages);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
@@ -78,8 +87,10 @@ namespace Fsel.Course.Infrastructure.Common
             #endregion validate request
 
             #region validate Unit
-
+            var listUnit = courseUnitMockTests.Select(x => x.UnitId).ToList();
             var unitIds = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
+            var unitUnfinished = listUnit.Except(unitIds).ToList();
+
             var units = await _unitRepository.Queryable.Where(x => unitIds.Contains(x.Id)).ToListAsync();
             if (units == null || units.Count == 0)
             {
@@ -110,14 +121,20 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.AnotherLevelUnitExists));
                 return methodResult;
             }
-
+            var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.Id && unitUnfinished.Contains(x.UnitId)).ToListAsync();
+            if(unitResults.Any() && unitResults.Any(x=>x.Status != EnumResultStatus.Unfinished))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist),nameof(unitResults));
+                return methodResult;
+            }
             #endregion validate Unit
 
             if (request.CourseLevel.GetEnumCourseType() == Shared.Enums.EnumCourseType.Ielts)
             {
                 #region validate mockTest
-
+                var listMocktest = courseUnitMockTests.Select(x => x.MockTestId).ToList();
                 var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).Distinct().ToList();
+                var mocktestUnfinished = listMocktest.Except(mocktestIds).ToList();
                 if (mocktestIds.Count > 2)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestIsUpToTwo), nameof(mocktestIds));
@@ -144,13 +161,20 @@ namespace Fsel.Course.Infrastructure.Common
                     return methodResult;
                 }
 
+                var mocktestResults = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == request.Id && mocktestUnfinished.Contains(x.MockTestId)).ToListAsync();
+                if (mocktestResults.Any() && mocktestResults.Any(x => x.Status != EnumResultStatus.Unfinished))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(mocktestResults));
+                    return methodResult;
+                }
                 #endregion validate mockTest
             }
             else
             {
                 #region validate finalTest
-
+                var listFinalTest = courseUnitMockTests.Select(x => x.FinalTestId).ToList();
                 var finalTestIds = request.CourseUnitMockTests.Where(e => e.FinalTestId != null).Select(x => x.FinalTestId).Distinct().ToList();
+                var finalTestUnfinished = listFinalTest.Except(finalTestIds).ToList();
                 if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestIds));
@@ -168,7 +192,12 @@ namespace Fsel.Course.Infrastructure.Common
                     methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIsUpToOne), nameof(finalTestIds));
                     return methodResult;
                 }
-
+                var finalTestResults = await _finalTestResultRepository.Queryable.Where(x => x.CourseId == request.Id && finalTestUnfinished.Contains(x.FinalTestId)).ToListAsync();
+                if (finalTestResults.Any() && finalTestResults.Any(x => x.Status != EnumResultStatus.Unfinished))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(finalTestResults));
+                    return methodResult;
+                }
                 #endregion validate finalTest
             }
 
