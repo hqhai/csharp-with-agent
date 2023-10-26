@@ -17,6 +17,9 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests;
+
     public class CourseHelper
     {
         private readonly ICourseRepository _courseRepository;
@@ -27,7 +30,9 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
-
+        private const string UNITID_KEY = "UnitId";
+        private const string MOCKTESTID_KEY = "MockTestId";
+        private const string FINALTESTID_KEY = "FinalTestId";
         public CourseHelper(ICourseRepository courseRepository
             , IUnitRepository unitRepository
             , IMapper mapper
@@ -87,10 +92,8 @@ namespace Fsel.Course.Infrastructure.Common
             #endregion validate request
 
             #region validate Unit
-            var listUnit = courseUnitMockTests.Where(x=>x.UnitId.HasValue).Select(x => x.UnitId).ToList();
-            var unitIds = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
-            var unitUnfinished = listUnit.Except(unitIds).ToList();
-
+            
+            var (unitIds, unitUnFinished) = await InitListCategories(courseUnitMockTests, UNITID_KEY, request.CourseUnitMockTests);
             var units = await _unitRepository.Queryable.Where(x => unitIds.Contains(x.Id)).ToListAsync();
             if (units == null || units.Count == 0)
             {
@@ -121,7 +124,7 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.AnotherLevelUnitExists));
                 return methodResult;
             }
-            var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.Id && unitUnfinished.Contains(x.UnitId)).ToListAsync();
+            var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.Id && unitUnFinished.Contains(x.UnitId)).ToListAsync();
             if(unitResults.Any() && unitResults.Any(x=>x.Status != EnumResultStatus.Unfinished))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist),nameof(unitResults));
@@ -132,9 +135,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (request.CourseLevel.GetEnumCourseType() == Shared.Enums.EnumCourseType.Ielts)
             {
                 #region validate mockTest
-                var listMocktest = courseUnitMockTests.Where(x => x.MockTestId.HasValue).Select(x => x.MockTestId).ToList();
-                var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).Distinct().ToList();
-                var mocktestUnfinished = listMocktest.Except(mocktestIds).ToList();
+                var (mocktestIds, mocktestUnFinished) = await InitListCategories(courseUnitMockTests, MOCKTESTID_KEY, request.CourseUnitMockTests);
                 if (mocktestIds.Count > 2)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestIsUpToTwo), nameof(mocktestIds));
@@ -161,7 +162,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return methodResult;
                 }
 
-                var mocktestResults = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == request.Id && mocktestUnfinished.Contains(x.MockTestId)).ToListAsync();
+                var mocktestResults = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == request.Id && mocktestUnFinished.Contains(x.MockTestId)).ToListAsync();
                 if (mocktestResults.Any() && mocktestResults.Any(x => x.Status != EnumResultStatus.Unfinished))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(mocktestResults));
@@ -172,9 +173,7 @@ namespace Fsel.Course.Infrastructure.Common
             else
             {
                 #region validate finalTest
-                var listFinalTest = courseUnitMockTests.Where(x => x.FinalTestId.HasValue).Select(x => x.FinalTestId).ToList();
-                var finalTestIds = request.CourseUnitMockTests.Where(e => e.FinalTestId != null).Select(x => x.FinalTestId).Distinct().ToList();
-                var finalTestUnfinished = listFinalTest.Except(finalTestIds).ToList();
+                var (finalTestIds, finalTestUnFinished) = await InitListCategories(courseUnitMockTests, FINALTESTID_KEY, request.CourseUnitMockTests);
                 if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestIds));
@@ -192,7 +191,7 @@ namespace Fsel.Course.Infrastructure.Common
                     methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIsUpToOne), nameof(finalTestIds));
                     return methodResult;
                 }
-                var finalTestResults = await _finalTestResultRepository.Queryable.Where(x => x.CourseId == request.Id && finalTestUnfinished.Contains(x.FinalTestId)).ToListAsync();
+                var finalTestResults = await _finalTestResultRepository.Queryable.Where(x => x.CourseId == request.Id && finalTestUnFinished.Contains(x.FinalTestId)).ToListAsync();
                 if (finalTestResults.Any() && finalTestResults.Any(x => x.Status != EnumResultStatus.Unfinished))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(finalTestResults));
@@ -202,6 +201,22 @@ namespace Fsel.Course.Infrastructure.Common
             }
 
             return methodResult;
+        }
+
+        /// <summary>
+        /// Hàm chung lấy dữ liệu của các loại category
+        /// </summary>
+        /// <param name="courseUnitMockTests"></param>
+        /// <param name="nameProperty"></param>
+        /// <param name="courseUnitMockTestsReq"></param>
+        /// <returns></returns>
+        public async Task<(List<Guid?> categoryIds, List<Guid?> listUnFinishedIds)> InitListCategories(List<CourseUnitMockTest> courseUnitMockTests, string nameProperty, IList<UpdateCourseUnitMockTestCommandModel>? courseUnitMockTestsReq)
+        {
+            var listCategoryIds = courseUnitMockTests.Where(x => x.GetPropValue(nameProperty) != null).Select(x => (Guid?)x.GetPropValue(nameProperty)).ToList();
+            var categoryIds = courseUnitMockTestsReq.Where(e => e.GetPropValue(nameProperty) != null).Select(x => (Guid?)x.GetPropValue(nameProperty)).ToList();
+            var listUnFinishedIds = listCategoryIds.Except(categoryIds).ToList();
+            return (categoryIds, listUnFinishedIds);
+
         }
     }
 }
