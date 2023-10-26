@@ -15,6 +15,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid GradingTeacherId { get; set; }
 
+        public Guid CourseId { get; set; }
+
+        public Guid UnitId { get; set; }
+
         public EnumClassForumResultStatus Status { get; set; }
 
         public Guid LessonResultId { get; set; }
