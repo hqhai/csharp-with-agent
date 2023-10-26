@@ -9,6 +9,7 @@ using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Application.Queries.CourseQuery
 {
@@ -42,13 +43,13 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                 return methodResult;
             }
             var courseModel = _mapper.Map<CourseModel>(course);
-            courseModel.CourseUnitMockTests = await GetCourseUnitMockTestsAsync(course);
+            courseModel.CourseUnitMockTests = await GetCourseUnitMockTestsAsync(course,cancellationToken);
             methodResult.Result = courseModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<IList<CourseUnitMockTestModel>> GetCourseUnitMockTestsAsync(Domain.Entities.Course course)
+        private async Task<IList<CourseUnitMockTestModel>> GetCourseUnitMockTestsAsync(EntityCourse course, CancellationToken cancellationToken)
         {
             var courseUnitMockTests = await _courseUnitMockTestRepository.Queryable.Include(x => x.FinalTest)
                                                                         .ThenInclude(x => x.FinalTestResults)
@@ -57,7 +58,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                                                         .Include(x => x.MockTest)
                                                                         .ThenInclude(x => x.MockTestResults)
                                                                         .Where(x => x.CourseId == course.Id)
-                                                                         .ToListAsync();
+                                                                         .ToListAsync(cancellationToken);
             return courseUnitMockTests.Select(x =>
             {
                 var courseUnitMockTest = _mapper.Map<CourseUnitMockTestModel>(x);
@@ -69,7 +70,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                 {
                     courseUnitMockTest.IsUsed = (x.MockTest!.MockTestResults.Any() && x.MockTest!.MockTestResults.Any(x => x.Status != EnumResultStatus.Unfinished));
                 }
-                if (courseUnitMockTest.FinalTestId.HasValue)
+                else if (courseUnitMockTest.FinalTestId.HasValue)
                 {
                     courseUnitMockTest.IsUsed = (x.FinalTest!.FinalTestResults.Any() && x.FinalTest!.FinalTestResults.Any(x => x.Status != EnumResultStatus.Unfinished));
                 }

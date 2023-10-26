@@ -64,7 +64,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             _mapper.Map(request, course);
             if (!course.IsValid())
             {
-                methodResult.AddErrorBadRequest(course.ErrorMessages);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course.Id), course.Id);
                 return methodResult;
             }
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
