@@ -31,9 +31,9 @@ namespace Fsel.Storage.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [HttpPost("{type}")]
-        public async Task<IActionResult> Upload([FromRoute] EnumFolderType type, IFormFile file)
+        public async Task<IActionResult> Upload([FromRoute] EnumFolderType type, IFormFile file, [FromQuery] bool isResize = false)
         {
-            var commandResult = await _amazonS3Service.UploadFileAsync(file, type);
+            var commandResult = await _amazonS3Service.UploadFileAsync(file, type, isResize);
             return commandResult.GetActionResult();
         }
     }
