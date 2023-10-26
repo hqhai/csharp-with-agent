@@ -41,7 +41,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         /// <summary>
         /// Create students nick name
         /// </summary>
-        [HttpPost]
+        [HttpPost("create-nick-name")]
         [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateNickNameStudentGameInfoCommand command)
