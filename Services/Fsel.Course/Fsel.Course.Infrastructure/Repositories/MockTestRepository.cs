@@ -6,7 +6,6 @@ namespace Fsel.Course.Infrastructure.Repositories
     using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
-    using Azure.Core;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
@@ -123,50 +122,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                                        .Where(x => x.Id == mockTestId)
                                        .AsNoTracking()
                                        .FirstOrDefaultAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<MockTestModel?> GetIncludeAsync(Guid courseId, Guid unitId, Guid? studentId)
-        {
-            try
-            {
-                return await Queryable.Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
-                                       .ThenInclude(x => x.SectionGroup)
-                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
-                                       .ThenInclude(x => x.SectionTimeCodes.Where(y => !y.IsDeleted))
-                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
-                                       .ThenInclude(x => x.SectionGroup)
-                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
-                                       .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
-                                       .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
-                                       .ThenInclude(x => x.Question)
-                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
-                                       .ThenInclude(x => x.SectionGroup)
-                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
-                                       .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
-                                       .Include(x => x.MockTestResults.Where(y => y.UnitId == unitId && y.CourseId == courseId && y.StudentId == studentId))
-                                       .Where(x => x.UnitSkillMockTests.Any(x => x.UnitId == unitId))
-                                       .AsNoTracking()
-                                       .Select(x => new MockTestModel
-                                       {
-                                           Id = x.Id,
-                                           Name = x.Name,
-                                           CreatedDate = x.CreatedDate,
-                                           IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
-                                           MockTestType = x.MockTestType,
-                                           ExecutionTime = _sectionConverter.GetExecutionTime(x.MockTestSections.Where(x => x.SectionGroup != null)
-                                             .Select(x => x.SectionGroup!).ToList()),
-                                           TotalQuestion = _sectionConverter.GetTotalQuestion(x.MockTestSections.Where(x => x.SectionGroup != null)
-                                             .Select(x => x.SectionGroup!).ToList()),
-                                           SectionGroups = x.MockTestSections.Where(x => x.SectionGroup != null)
-                                             .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
-                                             .Select(x => _sectionConverter.GetSectionGroupModel(x, true)).ToList(),
-                                           MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault(y => y.UnitId == unitId && y.CourseId == courseId && y.StudentId == studentId)),
-                                       }).FirstOrDefaultAsync();
             }
             catch (Exception)
             {

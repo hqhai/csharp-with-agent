@@ -28,7 +28,7 @@ namespace Fsel.Course.Domain.Entities
         private double _percent;
 
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double Percent
+        public virtual double Percent
         {
             get
             {
