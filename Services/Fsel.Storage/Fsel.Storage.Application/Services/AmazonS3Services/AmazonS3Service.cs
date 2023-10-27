@@ -1,8 +1,5 @@
-// Copyright (c) Atlantic. All rights reserved.
+﻿// Copyright (c) Atlantic. All rights reserved.
 
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Net.Mime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
@@ -13,6 +10,7 @@ using Fsel.Storage.Domain.Enums.ErrorCodes;
 using Fsel.Storage.Infrastructure.ValueSettings;
 using Humanizer.Bytes;
 using Microsoft.AspNetCore.Http;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace Fsel.Storage.Application.Services.AmazonS3Services
 {
@@ -142,29 +140,23 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
             if (file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             {
-                using (Image sourceImage = Image.FromStream(stream))
+                using (var image = Image.Load(stream))
                 {
-                    // Calculate the new size based on the target width and height
-                    var newWidth = _targetWidthResize;
-                    var newHeight = _targetHeightResize;
+                    int targetSize = Math.Min(_targetWidthResize, _targetHeightResize);
 
-                    // Create a new image with resized size
-                    using (var resizedImage = new Bitmap(newWidth, newHeight))
-                    using (Graphics graphics = Graphics.FromImage(resizedImage))
-                    {
-                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                        graphics.SmoothingMode = SmoothingMode.HighQuality;
-                        graphics.CompositingQuality = CompositingQuality.HighQuality;
-                        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                    // Tạo một ảnh vuông với kích thước đã resize
+                    image.Mutate(x => x
+                        .Resize(new ResizeOptions
+                        {
+                            Size = new Size(targetSize, targetSize),
+                            Mode = ResizeMode.Stretch
+                        }));
 
-                        graphics.DrawImage(sourceImage, 0, 0, newWidth, newHeight);
-
-                        // Create a memory stream for the resized image
-                        var resizedStream = new MemoryStream();
-                        resizedImage.Save(resizedStream, sourceImage.RawFormat);
-                        resizedStream.Seek(0, SeekOrigin.Begin); // Move the stream cursor to the beginning
-                        return resizedStream;
-                    }
+                    // Tạo một memory stream cho ảnh đã resize
+                    var resizedStream = new MemoryStream();
+                    image.Save(resizedStream, new JpegEncoder());
+                    resizedStream.Seek(0, SeekOrigin.Begin); // Đưa con trỏ của stream về đầu
+                    return resizedStream;
                 }
             }
 
@@ -209,6 +201,24 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        public async Task<MethodResult<IList<string>>> UploadFilesAsync(IList<IFormFile> files, EnumFolderType folderType, bool isResize = false)
+        {
+            MethodResult<IList<string>> results = new MethodResult<IList<string>>();
+            results.Result = new List<string>();
+
+            foreach(var file in files)
+            {
+                var uploadFile = UploadFileAsync(file, folderType, isResize);
+                var result = await uploadFile.WaitAsync(cancellationToken: CancellationToken.None).ConfigureAwait(true);
+                if (!string.IsNullOrEmpty(result.Result))
+                {
+                    results.Result.Add(result.Result);
+                }
+            }
+
+            return results;
         }
     }
 }
