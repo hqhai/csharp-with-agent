@@ -72,6 +72,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// FinalTestId must be at the end
         /// </summary>
-        FinalTestIdMustBeAtTheEnd
+        FinalTestIdMustBeAtTheEnd,
+
+        /// <summary>
+        /// requires 13 courseUnitMockTests
+        /// </summary>
+        Requires13CourseUnitMockTests
     }
 }
