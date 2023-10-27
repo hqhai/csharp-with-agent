@@ -152,12 +152,9 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             {
                 using (Image sourceImage = Image.FromStream(stream))
                 {
-                    int targetWidth = _targetWidthResize;
-                    int targetHeight = _targetHeightResize;
-
                     // Calculate the new size based on the target width and height
-                    var newWidth = targetWidth;
-                    var newHeight = (int)(sourceImage.Height * ((double)targetWidth / sourceImage.Width));
+                    var newWidth = _targetWidthResize;
+                    var newHeight = _targetHeightResize;
 
                     // Create a new image with resized size
                     using (var resizedImage = new Bitmap(newWidth, newHeight))
