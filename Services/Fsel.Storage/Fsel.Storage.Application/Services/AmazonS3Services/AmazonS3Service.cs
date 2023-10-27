@@ -51,95 +51,87 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         public async Task<MethodResult<string?>> UploadFileAsync(IFormFile? file, EnumFolderType folderType, bool isResize = false)
         {
             MethodResult<string?> result = IsValidFile(file, folderType);
-            try
+            if (file == null || !result.IsOK)
             {
-                if (file == null || !result.IsOK)
+                return result;
+            }
+
+            var folder = _appSetting.StorageConfig!.Folders!.GetPropValue<string>(folderType.ToString());
+            var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix());
+
+            var initiateRequest = new InitiateMultipartUploadRequest
+            {
+                BucketName = _appSetting.StorageConfig!.BucketName,
+                Key = key,
+            };
+            var initiateResponse = await _amazonS3Client.InitiateMultipartUploadAsync(initiateRequest);
+
+            // Calculate the size of each part
+            var partSize = _partSize;
+
+            // Create a list of parts to upload
+            var parts = new List<UploadPartResponse>();
+            Stream stream;
+            if (isResize)
+            {
+                stream = OpenReadStreamResize(file);
+            }
+            else
+            {
+                stream = file.OpenReadStream();
+            }
+
+            using (var sourceStream = stream)
+            {
+                var buffer = new byte[(long)partSize];
+                int bytesRead;
+                int partNumber = 1;
+
+                var partUploadTasks = new List<Task>();
+
+                while ((bytesRead = await sourceStream.ReadAsync(buffer.AsMemory(0, buffer.Length))) > 0)
                 {
-                    return result;
-                }
+                    var partBuffer = new byte[bytesRead];
+                    Array.Copy(buffer, 0, partBuffer, 0, bytesRead);
 
-                var folder = _appSetting.StorageConfig!.Folders!.GetPropValue<string>(folderType.ToString());
-                var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix());
-
-                var initiateRequest = new InitiateMultipartUploadRequest
-                {
-                    BucketName = _appSetting.StorageConfig!.BucketName,
-                    Key = key,
-                };
-                var initiateResponse = await _amazonS3Client.InitiateMultipartUploadAsync(initiateRequest);
-
-                // Calculate the size of each part
-                var partSize = _partSize;
-
-                // Create a list of parts to upload
-                var parts = new List<UploadPartResponse>();
-                Stream stream;
-                if (isResize)
-                {
-                    stream = OpenReadStreamResize(file);
-                }
-                else
-                {
-                    stream = file.OpenReadStream();
-                }
-
-                using (var sourceStream = stream)
-                {
-                    var buffer = new byte[(long)partSize];
-                    int bytesRead;
-                    int partNumber = 1;
-
-                    var partUploadTasks = new List<Task>();
-
-                    while ((bytesRead = await sourceStream.ReadAsync(buffer.AsMemory(0, buffer.Length))) > 0)
-                    {
-                        var partBuffer = new byte[bytesRead];
-                        Array.Copy(buffer, 0, partBuffer, 0, bytesRead);
-
-                        var uploadPartRequest = new UploadPartRequest
-                        {
-                            BucketName = _appSetting.StorageConfig!.BucketName,
-                            Key = key,
-                            UploadId = initiateResponse.UploadId,
-                            PartNumber = partNumber,
-                            PartSize = bytesRead,
-                            InputStream = new MemoryStream(partBuffer)
-                        };
-
-                        partUploadTasks.Add(Task.Run(async () =>
-                        {
-                            var uploadPartResponse = await _amazonS3Client.UploadPartAsync(uploadPartRequest);
-                            parts.Add(uploadPartResponse);
-                        }));
-
-                        partNumber++;
-                    }
-
-                    await Task.WhenAll(partUploadTasks).ConfigureAwait(false);
-
-                    // Complete the upload process
-                    var completeMultipartUploadRequest = new CompleteMultipartUploadRequest
+                    var uploadPartRequest = new UploadPartRequest
                     {
                         BucketName = _appSetting.StorageConfig!.BucketName,
                         Key = key,
                         UploadId = initiateResponse.UploadId,
-                        PartETags = parts.Select(p => new PartETag { PartNumber = p.PartNumber, ETag = p.ETag }).ToList()
+                        PartNumber = partNumber,
+                        PartSize = bytesRead,
+                        InputStream = new MemoryStream(partBuffer)
                     };
 
-                    var complete = await _amazonS3Client.CompleteMultipartUploadAsync(completeMultipartUploadRequest);
-                    if (complete.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    partUploadTasks.Add(Task.Run(async () =>
                     {
-                        result.AddErrorServer();
-                        return result;
-                    }
+                        var uploadPartResponse = await _amazonS3Client.UploadPartAsync(uploadPartRequest);
+                        parts.Add(uploadPartResponse);
+                    }));
 
-                    result.Result = GenerateAwsFileUrl(_appSetting.StorageConfig.BucketName, _appSetting.StorageConfig.AwsS3BaseUrl, key);
+                    partNumber++;
+                }
+
+                await Task.WhenAll(partUploadTasks).ConfigureAwait(false);
+
+                // Complete the upload process
+                var completeMultipartUploadRequest = new CompleteMultipartUploadRequest
+                {
+                    BucketName = _appSetting.StorageConfig!.BucketName,
+                    Key = key,
+                    UploadId = initiateResponse.UploadId,
+                    PartETags = parts.Select(p => new PartETag { PartNumber = p.PartNumber, ETag = p.ETag }).ToList()
+                };
+
+                var complete = await _amazonS3Client.CompleteMultipartUploadAsync(completeMultipartUploadRequest);
+                if (complete.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    result.AddErrorServer();
                     return result;
                 }
-            }
-            catch (Exception)
-            {
-                result.AddErrorServer();
+
+                result.Result = GenerateAwsFileUrl(_appSetting.StorageConfig.BucketName, _appSetting.StorageConfig.AwsS3BaseUrl, key);
                 return result;
             }
         }
