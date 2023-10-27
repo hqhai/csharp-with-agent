@@ -60,7 +60,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            
+
             _mapper.Map(request, course);
             if (!course.IsValid())
             {
