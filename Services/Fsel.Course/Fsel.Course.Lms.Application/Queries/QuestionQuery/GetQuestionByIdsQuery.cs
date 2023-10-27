@@ -117,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var questionModel = _mapper.Map<QuestionModel>(question);
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
             questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
-            questionModel.SectionId = question.SectionQuestions.Select(x => x.Section).FirstOrDefault()?.Id ?? question.SectionQuestions.Select(x => x.SectionPart).FirstOrDefault()?.SectionId;
+            questionModel.SectionId = question.SectionQuestions.Select(x => x.Section?.Id ?? x.SectionPart?.SectionId).FirstOrDefault();
             return questionModel;
         }
     }
