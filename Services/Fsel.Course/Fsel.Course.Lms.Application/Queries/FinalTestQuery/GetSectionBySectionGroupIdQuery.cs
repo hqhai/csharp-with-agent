@@ -96,20 +96,20 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             return sectionGroupResult;
         }
 
-        private IList<SectionDetailModel> GetSections(IList<Domain.Entities.Section> sections)
+        private IList<SectionDetailModel> GetSections(IList<Section> sections)
         {
             var listSection = new List<SectionDetailModel>();
             return sections.Select(x => GetSection(x)).ToList();
         }
 
-        private SectionDetailModel GetSection(Domain.Entities.Section section)
+        private SectionDetailModel GetSection(Section section)
         {
             var sectionDetail = _mapper.Map<SectionDetailModel>(section);
             sectionDetail.QuestionIds = section.SectionQuestions.OrderBy(x => x.CreatedDate).Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
             return sectionDetail;
         }
 
-        private async Task<(IList<Domain.Entities.Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
+        private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
         {
             var sections = await _sectionRepository.Queryable.Include(x => x.SectionQuestions)
                                                                     .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
