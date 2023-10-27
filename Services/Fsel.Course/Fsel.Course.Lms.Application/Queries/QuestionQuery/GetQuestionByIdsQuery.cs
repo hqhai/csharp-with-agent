@@ -101,7 +101,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions)
+            var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.Section)
+                                .Include(x => x.SectionQuestions)
                                 .ThenInclude(x => x.FinalTestAnswers.Where(x => finalTestResult != null && x.FinalTestResultId == finalTestResult.Id))
                                 .Where(x => request.QuestionIds.Contains(x.Id)).ToListAsync();
             if (questions == null || !questions.Any())
@@ -116,6 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var questionModel = _mapper.Map<QuestionModel>(question);
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
             questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
+            questionModel.SectionId = question.SectionQuestions.Select(x => x.Section?.Id ?? x.SectionPart?.SectionId).FirstOrDefault();
             return questionModel;
         }
     }
