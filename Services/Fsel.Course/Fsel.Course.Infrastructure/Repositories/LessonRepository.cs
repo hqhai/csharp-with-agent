@@ -51,7 +51,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 CountDone = x.LessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x.Status == EnumResultStatus.Done).Count(),
                 TotalDone = x.LessonHomeWorks.Count
             }).ToList();
-            return listDones.Sum(x => x.TotalDone) > 0 ? NumberHelper.ConvertPercentDouble((double)listDones.Sum(x => x.CountDone) / listDones.Sum(x => x.TotalDone)) : default;
+            return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
         }
 
         public async Task<double> GetPercentClassForum(Guid unitId, Guid? studentId)
@@ -67,7 +67,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 CountDone = x.LessonResults.SelectMany(x => x.ClassForumResults).Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded).Count(),
                 TotalDone = 1
             }).ToList();
-            return listDones.Sum(x => x.TotalDone) > 0 ? NumberHelper.ConvertPercentDouble((double)listDones.Sum(x => x.CountDone) / listDones.Sum(x => x.TotalDone)) : default;
+            return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
         }
 
         public async Task<double> GetPercentLesson(Guid unitId, Guid? studentId)
@@ -79,9 +79,9 @@ namespace Fsel.Course.Infrastructure.Repositories
             var listDones = lessons.Select(x => new
             {
                 CountDone = x.LessonResults.Where(x => x.Status == EnumResultStatus.Done).Count(),
-                TotalDone = x.UnitLessons.Count
+                TotalDone = 1
             }).ToList();
-            return listDones.Sum(x => x.TotalDone) > 0 ? NumberHelper.ConvertPercentDouble((double)listDones.Sum(x => x.CountDone) / listDones.Sum(x => x.TotalDone)) : default;
+            return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
         }
 
         public override async Task<Lesson?> GetIncludeByIdAsync(Guid id, int? siteId = null)

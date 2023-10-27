@@ -56,7 +56,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                  .ToListAsync();
             var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == EnumTimeCodeType.UnitTest).ToList();
             var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
-            return videoTimeCodes.Count > 0 ? NumberHelper.ConvertPercentDouble((double)videoTimeCodeResults.Count / videoTimeCodes.Count) : default;
+            return NumberHelper.GetPercent(videoTimeCodeResults.Count, videoTimeCodes.Count);
         }
 
         public async Task<VideoModel?> GetIncludeAllAsync(Guid? id)
