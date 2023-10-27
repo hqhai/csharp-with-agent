@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
 
         private async Task UpdateCourseStatusNew(Course course, Guid? studentId, CancellationToken cancellationToken)
         {
-            var courseResult = course.CourseResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == studentId);
+            var courseResult = course.CourseResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == course.Id);
             if (courseResult != null && courseResult.Status == EnumResultStatus.New)
             {
                 courseResult.Status = EnumResultStatus.Process;

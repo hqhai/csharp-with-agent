@@ -15,6 +15,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double PercentProgress { get; set; }
         public LessonResultModel? LessonResult { get; set; }
         public EnumMockTestType? MockTestType { get; set; }
+        public EnumResultStatus? Status { get; set; }
         public string? Type { get; set; }
         public Guid? ObjectId { get; set; }
         public Guid UnitId { get; set; }
