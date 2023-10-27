@@ -1,28 +1,47 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
     public class HomeWork : Entity
     {
-        [Required(ErrorMessage = nameof(EnumHomeWorkErrorCode.HW01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumHomeWorkErrorCode.HW02C))]
+        /// <summary>
+        /// Tên bài tập
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         /// <summary>
-        /// Nội dung hướng dẫn bài test
+        ///  Code
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumHomeWorkErrorCode.HW03C))]
-        public string? InstructionContent { get; set; }
+        ///
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Code { get; set; }
 
-        [MaxLength(1000, ErrorMessage = nameof(EnumHomeWorkErrorCode.HW03C))]
+        /// <summary>
+        /// Media Post
+        /// </summary>
         public string? MediaPost { get; set; }
 
-        public bool IsActive { get; set; }
+        /// <summary>
+        /// Trình độ Level
+        /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
+
+        /// <summary>
+        /// Loại kỹ năng
+        /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
-        public List<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
+
+        public ICollection<HomeWorkResult> HomeWorkResults { get; set; } = new List<HomeWorkResult>();
+        public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
+
+        public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
     }
 }

@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Diagnostics;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
@@ -25,7 +27,7 @@ namespace Fsel.Core.Base
         public BaseDbContext(DbContextOptions options, IMediator mediator)
             : base(options)
         {
-            _mediator = mediator ?? throw new ArgumentNullException("mediator");
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _trackEntities = new List<Entity>();
             Debug.WriteLine("BaseDbContext::ctor ->" + GetHashCode());
         }
@@ -73,6 +75,7 @@ namespace Fsel.Core.Base
             var entryMain = ChangeTracker.Entries().FirstOrDefault();
 
             if (entryMain != null && entryMain.State == EntityState.Modified && bool.TryParse(entryMain.CurrentValues[nameof(Entity.IsDeleted)]?.ToString(), out bool isDeleted) && isDeleted)
+            {
                 foreach (var entry in ChangeTracker.Entries())
                 {
                     entry.CurrentValues[nameof(Entity.IsDeleted)] = entryMain.CurrentValues[nameof(Entity.IsDeleted)];
@@ -80,6 +83,7 @@ namespace Fsel.Core.Base
                     entry.CurrentValues[nameof(Entity.DeletedUserId)] = entryMain.CurrentValues[nameof(Entity.DeletedUserId)];
                     entry.CurrentValues[nameof(Entity.DeletedFullName)] = entryMain.CurrentValues[nameof(Entity.DeletedFullName)];
                 }
+            }
         }
 
         private async Task DispatchDomainEventsAsync()

@@ -11,7 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <Folder Include="Commands\ClassForumCmd\" />
+    <Folder Include="Events\" />
   </ItemGroup>
 
 </Project>

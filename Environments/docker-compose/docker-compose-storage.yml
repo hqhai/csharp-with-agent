@@ -1,0 +1,29 @@
+version: '3.5'
+services:
+    storage.service:
+        container_name: storage.service
+        hostname: StorageService
+        image: ${DOCKER_REGISTRY-}storage-smicroservice:v1
+        build:
+            context: ./../../
+            dockerfile: Environments/Testing/Storage.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - SERVICENAME=Storage
+            - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - StorageConfig__BucketName=fsel
+            - StorageConfig__AwsS3BaseUrl=s3-hn-2.cloud.cmctelecom.vn
+            - StorageConfig__AwsAccessKey=O4XEY1D00U6CMM9LCXQW
+            - StorageConfig__AwsSecretAccessKey=nLxuRGDeMkbjqxj2moR3MMILktxz7qGA9GVvExLw
+            - StorageConfig__Folders_Videos=videos
+            - StorageConfig__Folders_Questions=quesions
+            - StorageConfig__Folders_Files=files
+        ports:
+            - 5205:80
+            - 7205:443

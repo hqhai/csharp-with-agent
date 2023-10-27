@@ -1,9 +1,10 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
-using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -28,19 +29,25 @@ namespace Fsel.Course.Application.Queries.LessonQuery
         public async Task<MethodResult<LessonModel>> Handle(GetLessonQuery request, CancellationToken cancellationToken)
         {
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
-
-            var lesson = await _lessonRepository.GetByIdAsync(request.Id);
+            ArgumentNullException.ThrowIfNull(request);
+            var lesson = await _lessonRepository.GetIncludeByIdNoTrackingAsync(request.Id);
 
             if (lesson == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.LS01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<LessonModel>(lesson);
+            var video = lesson.LessonVideos.Select(x => x.Video).FirstOrDefault();
+
+            var lessonModel = _mapper.Map<LessonModel>(lesson);
+            lessonModel.Video = _mapper.Map<VideoModel>(video);
+            lessonModel.VideoId = video?.Id;
+            lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.OrderBy(x => x!.CreatedDate).Select(x => x.HomeWork));
+            lessonModel.ExtraPracticeIds = lesson.LessonExtraPractices.OrderBy(x => x!.CreatedDate).Select(x => x.ExtracPraticeId).ToList();
+            lessonModel.ClassForum = _mapper.Map<ClassForumModel>(lesson.ClassForum);
+            lessonModel.IsActive = lesson.UnitLessons.Any();
+            methodResult.Result = lessonModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

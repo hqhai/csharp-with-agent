@@ -1,4 +1,6 @@
-﻿using Fsel.Common.ActionResults;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Common.ActionResults;
 using Fsel.Core.Applications.InternalEvents;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
@@ -54,8 +56,21 @@ namespace Fsel.Core.Base
             }
         }
 
+        public virtual async Task<IEnumerable<T>> GetByIdsAsync(IEnumerable<Guid> ids, int? siteId = null)
+        {
+            try
+            {
+                return await _dbSet.Where((T c) => ids.Contains(c.Id) && !c.IsDeleted).ToListAsync().ConfigureAwait(continueOnCapturedContext: false);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public virtual T Add(T newEntity)
         {
+            ArgumentNullException.ThrowIfNull(newEntity);
             try
             {
                 newEntity.CreatedDate = DateTime.Now;
@@ -65,6 +80,28 @@ namespace Fsel.Core.Base
                 newEntity.AddDomainEvent(new EntityCreatedEvent<T>(newEntity));
                 _dbBaseContext.TrackEntity(newEntity);
                 return _dbSet.Add(newEntity).Entity;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public virtual async Task AddList(IEnumerable<T> newEntities)
+        {
+            ArgumentNullException.ThrowIfNull(newEntities);
+            try
+            {
+                foreach (var newEntity in newEntities)
+                {
+                    newEntity.CreatedDate = DateTime.Now;
+                    newEntity.CreatedUserId = CurrentUserId;
+                    newEntity.CreatedFullName = CurrentFullName;
+                    newEntity.Id = Guid.NewGuid();
+                    newEntity.AddDomainEvent(new EntityCreatedEvent<T>(newEntity));
+                    _dbBaseContext.TrackEntity(newEntity);
+                }
+                await _dbSet.AddRangeAsync(newEntities);
             }
             catch (Exception)
             {
@@ -103,6 +140,7 @@ namespace Fsel.Core.Base
 
         public virtual Task<bool> DeleteAsync(T deleteEntity)
         {
+            ArgumentNullException.ThrowIfNull(deleteEntity);
             try
             {
                 deleteEntity.IsDeleted = true;
@@ -121,6 +159,7 @@ namespace Fsel.Core.Base
 
         public virtual T Update(T updateEntity)
         {
+            ArgumentNullException.ThrowIfNull(updateEntity);
             try
             {
                 updateEntity.UpdatedDate = DateTime.Now;
@@ -136,8 +175,30 @@ namespace Fsel.Core.Base
             }
         }
 
+        public virtual void UpdateList(IEnumerable<T> updateEntities)
+        {
+            ArgumentNullException.ThrowIfNull(updateEntities);
+            try
+            {
+                foreach (var updateEntity in updateEntities)
+                {
+                    updateEntity.UpdatedDate = DateTime.Now;
+                    updateEntity.CreatedUserId = CurrentUserId;
+                    updateEntity.CreatedFullName = CurrentFullName;
+                    updateEntity.AddDomainEvent(new EntityChangedEvent<T>(updateEntity));
+                    _dbBaseContext.TrackEntity(updateEntity);
+                }
+                _dbSet.UpdateRange(updateEntities);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public virtual async Task ExecuteTransactionAsync(Func<Task<VoidMethodResult>> action)
         {
+            ArgumentNullException.ThrowIfNull(action);
             if (_dbBaseContext.Database.IsInMemory() || _dbBaseContext.HasActiveTransaction)
             {
                 await action().ConfigureAwait(continueOnCapturedContext: false);
@@ -149,6 +210,7 @@ namespace Fsel.Core.Base
             {
                 using IDbContextTransaction? transaction = await _dbBaseContext.BeginTransactionAsync().ConfigureAwait(continueOnCapturedContext: false);
                 if (transaction != null)
+                {
                     try
                     {
                         if ((await action().ConfigureAwait(continueOnCapturedContext: false))?.IsOK ?? false)
@@ -165,6 +227,9 @@ namespace Fsel.Core.Base
                         transaction.Rollback();
                         throw;
                     }
+                }
+                else
+                { }
             }).ConfigureAwait(continueOnCapturedContext: false);
         }
     }

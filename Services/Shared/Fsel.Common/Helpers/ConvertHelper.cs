@@ -1,6 +1,8 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Reflection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Fsel.Common.Helpers
 {
@@ -33,7 +35,9 @@ namespace Fsel.Common.Helpers
         public static string StreamToString(Stream stream)
         {
             if (stream == null)
+            {
                 return string.Empty;
+            }
 
             using (var streamReader = new StreamReader(stream))
             {
@@ -43,7 +47,7 @@ namespace Fsel.Common.Helpers
 
         public static string ObjectToBase64(object data)
         {
-            var json = JsonConvert.SerializeObject(data);
+            var json = JsonSerializer.Serialize(data);
             var plainTextBytes = System.Text.Encoding.ASCII.GetBytes(json);
             return ByteArrayToBase64(plainTextBytes);
         }
@@ -51,48 +55,6 @@ namespace Fsel.Common.Helpers
         public static Stream ByteArrayToStream(byte[] input)
         {
             return new MemoryStream(input);
-        }
-
-        public static void Capitalize(this JArray jArr)
-        {
-            foreach (var x in jArr.ToList())
-            {
-                var childObj = x as JObject;
-                if (childObj != null)
-                {
-                    childObj.Capitalize();
-                    continue;
-                }
-                var childArr = x as JArray;
-                if (childArr != null)
-                {
-                    childArr.Capitalize();
-                }
-            }
-        }
-
-        public static void Capitalize(this JObject jObj)
-        {
-            foreach (var kvp in jObj.Cast<KeyValuePair<string, JToken>>().ToList())
-            {
-                jObj.Remove(kvp.Key);
-                var newKey = kvp.Key.Capitalize();
-                var childObj = kvp.Value as JObject;
-                if (childObj != null)
-                {
-                    childObj.Capitalize();
-                    jObj.Add(newKey, childObj);
-                    return;
-                }
-                var childArr = kvp.Value as JArray;
-                if (childArr != null)
-                {
-                    childArr.Capitalize();
-                    jObj.Add(newKey, childArr);
-                    return;
-                }
-                jObj.Add(newKey, kvp.Value);
-            }
         }
 
         public static string Capitalize(this string str)
@@ -104,6 +66,81 @@ namespace Fsel.Common.Helpers
             char[] arr = str.ToCharArray();
             arr[0] = char.ToUpper(arr[0]);
             return new string(arr);
+        }
+
+        public static string Serialize(this object? data)
+        {
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() },
+                PropertyNameCaseInsensitive = true
+            };
+            string jsonString = JsonSerializer.Serialize(data, options);
+            return jsonString;
+        }
+
+        public static T? Deserialize<T>(this string? data)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(data))
+                {
+                    return default;
+                }
+
+                var options = new JsonSerializerOptions
+                {
+                    Converters = { new JsonStringEnumConverter() },
+                    PropertyNameCaseInsensitive = true
+                };
+                T? obj = JsonSerializer.Deserialize<T>(data, options);
+                return obj;
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        public static T? Deserialize<T>(this object? objects)
+        {
+            try
+            {
+                var data = objects.Serialize();
+                return Deserialize<T>(data);
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        public static T? DeserializeFromFilePath<T>(string path)
+        {
+            using (StreamReader sr = new StreamReader(path))
+            {
+                string jsonString = sr.ReadToEnd();
+                return Deserialize<T>(jsonString);
+            }
+        }
+
+        public static TEnum? EnumParse<TEnum>(this string? data) where TEnum : Enum
+        {
+            if (Enum.TryParse(typeof(TEnum), data, false, out object? result))
+            {
+                return (TEnum)result;
+            }
+            return default;
+        }
+
+        public static IList<TEnum> EnumToList<TEnum>() where TEnum : Enum
+        {
+            return Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToList();
+        }
+
+        public static IList<string> EnumToListStr<TEnum>() where TEnum : Enum
+        {
+            return EnumToList<TEnum>().Select(x => x.ToString()).ToList();
         }
     }
 }

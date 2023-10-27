@@ -1,9 +1,13 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
+using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Core.Extensions;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.PlacementTests;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -17,16 +21,15 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
     public class SearchPlacementTestQueryHandler : IRequestHandler<SearchPlacementTestQuery, MethodResult<PagingItemsModel<PlacementTestModel>>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
-        private readonly IMapper _mapper;
 
-        public SearchPlacementTestQueryHandler(IMapper mapper, IPlacementTestRepository placementTestRepository)
+        public SearchPlacementTestQueryHandler(IPlacementTestRepository placementTestRepository)
         {
             _placementTestRepository = placementTestRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<PlacementTestModel>>> Handle(SearchPlacementTestQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<PlacementTestModel>>();
 
             if (request.PageSize > 100)
@@ -42,32 +45,33 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
                                          Name = i.Name,
                                          InstructionContent = i.InstructionContent,
                                          IsActive = i.IsActive,
-                                         CourseLevel = i.CourseLevel,
+                                         Level = i.Level,
                                          CreatedDate = i.CreatedDate,
                                          CreatedUserId = i.CreatedUserId,
+                                         CreatedFullName = i.CreatedFullName,
+                                         UpdatedFullName = i.UpdatedFullName,
                                          UpdatedDate = i.UpdatedDate,
                                          UpdatedUserId = i.UpdatedUserId,
                                      };
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                placementTestQuery = placementTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                placementTestQuery = placementTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
-            int totalItem = await placementTestQuery.CountAsync().ConfigureAwait(false);
-            var lists = await placementTestQuery.OrderByDescending(x => x.Id)
-                    .Skip((request.Page - 1) * request.PageSize)
-                    .Take(request.PageSize)
+            if (request.Level != null)
+            {
+                placementTestQuery = placementTestQuery.Where(m => m.Level == request.Level);
+            }
+
+            int totalItem = await placementTestQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await placementTestQuery
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
-                    .ToListAsync()
+                    .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<PlacementTestModel>
-            {
-                Items = _mapper.Map<IEnumerable<PlacementTestModel>>(lists),
-                PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
-            };
-
+            methodResult.Result = new PagingItemsModel<PlacementTestModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

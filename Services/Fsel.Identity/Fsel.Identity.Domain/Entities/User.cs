@@ -1,17 +1,23 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Identity;
+using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Core.Entities;
 
 namespace Fsel.Identity.Domain.Entities
 {
-    public class User : IdentityUser
+    public class User : UserEntity
     {
         [Required]
-        [MaxLength(250)]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FullName { get; set; }
 
-        [MaxLength(1000)]
-        public string? RefreshToken { get; set; }
+        public virtual Human? Human { get; set; }
 
-        public DateTime? RefreshTokenExpiryTime { get; set; }
+        public virtual ICollection<UserOtpCode> UserOtpCodes { get; set; } = new List<UserOtpCode>();
+
+        public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
+
+        public virtual ICollection<UserPlatform> UserPlatforms { get; set; } = new List<UserPlatform>();
     }
 }

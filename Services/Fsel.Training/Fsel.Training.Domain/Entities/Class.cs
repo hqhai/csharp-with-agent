@@ -1,0 +1,71 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Training.Domain.Entities
+{
+    using System;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
+
+    public class Class : Entity
+    {
+        /// <summary>
+        /// Id Class
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Code { get; set; }
+
+        /// <summary>
+        /// Name Class
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Name { get; set; }
+
+        /// <summary>
+        /// End Date
+        /// </summary>
+        public DateTime? EndDate { get; set; }
+
+        /// <summary>
+        /// Start Date
+        /// </summary>
+        public DateTime? StartDate { get; set; }
+
+        /// <summary>
+        /// Status
+        /// </summary>
+        public EnumClassStatus Status { get; set; }
+
+        public EnumTeacherApprovalStatus? TeacherApprovalStatus { get; set; }
+
+        public Guid PackageId { get; set; }
+
+        public Guid CourseId { get; set; }
+
+        public Guid? LiveTimeFrameId { get; set; }
+
+        /// <summary>
+        /// LiveDays
+        /// </summary>
+        public string? LiveDaysStr { get; set; }
+
+        [NotMapped]
+        public IList<DayOfWeek>? LiveDays
+        {
+            get { return ConvertHelper.Deserialize<IList<DayOfWeek>>(LiveDaysStr); }
+            set { LiveDaysStr = ConvertHelper.Serialize(value); }
+        }
+
+        public Guid? TeacherId { get; set; }
+
+        public Guid? CsoId { get; set; }
+
+        public ICollection<ClassStudent> ClassStudents { get; set; } = new List<ClassStudent>();
+        public ICollection<ClassLiveCalendar> ClassLiveCalendars { get; set; } = new List<ClassLiveCalendar>();
+    }
+}

@@ -1,35 +1,32 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumPlacementTestErrorCode
     {
         /// <summary>
-        /// Placement Test does not exist
+        /// Placement Test  is in active state
         /// </summary>
-        PT01V,
+        PlacementTestInActiveState,
 
         /// <summary>
-        /// Placement Test was used
+        ///  must have the correct score
         /// </summary>
-        PT02V,
+        MustCorrectScore,
 
         /// <summary>
-        /// Placement Test not is correct
+        ///  must have the correct score
         /// </summary>
-        PT03V,
+        PlacementTestResultMaxThree,
 
         /// <summary>
-        /// Name cannot be empty
+        ///  PlacementTest Lock
         /// </summary>
-        PT01C,
+        PlacementTestLock,
 
         /// <summary>
-        /// Name limited to 250 characters
+        ///  You chose the wrong Level
         /// </summary>
-        PT02C,
-
-        /// <summary>
-        /// Instruction Content limited to 1000 characters
-        /// </summary>
-        PT03C,
+        YouChoseTheWrongLevel
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Fsel.Common.Constants
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Common.Constants
 {
     public static class Settings
     {
@@ -30,6 +32,10 @@
 
         public const string SettingFileName = "appsettings.json";
 
+        public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
+
         public const string DefaultConnection = "DefaultConnection";
+
+        public const string CorsPolicy = "CorsPolicy";
     }
 }

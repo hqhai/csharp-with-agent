@@ -1,10 +1,13 @@
-﻿using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.CourseCmd
 {
@@ -16,30 +19,31 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     public class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseCommand, MethodResult<bool>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly IMapper _mapper;
-        private readonly ICourseUnitMockTestRepository _courseUnitRepository;
 
-        public DeleteCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitMockTestRepository courseUnitRepository,
-            IMapper mapper)
+        public DeleteCourseCommandHandler(ICourseRepository courseRepository)
         {
-            _courseUnitRepository = courseUnitRepository;
             _courseRepository = courseRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteCourseCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
 
-            var course = await _courseRepository.GetIncludeByIdAsync(request.Id);
+            var course = await _courseRepository.Queryable.Include(e => e.CourseUnitMockTests)
+                                                            .Include(e => e.CourseTeachers)
+                                                            .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
             if (course == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumCourseErrorCode.C01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
+
+            if (course.Status != EnumCourseStatus.New)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
                 return methodResult;
             }
 

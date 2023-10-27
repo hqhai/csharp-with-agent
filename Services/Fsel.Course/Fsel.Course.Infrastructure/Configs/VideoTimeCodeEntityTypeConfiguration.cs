@@ -1,4 +1,7 @@
-﻿using Fsel.Course.Domain.Entities;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Common.Helpers;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -9,11 +12,12 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<VideoTimeCode> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.TimeCodeType)
                   .HasMaxLength(100)
                   .HasConversion(
                       v => v.ToString(),
-                      v => (EnumTimeCodeType)Enum.Parse(typeof(EnumTimeCodeType), v));
+                      v => v.EnumParse<EnumTimeCodeType>());
         }
     }
 }

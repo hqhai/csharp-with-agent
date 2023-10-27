@@ -1,4 +1,7 @@
-﻿using Fsel.Course.Domain.Entities;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Common.Helpers;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -9,11 +12,12 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Question> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.QuestionType)
                  .HasMaxLength(100)
                  .HasConversion(
                      v => v.ToString(),
-                     v => (EnumQuestionType)Enum.Parse(typeof(EnumQuestionType), v));
+                     v => v.EnumParse<EnumQuestionType>());
         }
     }
 }

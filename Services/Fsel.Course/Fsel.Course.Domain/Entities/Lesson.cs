@@ -1,7 +1,9 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -10,38 +12,26 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên bài test
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumLessonErrorCode.LS01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumLessonErrorCode.LS02C))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         /// <summary>
         /// Nội dung hướng dẫn bài test
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumLessonErrorCode.LS03C))]
         public string? InstructionContent { get; set; }
-
-        [MaxLength(250, ErrorMessage = nameof(EnumLessonErrorCode.LS02C))]
-        public string? DisplayName { get; set; }
-
-        /// <summary>
-        /// Trạng thái kích hoạt
-        /// </summary>
-        public bool IsActive { get; set; }
-
-        /// <summary>
-        /// Giáo Viên ID
-        /// </summary>
-        public Guid? TeacherId { get; set; }
 
         /// <summary>
         /// Trình độ khóa
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
+        public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ClassForum? ClassForum { get; set; }
-        public List<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
-        public List<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
-        public List<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
+        public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
+        public ICollection<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
+        public ICollection<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
+        public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
+        public ICollection<LessonInstruction> LessonInstructions { get; set; } = new List<LessonInstruction>();
     }
 }

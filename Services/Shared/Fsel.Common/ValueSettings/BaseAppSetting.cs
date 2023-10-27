@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Common.ValueSettings
 {
     public class BaseAppSetting
@@ -10,6 +12,8 @@ namespace Fsel.Common.ValueSettings
     public class Services
     {
         public string? SenderApiUrl { get; set; }
+        public string? UserApiUrl { get; set; }
+        public string? ClassApiUrl { get; set; }
     }
 
     public class Jwt

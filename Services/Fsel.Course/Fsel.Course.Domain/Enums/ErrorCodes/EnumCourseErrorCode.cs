@@ -1,40 +1,72 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumCourseErrorCode
     {
         /// <summary>
-        /// Course does not exist
+        /// Course is not in a new state
         /// </summary>
-        C01V,
+        CourseNotInNewState,
 
         /// <summary>
-        /// Unit have been use
+        /// Course Not Type IElts
         /// </summary>
-        C02V,
+        CourseNotTypeIElts,
 
         /// <summary>
-        /// Unit null
+        /// Course Not Type Academic
         /// </summary>
-        C03V,
+        CourseNotTypeAcademic,
 
         /// <summary>
-        /// Name cannot be empty
+        /// Student not in class
         /// </summary>
-        C01C,
+        StudentNotInClass,
 
         /// <summary>
-        /// Name limited to 250 characters
+        /// MocktestId and UnitId cannot have values at the same time.
         /// </summary>
-        C02C,
+        MocktestIdAndUnitIdAreMutuallyExclusive,
 
         /// <summary>
-        /// Instruction Content limited to 1000 characters
+        /// Course must be in an Active state
         /// </summary>
-        C03C,
+        CourseMustActiveState,
 
         /// <summary>
-        /// Number of course >1
+        /// Course is in Active state
         /// </summary>
-        C04C,
+        CourseIsActiveState,
+
+        /// <summary>
+        /// Course is in New state, can't start Lesson
+        /// </summary>
+        CourseIsNewStateCantStartLesson,
+
+        /// <summary>
+        /// another level unit exists
+        /// </summary>
+        AnotherLevelUnitExists,
+
+        /// <summary>
+        /// Duplicate Unit Id
+        /// </summary>
+        DuplicateUnitId,
+
+        /// <summary>
+        /// MockTest is up to two
+        /// </summary>
+        MockTestIsUpToTwo,
+
+        /// <summary>
+        /// FinalTest is up to One
+        /// </summary>
+        FinalTestIsUpToOne,
+
+        /// <summary>
+        /// UnitTest is up to Eight
+        /// </summary>
+        UnitTestIsUpToEight
     }
 }

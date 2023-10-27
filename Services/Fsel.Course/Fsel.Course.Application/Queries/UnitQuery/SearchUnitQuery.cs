@@ -1,34 +1,40 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
+using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-
+using Fsel.Core.Extensions;
+using Fsel.Course.Application.Services.UserServices;
+using Fsel.Course.Application.Services.UserServices.Models;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Units;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.UnitQuery
 {
-    public class SearchUnitQuery : SearchUnitQueryModel, IRequest<MethodResult<PagingItemsModel<UnitModel>>>
+    public class SearchUnitQuery : SearchUnitQueryModel, IRequest<MethodResult<PagingItemsModel<UnitSearchModel>>>
     {
     }
 
-    public class SearchUnitQueryHandler : IRequestHandler<SearchUnitQuery, MethodResult<PagingItemsModel<UnitModel>>>
+    public class SearchUnitQueryHandler : IRequestHandler<SearchUnitQuery, MethodResult<PagingItemsModel<UnitSearchModel>>>
     {
-        private readonly IUnitRepository _UnitRepository;
-        private readonly IMapper _mapper;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IUserService _userService;
 
-        public SearchUnitQueryHandler(IMapper mapper, IUnitRepository UnitRepository)
+        public SearchUnitQueryHandler(IUnitRepository unitRepository, IUserService userService)
         {
-            _UnitRepository = UnitRepository;
-            _mapper = mapper;
+            _unitRepository = unitRepository;
+            _userService = userService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<UnitModel>>> Handle(SearchUnitQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<UnitSearchModel>>> Handle(SearchUnitQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<UnitModel>> methodResult = new MethodResult<PagingItemsModel<UnitModel>>();
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<PagingItemsModel<UnitSearchModel>> methodResult = new MethodResult<PagingItemsModel<UnitSearchModel>>();
 
             if (request.PageSize > 100)
             {
@@ -36,40 +42,64 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 return methodResult;
             }
 
-            var UnitQuery = from i in _UnitRepository.Queryable
-                            select new UnitModel
+            var unitQuery = _unitRepository.Queryable
+                                    .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                                    .Include(unit => unit.UnitLessons.Where(y => !y.IsDeleted))
+                                    .ThenInclude(unitLesson => unitLesson.Lesson)
+                                    .ThenInclude(lesson => lesson!.LessonVideos.Where(y => !y.IsDeleted))
+                                    .ThenInclude(lessonVideo => lessonVideo.Video)
+
+                            .Select(unit => new UnitSearchModel
                             {
-                                Id = i.Id,
-                                Name = i.Name,
-                                DisplayName = i.DisplayName,
-                                IsActive = i.IsActive,
-                                Type = i.Type,
-                                CourseLevel = i.CourseLevel,
-                                CreatedDate = i.CreatedDate,
-                                CreatedUserId = i.CreatedUserId,
-                                UpdatedDate = i.UpdatedDate,
-                                UpdatedUserId = i.UpdatedUserId,
-                            };
-            //Keyword
+                                Id = unit.Id,
+                                Name = unit.Name,
+                                Code = unit.Code,
+                                IsActive = unit.CourseUnitMockTests.Where(n => !n.IsDeleted).Any(),
+                                CourseLevel = unit.CourseLevel,
+                                CreatedDate = unit.CreatedDate,
+                                CreatedUserId = unit.CreatedUserId,
+                                UpdatedDate = unit.UpdatedDate,
+                                UpdatedUserId = unit.UpdatedUserId,
+                                TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
+                                                .SelectMany(lv => lv!.LessonVideos.Where(n => !n.IsDeleted))
+                                                .Select(v => v.Video)
+                                                .Select(n => n!.TeacherId).ToList()
+                            });
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                UnitQuery = UnitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                unitQuery = unitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()) || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
-            int totalItem = await UnitQuery.CountAsync().ConfigureAwait(false);
-            var lists = await UnitQuery.OrderByDescending(x => x.Id)
-                    .Skip((request.Page - 1) * request.PageSize)
-                    .Take(request.PageSize)
+            if (request.CourseLevel != null)
+            {
+                unitQuery = unitQuery.Where(m => m.CourseLevel == request.CourseLevel);
+            }
+
+            if (request.TeacherId.HasValue)
+            {
+                unitQuery = unitQuery.Where(m => m.TeacherIds!.Any(x => x == request.TeacherId));
+            }
+
+            int totalItem = await unitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await unitQuery
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
-                    .ToListAsync()
+                    .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<UnitModel>
+            var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
+            if (teacherResults.IsSuccessStatusCode)
             {
-                Items = _mapper.Map<IEnumerable<UnitModel>>(lists),
-                PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
-            };
+                var teachers = teacherResults.Content?.Result;
 
+                foreach (var item in lists)
+                {
+                    item.TeacherNames = teachers?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
+                }
+            }
+
+            methodResult.Result = new PagingItemsModel<UnitSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

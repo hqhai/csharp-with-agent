@@ -1,9 +1,10 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
-using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -27,20 +28,34 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
         public async Task<MethodResult<UnitModel>> Handle(GetUnitQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
-            var unit = await _unitRepository.GetByIdAsync(request.Id);
+            var unit = await _unitRepository.GetIncludeByIdAsync(request.Id);
 
             if (unit == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumUnitErrorCode.U01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<UnitModel>(unit);
+            var unitModel = _mapper.Map<UnitModel>(unit);
+            unitModel.IsActive = unit.CourseUnitMockTests.Any();
+            unitModel.Lessons = unit.UnitLessons.Select(x =>
+                                {
+                                    var model = _mapper.Map<LessonModel>(x.Lesson);
+                                    model.DisplayOrder = x.DisplayOrder;
+                                    return model;
+                                }).OrderBy(x => x.DisplayOrder).ToList();
+            unitModel.SkillMockTest = unit.UnitSkillMockTests.Select(x =>
+            {
+                var model = _mapper.Map<MockTestModel>(x.MockTest);
+                model.Skill = x.MockTest!.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault();
+                return model;
+            }).FirstOrDefault();
+
+            methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

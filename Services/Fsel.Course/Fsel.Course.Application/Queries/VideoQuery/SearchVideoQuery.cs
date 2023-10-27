@@ -1,8 +1,10 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Core.Extensions;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Videos;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -10,24 +12,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.VideoQuery
 {
-    public class SearchVideoQuery : SearchVideoQueryModel, IRequest<MethodResult<PagingItemsModel<VideoModel>>>
+    public class SearchVideoQuery : SearchVideoQueryModel, IRequest<MethodResult<PagingItemsModel<VideoSearchModel>>>
     {
     }
 
-    public class SearchVideoQueryHandler : IRequestHandler<SearchVideoQuery, MethodResult<PagingItemsModel<VideoModel>>>
+    public class SearchVideoQueryHandler : IRequestHandler<SearchVideoQuery, MethodResult<PagingItemsModel<VideoSearchModel>>>
     {
-        private readonly IMapper _mapper;
         private readonly IVideoRepository _videoRepository;
 
-        public SearchVideoQueryHandler(IMapper mapper, IVideoRepository videoRepository)
+        public SearchVideoQueryHandler(IVideoRepository videoRepository)
         {
-            _mapper = mapper;
             _videoRepository = videoRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<VideoModel>>> Handle(SearchVideoQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<VideoSearchModel>>> Handle(SearchVideoQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<VideoModel>> methodResult = new MethodResult<PagingItemsModel<VideoModel>>();
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<PagingItemsModel<VideoSearchModel>> methodResult = new MethodResult<PagingItemsModel<VideoSearchModel>>();
 
             if (request.PageSize > 100)
             {
@@ -35,38 +36,21 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 return methodResult;
             }
 
-            var VideoQuery = from i in _videoRepository.Queryable
-                             select new VideoModel
-                             {
-                                 Id = i.Id,
-                                 Name = i.Name,
-                                 IsActive = i.IsActive,
-                                 CourseLevel = i.CourseLevel,
-                                 CreatedDate = i.CreatedDate,
-                                 CreatedUserId = i.CreatedUserId,
-                                 UpdatedDate = i.UpdatedDate,
-                                 UpdatedUserId = i.UpdatedUserId,
-                             };
-            //Keyword
+            var videoQuery = _videoRepository.SearchAsync(request.TimeCodeType, request.TeacherId, request.CourseLevel);
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                VideoQuery = VideoQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                videoQuery = videoQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
-            int totalItem = await VideoQuery.CountAsync().ConfigureAwait(false);
-            var lists = await VideoQuery.OrderByDescending(x => x.Id)
-                    .Skip((request.Page - 1) * request.PageSize)
-                    .Take(request.PageSize)
+            int totalItem = await videoQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await videoQuery
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
-                    .ToListAsync()
+                    .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<VideoModel>
-            {
-                Items = _mapper.Map<IEnumerable<VideoModel>>(lists),
-                PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
-            };
-
+            methodResult.Result = new PagingItemsModel<VideoSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

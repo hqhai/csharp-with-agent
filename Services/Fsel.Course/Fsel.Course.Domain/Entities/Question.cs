@@ -1,19 +1,61 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
     public class Question : Entity
     {
+        /// <summary>
+        /// Loại câu hỏi
+        /// </summary>
         public EnumQuestionType QuestionType { get; set; }
-        public bool IsSave { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumQuestionErrorCode.Q01V))]
-        [MaxLength(1000, ErrorMessage = nameof(EnumQuestionErrorCode.Q03C))]
-        public string? Config { get; set; }
+        /// <summary>
+        /// Check câu hỏi có tính điểm không
+        /// </summary>
+        private bool _ungraded;
 
-        public List<ExcerciseQuestion> ExcerciseQuestions { get; set; } = new List<ExcerciseQuestion>();
+        public bool Ungraded
+        {
+            get { return _ungraded; }
+            set { _ungraded = QuestionType == EnumQuestionType.ExercisePreparation || value; }
+        }
+
+        /// <summary>
+        /// Lưu câu giải thích
+        /// </summary>
+        [MaxLength(3000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Explanation { get; set; }
+
+        /// <summary>
+        /// Tổng số câu trả lời đúng
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectTotal { get; set; }
+
+        /// <summary>
+        /// Config
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? ConfigStr { get; set; }
+
+        [NotMapped]
+        public object? Config
+        {
+            get { return ConvertHelper.Deserialize<object>(ConfigStr); }
+            set { ConfigStr = ConvertHelper.Serialize(value); }
+        }
+
+        public ICollection<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
+        public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
+        public ICollection<ExtraPracticeAnswer> ExtraPracticeAnswers { get; set; } = new List<ExtraPracticeAnswer>();
+        public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
+        public ICollection<SectionQuestion> SectionQuestions { get; set; } = new List<SectionQuestion>();
     }
 }

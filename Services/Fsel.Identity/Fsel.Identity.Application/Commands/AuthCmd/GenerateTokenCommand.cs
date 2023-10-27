@@ -1,65 +1,88 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base.Managers;
+using Fsel.Identity.Application.Services.InteractionService;
+using Fsel.Identity.Application.Services.LmsCourseService;
+using Fsel.Identity.Application.Services.OrderService;
+using Fsel.Identity.Application.Services.OrderService.Model;
+using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Models.EntityModels.Auths;
+using Fsel.Identity.Domain.IRepositories;
+using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
+using Fsel.Shared.Enums;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
     public class GenerateTokenCommand : IRequest<MethodResult<TokenModel>>
     {
-        public string? Id { get; set; }
+        public Guid? Id { get; set; }
     }
 
     public class GenerateTokenCommandHandler : IRequestHandler<GenerateTokenCommand, MethodResult<TokenModel>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IInteractionService _interactionService;
+        private readonly ITrainingService _trainingService;
+        private readonly ILmsCourseService _lmsCourseService;
+        private readonly IUserTokenRepository _userTokenRepository;
+        private readonly IOrderService _orderService;
         private readonly AppSetting _appSetting;
-        private readonly IMapper _mapper;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
-            AppSetting appSetting,
-            IMapper mapper)
+            IInteractionService interactionService,
+            ITrainingService trainingService,
+            ILmsCourseService lmsCourseService,
+            IUserTokenRepository userTokenRepository,
+            IOrderService orderService,
+            AppSetting appSetting)
         {
             _userManager = userManager;
-            _mapper = mapper;
+            _interactionService = interactionService;
+            _trainingService = trainingService;
+            _lmsCourseService = lmsCourseService;
+            _userTokenRepository = userTokenRepository;
+            _orderService = orderService;
             _appSetting = appSetting;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-
-            var user = await _userManager.FindByIdAsync(request.Id ?? string.Empty);
+            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                //methodResult.AddResultFromErrorList(placementTest.ErrorMessages);
                 return methodResult;
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
+            var jti = Guid.NewGuid().ToString();
             var authClaims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
-                new Claim(ClaimTypes.GivenName, user.FullName ?? string.Empty),
-                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                new Claim(ClaimTypes.NameIdentifier, user.Id ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty),
+                new Claim(JwtClaimNames.FullName, user.FullName ?? string.Empty),
+                new Claim(JwtClaimNames.Email, user.Email ?? string.Empty),
+                new Claim(JwtClaimNames.UserId, user.Id.ToString()),
+                new Claim(JwtClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
+                new Claim(JwtClaimNames.Jti, jti),
             };
 
             foreach (var userRole in userRoles)
             {
-                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                authClaims.Add(new Claim(JwtClaimNames.Role, userRole));
             }
 
             var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
@@ -68,27 +91,58 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 _appSetting.Jwt?.Issuer ?? string.Empty,
                 _appSetting.Jwt?.Audience ?? string.Empty,
                 authClaims,
-                expires: DateTime.Now.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
+                expires: DateTime.UtcNow.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
                 signingCredentials: signin
                 );
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
             var refreshToken = TokenHelper.GenerateRefreshToken();
 
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default);
+            await _userTokenRepository.AddAsync(new UserToken
+            {
+                Name = jti,
+                Value = accessToken,
+                RefreshToken = refreshToken,
+                LoginProvider = JwtBearerDefaults.AuthenticationScheme,
+                UserId = user.Id,
+                RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
+            });
 
-            await _userManager.UpdateAsync(user);
             var tokenLogin = new TokenModel
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
-                Roles = userRoles.ToList()
+                Roles = userRoles.ToList(),
+                Code = user.Human?.Code
             };
 
+            if (userRoles.Contains(EnumRole.Student.ToString()))
+            {
+                var student = user.Human?.Student;
+                tokenLogin.IsOrder = false;
+                tokenLogin.ClassId = student?.ClassId;
+                var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
+                var @class = classStudent?.Content?.Result;
+                var isPlacementTest = await _lmsCourseService.IsPlacementTestAsync(student?.Id ?? default);
+                var isSurvey = await _interactionService.IsSurveyCompleted(request.Id ?? default);
+                tokenLogin.IsPlacementTest = isPlacementTest?.Content?.Result;
+                if (@class != null)
+                {
+                    var order = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = request.Id });
+
+                    tokenLogin.ClassCode = @class.Code;
+                    tokenLogin.IsOrder = order?.Content?.Result == EnumOrderStatus.Payment;
+                }
+                if (isSurvey.IsSuccessStatusCode)
+                {
+                    tokenLogin.IsSurvey = isSurvey?.Content?.Result;
+                }
+            }
+
             methodResult.Result = tokenLogin;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

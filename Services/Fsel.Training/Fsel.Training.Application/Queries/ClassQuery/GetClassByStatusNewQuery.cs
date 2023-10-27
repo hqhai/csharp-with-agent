@@ -1,0 +1,91 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Training.Application.Queries.ClassQuery
+{
+    using System.Collections.Generic;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
+    using Fsel.Shared.Enums;
+    using Fsel.Training.Application.Services.OrderServices;
+    using Fsel.Training.Domain.Entities;
+    using Fsel.Training.Domain.IRepositories;
+    using Fsel.Training.Domain.Models.EntityModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class GetClassByStatusNewQuery : IRequest<MethodResult<IList<CourseClassModel>>>
+    {
+        public IList<CourseClassModel>? Courses { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public Guid PackageId { get; set; }
+        public Guid? LiveTimeFrameId { get; set; }
+        public IList<DayOfWeek>? LiveDays { get; set; }
+    }
+
+    public class GetClassByStatusNewQueryHandler : IRequestHandler<GetClassByStatusNewQuery, MethodResult<IList<CourseClassModel>>>
+    {
+        private readonly IClassRepository _classRepository;
+        private readonly IMediator _mediator;
+        private readonly IOrderService _orderService;
+
+        public GetClassByStatusNewQueryHandler(IClassRepository classRepository, IMediator mediator, IOrderService orderService)
+        {
+            _classRepository = classRepository;
+            _mediator = mediator;
+            _orderService = orderService;
+        }
+
+        public async Task<MethodResult<IList<CourseClassModel>>> Handle(GetClassByStatusNewQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<IList<CourseClassModel>> methodResult = new MethodResult<IList<CourseClassModel>>();
+            if (request.Courses == null || request.Courses.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Courses));
+                return methodResult;
+            }
+            var packagesResult = await _orderService.GetPackages();
+            if (!packagesResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(packagesResult.Error?.Content, packagesResult.StatusCode);
+                return methodResult;
+            }
+            var package = packagesResult.Content?.Result?.FirstOrDefault(p => p.Id == request.PackageId);
+            if (package == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
+                return methodResult;
+            }
+            List<Class> classes = new List<Class>();
+            if (package.Code == EnumPackageCode.PREMIUM)
+            {
+                var liveDaysStr = ConvertHelper.Serialize(request.LiveDays);
+                classes = await _classRepository.Queryable.Include(i => i.ClassStudents).Where(e => e.Status == EnumClassStatus.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId && e.ClassStudents.Count < 12 && e.LiveTimeFrameId == request.LiveTimeFrameId && liveDaysStr == e.LiveDaysStr).ToListAsync(cancellationToken: cancellationToken);
+            }
+            else
+            {
+                classes = await _classRepository.Queryable.Include(i => i.ClassStudents).Where(e => e.Status == EnumClassStatus.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId && e.ClassStudents.Count < 12).ToListAsync(cancellationToken: cancellationToken);
+            }
+            IList<CourseClassModel>? courseClassModels = new List<CourseClassModel>();
+            foreach (var item in request.Courses)
+            {
+                var courseClass = new CourseClassModel { CourseId = item.CourseId };
+                if (classes.Any(x => x.CourseId == item.CourseId))
+                {
+                    courseClass.Code = classes.FirstOrDefault(x => x.CourseId == item.CourseId)!.Code;
+                }
+                else
+                {
+                    var code = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel, Code = item.Code }, cancellationToken).ConfigureAwait(false);
+                    courseClass.Code = code.Result;
+                }
+                courseClassModels.Add(courseClass);
+            }
+            methodResult.Result = courseClassModels;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

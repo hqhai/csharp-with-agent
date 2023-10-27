@@ -1,28 +1,15 @@
-using System.Text.Json.Serialization;
-using Fsel.Common.Helpers;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Models.CommandModels.Excercises;
+using Fsel.Course.Domain.Models.CommandModels.Exercises;
 
 namespace Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes
 {
     public class CreateVideoTimeCodeCommandModel
     {
         public EnumTimeCodeType TimeCodeType { get; set; }
-        public string? DisplayTimeStr { get; set; }
-        public string? ExecutionTimeStr { get; set; }
-
-        [JsonIgnore]
-        public TimeSpan DisplayTime
-        {
-            get { return DisplayTimeStr.ConvertTimeSpan(); }
-        }
-
-        [JsonIgnore]
-        public TimeSpan ExecutionTime
-        {
-            get { return ExecutionTimeStr.ConvertTimeSpan(); }
-        }
-
-        public List<CreateExcerciseCommandModel> Excercises { get; set; } = new List<CreateExcerciseCommandModel>();
+        public double DisplayTime { get; set; }
+        public double ExecutionTime { get; set; }
+        public IList<CreateExerciseCommandModel>? Exercises { get; set; }
     }
 }

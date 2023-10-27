@@ -1,4 +1,6 @@
-﻿using Fsel.Course.Domain.Entities;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Course.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,6 +10,8 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<LessonExtraPractice> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.Lesson)
                             .WithMany(b => b.LessonExtraPractices)
                             .HasForeignKey(b => b.LessonId)

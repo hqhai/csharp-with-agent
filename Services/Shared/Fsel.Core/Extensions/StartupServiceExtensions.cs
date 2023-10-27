@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -5,9 +7,9 @@ using Fsel.Common.Constants;
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Base;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +25,7 @@ namespace Fsel.Core.Extensions
     {
         public static void AddServices(this WebApplicationBuilder builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddApiVersioning();
             builder.Services
@@ -37,12 +40,33 @@ namespace Fsel.Core.Extensions
                 .AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies())
                 .AddHttpContextAccessor();
             builder.AddAuthContexts();
+            builder.AddCors();
+        }
+
+        private static void AddCors(this WebApplicationBuilder builder)
+        {
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+                options.AddPolicy(Settings.CorsPolicy, builder => builder
+                        .AllowAnyOrigin()
+                        .SetIsOriginAllowedToAllowWildcardSubdomains()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
         }
 
         private static void AddAuthContexts(this WebApplicationBuilder builder)
         {
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
             builder.Services.AddScoped(x =>
             {
                 var authContext = new AuthContext();
@@ -65,16 +89,12 @@ namespace Fsel.Core.Extensions
 
         public static void AddAuthentication(this WebApplicationBuilder builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Services.AddAuthentication();
             builder.Services.Configure<IdentityOptions>(options =>
             {
-                // Password settings
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 6;
-                //options.Password.RequireNonAlphanumeric = true;
-                //options.Password.RequireUppercase = false;
-                //options.Password.RequireLowercase = false;
-                //options.Password.RequiredUniqueChars = 6;
                 options.SignIn.RequireConfirmedEmail = true;
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@.";
@@ -83,6 +103,7 @@ namespace Fsel.Core.Extensions
 
         public static void AddAuthenticationJwtBearers(this WebApplicationBuilder builder, BaseAppSetting? baseAppSetting)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             if (baseAppSetting != null)
             {
                 builder.Services
@@ -112,27 +133,35 @@ namespace Fsel.Core.Extensions
 
         public static T? AddAppSettings<T>(this WebApplicationBuilder builder) where T : BaseAppSetting
         {
-            var _baseAppSetting = builder.Configuration.Get<T>();
-            if (_baseAppSetting != null)
-                builder.Services.AddSingleton<T>(_baseAppSetting);
-            return _baseAppSetting;
+            ArgumentNullException.ThrowIfNull(builder);
+            var baseAppSetting = builder.Configuration.Get<T>();
+
+            ArgumentNullException.ThrowIfNull(baseAppSetting);
+            if (baseAppSetting != null)
+            {
+                builder.Services.AddSingleton<T>(baseAppSetting);
+            }
+            return baseAppSetting;
         }
 
         public static void AddDbContexts<TContext>(this WebApplicationBuilder builder) where TContext : DbContext
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Services.AddDbContext<TContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString(Settings.DefaultConnection)));
         }
 
         public static void AddRefitClients(this WebApplicationBuilder builder, Type refitInterfaceType, string? url)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Services.AddRefitClient(refitInterfaceType).ConfigureHttpClient(x =>
             {
                 x.BaseAddress = new Uri(url ?? string.Empty);
-            }).AddHttpMessageHandler<AuthorizationMessageHandler>();
+            })/*.AddHttpMessageHandler<AuthorizationMessageHandler>()*/;
         }
 
         public static void AddSwaggerGens(this WebApplicationBuilder builder, BaseAppSetting? baseAppSetting)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = baseAppSetting?.ServiceName, Version = "v1" });

@@ -1,4 +1,6 @@
-﻿namespace Fsel.Core.Base.Interfaces
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Core.Base.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {

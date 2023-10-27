@@ -1,0 +1,40 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+using System.Net;
+using Fsel.Common.ActionResults;
+using Fsel.Common.Constants;
+using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+using Fsel.Course.Lms.Application.Queries.CourseQuery;
+using Fsel.Shared.Enums;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Fsel.Course.Lms.Api.Controllers
+{
+    [ApiVersion(Settings.APIVersion)]
+    [Route(Settings.APIDefaultRoute + "/course-result")]
+    [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+    public class CourseResultController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public CourseResultController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Get Unit-skill-diagram
+        /// </summary>
+        [HttpGet("unit-skill-diagram")]
+        [ProducesResponseType(typeof(MethodResult<List<IList<SkillScores>>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitSkillDiagram([FromQuery] GetUnitSkillDiagramQuery query)
+        {
+            MethodResult<IList<SkillScores>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+    }
+}

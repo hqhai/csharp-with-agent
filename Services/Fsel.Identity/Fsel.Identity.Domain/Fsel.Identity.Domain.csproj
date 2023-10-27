@@ -13,11 +13,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Entities\RoleClaim.cs" />
+    <Compile Remove="Entities\UserClaim.cs" />
+    <Compile Remove="Entities\UserRole.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Constants\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Shared\Fsel.Core\Fsel.Core.csproj" />
+    <ProjectReference Include="..\..\Shared\Fsel.Shared\Fsel.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Diagnostics;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
@@ -9,7 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Fsel.Core.Base
 {
-    public class BaseIdentityDbContext<TUser> : IdentityUserContext<TUser>, IBaseDbContext where TUser : IdentityUser
+    public class BaseIdentityDbContext<TUser> : IdentityDbContext<TUser>, IBaseDbContext
+        where TUser : IdentityUser
     {
         private readonly IMediator _mediator;
 
@@ -27,7 +30,7 @@ namespace Fsel.Core.Base
         public BaseIdentityDbContext(DbContextOptions options, IMediator mediator)
             : base(options)
         {
-            _mediator = mediator ?? throw new ArgumentNullException("mediator");
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _trackEntities = new List<Entity>();
             Debug.WriteLine("BaseIdentityDbContext::ctor ->" + GetHashCode());
         }
@@ -100,7 +103,7 @@ namespace Fsel.Core.Base
         {
             if (transaction == null)
             {
-                throw new ArgumentNullException("transaction");
+                throw new ArgumentNullException(nameof(transaction));
             }
 
             if (transaction != _currentTransaction)

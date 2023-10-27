@@ -1,4 +1,6 @@
-﻿using Fsel.Common.Constants;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Common.Constants;
 
 namespace Fsel.Core.Base.BaseModels
 {

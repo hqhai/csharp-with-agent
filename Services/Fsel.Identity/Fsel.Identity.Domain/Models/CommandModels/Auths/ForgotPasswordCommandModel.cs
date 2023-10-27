@@ -1,6 +1,8 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 {
-    internal class ForgotPasswordCommandModel
+    public class ForgotPasswordCommandModel
     {
     }
 }

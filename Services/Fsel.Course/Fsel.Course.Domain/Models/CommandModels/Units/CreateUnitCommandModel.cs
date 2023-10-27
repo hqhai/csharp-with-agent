@@ -1,5 +1,6 @@
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Models.CommandModels.UnitSkillMockTests;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Units
 {
@@ -7,20 +8,12 @@ namespace Fsel.Course.Domain.Models.CommandModels.Units
     {
         public string? Name { get; set; }
 
-        public string? DisplayName { get; set; }
+        public string? Code { get; set; }
 
-        public bool IsActive { get; set; }
-
-        public List<Guid>? LessonIds { get; set; }
-
-        public EnumUnitType UnitType { get; set; }
+        public IList<Guid>? LessonIds { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
 
         public Guid MockTestId { get; set; }
-
-        public EnumMockTestType MockTestType { get; set; }
-
-       
     }
 }

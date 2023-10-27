@@ -1,4 +1,8 @@
-﻿using Fsel.Course.Domain.Enums;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Common.Helpers;
+using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
@@ -9,11 +13,18 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<EntityCourse> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.CourseLevel)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => (EnumCourseLevel)Enum.Parse(typeof(EnumCourseLevel), v));
+                    v => v.EnumParse<EnumCourseLevel>());
+
+            builder.Property(e => e.Status)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumCourseStatus>());
         }
     }
 }

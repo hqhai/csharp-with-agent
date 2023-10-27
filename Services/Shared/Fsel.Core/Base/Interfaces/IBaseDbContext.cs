@@ -1,4 +1,6 @@
-﻿using Fsel.Core.Entities;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Core.Entities;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Fsel.Core.Base.Interfaces

@@ -1,12 +1,23 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
+using System.Globalization;
+using System.Text;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
-using Fsel.Identity.Application.Services;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.IRepositories;
+using Fsel.Identity.Infrastructure.ValueSettings;
+using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
+using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using OtpNet;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -18,58 +29,86 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly ISenderService _senderService;
-        private readonly IMapper _mapper;
-        private readonly SignInManager<User> _signInManager;
+        private readonly IMediator _mediator;
+        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly AppSetting _appSetting;
 
-        public ForgotPasswordCommandHandler(UserManager<User> userManager, ISenderService senderService,
-            IMapper mapper, SignInManager<User> signInManager)
+        public ForgotPasswordCommandHandler(UserManager<User> userManager
+            , IMediator mediator
+            , IUserOtpCodeRepository userOtpCodeRepository
+            , AppSetting appSetting)
         {
             _userManager = userManager;
-            _senderService = senderService;
-            _mapper = mapper;
-            _signInManager = signInManager;
+            _mediator = mediator;
+            _userOtpCodeRepository = userOtpCodeRepository;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<bool>> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-
-            var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
+            if (string.IsNullOrEmpty(request.Email))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
+                return methodResult;
+            }
+            if (!request.Email.IsValidEmail())
+            {
+                methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                return methodResult;
+            }
+            var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorMessage(
-                    nameof(EnumAuthErrorCode.AU04V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                methodResult.Result = true;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
-            var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
+            var userOtpCode = await _userOtpCodeRepository.Queryable
+                                  .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
 
-            string resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-            if (string.IsNullOrEmpty(resetToken))
+            RandomSecureHelper randomSecure = new RandomSecureHelper();
+            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
+            var otp = totp.ComputeTotp();
+            if (userOtpCode == null)
             {
-                methodResult.StatusCode = StatusCodes.Status500InternalServerError;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU02ER));
-                return methodResult;
+                userOtpCode = new UserOtpCode
+                {
+                    UserId = user.Id,
+                    OTPCode = otp,
+                    Status = EnumOtpCodeStatus.New,
+                    ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime)
+                };
+                _userOtpCodeRepository.Add(userOtpCode);
+                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-            var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
-            if (!result.Succeeded)
+            else
             {
-                methodResult.StatusCode = StatusCodes.Status500InternalServerError;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU03ER));
-                return methodResult;
+                userOtpCode.OTPCode = otp;
+                userOtpCode.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
+                _userOtpCodeRepository.Update(userOtpCode);
+                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            var sendCommandModel = new SendEmailCommandModel
+            var param = new SendOtpTemplateModel
             {
-                Content = $"Tài khoản của bạn đã được reset thành công mời bạn nhập mật khẩu mới :{newPassword}",
-                Subject = "Forgot Password ",
-                ToEmails = new List<string> { $"{request.Email}" }
+                OtpCode = otp,
+                OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
             };
+            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
+            var sendResult = new MethodResult<bool>();
+            if (!string.IsNullOrEmpty(request.Email))
+            {
+                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+            }
 
-            var IsSendMail = await _senderService.SendEmailAsync(sendCommandModel);
+            if (!sendResult.IsOK)
+            {
+                methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
+                return methodResult;
+            }
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

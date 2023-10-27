@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lcms-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lcms-api
+  template:
+    metadata:
+      labels:
+        app: lcms-api
+    spec:
+      containers:
+      - name: lcms
+        image: fselacr.azurecr.io/lcmsapi
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+# service type loadbalancer       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lcms-api-svc
+spec:
+  selector:
+    app: lcms-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer

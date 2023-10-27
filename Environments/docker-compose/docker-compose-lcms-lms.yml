@@ -1,0 +1,52 @@
+version: '3.5'
+services:
+    lcms.service:
+        container_name: lcms.service
+        hostname: LcmsService
+        image: ${DOCKER_REGISTRY-}lcms-microservice:v1
+        build:
+            context: ./../../
+            dockerfile: Environments/Testing/Lcms.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Lcms Course
+            - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
+        ports:
+            - 5203:80
+            - 7203:443
+    lms.service:
+        container_name: lms.service
+        hostname: LmsService
+        image: ${DOCKER_REGISTRY-}lms-microservice:v1
+        build:
+            context: ./../../
+            dockerfile: Environments/Testing/Lms.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Lms Course
+            - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
+            - SERVICES_ClassApiUrl=http://training-testing.fsel-testing.svc/api/v1
+            - SERVICES_InteractionApiUrl=http://interaction-testing.fsel-testing.svc/api/v1
+            - SERVICES_SystemApiUrl=http://system-testing.fsel-testing.svc/api/v1
+            - SERVICES_OrderApiUrl=http://ordering-testing.fsel-testing.svc/api/v1
+            - SERVICES_SenderApiUrl=http://sender-testing.fsel-testing.svc/api/v1
+            - SERVICES_NotificationApiUrl=http://notification-testing.fsel-testing.svc/api/v1
+        ports:
+            - 5204:80
+            - 7204:443

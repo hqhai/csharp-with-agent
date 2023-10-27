@@ -1,29 +1,38 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
     public class Unit : Entity
     {
-        [Required(ErrorMessage = nameof(EnumUnitErrorCode.U01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumUnitErrorCode.U02C))]
+        /// <summary>
+        /// Mã Unit
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Code { get; set; }
+
+        /// <summary>
+        /// Tên Unit
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumUnitErrorCode.U01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumUnitErrorCode.U02C))]
-        public string? DisplayName { get; set; }
-
-        public bool IsActive { get; set; }
-
-        public EnumUnitType Type { get; set; }
-
+        /// <summary>
+        /// Trình dộ Level
+        /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<UnitSkillMockTest> UnitSkillMockTests { get; set; } = new List<UnitSkillMockTest>();
-
-        public List<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
-        public List<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
+        public ICollection<UnitSkillMockTest> UnitSkillMockTests { get; set; } = new List<UnitSkillMockTest>();
+        public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
+        public ICollection<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
+        public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
+        public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
+        public ICollection<MockTestResult> MockTestResults { get; set; } = new List<MockTestResult>();
     }
 }

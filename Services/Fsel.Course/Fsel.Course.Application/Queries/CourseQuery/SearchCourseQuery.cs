@@ -1,76 +1,98 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
+using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Core.Extensions;
+using Fsel.Course.Application.Services.UserServices;
+using Fsel.Course.Application.Services.UserServices.Models;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Courses;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.CourseQuery
 {
-    public class SearchCourseQuery : SearchCourseQueryModel, IRequest<MethodResult<PagingItemsModel<CourseModel>>>
+    public class SearchCourseQuery : SearchCourseQueryModel, IRequest<MethodResult<PagingItemsModel<CourseSearchModel>>>
     {
     }
 
-    public class SearchCourseQueryHandler : IRequestHandler<SearchCourseQuery, MethodResult<PagingItemsModel<CourseModel>>>
+    public class SearchCourseQueryHandler : IRequestHandler<SearchCourseQuery, MethodResult<PagingItemsModel<CourseSearchModel>>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public SearchCourseQueryHandler(IMapper mapper, ICourseRepository courseRepository)
+        public SearchCourseQueryHandler(ICourseRepository courseRepository, IUserService userService)
         {
             _courseRepository = courseRepository;
-            _mapper = mapper;
+            _userService = userService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<CourseModel>>> Handle(SearchCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<CourseSearchModel>>> Handle(SearchCourseQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<CourseModel>> methodResult = new MethodResult<PagingItemsModel<CourseModel>>();
-
+            MethodResult<PagingItemsModel<CourseSearchModel>> methodResult = new MethodResult<PagingItemsModel<CourseSearchModel>>();
+            ArgumentNullException.ThrowIfNull(request);
             if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
 
-            var courseQuery = from i in _courseRepository.Queryable
-                              select new CourseModel
+            var courseQuery = _courseRepository.Queryable
+                              .Include(course => course.CourseTeachers.Where(n => !n.IsDeleted))
+                              .Select(course => new CourseSearchModel
                               {
-                                  Id = i.Id,
-                                  Name = i.Name,
-                                  NumberOfLessons = i.NumberOfLessons,
-                                  NumberOfUnits = i.NumberOfUnits,
-                                  IsPublish = i.IsPublish,
-                                  CourseLevel = i.CourseLevel,
-                                  CreatedDate = i.CreatedDate,
-                                  CreatedUserId = i.CreatedUserId,
-                                  CreatedFullName = i.CreatedFullName,
-                                  UpdatedDate = i.UpdatedDate,
-                                  UpdatedUserId = i.UpdatedUserId,
-                                  UpdatedFullName = i.UpdatedFullName,
-                              };
-            //Keyword
+                                  Id = course.Id,
+                                  Name = course.Name,
+                                  Code = course.Code,
+                                  InstructionContent = course.InstructionContent,
+                                  Status = course.Status,
+                                  CourseLevel = course.CourseLevel,
+                                  CreatedDate = course.CreatedDate,
+                                  CreatedUserId = course.CreatedUserId,
+                                  CreatedFullName = course.CreatedFullName,
+                                  UpdatedDate = course.UpdatedDate,
+                                  UpdatedUserId = course.UpdatedUserId,
+                                  UpdatedFullName = course.UpdatedFullName,
+                                  TeacherIds = course.CourseTeachers.Where(n => !n.IsDeleted).Select(x => x.TeacherId).Distinct().ToList(),
+                              });
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                courseQuery = courseQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                courseQuery = courseQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
-            int totalItem = await courseQuery.CountAsync().ConfigureAwait(false);
-            var lists = await courseQuery.OrderByDescending(x => x.Id)
-                    .Skip((request.Page - 1) * request.PageSize)
-                    .Take(request.PageSize)
+            if (request.CourseLevel != null)
+            {
+                courseQuery = courseQuery.Where(m => m.CourseLevel == request.CourseLevel);
+            }
+
+            if (request.TeacherId != null)
+            {
+                courseQuery = courseQuery.Where(m => m.TeacherIds!.Any(x => x == request.TeacherId));
+            }
+
+            int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await courseQuery
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
-                    .ToListAsync()
+                    .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<CourseModel>
+            var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
+            if (teacherResults.IsSuccessStatusCode)
             {
-                Items = _mapper.Map<IEnumerable<CourseModel>>(lists),
-                PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
-            };
+                var teachers = teacherResults.Content?.Result;
+                foreach (var item in lists)
+                {
+                    item.TeacherNames = teachers?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
+                }
+            }
 
+            methodResult.Result = new PagingItemsModel<CourseSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

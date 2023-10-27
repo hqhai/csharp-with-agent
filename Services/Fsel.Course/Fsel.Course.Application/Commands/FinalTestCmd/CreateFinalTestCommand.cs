@@ -1,0 +1,110 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Application.Commands.FinalTestCmd
+{
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.CommandModels.FinalTests;
+    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class CreateFinalTestCommand : CreateFinalTestCommandModel, IRequest<MethodResult<FinalTestModel>>
+    {
+    }
+
+    public class CreateFinalTestCommandHandler : IRequestHandler<CreateFinalTestCommand, MethodResult<FinalTestModel>>
+    {
+        private readonly IMapper _mapper;
+        private readonly IFinalTestRepository _finalTestRepository;
+        private readonly SectionConverter _sectionConverter;
+
+        public CreateFinalTestCommandHandler(IMapper mapper, IFinalTestRepository finalTestRepository, SectionConverter sectionConverter)
+        {
+            _mapper = mapper;
+            _finalTestRepository = finalTestRepository;
+            _sectionConverter = sectionConverter;
+        }
+
+        public async Task<MethodResult<FinalTestModel>> Handle(CreateFinalTestCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<FinalTestModel> methodResult = new MethodResult<FinalTestModel>();
+            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
+                return methodResult;
+            }
+            if (await _finalTestRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name));
+                return methodResult;
+            }
+            FinalTest finalTest = _mapper.Map<FinalTest>(request);
+
+            foreach (var sectionGroup in request.SectionGroups)
+            {
+                if (sectionGroup == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                    return methodResult;
+                }
+                else
+                {
+                    if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
+                        return methodResult;
+                    }
+
+                    SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
+                    if (!method.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    }
+
+                    finalTest.FinalTestSections.Add(new FinalTestSection
+                    {
+                        SectionGroup = newSectionGroup
+                    });
+                    if (!newSectionGroup.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                        return methodResult;
+                    }
+                }
+            }
+            if (!finalTest.IsValid())
+            {
+                methodResult.AddErrorBadRequest(finalTest.ErrorMessages);
+                return methodResult;
+            }
+            else if (!methodResult.IsOK)
+            {
+                return methodResult;
+            }
+            await _finalTestRepository.ExecuteTransactionAsync(async () =>
+            {
+                finalTest = _finalTestRepository.Add(finalTest);
+
+                await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<FinalTestModel>(finalTest);
+                return methodResult;
+            });
+
+            return methodResult;
+        }
+    }
+}

@@ -1,0 +1,16 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Shared.Enums
+{
+    public enum EnumSenderTemplate
+    {
+        SendOtp,
+        SendOtpAndLink,
+        SendStudentPTOnline,
+        SendSurveyToParentStudent,
+        SendStudentCompleteUnitGood,
+        SendStudentCompleteUnitWeak,
+        SendStudentCompleteCourseIetls,
+        SendStudentCompleteCourseAcademic
+    }
+}

@@ -1,4 +1,6 @@
-﻿namespace Fsel.Common.Helpers
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Common.Helpers
 {
     public class PasswordGeneratorHelper
     {
@@ -38,37 +40,37 @@
             if (minimumLengthPassword < 1)
             {
                 throw new ArgumentException("The minimumlength is smaller than 1.",
-                    "minimumLengthPassword");
+                    nameof(minimumLengthPassword));
             }
 
             if (minimumLengthPassword > maximumLengthPassword)
             {
                 throw new ArgumentException("The minimumLength is bigger than the maximum length.",
-                    "minimumLengthPassword");
+                    nameof(minimumLengthPassword));
             }
 
             if (minimumLowerCaseChars < 0)
             {
                 throw new ArgumentException("The minimumLowerCase is smaller than 0.",
-                    "minimumLowerCaseChars");
+                    nameof(minimumLowerCaseChars));
             }
 
             if (minimumUpperCaseChars < 0)
             {
                 throw new ArgumentException("The minimumUpperCase is smaller than 0.",
-                    "minimumUpperCaseChars");
+                    nameof(minimumUpperCaseChars));
             }
 
             if (minimumNumericChars < 0)
             {
                 throw new ArgumentException("The minimumNumeric is smaller than 0.",
-                    "minimumNumericChars");
+                    nameof(minimumNumericChars));
             }
 
             if (minimumSpecialChars < 0)
             {
                 throw new ArgumentException("The minimumSpecial is smaller than 0.",
-                    "minimumSpecialChars");
+                    nameof(minimumSpecialChars));
             }
 
             _minimumNumberOfChars = minimumLowerCaseChars + minimumUpperCaseChars +
@@ -79,7 +81,7 @@
                 throw new ArgumentException(
                     "The minimum length ot the password is smaller than the sum " +
                     "of the minimum characters of all catagories.",
-                    "maximumLengthPassword");
+                    nameof(maximumLengthPassword));
             }
 
             MinimumLengthPassword = minimumLengthPassword;
@@ -106,8 +108,6 @@
         {
             var lengthOfPassword = _randomSecure.Next(MinimumLengthPassword, MaximumLengthPassword);
 
-            // Get the required number of characters of each catagory and
-            // add random charactes of all catagories
             var minimumChars = GetRandomString(AllLowerCaseChars, MinimumLowerCaseChars) +
                             GetRandomString(AllUpperCaseChars, MinimumUpperCaseChars) +
                             GetRandomString(AllNumericChars, MinimumNumericChars) +
@@ -115,7 +115,6 @@
             var rest = GetRandomString(_allAvailableChars, lengthOfPassword - minimumChars.Length);
             var unshuffeledResult = minimumChars + rest;
 
-            // Shuffle the result so the order of the characters are unpredictable
             var result = unshuffeledResult.ShuffleTextSecure();
             return result;
         }
@@ -149,7 +148,7 @@
 
     internal static class Extensions
     {
-        private static readonly Lazy<RandomSecureHelper> RandomSecure =
+        private static readonly Lazy<RandomSecureHelper> s_randomSecure =
             new Lazy<RandomSecureHelper>(() => new RandomSecureHelper());
 
         public static IEnumerable<T> ShuffleSecure<T>(this IEnumerable<T> source)
@@ -157,7 +156,7 @@
             var sourceArray = source.ToArray();
             for (int counter = 0; counter < sourceArray.Length; counter++)
             {
-                int randomIndex = RandomSecure.Value.Next(counter, sourceArray.Length);
+                int randomIndex = s_randomSecure.Value.Next(counter, sourceArray.Length);
                 yield return sourceArray[randomIndex];
 
                 sourceArray[randomIndex] = sourceArray[counter];

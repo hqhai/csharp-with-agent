@@ -1,0 +1,58 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Domain.Enums.ErrorCodes
+{
+    public enum EnumClassForumResultErrorCode
+    {
+        /// <summary>
+        /// Class Forum result Status not pendding
+        /// </summary>
+        ClassForumResultStatusNotPendding,
+
+        /// <summary>
+        /// Class Forum result Status not pendding For Grading
+        /// </summary>
+        ClassForumResultStatusNotPendingForGrading,
+
+        /// <summary>
+        /// Can not delete in the current status
+        /// </summary>
+        CanNotDeleteInCurrentStatus,
+
+        /// <summary>
+        /// Class Forum result Status not graded
+        /// </summary>
+        ClassForumResultStatusNotGraded,
+
+        /// <summary>
+        /// Beed Back Star Can only Have 5 star
+        /// </summary>
+        FeedBackStarOnlyCanHane5,
+
+        /// <summary>
+        /// Result not from student
+        /// </summary>
+        ResultNotFromStudent,
+
+        /// <summary>
+        /// Feedback Positive Or FeedBack Both Have Value
+        /// </summary>
+        FeedbackPositiveOrFeedBackBothHaveValue,
+        /// <summary>
+        /// Cso Id Invalid
+        /// </summary>
+        CsoInvalid,
+        /// <summary>
+        /// Teacher Id Invalid
+        /// </summary>
+        TeacherInvalid,
+        /// <summary>
+        /// Contains Forbidden Keywords
+        /// </summary>
+        ContainsForbiddenKeywords,
+        /// <summary>
+        /// Class Forum result Status not pendding For Grading or Graded
+        /// </summary>
+        ClassForumResultStatusNotPendingForGradingOrGraded,
+    }
+}

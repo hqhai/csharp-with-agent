@@ -1,10 +1,12 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Sender.Domain.Models.Entities
 {
     public class SendEmailModel
     {
-        public List<string>? ToEmails { get; set; }
-        public List<string>? BccEmails { get; set; }
-        public List<string>? CcEmails { get; set; }
+        public IList<string>? ToEmails { get; set; }
+        public IList<string>? BccEmails { get; set; }
+        public IList<string>? CcEmails { get; set; }
         public string? Subject { get; set; }
         public string? Content { get; set; }
     }

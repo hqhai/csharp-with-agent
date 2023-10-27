@@ -1,35 +1,27 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumVideoErrorCode
     {
         /// <summary>
-        /// Video does not exist
+        /// Videos name is exist
         /// </summary>
-        VD01V,
+        VideoNameIsExist,
 
         /// <summary>
         /// Video was used
         /// </summary>
-        VD02V,
+        VideoUsed,
 
         /// <summary>
-        /// Video not is correct
+        /// Config is in the wrong format
         /// </summary>
-        VD03V,
+        ConfigIsInTheWrongFormat,
 
         /// <summary>
-        /// Name cannot be empty
+        /// Cannot have both UnitTest and SkillTest at the same time
         /// </summary>
-        VD01C,
-
-        /// <summary>
-        /// Name limited to 250 characters
-        /// </summary>
-        VD02C,
-
-        /// <summary>
-        /// Instruction Content limited to 1000 characters
-        /// </summary>
-        VD03C,
+        CanNotUnitTestAndSkillTestAtTheSameTime,
     }
 }

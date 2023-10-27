@@ -1,8 +1,10 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Models.CommandModels.ClassForums;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 
 namespace Fsel.Course.Infrastructure.Maps
 {
@@ -11,8 +13,8 @@ namespace Fsel.Course.Infrastructure.Maps
         public ClassForumProfile()
         {
             CreateMap<ClassForum, ClassForumModel>().IgnoreAllNonExisting();
-            CreateMap<CreateClassForumCommandModel, ClassForum>().IgnoreAllNonExisting();
-            CreateMap<UpdateClassForumCommandModel, ClassForum>().IgnoreAllNonExisting();
+            CreateMap<CreateClassForumCommandModel, ClassForum>().IgnoreAllNonExisting();    
+            CreateMap<ClassForum, ClassForumByStudentModel>().IgnoreAllNonExisting();
         }
     }
 }

@@ -1,10 +1,17 @@
-﻿using System.Security.Cryptography;
+// Copyright (c) Atlantic. All rights reserved.
+
+using System.Security.Cryptography;
 
 namespace Fsel.Common.Helpers
 {
     public class RandomSecureHelper
     {
-        private readonly RNGCryptoServiceProvider _rngProvider = new RNGCryptoServiceProvider();
+        private readonly RandomNumberGenerator _rngProvider;
+
+        public RandomSecureHelper()
+        {
+            _rngProvider = RandomNumberGenerator.Create();
+        }
 
         public int Next()
         {
@@ -16,14 +23,21 @@ namespace Fsel.Common.Helpers
 
         public int Next(int maximumValue)
         {
-            // Do not use Next() % maximumValue because the distribution is not OK
-            return Next(0, maximumValue);
+            return Next(0, maximumValue);
         }
 
         public int Next(int minimumValue, int maximumValue)
         {
-            var seed = Next();             //  Generate uniformly distributed random integers within a given range.
-            return new Random(seed).Next(minimumValue, maximumValue);
+            var seed = Next();
+            return new Random(seed).Next(minimumValue, maximumValue);
+        }
+
+        public string Secretstrings()
+        {
+            var randomBytes = new byte[32];
+            _rngProvider.GetBytes(randomBytes);
+            string secret = BitConverter.ToString(randomBytes).Replace("-", "", StringComparison.OrdinalIgnoreCase);
+            return secret;
         }
     }
 }

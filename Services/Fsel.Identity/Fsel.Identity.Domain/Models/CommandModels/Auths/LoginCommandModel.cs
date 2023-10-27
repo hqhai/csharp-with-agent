@@ -1,13 +1,15 @@
-using System.ComponentModel.DataAnnotations;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Shared.Enums;
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 {
     public class LoginCommandModel
     {
-        [Required]
         public string? Username { get; set; }
 
-        [Required]
         public string? Password { get; set; }
+
+        public EnumPlatformCode? PlatformCode { get; set; }
     }
 }

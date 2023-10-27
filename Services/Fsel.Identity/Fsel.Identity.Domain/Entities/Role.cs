@@ -3,11 +3,12 @@
 namespace Fsel.Identity.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
-    using Microsoft.AspNetCore.Identity;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Entities;
 
-    public class Role : IdentityRole
+    public class Role : RoleEntity
     {
-        [StringLength(500)]
-        public string? Description { get; set; }
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Discription { get; set; }
     }
 }

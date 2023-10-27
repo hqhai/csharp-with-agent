@@ -1,4 +1,6 @@
-﻿using Fsel.Common.ActionResults;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Common.ActionResults;
 using Fsel.Core.Entities;
 
 namespace Fsel.Core.Base.Interfaces
@@ -12,6 +14,8 @@ namespace Fsel.Core.Base.Interfaces
 
         Task<T?> GetIncludeByIdAsync(Guid id, int? siteId = null);
 
+        Task<IEnumerable<T>> GetByIdsAsync(IEnumerable<Guid> ids, int? siteId = null);
+
         Task<bool> AnyAsync(Guid id, int? siteId = null);
 
         bool IsIdsInValid(IEnumerable<Guid> ids, int? siteId = null);
@@ -20,7 +24,11 @@ namespace Fsel.Core.Base.Interfaces
 
         T Add(T newEntity);
 
+        Task AddList(IEnumerable<T> newEntities);
+
         T Update(T updateEntity);
+
+        void UpdateList(IEnumerable<T> updateEntities);
 
         Task<bool> DeleteAsync(T deleteEntity);
 

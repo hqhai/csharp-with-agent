@@ -1,7 +1,9 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -10,14 +12,13 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên bài test
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumPlacementTestErrorCode.PT01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumPlacementTestErrorCode.PT02C))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         /// <summary>
         /// Nội dung hướng dẫn bài test
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumPlacementTestErrorCode.PT03C))]
         public string? InstructionContent { get; set; }
 
         /// <summary>
@@ -28,6 +29,9 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Trình độ khóa
         /// </summary>
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumPlacementTestLevel Level { get; set; }
+
+        public ExtraPractice? ExtraPractice { get; set; }
+        public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
     }
 }

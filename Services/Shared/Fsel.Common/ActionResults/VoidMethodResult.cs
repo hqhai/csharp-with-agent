@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Common.Enums.ErrorCodes;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Common.ActionResults
 {
@@ -12,69 +16,132 @@ namespace Fsel.Common.ActionResults
 
         public int? StatusCode { get; set; }
 
-        public void AddErrorMessage(ErrorResult errorResult)
+        private static IList<Error> GetErrors(string? fieldName = null, params object[]? errorValues)
         {
-            _errorMessages.Add(errorResult);
+            return new List<Error>() { new Error(fieldName, errorValues) };
         }
 
-        public void AddErrorMessage(string errorCode, string[] errorValues)
+        private static IList<Error> GetErrors(params object[]? errorValues)
         {
-            ErrorResult errorResult = new ErrorResult
+            return new List<Error>() { new Error(errorValues) };
+        }
+
+        public void AddError(ErrorResult? errorResult)
+        {
+            if (errorResult != null)
             {
-                ErrorCode = errorCode,
-            };
-            if (errorValues != null && errorValues.Length != 0)
+                _errorMessages.Add(errorResult);
+            }
+        }
+
+        public void AddError(IReadOnlyCollection<ErrorResult>? errorResults)
+        {
+            if (errorResults != null)
             {
-                foreach (string item in errorValues)
+                foreach (var errorResult in errorResults)
                 {
-                    errorResult.ErrorValues.Add(item);
+                    _errorMessages.Add(errorResult);
                 }
             }
-
-            AddErrorMessage(errorResult);
         }
 
-        public void AddErrorMessage(string errorCode, string errorMessage, string[] errorValues)
+        public void AddError(string? errorCode, params Error[]? errors)
         {
-            ErrorResult errorResult = new ErrorResult
+            if (errors != null)
             {
-                ErrorCode = errorCode,
-                ErrorMessage = errorMessage
-            };
-            if (errorValues != null && errorValues.Length != 0)
-            {
-                foreach (string item in errorValues)
+                _errorMessages.Add(new ErrorResult
                 {
-                    errorResult.ErrorValues.Add(item);
-                }
+                    ErrorCode = errorCode,
+                    Errors = errors
+                });
             }
-
-            AddErrorMessage(errorResult);
         }
 
-        public void AddErrorMessage(string exceptionErrorMessage)
+        public void AddErrorServer()
         {
-            AddErrorMessage("API_SERVER_ERROR", new string[0], exceptionErrorMessage);
+            AddError(StatusCodes.Status500InternalServerError, nameof(EnumSystemErrorCode.ServerError));
         }
 
-        private void AddErrorMessage(string errorCode, string[] errorValues, string exceptionErrorMessage)
+        public void AddError(string? errorCode)
         {
             _errorMessages.Add(new ErrorResult
             {
                 ErrorCode = errorCode,
-                ErrorMessage = "Error: " + exceptionErrorMessage,
-                ErrorValues = new List<string>(errorValues)
             });
         }
 
-        private void AddErrorMessage(string errorCode, string errorMessage, string[] errorValues, string exceptionErrorMessage)
+        public void AddError(string? errorCode, params object[]? errorValues)
         {
             _errorMessages.Add(new ErrorResult
             {
                 ErrorCode = errorCode,
-                ErrorMessage = "Error: " + errorMessage + ", Exception Message: " + exceptionErrorMessage,
-                ErrorValues = new List<string>(errorValues)
+                Errors = GetErrors(errorValues)
             });
+        }
+
+        public void AddError(string? errorCode, string? fieldName = null, params object[]? errorValues)
+        {
+            _errorMessages.Add(new ErrorResult
+            {
+                ErrorCode = errorCode,
+                Errors = GetErrors(fieldName, errorValues)
+            });
+        }
+
+        public void AddError(int statusCode, string? errorCode, string? fieldName, params object[]? errorValues)
+        {
+            StatusCode = statusCode;
+            AddError(errorCode, fieldName, errorValues);
+        }
+
+        public void AddError(int statusCode, string? errorCode, string? fieldName, object? errorValue)
+        {
+            if (errorValue != null)
+            {
+                StatusCode = statusCode;
+                AddError(errorCode, fieldName, errorValue);
+            }
+        }
+
+        public void AddError(int statusCode, string? errorCode, params Error[]? errors)
+        {
+            StatusCode = statusCode;
+            AddError(errorCode, errors);
+        }
+
+        public void AddError(int statusCode, IReadOnlyCollection<ErrorResult>? errorResults)
+        {
+            StatusCode = statusCode;
+            if (errorResults != null)
+            {
+                foreach (var errorResult in errorResults)
+                {
+                    _errorMessages.Add(errorResult);
+                }
+            }
+        }
+
+        public void AddErrorBadRequest(IReadOnlyCollection<ErrorResult>? errorResults)
+        {
+            AddError(StatusCodes.Status400BadRequest, errorResults);
+        }
+
+        public void AddErrorBadRequest(string? errorCode, string? fieldName = null, params object[]? errorValues)
+        {
+            AddError(StatusCodes.Status400BadRequest, errorCode, fieldName, errorValues);
+        }
+
+        public void AddErrorBadRequest(string? errorCode, string? fieldName, object? errorValue)
+        {
+            if (errorValue != null)
+            {
+                AddError(StatusCodes.Status400BadRequest, errorCode, fieldName, errorValue);
+            }
+        }
+
+        public void AddErrorBadRequest(string? errorCode, params Error[]? errors)
+        {
+            AddError(StatusCodes.Status400BadRequest, errorCode, errors);
         }
 
         public virtual IActionResult GetActionResult()
@@ -82,11 +149,11 @@ namespace Fsel.Common.ActionResults
             ObjectResult objectResult = new ObjectResult(this);
             if (!StatusCode.HasValue)
             {
-                objectResult.StatusCode = 500;
+                objectResult.StatusCode = StatusCodes.Status500InternalServerError;
                 return objectResult;
             }
 
-            objectResult.StatusCode = StatusCode;
+            objectResult.StatusCode = StatusCodes.Status200OK;
             return objectResult;
         }
     }

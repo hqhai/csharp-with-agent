@@ -1,0 +1,49 @@
+include:
+  - project: 'ci-templates/build-docker-images'
+    ref: master
+    file: '/general.yml'
+  - project: 'ci-templates/build-docker-images'
+    ref: master
+    file: '/build-image-gitlab-registry.yml'
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/auth-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/gateway-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/hangfire-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/interaction-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/lcms-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/lms-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/notification-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/ordering-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/realtime-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/sender-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/storage-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/system-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/training-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/user-api.yaml

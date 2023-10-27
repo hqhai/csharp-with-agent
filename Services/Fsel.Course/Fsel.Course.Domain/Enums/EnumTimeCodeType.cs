@@ -1,7 +1,11 @@
-﻿namespace Fsel.Course.Domain.Enums
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Domain.Enums
 {
     public enum EnumTimeCodeType
     {
-        Standalone, UnitTest, SkillTest
+        Standalone,
+        UnitTest,
+        SkillTest
     }
 }

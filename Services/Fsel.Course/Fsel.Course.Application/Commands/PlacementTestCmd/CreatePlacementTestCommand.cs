@@ -1,11 +1,19 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Infrastructure.Common;
+using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.PlacementTestCmd
 {
@@ -17,26 +25,76 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     {
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
+        private readonly SectionConverter _sectionConverter;
 
         public CreatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
-            IMapper mapper)
+            IMapper mapper,
+            SectionConverter sectionConverter)
         {
             _placementTestRepository = placementTestRepository;
             _mapper = mapper;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<PlacementTestModel>> Handle(CreatePlacementTestCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<PlacementTestModel> methodResult = new MethodResult<PlacementTestModel>();
 
             #region Validation
 
+            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
+                return methodResult;
+            }
+            if (await _placementTestRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Name));
+                return methodResult;
+            }
             PlacementTest placementTest = _mapper.Map<PlacementTest>(request);
-
             if (!placementTest.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(placementTest.ErrorMessages);
+                methodResult.AddErrorBadRequest(placementTest.ErrorMessages);
+                return methodResult;
+            }
+
+            foreach (var sectionGroup in request.SectionGroups)
+            {
+                if (sectionGroup == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                    return methodResult;
+                }
+                else
+                {
+                    if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
+                        return methodResult;
+                    }
+
+                    SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
+                    if (!method.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    }
+                    placementTest.PlacementTestSections.Add(new PlacementTestSection
+                    {
+                        SectionGroup = newSectionGroup
+                    });
+                    if (!newSectionGroup.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                        return methodResult;
+                    }
+                }
+            }
+
+            if (!methodResult.IsOK)
+            {
                 return methodResult;
             }
 
@@ -44,6 +102,19 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
+                if (placementTest.Level == EnumPlacementTestLevel.IELTS)
+                {
+                    placementTest.ExtraPractice = new ExtraPractice
+                    {
+                        Code = placementTest.Name,
+                        Name = placementTest.Name,
+                        IsActive = placementTest.IsActive,
+                        InstructionContent = placementTest.InstructionContent,
+                        Type = EnumExtraPracticeType.MockTest,
+                        CourseLevel = placementTest.Level.GetCourseLevelByPlacementTestLevel()
+                    };
+                }
+
                 placementTest = _placementTestRepository.Add(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

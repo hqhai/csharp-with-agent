@@ -1,13 +1,19 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
-using Fsel.Course.Domain.Entities;
+using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Course.Application.Services.UserServices;
+using Fsel.Course.Application.Services.UserServices.Models;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Courses;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Infrastructure.Common;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.CourseCmd
 {
@@ -19,74 +25,74 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitRepository _unitRepository;
-        private readonly ICourseUnitMockTestRepository _courseUnitRepository;
+        private readonly CourseHelper _courseHelper;
+        private readonly IUserService _userService;
 
-        public UpdateCourseTestCommandHandler(ICourseRepository courseRepository, ICourseUnitMockTestRepository courseUnitRepository,
-            IMapper mapper,
-            IUnitRepository unitRepository)
+        public UpdateCourseTestCommandHandler(ICourseRepository courseRepository
+            , IMapper mapper
+            , CourseHelper courseHelper
+            , IUserService userService)
         {
-            _courseUnitRepository = courseUnitRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
-            _unitRepository = unitRepository;
+            _courseHelper = courseHelper;
+            _userService = userService;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(UpdateCourseCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
             #region Validation
 
-            var course = await _courseRepository.GetIncludeByIdAsync(request.Id);
+            var course = await _courseRepository.Queryable.Include(e => e.CourseUnitMockTests)
+                                                        .Include(e => e.CourseTeachers)
+                                                        .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
             if (course == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumCourseErrorCode.C01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+            var method = await _courseHelper.Validate(course, request);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+            if (course.Status != EnumCourseStatus.New)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
                 return methodResult;
             }
             _mapper.Map(request, course);
-
-            if (!course.IsValid())
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
+            if (!teachers.IsSuccessStatusCode)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(course.ErrorMessages);
-                return methodResult;
-            }
-
-            if (request.UnitIds == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumCourseErrorCode.C03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.UnitIds), request.UnitIds) });
-                return methodResult;
-            }
-
-            if (_unitRepository.IsIdsInValid(request.UnitIds))
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumUnitErrorCode.U03V));
-
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
                 return methodResult;
             }
 
             #endregion Validation
 
+            course.CourseUnitMockTests.ForEach(x =>
+            {
+                var query = course.CourseUnitMockTests.OrderBy(n => n.DisplayOrder);
+                if (x.UnitId != null)
+                {
+                    x.Number = query.Where(n => n.UnitId != null).ToList().IndexOf(x) + 1;
+                }
+                else if (x.MockTestId != null)
+                {
+                    x.Number = query.Where(n => n.MockTestId != null).ToList().IndexOf(x) + 1;
+                }
+            });
+
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                course.CourseUnitMockTests = request.UnitIds.Select(x => new CourseUnitMockTest
-                {
-                    UnitId = x
-                }).ToList();
-
                 course = _courseRepository.Update(course);
-
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<CourseModel>(course);
                 return methodResult;
             });

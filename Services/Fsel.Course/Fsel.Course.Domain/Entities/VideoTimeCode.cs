@@ -1,38 +1,50 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
     public class VideoTimeCode : Entity
     {
-        [Range(1, long.MaxValue, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC04C))]
-        public long DisplayTimeTicks { get; set; }
+        /// <summary>
+        /// Thời gian bắt đầu xuất hiện TimeCode
+        /// </summary>
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public double DisplayTime { get; set; }
 
-        [Range(1, long.MaxValue, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC04C))]
-        public long ExecutionTimeTicks { get; set; }
+        /// <summary>
+        /// Thời gian hiện làm bài
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public double ExecutionTime { get; set; }
 
+        /// <summary>
+        /// Loại TimeCode
+        /// </summary>
         public EnumTimeCodeType TimeCodeType { get; set; }
 
         public Video? Video { get; set; }
         public Guid VideoId { get; set; }
 
         [NotMapped]
-        public TimeSpan DisplayTime
+        public TimeSpan DisplayTimeSpan
         {
-            get { return TimeSpan.FromTicks(DisplayTimeTicks); }
-            set { DisplayTimeTicks = value.Ticks; }
+            get { return TimeSpan.FromSeconds(DisplayTime); }
         }
 
         [NotMapped]
-        public TimeSpan ExecutionTime
+        public TimeSpan ExecutionTimeSpan
         {
-            get { return TimeSpan.FromTicks(ExecutionTimeTicks); }
-            set { ExecutionTimeTicks = value.Ticks; }
+            get { return TimeSpan.FromSeconds(ExecutionTime); }
         }
 
-        public List<TimeCodeExcercise> TimeCodeExcercises { get; set; } = new List<TimeCodeExcercise>();
+        public ICollection<TimeCodeExercise> TimeCodeExercises { get; set; } = new List<TimeCodeExercise>();
+        public ICollection<VideoTimeCodeResult> VideoTimeCodeResults { get; set; } = new List<VideoTimeCodeResult>();
+        public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
+        public ICollection<ExtraPracticeAnswer> ExtraPracticeAnswers { get; set; } = new List<ExtraPracticeAnswer>();
     }
 }

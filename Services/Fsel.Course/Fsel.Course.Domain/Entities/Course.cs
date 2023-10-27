@@ -1,26 +1,65 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Domain.Entities
 {
     public class Course : Entity
     {
-        [Required(ErrorMessage = nameof(EnumCourseErrorCode.C01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumCourseErrorCode.C02C))]
+        /// <summary>
+        /// Tên khóa học
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumCourseErrorCode.C04C))]
-        public int NumberOfUnits { get; set; }
+        /// <summary>
+        /// Mã khóa học
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Code { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumCourseErrorCode.C04C))]
-        public int NumberOfLessons { get; set; }
+        /// <summary>
+        /// Nội dung hướng dẫn khóa học
+        /// </summary>
+        public string? InstructionContent { get; set; }
 
-        public bool IsPublish { get; set; }
+        /// <summary>
+        /// Loại trạng thái
+        /// </summary>
+        public EnumCourseStatus Status { get; set; }
 
+        /// <summary>
+        /// Trình độ Level
+        /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
+        /// <summary>
+        /// Loại khóa học
+        /// </summary>
+        [NotMapped]
+        public EnumCourseType CourseType
+        {
+            get
+            {
+                return CourseLevel.GetEnumCourseType();
+            }
+        }
+
+        public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
+        public ICollection<CourseTeacher> CourseTeachers { get; set; } = new List<CourseTeacher>();
+        public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
+        public ICollection<CourseResult> CourseResults { get; set; } = new List<CourseResult>();
+        public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
+
+        public ICollection<MockTestResult> MockTestResults { get; set; } = new List<MockTestResult>();
+        public ICollection<FinalTestResult> FinalTestResults { get; set; } = new List<FinalTestResult>();
     }
 }

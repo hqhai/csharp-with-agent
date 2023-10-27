@@ -1,0 +1,27 @@
+version: '3.5'
+services:
+    ordering.service:
+        container_name: ordering.service
+        hostname: OrderingService
+        image: ${DOCKER_REGISTRY-}ordering-microservice:v1
+        build:
+            context: ./../../
+            dockerfile: Environments/Testing/Ordering.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.ordering-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Ordering
+            - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
+            - SERVICES_ClassApiUrl=http://training-testing.fsel-testing.svc/api/v1
+            - SERVICES_LmsCourseApiUrl=http://lmsapi-testing.fsel-testing.svc/api/v1
+            - SERVICES_OrderApiUrl=http://ordering-testing.fsel-testing.svc/api/v1
+        ports:
+            - 5209:80
+            - 7209:443

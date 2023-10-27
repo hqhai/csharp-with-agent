@@ -1,8 +1,10 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 
 namespace Fsel.Course.Infrastructure.Maps
 {
@@ -12,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<VideoTimeCode, VideoTimeCodeModel>().IgnoreAllNonExisting();
             CreateMap<CreateVideoTimeCodeCommandModel, VideoTimeCode>().IgnoreAllNonExisting();
-            CreateMap<UpdateVideoTimeCodeCommandModel, VideoTimeCode>().IgnoreAllNonExisting();
+            CreateMap<VideoTimeCodeResultModel, VideoTimeCodeResult>().IgnoreAllNonExisting();
         }
     }
 }

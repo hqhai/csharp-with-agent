@@ -1,35 +1,37 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumMockTestErrorCode
     {
         /// <summary>
-        /// Mock Final Test does not exist
+        /// MockTest Exists Other Than TypeSkillMockTest
         /// </summary>
-        MT01V,
+        MockTestExistsOtherThanTypeSkillMockTest,
 
         /// <summary>
-        /// Mock Final Test  was used
+        /// MockTest Exists Other Than TypeFullMockTest
         /// </summary>
-        MT02V,
+        MockTestExistsOtherThanTypeFullMockTest,
 
         /// <summary>
-        /// Mock Final Test  not is correct
+        /// MockTest  is in active state
         /// </summary>
-        MT03V,
+        MockTestInActiveState,
 
         /// <summary>
-        /// Name cannot be empty
+        /// MockTest is not in active state
         /// </summary>
-        MT01C,
+        MockTestNotInActiveState,
 
         /// <summary>
-        /// Name limited to 250 characters
+        /// MockTest must correct score
         /// </summary>
-        MT02C,
+        MockTestMustCorrectScore,
 
         /// <summary>
-        /// Mock Type = UnitMockTest
+        /// Skill Speaking Or Writing
         /// </summary>
-        MT04V
+        SkillSpeakingOrWriting,
     }
 }

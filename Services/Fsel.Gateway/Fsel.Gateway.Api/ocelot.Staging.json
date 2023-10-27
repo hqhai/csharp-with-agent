@@ -1,0 +1,297 @@
+{
+  "GlobalConfiguration": {
+    "BaseUrl": "http://gateway-staging.fsel-staging.svc"
+  },
+  "Routes": [
+    // Auth Service
+    {
+      "SwaggerKey": "auth",
+      "UpstreamPathTemplate": "/auth-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // User Service
+    {
+      "SwaggerKey": "user",
+      "UpstreamPathTemplate": "/user-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Lcms Course Service
+    {
+      "SwaggerKey": "lcms-course",
+      "UpstreamPathTemplate": "/lcms-course-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "lcmsapi-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Lms Course Service
+    {
+      "SwaggerKey": "lms-course",
+      "UpstreamPathTemplate": "/lms-course-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "lmsapi-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Storage Service
+    {
+      "SwaggerKey": "storage",
+      "UpstreamPathTemplate": "/storage-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "storage-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Sender Service
+    {
+      "SwaggerKey": "sender",
+      "UpstreamPathTemplate": "/sender-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sender-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Training Service
+    {
+      "SwaggerKey": "training",
+      "UpstreamPathTemplate": "/training-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "training-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Interaction Service
+    {
+      "SwaggerKey": "interaction",
+      "UpstreamPathTemplate": "/interaction-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "interaction-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Ordering Service
+    {
+      "SwaggerKey": "ordering",
+      "UpstreamPathTemplate": "/ordering-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "ordering-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // System Service
+    {
+      "SwaggerKey": "system",
+      "UpstreamPathTemplate": "/system-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "system-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Realtime Service
+    {
+      "SwaggerKey": "realtime",
+      "UpstreamPathTemplate": "/realtime-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "realtime-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Notification Service
+    {
+      "SwaggerKey": "notification",
+      "UpstreamPathTemplate": "/notification-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "notification-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    }
+  ],
+  "SwaggerEndPoints": [
+    {
+      "Key": "auth",
+      "Config": [
+        {
+          "Name": "Auths API",
+          "Version": "v1",
+          "Url": "http://auth-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "user",
+      "Config": [
+        {
+          "Name": "Users API",
+          "Version": "v1",
+          "Url": "http://user-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "lcms-course",
+      "Config": [
+        {
+          "Name": "Lcms Courses API",
+          "Version": "v1",
+          "Url": "http://lcmsapi-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "lms-course",
+      "Config": [
+        {
+          "Name": "Lms Courses API",
+          "Version": "v1",
+          "Url": "http://lmsapi-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "storage",
+      "Config": [
+        {
+          "Name": "Storage API",
+          "Version": "v1",
+          "Url": "http://storage-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "sender",
+      "Config": [
+        {
+          "Name": "Senders API",
+          "Version": "v1",
+          "Url": "http://sender-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "training",
+      "Config": [
+        {
+          "Name": "Training API",
+          "Version": "v1",
+          "Url": "http://training-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "interaction",
+      "Config": [
+        {
+          "Name": "Interaction API",
+          "Version": "v1",
+          "Url": "http://interaction-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "ordering",
+      "Config": [
+        {
+          "Name": "Ordering API",
+          "Version": "v1",
+          "Url": "http://ordering-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "system",
+      "Config": [
+        {
+          "Name": "System API",
+          "Version": "v1",
+          "Url": "http://system-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "realtime",
+      "Config": [
+        {
+          "Name": "Realtime API",
+          "Version": "v1",
+          "Url": "http://realtime-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "notification",
+      "Config": [
+        {
+          "Name": "Notification API",
+          "Version": "v1",
+          "Url": "http://notification-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ]
+}

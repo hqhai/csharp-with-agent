@@ -1,14 +1,17 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Units;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Infrastructure.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.UnitCmd
 {
@@ -19,75 +22,52 @@ namespace Fsel.Course.Application.Commands.UnitCmd
     public class UpdateUnitCommandHandler : IRequestHandler<UpdateUnitCommand, MethodResult<UnitModel>>
     {
         private readonly IUnitRepository _unitRepository;
+        private readonly UnitHelper _unitHelper;
         private readonly IMapper _mapper;
-        private readonly ILessonRepository _lessonRepository;
-        private readonly IMockTestRepository _mockTestRepository;
 
-        public UpdateUnitCommandHandler(IUnitRepository unitTestRepository, ILessonRepository lessonRepository, IMockTestRepository mockTestRepository,
+        public UpdateUnitCommandHandler(IUnitRepository unitTestRepository,
+            UnitHelper unitHelper,
             IMapper mapper)
         {
-            _lessonRepository = lessonRepository;
             _unitRepository = unitTestRepository;
+            _unitHelper = unitHelper;
             _mapper = mapper;
-            _mockTestRepository = mockTestRepository;
         }
 
         public async Task<MethodResult<UnitModel>> Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
             #region Validation
 
-            var unit = await _unitRepository.GetIncludeByIdAsync(request.Id);
-            if (unit == null)
+            if (request.LessonIds == null || !request.LessonIds.Any())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumUnitErrorCode.U01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
-            _mapper.Map(request, unit);
 
-            if (!unit.IsValid())
+            var unit = await _unitRepository.Queryable
+                                    .Include(e => e.UnitLessons)
+                                    .Include(e => e.UnitSkillMockTests)
+                                    .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+            if (unit == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(unit.ErrorMessages);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
 
             var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
             if (isUnitUsed)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumUnitErrorCode.U02V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
-            if (request.LessonIds == null)
+            _mapper.Map(request, unit);
+            var method = await _unitHelper.Validate(unit, request);
+            if (!method.IsOK)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumUnitErrorCode.U03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.LessonIds), request.LessonIds) });
-                return methodResult;
-            }
-
-            if (_lessonRepository.IsIdsInValid(request.LessonIds))
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.L03V));
-
-                return methodResult;
-            }
-            var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.UnitMockTest && x.Id == request.MockTestId);
-            if (!checkMockTest)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                nameof(EnumMockTestErrorCode.MT04V));
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
 
@@ -95,25 +75,25 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
-                unit.UnitLessons = request.LessonIds.Select(x => new UnitLesson
+                unit.UnitLessons = request.LessonIds!.Select((x, index) => new UnitLesson
                 {
+                    DisplayOrder = index + 1,
                     LessonId = x
                 }).ToList();
-
-                unit.UnitSkillMockTests = new List<UnitSkillMockTest>
-                  {
-                      new UnitSkillMockTest
-                      {
-                          MockTestId = request.MockTestId,
-                      }
-                  }
-              ;
-
+                if (request.MockTestId != null)
+                {
+                    unit.UnitSkillMockTests = new List<UnitSkillMockTest>
+                    {
+                        new UnitSkillMockTest
+                        {
+                            MockTestId = request.MockTestId ?? default,
+                        }
+                    };
+                }
                 unit = _unitRepository.Update(unit);
-
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<UnitModel>(unit);
                 return methodResult;
             });

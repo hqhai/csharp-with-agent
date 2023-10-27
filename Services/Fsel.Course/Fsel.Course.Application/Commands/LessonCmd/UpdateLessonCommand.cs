@@ -1,13 +1,16 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Lessons;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {
@@ -18,131 +21,94 @@ namespace Fsel.Course.Application.Commands.LessonCmd
     public class UpdateLessonCommandHandler : IRequestHandler<UpdateLessonCommand, MethodResult<LessonModel>>
     {
         private readonly ILessonRepository _lessonRepository;
-        private readonly ILessonHomeWorkRepository _lessonHomeWorkRepository;
-        private readonly ILessonExtraPracticeRepository _lessonExtraPracticeRepository;
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IExtraPracticeRepository _extraPracticeRepository;
-        private readonly IClassForumRepository _classForumRepository;
 
         public UpdateLessonCommandHandler(ILessonRepository lessonRepository
-            , ILessonHomeWorkRepository lessonHomeWorkRepository
-            , ILessonExtraPracticeRepository lessonExtraPracticeRepository
             , IMapper mapper, IHomeWorkRepository homeWorkRepository
             , IVideoRepository videoRepository
-            , IExtraPracticeRepository extraPracticeRepository
-            , IClassForumRepository classForumRepository)
+            , IExtraPracticeRepository extraPracticeRepository)
         {
             _lessonRepository = lessonRepository;
-            _lessonHomeWorkRepository = lessonHomeWorkRepository;
-            _lessonExtraPracticeRepository = lessonExtraPracticeRepository;
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
             _videoRepository = videoRepository;
             _extraPracticeRepository = extraPracticeRepository;
-            _classForumRepository = classForumRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
             #region Validation
 
-            var IsUnitLesson = await _lessonRepository.IsUnitLesson(request.Id);
-
-            if (IsUnitLesson)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.LS02V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
-                return methodResult;
-            }
-
-            var lesson = await _lessonRepository.GetByIdAsync(request.Id);
+            var lesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
             if (lesson == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.LS01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
                 return methodResult;
             }
-
             if (!lesson.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(lesson.ErrorMessages);
+                methodResult.AddErrorBadRequest(lesson.ErrorMessages);
                 return methodResult;
             }
 
-            if (request.HomeWorkIds == null)
+            if (request.LessonInstructions == null || request.LessonInstructions.Count == 0)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumHomeWorkErrorCode.HW03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.HomeWorkIds), request.HomeWorkIds) });
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonInstructions));
                 return methodResult;
             }
 
-            if (request.VideoIds == null)
+            if (request.HomeWorkIds == null || request.HomeWorkIds.Count == 0)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumHomeWorkErrorCode.HW03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.VideoIds), request.VideoIds) });
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.HomeWorkIds));
                 return methodResult;
             }
 
-            if (request.ExtraPracticeIds == null)
+            if (request.VideoIds == null || request.VideoIds.Count == 0)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumExtraPractiveErrorCode.EP03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.ExtraPracticeIds), request.ExtraPracticeIds) });
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoIds));
                 return methodResult;
             }
 
-            //if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
-            //{
-            //    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //    methodResult.AddErrorMessage(
-            //        nameof(EnumExtraPractiveErrorCode.EP03V));
+            var isLessonUsed = await _lessonRepository.IsLessonUsed(request.Id);
+            if (isLessonUsed)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonUsed), nameof(request.Id), request.Id);
+                return methodResult;
+            }
 
-            //    return methodResult;
-            //}
+            if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
+            {
+                if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ExtraPracticeIds));
+                    return methodResult;
+                }
+            }
 
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumVideoErrorCode.VD03V));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoIds));
 
                 return methodResult;
             }
-            if (_classForumRepository.IsIdsInValid(new List<Guid> { request.ClassForumId ?? Guid.Empty }))
+
+            if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumClassForumErrorCode.CF03V));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.HomeWorkIds));
+
+                return methodResult;
             }
-            //if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
-            //{
-            //    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //    methodResult.AddErrorMessage(
-            //        nameof(EnumHomeWorkErrorCode.HW03V));
 
-            //    return methodResult;
-            //}
-
-            _mapper.Map(request, lesson);
-
-            if (!lesson.IsValid())
+            var isExistName = await _lessonRepository.Queryable.AnyAsync(x => x.Name == request.Name && x.Id != request.Id, cancellationToken);
+            if (isExistName)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(lesson.ErrorMessages);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isExistName));
                 return methodResult;
             }
 
@@ -150,10 +116,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
             {
-                lesson.LessonExtraPractices = request.ExtraPracticeIds.Select(x => new LessonExtraPractice
+                if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
                 {
-                    ExtracPraticeId = x
-                }).ToList();
+                    lesson.LessonExtraPractices = request.ExtraPracticeIds.Select(x => new LessonExtraPractice
+                    {
+                        ExtracPraticeId = x
+                    }).ToList();
+                }
                 lesson.LessonHomeWorks = request.HomeWorkIds.Select(x => new LessonHomeWork
                 {
                     HomeWorkId = x
@@ -162,8 +131,18 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 {
                     VideoId = x
                 }).ToList();
+
+                lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonInstructions);
                 _mapper.Map(request, lesson);
 
+                if (lesson.ClassForum != null)
+                {
+                    _mapper.Map(request.ClassForum, lesson.ClassForum);
+                    lesson.ClassForum.ClassForumFiles = request.ClassForum?.FilePaths?.Select(x => new ClassForumFile
+                    {
+                        FilePath = x,
+                    }).ToList() ?? new List<ClassForumFile>();
+                }
                 lesson = _lessonRepository.Update(lesson);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

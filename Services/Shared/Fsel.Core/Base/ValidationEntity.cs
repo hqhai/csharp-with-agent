@@ -1,13 +1,13 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
-using Fsel.Core.Base.Interfaces;
 
 namespace Fsel.Core.Base
 {
-    public class ValidationEntity : IValidationEntity
+    public class ValidationEntity
     {
         #region Validation
 
@@ -21,22 +21,40 @@ namespace Fsel.Core.Base
             return GetType().Assembly;
         }
 
-        public void AddValidationError(string errorCode, string propertyName, object propertyValue)
+        public IList<Error> GetErrors(IList<object>? errorValues, string? fieldName = null, IList<object>? exactValues = null)
         {
-            AddValidationError(errorCode, new List<string> { MethodHelper.GenerateErrorResult(propertyName, propertyValue) });
+            return new List<Error>() { new Error(fieldName, errorValues, exactValues) };
         }
 
-        public void AddValidationError(string errorCode, List<string> errorValues)
+        public ErrorResult GetErrorResult(string? errorCode, IList<object>? errorValues, string? fieldName = null, IList<object>? exactValues = null)
+        {
+            return new ErrorResult
+            {
+                ErrorCode = errorCode,
+                Errors = GetErrors(errorValues, fieldName, exactValues)
+            };
+        }
+
+        public void AddErrorResults(string? errorCode, IList<object>? errorValues, string? fieldName = null, IList<object>? exactValues = null)
+        {
+            _errorMessages.Add(GetErrorResult(errorCode, errorValues, fieldName, exactValues));
+        }
+
+        public void AddErrorResults(string? errorCode, IList<Error> errors)
         {
             _errorMessages.Add(new ErrorResult
             {
                 ErrorCode = errorCode,
-                ErrorMessage = MethodHelper.GetErrorMessage(errorCode, GetAssembly()),
-                ErrorValues = errorValues
+                Errors = errors
             });
         }
 
-        public void AddValidationErrors(IEnumerable<ErrorResult> errorMessages)
+        public void AddErrorResults(ErrorResult errorMessages)
+        {
+            _errorMessages.Add(errorMessages);
+        }
+
+        public void AddErrorResults(IEnumerable<ErrorResult> errorMessages)
         {
             _errorMessages.AddRange(errorMessages);
         }
@@ -53,15 +71,28 @@ namespace Fsel.Core.Base
                     {
                         ErrorCode = item.ErrorMessage
                     };
-                    errorResult.ErrorMessage = MethodHelper.GetErrorMessage(item.ErrorMessage, GetAssembly());
+
+                    //errorResult.ErrorMessage = MethodHelper.GetErrorMessage(item.ErrorMessage, GetAssembly());
                     foreach (string memberName in item.MemberNames)
                     {
                         PropertyInfo? property = validationContext.ObjectType.GetProperty(memberName);
                         object? value = property?.GetValue(validationContext.ObjectInstance, null);
-                        errorResult.ErrorValues.Add(MethodHelper.GenerateErrorResult(memberName, value));
-                    }
 
-                    _errorMessages.Add(errorResult);
+                        if (value != null)
+                        {
+                            var errorValues = new List<object> { value };
+                            var customAttrs = property?.GetCustomAttributesData();
+                            var customAttr = customAttrs?.FirstOrDefault(x => x.NamedArguments.Select(n => n.TypedValue.Value).Contains(item.ErrorMessage));
+                            var extracValues = customAttr?.ConstructorArguments.Select(x => x.Value).Cast<object>().ToList();
+
+                            errorResult.Errors.Add(new Error(memberName, errorValues, extracValues));
+                        }
+                        else
+                        {
+                            errorResult.Errors.Add(new Error(memberName));
+                        }
+                    }
+                    AddErrorResults(errorResult);
                 }
             }
 

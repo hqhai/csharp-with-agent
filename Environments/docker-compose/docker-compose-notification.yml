@@ -1,0 +1,32 @@
+version: '3.5'
+services:
+    notification.service:
+        container_name: notification.service
+        hostname: NotificationService
+        image: ${DOCKER_REGISTRY-}notification-microservice:v1
+        build:
+            context: ./../../
+            dockerfile: Environments/Testing/Notification.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.notification-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Notification
+            - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - QueueConfig__RootUri=rabbitmq://42.96.58.145
+            - QueueConfig__Username=admin
+            - QueueConfig__Password=Fsel@2023
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
+            - SERVICES_OrderApiUrl=http://ordering-testing.fsel-testing.svc/api/v1
+            - SERVICES_LmsCourseApiUrl=http://lmsapi-testing.fsel-testing.svc/api/v1
+            - OneSignalConfig__BasePath=https://onesignal.com/api/v1
+            - OneSignalConfig__AppId=dac94d2c-f3e6-48f0-9581-86992e42a563
+            - OneSignalConfig__ApiKey=NmM3NzMxMWYtZjEyYi00NTMzLTliNjAtYzAyZjljYTY2ZWI3
+        ports:
+            - 5502:80
+            - 7502:443

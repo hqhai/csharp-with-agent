@@ -1,4 +1,6 @@
-﻿using Fsel.Course.Domain.Entities;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Course.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,6 +10,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<CourseUnitMockTest> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.HasOne(a => a.Unit)
                 .WithMany(b => b.CourseUnitMockTests)
                 .HasForeignKey(b => b.UnitId)
@@ -23,10 +26,10 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasForeignKey(b => b.MockTestId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            /*builder.HasOne(a => a.MockTest)
+            builder.HasOne(a => a.FinalTest)
                 .WithMany(b => b.CourseUnitMockTests)
-                .HasForeignKey(b => b.MockTestId)
-                .OnDelete(DeleteBehavior.Cascade);*/
+                .HasForeignKey(b => b.FinalTestId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
