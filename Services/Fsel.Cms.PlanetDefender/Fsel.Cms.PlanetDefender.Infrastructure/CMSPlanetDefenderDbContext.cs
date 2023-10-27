@@ -22,6 +22,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             SeedWheelOfBuff(modelBuilder);
             SeedZMatter(modelBuilder);
             SeedGameplayRuleConfigs(modelBuilder);
+            SeedSpaceShip(modelBuilder);
             modelBuilder.ApplyConfiguration(new StudentGameInfoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new WheelOfBuffEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameplayTimeConfigEntityTypeConfiguration());
@@ -33,6 +34,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         public DbSet<GameplayTimeConfig> GameplayTimeConfigs { get; set; }
         public DbSet<GameplayRuleConfig> GameplayRuleConfigs { get; set; }
         public DbSet<WheelOfBuff> WheelOfBuffs { get; set; }
+        public DbSet<SpaceShip> SpaceShips { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -55,6 +57,14 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             var zMatters = ConvertHelper.DeserializeFromFilePath<IList<ZMatter>>(path);
             ArgumentNullException.ThrowIfNull(zMatters);
             builder.Entity<ZMatter>().HasData(zMatters);
+        }
+
+        private static void SeedSpaceShip(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SpaceShip);
+            var spaceShips = ConvertHelper.DeserializeFromFilePath<IList<SpaceShip>>(path);
+            ArgumentNullException.ThrowIfNull(spaceShips);
+            builder.Entity<SpaceShip>().HasData(spaceShips);
         }
 
         private static void SeedGameplayRuleConfigs(ModelBuilder builder)
