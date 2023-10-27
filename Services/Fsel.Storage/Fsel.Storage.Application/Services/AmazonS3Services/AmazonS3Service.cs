@@ -1,5 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Net.Mime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
@@ -18,6 +21,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         private readonly AppSetting _appSetting;
         private readonly AmazonS3Client _amazonS3Client;
         private readonly TransferUtility _transferUtility;
+        private readonly int _targetWidthResize = 84;
+        private readonly int _targetHeightResize = 84;
         private readonly double _partSize = ByteSize.FromMegabytes(100).Bytes; // Size of each part (100 MB)
 
         private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
@@ -25,7 +30,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             { EnumFolderType.Fsis, ByteSize.FromGigabytes(1).Bytes }, //maximum question size (1 GB)
             { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
             { EnumFolderType.Files, ByteSize.FromMegabytes(6).Bytes }, //maximum file size (6 MB)
-            { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes } //maximum question size (6 MB)
+            { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes }, //maximum question size (6 MB)
+            { EnumFolderType.Images, ByteSize.FromMegabytes(20).Bytes } //maximum image size (20 MB)
         };
 
         public AmazonS3Service(AppSetting appSetting)
@@ -42,7 +48,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             _transferUtility = new TransferUtility(_amazonS3Client);
         }
 
-        public async Task<MethodResult<string?>> UploadFileAsync(IFormFile? file, EnumFolderType folderType)
+        public async Task<MethodResult<string?>> UploadFileAsync(IFormFile? file, EnumFolderType folderType, bool isResize = false)
         {
             MethodResult<string?> result = IsValidFile(file, folderType);
             try
@@ -67,8 +73,17 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
                 // Create a list of parts to upload
                 var parts = new List<UploadPartResponse>();
+                Stream stream;
+                if (isResize)
+                {
+                    stream = OpenReadStreamResize(file);
+                }
+                else
+                {
+                    stream = file.OpenReadStream();
+                }
 
-                using (var sourceStream = file.OpenReadStream())
+                using (var sourceStream = stream)
                 {
                     var buffer = new byte[(long)partSize];
                     int bytesRead;
@@ -127,6 +142,44 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 result.AddErrorServer();
                 return result;
             }
+        }
+
+        private Stream OpenReadStreamResize(IFormFile file)
+        {
+            var stream = file.OpenReadStream();
+
+            if (file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            {
+                using (Image sourceImage = Image.FromStream(stream))
+                {
+                    int targetWidth = _targetWidthResize;
+                    int targetHeight = _targetHeightResize;
+
+                    // Calculate the new size based on the target width and height
+                    var newWidth = targetWidth;
+                    var newHeight = (int)(sourceImage.Height * ((double)targetWidth / sourceImage.Width));
+
+                    // Create a new image with resized size
+                    using (var resizedImage = new Bitmap(newWidth, newHeight))
+                    using (Graphics graphics = Graphics.FromImage(resizedImage))
+                    {
+                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        graphics.SmoothingMode = SmoothingMode.HighQuality;
+                        graphics.CompositingQuality = CompositingQuality.HighQuality;
+                        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                        graphics.DrawImage(sourceImage, 0, 0, newWidth, newHeight);
+
+                        // Create a memory stream for the resized image
+                        var resizedStream = new MemoryStream();
+                        resizedImage.Save(resizedStream, sourceImage.RawFormat);
+                        resizedStream.Seek(0, SeekOrigin.Begin); // Move the stream cursor to the beginning
+                        return resizedStream;
+                    }
+                }
+            }
+
+            return stream;
         }
 
         private MethodResult<string?> IsValidFile(IFormFile? file, EnumFolderType folderType)

@@ -7,5 +7,6 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
     public class TestSkillScores : SkillScores
     {
         public EnumResultStatus? Status { get; set; }
+        public double PercentProgress { get; set; }
     }
 }

@@ -100,7 +100,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<MockTestModel?> GetIncludeAsync(Guid courseId, Guid unitId, Guid? studentId)
+        public async Task<MockTest?> GetAsync(Guid mockTestId, Guid? studentId)
         {
             try
             {
@@ -117,26 +117,11 @@ namespace Fsel.Course.Infrastructure.Repositories
                                        .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
                                        .ThenInclude(x => x.SectionGroup)
                                        .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
-                                       .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
-                                       .Include(x => x.MockTestResults.Where(y => y.UnitId == unitId && y.CourseId == courseId && y.StudentId == studentId))
-                                       .Where(x => x.UnitSkillMockTests.Any(x => x.UnitId == unitId))
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup).ThenInclude(x => x!.SectionGroupResults.Where(x => x.StudentId == studentId))
+                                       .Where(x => x.Id == mockTestId)
                                        .AsNoTracking()
-                                       .Select(x => new MockTestModel
-                                       {
-                                           Id = x.Id,
-                                           Name = x.Name,
-                                           CreatedDate = x.CreatedDate,
-                                           IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
-                                           MockTestType = x.MockTestType,
-                                           ExecutionTime = _sectionConverter.GetExecutionTime(x.MockTestSections.Where(x => x.SectionGroup != null)
-                                             .Select(x => x.SectionGroup!).ToList()),
-                                           TotalQuestion = _sectionConverter.GetTotalQuestion(x.MockTestSections.Where(x => x.SectionGroup != null)
-                                             .Select(x => x.SectionGroup!).ToList()),
-                                           SectionGroups = x.MockTestSections.Where(x => x.SectionGroup != null)
-                                             .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
-                                             .Select(x => _sectionConverter.GetSectionGroupModel(x, true)).ToList(),
-                                           MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault(y => y.UnitId == unitId && y.CourseId == courseId && y.StudentId == studentId)),
-                                       }).FirstOrDefaultAsync();
+                                       .FirstOrDefaultAsync();
             }
             catch (Exception)
             {

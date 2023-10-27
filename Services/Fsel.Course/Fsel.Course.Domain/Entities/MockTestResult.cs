@@ -27,5 +27,6 @@ namespace Fsel.Course.Domain.Entities
 
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
         public ICollection<MockTestScore> MockTestScores { get; set; } = new List<MockTestScore>();
+        public ICollection<SectionGroupResult> SectionGroupResults { get; set; } = new List<SectionGroupResult>();
     }
 }

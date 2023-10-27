@@ -88,8 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                             select vr;
 
             var answerQuery = from baseQ in baseQuery
-                              join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
@@ -165,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     var totalCountTimeCode = item.SkillScores.Select(x => x.TotalCount).Sum();
                     if (totalCountTimeCode != 0)
                     {
-                        item.Percent = NumberHelper.ConvertPercentDouble((double)correctCountTimeCode / totalCountTimeCode);
+                        item.Percent = NumberHelper.GetPercent(correctCountTimeCode, totalCountTimeCode);
                     }
                 }
             }
@@ -173,7 +172,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var totalCount = scoreQuery.Select(x => x.TotalCount).Sum();
             if (totalCount != 0)
             {
-                lessonScore.Percent = NumberHelper.ConvertPercentDouble((double)correctCount / totalCount);
+                lessonScore.Percent = NumberHelper.GetPercent(correctCount, totalCount);
                 lessonScore.TotalCount = totalCount;
                 lessonScore.CorrectCount = correctCount;
             }

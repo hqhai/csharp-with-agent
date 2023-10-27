@@ -319,14 +319,14 @@ namespace Fsel.Course.Infrastructure.Common
                                                     CorrectCount = answerTimeCodeQJ.CorrectCount,
                                                     TotalQuestion = questionTimeCodeQJ.TotalQuestion,
                                                     CountQuestion = answerTimeCodeQJ.TotalAnswer,
-                                                    Percent = questionTimeCodeQJ.TotalCount > 0 ? NumberHelper.ConvertPercentDouble((double)answerTimeCodeQJ.CorrectCount / questionTimeCodeQJ.TotalCount) : default
+                                                    Percent = NumberHelper.GetPercent(answerTimeCodeQJ.CorrectCount, questionTimeCodeQJ.TotalCount)
                                                 }).ToList()
                              };
             var skillScores = scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone && x.SkillScores?.Count > 0).SelectMany(x => x.SkillScores!).ToList();
             videoResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
-            videoResult.Percent = videoResult.CorrectTotal > 0 ? NumberHelper.ConvertPercentDouble((double)videoResult.CorrectCount / videoResult.CorrectTotal) : default;
+            videoResult.Percent = NumberHelper.GetPercent(videoResult.CorrectCount, videoResult.CorrectTotal);
             videoResult.VideoSkillScores = scoreQuery.ToList();
             return methodResult;
         }

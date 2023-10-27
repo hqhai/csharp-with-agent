@@ -13,6 +13,9 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid CourseId { get; set; }
 
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public override double Percent { get; set; }
+
         public Unit? Unit { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
