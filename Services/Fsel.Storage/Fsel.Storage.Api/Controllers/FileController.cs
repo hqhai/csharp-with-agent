@@ -36,5 +36,20 @@ namespace Fsel.Storage.Api.Controllers
             var commandResult = await _amazonS3Service.UploadFileAsync(file, type, isResize);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Upload file
+        /// </summary>
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [HttpPost("multiple/{type}")]
+        public async Task<IActionResult> Uploads([FromRoute] EnumFolderType type, IList<IFormFile> files, [FromQuery] bool isResize = false)
+        {
+            var commandResult = await _amazonS3Service.UploadFilesAsync(files, type, isResize);
+            return commandResult.GetActionResult();
+        }
     }
 }
