@@ -65,11 +65,11 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             foreach (var item in placementTestResultModels)
             {
                 var (ptNext, isLock) = item.Level.GetLevelInScore(item.Percent, age);
-                if (item.SkillScores != null && item.SkillScores.Count > 0)
-                {
-                    item.CountQuestion = item.SkillScores.Sum(x => x.CountQuestion);
-                    item.TotalQuestion = item.SkillScores.Sum(x => x.TotalQuestion);
-                }
+                //if (item.SkillScores != null && item.SkillScores.Count > 0)
+                //{
+                //    item.CountQuestion = item.SkillScores.Sum(x => x.CountQuestion);
+                //    item.TotalQuestion = item.SkillScores.Sum(x => x.TotalQuestion);
+                //}
                 item.CourseLevel = ptNext;
                 item.IsLock = isLock;
             }
