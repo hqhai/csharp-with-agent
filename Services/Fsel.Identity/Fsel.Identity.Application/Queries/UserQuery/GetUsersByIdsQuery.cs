@@ -35,6 +35,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
             if (request.UserIds == null || !request.UserIds.Any())
             {
+                methodResult.Result = new List<HumanModel>();
                 return methodResult;
             }
             var humans = await _humanRepository.Queryable.Where(p => p.UserId.HasValue && request.UserIds.Contains(p.UserId.Value)).ToListAsync(cancellationToken);
