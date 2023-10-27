@@ -67,6 +67,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// UnitTest is up to Eight
         /// </summary>
-        UnitTestIsUpToEight
+        UnitTestIsUpToEight,
+
+        /// <summary>
+        /// FinalTestId must be at the end
+        /// </summary>
+        FinalTestIdMustBeAtTheEnd
     }
 }

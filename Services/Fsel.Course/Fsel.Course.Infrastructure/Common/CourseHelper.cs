@@ -92,8 +92,12 @@ namespace Fsel.Course.Infrastructure.Common
             #endregion validate request
 
             #region validate Unit
-            
             var (unitIds, unitUnFinished) = await InitListCategories(courseUnitMockTests, UNITID_KEY, request.CourseUnitMockTests);
+            if (unitIds.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unitIds));
+                return methodResult;
+            }
             var units = await _unitRepository.Queryable.Where(x => unitIds.Contains(x.Id)).ToListAsync();
             if (units == null || units.Count == 0)
             {
@@ -125,9 +129,9 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
             var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.Id && unitUnFinished.Contains(x.UnitId)).ToListAsync();
-            if(unitResults.Any() && unitResults.Any(x=>x.Status != EnumResultStatus.Unfinished))
+            if (unitResults.Any() && unitResults.Any(x => x.Status != EnumResultStatus.Unfinished))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist),nameof(unitResults));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(unitResults));
                 return methodResult;
             }
             #endregion validate Unit
@@ -174,6 +178,15 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 #region validate finalTest
                 var (finalTestIds, finalTestUnFinished) = await InitListCategories(courseUnitMockTests, FINALTESTID_KEY, request.CourseUnitMockTests);
+                if (request.CourseUnitMockTests != null && request.CourseUnitMockTests.Count > 0)
+                {
+                    var lastItem = request.CourseUnitMockTests[request.CourseUnitMockTests.Count - 1];
+                    if (lastItem.FinalTestId == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIdMustBeAtTheEnd), nameof(finalTestIds));
+                        return methodResult;
+                    }
+                }
                 if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestIds));
