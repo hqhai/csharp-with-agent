@@ -3,6 +3,8 @@
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
+    using Fsel.Cms.PlanetDefender.Application.Commands;
+    using Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery;
     using Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
@@ -34,6 +36,18 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         {
             MethodResult<PagingItemsModel<StudentInPlatformModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create students nick name
+        /// </summary>
+        [HttpPost("create-nick-name")]
+        [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] CreateNickNameStudentGameInfoCommand command)
+        {
+            MethodResult<StudentGameInfoModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
