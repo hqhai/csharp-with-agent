@@ -102,7 +102,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             {
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
-                sectionGroup.Sections!.Clear();
                 sectionGroup.Status = GetResultStatus(indexProcess, index);
                 sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
                 return sectionGroup;
