@@ -100,11 +100,11 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
             var units = await _unitRepository.Queryable.Where(x => unitIds.Contains(x.Id)).ToListAsync();
-            //if (units == null || units.Count == 0)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-            //    return methodResult;
-            //}
+            if (units == null || units.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
             if (unitIds.Count != unitIds.Distinct().Count())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.DuplicateUnitId));
@@ -117,24 +117,24 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            //if (units.Count != unitIds.Count)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
-            //    return methodResult;
-            //}
+            if (units.Count != unitIds.Count)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
+                return methodResult;
+            }
 
-            //var isCheck = units.All(x => unitIds.Contains(x.Id) && x.CourseLevel == request.CourseLevel);
-            //if (!isCheck)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.AnotherLevelUnitExists));
-            //    return methodResult;
-            //}
-            //var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.Id && unitUnFinished.Contains(x.UnitId)).ToListAsync();
-            //if (unitResults.Any() && unitResults.Any(x => x.Status != EnumResultStatus.Unfinished))
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(unitResults));
-            //    return methodResult;
-            //}
+            var isCheck = units.All(x => unitIds.Contains(x.Id) && x.CourseLevel == request.CourseLevel);
+            if (!isCheck)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.AnotherLevelUnitExists));
+                return methodResult;
+            }
+            var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.Id && unitUnFinished.Contains(x.UnitId)).ToListAsync();
+            if (unitResults.Any() && unitResults.Any(x => x.Status != EnumResultStatus.Unfinished))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(unitResults));
+                return methodResult;
+            }
             #endregion validate Unit
 
             if (request.CourseLevel.GetEnumCourseType() == Shared.Enums.EnumCourseType.Ielts)
@@ -153,25 +153,19 @@ namespace Fsel.Course.Infrastructure.Common
                         methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestIsUpToTwo), nameof(mocktestIds));
                         return methodResult;
                     }
-                    var lastItem10 = request.CourseUnitMockTests[request.CourseUnitMockTests.Count - 1];
-                    var lastItem5 = request.CourseUnitMockTests[request.CourseUnitMockTests.Count - 6];
-                    if (mocktestIds.Count == 1)
+                    // MockTest nếu có thì bắt buộc ở 2 vị trí 5 và 10 nếu ko phải MockTest Thì báo lỗi
+                    // MockTest ở các vị trí khác thì báo lỗi
+                    foreach (var i in request.CourseUnitMockTests)
                     {
-                        if (mocktestIds.First() != lastItem5.MockTestId)
+                        if(i.DisplayOrder != 4 && i.DisplayOrder != 9)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mocktestIds));
-                            return methodResult;
+                            if(i.MockTestId != null)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mocktestIds));
+                                return methodResult;
+                            }
                         }
                     }
-                    else
-                    {
-                        if (mocktestIds[mocktestIds.Count - 1] != lastItem10.MockTestId)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mocktestIds));
-                            return methodResult;
-                        }
-                    }
-                   
 
                     if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
                     {
@@ -212,11 +206,18 @@ namespace Fsel.Course.Infrastructure.Common
                         methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIsUpToOne), nameof(finalTestIds));
                         return methodResult;
                     }
-                    var lastItem = request.CourseUnitMockTests[request.CourseUnitMockTests.Count - 1];
-                    if (lastItem.FinalTestId != finalTestIds.First())
+                    // - Vị trí thứ 13 bắt buộc là của Final nếu ko phải là Final thì báo lỗi
+                    // - Final ở các vị trí khác thì báo lỗi
+                    foreach (var i in request.CourseUnitMockTests)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIdMustBeAtTheEnd), nameof(finalTestIds));
-                        return methodResult;
+                        if (i.DisplayOrder != 12)
+                        {
+                            if (i.FinalTestId != null)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIdMustBeAtTheEnd), nameof(finalTestIds));
+                                return methodResult;
+                            }
+                        }
                     }
                     if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
                     {
