@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -76,28 +77,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 {
                     if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot)
                     {
-                        if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= request.TaggetWordLimit) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= request.TaggetTimeLimit))
+                        long score = 0;
+                        if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= request.WordLimit) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= request.TimeLimit))
                         {
-                            var enumClassForumScores = Enum.GetValues(typeof(EnumClassForumScoreCriteria)).Cast<EnumClassForumScoreCriteria>().ToList();
-                            classForumResult.ClassForumScores = enumClassForumScores.Select(x => new ClassForumScore
-                            {
-                                ClassForumResultId = classForumResult.Id,
-                                Score = 9,
-                                Criteria = x,
-                            }).ToList();
-                            classForumResult.Status = EnumClassForumResultStatus.Graded;
+                            score = 9;
                         }
-                        else
+
+                        var enumClassForumScores = Enum.GetValues(typeof(EnumClassForumScoreCriteria)).Cast<EnumClassForumScoreCriteria>().ToList();
+                        classForumResult.ClassForumScores = enumClassForumScores.Select(x => new ClassForumScore
                         {
-                            var enumClassForumScores = Enum.GetValues(typeof(EnumClassForumScoreCriteria)).Cast<EnumClassForumScoreCriteria>().ToList();
-                            classForumResult.ClassForumScores = enumClassForumScores.Select(x => new ClassForumScore
-                            {
-                                ClassForumResultId = classForumResult.Id,
-                                Score = 0,
-                                Criteria = x,
-                            }).ToList();
-                            classForumResult.Status = EnumClassForumResultStatus.Graded;
-                        }
+                            ClassForumResultId = classForumResult.Id,
+                            Score = score,
+                            Criteria = x,
+                        }).ToList();
+                        classForumResult.Status = EnumClassForumResultStatus.Graded;
                     }
                     else
                     {

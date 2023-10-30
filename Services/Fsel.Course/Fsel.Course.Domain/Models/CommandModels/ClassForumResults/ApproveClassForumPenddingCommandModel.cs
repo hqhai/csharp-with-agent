@@ -8,8 +8,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
 
         public bool IsApprove { get; set; }
 
-        public long TaggetWordLimit { get; set; }
+        public long WordLimit { get; set; }
 
-        public double TaggetTimeLimit { get; set; }
+        public double TimeLimit { get; set; }
     }
 }
