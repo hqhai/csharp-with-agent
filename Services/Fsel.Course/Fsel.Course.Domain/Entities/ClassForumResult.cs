@@ -45,6 +45,12 @@ namespace Fsel.Course.Domain.Entities
 
         public DateTime? GradingStartDate { get; set; }
 
+        public string? RetryContent { get; set; }
+
+        public string? RetryWordContent { get; set; }
+
+        public string? RetryGradingAlFeedBack { get; set; }
+
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
