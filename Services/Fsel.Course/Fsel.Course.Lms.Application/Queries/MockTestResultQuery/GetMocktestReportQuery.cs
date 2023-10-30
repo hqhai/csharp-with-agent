@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             if (mockTestResult.SkillScores != null)
             {
                 mockTestResultModel.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
-                mockTestResultModel.IsWait = await GetWait(mockTestResult);
+                mockTestResultModel.IsTeacherGraded = await GetWait(mockTestResult);
             }
 
             methodResult.Result = mockTestResultModel;
