@@ -7,5 +7,9 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
         public Guid ClassForumResultId { get; set; }
 
         public bool IsApprove { get; set; }
+
+        public long TaggetWordLimit { get; set; }
+
+        public double TaggetTimeLimit { get; set; }
     }
 }
