@@ -91,15 +91,19 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             }
             var course = await GetCourse(@class.CourseId, studentId, cancellationToken);
             var courseResult = course?.CourseResults.FirstOrDefault();
-            if (course == null || courseResult == null)
+            if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            if (courseResult.Status == EnumResultStatus.New)
+            if (courseResult == null || courseResult.Status == EnumResultStatus.New)
             {
                 var (lesson, objectId, type, objectStatus) = await GetLesson(default, studentId, course, cancellationToken);
                 lessonOverview = GetLessonOverview(lesson, default, studentId, objectId, type, objectStatus);
+                if (courseResult == null)
+                {
+                    lessonOverview = GetLessonOverview(lesson, default, studentId, course.Id, nameof(Course), EnumResultStatus.New);
+                }
             }
             else
             {
