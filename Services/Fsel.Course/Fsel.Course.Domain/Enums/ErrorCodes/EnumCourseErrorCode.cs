@@ -97,11 +97,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         ///  MocktestResults Exist
         /// </summary>
-        MocktestResultsExist,
+        MockTestResultsExist,
 
         /// <summary>
-        ///  FinalTestResults Exist
+        ///  FinalTest HasBeen Used
         /// </summary>
-        FinalTestResultsExist
+        FinalTestHasBeenUsed,
+
+        /// <summary>
+        ///  Unit Has Been Used
+        /// </summary>
+        UnitHasBeenUsed
     }
 }

@@ -91,7 +91,7 @@ namespace Fsel.Course.Infrastructure.Common
             #endregion validate request
 
             #region validate Unit
-            var (unitIds, unitUnFinished) = await InitListCategories(courseUnitMockTests, "UnitId", request.CourseUnitMockTests);
+            var (unitIds, unitUnFinished) = await InitListCategories(courseUnitMockTests, nameof(CourseUnitMockTest.UnitId), request.CourseUnitMockTests);
             if (unitIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unitIds));
@@ -130,7 +130,7 @@ namespace Fsel.Course.Infrastructure.Common
             var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.Id && unitUnFinished.Contains(x.UnitId)).ToListAsync();
             if (unitResults.Any() && unitResults.Any(x => x.Status != EnumResultStatus.Unfinished))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitResultsExist), nameof(unitResults));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitHasBeenUsed), nameof(unitResults));
                 return methodResult;
             }
             #endregion validate Unit
@@ -143,7 +143,7 @@ namespace Fsel.Course.Infrastructure.Common
                     methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseUnitMockTestsIsTen));
                     return methodResult;
                 }
-                var (mocktestIds, mocktestUnFinished) = await InitListCategories(courseUnitMockTests, "MockTestId", request.CourseUnitMockTests);
+                var (mocktestIds, mocktestUnFinished) = await InitListCategories(courseUnitMockTests, nameof(CourseUnitMockTest.MockTestId), request.CourseUnitMockTests);
                 if (mocktestIds.Any())
                 {
                     if (mocktestIds.Count > 2)
@@ -176,7 +176,7 @@ namespace Fsel.Course.Infrastructure.Common
                     var mocktestResults = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == request.Id && mocktestUnFinished.Contains(x.MockTestId)).ToListAsync();
                     if (mocktestResults.Any() && mocktestResults.Any(x => x.Status != EnumResultStatus.Unfinished))
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MocktestResultsExist), nameof(mocktestResults));
+                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestResultsExist), nameof(mocktestResults));
                         return methodResult;
                     }
                 }
@@ -190,7 +190,7 @@ namespace Fsel.Course.Infrastructure.Common
                     methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.Requires13CourseUnitMockTests));
                     return methodResult;
                 }
-                var (finalTestIds, finalTestUnFinished) = await InitListCategories(courseUnitMockTests, "FinalTestId", request.CourseUnitMockTests);
+                var (finalTestIds, finalTestUnFinished) = await InitListCategories(courseUnitMockTests, nameof(CourseUnitMockTest.FinalTestId), request.CourseUnitMockTests);
                 if (finalTestIds.Any())
                 {
                     if (finalTestIds.Count > 1)
@@ -215,7 +215,7 @@ namespace Fsel.Course.Infrastructure.Common
                     var finalTestResults = await _finalTestResultRepository.Queryable.Where(x => x.CourseId == request.Id && finalTestUnFinished.Contains(x.FinalTestId)).ToListAsync();
                     if (finalTestResults.Any() && finalTestResults.Any(x => x.Status != EnumResultStatus.Unfinished))
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestResultsExist), nameof(finalTestResults));
+                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestHasBeenUsed), nameof(finalTestResults));
                         return methodResult;
                     }
                 }
