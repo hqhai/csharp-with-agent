@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    [Migration("20231030141256_Update_NotificationTypeTable_Add_TemplateLink")]
+    [Migration("20231030152154_Update_NotificationTypeTable_Add_TemplateLink")]
     partial class Update_NotificationTypeTable_Add_TemplateLink
     {
         /// <inheritdoc />
@@ -292,7 +292,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={1}&commentId={2}",
                             TemplateMessage = "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
                             Type = "LinkComment"
                         },

@@ -55,6 +55,13 @@ namespace Fsel.Notification.Infrastructure.Migrations
                 column: "TemplateLink",
                 value: "/class-forum-management");
 
+            migrationBuilder.UpdateData(
+                table: "NotificationTypes",
+                keyColumn: "Id",
+                keyValue: new Guid("efba1f99-8fad-47b5-af14-978f674f438e"),
+                column: "TemplateLink",
+                value: "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={1}&commentId={2}");
+
             migrationBuilder.InsertData(
                 table: "NotificationTypes",
                 columns: new[] { "Id", "Content", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "Icon", "IsDeleted", "Priority", "TemplateLink", "TemplateMessage", "Type", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
@@ -117,6 +124,13 @@ namespace Fsel.Notification.Infrastructure.Migrations
                 table: "NotificationTypes",
                 keyColumn: "Id",
                 keyValue: new Guid("d789788a-1ba6-405b-f280-ae92cd3b4fc2"),
+                column: "TemplateLink",
+                value: "");
+
+            migrationBuilder.UpdateData(
+                table: "NotificationTypes",
+                keyColumn: "Id",
+                keyValue: new Guid("efba1f99-8fad-47b5-af14-978f674f438e"),
                 column: "TemplateLink",
                 value: "");
         }

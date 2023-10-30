@@ -26,7 +26,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
-    "templateLink": "",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={1}&commentId={2}",
     "createdDate": "2023-08-28"
   },
   {
