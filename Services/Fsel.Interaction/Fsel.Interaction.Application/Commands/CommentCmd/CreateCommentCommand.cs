@@ -115,7 +115,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             Content = EnumNotificationContent.Comment,
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
-                            ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, classForumResult?.UnitId ?? default, request.ObjectId, comment.Id },
+                            ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default,  request.ObjectId, comment.Id },
                             PlatformCode = EnumPlatformCode.LMS
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
@@ -154,7 +154,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             Content = EnumNotificationContent.ReplyComment,
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
-                            ParamsLink = new List<object> { classForumResultOfCommentOwner?.UnitId ?? default, classForumResultOfCommentOwner?.CourseId ?? default, classForumResultOfCommentOwner?.UnitId ?? default, commentOwner?.ObjectId ?? default, request.ObjectId, comment.Id },
+                            ParamsLink = new List<object> { classForumResultOfCommentOwner?.UnitId ?? default, classForumResultOfCommentOwner?.CourseId ?? default,commentOwner?.ObjectId ?? default, request.ObjectId, comment.Id },
                             PlatformCode = EnumPlatformCode.LMS
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
