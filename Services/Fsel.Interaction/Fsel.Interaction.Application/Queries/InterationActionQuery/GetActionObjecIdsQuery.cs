@@ -17,7 +17,7 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
 
     public class GetActionObjecIdsQuery : IRequest<MethodResult<IList<InteractionActionModel>>>
     {
-        public IList<Guid>? ObjectIds { get; set; }
+        public IList<Guid> ObjectIds { get; set; } = new List<Guid>();
         public Guid? UserId { get; set; }
     }
 
@@ -59,17 +59,23 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
                 .ToListAsync(cancellationToken);
 
             var interactionActions = new List<InteractionActionModel>();
-            foreach (var action in actions)
-            {
-                interactionActions.Add(new InteractionActionModel
-                {
-                    ObjectId = action.ObjectId,
-                    IsDisable = action.Datas.Any(x => x.Type == EnumInteractionActionType.Disable && x.UserId == request.UserId),
-                    IsLiked = action.Datas.Any(x => x.Type == EnumInteractionActionType.Like && x.UserId == request.UserId),
-                    LikeNumber = action.Datas.Where(x => x.Type == EnumInteractionActionType.Like).Count(),
-                    CommentNumber = comments.FirstOrDefault(x => x.ObjectId == action.ObjectId)?.Number ?? default,
-                });
-            }
+
+            interactionActions = (
+                                      from objectId in request.ObjectIds
+                                      join action in actions on objectId equals action.ObjectId into actionGroup
+                                      from action in actionGroup.DefaultIfEmpty()
+                                      join comment in comments on objectId equals comment.ObjectId into commentGroup
+                                      from comment in commentGroup.DefaultIfEmpty()
+                                      select new InteractionActionModel
+                                      {
+                                          ObjectId = objectId,
+                                          IsDisable = action != null && action.Datas.Any(x => x.Type == EnumInteractionActionType.Disable && x.UserId == request.UserId),
+                                          IsLiked = action != null && action.Datas.Any(x => x.Type == EnumInteractionActionType.Like && x.UserId == request.UserId),
+                                          LikeNumber = action != null ? action.Datas.Count(x => x.Type == EnumInteractionActionType.Like) : default,
+                                          CommentNumber = comment != null ? comment.Number : default,
+                                      }
+                                  ).ToList();
+
 
             methodResult.Result = interactionActions;
             methodResult.StatusCode = StatusCodes.Status200OK;

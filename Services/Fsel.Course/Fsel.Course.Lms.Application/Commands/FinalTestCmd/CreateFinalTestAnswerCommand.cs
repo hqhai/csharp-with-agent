@@ -178,7 +178,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     CorrectCount = count,
                     CountQuestion = item.Answers.Count,
                     TotalQuestion = questions.Count,
-                    Percent = totalCount > 0 ? NumberHelper.ConvertPercentDouble((double)count / totalCount) : default
+                    Percent = NumberHelper.GetPercent(count, totalCount)
                 }
                 );
             }
@@ -191,7 +191,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 finalTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
                 finalTestResult.Status = EnumResultStatus.Done;
                 finalTestResult.SkillScores = skillScores;
-                finalTestResult.Percent = finalTestResult.CorrectTotal > 0 ? NumberHelper.ConvertPercentDouble((double)finalTestResult.CorrectCount / finalTestResult.CorrectTotal) : 0;
+                finalTestResult.Percent = NumberHelper.GetPercent(finalTestResult.CorrectCount, finalTestResult.CorrectTotal);
                 await _finishOneFinalTestPublisher.Publish(finalTestResult, cancellationToken);
                 finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

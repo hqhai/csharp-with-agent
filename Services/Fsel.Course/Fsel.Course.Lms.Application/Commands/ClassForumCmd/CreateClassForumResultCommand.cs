@@ -91,7 +91,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-            
 
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.LessonId, cancellationToken);
             if (classForum == null)

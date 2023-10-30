@@ -59,20 +59,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var courseUnitMockTests = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
             if (courseUnitMockTests == null || !courseUnitMockTests.Any())
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             if (course.CourseType == EnumCourseType.Ielts)
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -81,7 +78,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.FinalTestId == finalTestId && x.CourseId == request.CourseId && x.StudentId == request.StudentId).FirstOrDefaultAsync(cancellationToken);
             if (finalTestResult == null)
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -125,9 +121,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         Skill = x.CourseSkill,
                         CorrectCount = correctCount,
                         TotalCount = correctTotal,
-                        Percent = correctTotal > 0 ? NumberHelper.ConvertPercentDouble((double)correctCount / correctTotal) : default,
+                        Percent = NumberHelper.GetPercent(correctCount, correctTotal),
                         CountQuestion = countQuestion,
-                        TotalQuestion = totalQuestion
+                        TotalQuestion = totalQuestion,
+                        PercentProgress = NumberHelper.GetPercent(countQuestion, totalQuestion)
                     };
                     return skillScores;
                 }).ToList();

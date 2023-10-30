@@ -3,7 +3,6 @@
 namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 {
     using System;
-    using System.Text.Json.Serialization;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -15,7 +14,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     using Microsoft.EntityFrameworkCore;
 
     public class CreateStudentDailyStreakCommand : CreateStudentDailyStreakQueueModel, IRequest<MethodResult<bool>>
-    {      
+    {
     }
 
     public class CreateStudentDailyStreakCommandHandler : IRequestHandler<CreateStudentDailyStreakCommand, MethodResult<bool>>
@@ -56,7 +55,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             var isStudentDate = student.StudentDailyStreaks.Any(x => x.DailyDate.Date == date.Date);
             if (isStudentDate)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isStudentDate));
+                methodResult.StatusCode = StatusCodes.Status201Created;
                 return methodResult;
             }
             var studentDailyStreak = new StudentDailyStreak

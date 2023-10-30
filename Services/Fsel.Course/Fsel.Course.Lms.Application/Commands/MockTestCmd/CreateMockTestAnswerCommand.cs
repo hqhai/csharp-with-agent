@@ -135,6 +135,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                 mockTestAnswer = new MockTestAnswer
                                 {
                                     Answer = answerConfig,
+                                    CorrectCount = correctCount,
                                     MockTestResultId = mockTestResult.Id,
                                     SectionQuestionId = sectionQuestionId
                                 };
@@ -198,7 +199,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         Scores = count.GetIeltsScore(sectionGroup.CourseSkill),
                         CountQuestion = item.Answers.Count,
                         TotalQuestion = item.Answers.Count,
-                        Percent = questionCount > 0 ? NumberHelper.ConvertPercentDouble((double)count / questionCount) : default
+                        Percent = NumberHelper.GetPercent(count, questionCount)
                     };
                     skillScores.Add(skillScore);
                 }
@@ -207,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-                mockTestResult.Percent = (int)skillScores.Sum(x => x.TotalCount) > 0 ? NumberHelper.ConvertPercentDouble(skillScores.Sum(x => x.CorrectCount) / skillScores.Sum(x => x.TotalCount)) : default;
+                mockTestResult.Percent = NumberHelper.GetPercent(skillScores.Sum(x => x.CorrectCount), skillScores.Sum(x => x.TotalCount));
                 mockTestResult.Status = EnumResultStatus.Done;
                 mockTestResult.SkillScores = skillScores;
             }

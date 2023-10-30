@@ -14,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<VideoTimeCode, VideoTimeCodeModel>().IgnoreAllNonExisting();
             CreateMap<CreateVideoTimeCodeCommandModel, VideoTimeCode>().IgnoreAllNonExisting();
+            CreateMap<VideoTimeCodeResultModel, VideoTimeCodeResult>().IgnoreAllNonExisting();
         }
     }
 }

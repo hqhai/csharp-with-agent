@@ -2,7 +2,6 @@
 
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Enums;
-using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
@@ -13,10 +12,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int CorrectTotal { get; set; }
         public int CorrectCount { get; set; }
         public EnumTimeCodeType TimeCodeType { get; set; }
-        public EnumCurrentStatus Status { get; set; }
+        public EnumResultStatus Status { get; set; }
         public Guid VideoId { get; set; }
         public double DisplayTime { get; set; }
         public double ExecutionTime { get; set; }
-        public ICollection<ExerciseModel>? Exercises { get; set; }
+        public IList<ExerciseModel>? Exercises { get; set; }
     }
 }

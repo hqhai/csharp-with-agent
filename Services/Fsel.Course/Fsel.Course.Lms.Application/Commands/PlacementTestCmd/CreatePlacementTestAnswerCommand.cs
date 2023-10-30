@@ -198,7 +198,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     {
                         Skill = item.Skill,
                         CountQuestion = countQuestion,
-                        Scores = percent.GetIeltsScore(item.Skill),
                         TotalQuestion = questions.Count,
                         TotalCount = questions.Sum(x => x.CorrectTotal),
                         CorrectCount = count,
@@ -206,7 +205,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     };
                     if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
                     {
-                        skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(skillScore.Skill);
+                        skillScore.Scores = skillScore.CorrectCount.GetIeltsScorePT(skillScore.Skill);
                     }
                     skillScores.Add(skillScore);
                 }
@@ -218,7 +217,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             placementTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
             placementTestResult.Status = EnumResultStatus.Done;
             placementTestResult.SkillScores = skillScores;
-            placementTestResult.Percent = placementTestResult.CorrectTotal > 0 ? NumberHelper.ConvertPercentDouble((double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal) : default;
+            placementTestResult.Percent = NumberHelper.GetPercent(placementTestResult.CorrectCount, placementTestResult.CorrectTotal);
             placementTestResult.PlacementTestAnswers = placementTestAnswers;
 
             var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());

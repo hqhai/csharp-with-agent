@@ -15,5 +15,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumFinalTestLevel FinalTestLevel { get; set; }
         public IList<SectionGroupModel>? SectionGroups { get; set; }
         public FinalTestResultModel? FinalTestResult { get; set; }
+        public IList<EnumCourseSkill>? CourseSkills { get; set; }
     }
 }
