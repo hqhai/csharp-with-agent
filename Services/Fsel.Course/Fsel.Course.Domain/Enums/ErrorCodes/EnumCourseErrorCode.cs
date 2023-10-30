@@ -57,12 +57,12 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// MockTest is up to two
         /// </summary>
-        MockTestIsUpToTwo,
+        MockTestCannotBeDreaterThan2,
 
         /// <summary>
         /// FinalTest is up to One
         /// </summary>
-        FinalTestIsUpToOne,
+        FinalTestCannotBeDreaterThan1,
 
         /// <summary>
         /// UnitTest is up to Eight
@@ -87,12 +87,12 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         ///CourseUnitMockTests Is Ten
         /// </summary>
-        CourseUnitMockTestsIsTen,
+        TheNumberOfItemsCannotBeDifferentFrom10,
 
         /// <summary>
-        ///MockTestId is in position five or ten
+        /// MockTes tMust Be I nPositions 5 And 10
         /// </summary>
-        MockTestIdIsInPositionFiveOrTen,
+        MockTestMustBeInPositions5And10,
 
         /// <summary>
         ///  MocktestResults Exist

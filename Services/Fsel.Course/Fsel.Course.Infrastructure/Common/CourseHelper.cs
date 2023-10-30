@@ -138,9 +138,9 @@ namespace Fsel.Course.Infrastructure.Common
             if (request.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts)
             {
                 #region validate mockTest
-                if (request.CourseUnitMockTests.Count < 10 || request.CourseUnitMockTests.Count > 10)
+                if (request.CourseUnitMockTests.Count != 10)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseUnitMockTestsIsTen));
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TheNumberOfItemsCannotBeDifferentFrom10));
                     return methodResult;
                 }
                 var (mocktestIds, mocktestUnFinished) = await InitListCategories(courseUnitMockTests, nameof(CourseUnitMockTest.MockTestId), request.CourseUnitMockTests);
@@ -148,14 +148,14 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     if (mocktestIds.Count > 2)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestIsUpToTwo), nameof(mocktestIds));
+                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestCannotBeDreaterThan2), nameof(mocktestIds));
                         return methodResult;
                     }
                     // MockTest nếu có thì bắt buộc ở 2 vị trí 5 và 10 nếu ko phải MockTest Thì báo lỗi
                     // MockTest ở các vị trí khác thì báo lỗi
                     if (request.CourseUnitMockTests.Any(i => (i.DisplayOrder != 4 && i.DisplayOrder != 9) && i.MockTestId != null))
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestIdIsInPositionFiveOrTen), nameof(mocktestIds));
+                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestMustBeInPositions5And10), nameof(mocktestIds));
                         return methodResult;
                     }
 
@@ -195,7 +195,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     if (finalTestIds.Count > 1)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIsUpToOne), nameof(finalTestIds));
+                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestCannotBeDreaterThan1), nameof(finalTestIds));
                         return methodResult;
                     }
                     // - Vị trí thứ 13 bắt buộc là của Final nếu ko phải là Final thì báo lỗi
