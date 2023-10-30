@@ -31,5 +31,8 @@ namespace Fsel.Interaction.Application.Services.CourseServices
 
         [Post("/class-forum-result/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<ClassForumResultModel>>>> ExecuteListClassForumResultQueryAsync([Body] BaseQueryModel query);
+
+        [Get("/class-forum-result/execute-query")]
+        Task<IApiResponse<MethodResult<ClassForumResultInfoModel>>> GetClassForumResultInfoByIdAsync([FromQuery] BaseQueryModel query);
     }
 }

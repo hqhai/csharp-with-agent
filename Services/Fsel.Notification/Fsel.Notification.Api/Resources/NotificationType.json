@@ -6,7 +6,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
-    "templateLink": "",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}",
     "createdDate": "2023-08-28"
   },
   {
@@ -16,7 +16,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bạn có bài đăng của học sinh đang chờ duyệt.",
-    "templateLink": "",
+    "templateLink": "/class-forum-management",
     "createdDate": "2023-08-28"
   },
   {
@@ -26,7 +26,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
-    "templateLink": "",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}",
     "createdDate": "2023-08-28"
   },
   {
@@ -36,7 +36,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa bình luận bài viết của bạn.",
-    "templateLink": "",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}",
     "createdDate": "2023-08-28"
   },
   {
@@ -46,7 +46,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa trả lời bình luận của bạn.",
-    "templateLink": "",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}&repCommentId={5}",
     "createdDate": "2023-08-28"
   },
   {
@@ -56,7 +56,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!",
-    "templateLink": "",
+    "templateLink": "/learn",
     "createdDate": "2023-08-28"
   },
   {
@@ -66,7 +66,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bạn có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.",
-    "templateLink": "",
+    "templateLink": "/payment",
     "createdDate": "2023-08-28"
   }
 ]
