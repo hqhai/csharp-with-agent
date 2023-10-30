@@ -77,6 +77,31 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// requires 13 courseUnitMockTests
         /// </summary>
-        Requires13CourseUnitMockTests
+        Requires13CourseUnitMockTests,
+
+        /// <summary>
+        /// Unit Results Exist
+        /// </summary>
+        UnitResultsExist,
+
+        /// <summary>
+        ///CourseUnitMockTests Is Ten
+        /// </summary>
+        CourseUnitMockTestsIsTen,
+
+        /// <summary>
+        ///MockTestId is in position five or ten
+        /// </summary>
+        MockTestIdIsInPositionFiveOrTen,
+
+        /// <summary>
+        ///  MocktestResults Exist
+        /// </summary>
+        MocktestResultsExist,
+
+        /// <summary>
+        ///  FinalTestResults Exist
+        /// </summary>
+        FinalTestResultsExist
     }
 }

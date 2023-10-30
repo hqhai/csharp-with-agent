@@ -31,9 +31,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
-        private const string UNITID_KEY = "UnitId";
-        private const string MOCKTESTID_KEY = "MockTestId";
-        private const string FINALTESTID_KEY = "FinalTestId";
+       
         public CourseHelper(ICourseRepository courseRepository
             , IUnitRepository unitRepository
             , IMapper mapper
@@ -57,7 +55,7 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            var courseUnitMockTests = course.CourseUnitMockTests.ToList();
+            var courseUnitMockTests = course?.CourseUnitMockTests.ToList();
             if(courseUnitMockTests == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -93,7 +91,7 @@ namespace Fsel.Course.Infrastructure.Common
             #endregion validate request
 
             #region validate Unit
-            var (unitIds, unitUnFinished) = await InitListCategories(courseUnitMockTests, UNITID_KEY, request.CourseUnitMockTests);
+            var (unitIds, unitUnFinished) = await InitListCategories(courseUnitMockTests, "UnitId", request.CourseUnitMockTests);
             if (unitIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unitIds));
@@ -132,20 +130,20 @@ namespace Fsel.Course.Infrastructure.Common
             var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.Id && unitUnFinished.Contains(x.UnitId)).ToListAsync();
             if (unitResults.Any() && unitResults.Any(x => x.Status != EnumResultStatus.Unfinished))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(unitResults));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitResultsExist), nameof(unitResults));
                 return methodResult;
             }
             #endregion validate Unit
 
-            if (request.CourseLevel.GetEnumCourseType() == Shared.Enums.EnumCourseType.Ielts)
+            if (request.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts)
             {
                 #region validate mockTest
-                if (request.CourseUnitMockTests.Count < 10)
+                if (request.CourseUnitMockTests.Count < 10 || request.CourseUnitMockTests.Count > 10)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.Requires13CourseUnitMockTests));
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseUnitMockTestsIsTen));
                     return methodResult;
                 }
-                var (mocktestIds, mocktestUnFinished) = await InitListCategories(courseUnitMockTests, MOCKTESTID_KEY, request.CourseUnitMockTests);
+                var (mocktestIds, mocktestUnFinished) = await InitListCategories(courseUnitMockTests, "MockTestId", request.CourseUnitMockTests);
                 if (mocktestIds.Any())
                 {
                     if (mocktestIds.Count > 2)
@@ -155,16 +153,10 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     // MockTest nếu có thì bắt buộc ở 2 vị trí 5 và 10 nếu ko phải MockTest Thì báo lỗi
                     // MockTest ở các vị trí khác thì báo lỗi
-                    foreach (var i in request.CourseUnitMockTests)
+                    if (request.CourseUnitMockTests.Any(i => (i.DisplayOrder != 4 && i.DisplayOrder != 9) && i.MockTestId != null))
                     {
-                        if(i.DisplayOrder != 4 && i.DisplayOrder != 9)
-                        {
-                            if(i.MockTestId != null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mocktestIds));
-                                return methodResult;
-                            }
-                        }
+                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestIdIsInPositionFiveOrTen), nameof(mocktestIds));
+                        return methodResult;
                     }
 
                     if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
@@ -184,7 +176,7 @@ namespace Fsel.Course.Infrastructure.Common
                     var mocktestResults = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == request.Id && mocktestUnFinished.Contains(x.MockTestId)).ToListAsync();
                     if (mocktestResults.Any() && mocktestResults.Any(x => x.Status != EnumResultStatus.Unfinished))
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(mocktestResults));
+                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MocktestResultsExist), nameof(mocktestResults));
                         return methodResult;
                     }
                 }
@@ -198,7 +190,7 @@ namespace Fsel.Course.Infrastructure.Common
                     methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.Requires13CourseUnitMockTests));
                     return methodResult;
                 }
-                var (finalTestIds, finalTestUnFinished) = await InitListCategories(courseUnitMockTests, FINALTESTID_KEY, request.CourseUnitMockTests);
+                var (finalTestIds, finalTestUnFinished) = await InitListCategories(courseUnitMockTests, "FinalTestId", request.CourseUnitMockTests);
                 if (finalTestIds.Any())
                 {
                     if (finalTestIds.Count > 1)
@@ -208,16 +200,10 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     // - Vị trí thứ 13 bắt buộc là của Final nếu ko phải là Final thì báo lỗi
                     // - Final ở các vị trí khác thì báo lỗi
-                    foreach (var i in request.CourseUnitMockTests)
+                    if (request.CourseUnitMockTests.Any(i => (i.DisplayOrder != 12) && i.FinalTestId != null))
                     {
-                        if (i.DisplayOrder != 12)
-                        {
-                            if (i.FinalTestId != null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIdMustBeAtTheEnd), nameof(finalTestIds));
-                                return methodResult;
-                            }
-                        }
+                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIdMustBeAtTheEnd), nameof(finalTestIds));
+                        return methodResult;
                     }
                     if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
                     {
@@ -229,7 +215,7 @@ namespace Fsel.Course.Infrastructure.Common
                     var finalTestResults = await _finalTestResultRepository.Queryable.Where(x => x.CourseId == request.Id && finalTestUnFinished.Contains(x.FinalTestId)).ToListAsync();
                     if (finalTestResults.Any() && finalTestResults.Any(x => x.Status != EnumResultStatus.Unfinished))
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(finalTestResults));
+                        methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestResultsExist), nameof(finalTestResults));
                         return methodResult;
                     }
                 }
@@ -250,8 +236,8 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<(List<Guid?> categoryIds, List<Guid?> listUnFinishedIds)> InitListCategories(List<CourseUnitMockTest> courseUnitMockTests, string nameProperty, IList<UpdateCourseUnitMockTestCommandModel>? courseUnitMockTestsReq)
         {
             var listCategoryIds = courseUnitMockTests.Where(x => x.GetPropValue(nameProperty) != null).Select(x => (Guid?)x.GetPropValue(nameProperty)).ToList();
-            var categoryIds = courseUnitMockTestsReq.Where(e => e.GetPropValue(nameProperty) != null).Select(x => (Guid?)x.GetPropValue(nameProperty)).ToList();
-            var listUnFinishedIds = listCategoryIds.Except(categoryIds).ToList();
+            var categoryIds = courseUnitMockTestsReq?.Where(e => e.GetPropValue(nameProperty) != null).Select(x => (Guid?)x.GetPropValue(nameProperty)).ToList();
+            var listUnFinishedIds = listCategoryIds?.Except(categoryIds).ToList();
             return (categoryIds, listUnFinishedIds);
 
         }
