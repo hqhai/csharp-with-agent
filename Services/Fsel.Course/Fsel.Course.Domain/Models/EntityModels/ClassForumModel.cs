@@ -15,8 +15,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? MediaPost { get; set; }
 
-        public bool IsActive { get; set; }
-
         public EnumCourseSkill CourseSkill { get; set; }
 
         public Guid? LessonId { get; set; }
