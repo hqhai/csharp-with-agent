@@ -13,6 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid CourseId { get; set; }
         public DateTime? GradingStartDate { get; set; }
         public Guid? GradingTeacherId { get; set; }
+        public bool IsWait { get; set; }
         public double Scores { get; set; }
         public object? MockTestScores { get; set; }
         public int? UnitDisplayOrder { get; set; }

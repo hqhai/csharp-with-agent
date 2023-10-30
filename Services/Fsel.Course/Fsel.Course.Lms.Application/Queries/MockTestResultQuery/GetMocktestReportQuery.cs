@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -25,13 +26,15 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     public class GetMockTestReportQueryHandler : IRequestHandler<GetMockTestReportQuery, MethodResult<MockTestResultModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IMockTestRepository _mockTestRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
+            _mockTestRepository = mockTestRepository;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
@@ -52,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             var mockTestResult = await _mockTestResultRepository.Queryable
                                     .Include(x => x.MockTestScores)
-                                    .ThenInclude(x => x.SectionGroup)
+                                        .ThenInclude(x => x.SectionGroup)
                                     .Where(x => x.Id == request.MockTestResultId && x.StudentId == studentId)
                                     .AsNoTracking()
                                     .Select(x => new MockTestResultModel
@@ -67,6 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         Status = x.Status,
                                         StudentId = x.StudentId,
                                         MockTestId = x.MockTestId,
+                                        IsWait = GetWait(x),
                                         MockTestScores = x.MockTestScores
                                         .OrderBy(x => x.CreatedDate)
                                         .Where(n => n.SectionGroup != null)
@@ -80,7 +84,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         {
                                             Skill = n.Key,
                                             MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).ToList())
-
                                         })
                                     }).FirstOrDefaultAsync(cancellationToken);
 
@@ -92,6 +95,21 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             methodResult.Result = mockTestResult;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static bool GetWait(MockTestResult mockTestResult)
+        {
+            var skills = mockTestResult.MockTest?.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList();
+            if (skills != null && skills.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing))
+            {
+                if (mockTestResult.MockTestScores != null && mockTestResult.MockTestScores.Any())
+                {
+                    var skillScores = mockTestResult.MockTestScores.Select(x => x.SectionGroup!.CourseSkill).ToList();
+                    return skillScores.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
+                }
+                return false;
+            }
+            return true;
         }
     }
 }
