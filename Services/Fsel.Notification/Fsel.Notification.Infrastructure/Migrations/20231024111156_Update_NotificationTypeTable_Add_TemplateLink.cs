@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -16,7 +16,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                 keyColumn: "Id",
                 keyValue: new Guid("810c70ca-4f3c-4d02-a194-708fa45d42ea"),
                 column: "TemplateLink",
-                value: "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}");
+                value: "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={3}&commentId={4}");
 
             migrationBuilder.UpdateData(
                 table: "NotificationTypes",

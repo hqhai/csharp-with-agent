@@ -261,7 +261,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={3}",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
                             TemplateMessage = "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
                             Type = "LinkPage"
                         },
@@ -275,7 +275,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "",
+                            TemplateLink = "/class-forum-management",
                             TemplateMessage = "Bạn có bài đăng của học sinh đang chờ duyệt.",
                             Type = "Text"
                         },
@@ -303,7 +303,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}",
                             TemplateMessage = "{0} vừa bình luận bài viết của bạn.",
                             Type = "LinkComment"
                         },
@@ -317,7 +317,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}&repCommentId={5}",
                             TemplateMessage = "{0} vừa trả lời bình luận của bạn.",
                             Type = "LinkComment"
                         },
@@ -331,7 +331,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "",
+                            TemplateLink = "/learn",
                             TemplateMessage = "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!",
                             Type = "Text"
                         },
@@ -345,7 +345,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "",
+                            TemplateLink = "/payment",
                             TemplateMessage = "Bạn có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.",
                             Type = "Text"
                         });

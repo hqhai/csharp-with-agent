@@ -100,8 +100,9 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
                     ParamsLink = returnedParamsLink,
                     Type = businessType,
                     Content = businessContent,
-                    UserId = objectOwnerId,
                     SenderId = _authContext.CurrentUserId,
+                    Roles = new List<EnumRole> { EnumRole.CSO },
+                    PlatformCode = EnumPlatformCode.LMSAdmin
                 };
 
                 await _interationActionPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
