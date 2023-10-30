@@ -61,5 +61,19 @@ namespace Fsel.Course.Lms.Api.Controllers
             var commandResult = await _mediator.Send(new GetClassForumResultQuery { ClassForumResultId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Update try again
+        /// </summary>
+        [HttpPut("Retry/{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStatus([FromRoute] Guid id, [FromBody] RetryClassForumResultCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
+            MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
