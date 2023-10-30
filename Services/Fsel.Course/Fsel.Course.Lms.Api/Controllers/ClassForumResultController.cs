@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Update try again
         /// </summary>
-        [HttpPut("Retry/{id}")]
+        [HttpPut("retry/{id}")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateStatus([FromRoute] Guid id, [FromBody] RetryClassForumResultCommand command)

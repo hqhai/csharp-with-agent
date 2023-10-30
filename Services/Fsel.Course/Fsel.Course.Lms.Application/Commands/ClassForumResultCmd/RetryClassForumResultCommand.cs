@@ -35,9 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ClassForumResultModel>();
 
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumResultFiles)
-                                                                    .Where(e => e.Id == request.Id)
-                                                                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            var classForumResult = await _classForumResultRepository.GetByIdAsync(request.Id);
 
             if (classForumResult == null)
             {
