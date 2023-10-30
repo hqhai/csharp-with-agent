@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 using Amazon.S3;
 using Amazon.S3.Model;
@@ -19,8 +19,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         private readonly AppSetting _appSetting;
         private readonly AmazonS3Client _amazonS3Client;
         private readonly TransferUtility _transferUtility;
-        private readonly int _targetWidthResize = 84;
-        private readonly int _targetHeightResize = 84;
+        private readonly float _targetWidthResize = 270F;
+        private readonly float _targetHeightResize = 180F;
         private readonly double _partSize = ByteSize.FromMegabytes(100).Bytes; // Size of each part (100 MB)
 
         private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
@@ -142,14 +142,24 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             {
                 using (var image = Image.Load(stream))
                 {
-                    int targetSize = Math.Min(_targetWidthResize, _targetHeightResize);
+                    float thumbWidth = _targetWidthResize;
+                    float thumbHeight = _targetHeightResize;
+                    //calculate  image  size
+                    if (image.Width > image.Height)
+                    {
+                        thumbHeight = ((float)image.Height / image.Width) * thumbWidth;
+                    }
+                    else
+                    {
+                        thumbWidth = ((float)image.Width / image.Height) * thumbHeight;
+                    }
+
 
                     // Tạo một ảnh vuông với kích thước đã resize
                     image.Mutate(x => x
                         .Resize(new ResizeOptions
                         {
-                            Size = new Size(targetSize, targetSize),
-                            Mode = ResizeMode.Stretch
+                            Size = new Size((int)thumbWidth, (int)thumbHeight),
                         }));
 
                     // Tạo một memory stream cho ảnh đã resize
