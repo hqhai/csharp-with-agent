@@ -54,6 +54,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public DateTime? CheckStartDate { get; set; }
 
         public DateTime? GradingStartDate { get; set; }
+        public string? RetryContent { get; set; }
+        public string? RetryWordContent { get; set; }
+        public string? RetryGradingAlFeedBack { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }
         public LessonResultModel? LessonResult { get; set; }
