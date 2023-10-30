@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class SectionGroupĐetailModel : BaseModel
+    public class SectionGroupDetailModel : BaseModel
     {
         public double ExecutionTime { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
