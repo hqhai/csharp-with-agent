@@ -168,7 +168,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     Roles = roles,
                     Content = EnumNotificationContent.CreateClassForumResult,
                     Type = EnumNotificationType.Text,
-                    SenderId = _authContext.CurrentUserId
+                    SenderId = _authContext.CurrentUserId,
+                    PlatformCode = EnumPlatformCode.LMSAdmin
                 };
 
                 await _notificationMessagePublisher.Publish(model, cancellationToken);

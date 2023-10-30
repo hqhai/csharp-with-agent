@@ -6,6 +6,7 @@ namespace Fsel.Shared.Enums
     {
         LMS = 1,
         LCMS,
+        LMSAdmin,
         PlanetDefender,
     }
 }
