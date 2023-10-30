@@ -3162,6 +3162,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int>("CorrectTotal")
                         .HasColumnType("int");
 
+                    b.Property<double>("CountQuestion")
+                        .HasColumnType("float");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -3211,6 +3214,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("TotalQuestion")
+                        .HasColumnType("float");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")

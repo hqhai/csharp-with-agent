@@ -43,6 +43,13 @@ namespace Fsel.Course.Infrastructure.Common
             return sectionGroupModel;
         }
 
+        public SectionGroupModel GetSectionGroup(SectionGroup? sectionGroup)
+        {
+            var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
+            sectionGroupModel.TotalQuestion = GetTotalQuestion(sectionGroup);
+            return sectionGroupModel;
+        }
+
         public double GetExecutionTime(IList<SectionGroup>? sectionGroups)
         {
             if (sectionGroups != null && sectionGroups.Any())

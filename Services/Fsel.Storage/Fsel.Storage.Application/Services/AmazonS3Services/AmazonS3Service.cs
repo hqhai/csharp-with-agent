@@ -1,4 +1,4 @@
-// Copyright (c) Atlantic. All rights reserved.
+﻿// Copyright (c) Atlantic. All rights reserved.
 
 using Amazon.S3;
 using Amazon.S3.Model;
@@ -10,6 +10,7 @@ using Fsel.Storage.Domain.Enums.ErrorCodes;
 using Fsel.Storage.Infrastructure.ValueSettings;
 using Humanizer.Bytes;
 using Microsoft.AspNetCore.Http;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace Fsel.Storage.Application.Services.AmazonS3Services
 {
@@ -18,6 +19,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         private readonly AppSetting _appSetting;
         private readonly AmazonS3Client _amazonS3Client;
         private readonly TransferUtility _transferUtility;
+        private readonly int _targetWidthResize = 84;
+        private readonly int _targetHeightResize = 84;
         private readonly double _partSize = ByteSize.FromMegabytes(100).Bytes; // Size of each part (100 MB)
 
         private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
@@ -25,7 +28,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             { EnumFolderType.Fsis, ByteSize.FromGigabytes(1).Bytes }, //maximum question size (1 GB)
             { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
             { EnumFolderType.Files, ByteSize.FromMegabytes(6).Bytes }, //maximum file size (6 MB)
-            { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes } //maximum question size (6 MB)
+            { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes }, //maximum question size (6 MB)
+            { EnumFolderType.Images, ByteSize.FromMegabytes(20).Bytes } //maximum image size (20 MB)
         };
 
         public AmazonS3Service(AppSetting appSetting)
@@ -42,91 +46,121 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             _transferUtility = new TransferUtility(_amazonS3Client);
         }
 
-        public async Task<MethodResult<string?>> UploadFileAsync(IFormFile? file, EnumFolderType folderType)
+        public async Task<MethodResult<string?>> UploadFileAsync(IFormFile? file, EnumFolderType folderType, bool isResize = false)
         {
             MethodResult<string?> result = IsValidFile(file, folderType);
-            try
+            if (file == null || !result.IsOK)
             {
-                if (file == null || !result.IsOK)
+                return result;
+            }
+
+            var folder = _appSetting.StorageConfig!.Folders!.GetPropValue<string>(folderType.ToString());
+            var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix());
+
+            var initiateRequest = new InitiateMultipartUploadRequest
+            {
+                BucketName = _appSetting.StorageConfig!.BucketName,
+                Key = key,
+            };
+            var initiateResponse = await _amazonS3Client.InitiateMultipartUploadAsync(initiateRequest);
+
+            // Calculate the size of each part
+            var partSize = _partSize;
+
+            // Create a list of parts to upload
+            var parts = new List<UploadPartResponse>();
+            Stream stream;
+            if (isResize)
+            {
+                stream = OpenReadStreamResize(file);
+            }
+            else
+            {
+                stream = file.OpenReadStream();
+            }
+
+            using (var sourceStream = stream)
+            {
+                var buffer = new byte[(long)partSize];
+                int bytesRead;
+                int partNumber = 1;
+
+                var partUploadTasks = new List<Task>();
+
+                while ((bytesRead = await sourceStream.ReadAsync(buffer.AsMemory(0, buffer.Length))) > 0)
                 {
-                    return result;
-                }
+                    var partBuffer = new byte[bytesRead];
+                    Array.Copy(buffer, 0, partBuffer, 0, bytesRead);
 
-                var folder = _appSetting.StorageConfig!.Folders!.GetPropValue<string>(folderType.ToString());
-                var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix());
-
-                var initiateRequest = new InitiateMultipartUploadRequest
-                {
-                    BucketName = _appSetting.StorageConfig!.BucketName,
-                    Key = key,
-                };
-                var initiateResponse = await _amazonS3Client.InitiateMultipartUploadAsync(initiateRequest);
-
-                // Calculate the size of each part
-                var partSize = _partSize;
-
-                // Create a list of parts to upload
-                var parts = new List<UploadPartResponse>();
-
-                using (var sourceStream = file.OpenReadStream())
-                {
-                    var buffer = new byte[(long)partSize];
-                    int bytesRead;
-                    int partNumber = 1;
-
-                    var partUploadTasks = new List<Task>();
-
-                    while ((bytesRead = await sourceStream.ReadAsync(buffer.AsMemory(0, buffer.Length))) > 0)
-                    {
-                        var partBuffer = new byte[bytesRead];
-                        Array.Copy(buffer, 0, partBuffer, 0, bytesRead);
-
-                        var uploadPartRequest = new UploadPartRequest
-                        {
-                            BucketName = _appSetting.StorageConfig!.BucketName,
-                            Key = key,
-                            UploadId = initiateResponse.UploadId,
-                            PartNumber = partNumber,
-                            PartSize = bytesRead,
-                            InputStream = new MemoryStream(partBuffer)
-                        };
-
-                        partUploadTasks.Add(Task.Run(async () =>
-                        {
-                            var uploadPartResponse = await _amazonS3Client.UploadPartAsync(uploadPartRequest);
-                            parts.Add(uploadPartResponse);
-                        }));
-
-                        partNumber++;
-                    }
-
-                    await Task.WhenAll(partUploadTasks).ConfigureAwait(false);
-
-                    // Complete the upload process
-                    var completeMultipartUploadRequest = new CompleteMultipartUploadRequest
+                    var uploadPartRequest = new UploadPartRequest
                     {
                         BucketName = _appSetting.StorageConfig!.BucketName,
                         Key = key,
                         UploadId = initiateResponse.UploadId,
-                        PartETags = parts.Select(p => new PartETag { PartNumber = p.PartNumber, ETag = p.ETag }).ToList()
+                        PartNumber = partNumber,
+                        PartSize = bytesRead,
+                        InputStream = new MemoryStream(partBuffer)
                     };
 
-                    var complete = await _amazonS3Client.CompleteMultipartUploadAsync(completeMultipartUploadRequest);
-                    if (complete.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    partUploadTasks.Add(Task.Run(async () =>
                     {
-                        result.AddErrorServer();
-                        return result;
-                    }
+                        var uploadPartResponse = await _amazonS3Client.UploadPartAsync(uploadPartRequest);
+                        parts.Add(uploadPartResponse);
+                    }));
 
-                    result.Result = GenerateAwsFileUrl(_appSetting.StorageConfig.BucketName, _appSetting.StorageConfig.AwsS3BaseUrl, key);
+                    partNumber++;
+                }
+
+                await Task.WhenAll(partUploadTasks).ConfigureAwait(false);
+
+                // Complete the upload process
+                var completeMultipartUploadRequest = new CompleteMultipartUploadRequest
+                {
+                    BucketName = _appSetting.StorageConfig!.BucketName,
+                    Key = key,
+                    UploadId = initiateResponse.UploadId,
+                    PartETags = parts.Select(p => new PartETag { PartNumber = p.PartNumber, ETag = p.ETag }).ToList()
+                };
+
+                var complete = await _amazonS3Client.CompleteMultipartUploadAsync(completeMultipartUploadRequest);
+                if (complete.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    result.AddErrorServer();
                     return result;
                 }
-            }
-            catch (Exception)
-            {
-                result.AddErrorServer();
+
+                result.Result = GenerateAwsFileUrl(_appSetting.StorageConfig.BucketName, _appSetting.StorageConfig.AwsS3BaseUrl, key);
                 return result;
             }
+        }
+
+        private Stream OpenReadStreamResize(IFormFile file)
+        {
+            var stream = file.OpenReadStream();
+
+            if (file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            {
+                using (var image = Image.Load(stream))
+                {
+                    int targetSize = Math.Min(_targetWidthResize, _targetHeightResize);
+
+                    // Tạo một ảnh vuông với kích thước đã resize
+                    image.Mutate(x => x
+                        .Resize(new ResizeOptions
+                        {
+                            Size = new Size(targetSize, targetSize),
+                            Mode = ResizeMode.Stretch
+                        }));
+
+                    // Tạo một memory stream cho ảnh đã resize
+                    var resizedStream = new MemoryStream();
+                    image.Save(resizedStream, new JpegEncoder());
+                    resizedStream.Seek(0, SeekOrigin.Begin); // Đưa con trỏ của stream về đầu
+                    return resizedStream;
+                }
+            }
+
+            return stream;
         }
 
         private MethodResult<string?> IsValidFile(IFormFile? file, EnumFolderType folderType)
@@ -167,6 +201,24 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        public async Task<MethodResult<IList<string>>> UploadFilesAsync(IList<IFormFile> files, EnumFolderType folderType, bool isResize = false)
+        {
+            MethodResult<IList<string>> results = new MethodResult<IList<string>>();
+            results.Result = new List<string>();
+
+            foreach(var file in files)
+            {
+                var uploadFile = UploadFileAsync(file, folderType, isResize);
+                var result = await uploadFile.WaitAsync(cancellationToken: CancellationToken.None).ConfigureAwait(true);
+                if (!string.IsNullOrEmpty(result.Result))
+                {
+                    results.Result.Add(result.Result);
+                }
+            }
+
+            return results;
         }
     }
 }
