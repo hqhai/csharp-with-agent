@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Delete a Lesson Note
         /// </summary>
         [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(MethodResult<LessonNoteModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {

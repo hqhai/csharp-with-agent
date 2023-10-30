@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IExerciseRepository _exerciseRepository;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IUserService _userService;
@@ -46,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             IVideoResultRepository videoResultRepository,
             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
             IExerciseRepository exerciseRepository,
+            IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
             IExerciseQuestionRepository exerciseQuestionRepository,
             IQuestionRepository questionRepository,
             IUserService userService)
@@ -58,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _exerciseRepository = exerciseRepository;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _questionRepository = questionRepository;
             _userService = userService;
@@ -161,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     var totalCountTimeCode = item.SkillScores.Select(x => x.TotalCount).Sum();
                     if (totalCountTimeCode != 0)
                     {
-                        item.Percent = NumberHelper.ConvertPercentDouble((double)correctCountTimeCode / totalCountTimeCode);
+                        item.Percent = NumberHelper.GetPercent(correctCountTimeCode, totalCountTimeCode);
                     }
                 }
             }
@@ -169,7 +172,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var totalCount = scoreQuery.Select(x => x.TotalCount).Sum();
             if (totalCount != 0)
             {
-                lessonScore.Percent = NumberHelper.ConvertPercentDouble((double)correctCount / totalCount);
+                lessonScore.Percent = NumberHelper.GetPercent(correctCount, totalCount);
                 lessonScore.TotalCount = totalCount;
                 lessonScore.CorrectCount = correctCount;
             }

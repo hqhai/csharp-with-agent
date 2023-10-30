@@ -127,7 +127,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else if (courseType != null)
                 {
-                    return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Average(x =>
+                    return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Sum(x =>
                     {
                         if (x.Skill == EnumCourseSkill.Writing || x.Skill == EnumCourseSkill.Speaking)
                         {
@@ -170,7 +170,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CountQuestion = 1,
                 TotalCount = TotalScoreClassForum,
                 CorrectCount = classForumResult.ClassForumScores.Sum(x => x.Score),
-                Percent = NumberHelper.ConvertPercentDouble((double)classForumResult.ClassForumScores.Sum(x => x.Score) / TotalScoreClassForum)
+                Percent = NumberHelper.GetPercent(classForumResult.ClassForumScores.Sum(x => x.Score), TotalScoreClassForum)
             };
         }
 
@@ -236,7 +236,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     CorrectCount = group.Sum(x => x.CorrectCount),
                     CountQuestion = group.Sum(x => x.CountQuestion),
                     TotalQuestion = group.Sum(x => x.TotalQuestion),
-                    Percent = NumberHelper.ConvertDouble(group.Average(x => x.Percent)),
+                    Percent = NumberHelper.ConvertRound(group.Average(x => x.Percent)),
                 };
             }
             return new SkillScores();
@@ -253,7 +253,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores.CountQuestion = x.Sum(x => x.CountQuestion);
                 skillScores.TotalCount = x.Sum(x => x.TotalCount);
                 skillScores.CorrectCount = x.Sum(x => x.CorrectCount);
-                skillScores.Percent = x.Sum(x => x.TotalCount) > 0 ? NumberHelper.ConvertPercentDouble(x.Sum(x => x.CorrectCount) / x.Sum(x => x.TotalCount)) : default;
+                skillScores.Percent = NumberHelper.GetPercent(x.Sum(x => x.CorrectCount), x.Sum(x => x.TotalCount));
                 return skillScores;
             };
             return skillScores;
@@ -285,7 +285,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (skillScorePercents.Any())
             {
                 var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                return (skillScoreSkills, NumberHelper.ConvertDouble(skillScorePercents.Average(x => x.Item2)));
+                return (skillScoreSkills, NumberHelper.ConvertRound(skillScorePercents.Average(x => x.Item2), 1));
             }
 
             return (new List<SkillScores>(), default);
@@ -403,7 +403,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     courseResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                     courseResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-                    courseResult.Percent = NumberHelper.ConvertDouble(percent);
+                    courseResult.Percent = NumberHelper.ConvertRound(percent);
                     courseResult.SkillScores = skillScores;
                     _courseResultRepository.Update(courseResult);
                     await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

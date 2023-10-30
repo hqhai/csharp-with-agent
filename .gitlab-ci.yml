@@ -1,6 +1,9 @@
 include:
   - project: 'ci-templates/build-docker-images'
     ref: master
+    file: '/general.yml'
+  - project: 'ci-templates/build-docker-images'
+    ref: master
     file: '/build-image-gitlab-registry.yml'
   - project: 'ci-templates/gitlab-ci-projects'
     ref: master

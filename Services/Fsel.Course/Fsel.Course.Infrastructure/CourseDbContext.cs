@@ -47,6 +47,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<UnitResult> UnitResults { get; set; }
         public DbSet<CourseResult> CourseResults { get; set; }
         public DbSet<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; }
+        public DbSet<VideoTimeCodeResult> VideoTimeCodeResults { get; set; }
         public DbSet<LessonNote> LessonNotes { get; set; }
         public DbSet<QuestionForm> QuestionForms { get; set; }
         public DbSet<LessonInstruction> LessonInstructions { get; set; }
@@ -59,6 +60,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<PlacementTestResult> PlacementTestResults { get; set; }
         public DbSet<Section> Sections { get; set; }
         public DbSet<SectionGroup> SectionGroups { get; set; }
+        public DbSet<SectionGroupResult> SectionGroupResults { get; set; }
         public DbSet<SectionPart> SectionParts { get; set; }
         public DbSet<SectionQuestion> SectionQuestions { get; set; }
         public DbSet<SectionTimeCode> SectionTimeCodes { get; set; }
@@ -113,6 +115,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoTimeCodeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionFormEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonInstructionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkAnswerEntityTypeConfiguration());
@@ -124,6 +127,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new PlacementTestResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionGroupEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionGroupResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionPartEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionTimeCodeEntityTypeConfiguration());
