@@ -119,5 +119,15 @@ namespace Fsel.Shared.Constants
                 public const string UpdateClassLiveAssignment = $"{KeyQueue}_UpdateClassLiveAssignment";
             }
         }
+
+        public static class PlantDefenderQueue
+        {
+            public const string KeyQueue = nameof(PlantDefenderQueue);
+
+            public static class NameQueue
+            {
+                public const string DeleteGuestStudent = $"{KeyQueue}_DeleteGuestStudent";
+            }
+        }
     }
 }

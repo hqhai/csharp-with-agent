@@ -49,5 +49,17 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
             MethodResult<StudentGameInfoModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Link Account
+        /// </summary>
+        [HttpPost("link-account")]
+        [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LinkAccount([FromBody] LinkStudentGameInfoCommand command)
+        {
+            MethodResult<StudentGameInfoModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
