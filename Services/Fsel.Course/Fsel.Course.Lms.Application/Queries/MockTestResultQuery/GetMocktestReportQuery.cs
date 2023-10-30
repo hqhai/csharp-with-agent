@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
     using System;
+    using System.Linq.Dynamic.Core;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -58,20 +59,28 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         .ThenInclude(x => x.SectionGroup)
                                     .Where(x => x.Id == request.MockTestResultId && x.StudentId == studentId)
                                     .AsNoTracking()
-                                    .Select(x => new MockTestResultModel
-                                    {
-                                        Id = x.Id,
-                                        Percent = x.Percent,
-                                        CorrectCount = x.CorrectCount,
-                                        CorrectTotal = x.CorrectTotal,
-                                        CourseId = x.CourseId,
-                                        CreatedDate = x.CreatedDate,
-                                        SkillScores = x.SkillScores,
-                                        Status = x.Status,
-                                        StudentId = x.StudentId,
-                                        MockTestId = x.MockTestId,
-                                        IsWait = GetWait(x),
-                                        MockTestScores = x.MockTestScores
+                                    .FirstOrDefaultAsync(cancellationToken);
+            if (mockTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                return methodResult;
+            }
+            var mockTestResultModel = GetMockTestResult(mockTestResult);
+            if (mockTestResult.SkillScores != null)
+            {
+                mockTestResultModel.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
+                mockTestResultModel.IsWait = await GetWait(mockTestResult);
+            }
+
+            methodResult.Result = mockTestResultModel;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        private MockTestResultModel GetMockTestResult(MockTestResult? x)
+        {
+            var mockTestResult = _mapper.Map<MockTestResultModel>(x);
+            mockTestResult.MockTestScores = x?.MockTestScores
                                         .OrderBy(x => x.CreatedDate)
                                         .Where(n => n.SectionGroup != null)
                                         .Select(n => new
@@ -84,27 +93,23 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         {
                                             Skill = n.Key,
                                             MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).ToList())
-                                        })
-                                    }).FirstOrDefaultAsync(cancellationToken);
-
-            if (mockTestResult?.SkillScores != null)
-            {
-                mockTestResult.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
-            }
-
-            methodResult.Result = mockTestResult;
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            return methodResult;
+                                        });
+            return mockTestResult;
         }
 
-        private static bool GetWait(MockTestResult mockTestResult)
+        private async Task<bool> GetWait(MockTestResult data)
         {
-            var skills = mockTestResult.MockTest?.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList();
+            var mockTest = await _mockTestRepository.Queryable
+                .Include(x => x.MockTestSections)
+                .ThenInclude(x => x.SectionGroup)
+                .Where(x => x.Id == data.MockTestId).FirstOrDefaultAsync();
+
+            var skills = mockTest?.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList();
             if (skills != null && skills.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing))
             {
-                if (mockTestResult.MockTestScores != null && mockTestResult.MockTestScores.Any())
+                if (data.MockTestScores != null && data.MockTestScores.Any())
                 {
-                    var skillScores = mockTestResult.MockTestScores.Select(x => x.SectionGroup!.CourseSkill).ToList();
+                    var skillScores = data.MockTestScores.Select(x => x.SectionGroup!.CourseSkill).ToList();
                     return skillScores.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
                 }
                 return false;
