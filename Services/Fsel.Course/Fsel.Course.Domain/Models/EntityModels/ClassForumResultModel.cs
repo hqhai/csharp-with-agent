@@ -50,6 +50,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public DateTime? CheckStartDate { get; set; }
 
         public DateTime? GradingStartDate { get; set; }
+        public string? RetryContent { get; set; }
+        public string? RetryWordContent { get; set; }
+        public string? RetryGradingAlFeedBack { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }
         public LessonResultModel? LessonResult { get; set; }
@@ -58,7 +61,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int UnitDisplayOrder { get; set; }
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
-        public IList<string>? FilePaths { get { return ClassForumResultFiles?.Select(x => x.FilePath ?? string.Empty).ToList(); } }
+        public IList<string>? FilePaths { get { return ClassForumResultFiles?.Where(x => !x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
+        public IList<string>? RetryFilePaths { get { return ClassForumResultFiles?.Where(x => x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
         [JsonIgnore]
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
         public IList<ClassForumScoreModel>? ClassForumScores { get; set; }
