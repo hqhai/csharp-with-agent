@@ -6,7 +6,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Models;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.SystemService;
@@ -90,8 +92,21 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             break;
                         }
 
-                        var classForumResultResult = await _courseService.GetClassForumResultByIdAsync(request.ObjectId);
+                        var classForumResultResult = await _courseService.GetClassForumResultInfoByIdAsync(new BaseQueryModel
+                        {
+                            Filters = new List<GenericFilterModel>
+                                            {
+                                                new GenericFilterModel
+                                                {
+                                                    Property = "Id",
+                                                    Value = request.ObjectId,
+                                                    Operator = Common.Enums.EnumFilterOperator.Equal
+                                                }
+                                            },
+                            IncludePaths = new List<string> { "LessonResult" }
+                        });
                         var classForumResult = classForumResultResult.Content?.Result;
+
                         model = new NotificationQueueModel()
                         {
                             ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, },
@@ -115,7 +130,20 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         {
                             break;
                         }
-                        var classForumResultOfCommentOwnerResult = await _courseService.GetClassForumResultByIdAsync(commentOwner?.ObjectId ?? default);
+
+                        var classForumResultOfCommentOwnerResult = await _courseService.GetClassForumResultInfoByIdAsync(new BaseQueryModel
+                        {
+                            Filters = new List<GenericFilterModel>
+                                            {
+                                                new GenericFilterModel
+                                                {
+                                                    Property = "Id",
+                                                    Value = commentOwner?.ObjectId,
+                                                    Operator = Common.Enums.EnumFilterOperator.Equal
+                                                }
+                                            },
+                            IncludePaths = new List<string> { "LessonResult" }
+                        });
                         var classForumResultOfCommentOwner = classForumResultOfCommentOwnerResult.Content?.Result;
 
                         model = new NotificationQueueModel()

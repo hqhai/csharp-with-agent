@@ -21,14 +21,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid StudentId { get; set; }
 
-        #region khoa them
-
-        public Guid? UnitId { get; set; }
-
-        public Guid? CourseId { get; set; }
-
-        #endregion khoa them
-
         public Guid ClassForumId { get; set; }
 
         public int? FeedBackStars { get; set; }

@@ -120,8 +120,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 GradingStartDate = classForumResult.GradingStartDate,
                 CheckCsoId = classForumResult.CheckCsoId,
                 GradingTeacherId = classForumResult.GradingTeacherId ?? default,
-                UnitId = classForumResult.LessonResult?.UnitId,
-                CourseId = classForumResult.LessonResult?.CourseId,
                 ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(classForumResult.ClassForumResultFiles),
                 ClassForumScores = classForumResult.ClassForumScores == null ? null : classForumResult.ClassForumScores.Select(x => new ClassForumScoreModel
                 {
