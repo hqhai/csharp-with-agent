@@ -1,11 +1,13 @@
 using System.Globalization;
+using Fsel.Common.Helpers;
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
+using Fsel.Notification.Infrastructure.ValueSettings;
+using Fsel.Shared.Enums;
 using Fsel.Shared.Models.ShareModels;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
@@ -13,13 +15,13 @@ namespace Fsel.Notification.Application.Queues.Consumers
     {
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
-        private readonly ILogger<SendNotificationConsumer> _logger;
+        private readonly AppSetting _appSetting;
 
-        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, ILogger<SendNotificationConsumer> logger)
+        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AppSetting appSetting)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;
-            _logger = logger;
+            _appSetting = appSetting;
         }
 
         public async Task Consume(ConsumeContext<NotificationQueueModel> context)
@@ -33,20 +35,30 @@ namespace Fsel.Notification.Application.Queues.Consumers
                 string message = dataReceipt.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, dataReceipt.ParamsMessage.ToArray()) : notificationType?.TemplateMessage!;
 
                 string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : notificationType?.TemplateLink!;
-
-                _logger.LogInformation($"SendNotificationConsumer: {dataReceipt.UserId}");
+                string? url;
+                if (dataReceipt.PlatformCode == EnumPlatformCode.LMS)
+                {
+                    url = _appSetting.ConstantUrl?.LmsWebsiteDomain?.CombineUrl(link);
+                }
+                else if (dataReceipt.PlatformCode == EnumPlatformCode.LCMS)
+                {
+                    url = _appSetting.ConstantUrl?.LcmsWebsiteDomain?.CombineUrl(link);
+                }
+                else
+                {
+                    url = _appSetting.ConstantUrl?.LmsAdminWebsiteDomain?.CombineUrl(link);
+                }
                 CreateNotificationCommand model = new CreateNotificationCommand()
                 {
                     UserId = dataReceipt.UserId ?? default,
                     ObjectId = dataReceipt.ObjectId,
                     Message = message,
-                    Link = link,
                     Roles = dataReceipt.Roles,
                     NotificationTypeId = notificationType?.Id ?? default,
                     SenderId = dataReceipt.SenderId,
+                    Link = url
                 };
                 await _mediator.Send(model).ConfigureAwait(false);
-                _logger.LogInformation($"SendNotificationConsumer: Sent {dataReceipt.UserId}");
             }
         }
     }

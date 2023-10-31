@@ -5,6 +5,7 @@ namespace Fsel.Interaction.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Commands.SupportQuetionCmd;
     using Fsel.Interaction.Application.Queries.SupportQuestionQuery;
@@ -15,7 +16,7 @@ namespace Fsel.Interaction.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/support-question")]
     [ApiController]
-    public class SupportQuestionController : ControllerBase
+    public class SupportQuestionController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -32,6 +33,7 @@ namespace Fsel.Interaction.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchSupportQuestionQuery query)
         {
+            SetQuery(query);
             MethodResult<PagingItemsModel<SupportQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }

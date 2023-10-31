@@ -107,7 +107,6 @@ namespace Fsel.Notification.Application.Commands
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
                 //Save into Database
-                _logger.LogInformation("CreateNotificationCommandHandler:Starting Insert To Database");
                 if (listNotificationMessage.Count > 0)
                 {
                     await _notificationsRepository.AddList(listNotificationMessage);
@@ -117,7 +116,6 @@ namespace Fsel.Notification.Application.Commands
                     notificationNew = _notificationsRepository.Add(notificationNew);
                 }
 
-                _logger.LogInformation("CreateNotificationCommandHandler:Ending Save To Database");
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 string avatarPath = string.Empty;
