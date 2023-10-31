@@ -2,6 +2,7 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using System.ComponentModel;
     using System.Globalization;
     using System.Text.RegularExpressions;
 
@@ -19,12 +20,24 @@ namespace Fsel.Shared.Helpers
                 return false;
             }
 
-            return str.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+            return str.Contains(value, StringComparison.OrdinalIgnoreCase);
         }
 
-        public static string ToNormalizedString(this string? str)
+        public static string? ToNormalizedString(this string? str)
         {
-            return (str ?? string.Empty).ToLower().Trim();
+            return (str ?? string.Empty).ToLower(CultureInfo.CurrentCulture).Trim();
+        }
+
+        public static IList<T>? ToList<T>(this string? str, char separator = ',')
+        {
+            return str?.Split(separator).Select(x =>
+            {
+                if (TypeDescriptor.GetConverter(typeof(T)).IsValid(x))
+                {
+                    return (T?)TypeDescriptor.GetConverter(typeof(T)).ConvertFromInvariantString(x) ?? default;
+                }
+                return default;
+            }).Where(x => x != null).Select(x => x!).ToList();
         }
     }
 }
