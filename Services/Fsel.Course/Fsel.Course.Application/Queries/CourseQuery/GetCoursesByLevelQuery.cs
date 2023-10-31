@@ -33,7 +33,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<List<CourseModel>> methodResult = new MethodResult<List<CourseModel>>();
 
-            var courses = await _courseRepository.Queryable.Where(p => p.CourseLevel == request.CourseLevel && (!request.Status.HasValue || request.Status == p.Status)).Select(x => new CourseModel
+            var courses = await _courseRepository.Queryable.Where(p => !p.IsArchive && p.CourseLevel == request.CourseLevel && (!request.Status.HasValue || request.Status == p.Status)).Select(x => new CourseModel
             {
                 Id = x.Id,
                 CourseLevel = x.CourseLevel,

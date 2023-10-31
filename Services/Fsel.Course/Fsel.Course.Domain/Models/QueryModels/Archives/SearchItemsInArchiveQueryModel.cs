@@ -12,5 +12,10 @@ namespace Fsel.Course.Domain.Models.QueryModels.Archives
         public EnumCourseLevel? Level { get; set; }
         public IList<Guid>? TeacherIds { get; set; }
         public EnumTimeCodeType? TimeCodeType { get; set; }
+        public EnumExtraPracticeType? Type { get; set; }
+        public EnumCourseSkill? Skill { get; set; }
+        public EnumMockTestType? MockTestType { get; set; }
+        public EnumFinalTestLevel? FinalTestLevel { get; set; }
+        public EnumPlacementTestLevel? PlacementTestLevel { get; set; }
     }
 }

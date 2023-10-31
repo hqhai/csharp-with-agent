@@ -116,7 +116,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return Queryable.Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
+                return Queryable.Where(p => !p.IsArchive).Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                                     .Include(video => video.VideoTimeCodes.Where(x => !x.IsDeleted))
                                     .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                     .ThenInclude(timeCodeExercise => timeCodeExercise.Exercise)
