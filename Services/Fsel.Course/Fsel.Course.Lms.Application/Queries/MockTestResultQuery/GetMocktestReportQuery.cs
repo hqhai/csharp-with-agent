@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
     using System;
+    using System.Linq.Dynamic.Core;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -12,7 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -25,13 +26,15 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     public class GetMockTestReportQueryHandler : IRequestHandler<GetMockTestReportQuery, MethodResult<MockTestResultModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IMockTestRepository _mockTestRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
+            _mockTestRepository = mockTestRepository;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
@@ -52,22 +55,31 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             var mockTestResult = await _mockTestResultRepository.Queryable
                                     .Include(x => x.MockTestScores)
-                                    .ThenInclude(x => x.SectionGroup)
+                                        .ThenInclude(x => x.SectionGroup)
                                     .Where(x => x.Id == request.MockTestResultId && x.StudentId == studentId)
                                     .AsNoTracking()
-                                    .Select(x => new MockTestResultModel
-                                    {
-                                        Id = x.Id,
-                                        Percent = x.Percent,
-                                        CorrectCount = x.CorrectCount,
-                                        CorrectTotal = x.CorrectTotal,
-                                        CourseId = x.CourseId,
-                                        CreatedDate = x.CreatedDate,
-                                        SkillScores = x.SkillScores,
-                                        Status = x.Status,
-                                        StudentId = x.StudentId,
-                                        MockTestId = x.MockTestId,
-                                        MockTestScores = x.MockTestScores
+                                    .FirstOrDefaultAsync(cancellationToken);
+            if (mockTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                return methodResult;
+            }
+            var mockTestResultModel = GetMockTestResult(mockTestResult);
+            if (mockTestResult.SkillScores != null)
+            {
+                mockTestResultModel.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
+                mockTestResultModel.IsTeacherGraded = await IsTeacherGraded(mockTestResult);
+            }
+
+            methodResult.Result = mockTestResultModel;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        private MockTestResultModel GetMockTestResult(MockTestResult? x)
+        {
+            var mockTestResult = _mapper.Map<MockTestResultModel>(x);
+            mockTestResult.MockTestScores = x?.MockTestScores
                                         .OrderBy(x => x.CreatedDate)
                                         .Where(n => n.SectionGroup != null)
                                         .Select(n => new
@@ -80,17 +92,28 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         {
                                             Skill = n.Key,
                                             MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).ToList())
-                                        })
-                                    }).FirstOrDefaultAsync(cancellationToken);
+                                        });
+            return mockTestResult;
+        }
 
-            if (mockTestResult?.SkillScores != null)
+        private async Task<bool> IsTeacherGraded(MockTestResult data)
+        {
+            var mockTest = await _mockTestRepository.Queryable
+                .Include(x => x.MockTestSections)
+                .ThenInclude(x => x.SectionGroup)
+                .Where(x => x.Id == data.MockTestId).FirstOrDefaultAsync();
+
+            var skills = mockTest?.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList();
+            if (skills != null && skills.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing))
             {
-                mockTestResult.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores), true);
+                if (data.MockTestScores != null && data.MockTestScores.Any())
+                {
+                    var skillScores = data.MockTestScores.Select(x => x.SectionGroup!.CourseSkill).ToList();
+                    return skillScores.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
+                }
+                return false;
             }
-
-            methodResult.Result = mockTestResult;
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            return methodResult;
+            return true;
         }
     }
 }
