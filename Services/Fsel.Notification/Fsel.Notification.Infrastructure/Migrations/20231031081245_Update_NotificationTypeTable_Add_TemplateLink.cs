@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -60,7 +60,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                 keyColumn: "Id",
                 keyValue: new Guid("efba1f99-8fad-47b5-af14-978f674f438e"),
                 column: "TemplateLink",
-                value: "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}");
+                value: "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={1}&commentId={2}");
 
             migrationBuilder.InsertData(
                 table: "NotificationTypes",
@@ -68,8 +68,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                 values: new object[,]
                 {
                     { new Guid("17c0df26-f131-42bf-b315-0a8a85524f6f"), "DeleteClassForumResult", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}", "Bài viết của bạn đã vi phạm Tiêu chuẩn cộng đồng của FSEL và đã bị xóa", "LinkPage", null, null, null },
-                    { new Guid("810c70ca-4f3c-20d4-a491-708fa45d42ea"), "LikeComment", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}", "{0} vừa thích bình luận của bạn.", "LinkComment", null, null, null },
-                    { new Guid("810c70ca-4f3c-4d02-a491-708fa45d42ea"), "LikeClassForum", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}", "{0} vừa thích bài viết của bạn.", "LinkPage", null, null, null },
                     { new Guid("96c0df96-f131-42bf-b315-0a8a85524f6f"), "DeleteComment", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}", "Bình luận của bạn đã vi phạm Tiêu chuẩn cộng đồng của FSEL và đã bị xóa", "LinkComment", null, null, null }
                 });
         }
@@ -81,16 +79,6 @@ namespace Fsel.Notification.Infrastructure.Migrations
                 table: "NotificationTypes",
                 keyColumn: "Id",
                 keyValue: new Guid("17c0df26-f131-42bf-b315-0a8a85524f6f"));
-
-            migrationBuilder.DeleteData(
-                table: "NotificationTypes",
-                keyColumn: "Id",
-                keyValue: new Guid("810c70ca-4f3c-20d4-a491-708fa45d42ea"));
-
-            migrationBuilder.DeleteData(
-                table: "NotificationTypes",
-                keyColumn: "Id",
-                keyValue: new Guid("810c70ca-4f3c-4d02-a491-708fa45d42ea"));
 
             migrationBuilder.DeleteData(
                 table: "NotificationTypes",
