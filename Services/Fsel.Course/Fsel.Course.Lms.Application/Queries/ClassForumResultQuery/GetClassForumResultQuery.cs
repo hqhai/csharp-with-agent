@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -43,22 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ClassForumResultModel>();
-            var classForumResult = await _classForumResultRepository.Queryable
-                .Include(x => x.LessonResult)
-                .ThenInclude(x => x!.Lesson)
-                .ThenInclude(x => x!.UnitLessons)
-                .Include(x => x.LessonResult)
-                .ThenInclude(x => x!.Unit)
-                .ThenInclude(x => x!.CourseUnitMockTests)
-                .Include(x => x.LessonResult)
-                .ThenInclude(x => x!.Course)
-                .Include(x => x.ClassForum)
-                .ThenInclude(x => x!.ClassForumFiles)
-                .Include(x => x.ClassForumResultFiles)
-                .Include(x => x.ClassForumScores)
-                .Where(x => x.Id == request.ClassForumResultId)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(cancellationToken);
+            var classForumResult = await _classForumResultRepository.GetByIdAsync(request.ClassForumResultId);
 
             if (classForumResult == null)
             {
@@ -102,12 +86,30 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     }
                 }
             }
+            classForumResult = _classForumResultRepository.Update(classForumResult);
+            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            classForumResult = await _classForumResultRepository.Queryable
+                .Include(x => x.LessonResult)
+                .ThenInclude(x => x!.Lesson)
+                .ThenInclude(x => x!.UnitLessons)
+                .Include(x => x.LessonResult)
+                .ThenInclude(x => x!.Unit)
+                .ThenInclude(x => x!.CourseUnitMockTests)
+                .Include(x => x.LessonResult)
+                .ThenInclude(x => x!.Course)
+                .Include(x => x.ClassForum)
+                .ThenInclude(x => x!.ClassForumFiles)
+                .Include(x => x.ClassForumResultFiles)
+                .Include(x => x.ClassForumScores)
+                .Where(x => x.Id == request.ClassForumResultId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
 
             var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId);
-
             var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId);
-
             var course = classForumResult.LessonResult?.Course;
+
 
             var classForumResultModel = new ClassForumResultModel
             {
@@ -135,8 +137,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 PostArea = "L" + lesson?.DisplayOrder + "_" + "U" + unit?.Number + "_" + course?.Code
             };
 
-            classForumResult = _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             methodResult.Result = classForumResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
