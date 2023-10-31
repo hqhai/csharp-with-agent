@@ -285,7 +285,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (skillScorePercents.Any())
             {
                 var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                return (skillScoreSkills, NumberHelper.ConvertRound(skillScorePercents.Average(x => x.Item2), 1));
+                return (skillScoreSkills, NumberHelper.ConvertRound(skillScorePercents.Average(x => x.Item2)));
             }
 
             return (new List<SkillScores>(), default);
