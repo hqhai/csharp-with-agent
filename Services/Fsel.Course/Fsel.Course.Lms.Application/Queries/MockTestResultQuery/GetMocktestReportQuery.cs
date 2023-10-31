@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             if (mockTestResult.SkillScores != null)
             {
                 mockTestResultModel.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
-                mockTestResultModel.IsTeacherGraded = await GetWait(mockTestResult);
+                mockTestResultModel.IsTeacherGraded = await IsTeacherGraded(mockTestResult);
             }
 
             methodResult.Result = mockTestResultModel;
@@ -97,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             return mockTestResult;
         }
 
-        private async Task<bool> GetWait(MockTestResult data)
+        private async Task<bool> IsTeacherGraded(MockTestResult data)
         {
             var mockTest = await _mockTestRepository.Queryable
                 .Include(x => x.MockTestSections)
