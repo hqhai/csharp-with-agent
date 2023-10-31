@@ -25,12 +25,15 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             {
                 ObjectId = request.ObjectId,
                 Message = request.Message,
+                UserId = request.UserId,
                 Link = request.Link,
                 Type = request.Type,
                 Content = request.Content,
                 ParamsMessage = request.ParamsMessage,
+                ParamsLink = request.ParamsLink,
                 Roles = request.Roles,
                 SenderId = request.SenderId,
+                PlatformCode = request.PlatformCode,
             }, cancellationToken);
         }
     }
