@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -68,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var mockTestResultModel = GetMockTestResult(mockTestResult);
             if (mockTestResult.SkillScores != null)
             {
-                mockTestResultModel.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
+                mockTestResultModel.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores), true);
                 mockTestResultModel.IsTeacherGraded = await IsTeacherGraded(mockTestResult);
             }
 
