@@ -8,6 +8,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -29,13 +30,15 @@ namespace Fsel.Course.Application.Queries.CourseQuery
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IMapper _mapper;
 
-        public GetCourseProgressQueryHandler(ICourseRepository courseRepository, IUnitResultRepository unitResultRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository)
+        public GetCourseProgressQueryHandler(ICourseRepository courseRepository, IUnitResultRepository unitResultRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IMapper mapper)
         {
             _courseRepository = courseRepository;
             _unitResultRepository = unitResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<CourseModel>>> Handle(GetCourseProgressQuery request, CancellationToken cancellationToken)
@@ -43,33 +46,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<CourseModel>> methodResult = new MethodResult<PagingItemsModel<CourseModel>>();
 
-            var query = _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseResults).Where(x => x.CourseResults.Any() && x.CourseUnitMockTests.Any(x => !x.UnitId.HasValue && !x.MockTestId.HasValue && !x.FinalTestId.HasValue))
-                .Select(x => new CourseModel
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Code = x.Code,
-                    InstructionContent = x.InstructionContent,
-                    Status = x.Status,
-                    CourseLevel = x.CourseLevel,
-                    CourseType = x.CourseType,
-                    CreatedDate = x.CreatedDate,
-                    CreatedFullName = x.CreatedFullName,
-                    CreatedUserId = x.CreatedUserId,
-                    UpdatedDate = x.UpdatedDate,
-                    UpdatedUserId = x.UpdatedUserId,
-                    UpdatedFullName = x.UpdatedFullName,
-                    CourseUnitMockTests = x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).Select(o => new CourseUnitMockTestModel
-                    {
-                        CourseId = o.CourseId,
-                        DisplayOrder = o.DisplayOrder,
-                        UnitId = o.UnitId,
-                        FinalTestId = o.FinalTestId,
-                        MockTestId = o.MockTestId,
-                        Type = o.FinalTestId != null ? nameof(o.FinalTest) : (o.MockTestId != null ? nameof(o.MockTest) : (o.UnitId != null ? nameof(o.Unit) : default)),
-                    }).ToList()
-
-                });
+            var query = _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseResults).Where(x => x.CourseResults.Any() && x.CourseUnitMockTests.Any(x => !x.UnitId.HasValue && !x.MockTestId.HasValue && !x.FinalTestId.HasValue));
 
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -89,7 +66,22 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            foreach (var item in lists)
+            var courses = _mapper.Map<List<CourseModel>>(lists);
+
+            courses.ForEach(x =>
+            {
+                x.CourseUnitMockTests = x.CourseUnitMockTests!.OrderBy(x => x.DisplayOrder).Select(o => new CourseUnitMockTestModel
+                {
+                    CourseId = o.CourseId,
+                    DisplayOrder = o.DisplayOrder,
+                    UnitId = o.UnitId,
+                    FinalTestId = o.FinalTestId,
+                    MockTestId = o.MockTestId,
+                    Type = o.FinalTestId != null ? nameof(o.FinalTest) : (o.MockTestId != null ? nameof(o.MockTest) : (o.UnitId != null ? nameof(o.Unit) : default)),
+                }).ToList();
+            });
+
+            foreach (var item in courses)
             {
                 if (item.CourseUnitMockTests != null)
                 {
@@ -97,7 +89,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                 }
             }
 
-            methodResult.Result = new PagingItemsModel<CourseModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<CourseModel>(courses, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -107,45 +99,45 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             foreach (var item in courseUnitMockTests)
             {
                 //Check điều kiện bản ghi hiện tại
-                bool conditionSetStatus = await CheckConditionToSetStatus(item,cancellationToken);
+                bool conditionSetStatus = await CheckConditionToSetStatus(item);
 
                 if (string.IsNullOrEmpty(item.Type))
                 {
-                    item.Status = null;
+                    item.IsUsed = null;
                 }
                 else if (conditionSetStatus)
                 {
                     var courseUnitMockTestNext = courseUnitMockTests[courseUnitMockTests.IndexOf(item) + 1]; // Lấy bản ghi liền kề sau
-                    item.Status = courseUnitMockTestNext != null && !await CheckConditionToSetStatus(courseUnitMockTestNext, cancellationToken); // Check điều kiện bản ghi liền kề sau 
+                    item.IsUsed = courseUnitMockTestNext != null && !await CheckConditionToSetStatus(courseUnitMockTestNext); // Check điều kiện bản ghi liền kề sau 
                 }
                 else
                 {
-                    item.Status = false;
+                    item.IsUsed = false;
                 }
             }
             return courseUnitMockTests;
         }
 
 
-        private async Task<bool> CheckConditionToSetStatus(CourseUnitMockTestModel courseUnitMockTest, CancellationToken cancellationToken)
+        private async Task<bool> CheckConditionToSetStatus(CourseUnitMockTestModel courseUnitMockTest)
         {
             bool isValid = false;
 
             if (courseUnitMockTest?.FinalTestId != null)
             {
-                var finalTestResults = await _finalTestResultRepository.Queryable.Where(x => x.CourseId == courseUnitMockTest.CourseId && x.FinalTestId == courseUnitMockTest.FinalTestId && x.Status != EnumResultStatus.Unfinished).ToListAsync(cancellationToken);
-                isValid = finalTestResults.Any();
+                var finalTestResults = await _finalTestResultRepository.Queryable.AnyAsync(x => x.CourseId == courseUnitMockTest.CourseId && x.FinalTestId == courseUnitMockTest.FinalTestId && x.Status != EnumResultStatus.Unfinished);
+                isValid = finalTestResults;
 
             }
             else if (courseUnitMockTest?.MockTest != null)
             {
-                var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == courseUnitMockTest.CourseId && x.MockTestId == courseUnitMockTest.MockTestId && x.Status != EnumResultStatus.Unfinished).ToListAsync(cancellationToken);
-                isValid = mockTestResults.Any();
+                var mockTestResults = await _mockTestResultRepository.Queryable.AnyAsync(x => x.CourseId == courseUnitMockTest.CourseId && x.MockTestId == courseUnitMockTest.MockTestId && x.Status != EnumResultStatus.Unfinished);
+                isValid = mockTestResults;
             }
             else if (courseUnitMockTest?.UnitId != null)
             {
-                var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == courseUnitMockTest.CourseId && x.UnitId == courseUnitMockTest.UnitId && x.Status != EnumResultStatus.Unfinished).ToListAsync(cancellationToken);
-                isValid = unitResults.Any();
+                var unitResults = await _unitResultRepository.Queryable.AnyAsync(x => x.CourseId == courseUnitMockTest.CourseId && x.UnitId == courseUnitMockTest.UnitId && x.Status != EnumResultStatus.Unfinished);
+                isValid = unitResults;
 
             }
 
