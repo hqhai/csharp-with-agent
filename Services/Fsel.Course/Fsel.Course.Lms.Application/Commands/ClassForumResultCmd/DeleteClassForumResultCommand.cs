@@ -66,11 +66,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             NotificationQueueModel notificationQueueModel = new NotificationQueueModel()
             {
                 UserId = classForumResult?.CreatedUserId,
-                Type = EnumNotificationType.LinkComment,
+                Type = EnumNotificationType.LinkPage,
                 Content = EnumNotificationContent.DeleteClassForumResult,
                 SenderId = _authContext.CurrentUserId,
                 ParamsLink = returnedParamsLink,
                 ObjectId = classForumResult?.Id ?? Guid.NewGuid(),
+                PlatformCode = EnumPlatformCode.LMS
             };
 
             await _notificationMessagePublisher.Publish(notificationQueueModel, cancellationToken).ConfigureAwait(false);

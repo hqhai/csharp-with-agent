@@ -122,6 +122,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 GradingStartDate = classForumResult.GradingStartDate,
                 CheckCsoId = classForumResult.CheckCsoId,
                 UnitId = unit?.Id ?? default,
+                CreatedUserId = classForumResult.CreatedUserId,
                 CourseId = course?.Id ?? default,
                 GradingTeacherId = classForumResult.GradingTeacherId ?? default,
                 ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(classForumResult.ClassForumResultFiles),

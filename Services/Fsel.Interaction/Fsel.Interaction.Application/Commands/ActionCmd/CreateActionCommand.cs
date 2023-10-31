@@ -16,6 +16,10 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.TrainingServices;
+    using Fsel.Interaction.Application.Services.CourseServices.Models;
+    using Fsel.Interaction.Application.Services.CourseServices;
 
     public class CreateActionCommand : CreateActionCommandModel, IRequest<MethodResult<bool>>
     {
@@ -28,14 +32,24 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         private readonly DiscussionBoardLikePublisher _discussionBoardLikePublisher;
         private readonly InterationActionPublisher _interationActionPublisher;
         private readonly AuthContext _authContext;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly IUserService _userService;
+        private readonly ITrainingService _trainingService;
+        private readonly ICourseService _courseService;
+        private readonly ICommentRepository _commentRepository;
 
-        public CreateActionCommandHandler(IMapper mapper, IInteractionActionRepository interactionActionRepository, AuthContext authContext, DiscussionBoardLikePublisher discussionBoardLikePublisher, InterationActionPublisher interationActionPublisher)
+        public CreateActionCommandHandler(IMapper mapper, IInteractionActionRepository interactionActionRepository, AuthContext authContext, DiscussionBoardLikePublisher discussionBoardLikePublisher, InterationActionPublisher interationActionPublisher, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, ITrainingService trainingService, ICourseService courseService, ICommentRepository commentRepository)
         {
             _mapper = mapper;
             _interactionActionRepository = interactionActionRepository;
             _authContext = authContext;
             _discussionBoardLikePublisher = discussionBoardLikePublisher;
             _interationActionPublisher = interationActionPublisher;
+            _notificationMessagePublisher = notificationMessagePublisher;
+            _userService = userService;
+            _trainingService = trainingService;
+            _courseService = courseService;
+            _commentRepository = commentRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateActionCommand request, CancellationToken cancellationToken)
@@ -77,10 +91,43 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
                     action = _interactionActionRepository.Add(action);
 
+                    var businessType = EnumNotificationType.LinkPage;
+                    var businessContent = EnumNotificationContent.LikeClassForum;
+
+                    //class forum
+                    var classForumResultTemp = await GetClassForumResultModel(request.ObjectId);
+
+                    var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(request.ObjectId, classForumResultTemp!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId);
+
+
+                    bool conditionCheckIsClassForum = await CheckObjecIsClassForum(request.ObjectId);
+                    if (!conditionCheckIsClassForum)
+                    {
+                        var comment = await _commentRepository.GetByIdAsync(request.ObjectId);
+                        classForumResultTemp = await GetClassForumResultModel(comment!.ObjectId);
+                        (returnedParamsLink, objectOwnerId) =  CustomDataForParamMessage(request.ObjectId, comment!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId);
+
+                        businessType = EnumNotificationType.LinkComment;
+                        businessContent = EnumNotificationContent.LikeComment;
+                    }
+
                     if (action.Type == EnumInteractionActionType.Like)
                     {
-                        await _discussionBoardLikePublisher.Publish(action.ObjectId, cancellationToken).ConfigureAwait(false);
+                        NotificationQueueModel model = new NotificationQueueModel()
+                        {
+                            ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, },
+                            ObjectId = request.ObjectId,
+                            UserId = objectOwnerId,
+                            SenderId = _authContext.CurrentUserId,
+                            ParamsLink = returnedParamsLink,
+                            Type = businessType,
+                            Content = businessContent,
+                            PlatformCode = EnumPlatformCode.LMS
+                        };
+                        await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                     }
+
+
                 }
                 else if (action.Type == EnumInteractionActionType.Like)
                 {
@@ -110,6 +157,73 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             });
 
             return methodResult;
+        }
+
+        /// <summary>
+        /// Laasy duwx lijeeu cuar Clas
+        /// </summary>
+        /// <param name="courseService"></param>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        public async Task<ClassForumResultModel> GetClassForumResultModel(Guid id)
+        {
+            if (_courseService == null)
+            {
+                return new ClassForumResultModel();
+            }
+
+            var response = await _courseService.GetClassForumResultByIdAsync(id) ?? default;
+
+
+            return response?.Content?.Result ?? new ClassForumResultModel();
+        }
+
+
+        /// <summary>
+        /// Kiểm tra xem ObjectId truyền vào có phải là ClassForum hay không
+        /// </summary>
+        /// <param name="objectId"></param>
+        /// <param name="commentRepository"></param>
+        /// <param name="courseService"></param>
+        /// <returns></returns>
+        public async Task<bool> CheckObjecIsClassForum(Guid objectId)
+        {
+            bool isClassForum = true;
+
+            var comment = await _commentRepository.GetByIdAsync(objectId);
+
+            var classForum = await _courseService.GetClassForumResultByIdAsync(objectId);
+
+            if (comment != null && classForum?.Content?.Result == null)
+            {
+                isClassForum = false;
+            }
+
+            return isClassForum;
+        }
+
+
+        /// <summary>
+        /// Lấy tham số để truyền vào link, message
+        /// </summary>
+        /// <param name="_courseService"></param>
+        /// <param name="objectId"></param>
+        /// <param name="userService"></param>
+        /// <param name="trainingService"></param>
+        /// <returns></returns>
+        public (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(Guid objectId, dynamic templateResult, Guid? courseId, Guid? unitId)
+        {
+            if (templateResult == null)
+            {
+                return (new List<object>(), Guid.Empty);
+            }
+
+            // param
+            var paramsLink = new List<object> { unitId?.ToString() ?? string.Empty, courseId?.ToString() ?? string.Empty, templateResult?.Id.ToString() ?? string.Empty, objectId };
+            var ownerObjectId = templateResult?.CreatedUserId ?? default;
+
+
+            return (paramsLink, ownerObjectId);
         }
     }
 }
