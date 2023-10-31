@@ -15,6 +15,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid GradingTeacherId { get; set; }
 
+        public Guid CourseId { get; set; }
+
+        public Guid UnitId { get; set; }
+
         public EnumClassForumResultStatus Status { get; set; }
 
         public Guid LessonResultId { get; set; }
@@ -65,6 +69,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<string>? RetryFilePaths { get { return ClassForumResultFiles?.Where(x => x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
         [JsonIgnore]
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
+
         public IList<ClassForumScoreModel>? ClassForumScores { get; set; }
     }
 }
