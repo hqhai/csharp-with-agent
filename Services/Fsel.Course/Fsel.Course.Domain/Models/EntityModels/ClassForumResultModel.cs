@@ -65,9 +65,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int UnitDisplayOrder { get; set; }
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
-        public IList<string>? FilePaths
-        { get { return ClassForumResultFiles?.Select(x => x.FilePath ?? string.Empty).ToList(); } }
-
+        public IList<string>? FilePaths { get { return ClassForumResultFiles?.Where(x => !x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
+        public IList<string>? RetryFilePaths { get { return ClassForumResultFiles?.Where(x => x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
         [JsonIgnore]
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
 

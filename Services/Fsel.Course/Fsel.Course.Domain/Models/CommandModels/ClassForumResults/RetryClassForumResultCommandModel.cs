@@ -11,5 +11,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
         public string? RetryWordContent { get; set; }
 
         public string? RetryGradingAlFeedBack { get; set; }
+
+        public IList<string>? RetryFilePaths { get; set; }
     }
 }
