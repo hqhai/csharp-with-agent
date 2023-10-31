@@ -71,7 +71,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                     Content = EnumNotificationContent.DeleteComment,
                     SenderId = _authContext.CurrentUserId,
                     ParamsLink = returnedParamsLink,
-                    ObjectId = comment.Id
+                    ObjectId = comment.Id,
+                    PlatformCode = EnumPlatformCode.LMS
                 };
 
                 await _notificationMessagePublisher.Publish(notificationQueueModel, cancellationToken).ConfigureAwait(false);
