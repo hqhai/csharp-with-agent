@@ -18,6 +18,6 @@ namespace Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models
 
         public Guid? ClassId { get; set; }
         public long NumberOfToken { get; set; }
-        public HumanModel? Human { get; set; }
+        public HumanProfileModel? Human { get; set; }
     }
 }
