@@ -59,37 +59,13 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             }
 
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-
-            var courses = _mapper.Map<List<CourseModel>>(lists);
-
-            courses.ForEach(x =>
+            var result = await _courseRepository.GetListByPageAsync<CourseModel>(query, request, cancellationToken);
+            result.Items.ForEach(x =>
             {
-                x.CourseUnitMockTests = x.CourseUnitMockTests!.OrderBy(x => x.DisplayOrder).Select(o => new CourseUnitMockTestModel
-                {
-                    CourseId = o.CourseId,
-                    DisplayOrder = o.DisplayOrder,
-                    UnitId = o.UnitId,
-                    FinalTestId = o.FinalTestId,
-                    MockTestId = o.MockTestId,
-                    Type = o.FinalTestId != null ? nameof(o.FinalTest) : (o.MockTestId != null ? nameof(o.MockTest) : (o.UnitId != null ? nameof(o.Unit) : default)),
-                }).ToList();
+                x.CourseUnitMockTests = GetCourseUnitMockTests(x.CourseUnitMockTests!.OrderBy(x => x.DisplayOrder).ToList(), cancellationToken).Result;
             });
 
-            foreach (var item in courses)
-            {
-                if (item.CourseUnitMockTests != null)
-                {
-                    item.CourseUnitMockTests = await GetCourseUnitMockTests(item.CourseUnitMockTests, cancellationToken);
-                }
-            }
-
-            methodResult.Result = new PagingItemsModel<CourseModel>(courses, request, totalItem);
+            methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -118,7 +94,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             return courseUnitMockTests;
         }
 
-
+      
         private async Task<bool> CheckConditionToSetStatus(CourseUnitMockTestModel courseUnitMockTest)
         {
             bool isValid = false;
