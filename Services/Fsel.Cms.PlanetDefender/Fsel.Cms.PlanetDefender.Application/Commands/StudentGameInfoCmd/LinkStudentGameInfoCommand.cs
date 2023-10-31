@@ -15,9 +15,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Models;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -89,12 +87,18 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
 
             if (request.IsChooseUser)
             {
-                studentGameInfo = new StudentGameInfo
+                if (studentGameInfo != null)
                 {
-                    Level = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel!,
-                    StudentId = request.UserId
-                };
-                _studentGameInfoRepository.Add(studentGameInfo);
+                }
+                else
+                {
+                    studentGameInfo = new StudentGameInfo
+                    {
+                        Level = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel!,
+                        StudentId = request.UserId
+                    };
+                    _studentGameInfoRepository.Add(studentGameInfo);
+                }
             }
             else
             {
