@@ -64,11 +64,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get Sections
         /// </summary>
         [HttpGet("sections")]
-        [ProducesResponseType(typeof(MethodResult<SectionGroupĐetailModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<SectionGroupDetailModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetSections([FromQuery] GetSectionBySectionGroupIdQuery query)
         {
-            MethodResult<SectionGroupĐetailModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<SectionGroupDetailModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
