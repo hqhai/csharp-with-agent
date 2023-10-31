@@ -15,6 +15,8 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FilePath { get; set; }
 
+        public bool IsRetry { get; set; }
+
         public Guid ClassForumResultId { get; set; }
 
         public ClassForumResult? ClassForumResult { get; set; }

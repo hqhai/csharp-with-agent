@@ -236,7 +236,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     CorrectCount = group.Sum(x => x.CorrectCount),
                     CountQuestion = group.Sum(x => x.CountQuestion),
                     TotalQuestion = group.Sum(x => x.TotalQuestion),
-                    Percent = NumberHelper.ConvertDouble(group.Average(x => x.Percent)),
+                    Percent = NumberHelper.ConvertRound(group.Average(x => x.Percent)),
                 };
             }
             return new SkillScores();
@@ -285,7 +285,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (skillScorePercents.Any())
             {
                 var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                return (skillScoreSkills, NumberHelper.ConvertDouble(skillScorePercents.Average(x => x.Item2)));
+                return (skillScoreSkills, NumberHelper.ConvertRound(skillScorePercents.Average(x => x.Item2)));
             }
 
             return (new List<SkillScores>(), default);
@@ -403,7 +403,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     courseResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                     courseResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-                    courseResult.Percent = NumberHelper.ConvertDouble(percent);
+                    courseResult.Percent = NumberHelper.ConvertRound(percent);
                     courseResult.SkillScores = skillScores;
                     _courseResultRepository.Update(courseResult);
                     await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

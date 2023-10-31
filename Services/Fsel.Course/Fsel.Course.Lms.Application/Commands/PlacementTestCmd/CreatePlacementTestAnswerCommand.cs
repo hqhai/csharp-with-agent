@@ -214,6 +214,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             #endregion Validation
 
+            placementTestResult.CountQuestion = request.CountQuestion;
+            placementTestResult.TotalQuestion = request.TotalQuestion;
             placementTestResult.CorrectCount = Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
             placementTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
             placementTestResult.Status = EnumResultStatus.Done;
