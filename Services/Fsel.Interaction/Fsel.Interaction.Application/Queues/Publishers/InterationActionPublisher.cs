@@ -1,6 +1,7 @@
 using Fsel.Core.Base.Interfaces;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 
 namespace Fsel.Interaction.Application.Queues.Publishers
 {
@@ -25,6 +26,11 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 ObjectId = model.ObjectId,
                 Type = model.Type,
                 UserId = model.UserId,
+                Content = model.Content,
+                SenderId = model.SenderId,
+                ParamsLink = model.ParamsLink,
+                ParamsMessage = model.ParamsMessage,
+                InterationType = model.InterationType
             }, cancellationToken);
 
         }

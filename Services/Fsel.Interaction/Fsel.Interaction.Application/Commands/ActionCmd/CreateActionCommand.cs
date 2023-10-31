@@ -86,7 +86,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                 {
                     await _interactionActionRepository.DeleteAsync(action);
                 }
-                else if (action.Type == EnumInteractionActionType.Disable || action.Type == EnumInteractionActionType.Flag)
+                else if (action.Type == EnumInteractionActionType.Disable)
                 {
                     InterationActionQueueModel model = new InterationActionQueueModel()
                     {

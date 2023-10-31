@@ -109,6 +109,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     Type = EnumNotificationType.Text,
                     Content = EnumNotificationContent.OrderCreate,
                     SenderId = order.CreatedUserId,
+                    PlatformCode = EnumPlatformCode.LMSAdmin
                 }, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(order);
