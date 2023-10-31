@@ -6,7 +6,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
     "createdDate": "2023-08-28"
   },
   {
@@ -26,7 +26,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={1}&commentId={2}",
     "createdDate": "2023-08-28"
   },
   {
@@ -36,7 +36,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa bình luận bài viết của bạn.",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
     "createdDate": "2023-08-28"
   },
   {
@@ -46,7 +46,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa trả lời bình luận của bạn.",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={2}&type=classForum&classForumResultId={3}&commentId={4}&repCommentId={5}",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={1}&commentId={2}&repCommentId={3}",
     "createdDate": "2023-08-28"
   },
   {
@@ -68,5 +68,27 @@
     "templateMessage": "Bạn có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.",
     "templateLink": "/payment",
     "createdDate": "2023-08-28"
+  },
+  {
+    "id": "96c0df96-f131-42bf-b315-0a8a85524f6f",
+    "type": "LinkComment",
+    "content": "DeleteComment",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bình luận của bạn đã vi phạm Tiêu chuẩn cộng đồng của FSEL và đã bị xóa",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "17c0df26-f131-42bf-b315-0a8a85524f6f",
+    "type": "LinkPage",
+    "content": "DeleteClassForumResult",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài viết của bạn đã vi phạm Tiêu chuẩn cộng đồng của FSEL và đã bị xóa",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
+    "createdDate": "2023-08-28"
   }
+
+
 ]
