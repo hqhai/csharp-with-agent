@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -43,6 +44,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return methodResult;
             }
             _mapper.Map(request, classForumResult);
+            if (request.RetryFilePaths != null)
+            {
+                classForumResult.ClassForumResultFiles = request.RetryFilePaths.Select(x => new ClassForumResultFile
+                {
+                    IsRetry = true,
+                    FilePath = x,
+                }).ToList();
+            }
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
