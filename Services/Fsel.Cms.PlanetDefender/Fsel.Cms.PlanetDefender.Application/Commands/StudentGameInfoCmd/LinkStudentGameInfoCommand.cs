@@ -16,6 +16,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Models;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
@@ -32,13 +33,19 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly DeleteGuestStudentPublisher _deleteGuestStudentPublisher;
+        private readonly AuthContext _authContext;
 
-        public LinkStudentGameInfoCommandHandler(IStudentGameInfoRepository studentGameInfoRepository, IMapper mapper, IUserService userService, DeleteGuestStudentPublisher deleteGuestStudentPublisher)
+        public LinkStudentGameInfoCommandHandler(IStudentGameInfoRepository studentGameInfoRepository
+            , IMapper mapper
+            , IUserService userService
+            , DeleteGuestStudentPublisher deleteGuestStudentPublisher
+            , AuthContext authContext)
         {
             _studentGameInfoRepository = studentGameInfoRepository;
             _mapper = mapper;
             _userService = userService;
             _deleteGuestStudentPublisher = deleteGuestStudentPublisher;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<StudentGameInfoModel>> Handle(LinkStudentGameInfoCommand request, CancellationToken cancellationToken)
@@ -46,76 +53,68 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentGameInfoModel> methodResult = new MethodResult<StudentGameInfoModel>();
 
-            var guestStudentResult = await _userService.ExecuteListStudentQueryAsync(new BaseQueryModel
-            {
-                Filters = new List<GenericFilterModel>
-                {
-                    new GenericFilterModel
-                    {
-                        Property = nameof(StudentModel.Human.UserId),
-                        Value = request.GuestUserId,
-                        Operator = Common.Enums.EnumFilterOperator.Equal
-                    }
-                }
-            });
-            var guestStudent = guestStudentResult.Content?.Result;
+            /*var guestStudentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
+            var guestStudent = guestStudentResult.Content?.Result;*/
 
-            var studentResult = await _userService.ExecuteListStudentQueryAsync(new BaseQueryModel
-            {
-                Filters = new List<GenericFilterModel>
-                {
-                    new GenericFilterModel
-                    {
-                        Property = nameof(StudentModel.Human.UserId),
-                        Value = request.UserId,
-                        Operator = Common.Enums.EnumFilterOperator.Equal
-                    }
-                }
-            });
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
             var student = studentResult.Content?.Result;
 
-            var guestStudentId = guestStudent?.Where(x => x.Human?.UserId == request.GuestUserId).Select(x => x.Id).FirstOrDefault();
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
 
-            var guestStudentGameId = await _studentGameInfoRepository.Queryable.Where(x => x.StudentId == guestStudentId).FirstOrDefaultAsync(cancellationToken);
+            var guestUserId = _authContext.CurrentUserId;
+
+            var studentGuestResult = await _userService.GetStudentByUserIdAsync(guestUserId);
+            var guestStudent = studentGuestResult.Content?.Result;
+            if (guestStudent == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(guestStudent));
+                return methodResult;
+            }
+
+            /*var guestStudentId = guestStudent?.Where(x => x.Human?.UserId == request.GuestUserId).Select(x => x.Id).FirstOrDefault();*/
+
+            /* var guestStudentGameId = await _studentGameInfoRepository.Queryable.Where(x => x.StudentId == student.Id).FirstOrDefaultAsync(cancellationToken);
 
             if (guestStudentGameId == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(guestStudentGameId));
                 return methodResult;
-            }
+            }*/
 
-            var studentId = await _studentGameInfoRepository.Queryable.Where(x => x.StudentId == request.UserId).FirstOrDefaultAsync(cancellationToken);
+            var studentGameInfo = await _studentGameInfoRepository.Queryable.Where(x => x.StudentId == student.Id).FirstOrDefaultAsync(cancellationToken);
 
             if (request.IsChooseUser)
             {
-                var level = student?.Where(x => x.Id == request.UserId).Select(x => x.CourseLevel).FirstOrDefault();
-
-                studentId = new StudentGameInfo
+                studentGameInfo = new StudentGameInfo
                 {
-                    Level = (Shared.Enums.EnumGameCourseLevel)level!,
+                    Level = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel!,
                     StudentId = request.UserId
                 };
-                _studentGameInfoRepository.Add(studentId);
+                _studentGameInfoRepository.Add(studentGameInfo);
             }
             else
             {
-                var guestLevel = guestStudent?.Where(x => x.Id == request.GuestUserId).Select(x => x.CourseLevel).FirstOrDefault();
+                /*var guestLevel = guestStudent?.Where(x => x.Id == request.GuestUserId).Select(x => x.CourseLevel).FirstOrDefault();*/
 
-                studentId = new StudentGameInfo
+                studentGameInfo = new StudentGameInfo
                 {
                     StudentId = request.UserId,
-                    Level = guestStudentGameId.Level
+                    Level = (Shared.Enums.EnumGameCourseLevel)guestStudent.CourseLevel
                 };
-                var updateTokenStudent = await _userService.UpdateStudentByTokenAsync(new Services.UserServices.Models.UpdateStudentByTokenModel { NumberOfToken = student!.Where(x => x.Id == request.UserId).Select(x => x.NumberOfToken).FirstOrDefault(), StudentId = request.UserId });
+                var updateTokenStudent = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel { NumberOfToken = student.NumberOfToken, StudentId = student.Id });
                 if (!updateTokenStudent.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(updateTokenStudent));
                     return methodResult;
                 }
-                _studentGameInfoRepository.Add(studentId);
+                _studentGameInfoRepository.Add(studentGameInfo);
             }
             await _studentGameInfoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            await _deleteGuestStudentPublisher.Publish(guestStudentGameId, cancellationToken).ConfigureAwait(false);
+            /*await _deleteGuestStudentPublisher.Publish(guestStudentGameId, cancellationToken).ConfigureAwait(false);*/
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
