@@ -152,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 {
                     // Lấy bài post học sinh trong lớp
                     var classForumResultAllStudents = classForumResults.Where(x => x.ClassForumId == classForum.Id &&
-                                    x.Id != classForumResultCurrentStudent.Id && x.Status != EnumClassForumResultStatus.Pending && x.Status != EnumClassForumResultStatus.Draft
+                                    x.Id != classForumResultCurrentStudent.Id && x.Status != EnumClassForumResultStatus.Draft && x.Status != EnumClassForumResultStatus.Pending
                                     ).ToList();
                     classForumByStudentModel.ClassForumResultAllStudents = classForumResultAllStudents;
 
