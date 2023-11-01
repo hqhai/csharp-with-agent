@@ -4,7 +4,9 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using Fsel.Cms.PlanetDefender.Application.Commands.GameHistoryCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.GameHistoryQuery;
+    using Fsel.Cms.PlanetDefender.Application.Queries.GameplayRuleConfigs;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
+    using Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.GameplayRuleConfigs;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
@@ -45,6 +47,18 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         {
             MethodResult<PagingItemsModel<GameHistoryModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get list gameplaytimeconfig
+        /// </summary>
+        [HttpGet("high-score")]
+        [ProducesResponseType(typeof(MethodResult<GameHistoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetList()
+        {
+            var commandResult = await _mediator.Send(new GetHighestScoreGameHistoryQuery { }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
