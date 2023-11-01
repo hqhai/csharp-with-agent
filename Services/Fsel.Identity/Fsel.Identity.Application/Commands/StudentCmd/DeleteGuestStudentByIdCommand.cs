@@ -7,6 +7,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -19,11 +21,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
     public class DeleteStudentByIdCommandHandler : IRequestHandler<DeleteGuestStudentByIdCommand, VoidMethodResult>
     {
-        private readonly IStudentRepository _studentRepository;
+        private readonly UserManager<User> _userManager;
+        private readonly IHumanRepository _humanRepository;
 
-        public DeleteStudentByIdCommandHandler(IStudentRepository studentRepository)
+        public DeleteStudentByIdCommandHandler(UserManager<User> userManager, IHumanRepository humanRepository)
         {
-            _studentRepository = studentRepository;
+            _userManager = userManager;
+            _humanRepository = humanRepository;
         }
 
         public async Task<VoidMethodResult> Handle(DeleteGuestStudentByIdCommand request, CancellationToken cancellationToken)
@@ -31,11 +35,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            var student = await _studentRepository.Queryable.Where(x => x.Id == request.Id).FirstOrDefaultAsync(cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x.Student).Where(x => x.Id == request.Id).FirstOrDefaultAsync(cancellationToken);
 
-            await _studentRepository.DeleteAsync(student!);
-            await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _userManager.DeleteAsync(user!);
 
+            await _humanRepository.DeleteAsync(user?.Human ?? new Human());
+            await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

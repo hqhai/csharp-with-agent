@@ -3,10 +3,9 @@
 namespace Fsel.Cms.PlanetDefender.Application.Queues
 {
     using System.Threading.Tasks;
-    using Fsel.Cms.PlanetDefender.Domain.Entities;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Models.ShareModels;
 
     public class DeleteGuestStudentPublisher
     {
@@ -17,15 +16,11 @@ namespace Fsel.Cms.PlanetDefender.Application.Queues
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(StudentGameInfo models, CancellationToken cancellationToken)
+        public async Task Publish(Guid id, CancellationToken cancellationToken)
         {
-            if (models == null)
+            await _queueProvider.Publish(QueueSettings.PlantDefenderQueue.NameQueue.DeleteGuestStudent, new BaseQueueModel
             {
-                return;
-            }
-            await _queueProvider.Publish(QueueSettings.PlantDefenderQueue.NameQueue.DeleteGuestStudent, new DeleteGuestStudentQueueModel
-            {
-                Id = models.Id,
+                QueueId = id.ToString(),
             }, cancellationToken);
         }
     }

@@ -51,9 +51,6 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentGameInfoModel> methodResult = new MethodResult<StudentGameInfoModel>();
 
-            /*var guestStudentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
-            var guestStudent = guestStudentResult.Content?.Result;*/
-
             var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
             var student = studentResult.Content?.Result;
 
@@ -73,22 +70,13 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
                 return methodResult;
             }
 
-            /*var guestStudentId = guestStudent?.Where(x => x.Human?.UserId == request.GuestUserId).Select(x => x.Id).FirstOrDefault();*/
-
-            /* var guestStudentGameId = await _studentGameInfoRepository.Queryable.Where(x => x.StudentId == student.Id).FirstOrDefaultAsync(cancellationToken);
-
-            if (guestStudentGameId == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(guestStudentGameId));
-                return methodResult;
-            }*/
-
             var studentGameInfo = await _studentGameInfoRepository.Queryable.Where(x => x.StudentId == student.Id).FirstOrDefaultAsync(cancellationToken);
 
             if (request.IsChooseUser)
             {
                 if (studentGameInfo != null)
                 {
+                    studentGameInfo.Level = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel;
                     _studentGameInfoRepository.Update(studentGameInfo);
                 }
                 else
@@ -96,20 +84,27 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
                     studentGameInfo = new StudentGameInfo
                     {
                         Level = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel!,
-                        StudentId = request.UserId
+                        StudentId = student.Id
                     };
                     _studentGameInfoRepository.Add(studentGameInfo);
                 }
             }
             else
             {
-                /*var guestLevel = guestStudent?.Where(x => x.Id == request.GuestUserId).Select(x => x.CourseLevel).FirstOrDefault();*/
-
-                studentGameInfo = new StudentGameInfo
+                if (studentGameInfo != null)
                 {
-                    StudentId = request.UserId,
-                    Level = (Shared.Enums.EnumGameCourseLevel)guestStudent.CourseLevel
-                };
+                    studentGameInfo.Level = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel;
+                    _studentGameInfoRepository.Update(studentGameInfo);
+                }
+                else
+                {
+                    studentGameInfo = new StudentGameInfo
+                    {
+                        StudentId = student.Id,
+                        Level = (Shared.Enums.EnumGameCourseLevel)guestStudent.CourseLevel
+                    };
+                }
+
                 var updateTokenStudent = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel { NumberOfToken = student.NumberOfToken, StudentId = student.Id });
                 if (!updateTokenStudent.IsSuccessStatusCode)
                 {
@@ -119,7 +114,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
                 _studentGameInfoRepository.Add(studentGameInfo);
             }
             await _studentGameInfoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            /*await _deleteGuestStudentPublisher.Publish(guestStudentGameId, cancellationToken).ConfigureAwait(false);*/
+            await _deleteGuestStudentPublisher.Publish(guestUserId, cancellationToken).ConfigureAwait(false);
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -3,7 +3,6 @@
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
-    using Fsel.Cms.PlanetDefender.Application.Commands;
     using Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery;
     using Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models;
