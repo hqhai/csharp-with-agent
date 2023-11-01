@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
-    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -43,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course)
+            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => !x.IsDeleted)
                 .GroupBy(r => new { r.StudentId, r.CourseId })
                 .Select(group => new CourseResultModel
                 {
