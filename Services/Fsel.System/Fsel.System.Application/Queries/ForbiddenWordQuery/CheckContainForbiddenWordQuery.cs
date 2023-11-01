@@ -36,19 +36,10 @@ namespace Fsel.System.Application.Queries.ForbiddenWordQuery
                 return methodResult;
             }
 
-            if (request.Word == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
-
-            var inputWord = StringHelper.RemoveHTMLTags(request.Word.Trim('"'));
-            var forbiddenWords = await _forbiddenWordRepository.Queryable
-                .Where(x => (" " + inputWord.Trim().ToLower() + " ").Contains(" " + x.Word.ToLower() + " "))
-                .Select(x => x.Word.ToLower())
-                .Distinct()
-                .ToListAsync(cancellationToken: cancellationToken);
-            methodResult.Result = forbiddenWords;
+            var forbiddenWordQuery = await _forbiddenWordRepository.Queryable
+            .Where(x => (" " + StringHelper.RemoveHTMLTags(request.Word) + " ").ToLower().Contains(" " + x.Word.ToLower() + " "))
+            .Select(x => x.Word).Distinct().ToListAsync(cancellationToken: cancellationToken);
+            methodResult.Result = forbiddenWordQuery;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
