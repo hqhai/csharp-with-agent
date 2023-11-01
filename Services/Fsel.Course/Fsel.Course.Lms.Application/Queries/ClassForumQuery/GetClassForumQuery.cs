@@ -148,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 }
 
                 ///Xử lý kết quả trả về
-                if (classForumResultCurrentStudent != null && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Draft)
+                if (classForumResultCurrentStudent != null && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Draft && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Pending)
                 {
                     // Lấy bài post học sinh trong lớp
                     var classForumResultAllStudents = classForumResults.Where(x => x.ClassForumId == classForum.Id &&
