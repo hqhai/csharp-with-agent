@@ -89,6 +89,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
             {
                 if (studentGameInfo != null)
                 {
+                    _studentGameInfoRepository.Update(studentGameInfo);
                 }
                 else
                 {
