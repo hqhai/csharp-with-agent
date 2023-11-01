@@ -35,6 +35,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         public DbSet<GameplayRuleConfig> GameplayRuleConfigs { get; set; }
         public DbSet<WheelOfBuff> WheelOfBuffs { get; set; }
         public DbSet<SpaceShip> SpaceShips { get; set; }
+        public DbSet<GameHistory> GameHistories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
