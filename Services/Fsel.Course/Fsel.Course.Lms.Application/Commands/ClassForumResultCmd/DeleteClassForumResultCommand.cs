@@ -43,7 +43,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-
             var classForumResult = await _classForumResulRepository.GetIncludeByIdAsync(request.Id);
 
             if (classForumResult == null)
@@ -56,48 +55,47 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.CanNotDeleteInCurrentStatus), nameof(classForumResult.Status), classForumResult.Status);
                 return methodResult;
             }
+
+
             await _classForumResulRepository.ExecuteTransactionAsync(async () =>
-        {
-            var result = await _classForumResulRepository.DeleteAsync(classForumResult);
-            await _classForumResulRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+             {
+                 var result = await _classForumResulRepository.DeleteAsync(classForumResult);
+                 await _classForumResulRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-            var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(classForumResult?.Id, classForumResult!, classForumResult?.LessonResult?.CourseId, classForumResult?.LessonResult?.UnitId);
+                 var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(classForumResult!, classForumResult?.LessonResult?.CourseId, classForumResult?.LessonResult?.UnitId);
 
-            NotificationQueueModel notificationQueueModel = new NotificationQueueModel()
-            {
-                UserId = classForumResult?.CreatedUserId,
-                Type = EnumNotificationType.LinkComment,
-                Content = EnumNotificationContent.DeleteClassForumResult,
-                SenderId = _authContext.CurrentUserId,
-                ParamsLink = returnedParamsLink,
-                ObjectId = classForumResult?.Id ?? Guid.NewGuid(),
-            };
+                 NotificationQueueModel notificationQueueModel = new NotificationQueueModel()
+                 {
+                     Type = EnumNotificationType.LinkPage,
+                     Content = EnumNotificationContent.DeleteClassForumResult,
+                     SenderId = _authContext.CurrentUserId,
+                     ParamsLink = returnedParamsLink,
+                     ObjectId = classForumResult?.Id ?? Guid.NewGuid(),
+                     PlatformCode = EnumPlatformCode.LMS,
+                     UserId = objectOwnerId,
+                 };
 
-            await _notificationMessagePublisher.Publish(notificationQueueModel, cancellationToken).ConfigureAwait(false);
+                 await _notificationMessagePublisher.Publish(notificationQueueModel, cancellationToken).ConfigureAwait(false);
 
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = result;
-            return methodResult;
-        });
+                 methodResult.StatusCode = StatusCodes.Status200OK;
+                 methodResult.Result = result;
+                 return methodResult;
+             });
 
             return methodResult;
         }
 
-        public static (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(Guid? objectId, dynamic templateResult, Guid? courseId, Guid? unitId)
+
+
+        public static (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(dynamic templateResult, Guid? courseId, Guid? unitId)
         {
             if (templateResult == null)
             {
                 return (new List<object>(), Guid.Empty);
             }
 
-            if (objectId == null)
-            {
-                return (new List<object>(), Guid.Empty);
-
-            }
-
             // param
-            var paramsLink = new List<object> { unitId.ToString() ?? string.Empty, courseId.ToString() ?? string.Empty, templateResult?.Id.ToString() ?? string.Empty, objectId };
+            var paramsLink = new List<object> { unitId.ToString() ?? string.Empty, courseId.ToString() ?? string.Empty, templateResult?.Id.ToString() ?? string.Empty };
             var ownerObjectId = templateResult?.CreatedUserId ?? default;
 
 
