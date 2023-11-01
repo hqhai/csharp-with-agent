@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    [Migration("20231030152154_Update_NotificationTypeTable_Add_TemplateLink")]
-    partial class Update_NotificationTypeTable_Add_TemplateLink
+    [Migration("20231031133523_Update_NotificationTypeTable_Add_TemplateLink_V2")]
+    partial class Update_NotificationTypeTable_Add_TemplateLink_V2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -292,7 +292,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={1}&commentId={2}",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
                             TemplateMessage = "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
                             Type = "LinkComment"
                         },
@@ -379,6 +379,34 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
                             TemplateMessage = "Bài viết của bạn đã vi phạm Tiêu chuẩn cộng đồng của FSEL và đã bị xóa",
                             Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("810c70ca-4f3c-4d02-a491-708fa45d42ea"),
+                            Content = "LikeClassForum",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
+                            TemplateMessage = "{0} vừa thích bài viết của bạn.",
+                            Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("810c70ca-4f3c-20d4-a491-708fa45d42ea"),
+                            Content = "LikeComment",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
+                            TemplateMessage = "{0} vừa thích bình luận của bạn.",
+                            Type = "LinkComment"
                         });
                 });
 
