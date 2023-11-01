@@ -26,5 +26,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
 
         [Range(0, 10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public int DestroyNumber { get; set; }
+
+        public SpaceShip? SpaceShip { get; set; }
     }
 }

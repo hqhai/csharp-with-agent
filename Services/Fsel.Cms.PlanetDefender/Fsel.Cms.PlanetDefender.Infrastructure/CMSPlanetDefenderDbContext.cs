@@ -26,6 +26,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             modelBuilder.ApplyConfiguration(new StudentGameInfoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new WheelOfBuffEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameplayTimeConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameHistoryEntityTypeConfiguration());
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -78,7 +80,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
 
         private static void SeedWheelOfBuff(ModelBuilder builder)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,ResourceSettings.WheelOfBuffType);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.WheelOfBuffType);
             var wheelOfBuffConfigs = ConvertHelper.DeserializeFromFilePath<IList<WheelOfBuff>>(path);
             ArgumentNullException.ThrowIfNull(wheelOfBuffConfigs);
             builder.Entity<WheelOfBuff>().HasData(wheelOfBuffConfigs);

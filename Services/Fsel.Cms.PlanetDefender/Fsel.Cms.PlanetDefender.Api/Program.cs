@@ -23,6 +23,7 @@ builder.Services.AddScoped<IGameplayTimeConfigRepository, GameplayTimeConfigRepo
 builder.Services.AddScoped<IGameplayRuleConfigRepository, GameplayRuleConfigRepository>();
 builder.Services.AddScoped<IWheelOfBuffRepository, WheelOfBuffRepository>();
 builder.Services.AddScoped<ISpaceShipRepository, SpaceShipRepository>();
+builder.Services.AddScoped<IGameHistoryRepository, GameHistoryRepository>();
 
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
