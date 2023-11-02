@@ -4,9 +4,12 @@ namespace Fsel.Identity.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -17,10 +20,26 @@ namespace Fsel.Identity.Api.Controllers
     public class StudentController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IStudentRepository _studentRepository;
 
-        public StudentController(IMediator mediator)
+        public StudentController(IMediator mediator, IStudentRepository studentRepository)
         {
             _mediator = mediator;
+            _studentRepository = studentRepository;
+        }
+
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpPost("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
+        {
+            var result = await _studentRepository.GetListResultAsync<StudentModel>(query);
+            return result.GetActionResult();
         }
 
         /// <summary>

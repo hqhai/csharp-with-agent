@@ -26,7 +26,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={1}&commentId={2}",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
     "createdDate": "2023-08-28"
   },
   {
@@ -88,7 +88,25 @@
     "templateMessage": "Bài viết của bạn đã vi phạm Tiêu chuẩn cộng đồng của FSEL và đã bị xóa",
     "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
     "createdDate": "2023-08-28"
+  },
+  {
+    "id": "810C70CA-4F3C-4D02-A491-708FA45D42EA",
+    "type": "LinkPage",
+    "content": "LikeClassForum",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa thích bài viết của bạn.",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "810C70CA-4F3C-20D4-A491-708FA45D42EA",
+    "type": "LinkComment",
+    "content": "LikeComment",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa thích bình luận của bạn.",
+    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
+    "createdDate": "2023-08-28"
   }
-
-
 ]
