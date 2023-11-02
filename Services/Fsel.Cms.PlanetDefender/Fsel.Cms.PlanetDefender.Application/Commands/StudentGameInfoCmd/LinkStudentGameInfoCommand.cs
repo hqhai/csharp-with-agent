@@ -103,15 +103,17 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
                         StudentId = guestStudent.Id,
                         Level = (Shared.Enums.EnumGameCourseLevel)guestStudent.CourseLevel
                     };
-                    var updateTokenStudent = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel { NumberOfToken = guestStudent.NumberOfToken, StudentId = student.Id });
-                    if (!updateTokenStudent.IsSuccessStatusCode)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(updateTokenStudent));
-                        return methodResult;
-                    }
+
                     _studentGameInfoRepository.Add(studentGameInfo);
                 }
             }
+            var updateTokenStudent = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel { NumberOfToken = guestStudent.NumberOfToken, StudentId = student.Id });
+            if (!updateTokenStudent.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(updateTokenStudent));
+                return methodResult;
+            }
+
             await _studentGameInfoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             await _deleteGuestStudentPublisher.Publish(guestUserId, cancellationToken).ConfigureAwait(false);
 
