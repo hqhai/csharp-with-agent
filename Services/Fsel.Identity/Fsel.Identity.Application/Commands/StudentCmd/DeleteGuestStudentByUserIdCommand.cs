@@ -14,23 +14,23 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class DeleteGuestStudentByIdCommand : IRequest<VoidMethodResult>
+    public class DeleteGuestStudentByUserIdCommand : IRequest<VoidMethodResult>
     {
         public Guid? Id { get; set; }
     }
 
-    public class DeleteStudentByIdCommandHandler : IRequestHandler<DeleteGuestStudentByIdCommand, VoidMethodResult>
+    public class DeleteGuestStudentByUserIdCommandHandler : IRequestHandler<DeleteGuestStudentByUserIdCommand, VoidMethodResult>
     {
         private readonly UserManager<User> _userManager;
         private readonly IHumanRepository _humanRepository;
 
-        public DeleteStudentByIdCommandHandler(UserManager<User> userManager, IHumanRepository humanRepository)
+        public DeleteGuestStudentByUserIdCommandHandler(UserManager<User> userManager, IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _humanRepository = humanRepository;
         }
 
-        public async Task<VoidMethodResult> Handle(DeleteGuestStudentByIdCommand request, CancellationToken cancellationToken)
+        public async Task<VoidMethodResult> Handle(DeleteGuestStudentByUserIdCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();

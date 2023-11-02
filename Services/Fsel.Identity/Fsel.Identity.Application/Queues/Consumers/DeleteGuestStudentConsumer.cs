@@ -26,7 +26,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
             }
             var data = context.Message;
 
-            var classForum = new DeleteGuestStudentByIdCommand
+            var classForum = new DeleteGuestStudentByUserIdCommand
             {
                 Id = Guid.Parse(data.QueueId!),
             };
