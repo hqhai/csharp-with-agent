@@ -7,6 +7,7 @@ namespace Fsel.System.Api.Controllers.Student
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.QuestBoardStudentCmd;
+    using Fsel.System.Application.Queries.QuestBoardQuery;
     using Fsel.System.Application.Queries.QuestBoardStudentQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
@@ -34,6 +35,18 @@ namespace Fsel.System.Api.Controllers.Student
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<QuestBoardByStudentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchQuestBoardByStudentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// List Quest Board
+        /// </summary>
+        [HttpGet("get-list")]
+        [ProducesResponseType(typeof(MethodResult<IList<QuestBoardModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetList([FromQuery] GetListQuestBoardQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
