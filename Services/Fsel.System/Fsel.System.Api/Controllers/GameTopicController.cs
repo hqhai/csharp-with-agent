@@ -48,5 +48,17 @@ namespace Fsel.System.Api.Controllers
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get list game topic
+        /// </summary>
+        [HttpGet("get-list")]
+        [ProducesResponseType(typeof(MethodResult<IList<GameTopicModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromQuery] GetGameTopicsQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
