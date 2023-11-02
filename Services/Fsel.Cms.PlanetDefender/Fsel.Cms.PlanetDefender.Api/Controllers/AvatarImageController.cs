@@ -30,9 +30,9 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<AvatarImageModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetList([FromQuery] GetListAvatarImageQuery query)
+        public async Task<IActionResult> GetList()
         {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new GetListAvatarImageQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

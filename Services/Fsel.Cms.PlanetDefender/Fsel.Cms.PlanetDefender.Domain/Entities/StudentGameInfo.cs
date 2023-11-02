@@ -15,6 +15,8 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
         public string? NickName { get; set; }
         public EnumGender Gender { get; set; }
 
+        public int Studentlevel { get; set; }
+
         public ICollection<StudentGameAvatar> StudentGameAvatars { get; set; } = new List<StudentGameAvatar>();
     }
 }

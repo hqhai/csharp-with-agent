@@ -13,7 +13,9 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
         public Guid StudentId { get; set; }
         public EnumGender Gender { get; set; }
         public string? NickName { get; set; }
-
         public IList<StudentGameAvatarModel>? StudentGameAvatars { get; set; }
+        public int? HighestRoundNumber { get; set; }
+        public long? MaxScore { get; set; }
     }
+
 }

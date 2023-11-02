@@ -15,6 +15,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
     using Fsel.Core.Base;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class ChooseStudentGenderCommand : ChooseStudentGenderCommandModel, IRequest<MethodResult<StudentGameInfoModel>>
     {
@@ -26,13 +27,15 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
         private readonly IStudentGameInfoRepository _studentGameInfoRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly IAvatarImageRepository _avatarImageRepository;
 
-        public ChooseStudentGenderCommandHandler(IMapper mapper, IStudentGameInfoRepository studentGameInfoRepository, IUserService userService, AuthContext authContext)
+        public ChooseStudentGenderCommandHandler(IMapper mapper, IStudentGameInfoRepository studentGameInfoRepository, IUserService userService, AuthContext authContext, IAvatarImageRepository avatarImageRepository)
         {
             _mapper = mapper;
             _studentGameInfoRepository = studentGameInfoRepository;
             _userService = userService;
             _authContext = authContext;
+            _avatarImageRepository = avatarImageRepository;
         }
 
         public async Task<MethodResult<StudentGameInfoModel>> Handle(ChooseStudentGenderCommand request, CancellationToken cancellationToken)
@@ -43,6 +46,8 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
             var student = studentResult?.Content?.Result;
             StudentGameInfo studentGameInfo = _mapper.Map<StudentGameInfo>(request);
 
+            var avatarId = await _avatarImageRepository.Queryable.OrderByDescending(x => x.Level).Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+
             await _studentGameInfoRepository.ExecuteTransactionAsync(async () =>
             {
                 studentGameInfo.StudentGameAvatars = new List<StudentGameAvatar>()
@@ -50,7 +55,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
                     new StudentGameAvatar
                     {
                         IsActive = true,
-                        AvatarImageId = studentGameInfo.StudentGameAvatars.Select(x => x.AvatarImage).OrderByDescending(x => x!.Level).Select(x => x!.Id).FirstOrDefault(),
+                        AvatarImageId = avatarId,
                         StudentGameInfoId = studentGameInfo.Id
                     }
                 };

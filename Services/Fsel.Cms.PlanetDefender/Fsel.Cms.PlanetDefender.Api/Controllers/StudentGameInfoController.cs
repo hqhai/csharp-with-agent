@@ -4,6 +4,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
     using Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd;
+    using Fsel.Cms.PlanetDefender.Application.Queries.AvatarImageQuery;
     using Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery;
     using Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
@@ -59,6 +60,18 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         {
             MethodResult<StudentGameInfoModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get list avatar image
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetList()
+        {
+            var commandResult = await _mediator.Send(new GetStudentGameInfoQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

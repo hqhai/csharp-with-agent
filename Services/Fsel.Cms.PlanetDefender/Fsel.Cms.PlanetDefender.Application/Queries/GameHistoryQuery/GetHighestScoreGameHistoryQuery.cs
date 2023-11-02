@@ -26,6 +26,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.GameHistoryQuery
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
+
         public GetHighestScoreGameHistoryQueryHandler(IGameHistoryRepository gameHistoryRepository, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _gameHistoryRepository = gameHistoryRepository;
