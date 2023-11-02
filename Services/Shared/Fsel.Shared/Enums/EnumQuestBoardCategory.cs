@@ -23,5 +23,11 @@ namespace Fsel.Shared.Enums
 
         [Description("Hoàn thành Cấp độ đầu tiên (Đạt)")]
         FinishOneLevelPass,
+
+        [Description("Post một bài class forum")]
+        FinishOneClassForumPost,
+
+        [Description("Bình luận vào một bài class forum của học sinh khác")]
+        CommentOnOtherPost,
     }
 }

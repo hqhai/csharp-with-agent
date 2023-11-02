@@ -10,6 +10,9 @@ namespace Fsel.System.Domain.Entities
     public class QuestBoardStudent : Entity
     {
         public EnumQuestBoardStudentStatus Status { get; set; }
+
+        public int AchievedPoints { get; set; }
+
         public QuestBoard? QuestBoard { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]

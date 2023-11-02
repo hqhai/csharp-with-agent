@@ -3,36 +3,72 @@
     "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
     "type": "MainQuests",
     "category": "FinishOneLesson",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   },
   {
     "id": "72933280-e14b-4715-a802-dcd88e031e79",
     "type": "MainQuests",
     "category": "FinishOneHomeworkMiniProject",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   },
   {
     "id": "cfce3f4b-66d5-467d-8f57-50a089257bcb",
     "type": "MainQuests",
     "category": "FinishOneUnitTest",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   },
   {
     "id": "7b436441-ef2f-4a83-be79-ee5ec5f18355",
     "type": "MainQuests",
     "category": "FinishOneUnit",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   },
   {
     "id": "64c0a3a5-849c-412d-86b6-3f5e4809cc84",
     "type": "MainQuests",
     "category": "FinishOneFinalTest",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   },
   {
     "id": "bb35cdbf-98a7-4ce7-9b71-f457b386d64c",
     "type": "MainQuests",
     "category": "FinishOneLevelPass",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "1b35cdbf-98a7-4ce7-9b71-f457b386d62c",
+    "type": "MainQuests",
+    "category": "FinishOneClassForumPost",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "9935cdbf-98a7-4ce7-9b71-f457b386d64c",
+    "type": "MainQuests",
+    "category": "CommentOnOtherPost",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   }
 ]
