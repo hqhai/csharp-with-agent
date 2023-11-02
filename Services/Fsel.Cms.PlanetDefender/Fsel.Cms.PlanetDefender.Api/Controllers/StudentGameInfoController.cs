@@ -3,7 +3,6 @@
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
-    using Fsel.Cms.PlanetDefender.Application.Commands;
     using Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery;
     using Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models;
@@ -45,6 +44,18 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateNickNameStudentGameInfoCommand command)
+        {
+            MethodResult<StudentGameInfoModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Link Account
+        /// </summary>
+        [HttpPost("link-account")]
+        [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> LinkAccount([FromBody] LinkStudentGameInfoCommand command)
         {
             MethodResult<StudentGameInfoModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

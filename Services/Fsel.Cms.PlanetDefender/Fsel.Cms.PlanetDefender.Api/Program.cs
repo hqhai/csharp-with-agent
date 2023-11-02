@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Cms.PlanetDefender.Application.Queues;
 using Fsel.Cms.PlanetDefender.Application.Services.SystemServices;
 using Fsel.Cms.PlanetDefender.Application.Services.UserServices;
 using Fsel.Cms.PlanetDefender.Domain.IRepositories;
@@ -27,6 +28,8 @@ builder.Services.AddScoped<ISpaceShipRepository, SpaceShipRepository>();
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 
+builder.Services.AddScoped<DeleteGuestStudentPublisher>();
+builder.AddMassTransit(appSetting);
 var app = builder.Build();
 app.UseServices();
 app.Run();
