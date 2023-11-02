@@ -41,10 +41,20 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
             MethodResult<StudentGameInfoModel> methodResult = new MethodResult<StudentGameInfoModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
-
             StudentGameInfo studentGameInfo = _mapper.Map<StudentGameInfo>(request);
+
             await _studentGameInfoRepository.ExecuteTransactionAsync(async () =>
             {
+                studentGameInfo.StudentGameAvatars = new List<StudentGameAvatar>()
+                {
+                    new StudentGameAvatar
+                    {
+                        IsActive = true,
+                        AvatarImageId = studentGameInfo.StudentGameAvatars.Select(x => x.AvatarImage).OrderByDescending(x => x.Level).Select(x => x.Id).FirstOrDefault(),
+                        StudentGameInfoId = studentGameInfo.Id
+                    }
+                };
+
                 studentGameInfo.StudentId = student!.Id;
                 studentGameInfo = _studentGameInfoRepository.Add(studentGameInfo);
                 await _studentGameInfoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

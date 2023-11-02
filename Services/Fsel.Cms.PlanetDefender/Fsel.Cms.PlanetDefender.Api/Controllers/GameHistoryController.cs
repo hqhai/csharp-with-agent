@@ -2,22 +2,20 @@
 
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
+    using System.Net;
     using Fsel.Cms.PlanetDefender.Application.Commands.GameHistoryCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.GameHistoryQuery;
-    using Fsel.Cms.PlanetDefender.Application.Queries.GameplayRuleConfigs;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
-    using Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.GameplayRuleConfigs;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using System.Net;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/game-history")]
     [ApiController]
-    public class GameHistoryController
+    public class GameHistoryController : ControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -25,6 +23,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         {
             _mediator = mediator;
         }
+
         /// <summary>
         /// Create a Support Category
         /// </summary>

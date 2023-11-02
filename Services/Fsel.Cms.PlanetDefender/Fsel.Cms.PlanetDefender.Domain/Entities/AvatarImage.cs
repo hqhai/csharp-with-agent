@@ -10,6 +10,8 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
 
         public string? FilePath { get; set; }
 
+        public int? Level { get; set; }
+
         public ICollection<StudentGameAvatar> StudentGameAvatars { get; set; } = new List<StudentGameAvatar>();
     }
 }
