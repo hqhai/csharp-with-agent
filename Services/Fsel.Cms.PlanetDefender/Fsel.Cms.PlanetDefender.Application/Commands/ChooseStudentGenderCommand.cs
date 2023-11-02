@@ -50,7 +50,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
                     new StudentGameAvatar
                     {
                         IsActive = true,
-                        AvatarImageId = studentGameInfo.StudentGameAvatars.Select(x => x.AvatarImage).OrderByDescending(x => x.Level).Select(x => x.Id).FirstOrDefault(),
+                        AvatarImageId = studentGameInfo.StudentGameAvatars.Select(x => x.AvatarImage).OrderByDescending(x => x!.Level).Select(x => x!.Id).FirstOrDefault(),
                         StudentGameInfoId = studentGameInfo.Id
                     }
                 };
