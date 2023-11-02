@@ -103,6 +103,7 @@ builder.Services.AddScoped<SectionConverter>();
 builder.Services.AddScoped<VideoConverter>();
 builder.Services.AddScoped<CourseHelper>();
 builder.Services.AddScoped<UnitHelper>();
+builder.Services.AddScoped<QuestionConverter>();
 
 // Publisher
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();

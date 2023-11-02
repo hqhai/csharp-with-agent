@@ -176,7 +176,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
                         if (placementTestAnswer == null)
                         {
-                            var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
+                            var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer.Answer, question.Config, question.QuestionType);
                             if (answerConfig == null && !string.IsNullOrEmpty(answer.Answer?.ToString()))
                             {
                                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);

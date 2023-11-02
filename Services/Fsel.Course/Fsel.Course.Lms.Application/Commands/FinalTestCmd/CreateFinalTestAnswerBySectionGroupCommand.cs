@@ -217,7 +217,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (finalTestAnswer == null)
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(item.Answer, question.Config, question.QuestionType);
                         if (!string.IsNullOrEmpty(item.Answer?.ToString()) && answerConfig == null)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);

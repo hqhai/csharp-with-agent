@@ -34,9 +34,9 @@ namespace Fsel.Course.Domain.Entities
         public HomeWorkResult? HomeWorkResult { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid? HomeWorkQuestionId { get; set; }
+        public Guid HomeWorkQuestionId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid? HomeWorkResultId { get; set; }
+        public Guid HomeWorkResultId { get; set; }
     }
 }

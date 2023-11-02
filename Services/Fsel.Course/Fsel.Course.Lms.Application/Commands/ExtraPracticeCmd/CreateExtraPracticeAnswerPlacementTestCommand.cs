@@ -165,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.QuestionId == answer.QuestionId && x.ExtraPracticeResultId == request.ExtraPracticeResultId, cancellationToken);
                     if (extraPracticeAnswer == null)
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
+                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer.Answer, question.Config, question.QuestionType);
                         if (answerConfig == null && !string.IsNullOrEmpty(answer.Answer?.ToString()))
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);

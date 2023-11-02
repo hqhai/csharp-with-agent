@@ -117,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                 var exerciseId = exercise?.Id ?? default;
                 var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCodeResult.Id, question.Id, exerciseId);
-                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(item.Answer, question.Config, question.QuestionType);
                 if (!string.IsNullOrEmpty(item.Answer?.ToString()) && answerConfig == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);

@@ -121,7 +121,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                         var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable
                                        .FirstOrDefaultAsync(x => x.QuestionId == item.QuestionId && x.ExtraPracticeResultId == extraPracticeResult.Id && x.VideoTimeCodeId == currenVideoTimeCodeId, cancellationToken);
 
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(item.Answer, question.Config, question.QuestionType);
                         if (answerConfig == null && !string.IsNullOrEmpty(item.Answer?.ToString()))
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);

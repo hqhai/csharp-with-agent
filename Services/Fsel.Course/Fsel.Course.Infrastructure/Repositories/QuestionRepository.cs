@@ -41,5 +41,18 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
+
+        public async Task<List<Question>> GetIncludeByHomeWorkAsync(IEnumerable<Guid> ids)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.HomeWorkQuestions)
+                                    .Where(x => ids.Contains(x.Id)).ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -265,7 +265,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (mockTestAnswer == null)
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(item.Answer, question.Config, question.QuestionType);
                         if (!string.IsNullOrEmpty(item.Answer?.ToString()) && answerConfig == null)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);

@@ -189,7 +189,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                        .FirstOrDefaultAsync(x => x.ExtraPracticeExerciseResultId == extraPracticeExerciseResult.Id && x.QuestionId == item.QuestionId, cancellationToken);
                 if (extraPracticeAnswer == null)
                 {
-                    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(item.Answer, question.Config, question.QuestionType);
                     if (answerConfig == null && !string.IsNullOrEmpty(item.Answer?.ToString()))
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
