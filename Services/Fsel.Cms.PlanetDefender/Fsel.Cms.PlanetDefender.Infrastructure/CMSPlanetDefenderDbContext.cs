@@ -27,6 +27,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             modelBuilder.ApplyConfiguration(new WheelOfBuffEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameplayTimeConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameHistoryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentGameAvatarEntityTypeConfiguration());
+
+
 
             base.OnModelCreating(modelBuilder);
         }
@@ -38,6 +41,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         public DbSet<WheelOfBuff> WheelOfBuffs { get; set; }
         public DbSet<SpaceShip> SpaceShips { get; set; }
         public DbSet<GameHistory> GameHistories { get; set; }
+        public DbSet<StudentGameAvatar> StudentGameAvatars { get; set; }
+        public DbSet<AvatarImage> AvatarImages { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

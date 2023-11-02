@@ -24,6 +24,8 @@ builder.Services.AddScoped<IGameplayRuleConfigRepository, GameplayRuleConfigRepo
 builder.Services.AddScoped<IWheelOfBuffRepository, WheelOfBuffRepository>();
 builder.Services.AddScoped<ISpaceShipRepository, SpaceShipRepository>();
 builder.Services.AddScoped<IGameHistoryRepository, GameHistoryRepository>();
+builder.Services.AddScoped<IStudentGameAvatarRepository, StudentGameAvatarRepository>();
+builder.Services.AddScoped<IAvatarImageRepository, AvatarImageRepository>();
 
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
