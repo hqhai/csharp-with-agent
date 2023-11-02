@@ -286,15 +286,16 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool IsNullOrEmptyData(object? data, string? nameProperty)
         {
-            if (data is IList<object> && !string.IsNullOrEmpty(nameProperty))
+            if (data is IList list && !string.IsNullOrEmpty(nameProperty))
             {
-                var objects = data as IList<object>;
+                var objects = list.Cast<object>().ToList();
                 if (objects != null && objects.Any())
                 {
                     return objects.Any(x =>
                      {
-                         var datas = x.GetPropValue(nameProperty) as IList<object>;
-                         return ((datas == null || !datas.Any()) || datas.Any(x => string.IsNullOrEmpty(x.ToString()))) || string.IsNullOrEmpty(x.ToString());
+                         var datas = x.GetPropValue(nameProperty) as IList;
+                         var listObject = datas?.Cast<object>().ToList();
+                         return ((listObject == null || !listObject.Any()) || listObject.Any(x => string.IsNullOrEmpty(x.ToString()))) || string.IsNullOrEmpty(x.ToString());
                      });
                 }
             }
