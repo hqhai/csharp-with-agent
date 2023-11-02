@@ -45,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IMapper _mapper;
         private readonly ICourseRepository _courseRepository;
         private readonly AuthContext _authContext;
+        private readonly QuestionConverter _questionConverter;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IMediator _mediator;
 
@@ -57,6 +58,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             , IMapper mapper
             , ICourseRepository courseRepository
             , AuthContext authContext
+            , QuestionConverter questionConverter
             , AnswerTypeConverter answerTypeConverter
             , IMediator mediator)
         {
@@ -69,6 +71,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _mapper = mapper;
             _courseRepository = courseRepository;
             _authContext = authContext;
+            _questionConverter = questionConverter;
             _answerTypeConverter = answerTypeConverter;
             _mediator = mediator;
         }
@@ -156,32 +159,18 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     foreach (var answer in item.Answers)
                     {
                         var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                        if (question == null)
+                        var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit, true);
+                        if (!questionResult.IsOK)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                            methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                             return methodResult;
                         }
-                        else if (question.Config == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
-                            return methodResult;
-                        }
-                        else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question.SectionQuestions));
-                            return methodResult;
-                        }
-                        var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
+                        var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                        var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()!.Id;
                         var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == placementTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
 
                         if (placementTestAnswer == null)
                         {
-                            var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer.Answer, question.Config, question.QuestionType);
-                            if (answerConfig == null && !string.IsNullOrEmpty(answer.Answer?.ToString()))
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
-                                return methodResult;
-                            }
                             count += correctCount;
                             countQuestion++;
                             placementTestAnswer = new PlacementTestAnswer

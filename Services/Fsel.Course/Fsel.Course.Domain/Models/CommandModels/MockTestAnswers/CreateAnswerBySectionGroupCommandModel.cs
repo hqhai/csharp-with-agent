@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestAnswers
     {
         public Guid SectionGroupId { get; set; }
         public Guid MockTestResultId { get; set; }
+        public bool IsSubmit { get; set; }
         public IList<CreateAnswerRequestModel>? Answers { get; set; }
     }
 

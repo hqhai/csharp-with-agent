@@ -37,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly QuestionConverter _questionConverter;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ISectionRepository _sectionRepository;
@@ -49,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , IQuestionRepository questionRepository
             , AuthContext authContext
             , IUserService userService
+            , QuestionConverter questionConverter
             , IMockTestAnswerRepository mockTestAnswerRepository
             , IMockTestResultRepository mockTestResultRepository
             , ISectionRepository sectionRepository
@@ -61,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _questionRepository = questionRepository;
             _authContext = authContext;
             _userService = userService;
+            _questionConverter = questionConverter;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _sectionRepository = sectionRepository;
@@ -256,21 +259,18 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                    if (question == null || question.Config == null)
+                    var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit);
+                    if (!questionResult.IsOK)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                        methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    var sectionQuestionId = question.SectionQuestions.FirstOrDefault()?.Id ?? default;
+                    var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                    var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
+
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (mockTestAnswer == null)
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(item.Answer, question.Config, question.QuestionType);
-                        if (!string.IsNullOrEmpty(item.Answer?.ToString()) && answerConfig == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
-                            return methodResult;
-                        }
                         mockTestAnswers.Add(GetMockTestAnswer(answerConfig, correctCount, request, sectionQuestionId, default));
                     }
                 }

@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ISectionRepository _sectionRepository;
+        private readonly QuestionConverter _questionConverter;
         private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
@@ -41,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , IMockTestAnswerRepository mockTestAnswerRepository
             , IMockTestResultRepository mockTestResultRepository
             , ISectionRepository sectionRepository
+            , QuestionConverter questionConverter
             , ISectionTimeCodeRepository sectionTimeCodeRepository
             , ISectionGroupRepository sectionGroupRepository
             , IMapper mapper)
@@ -50,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _sectionRepository = sectionRepository;
+            _questionConverter = questionConverter;
             _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
@@ -105,33 +108,19 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         if (answer.QuestionId != null && questions != null)
                         {
                             var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                            if (question == null)
+                            var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit, true);
+                            if (!questionResult.IsOK)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                                methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                                 return methodResult;
                             }
-                            else if (question.Config == null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
-                                return methodResult;
-                            }
-                            else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question.SectionQuestions));
-                                return methodResult;
-                            }
-                            var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
+                            var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                            var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()!.Id;
                             var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
                             if (mockTestAnswer == null)
                             {
-                                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer.Answer, question.Config, question.QuestionType);
-                                if (!string.IsNullOrEmpty(answer.Answer?.ToString()) && answerConfig == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
-                                    return methodResult;
-                                }
                                 count += correctCount;
-                                questionCount += question.CorrectTotal;
+                                questionCount += questionItem.CorrectTotal;
                                 mockTestAnswer = new MockTestAnswer
                                 {
                                     Answer = answerConfig,

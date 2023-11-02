@@ -29,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IUserService _userService;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
+        private readonly QuestionConverter _questionConverter;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
@@ -38,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , IUserService userService
             , ISectionGroupRepository sectionGroupRepository
             , IMapper mapper
+            , QuestionConverter questionConverter
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
             , AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
@@ -47,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _userService = userService;
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
+            _questionConverter = questionConverter;
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
@@ -110,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     extraPracticeResult.Percent = 0;
                 }
                 extraPracticeResult.CorrectCount = extraPracticeResult.ExtraPracticeAnswers.Sum(x => x.CorrectCount);
-                if (request.IsActive)
+                if (request.IsSubmit)
                 {
                     extraPracticeResult.Status = EnumResultStatus.Done;
                     extraPracticeResult.Percent = 100;
@@ -152,25 +155,16 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                 foreach (var answer in answers)
                 {
                     var question = await _questionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == answer.QuestionId, cancellationToken);
-                    if (question == null)
+                    var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit, true);
+                    if (!questionResult.IsOK)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(answer.QuestionId), answer.QuestionId);
+                        methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    else if (question.Config == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), question);
-                        return methodResult;
-                    }
+                    var (questionItem, answerConfig, correctCount) = questionResult.Result;
                     var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.QuestionId == answer.QuestionId && x.ExtraPracticeResultId == request.ExtraPracticeResultId, cancellationToken);
                     if (extraPracticeAnswer == null)
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer.Answer, question.Config, question.QuestionType);
-                        if (answerConfig == null && !string.IsNullOrEmpty(answer.Answer?.ToString()))
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
-                            return methodResult;
-                        }
                         extraPracticeResult.ExtraPracticeAnswers.Add(new ExtraPracticeAnswer
                         {
                             Answer = answerConfig,

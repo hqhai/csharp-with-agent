@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IMapper _mapper;
+        private readonly QuestionConverter _questionConverter;
         private readonly FinishOneFinalTestPublisher _finishOneFinalTestPublisher;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
@@ -44,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             , IFinalTestResultRepository finalTestResultRepository
             , IFinalTestRepository finalTestRepository
             , IMapper mapper
+            , QuestionConverter questionConverter
             , FinishOneFinalTestPublisher finishOneFinalTestPublisher
             , AuthContext authContext
             , IUserService userService
@@ -55,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             _finalTestResultRepository = finalTestResultRepository;
             _finalTestRepository = finalTestRepository;
             _mapper = mapper;
+            _questionConverter = questionConverter;
             _finishOneFinalTestPublisher = finishOneFinalTestPublisher;
             _authContext = authContext;
             _userService = userService;
@@ -134,32 +137,18 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 foreach (var answer in item.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                    if (question == null)
+                    var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit, true);
+                    if (!questionResult.IsOK)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                        methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    else if (question.Config == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
-                        return methodResult;
-                    }
-                    else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question.SectionQuestions));
-                        return methodResult;
-                    }
-                    var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
+                    var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                    var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()!.Id;
                     var finalAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == finalTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
 
                     if (finalAnswer == null)
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer.Answer, question.Config, question.QuestionType);
-                        if (!string.IsNullOrEmpty(answer.Answer?.ToString()) && answerConfig == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumFinalTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
-                            return methodResult;
-                        }
                         finalAnswer = new FinalTestAnswer
                         {
                             CorrectCount = correctCount,

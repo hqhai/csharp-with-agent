@@ -25,31 +25,25 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     public class CreateHomeWorkAnswerCommandHandler : IRequestHandler<CreateHomeWorkAnswerCommand, MethodResult<bool>>
     {
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
-        private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
         private readonly QuestionConverter _questionConverter;
         private readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
-        private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
-            IHomeWorkQuestionRepository homeWorkQuestionRepository,
             QuestionConverter questionConverter,
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
             IHomeWorkRepository homeWorkRepository,
             FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
-            AnswerTypeConverter answerTypeConverter,
             IQuestionRepository questionRepository
             )
         {
             _homeWorkResultRepository = homeWorkResultRepository;
-            _homeWorkQuestionRepository = homeWorkQuestionRepository;
             _questionConverter = questionConverter;
             _homeWorkAnswerRepository = homeWorkAnswerRepository;
             _homeWorkRepository = homeWorkRepository;
             _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
-            _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
         }
 
@@ -79,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, true);
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
@@ -106,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     homeWorkAnswers.Add(homeWorkAnswer);
                 }
                 homeWorkAnswer.Answer = answerConfig;
-                homeWorkAnswer.CorrectCount = request.IsSubmit ? correctCount : default;
+                homeWorkAnswer.CorrectCount = correctCount;
             }
 
             var homeWork = await _homeWorkRepository.Queryable

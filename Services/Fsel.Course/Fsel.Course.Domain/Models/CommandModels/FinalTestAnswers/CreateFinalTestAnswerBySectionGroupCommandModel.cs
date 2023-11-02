@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers
     {
         public Guid SectionGroupId { get; set; }
         public Guid FinalTestResultId { get; set; }
+        public bool IsSubmit { get; set; }
         public IList<CreateFinalTestAnswerRequestModel>? Answers { get; set; }
     }
 

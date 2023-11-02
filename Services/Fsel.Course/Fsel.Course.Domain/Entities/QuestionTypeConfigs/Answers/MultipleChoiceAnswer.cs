@@ -4,12 +4,12 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 {
     using System.Collections.Generic;
 
-    public class MutipleChoiceAnswer
+    public class MultipleChoiceAnswer
     {
-        public IList<MutipleChoiceAnswers>? Answers { get; set; }
+        public IList<MultipleChoiceAnswers>? Answers { get; set; }
     }
 
-    public class MutipleChoiceAnswers
+    public class MultipleChoiceAnswers
     {
         public long Id { get; set; }
 

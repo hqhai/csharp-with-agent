@@ -3,6 +3,7 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using System;
+    using System.Collections;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
@@ -11,51 +12,52 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class AnswerTypeConverter
     {
-        public (object?, int) GetTotalCorrectByAnswerType(object? configAnswer, object? configQuestion, EnumQuestionType type, bool isSubmit = false, bool IsMandatoryAnswer = false)
+        public (object?, int, bool) GetTotalCorrectByAnswerType(object? configAnswer, object? configQuestion, EnumQuestionType type, bool isSubmit = false, bool isMandatoryAnswer = false)
         {
             int totalCorrect = default;
+            bool isAnswerMissing = default;
             switch (type)
             {
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
-                    totalCorrect = GetTotalCorrectTypeCheckListAnswer(ref configAnswer, configQuestion, isSubmit);
+                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeCheckListAnswer(ref configAnswer, configQuestion, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.Listing:
-                    totalCorrect = GetTotalCorrectTypeListingAnswer(ref configAnswer, configQuestion, isSubmit);
+                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeListingAnswer(ref configAnswer, configQuestion, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.DragAndDropPicture:
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
-                    totalCorrect = GetTotalCorrectTypeMaschingAnswer(ref configAnswer, configQuestion, isSubmit);
+                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeMaschingAnswer(ref configAnswer, configQuestion, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
-                    totalCorrect = GetTotalCorrectTypeShortAnswerWordBase(ref configAnswer, configQuestion, isSubmit);
+                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeShortAnswerWordBase(ref configAnswer, configQuestion, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
-                    totalCorrect = GetTotalCorrectTypeShortAnswerWordCount(ref configAnswer, configQuestion, isSubmit);
+                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeShortAnswerWordCount(ref configAnswer, configQuestion, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
-                    totalCorrect = GetTotalCorrectTypeGapFillBySubAnswer(ref configAnswer, configQuestion, isSubmit);
+                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeGapFillBySubAnswer(ref configAnswer, configQuestion, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
-                    totalCorrect = GetTotalCorrectTypeGapFillGapAnswer(ref configAnswer, configQuestion, isSubmit);
+                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeGapFillGapAnswer(ref configAnswer, configQuestion, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
-                    totalCorrect = GetTotalCorrectTypeDragDropOrderAnswer(ref configAnswer, configQuestion, isSubmit);
+                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeDragDropOrderAnswer(ref configAnswer, configQuestion, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
-                    totalCorrect = GetTotalCorrectTypeMultipleOptionAnswer(ref configAnswer, configQuestion, isSubmit);
+                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeMultipleOptionAnswer(ref configAnswer, configQuestion, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
@@ -65,119 +67,152 @@ namespace Fsel.Course.Infrastructure.Common
                     throw new ArgumentException("Invalid answer type");
             }
 
-            return (configAnswer, totalCorrect);
+            return (configAnswer, totalCorrect, isAnswerMissing);
         }
 
-        private static int GetTotalCorrectTypeMultipleOptionAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit)
+        private static (int, bool) GetTotalCorrectTypeMultipleOptionAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
             var dataQuestion = configQuestion.Deserialize<MultipleOptionSentenceCompletionQuestion>();
             int number = 0;
+            bool isAnswerMissing = false;
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
             {
-                foreach (var item in dataAnswer.Answers)
+                if (isMandatoryAnswer && dataAnswer.Answers.Any(x => !x.AnswerId.HasValue))
                 {
-                    var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                    if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => (item.AnswerId.HasValue && n.Id == item.AnswerId) && n.IsCorrect == true))
+                    isAnswerMissing = true;
+                }
+                if (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing))
+                {
+                    foreach (var item in dataAnswer.Answers)
                     {
-                        number++;
-                        item.IsExact = true;
-                    }
-                    else
-                    {
-                        item.IsExact = false;
+                        var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
+                        if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => (item.AnswerId.HasValue && n.Id == item.AnswerId) && n.IsCorrect == true))
+                        {
+                            number++;
+                            item.IsExact = true;
+                        }
+                        else
+                        {
+                            item.IsExact = false;
+                        }
                     }
                 }
             }
             configAnswer = dataAnswer;
-            return number;
+            return (number, isAnswerMissing);
         }
 
-        private static int GetTotalCorrectTypeMaschingAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit)
+        private static (int, bool) GetTotalCorrectTypeMaschingAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<MatchingTypeAnswer>();
             var dataQuestion = configQuestion.Deserialize<MatchingTypeQuestion>();
-            int number = 0;
+            int number = default;
+            bool isAnswerMissing = default;
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.From != null && dataQuestion.To != null && dataQuestion.Link != null && isSubmit)
             {
-                foreach (var item in dataAnswer.Answers)
+                if (isMandatoryAnswer && IsNullOrEmptyDataHasValue(dataAnswer.Answers, "ToId"))
                 {
-                    if (dataQuestion.Link.Any(x => x.FromId == item.FromId && (item.ToId.HasValue && x.ToId == item.ToId)))
+                    isAnswerMissing = true;
+                }
+                if (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing))
+                {
+                    foreach (var item in dataAnswer.Answers)
                     {
-                        number++;
-                        item.IsExact = true;
-                    }
-                    else
-                    {
-                        item.IsExact = false;
+                        if (dataQuestion.Link.Any(x => x.FromId == item.FromId && (item.ToId.HasValue && x.ToId == item.ToId)))
+                        {
+                            number++;
+                            item.IsExact = true;
+                        }
+                        else
+                        {
+                            item.IsExact = false;
+                        }
                     }
                 }
             }
             configAnswer = dataAnswer;
-            return number;
+            return (number, isAnswerMissing);
         }
 
-        private static int GetTotalCorrectTypeCheckListAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit)
+        private static (int, bool) GetTotalCorrectTypeCheckListAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit, bool isMandatoryAnswer)
         {
-            var dataAnswer = configAnswer.Deserialize<MutipleChoiceAnswer>();
+            var dataAnswer = configAnswer.Deserialize<MultipleChoiceAnswer>();
             var dataQuestion = configQuestion.Deserialize<MutipleChoiceQuestion>();
             int number = 0;
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
+            bool isAnswerMissing = default;
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
             {
-                foreach (var item in dataAnswer.Answers)
+                if (isMandatoryAnswer && !IsNullOrEmptyDataValueBool(dataAnswer.Answers, "IsChecked"))
                 {
-                    var isCheck = item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
-                    if (isCheck)
+                    isAnswerMissing = true;
+                }
+                if (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing))
+                {
+                    foreach (var item in dataAnswer.Answers!)
                     {
-                        number++;
+                        var isCheck = item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
+                        if (isCheck)
+                        {
+                            number++;
+                        }
+                        item.IsExact = isCheck;
                     }
-                    item.IsExact = isCheck;
                 }
             }
             configAnswer = dataAnswer;
-            return number;
+            return (number, isAnswerMissing);
         }
 
-        private static int GetTotalCorrectTypeListingAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit)
+        private static (int, bool) GetTotalCorrectTypeListingAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
             int number = 0;
-
+            bool isAnswerMissing = default;
             if (dataQuestion != null && dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataAnswer.Answers.Count >= dataQuestion.ExactWordCount && isSubmit)
             {
-                dataAnswer.IsExact = true;
-                number++;
-            }
-            else if (dataAnswer != null)
-            {
-                dataAnswer.IsExact = false;
+                if (isMandatoryAnswer && IsNullOrEmptyData(dataAnswer.Answers, "Answers"))
+                {
+                    isAnswerMissing = true;
+                }
+                if (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing))
+                {
+                    if (dataAnswer.Answers.Count >= dataQuestion.ExactWordCount)
+                    {
+                        dataAnswer.IsExact = true;
+                        number++;
+                    }
+                }
             }
             configAnswer = dataAnswer;
-            return number;
+            return (number, isAnswerMissing);
         }
 
-        private static int GetTotalCorrectTypeShortAnswerWordCount(ref object? configAnswer, object? configQuestion, bool isSubmit)
+        private static (int, bool) GetTotalCorrectTypeShortAnswerWordCount(ref object? configAnswer, object? configQuestion, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
             int number = 0;
-
+            bool isAnswerMissing = default;
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && isSubmit)
             {
-                var answerStrs = dataAnswer.Answers.Trim().Split(' ');
-                if (answerStrs != null && answerStrs.Length >= dataQuestion.ExactWordCount)
+                if (isMandatoryAnswer && string.IsNullOrEmpty(dataAnswer.Answers))
                 {
-                    dataAnswer.IsExact = true;
-                    number++;
+                    isAnswerMissing = true;
                 }
-                else
+                if (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing))
                 {
-                    dataAnswer.IsExact = false;
+                    var answerStrs = dataAnswer.Answers.Trim().Split(' ');
+                    if (answerStrs != null && answerStrs.Length >= dataQuestion.ExactWordCount)
+                    {
+                        dataAnswer.IsExact = true;
+                        number++;
+                    }
                 }
             }
             configAnswer = dataAnswer;
-            return number;
+            return (number, isAnswerMissing);
         }
 
         private static bool IsShortAnswer(string question, string answer)
@@ -187,55 +222,132 @@ namespace Fsel.Course.Infrastructure.Common
             return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
 
-        private static int GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion, bool isSubmit)
+        private static (int, bool) GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
             int number = 0;
-
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Content != null && dataQuestion.Content.Count > 0 && isSubmit)
+            bool isAnswerMissing = default;
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Content != null && dataQuestion.Content.Any() && isSubmit)
             {
-                if (dataQuestion.Content.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
+                if (isMandatoryAnswer && string.IsNullOrEmpty(dataAnswer.Answers))
                 {
-                    dataAnswer.IsExact = true;
-                    number++;
+                    isAnswerMissing = true;
                 }
-                else
+                if (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing))
                 {
-                    dataAnswer.IsExact = false;
+                    if (dataAnswer.Answers != null && dataQuestion.Content.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
+                    {
+                        dataAnswer.IsExact = true;
+                        number++;
+                    }
                 }
             }
             configAnswer = dataAnswer;
-            return number;
+            return (number, isAnswerMissing);
         }
 
-        private static int GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit)
+        private static (int, bool) GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
             int number = 0;
-            if (dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataQuestion != null && dataQuestion.Contents != null)
+            bool isAnswerMissing = default;
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null)
             {
-                foreach (var item in dataAnswer.Answers)
+                if (isMandatoryAnswer && IsNullOrEmptyData(dataAnswer.Answers, "Answer"))
                 {
-                    var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
-                    if (question != null && question.Words != null && question.Words.Count > 0 && item.Answer != null && item.Answer.Count > 0 && isSubmit)
+                    isAnswerMissing = true;
+                }
+                if (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing))
+                {
+                    foreach (var item in dataAnswer.Answers!)
                     {
-                        var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
-                        item.IsExacts = isExacts;
-                        if (isExacts.All(x => x))
+                        var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
+                        if (question != null && question.Words != null && question.Words.Count > 0 && item.Answer != null && item.Answer.Count > 0 && isSubmit)
                         {
-                            number++;
+                            var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
+                            item.IsExacts = isExacts;
+                            if (isExacts.All(x => x))
+                            {
+                                number++;
+                            }
                         }
-                    }
-                    else
-                    {
-                        item.IsExacts = new List<bool>();
+                        else
+                        {
+                            item.IsExacts = new List<bool>();
+                        }
                     }
                 }
             }
             configAnswer = dataAnswer;
-            return number;
+            return (number, isAnswerMissing);
+        }
+
+        private static bool IsNullOrEmptyData(object? data, string? nameProperty)
+        {
+            if (data is IList<object> && !string.IsNullOrEmpty(nameProperty))
+            {
+                var objects = data as IList<object>;
+                if (objects != null && objects.Any())
+                {
+                    return objects.Any(x =>
+                     {
+                         var datas = x.GetPropValue(nameProperty) as IList<object>;
+                         return ((datas == null || !datas.Any()) || datas.Any(x => string.IsNullOrEmpty(x.ToString()))) || string.IsNullOrEmpty(x.ToString());
+                     });
+                }
+            }
+            else
+            {
+                return string.IsNullOrEmpty(data?.ToString());
+            }
+            return false;
+        }
+
+        private static bool IsNullOrEmptyDataHasValue(object? data, string? nameProperty)
+        {
+            if (data is IList list && !string.IsNullOrEmpty(nameProperty))
+            {
+                var objects = list.Cast<object>().ToList();
+                if (objects != null && objects.Any())
+                {
+                    return objects.Any(x =>
+                    {
+                        if (x.GetPropValue(nameProperty) is int number)
+                        {
+                            return number != 0;
+                        }
+                        var propertyValue = x.GetPropValue(nameProperty)?.ToString();
+                        return string.IsNullOrEmpty(propertyValue);
+                    });
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return string.IsNullOrEmpty(data?.ToString());
+            }
+        }
+
+        private static bool IsNullOrEmptyDataValueBool(object? data, string? nameProperty)
+        {
+            if (data is IList list && !string.IsNullOrEmpty(nameProperty))
+            {
+                var objects = list.Cast<object>().ToList();
+                if (objects != null && objects.Any())
+                {
+                    return objects.Any(x => (bool)x.GetPropValue(nameProperty));
+                }
+            }
+            else
+            {
+                return string.IsNullOrEmpty(data?.ToString());
+            }
+            return false;
         }
 
         private static bool CheckAnswer(IList<string> words, string word, int index)
@@ -259,45 +371,55 @@ namespace Fsel.Course.Infrastructure.Common
             return false;
         }
 
-        private static int GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit)
+        private static (int, bool) GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
             int number = 0;
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
+            bool isAnswerMissing = default;
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
             {
-                foreach (var item in dataAnswer.Answers)
+                if (isMandatoryAnswer && IsNullOrEmptyData(dataAnswer.Answers, "Answer"))
                 {
-                    var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
-                    if (question != null && question.Words != null && question.Words.Count > 0 && item.Answer != null && item.Answer.Count > 0)
+                    isAnswerMissing = true;
+                }
+                if (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing))
+                {
+                    foreach (var item in dataAnswer.Answers!)
                     {
-                        var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
-                        item.IsExacts = isExacts;
-                        number += isExacts.Count(x => x);
-                    }
-                    else
-                    {
-                        item.IsExacts = new List<bool>();
+                        var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
+                        if (question != null && question.Words != null && question.Words.Count > 0 && item.Answer != null && item.Answer.Count > 0)
+                        {
+                            var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
+                            item.IsExacts = isExacts;
+                            number += isExacts.Count(x => x);
+                        }
+                        else
+                        {
+                            item.IsExacts = new List<bool>();
+                        }
                     }
                 }
             }
             configAnswer = dataAnswer;
-            return number;
+            return (number, isAnswerMissing);
         }
 
-        private static int GetTotalCorrectTypeDragDropOrderAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit)
+        private static (int, bool) GetTotalCorrectTypeDragDropOrderAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
             var dataQuestion = configQuestion.Deserialize<DragAndDropSentenceOrderQuestion>();
             int number = 0;
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
+            bool isAnswerMissing = default;
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
             {
-                if (dataAnswer.Answers.SelectMany(x => x.Answer))
+                if (isMandatoryAnswer && IsNullOrEmptyData(dataAnswer.Answers, "Answer"))
                 {
+                    isAnswerMissing = true;
                 }
-                else
+                if (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing))
                 {
-                    foreach (var item in dataAnswer.Answers)
+                    foreach (var item in dataAnswer.Answers!)
                     {
                         var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
                         if (question != null && item.Answer != null && question.Words != null && question.Words.Count > 0)
@@ -317,7 +439,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return number;
+            return (number, isAnswerMissing);
         }
     }
 }

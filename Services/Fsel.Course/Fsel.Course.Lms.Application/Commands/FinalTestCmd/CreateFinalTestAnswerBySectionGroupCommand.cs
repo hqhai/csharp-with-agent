@@ -35,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly AuthContext _authContext;
+        private readonly QuestionConverter _questionConverter;
         private readonly IUserService _userService;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
@@ -45,6 +46,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         public CreateFinalTestAnswerBySectionGroupCommandHandler(AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
             , AuthContext authContext
+            , QuestionConverter questionConverter
             , IUserService userService
             , IFinalTestResultRepository finalTestResultRepository
             , IFinalTestAnswerRepository finalTestAnswerRepository
@@ -55,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _authContext = authContext;
+            _questionConverter = questionConverter;
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
             _finalTestAnswerRepository = finalTestAnswerRepository;
@@ -208,21 +211,17 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                    if (question == null || question.Config == null)
+                    var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit);
+                    if (!questionResult.IsOK)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                        methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    var sectionQuestionId = question.SectionQuestions.FirstOrDefault()?.Id ?? default;
+                    var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                    var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
                     var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (finalTestAnswer == null)
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(item.Answer, question.Config, question.QuestionType);
-                        if (!string.IsNullOrEmpty(item.Answer?.ToString()) && answerConfig == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
-                            return methodResult;
-                        }
                         finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, request, sectionQuestionId));
                     }
                 }

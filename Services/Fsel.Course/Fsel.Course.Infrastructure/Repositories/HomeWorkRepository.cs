@@ -76,9 +76,9 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return await Queryable
                         .Include(x => x.HomeWorkQuestions)
-                        .ThenInclude(x => x.HomeWorkAnswers.Where(n => n.HomeWorkResultId == homeWorkResult.Id))
-                        .Include(x => x.HomeWorkQuestions)
                         .ThenInclude(x => x.Question)
+                        .Include(x => x.HomeWorkQuestions)
+                        .ThenInclude(x => x.HomeWorkAnswers.Where(n => n.HomeWorkResultId == homeWorkResult.Id))
                         .Where(x => x.Id == id)
                         .AsNoTracking()
                         .FirstOrDefaultAsync();

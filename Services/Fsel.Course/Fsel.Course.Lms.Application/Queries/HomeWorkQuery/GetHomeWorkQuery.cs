@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             homeWorkModel.Questions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).Select(n =>
             {
                 var answer = n.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id);
-                return _questionConverter.GetQuestion(n.Question ?? new Question(), answer);
+                return _questionConverter.GetQuestion(n.Question ?? new Question(), answer, checkDone);
             }).ToList();
             homeWorkModel.HomeWorkResult = _mapper.Map<HomeWorkResultModel>(homeWorkResult);
             return homeWorkModel;

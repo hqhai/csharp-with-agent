@@ -32,7 +32,7 @@ namespace Fsel.Course.Infrastructure.Common
             return questionModel;
         }
 
-        public MethodResult<(Question, object?, int)> HandleQuestionAnswer(Question? question, object? answer)
+        public MethodResult<(Question, object?, int)> HandleQuestionAnswer(Question? question, object? answer, bool isSubmit = false, bool isMandatoryAnswer = false)
         {
             var methodResult = new MethodResult<(Question, object?, int)>();
             if (question == null || question.Config == null)
@@ -40,10 +40,15 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                 return methodResult;
             }
-            var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, question.Config, question.QuestionType);
+            var (answerConfig, correctCount, isAnswerMissing) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, question.Config, question.QuestionType, isSubmit, isMandatoryAnswer);
             if (answerConfig == null && !string.IsNullOrEmpty(answer?.ToString()))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
+                return methodResult;
+            }
+            if (isMandatoryAnswer && isAnswerMissing)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.QuestionNotCompleted), nameof(question), new object[] { question.Id });
                 return methodResult;
             }
             methodResult.Result = (question, answerConfig, correctCount);
