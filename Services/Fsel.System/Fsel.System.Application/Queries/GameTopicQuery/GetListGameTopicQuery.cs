@@ -42,7 +42,12 @@ namespace Fsel.System.Application.Queries.GameTopicQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Value ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim(), StringComparison.OrdinalIgnoreCase));
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Value ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+            }
+
+            if (request.Value != null)
+            {
+                query = query.Where(x => x.Value == request.Value);
             }
 
             if (request.CourseLevel != null)
