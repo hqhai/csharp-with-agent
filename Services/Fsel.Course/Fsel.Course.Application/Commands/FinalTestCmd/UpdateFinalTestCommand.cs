@@ -53,7 +53,11 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
                 return methodResult;
             }
-
+            if (finalTest.CourseUnitMockTests.Count > 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState));
+                return methodResult;
+            }
             if (await _finalTestRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name));

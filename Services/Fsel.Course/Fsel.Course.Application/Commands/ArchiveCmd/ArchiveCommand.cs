@@ -11,6 +11,7 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
     using Microsoft.EntityFrameworkCore;
     using Fsel.Course.Domain.Entities;
     using Microsoft.AspNetCore.Http;
+    using Fsel.Shared.Enums;
 
     public class ArchiveCommand : IRequest<MethodResult<bool>>
     {
@@ -98,7 +99,14 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
             var courses = await _courseRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
             if (courses != null)
             {
-                courses.ForEach(p => { p.IsArchive = !p.IsArchive; });
+                courses.ForEach(p =>
+                {
+                    if (!p.IsArchive && p.Status == EnumCourseStatus.Active)
+                    {
+                        p.Status = EnumCourseStatus.InActive;
+                    }
+                    p.IsArchive = !p.IsArchive;
+                });
                 _courseRepository.UpdateList(courses);
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
