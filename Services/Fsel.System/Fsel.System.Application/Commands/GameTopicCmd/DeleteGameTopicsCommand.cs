@@ -42,7 +42,7 @@ namespace Fsel.System.Application.Commands.GameTopicCmd
             {
                 await _gameTopicRepository.DeleteListAsync(gameTopics);
                 await _gameTopicRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;
             });
