@@ -9,27 +9,8 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
 
-    public class MockTestAnswer : Entity
+    public class MockTestAnswer : BaseAnswer
     {
-        /// <summary>
-        /// Câu trả lời
-        /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? AnswerStr { get; set; }
-
-        [NotMapped]
-        public object? Answer
-        {
-            get { return ConvertHelper.Deserialize<object>(AnswerStr); }
-            set { AnswerStr = ConvertHelper.Serialize(value); }
-        }
-
-        /// <summary>
-        /// Số lượng câu trả lời đúng
-        /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount { get; set; }
-
         public Guid? SectionQuestionId { get; set; }
 
         public SectionQuestion? SectionQuestion { get; set; }

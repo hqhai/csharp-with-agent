@@ -8,27 +8,8 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
 
-    public class PlacementTestAnswer : Entity
+    public class PlacementTestAnswer : BaseAnswer
     {
-        /// <summary>
-        /// Câu trả lời
-        /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? AnswerStr { get; set; }
-
-        [NotMapped]
-        public object? Answer
-        {
-            get { return ConvertHelper.Deserialize<object>(AnswerStr); }
-            set { AnswerStr = ConvertHelper.Serialize(value); }
-        }
-
-        /// <summary>
-        /// Số câu trả lời đúng của Student
-        /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount { get; set; }
-
         public PlacementTestResult? PlacementTestResult { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
