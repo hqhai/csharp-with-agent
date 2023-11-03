@@ -99,7 +99,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
                 };
             }).ToList();
-            skillScores.ForEach(x => x.Percent = NumberHelper.GetPercent(x.CorrectCount, x.TotalCount));
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CountQuestion = skillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = skillScores.Sum(x => x.TotalQuestion);

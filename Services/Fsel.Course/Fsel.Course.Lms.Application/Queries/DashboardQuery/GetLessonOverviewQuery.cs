@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -209,7 +210,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 lessonDashBoard.StatusVideo = statusVideo;
                 lessonDashBoard.StatusClassForum = statusClassForum;
                 lessonDashBoard.StatusHomeWork = statusHomeWork;
-                lessonDashBoard.PercentProgress = Math.Round((double)numbers.Average() * 100, 0);
+                lessonDashBoard.PercentProgress = NumberHelper.ConvertPercentDouble((double)numbers.Average());
             }
             return lessonDashBoard;
         }

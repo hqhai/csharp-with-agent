@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             MethodResult<SectionGroupResultModel> methodResult = new MethodResult<SectionGroupResultModel>();
             if (request.Answers == null || !request.Answers.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Answers));
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultDone), nameof(mockTestResult.Status));
                 return methodResult;
             }
-            var sectionGroup = await _sectionGroupRepository.Queryable.Where(x => x.Id == request.SectionGroupId).FirstOrDefaultAsync(cancellationToken);
+            var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
             if (sectionGroup == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
@@ -172,7 +172,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             ArgumentNullException.ThrowIfNull(skillScores);
             mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-            mockTestResult.Percent = NumberHelper.GetPercent(skillScores.Sum(x => x.CorrectCount), skillScores.Sum(x => x.TotalCount));
             mockTestResult.Status = EnumResultStatus.Done;
             mockTestResult.SkillScores = skillScores;
             return mockTestResult;
@@ -182,7 +181,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         {
             sectionGroupResult.CorrectCount = (int)skillScores.CorrectCount;
             sectionGroupResult.CorrectTotal = (int)skillScores.TotalCount;
-            sectionGroupResult.Percent = NumberHelper.GetPercent(skillScores.CorrectCount, skillScores.TotalCount);
             sectionGroupResult.Status = EnumResultStatus.Done;
             if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
             {
@@ -369,7 +367,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 skillScore.TotalCount = 36;
                 skillScore.TotalQuestion = sectionTimeCodes.Count;
             }
-            skillScore.Percent = NumberHelper.GetPercent(skillScore.CorrectCount, skillScore.TotalCount);
             skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(sectionGroup.CourseSkill);
             return skillScore;
         }

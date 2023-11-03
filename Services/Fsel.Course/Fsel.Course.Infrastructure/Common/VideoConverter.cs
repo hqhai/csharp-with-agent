@@ -326,7 +326,6 @@ namespace Fsel.Course.Infrastructure.Common
             videoResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
-            videoResult.Percent = NumberHelper.GetPercent(videoResult.CorrectCount, videoResult.CorrectTotal);
             videoResult.VideoSkillScores = scoreQuery.ToList();
             return methodResult;
         }

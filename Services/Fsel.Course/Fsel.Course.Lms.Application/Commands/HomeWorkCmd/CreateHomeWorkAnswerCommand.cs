@@ -50,11 +50,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         public async Task<MethodResult<bool>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(request.Answers);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
 
+            if (request.Answers == null || !request.Answers.Any())
+            {
+                methodResult.Result = false;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
             var homeWorkResult = await _homeWorkResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId, cancellationToken);
             if (homeWorkResult == null)
             {
@@ -117,7 +122,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             {
                 homeWorkResult.CorrectCount = correctTotal;
                 homeWorkResult.Status = EnumResultStatus.Done;
-                homeWorkResult.Percent = NumberHelper.GetPercent(homeWorkResult.CorrectCount, homeWorkResult.CorrectTotal);
                 var skillScores = new SkillScores
                 {
                     Skill = homeWork.CourseSkill,
@@ -125,8 +129,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     TotalCount = listQuestion.Sum(x => x!.CorrectTotal),
                     CountQuestion = request.Answers.Count,
                     TotalQuestion = listQuestion.Count,
-                    Percent = homeWorkResult.Percent,
-                    Scores = 0
                 };
                 homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
 

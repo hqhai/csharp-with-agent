@@ -32,7 +32,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
     public class CreateFinalTestAnswerBySectionGroupCommandHandler : IRequestHandler<CreateFinalTestAnswerBySectionGroupCommand, MethodResult<SectionGroupResultModel>>
     {
-        private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly AuthContext _authContext;
         private readonly QuestionConverter _questionConverter;
@@ -43,8 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
 
-        public CreateFinalTestAnswerBySectionGroupCommandHandler(AnswerTypeConverter answerTypeConverter
-            , IQuestionRepository questionRepository
+        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
             , AuthContext authContext
             , QuestionConverter questionConverter
             , IUserService userService
@@ -54,7 +52,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             , ISectionGroupRepository sectionGroupRepository
             , IMapper mapper)
         {
-            _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _authContext = authContext;
             _questionConverter = questionConverter;
@@ -72,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             MethodResult<SectionGroupResultModel> methodResult = new MethodResult<SectionGroupResultModel>();
             if (request.Answers == null || !request.Answers.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Answers));
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
@@ -153,7 +150,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             ArgumentNullException.ThrowIfNull(skillScores);
             finalTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             finalTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-            finalTestResult.Percent = NumberHelper.GetPercent(skillScores.Sum(x => x.CorrectCount), skillScores.Sum(x => x.TotalCount));
             finalTestResult.Status = EnumResultStatus.Done;
             finalTestResult.SkillScores = skillScores;
             return finalTestResult;
@@ -163,7 +159,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         {
             sectionGroupResult.CorrectCount = (int)skillScores.CorrectCount;
             sectionGroupResult.CorrectTotal = (int)skillScores.TotalCount;
-            sectionGroupResult.Percent = NumberHelper.GetPercent(skillScores.CorrectCount, skillScores.TotalCount);
             sectionGroupResult.Status = EnumResultStatus.Done;
             if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
             {
@@ -253,8 +248,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 TotalCount = questions.Sum(x => x.CorrectTotal),
                 TotalQuestion = questions.Count
             };
-            skillScore.Percent = NumberHelper.GetPercent(skillScore.CorrectCount, skillScore.TotalCount);
-            skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(sectionGroup.CourseSkill);
             return skillScore;
         }
     }

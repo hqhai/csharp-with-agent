@@ -188,34 +188,33 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         Scores = count.GetIeltsScore(sectionGroup.CourseSkill),
                         CountQuestion = item.Answers.Count,
                         TotalQuestion = item.Answers.Count,
-                        Percent = NumberHelper.GetPercent(count, questionCount)
                     };
                     skillScores.Add(skillScore);
                 }
             }
+
             if (mockTestAnswers.Count > 0)
             {
                 mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-                mockTestResult.Percent = NumberHelper.GetPercent(skillScores.Sum(x => x.CorrectCount), skillScores.Sum(x => x.TotalCount));
                 mockTestResult.Status = EnumResultStatus.Done;
                 mockTestResult.SkillScores = skillScores;
             }
 
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>
-            {
-                if (mockTestAnswers.Count > 0)
-                {
-                    await _mockTestAnswerRepository.AddList(mockTestAnswers);
-                    await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
+                    {
+                        if (mockTestAnswers.Count > 0)
+                        {
+                            await _mockTestAnswerRepository.AddList(mockTestAnswers);
+                            await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        }
 
-                _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
-                return methodResult;
-            });
+                        _mockTestResultRepository.Update(mockTestResult);
+                        await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                        methodResult.StatusCode = StatusCodes.Status201Created;
+                        methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
+                        return methodResult;
+                    });
 
             return methodResult;
         }
