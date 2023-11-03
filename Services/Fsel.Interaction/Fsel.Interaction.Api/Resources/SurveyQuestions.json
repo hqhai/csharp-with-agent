@@ -164,7 +164,7 @@
   {
     "id": "ee0e74f5-83ae-44dd-a7d0-0f7b650884f8",
     "createdDate": "2023-07-21",
-    "question": "Họ tên đầy đủ của bạn là gì",
+    "question": "Họ tên",
     "description": "Câu trả lời của bạn",
     "icon": null,
     "displayOrder": 1.1,
@@ -444,7 +444,7 @@
   {
     "id": "73ab87b1-c0ae-40c6-ba37-1cdce350563a",
     "createdDate": "2023-07-21",
-    "question": "Bạn nhà có thể cam kết hoàn thành khóa học 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 10 năm 2023 đến tháng 3 năm 2024 không?",
+    "question": "Bạn nhà có thể cam kết hoàn thành khóa học 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 4 năm 2024 không?",
     "description": "Câu trả lời của bạn",
     "icon": null,
     "displayOrder": 4,
@@ -546,7 +546,7 @@
   {
     "id": "56628f4a-0384-426c-b849-81ab1671afa4",
     "createdDate": "2023-07-21",
-    "question": "Chúng tôi sẽ tổ chức 2 buổi on-site (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến phản hồi của các bạn trong giai đoạn thử nghiệm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
+    "question": "Chúng tôi sẽ tổ chức 2 buổi gặp mặt trực tiếp (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến phản hồi của các bạn trong giai đoạn thử nghiệm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
     "description": "Câu trả lời của bạn",
     "icon": null,
     "displayOrder": 7,

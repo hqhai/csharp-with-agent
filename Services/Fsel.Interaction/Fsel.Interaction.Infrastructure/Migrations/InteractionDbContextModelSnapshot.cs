@@ -1032,7 +1032,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 1.1f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Họ tên đầy đủ của bạn là gì",
+                            Question = "Họ tên",
                             Type = "ShortAnswer"
                         },
                         new
@@ -1122,7 +1122,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 4f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Bạn nhà có thể cam kết hoàn thành khóa học 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 10 năm 2023 đến tháng 3 năm 2024 không?",
+                            Question = "Bạn nhà có thể cam kết hoàn thành khóa học 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 4 năm 2024 không?",
                             Type = "MultipleChoiceVertical"
                         },
                         new
@@ -1182,7 +1182,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 7f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Chúng tôi sẽ tổ chức 2 buổi on-site (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến phản hồi của các bạn trong giai đoạn thử nghiệm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
+                            Question = "Chúng tôi sẽ tổ chức 2 buổi gặp mặt trực tiếp (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến phản hồi của các bạn trong giai đoạn thử nghiệm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
                             Type = "MultipleChoiceHorizontal"
                         },
                         new

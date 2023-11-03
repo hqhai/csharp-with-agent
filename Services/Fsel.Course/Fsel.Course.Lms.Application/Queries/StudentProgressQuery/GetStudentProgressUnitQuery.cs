@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var counts = new List<int>();
             if (lessonIds != null && lessonIds.Any())
             {
-                var lessonResults = await _lessonResultRepository.GetListAsync(lessonIds, request.StudentId);
+                var lessonResults = await _lessonResultRepository.GetListAsync(lessonIds, request.StudentId, request.UnitId);
                 if (lessonResults != null && lessonResults.Any())
                 {
                     var countVideo = lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId).Count();

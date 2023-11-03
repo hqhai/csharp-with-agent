@@ -47,14 +47,14 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                         .Include(x => x.VideoResult)
                                                         .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                                         .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                        .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished && x.CourseId == courseId)
+                                                        .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.New && x.CourseId == courseId)
                                                         .OrderByDescending(x => x.CreatedDate)
                                                         .ThenBy(x => x.UpdatedDate)
                                                         .AsNoTracking()
                                                         .FirstOrDefaultAsync();
         }
 
-        public async Task<List<LessonResult>?> GetListAsync(IList<Guid>? lessonIds, Guid? studentId)
+        public async Task<List<LessonResult>?> GetListAsync(IList<Guid>? lessonIds, Guid? studentId, Guid unitId)
         {
             if (lessonIds == null || !lessonIds.Any())
             {
@@ -63,7 +63,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             return await Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                                         .Include(x => x.VideoResult)
                                                      .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
-                                                        .Where(x => lessonIds.Contains(x.LessonId) && x.StudentId == studentId)
+                                                        .Where(x => lessonIds.Contains(x.LessonId) && x.StudentId == studentId && x.UnitId == unitId)
                                                      .ToListAsync();
         }
 

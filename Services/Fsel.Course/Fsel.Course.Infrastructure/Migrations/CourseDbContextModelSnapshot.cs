@@ -66,9 +66,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsAlFeedBack")
                         .HasColumnType("bit");
 
@@ -266,6 +263,15 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("LessonResultId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("RetryContent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RetryGradingAlFeedBack")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RetryWordContent")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -343,6 +349,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<bool>("IsRetry")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")

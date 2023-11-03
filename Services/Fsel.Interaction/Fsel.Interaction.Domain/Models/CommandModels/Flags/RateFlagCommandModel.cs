@@ -12,6 +12,6 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.Flags
         public string? FeedBack { get; set; }
 
         public EnumInteractionType Type { get; set; }
-        public Guid? ObjectId { get; set; }
+        public Guid ObjectId { get; set; }
     }
 }

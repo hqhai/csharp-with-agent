@@ -8,15 +8,8 @@ namespace Fsel.Interaction.Application.Services.CourseServices.Models
     {
         public string? Content { get; set; }
         public Guid? StudentId { get; set; }
-
-        public ClassForumModel? ClassForum { get; set; }
-
+        public Guid? UnitId { get; set; }
+        public Guid? CourseId { get; set; }
     }
-
-    public class ClassForumModel : BaseModel
-    {
-        public IList<ClassForumResultModel>? ClassForumResults { get; set; }
-    }
-
 
 }

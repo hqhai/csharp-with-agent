@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     {
         private const int PercentOccupyHomeWork = 30;
         private const int PercentOccupyVideo = 40;
-        private const int PercentOccupyClassForum = 40;
+        private const int PercentOccupyClassForum = 30;
         private readonly FinishOneLessonPublisher _finishOneLessonPublisher;
         private readonly ILessonResultRepository _lessonResultRepository;
 
