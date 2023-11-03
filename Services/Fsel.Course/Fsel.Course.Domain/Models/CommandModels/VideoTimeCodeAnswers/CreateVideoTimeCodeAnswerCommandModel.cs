@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers
     {
         public Guid LessonId { get; set; }
         public Guid LessonResultId { get; set; }
-        public bool IsSubmit { get; set; }
+        public bool IsSubmit { get; set; } = true;
         public IList<VideoTimeCodeAnswerQuestionModel>? Answers { get; set; }
     }
 

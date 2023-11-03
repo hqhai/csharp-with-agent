@@ -37,7 +37,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICourseRepository _courseRepository;
-        private readonly AnswerTypeConverter _answerTypeConverter;
 
         public CreateFinalTestAnswerCommandHandler(
             IQuestionRepository questionRepository
@@ -49,8 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             , FinishOneFinalTestPublisher finishOneFinalTestPublisher
             , AuthContext authContext
             , IUserService userService
-            , ICourseRepository courseRepository
-            , AnswerTypeConverter answerTypeConverter)
+            , ICourseRepository courseRepository)
         {
             _questionRepository = questionRepository;
             _finalTestAnswerRepository = finalTestAnswerRepository;
@@ -62,7 +60,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             _authContext = authContext;
             _userService = userService;
             _courseRepository = courseRepository;
-            _answerTypeConverter = answerTypeConverter;
         }
 
         public async Task<MethodResult<FinalTestResultModel>> Handle(CreateFinalTestAnswerCommand request, CancellationToken cancellationToken)
@@ -137,7 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 foreach (var answer in item.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                    var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit, true);
+                    var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit);
                     if (!questionResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);

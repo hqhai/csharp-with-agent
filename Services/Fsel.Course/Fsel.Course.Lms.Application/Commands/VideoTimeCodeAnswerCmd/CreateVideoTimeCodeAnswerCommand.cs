@@ -129,8 +129,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         QuestionId = questionItem.Id,
                         VideoTimeCodeResultId = videoTimeCodeResult.Id,
                         VideoResultId = videoResult.Id,
-                        CorrectCount = question.Ungraded ? default : correctCount,
-                        Status = GetAnswerStatus(videoTimeCode.TimeCodeType, correctCount, question.CorrectTotal)
+                        CorrectCount = questionItem.Ungraded ? default : correctCount,
+                        Status = GetAnswerStatus(videoTimeCode.TimeCodeType, correctCount, questionItem.CorrectTotal)
                     };
 
                     videoTimeCodeAnswers.Add(answer);
