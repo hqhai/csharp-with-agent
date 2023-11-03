@@ -209,7 +209,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 TotalCount = x.Sum(x => x.TotalCount),
                 CountQuestion = x.Sum(x => x.CountQuestion),
                 TotalQuestion = x.Sum(x => x.TotalQuestion),
-                Percent = x.Sum(x => x.CorrectCount).GetPercent(x.Sum(x => x.TotalCount))
             }).ToList();
         }
 
