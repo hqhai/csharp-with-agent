@@ -31,6 +31,11 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumPlacementTestLevel Level { get; set; }
 
+        /// <summary>
+        /// Trạng thái Archive
+        /// </summary>
+        public bool IsArchive { get; set; }
+
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
     }

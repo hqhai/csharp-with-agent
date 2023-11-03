@@ -19,11 +19,6 @@ namespace Fsel.Course.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
-        /// Trạng thái kích hoạt
-        /// </summary>
-        public bool IsActive { get; set; }
-
-        /// <summary>
         /// Thời gian hiện làm bài
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
@@ -33,6 +28,11 @@ namespace Fsel.Course.Domain.Entities
         /// Loại FinalTest
         /// </summary>
         public EnumFinalTestLevel FinalTestLevel { get; set; }
+
+        /// <summary>
+        /// Trạng thái Archive
+        /// </summary>
+        public bool IsArchive { get; set; }
 
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
         public ICollection<FinalTestSection> FinalTestSections { get; set; } = new List<FinalTestSection>();
