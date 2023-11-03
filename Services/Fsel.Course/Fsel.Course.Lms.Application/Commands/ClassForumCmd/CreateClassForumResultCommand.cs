@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Deepgram.Models;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -17,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -40,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ISystemService _systemService;
+        private readonly IOrderService _orderService;
         public CreateClassForumResultCommandHandler(IMapper mapper
             , AuthContext authContext
             , IUserService userService
@@ -48,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             , ILessonResultRepository lessonResultRepository
             , NotificationMessagePublisher notificationMessagePublisher
             , ISystemService systemService
+            ,IOrderService orderService
             )
         {
             _mapper = mapper;
@@ -58,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _lessonResultRepository = lessonResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
             _systemService = systemService;
+            _orderService = orderService;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -77,8 +82,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords), string.Join(", ", containsForbiddenWord));
                 return methodResult;
             }
-
+            
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
@@ -90,7 +96,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-
+            
+                 
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.LessonId, cancellationToken);
             if (classForum == null)
             {
@@ -102,6 +109,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     .Include(x => x.ClassForumResultFiles)
                     .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
+
+           
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
@@ -134,6 +143,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     {
                         await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
+
+                    createQuestBoardStudent();
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
                 {
@@ -179,5 +190,43 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             return methodResult;
         }
+
+        public async void createQuestBoardStudent()
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneClassForumPost };
+            string lstCategory = ConvertHelper.Serialize(categories);
+            var studentByPackage = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var idStudent = studentByPackage.Content.Result.Id;
+            var packageId = studentByPackage.Content.Result.PackageId;
+            var questBoards = await _systemService.GetListQuestBoardQuery(packageId, lstCategory);
+            var questBoard = questBoards.Content.Result.First();
+
+            GetListQuestBoardStudentModel questBoardQuery = new GetListQuestBoardStudentModel()
+            {
+                QuestBoardId = questBoard.Id,
+                StudentId = idStudent
+            };
+            var quesBoardStudent = await _systemService.GetListQuestBoardStudent(questBoardQuery);
+            if (quesBoardStudent.Content.Result.Count == 0)
+            {
+                await _systemService.CreateQuestBoardStudent(questBoard.Id);
+            }
+            if (quesBoardStudent.Content.Result != null)
+            {
+
+                if (quesBoardStudent.Content.Result.Any())
+                {
+                    var id = quesBoardStudent.Content.Result.First().Id;
+                    // cập nhật AchievedPoints
+                    await _systemService.UpdateQuestBoardStudentCommand(id);
+                }
+
+            }
+           
+
+        }
+
+
+
     }
 }
