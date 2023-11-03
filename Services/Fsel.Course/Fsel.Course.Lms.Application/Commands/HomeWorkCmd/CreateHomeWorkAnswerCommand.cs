@@ -56,7 +56,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             if (request.Answers == null || !request.Answers.Any())
             {
-                methodResult.Result = false;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -72,6 +71,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 return methodResult;
             }
             var questionIds = request.Answers.Select(x => x.QuestionId).Distinct().ToList();
+            if (questionIds == null || !questionIds.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionIds));
+                return methodResult;
+            }
             var questions = await _questionRepository.GetIncludeByHomeWorkAsync(questionIds);
             var homeWorkAnswers = new List<HomeWorkAnswer>();
             int correctTotal = default;
