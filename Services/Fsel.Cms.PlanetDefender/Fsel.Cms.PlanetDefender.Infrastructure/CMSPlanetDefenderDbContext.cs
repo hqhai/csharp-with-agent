@@ -23,13 +23,12 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             SeedZMatter(modelBuilder);
             SeedGameplayRuleConfigs(modelBuilder);
             SeedSpaceShip(modelBuilder);
+            StudentTagName(modelBuilder);
+
             modelBuilder.ApplyConfiguration(new StudentGameInfoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new WheelOfBuffEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameplayTimeConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameHistoryEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new StudentGameAvatarEntityTypeConfiguration());
-
-
 
             base.OnModelCreating(modelBuilder);
         }
@@ -41,9 +40,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         public DbSet<WheelOfBuff> WheelOfBuffs { get; set; }
         public DbSet<SpaceShip> SpaceShips { get; set; }
         public DbSet<GameHistory> GameHistories { get; set; }
-        public DbSet<StudentGameAvatar> StudentGameAvatars { get; set; }
         public DbSet<AvatarImage> AvatarImages { get; set; }
-
+        public DbSet<StudentSpaceShip> StudentSpaceShips { get; set; }
+        public DbSet<StudentTagName> StudentTagNames { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -90,6 +89,14 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             var wheelOfBuffConfigs = ConvertHelper.DeserializeFromFilePath<IList<WheelOfBuff>>(path);
             ArgumentNullException.ThrowIfNull(wheelOfBuffConfigs);
             builder.Entity<WheelOfBuff>().HasData(wheelOfBuffConfigs);
+        }
+
+        private static void StudentTagName(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.StudentTagName);
+            var studentTagNames = ConvertHelper.DeserializeFromFilePath<IList<StudentTagName>>(path);
+            ArgumentNullException.ThrowIfNull(studentTagNames);
+            builder.Entity<StudentTagName>().HasData(studentTagNames);
         }
     }
 }

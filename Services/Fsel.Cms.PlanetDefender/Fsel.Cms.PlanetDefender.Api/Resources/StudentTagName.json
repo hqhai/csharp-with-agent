@@ -1,0 +1,45 @@
+[
+  {
+    "id": "9f860757-1a3e-4a05-aaf5-2dc1797e23bf",
+    "createdDate": "2023-07-21",
+    "level": 1,
+    "maxLevelSpaceShipId": null,
+    "tagName": "Captain"
+  },
+  {
+    "id": "88bf6e6d-d9d6-4d52-bf9d-52f252f16404",
+    "createdDate": "2023-07-21",
+    "level": 10,
+    "maxLevelSpaceShipId": null,
+    "tagName": "Major"
+  },
+  {
+    "id": "edc52c09-c407-4371-9201-8f09351c1f58",
+    "createdDate": "2023-07-21",
+    "level": 20,
+    "maxLevelSpaceShipId": null,
+    "tagName": "Colonel"
+  },
+  {
+    "id": "b38637d8-129d-4d50-bdf5-a3304684740d",
+    "createdDate": "2023-07-21",
+    "level": 30,
+    "maxLevelSpaceShipId": null,
+    "tagName": "Brigadier"
+  },
+  {
+    "id": "402dec4e-39c9-4235-8c7d-b18eb2092305",
+    "createdDate": "2023-07-21",
+    "level": 40,
+    "maxLevelSpaceShipId": null,
+    "tagName": "General"
+  },
+  {
+    "id": "e2ef7a2e-bc23-4103-8e2b-23cfdca5264e",
+    "createdDate": "2023-07-21",
+    "level": 50,
+    "maxLevelSpaceShipId": null,
+    "tagName": "Supreme Leader"
+  }
+]
+

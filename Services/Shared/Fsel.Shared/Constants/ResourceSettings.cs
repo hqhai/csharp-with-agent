@@ -17,5 +17,7 @@ namespace Fsel.Shared.Constants
         public const string SpaceShip = "Resources//SpaceShip.json";
 
         public const string GameplayRuleConfig = "Resources//GameplayRuleConfig.json";
+
+        public const string StudentTagName = "Resources//StudentTagName.json";
     }
 }

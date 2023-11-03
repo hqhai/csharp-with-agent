@@ -28,14 +28,20 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly IAvatarImageRepository _avatarImageRepository;
+        private readonly IStudentTagNameRepository _studentTagNameRepository;
+        private readonly IStudentSpaceShipRepository _studentSpaceShipRepository;
+        private readonly ISpaceShipRepository _spaceShipRepository;
 
-        public ChooseStudentGenderCommandHandler(IMapper mapper, IStudentGameInfoRepository studentGameInfoRepository, IUserService userService, AuthContext authContext, IAvatarImageRepository avatarImageRepository)
+        public ChooseStudentGenderCommandHandler(IMapper mapper, IStudentGameInfoRepository studentGameInfoRepository, IUserService userService, AuthContext authContext, IAvatarImageRepository avatarImageRepository, IStudentTagNameRepository studentTagNameRepository, IStudentSpaceShipRepository studentSpaceShipRepository, ISpaceShipRepository spaceShipRepository)
         {
             _mapper = mapper;
             _studentGameInfoRepository = studentGameInfoRepository;
             _userService = userService;
             _authContext = authContext;
             _avatarImageRepository = avatarImageRepository;
+            _studentTagNameRepository = studentTagNameRepository;
+            _studentSpaceShipRepository = studentSpaceShipRepository;
+            _spaceShipRepository = spaceShipRepository;
         }
 
         public async Task<MethodResult<StudentGameInfoModel>> Handle(ChooseStudentGenderCommand request, CancellationToken cancellationToken)
@@ -47,19 +53,24 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
             StudentGameInfo studentGameInfo = _mapper.Map<StudentGameInfo>(request);
 
             var avatarId = await _avatarImageRepository.Queryable.OrderByDescending(x => x.Level).Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            var studentTagNameId = await _studentTagNameRepository.Queryable.Where(x => x.Level == 1).Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            var spaceShip = await _spaceShipRepository.Queryable.Where(x => x.IsDefault).FirstOrDefaultAsync(cancellationToken);
+
+            var studentSpaceShip = new StudentSpaceShip
+            {
+                IsActive = true,
+                Level = 1,
+                StudentId = student!.Id,
+                SpaceShipId = spaceShip!.Id,
+            };
+            studentSpaceShip = _studentSpaceShipRepository.Add(studentSpaceShip);
+            await _studentSpaceShipRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
             await _studentGameInfoRepository.ExecuteTransactionAsync(async () =>
             {
-                studentGameInfo.StudentGameAvatars = new List<StudentGameAvatar>()
-                {
-                    new StudentGameAvatar
-                    {
-                        IsActive = true,
-                        AvatarImageId = avatarId,
-                        StudentGameInfoId = studentGameInfo.Id
-                    }
-                };
-
+                studentGameInfo.Level = 1;
+                studentGameInfo.AvatarImageId = avatarId;
+                studentGameInfo.TagNameId = studentTagNameId;
                 studentGameInfo.StudentId = student!.Id;
                 studentGameInfo = _studentGameInfoRepository.Add(studentGameInfo);
                 await _studentGameInfoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

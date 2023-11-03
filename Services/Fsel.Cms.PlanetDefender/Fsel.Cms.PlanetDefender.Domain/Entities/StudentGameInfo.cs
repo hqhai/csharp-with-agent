@@ -8,15 +8,19 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
 {
     public class StudentGameInfo : Entity
     {
-        public EnumGameCourseLevel Level { get; set; }
+        public EnumGameCourseLevel CourseLevel { get; set; }
         public Guid StudentId { get; set; }
 
         [RegexValid(Regex = "^[A-Za-z0-9]{4,20}$s", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? NickName { get; set; }
         public EnumGender Gender { get; set; }
 
-        public int Studentlevel { get; set; }
+        public int Level { get; set; }
 
-        public ICollection<StudentGameAvatar> StudentGameAvatars { get; set; } = new List<StudentGameAvatar>();
+        public Guid AvatarImageId { get; set; }
+
+        public AvatarImage? AvatarImage { get; set; }
+        public Guid TagNameId { get; set; }
+
     }
 }

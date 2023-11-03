@@ -9,13 +9,18 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
 
     public class StudentGameInfoModel : BaseModel
     {
-        public EnumGameCourseLevel? Level { get; set; }
+        public EnumGameCourseLevel CourseLevel { get; set; }
         public Guid StudentId { get; set; }
-        public EnumGender Gender { get; set; }
+
         public string? NickName { get; set; }
-        public IList<StudentGameAvatarModel>? StudentGameAvatars { get; set; }
+        public EnumGender Gender { get; set; }
+
+        public int Level { get; set; }
+
+        public Guid AvatarImageId { get; set; }
+
+        public Guid TagNameId { get; set; }
         public int? HighestRoundNumber { get; set; }
         public long? MaxScore { get; set; }
     }
-
 }

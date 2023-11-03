@@ -17,6 +17,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Maps
             CreateMap<ChooseStudentGenderCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
             CreateMap<ChooseUserLevelCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
             CreateMap<CreateNickNameStudentGameInfoCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
+            CreateMap<UpdateStudentAvatarImageCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
+            CreateMap<UpdateStudentTagNameCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
         }
     }
 }

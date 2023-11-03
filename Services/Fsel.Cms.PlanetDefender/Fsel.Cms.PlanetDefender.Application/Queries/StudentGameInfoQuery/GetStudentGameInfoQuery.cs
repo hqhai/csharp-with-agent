@@ -44,8 +44,8 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
             var studentId = studentResult.Content?.Result?.Id;
             var gameHistory = await _gameHistoryRepository.Queryable.Where(x => x.StudentId == studentId).OrderByDescending(p => p.RoundNumber).FirstOrDefaultAsync(cancellationToken);
 
-            var roundNumber = gameHistory!.RoundNumber;
-            var score = gameHistory!.Score;
+            var roundNumber = gameHistory?.RoundNumber;
+            var score = gameHistory?.Score;
 
             var studentGameInfo = await _studentGameInfoRepository.Queryable
                         .Where(x => x.StudentId == studentId)
@@ -56,15 +56,10 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
                             CreatedDate = x.CreatedDate,
                             Gender = x.Gender,
                             Level = x.Level,
+                            TagNameId = x.TagNameId,
+                            CourseLevel = x.CourseLevel,
                             NickName = x.NickName,
-                            StudentGameAvatars = x.StudentGameAvatars.Where(x => x.StudentGameInfoId == studentId).Select(x => new StudentGameAvatarModel
-                            {
-                                AvatarImageId = x.AvatarImageId,
-                                StudentGameInfoId = x.StudentGameInfoId,
-                                CreatedDate = x.CreatedDate,
-                                IsActive = x.IsActive,
-                                Id = x.Id,
-                            }).ToList(),
+                            AvatarImageId = x.AvatarImageId,
                             HighestRoundNumber = roundNumber,
                             MaxScore = score
                         }).FirstOrDefaultAsync(cancellationToken);
