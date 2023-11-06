@@ -72,8 +72,6 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
 
             var comments = await _commentRepository.Queryable.Where(x => flagQuery.Select(x => x.ObjectId).Contains(x.Id)).ToListAsync(cancellationToken);
 
-           
-
             int totalItem = await flagQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await flagQuery
                     .ApplySortAndPaging(request)
@@ -115,11 +113,13 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                 {
                     var commentLevel1Id = _commentRepository.Queryable.Where(x => x.Id == item.ObjectId).Select(x => x.ObjectId).FirstOrDefault();
                     var commentLevel2Id = _commentRepository.Queryable.Where(x => x.Id == commentLevel1Id).Select(x => x.ObjectId).FirstOrDefault();
-                    var classforum = classForumResults?.Where(x => x.Id == commentLevel2Id).FirstOrDefault();
-                    item.Content = classforum?.Content;
-                    item.CreatedUserName = classforum?.CreatedFullName;
-                    item.UserId = classforum?.CreatedUserId;
-                    item.StudentId = classforum?.StudentId;
+                    var classForumResult = classForumResults?.Where(x => x.Id == commentLevel2Id).FirstOrDefault();
+                    item.Content = classForumResult?.Content;
+                    item.CreatedUserName = classForumResult?.CreatedFullName;
+                    item.UserId = classForumResult?.CreatedUserId;
+                    item.StudentId = classForumResult?.StudentId;
+                    item.FlagedClassForumResultId = classForumResult?.Id;
+                    item.FlagedCommentId = item.Id;
                     item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
                 }
 
@@ -130,6 +130,7 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                     item.CreatedUserName = classForumResult?.CreatedFullName;
                     item.UserId = classForumResult?.CreatedUserId;
                     item.StudentId = classForumResult?.StudentId;
+                    item.FlagedClassForumResultId = classForumResult?.Id;
                     item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
                 }
             }
