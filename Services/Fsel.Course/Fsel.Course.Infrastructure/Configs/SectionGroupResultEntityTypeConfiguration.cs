@@ -39,6 +39,11 @@ namespace Fsel.Course.Infrastructure.Configs
             .WithMany(b => b.SectionGroupResults)
             .HasForeignKey(b => b.ExtraPracticeResultId)
             .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.PlacementTestResult)
+                  .WithMany(b => b.SectionGroupResults)
+                  .HasForeignKey(b => b.PlacementTestResultId)
+                  .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

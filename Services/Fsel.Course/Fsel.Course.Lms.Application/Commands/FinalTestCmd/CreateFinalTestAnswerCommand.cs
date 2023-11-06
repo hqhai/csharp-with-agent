@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
             if (request.FinalTestAnswers == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.FinalTestAnswers));
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);

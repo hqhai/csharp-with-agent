@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             var student = studentResult?.Content?.Result;
             var studentId = student?.Id ?? default;
 
-            var finalTestResult = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.FinalTestResultId, cancellationToken);
+            var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
             if (finalTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
@@ -92,7 +92,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.FinalTestResultsDone), nameof(finalTestResult.Status));
                 return methodResult;
             }
-            var sectionGroup = await _sectionGroupRepository.Queryable.Where(x => x.Id == request.SectionGroupId).FirstOrDefaultAsync(cancellationToken);
+            var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
             if (sectionGroup == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
@@ -180,9 +180,9 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             var anserResult = new MethodResult<(SkillScores, IList<FinalTestAnswer>)>();
             var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
-            if (questions == null)
+            if (questions == null || !questions.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
             anserResult = await CreateAnswer(request, sectionGroup, questions);

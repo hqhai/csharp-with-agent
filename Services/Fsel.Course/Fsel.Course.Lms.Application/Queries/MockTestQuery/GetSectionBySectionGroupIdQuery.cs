@@ -13,9 +13,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -28,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDetailModel>>
     {
         private readonly ISectionRepository _sectionRepository;
+        private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
         private readonly SectionConverter _sectionConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -36,9 +39,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
 
-        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, SectionConverter sectionConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
+        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionConverter sectionConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
         {
             _sectionRepository = sectionRepository;
+            _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
             _sectionConverter = sectionConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -77,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             var (sections, totalCount) = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
 
             var sectonGroupDetail = _mapper.Map<SectionGroupDetailModel>(sectionGroup);
-            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId));
+            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId, sectionGroup));
             sectonGroupDetail.Sections = GetSections(sections, sectionGroup.CourseSkill);
             sectonGroupDetail.TotalQuestion = totalCount;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -85,24 +89,30 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             return methodResult;
         }
 
-        private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, Guid studentId)
+        private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, Guid studentId, SectionGroup sectionGroup)
         {
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
+                {
+                    ExecutionTime = sectionGroup.ExecutionTime,
+                    ObjectResultId = sectionGroupResult.Id,
+                    ObjectResultType = nameof(MockTest)
+                }, CancellationToken.None).ConfigureAwait(false);
             }
             return sectionGroupResult;
         }
 
-        private IList<SectionDetailModel> GetSections(IList<Domain.Entities.Section> sections, EnumCourseSkill skill)
+        private IList<SectionDetailModel> GetSections(IList<Section> sections, EnumCourseSkill skill)
         {
             var listSection = new List<SectionDetailModel>();
             return sections.Select(x => GetSection(x, skill)).ToList();
         }
 
-        private SectionDetailModel GetSection(Domain.Entities.Section section, EnumCourseSkill skill)
+        private SectionDetailModel GetSection(Section section, EnumCourseSkill skill)
         {
             var sectionDetail = _mapper.Map<SectionDetailModel>(section);
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
@@ -123,9 +133,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             return sectionPartModel;
         }
 
-        private async Task<(IList<Domain.Entities.Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
+        private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
         {
-            var sections = new List<Domain.Entities.Section>();
+            var sections = new List<Section>();
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
             {
                 sections = await _sectionRepository.Queryable.Include(x => x.SectionParts).ThenInclude(x => x.SectionQuestions)

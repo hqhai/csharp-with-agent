@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         {
             var mockTest = mockTestResult.MockTest;
             var numberOfDone = 4;
-            if (mockTest == null)
+            if (mockTest == null || mockTestResult == null)
             {
                 return;
             }

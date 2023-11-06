@@ -10,5 +10,6 @@ namespace Fsel.Course.Domain.Entities
         public double CountQuestion { get; set; }
         public EnumPlacementTestLevel Level { get; set; }
         public ICollection<PlacementTestAnswer> PlacementTestAnswers { get; set; } = new List<PlacementTestAnswer>();
+        public ICollection<SectionGroupResult> SectionGroupResults { get; set; } = new List<SectionGroupResult>();
     }
 }
