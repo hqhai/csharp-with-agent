@@ -17,12 +17,9 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public Guid? ObjectId { get; set; }
 
         public string? Content { get; set; }
-
-        public Guid? FlagedClassForumResultId { get; set; }
         public string? CreatedUserName { get; set; }
         public Guid? StudentId { get; set; }
         public Guid? UserId { get; set; }
         public string? AvatarPath { get; set; }
-        public Guid? FlagedCommentId { get; set; }
     }
 }

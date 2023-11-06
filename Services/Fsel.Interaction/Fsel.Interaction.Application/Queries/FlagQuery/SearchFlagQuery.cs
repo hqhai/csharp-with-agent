@@ -118,8 +118,6 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                     item.CreatedUserName = classForumResult?.CreatedFullName;
                     item.UserId = classForumResult?.CreatedUserId;
                     item.StudentId = classForumResult?.StudentId;
-                    item.FlagedClassForumResultId = classForumResult?.Id;
-                    item.FlagedCommentId = item.Id;
                     item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
                 }
 
@@ -130,7 +128,6 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                     item.CreatedUserName = classForumResult?.CreatedFullName;
                     item.UserId = classForumResult?.CreatedUserId;
                     item.StudentId = classForumResult?.StudentId;
-                    item.FlagedClassForumResultId = classForumResult?.Id;
                     item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
                 }
             }
