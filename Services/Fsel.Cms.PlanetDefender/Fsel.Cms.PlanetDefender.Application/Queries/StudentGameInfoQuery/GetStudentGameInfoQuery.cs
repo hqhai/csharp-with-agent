@@ -42,10 +42,6 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
             var methodResult = new MethodResult<StudentGameInfoModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var studentId = studentResult.Content?.Result?.Id;
-            var gameHistory = await _gameHistoryRepository.Queryable.Where(x => x.StudentId == studentId).OrderByDescending(p => p.RoundNumber).FirstOrDefaultAsync(cancellationToken);
-
-            var roundNumber = gameHistory?.RoundNumber;
-            var score = gameHistory?.Score;
 
             var studentGameInfo = await _studentGameInfoRepository.Queryable
                         .Where(x => x.StudentId == studentId)
@@ -60,9 +56,16 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
                             CourseLevel = x.CourseLevel,
                             NickName = x.NickName,
                             AvatarImageId = x.AvatarImageId,
-                            HighestRoundNumber = roundNumber,
-                            MaxScore = score
+                            TagName = x.StudentTagName!.TagName,
+                            /*HighestRoundNumber = roundNumber,
+                            HighestScore = score*/
                         }).FirstOrDefaultAsync(cancellationToken);
+            var gameHistory = await _gameHistoryRepository.Queryable.Where(x => x.StudentGameInfoId == studentGameInfo!.Id).OrderByDescending(p => p.RoundNumber).FirstOrDefaultAsync(cancellationToken);
+
+            var roundNumber = gameHistory?.RoundNumber;
+            var score = gameHistory?.Score;
+            studentGameInfo!.HighestRoundNumber = roundNumber;
+            studentGameInfo.HighestScore = score;
 
             methodResult.Result = studentGameInfo;
             return methodResult;

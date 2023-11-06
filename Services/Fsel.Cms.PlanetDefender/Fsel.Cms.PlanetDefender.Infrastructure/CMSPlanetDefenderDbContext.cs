@@ -24,6 +24,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             SeedGameplayRuleConfigs(modelBuilder);
             SeedSpaceShip(modelBuilder);
             StudentTagName(modelBuilder);
+            AvatarImage(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new StudentGameInfoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new WheelOfBuffEntityTypeConfiguration());
@@ -97,6 +98,14 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             var studentTagNames = ConvertHelper.DeserializeFromFilePath<IList<StudentTagName>>(path);
             ArgumentNullException.ThrowIfNull(studentTagNames);
             builder.Entity<StudentTagName>().HasData(studentTagNames);
+        }
+
+        private static void AvatarImage(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AvatarImage);
+            var avatarImages = ConvertHelper.DeserializeFromFilePath<IList<AvatarImage>>(path);
+            ArgumentNullException.ThrowIfNull(avatarImages);
+            builder.Entity<AvatarImage>().HasData(avatarImages);
         }
     }
 }

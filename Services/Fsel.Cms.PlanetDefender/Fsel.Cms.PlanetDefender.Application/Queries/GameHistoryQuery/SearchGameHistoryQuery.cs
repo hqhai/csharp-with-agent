@@ -11,7 +11,10 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.GameHistoryQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SearchGameHistoryQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<GameHistoryModel>>>
     {
@@ -22,23 +25,57 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.GameHistoryQuery
         private readonly IGameHistoryRepository _gameHistoryRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly IStudentGameInfoRepository _studentGameInfoRepository;
 
-        public SearchGameHistoryQueryHandler(IGameHistoryRepository gameHistoryRepository, AuthContext authContext, IUserService userService)
+        public SearchGameHistoryQueryHandler(IGameHistoryRepository gameHistoryRepository, AuthContext authContext, IUserService userService, IStudentGameInfoRepository studentGameInfoRepository)
         {
             _gameHistoryRepository = gameHistoryRepository;
             _authContext = authContext;
             _userService = userService;
+            _studentGameInfoRepository = studentGameInfoRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<GameHistoryModel>>> Handle(SearchGameHistoryQuery request, CancellationToken cancellationToken)
         {
+            MethodResult<PagingItemsModel<GameHistoryModel>> methodResult = new MethodResult<PagingItemsModel<GameHistoryModel>>();
             ArgumentNullException.ThrowIfNull(request);
+            if (request.PageSize > 100)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var studentId = studentResult.Content?.Result?.Id;
 
-            var gameHistory = _gameHistoryRepository.Queryable.Where(x => x.StudentId == studentId);
-            return await _gameHistoryRepository.GetListByPageResultAsync<GameHistoryModel>(gameHistory, request, cancellationToken).ConfigureAwait(false);
+            var studentGameInfo = await _studentGameInfoRepository.Queryable.Where(x => x.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
+
+            var gameHistory = _gameHistoryRepository.Queryable
+                    .Where(x => x.StudentGameInfoId == studentGameInfo!.Id)
+                    .Select(x => new GameHistoryModel
+                    {
+                        Id = x.Id,
+                        CreatedDate = x.CreatedDate,
+                        CreatedFullName = x.CreatedFullName,
+                        DestroyNumber = x.DestroyNumber,
+                        CreatedUserId = x.CreatedUserId,
+                        ImpactNumber = x.ImpactNumber,
+                        NumberOfToken = x.NumberOfToken,
+                        RoundNumber = x.RoundNumber,
+                        Score = x.Score,
+                        SpaceShipId = x.SpaceShipId,
+                        SpaceShipCode = x.SpaceShip!.Code,
+                    });
+
+            int totalItem = await gameHistory.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await gameHistory
+                    .ApplySortAndPaging(request)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+            methodResult.Result = new PagingItemsModel<GameHistoryModel>(lists, request, totalItem);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
         }
     }
 }

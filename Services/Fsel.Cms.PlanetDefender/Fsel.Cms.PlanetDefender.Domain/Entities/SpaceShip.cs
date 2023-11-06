@@ -17,5 +17,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
         public string? Code { get; set; }
 
         public ICollection<GameHistory> GameHistories { get; set; } = new List<GameHistory>();
+        public ICollection<StudentTagName> StudentTagNames { get; set; } = new List<StudentTagName>();
+        public ICollection<SpaceShip> SpaceShips { get; set; } = new List<SpaceShip>();
     }
 }

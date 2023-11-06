@@ -20,10 +20,12 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentTagNameQuery
     public class GetListStudentTagNameQueryHandler : IRequestHandler<GetListStudentTagNameQuery, MethodResult<IList<StudentTagNameModel>>>
     {
         private readonly IStudentTagNameRepository _studentTagNameRepository;
+        private readonly IStudentGameInfoRepository _studentGameInfoRepository;
 
-        public GetListStudentTagNameQueryHandler(IStudentTagNameRepository studentTagNameRepository)
+        public GetListStudentTagNameQueryHandler(IStudentTagNameRepository studentTagNameRepository, IStudentGameInfoRepository studentGameInfoRepository)
         {
             _studentTagNameRepository = studentTagNameRepository;
+            _studentGameInfoRepository = studentGameInfoRepository;
         }
 
         public async Task<MethodResult<IList<StudentTagNameModel>>> Handle(GetListStudentTagNameQuery request, CancellationToken cancellationToken)
@@ -41,6 +43,8 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentTagNameQuery
                 MaxLevelSpaceShipId = x.MaxLevelSpaceShipId,
                 TagName = x.TagName,
             }).ToListAsync(cancellationToken);
+
+            /*var studentInfo = await _studentGameInfoRepository.Queryable.Where(x)*/
 
             methodResult.Result = studentTagName;
             return methodResult;

@@ -10,10 +10,12 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
 
         public int Level { get; set; }
 
-        public Guid StudentId { get; set; }
+        public Guid StudentGameInfoId { get; set; }
 
         public Guid SpaceShipId { get; set; }
 
         public SpaceShip? SpaceShip { get; set; }
+
+        public StudentGameInfo? StudentGameInfo { get; set;}
     }
 }

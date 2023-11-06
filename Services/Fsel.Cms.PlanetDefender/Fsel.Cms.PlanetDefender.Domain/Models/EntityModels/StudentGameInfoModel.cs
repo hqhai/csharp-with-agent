@@ -20,7 +20,12 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
         public Guid AvatarImageId { get; set; }
 
         public Guid TagNameId { get; set; }
+
+        public string? TagName { get; set; }
         public int? HighestRoundNumber { get; set; }
-        public long? MaxScore { get; set; }
+        public long? HighestScore { get; set; }
+
+        public StudentTagNameModel? StudentTagName { get; set; }
+
     }
 }

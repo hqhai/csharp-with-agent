@@ -19,5 +19,6 @@ namespace Fsel.Shared.Constants
         public const string GameplayRuleConfig = "Resources//GameplayRuleConfig.json";
 
         public const string StudentTagName = "Resources//StudentTagName.json";
+        public const string AvatarImage = "Resources//AvatarImage.json";
     }
 }

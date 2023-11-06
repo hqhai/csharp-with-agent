@@ -7,18 +7,13 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class GameHistoryEntityTypeConfiguration : IEntityTypeConfiguration<GameHistory>
+    public class StudentSpaceShipEntityTypeConfiguration : IEntityTypeConfiguration<StudentSpaceShip>
     {
-        public void Configure(EntityTypeBuilder<GameHistory> builder)
+        public void Configure(EntityTypeBuilder<StudentSpaceShip> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.HasOne(a => a.SpaceShip)
-                  .WithMany(b => b.GameHistories)
-                  .HasForeignKey(b => b.SpaceShipId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
             builder.HasOne(a => a.StudentGameInfo)
-                  .WithMany(b => b.GameHistories)
+                  .WithMany(b => b.StudentSpaceShips)
                   .HasForeignKey(b => b.StudentGameInfoId)
                   .OnDelete(DeleteBehavior.Cascade);
         }

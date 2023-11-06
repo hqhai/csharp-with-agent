@@ -11,10 +11,10 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
 
         public long Score { get; set; }
 
-        public Guid StudentId { get; set; }
-
         public Guid SpaceShipId { get; set; }
-        public int CoinNumber { get; set; }
+
+        public string? SpaceShipCode { get; set; }
+        public int NumberOfToken { get; set; }
         public int ImpactNumber { get; set; }
         public int DestroyNumber { get; set; }
     }

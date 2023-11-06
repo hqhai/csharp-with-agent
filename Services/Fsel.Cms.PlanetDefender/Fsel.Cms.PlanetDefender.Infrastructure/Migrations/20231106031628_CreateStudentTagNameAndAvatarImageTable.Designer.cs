@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 {
     [DbContext(typeof(CmsPlanetDefenderDbContext))]
-    [Migration("20231103072239_CreateStudentTagNameAndAvatarImageTable")]
+    [Migration("20231106031628_CreateStudentTagNameAndAvatarImageTable")]
     partial class CreateStudentTagNameAndAvatarImageTable
     {
         /// <inheritdoc />
@@ -62,9 +62,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Property<string>("FilePath")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -88,6 +85,18 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AvatarImages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("0e614a70-18b3-4fa1-9fff-632f1af667cd"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            FilePath = "https://fsel.s3-hn-2.cloud.cmctelecom.vn/videos/vetranhmeohoathinhdethuong_1699239452.jpg",
+                            IsDeleted = false,
+                            Level = 1
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.GameHistory", b =>
@@ -96,9 +105,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
-
-                    b.Property<int>("CoinNumber")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -137,6 +143,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<int>("NumberOfToken")
+                        .HasColumnType("int");
+
                     b.Property<int>("RoundNumber")
                         .HasColumnType("int");
 
@@ -146,7 +155,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Property<Guid>("SpaceShipId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("StudentId")
+                    b.Property<Guid>("StudentGameInfoId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -165,6 +174,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("SpaceShipId");
+
+                    b.HasIndex("StudentGameInfoId");
 
                     b.ToTable("GameHistories");
                 });
@@ -399,6 +410,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<Guid?>("SpaceShipId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -413,6 +427,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SpaceShipId");
 
                     b.ToTable("SpaceShips");
 
@@ -490,6 +506,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("StudentTagNameId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("TagNameId")
                         .HasColumnType("uniqueidentifier");
 
@@ -509,6 +528,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AvatarImageId");
+
+                    b.HasIndex("StudentTagNameId");
 
                     b.ToTable("StudentGameInfos");
                 });
@@ -560,7 +581,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Property<Guid>("SpaceShipId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("StudentId")
+                    b.Property<Guid>("StudentGameInfoId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -579,6 +600,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("SpaceShipId");
+
+                    b.HasIndex("StudentGameInfoId");
 
                     b.ToTable("StudentSpaceShips");
                 });
@@ -631,7 +654,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("TagName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -1077,7 +1102,22 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", "StudentGameInfo")
+                        .WithMany("GameHistories")
+                        .HasForeignKey("StudentGameInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("SpaceShip");
+
+                    b.Navigation("StudentGameInfo");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", b =>
+                {
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", null)
+                        .WithMany("SpaceShips")
+                        .HasForeignKey("SpaceShipId");
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", b =>
@@ -1088,7 +1128,13 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.StudentTagName", "StudentTagName")
+                        .WithMany()
+                        .HasForeignKey("StudentTagNameId");
+
                     b.Navigation("AvatarImage");
+
+                    b.Navigation("StudentTagName");
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentSpaceShip", b =>
@@ -1099,13 +1145,21 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", "StudentGameInfo")
+                        .WithMany("StudentSpaceShips")
+                        .HasForeignKey("StudentGameInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("SpaceShip");
+
+                    b.Navigation("StudentGameInfo");
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentTagName", b =>
                 {
                     b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", "SpaceShip")
-                        .WithMany()
+                        .WithMany("StudentTagNames")
                         .HasForeignKey("SpaceShipId");
 
                     b.Navigation("SpaceShip");
@@ -1114,6 +1168,17 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", b =>
                 {
                     b.Navigation("GameHistories");
+
+                    b.Navigation("SpaceShips");
+
+                    b.Navigation("StudentTagNames");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", b =>
+                {
+                    b.Navigation("GameHistories");
+
+                    b.Navigation("StudentSpaceShips");
                 });
 #pragma warning restore 612, 618
         }

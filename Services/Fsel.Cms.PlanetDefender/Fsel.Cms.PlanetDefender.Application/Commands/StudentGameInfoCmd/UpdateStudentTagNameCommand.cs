@@ -28,13 +28,15 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly IStudentTagNameRepository _studentTagRepository;
 
-        public UpdateStudentTagNameCommandHandler(IStudentGameInfoRepository studentGameInfoRepository, IMapper mapper, IUserService userService, AuthContext authContext)
+        public UpdateStudentTagNameCommandHandler(IStudentGameInfoRepository studentGameInfoRepository, IMapper mapper, IUserService userService, AuthContext authContext, IStudentTagNameRepository studentTagRepository)
         {
             _studentGameInfoRepository = studentGameInfoRepository;
             _mapper = mapper;
             _userService = userService;
             _authContext = authContext;
+            _studentTagRepository = studentTagRepository;
         }
 
         public async Task<MethodResult<StudentGameInfoModel>> Handle(UpdateStudentTagNameCommand request, CancellationToken cancellationToken)
@@ -50,7 +52,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            if (!await _studentGameInfoRepository.AnyAsync(request.TagNameId))
+            if (!await _studentTagRepository.AnyAsync(request.TagNameId))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.TagNameId));
                 return methodResult;

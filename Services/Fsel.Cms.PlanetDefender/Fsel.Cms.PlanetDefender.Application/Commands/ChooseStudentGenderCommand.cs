@@ -52,22 +52,24 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
             var student = studentResult?.Content?.Result;
             StudentGameInfo studentGameInfo = _mapper.Map<StudentGameInfo>(request);
 
-            var avatarId = await _avatarImageRepository.Queryable.OrderByDescending(x => x.Level).Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
-            var studentTagNameId = await _studentTagNameRepository.Queryable.Where(x => x.Level == 1).Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            var avatarId = await _avatarImageRepository.Queryable.OrderBy(x => x.Level).Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            var studentTagNameId = await _studentTagNameRepository.Queryable.OrderBy(x => x.Level).Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
             var spaceShip = await _spaceShipRepository.Queryable.Where(x => x.IsDefault).FirstOrDefaultAsync(cancellationToken);
 
-            var studentSpaceShip = new StudentSpaceShip
-            {
-                IsActive = true,
-                Level = 1,
-                StudentId = student!.Id,
-                SpaceShipId = spaceShip!.Id,
-            };
-            studentSpaceShip = _studentSpaceShipRepository.Add(studentSpaceShip);
             await _studentSpaceShipRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
             await _studentGameInfoRepository.ExecuteTransactionAsync(async () =>
             {
+                studentGameInfo.StudentSpaceShips = new List<StudentSpaceShip>()
+                {
+                    new StudentSpaceShip
+                    {
+                        IsActive = true,
+                        Level = 1,
+                        StudentGameInfoId = studentGameInfo.Id,
+                        SpaceShipId = spaceShip!.Id,
+                    }
+                };
                 studentGameInfo.Level = 1;
                 studentGameInfo.AvatarImageId = avatarId;
                 studentGameInfo.TagNameId = studentTagNameId;

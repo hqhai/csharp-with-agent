@@ -6,8 +6,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
 
     public class AvatarImage : Entity
     {
-        public bool IsActive { get; set; }
-
         public string? FilePath { get; set; }
 
         public int? Level { get; set; }
