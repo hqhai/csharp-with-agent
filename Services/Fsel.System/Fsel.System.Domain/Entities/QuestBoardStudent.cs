@@ -11,7 +11,7 @@ namespace Fsel.System.Domain.Entities
     {
         public EnumQuestBoardStudentStatus Status { get; set; }
 
-        public int AchievedPoints { get; set; }
+        public float AchievedPoints { get; set; }
 
         public QuestBoard? QuestBoard { get; set; }
 

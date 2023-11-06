@@ -41,8 +41,10 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly ICourseService _courseService;
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private const float Archieve_Point = 1;
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, IUserService userService)
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, IUserService userService, QuestBoardPublisher questBoardPublisher)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
@@ -52,6 +54,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _courseService = courseService;
             _systemService = systemService;
             _userService = userService;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -126,7 +129,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         #region DoQuestBoard
                         if (_authContext.CurrentUserId != postOwner!.CreatedUserId)
                         {
-                            await DoQuestBoard();
+                            await DoQuestBoard(cancellationToken);
                         }
                         #endregion
 
@@ -183,7 +186,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         }
 
 
-        public async Task DoQuestBoard()
+        public async Task DoQuestBoard(CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneClassForumPost };
 
@@ -203,19 +206,25 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 QuestBoardId = questBoardId,
                 StudentId = studentId
             };
-            var quesBoardStudent = await _systemService.GetListQuestBoardStudent(questBoardQuery);
+           // var quesBoardStudent = await _systemService.GetListQuestBoardStudent(questBoardQuery);
 
 
-
-            if (quesBoardStudent?.Content?.Result?.Count == 0 || quesBoardStudent?.Content?.Result == null)
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel
             {
-                await _systemService.CreateQuestBoardStudent(questBoardId);
-            }
-            else
-            {
-                var questBoardStudentId = quesBoardStudent!.Content?.Result?.FirstOrDefault()?.Id ?? default;
-                await _systemService.UpdateQuestBoardStudentCommand(questBoardStudentId);
-            }
+                StudentId = (Guid)studentId!,
+                Categories = categories,
+                AchievedPoint = Archieve_Point,
+            }, cancellationToken);
+
+            //if (quesBoardStudent?.Content?.Result?.Count == 0 || quesBoardStudent?.Content?.Result == null)
+            //{
+            //    await _systemService.CreateQuestBoardStudent(questBoardId);
+            //}
+            //else
+            //{
+            //    var questBoardStudentId = quesBoardStudent!.Content?.Result?.FirstOrDefault()?.Id ?? default;
+            //    await _systemService.UpdateQuestBoardStudentCommand(questBoardStudentId);
+            //}
         }
     }
 }
