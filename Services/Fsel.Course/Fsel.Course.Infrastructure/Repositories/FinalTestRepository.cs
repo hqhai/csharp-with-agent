@@ -26,7 +26,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     .ThenInclude(x => x!.Sections.Where(n => !n.IsDeleted))
                                     .ThenInclude(x => x!.SectionQuestions.Where(n => !n.IsDeleted))
                                     .ThenInclude(x => x.Question)
-                                    .Include(p => p.CourseUnitMockTests)
                                     .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)

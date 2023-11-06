@@ -13,6 +13,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class DeleteFinalTestCommand : IRequest<MethodResult<bool>>
     {
@@ -23,12 +24,15 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     {
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly SectionConverter _sectionConverter;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public DeleteFinalTestCommandHandler(IFinalTestRepository finalTestRepository
-            , SectionConverter sectionConverter)
+            , SectionConverter sectionConverter,
+ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _finalTestRepository = finalTestRepository;
             _sectionConverter = sectionConverter;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteFinalTestCommand request, CancellationToken cancellationToken)
@@ -41,7 +45,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
                 return methodResult;
             }
-            if (finalTest.CourseUnitMockTests.Count > 0)
+            if (await _courseUnitMockTestRepository.Queryable.AnyAsync(p => p.FinalTestId == finalTest.Id, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState));
                 return methodResult;
