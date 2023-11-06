@@ -4,6 +4,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
     using Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd;
+    using Fsel.Cms.PlanetDefender.Application.Commands.ZMatterCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery;
     using Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
@@ -59,6 +60,44 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         {
             MethodResult<StudentGameInfoModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get list avatar image
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get()
+        {
+            var commandResult = await _mediator.Send(new GetStudentGameInfoQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update Tag Name id
+        /// </summary>
+        [HttpPut("update-tag-name")]
+        [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateTagName([FromBody] UpdateStudentTagNameCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            MethodResult<StudentGameInfoModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update Tag Name id
+        /// </summary>
+        [HttpPut("update-avatar-image")]
+        [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateAvatarImage([FromBody] UpdateStudentAvatarImageCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            MethodResult<StudentGameInfoModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

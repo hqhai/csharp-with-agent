@@ -76,14 +76,14 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
             {
                 if (studentGameInfo != null)
                 {
-                    studentGameInfo.Level = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel;
+                    studentGameInfo.CourseLevel = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel;
                     _studentGameInfoRepository.Update(studentGameInfo);
                 }
                 else
                 {
                     studentGameInfo = new StudentGameInfo
                     {
-                        Level = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel!,
+                        CourseLevel = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel!,
                         StudentId = student.Id
                     };
                     _studentGameInfoRepository.Add(studentGameInfo);
@@ -93,7 +93,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
             {
                 if (studentGameInfo != null)
                 {
-                    studentGameInfo.Level = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel;
+                    studentGameInfo.CourseLevel = (Shared.Enums.EnumGameCourseLevel)student.CourseLevel;
                     _studentGameInfoRepository.Update(studentGameInfo);
                 }
                 else
@@ -101,7 +101,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.StudentGameInfoCmd
                     studentGameInfo = new StudentGameInfo
                     {
                         StudentId = guestStudent.Id,
-                        Level = (Shared.Enums.EnumGameCourseLevel)guestStudent.CourseLevel
+                        CourseLevel = (Shared.Enums.EnumGameCourseLevel)guestStudent.CourseLevel
                     };
 
                     _studentGameInfoRepository.Add(studentGameInfo);
