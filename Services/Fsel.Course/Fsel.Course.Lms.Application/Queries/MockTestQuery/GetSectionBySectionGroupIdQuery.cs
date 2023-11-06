@@ -96,24 +96,32 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             return sectionGroupResult;
         }
 
-        private IList<SectionDetailModel> GetSections(IList<Domain.Entities.Section> sections, EnumCourseSkill skill)
+        private IList<SectionDetailModel> GetSections(IList<Section> sections, EnumCourseSkill skill)
         {
             var listSection = new List<SectionDetailModel>();
             return sections.Select(x => GetSection(x, skill)).ToList();
         }
 
-        private SectionDetailModel GetSection(Domain.Entities.Section section, EnumCourseSkill skill)
+        private SectionDetailModel GetSection(Section section, EnumCourseSkill skill)
         {
             var sectionDetail = _mapper.Map<SectionDetailModel>(section);
+            sectionDetail.Answer = section.MockTestAnswers.FirstOrDefault()?.Answer;
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
             {
                 sectionDetail.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPart(x)).ToList();
             }
             else if (skill == EnumCourseSkill.Speaking)
             {
-                sectionDetail.SectionTimeCodes = _mapper.Map<IList<SectionTimeCodeModel>>(section.SectionTimeCodes.ToList());
+                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => GetSectionTimeCode(x)).ToList();
             }
             return sectionDetail;
+        }
+
+        private SectionTimeCodeDetailModel GetSectionTimeCode(SectionTimeCode sectionTimeCode)
+        {
+            var sectionTimeCodeModel = _mapper.Map<SectionTimeCodeDetailModel>(sectionTimeCode);
+            sectionTimeCodeModel.Answer = sectionTimeCode.MockTestAnswers.FirstOrDefault()?.Answer;
+            return sectionTimeCodeModel;
         }
 
         private SectionPartDetailModel GetSectionPart(SectionPart sectionPart)
@@ -123,9 +131,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             return sectionPartModel;
         }
 
-        private async Task<(IList<Domain.Entities.Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
+        private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
         {
-            var sections = new List<Domain.Entities.Section>();
+            var sections = new List<Section>();
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
             {
                 sections = await _sectionRepository.Queryable.Include(x => x.SectionParts).ThenInclude(x => x.SectionQuestions)
@@ -134,12 +142,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             }
             else if (skill == EnumCourseSkill.Writing)
             {
-                sections = await _sectionRepository.Queryable.Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
+                sections = await _sectionRepository.Queryable.Include(x => x.MockTestAnswers).Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
                                                                     .ToListAsync();
             }
             else
             {
-                sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes)
+                sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).ThenInclude(x => x.MockTestAnswers)
                                                             .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
                                                             .ToListAsync();
             }

@@ -13,6 +13,7 @@ namespace Fsel.Course.Infrastructure.Maps
         public SectionTimeCodeProfile()
         {
             CreateMap<SectionTimeCode, SectionTimeCodeModel>().IgnoreAllNonExisting();
+            CreateMap<SectionTimeCode, SectionTimeCodeDetailModel>().IgnoreAllNonExisting();
             CreateMap<CreateSectionTimeCodeCommandModel, SectionTimeCode>().IgnoreAllNonExisting();
             CreateMap<UpdateSectionTimeCodeCommandModel, SectionTimeCode>().IgnoreAllNonExisting();
         }

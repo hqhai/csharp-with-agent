@@ -112,8 +112,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
         private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
         {
             var sections = await _sectionRepository.Queryable.Include(x => x.SectionQuestions)
-                                                                    .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
-                                                                    .ToListAsync();
+                                                                .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
+                                                                .ToListAsync();
             return (sections, _sectionConverter.GetTotalQuestion(sections, skill));
         }
     }
