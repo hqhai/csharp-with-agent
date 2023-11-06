@@ -6,12 +6,15 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.SystemService;
+    using Fsel.Interaction.Application.Services.SystemService.Models;
+    using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
@@ -37,8 +40,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly AuthContext _authContext;
         private readonly ICourseService _courseService;
         private readonly ISystemService _systemService;
+        private readonly IUserService _userService;
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService)
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, IUserService userService)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
@@ -47,6 +51,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _classForumCommentPublisher = classForumCommentPublisher;
             _courseService = courseService;
             _systemService = systemService;
+            _userService = userService;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -75,7 +80,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 NotificationQueueModel model = new NotificationQueueModel();
-
                 switch (request.Type)
                 {
                     case EnumInteractionType.DiscussionBoard:
@@ -118,7 +122,16 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, request.ObjectId, comment.Id },
                             PlatformCode = EnumPlatformCode.LMS
                         };
+
+                        #region DoQuestBoard
+                        if (_authContext.CurrentUserId != postOwner!.CreatedUserId)
+                        {
+                            await DoQuestBoard();
+                        }
+                        #endregion
+
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+
                         break;
 
                     case EnumInteractionType.ReplyComment:
@@ -167,6 +180,42 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             });
 
             return methodResult;
+        }
+
+
+        public async Task DoQuestBoard()
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneClassForumPost };
+
+            var studentByPackage = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+
+            var packageId = studentByPackage?.Content?.Result?.PackageId ?? default;
+            string listCategory = ConvertHelper.Serialize(categories);
+
+            var studentId = studentByPackage?.Content?.Result?.Id;
+            var questBoards = await _systemService.GetListQuestBoardQuery(packageId, listCategory);
+
+            var questBoard = questBoards?.Content?.Result != null ? questBoards?.Content?.Result.FirstOrDefault() : default;
+            var questBoardId = questBoard?.Id ?? default;
+
+            GetListQuestBoardStudentModel questBoardQuery = new GetListQuestBoardStudentModel()
+            {
+                QuestBoardId = questBoardId,
+                StudentId = studentId
+            };
+            var quesBoardStudent = await _systemService.GetListQuestBoardStudent(questBoardQuery);
+
+
+
+            if (quesBoardStudent?.Content?.Result?.Count == 0 || quesBoardStudent?.Content?.Result == null)
+            {
+                await _systemService.CreateQuestBoardStudent(questBoardId);
+            }
+            else
+            {
+                var questBoardStudentId = quesBoardStudent!.Content?.Result?.FirstOrDefault()?.Id ?? default;
+                await _systemService.UpdateQuestBoardStudentCommand(questBoardStudentId);
+            }
         }
     }
 }
