@@ -65,12 +65,10 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
                     new StudentSpaceShip
                     {
                         IsActive = true,
-                        Level = 1,
                         StudentGameInfoId = studentGameInfo.Id,
                         SpaceShipId = spaceShip!.Id,
                     }
                 };
-                studentGameInfo.Level = 1;
                 studentGameInfo.AvatarImageId = avatarId;
                 studentGameInfo.TagNameId = studentTagNameId;
                 studentGameInfo.StudentId = student!.Id;

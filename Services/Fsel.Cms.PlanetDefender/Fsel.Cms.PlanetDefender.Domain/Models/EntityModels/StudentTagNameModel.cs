@@ -13,8 +13,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
 
         public Guid? MaxLevelSpaceShipId { get; set; }
 
-        public bool? IsActive { get; set; }
-
         public SpaceShipModel? SpaceShip { get; set; }
     }
 }

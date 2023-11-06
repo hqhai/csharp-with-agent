@@ -25,7 +25,5 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
         public int? HighestRoundNumber { get; set; }
         public long? HighestScore { get; set; }
 
-        public StudentTagNameModel? StudentTagName { get; set; }
-
     }
 }

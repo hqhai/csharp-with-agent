@@ -16,6 +16,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
 
         public SpaceShip? SpaceShip { get; set; }
 
-        public StudentGameInfo? StudentGameInfo { get; set;}
+        public StudentGameInfo? StudentGameInfo { get; set; }
     }
 }

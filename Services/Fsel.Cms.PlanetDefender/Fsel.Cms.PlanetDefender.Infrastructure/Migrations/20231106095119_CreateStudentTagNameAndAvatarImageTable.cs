@@ -18,6 +18,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                 table: "StudentGameInfos",
                 type: "int",
                 nullable: false,
+                defaultValue: 1,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)",
                 oldMaxLength: 100);
@@ -72,7 +73,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Level = table.Column<int>(type: "int", nullable: true)
+                    Level = table.Column<int>(type: "int", nullable: true, defaultValue: 1)
                 },
                 constraints: table =>
                 {
@@ -135,7 +136,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Level = table.Column<int>(type: "int", nullable: false),
+                    Level = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
                     StudentGameInfoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SpaceShipId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -171,19 +172,19 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    Level = table.Column<int>(type: "int", nullable: false),
+                    Level = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
                     TagName = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    MaxLevelSpaceShipId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SpaceShipId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    MaxLevelSpaceShipId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StudentTagNames", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudentTagNames_SpaceShips_SpaceShipId",
-                        column: x => x.SpaceShipId,
+                        name: "FK_StudentTagNames_SpaceShips_MaxLevelSpaceShipId",
+                        column: x => x.MaxLevelSpaceShipId,
                         principalTable: "SpaceShips",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -200,15 +201,15 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "StudentTagNames",
-                columns: new[] { "Id", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "IsDeleted", "Level", "MaxLevelSpaceShipId", "SpaceShipId", "TagName", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
+                columns: new[] { "Id", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "IsDeleted", "Level", "MaxLevelSpaceShipId", "TagName", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
                 values: new object[,]
                 {
-                    { new Guid("402dec4e-39c9-4235-8c7d-b18eb2092305"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 40, null, null, "General", null, null, null },
-                    { new Guid("88bf6e6d-d9d6-4d52-bf9d-52f252f16404"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 10, null, null, "Major", null, null, null },
-                    { new Guid("9f860757-1a3e-4a05-aaf5-2dc1797e23bf"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 1, null, null, "Captain", null, null, null },
-                    { new Guid("b38637d8-129d-4d50-bdf5-a3304684740d"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 30, null, null, "Brigadier", null, null, null },
-                    { new Guid("e2ef7a2e-bc23-4103-8e2b-23cfdca5264e"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 50, null, null, "Supreme Leader", null, null, null },
-                    { new Guid("edc52c09-c407-4371-9201-8f09351c1f58"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 20, null, null, "Colonel", null, null, null }
+                    { new Guid("402dec4e-39c9-4235-8c7d-b18eb2092305"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 40, null, "General", null, null, null },
+                    { new Guid("88bf6e6d-d9d6-4d52-bf9d-52f252f16404"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 10, null, "Major", null, null, null },
+                    { new Guid("9f860757-1a3e-4a05-aaf5-2dc1797e23bf"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 1, null, "Captain", null, null, null },
+                    { new Guid("b38637d8-129d-4d50-bdf5-a3304684740d"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 30, null, "Brigadier", null, null, null },
+                    { new Guid("e2ef7a2e-bc23-4103-8e2b-23cfdca5264e"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 50, null, "Supreme Leader", null, null, null },
+                    { new Guid("edc52c09-c407-4371-9201-8f09351c1f58"), new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, 20, null, "Colonel", null, null, null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -247,9 +248,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                 column: "StudentGameInfoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudentTagNames_SpaceShipId",
+                name: "IX_StudentTagNames_MaxLevelSpaceShipId",
                 table: "StudentTagNames",
-                column: "SpaceShipId");
+                column: "MaxLevelSpaceShipId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_SpaceShips_SpaceShips_SpaceShipId",
@@ -340,7 +341,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                 maxLength: 100,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "int");
+                oldType: "int",
+                oldDefaultValue: 1);
         }
     }
 }

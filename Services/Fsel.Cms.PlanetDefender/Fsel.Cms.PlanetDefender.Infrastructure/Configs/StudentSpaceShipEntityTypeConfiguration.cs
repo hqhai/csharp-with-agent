@@ -16,6 +16,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
                   .WithMany(b => b.StudentSpaceShips)
                   .HasForeignKey(b => b.StudentGameInfoId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(b => b.Level).HasDefaultValue(1);
         }
     }
 }

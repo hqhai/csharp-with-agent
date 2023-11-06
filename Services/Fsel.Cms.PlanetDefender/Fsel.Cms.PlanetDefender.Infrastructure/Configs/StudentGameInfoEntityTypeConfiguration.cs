@@ -25,6 +25,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
                .HasConversion(
                    v => v.ToString(),
                    v => v.EnumParse<EnumGender>());
+
+            builder.Property(b => b.Level).HasDefaultValue(1);
         }
     }
 }

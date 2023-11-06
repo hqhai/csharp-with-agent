@@ -52,6 +52,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.GameHistoryQuery
 
             var gameHistory = _gameHistoryRepository.Queryable
                     .Where(x => x.StudentGameInfoId == studentGameInfo!.Id)
+                    .Include(x => x.SpaceShip)
                     .Select(x => new GameHistoryModel
                     {
                         Id = x.Id,

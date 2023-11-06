@@ -35,6 +35,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.AvatarImageQuery
                 CreatedDate = x.CreatedDate,
                 CreatedFullName = x.CreatedFullName,
                 FilePath = x.FilePath,
+                Level = x.Level,
             }).ToListAsync(cancellationToken);
 
             methodResult.Result = avatarImage;

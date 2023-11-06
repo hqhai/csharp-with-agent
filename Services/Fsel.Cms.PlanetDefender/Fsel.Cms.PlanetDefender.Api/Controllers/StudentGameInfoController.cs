@@ -68,7 +68,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetList()
+        public async Task<IActionResult> Get()
         {
             var commandResult = await _mediator.Send(new GetStudentGameInfoQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();

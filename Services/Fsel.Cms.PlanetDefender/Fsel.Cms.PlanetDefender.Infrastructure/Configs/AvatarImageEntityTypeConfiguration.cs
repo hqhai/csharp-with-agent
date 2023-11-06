@@ -7,16 +7,11 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class StudentTagNameEntityTypeConfiguration : IEntityTypeConfiguration<StudentTagName>
+    internal class AvatarImageEntityTypeConfiguration : IEntityTypeConfiguration<AvatarImage>
     {
-        public void Configure(EntityTypeBuilder<StudentTagName> builder)
+        public void Configure(EntityTypeBuilder<AvatarImage> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.HasOne(a => a.SpaceShip)
-                  .WithMany(b => b.StudentTagNames)
-                  .HasForeignKey(b => b.MaxLevelSpaceShipId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
             builder.Property(b => b.Level).HasDefaultValue(1);
         }
     }

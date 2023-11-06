@@ -30,6 +30,10 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             modelBuilder.ApplyConfiguration(new WheelOfBuffEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameplayTimeConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameHistoryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new AvatarImageEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentSpaceShipEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentTagNameEntityTypeConfiguration());
+
 
             base.OnModelCreating(modelBuilder);
         }

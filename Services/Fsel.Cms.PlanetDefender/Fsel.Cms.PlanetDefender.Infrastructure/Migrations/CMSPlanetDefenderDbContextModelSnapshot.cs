@@ -64,7 +64,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<int?>("Level")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -495,7 +497,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<int>("Level")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<string>("NickName")
                         .HasColumnType("nvarchar(max)");
@@ -573,7 +577,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<int>("Level")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<Guid>("SpaceShipId")
                         .HasColumnType("uniqueidentifier");
@@ -642,12 +648,11 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<int>("Level")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<Guid?>("MaxLevelSpaceShipId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("SpaceShipId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("TagName")
@@ -670,7 +675,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SpaceShipId");
+                    b.HasIndex("MaxLevelSpaceShipId");
 
                     b.ToTable("StudentTagNames");
 
@@ -1157,7 +1162,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                 {
                     b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", "SpaceShip")
                         .WithMany("StudentTagNames")
-                        .HasForeignKey("SpaceShipId");
+                        .HasForeignKey("MaxLevelSpaceShipId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("SpaceShip");
                 });

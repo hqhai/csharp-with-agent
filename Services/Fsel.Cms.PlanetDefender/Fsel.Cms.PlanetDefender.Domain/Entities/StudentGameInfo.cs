@@ -13,6 +13,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
 
         [RegexValid(Regex = "^[A-Za-z0-9]{4,20}$s", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? NickName { get; set; }
+
         public EnumGender Gender { get; set; }
 
         public int Level { get; set; }
@@ -26,6 +27,5 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
 
         public ICollection<GameHistory> GameHistories { get; set; } = new List<GameHistory>();
         public ICollection<StudentSpaceShip> StudentSpaceShips { get; set; } = new List<StudentSpaceShip>();
-
     }
 }
