@@ -122,8 +122,7 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                     item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
                     item.ClassForumResultId = classForumResult?.Id;
                 }
-
-                if (item.Type == EnumInteractionType.ClassForum)
+                else if (item.Type == EnumInteractionType.ClassForum)
                 {
                     var classForumResult = classForumResults?.Where(x => x.Id == item.ObjectId).FirstOrDefault();
                     item.Content = classForumResult?.Content;
@@ -131,6 +130,7 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                     item.UserId = classForumResult?.CreatedUserId;
                     item.StudentId = classForumResult?.StudentId;
                     item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
+                    item.ClassForumResultId = classForumResult?.Id;
                 }
             }
             methodResult.Result = new PagingItemsModel<FlagModel>(lists, request, totalItem);
