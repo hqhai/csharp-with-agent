@@ -21,5 +21,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public Guid? StudentId { get; set; }
         public Guid? UserId { get; set; }
         public string? AvatarPath { get; set; }
+        public Guid? ClassForumResultId { get; set; }
     }
 }

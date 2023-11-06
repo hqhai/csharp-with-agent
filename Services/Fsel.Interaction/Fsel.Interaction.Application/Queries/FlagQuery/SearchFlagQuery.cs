@@ -111,14 +111,16 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
             {
                 if (item.Type == EnumInteractionType.ReplyComment)
                 {
-                    var commentLevel1Id = _commentRepository.Queryable.Where(x => x.Id == item.ObjectId).Select(x => x.ObjectId).FirstOrDefault();
-                    var commentLevel2Id = _commentRepository.Queryable.Where(x => x.Id == commentLevel1Id).Select(x => x.ObjectId).FirstOrDefault();
-                    var classForumResult = classForumResults?.Where(x => x.Id == commentLevel2Id).FirstOrDefault();
+                    var commentLevel2Id = _commentRepository.Queryable.Where(x => x.Id == item.ObjectId).Select(x => x.ObjectId).FirstOrDefault();
+                    var commentLevel1Id = _commentRepository.Queryable.Where(x => x.Id == commentLevel2Id).FirstOrDefault()?.ObjectId;
+
+                    var classForumResult = classForumResults?.Where(x => x.Id == (commentLevel1Id ?? commentLevel2Id)).FirstOrDefault();
                     item.Content = classForumResult?.Content;
                     item.CreatedUserName = classForumResult?.CreatedFullName;
                     item.UserId = classForumResult?.CreatedUserId;
                     item.StudentId = classForumResult?.StudentId;
                     item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
+                    item.ClassForumResultId = classForumResult?.Id;
                 }
 
                 if (item.Type == EnumInteractionType.ClassForum)
