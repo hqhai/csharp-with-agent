@@ -30,14 +30,17 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
         private readonly IMapper _mapper;
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly SectionConverter _sectionConverter;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public UpdateFinalTestCommandHandler(IMapper mapper
             , IFinalTestRepository finalTestRepository
-            , SectionConverter sectionConverter)
+            , SectionConverter sectionConverter,
+ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _mapper = mapper;
             _finalTestRepository = finalTestRepository;
             _sectionConverter = sectionConverter;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<FinalTestModel>> Handle(UpdateFinalTestCommand request, CancellationToken cancellationToken)
@@ -53,7 +56,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
                 return methodResult;
             }
-            if (finalTest.CourseUnitMockTests.Count > 0)
+            if (await _courseUnitMockTestRepository.Queryable.AnyAsync(p => p.FinalTestId == finalTest.Id, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState));
                 return methodResult;
