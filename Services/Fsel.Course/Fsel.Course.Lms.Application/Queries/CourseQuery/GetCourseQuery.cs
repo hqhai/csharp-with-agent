@@ -35,13 +35,19 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
         private readonly IOrderService _orderService;
+        private readonly IUnitResultRepository _unitResultRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IFinalTestResultRepository _finalTestResultRepository;
 
         public GetCourseQueryHandler(IMapper mapper,
             AuthContext authContext,
             IOrderService orderService,
             ICourseRepository courseRepository,
             IUserService userService,
-            ITrainingService trainingService)
+            ITrainingService trainingService,
+            IUnitResultRepository unitResultRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            IFinalTestResultRepository finalTestResultRepository)
         {
             _courseRepository = courseRepository;
             _mapper = mapper;
@@ -49,6 +55,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             _trainingService = trainingService;
             _authContext = authContext;
             _orderService = orderService;
+            _unitResultRepository = unitResultRepository;
+            _mockTestResultRepository = mockTestResultRepository;
+            _finalTestResultRepository = finalTestResultRepository;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
@@ -162,40 +171,61 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 return;
             }
-            course.CourseResults.Add(new CourseResult
+            if (course.CourseResults.Count <= 0)
             {
-                StudentId = studentId ?? default,
-                Status = EnumResultStatus.Process
-            });
-            var unitIds = course.CourseUnitMockTests.Where(x => x.UnitId != null).OrderBy(x => x.DisplayOrder).Select(x => x.UnitId).ToList();
-            var finalTestIds = course.CourseUnitMockTests.Where(x => x.FinalTestId != null).Select(x => x.FinalTestId).ToList();
-            var mockTestIds = course.CourseUnitMockTests.Where(x => x.MockTestId != null).Select(x => x.MockTestId).ToList();
-            if (unitIds.Count > 0)
-            {
-                course.UnitResults = unitIds.Select((x, index) => new UnitResult
+                course.CourseResults.Add(new CourseResult
                 {
-                    UnitId = x ?? default,
                     StudentId = studentId ?? default,
-                    Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished
-                }).ToList();
+                    Status = EnumResultStatus.Process
+                });
             }
-            if (finalTestIds.Count > 0)
+
+            var courseUnitMockTests = course.CourseUnitMockTests.ToList();
+            foreach (var courseUnitMockTest in courseUnitMockTests)
             {
-                course.FinalTestResults = finalTestIds.Select(x => new FinalTestResult
+                var index = courseUnitMockTests.IndexOf(courseUnitMockTest);
+                if (courseUnitMockTest.UnitId.HasValue)
                 {
-                    FinalTestId = x ?? default,
-                    StudentId = studentId ?? default,
-                    Status = EnumResultStatus.Unfinished
-                }).ToList();
-            }
-            if (mockTestIds.Count > 0)
-            {
-                course.MockTestResults = mockTestIds.Select(x => new MockTestResult
+                    var checkUnitResult = await _unitResultRepository.Queryable.AnyAsync(x => x.UnitId == courseUnitMockTest.UnitId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId, cancellationToken);
+                    if (!checkUnitResult)
+                    {
+                        course.UnitResults.Add(new UnitResult
+                        {
+                            UnitId = courseUnitMockTest.UnitId.Value,
+                            StudentId = studentId ?? default,
+                            Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished
+                        });
+                    }
+                }
+                else if (courseUnitMockTest.FinalTestId.HasValue)
                 {
-                    MockTestId = x ?? default,
-                    StudentId = studentId ?? default,
-                    Status = EnumResultStatus.Unfinished
-                }).ToList();
+                    var checkFinalResult = await _finalTestResultRepository.Queryable.AnyAsync(x => x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId, cancellationToken);
+                    if (!checkFinalResult)
+                    {
+                        course.FinalTestResults.Add(new FinalTestResult
+                        {
+                            FinalTestId = courseUnitMockTest.FinalTestId.Value,
+                            StudentId = studentId ?? default,
+                            Status = EnumResultStatus.Unfinished
+                        });
+                    }
+
+                }
+                else if (courseUnitMockTest.MockTestId.HasValue)
+                {
+                    var checkMockTest = await _mockTestResultRepository.Queryable.AnyAsync(x => x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId, cancellationToken);
+                    if (!checkMockTest)
+                    {
+                        course.MockTestResults.Add(new MockTestResult
+                        {
+                            MockTestId = courseUnitMockTest.MockTestId.Value,
+                            StudentId = studentId ?? default,
+                            Status = EnumResultStatus.Unfinished
+                        });
+                    }
+
+                }
+                break;
             }
             course = _courseRepository.Update(course);
             await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -207,18 +237,10 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 return null;
             }
-            return new UnitModel
-            {
-                Id = unit.Id,
-                Name = unit.Name,
-                Code = unit.Code,
-                CourseLevel = unit.CourseLevel,
-                CreatedDate = unit.CreatedDate,
-                CreatedFullName = unit.CreatedFullName,
-                CreatedUserId = unit.CreatedUserId,
-                IsActive = unit.CourseUnitMockTests.Any(),
-                UnitResult = _mapper.Map<UnitResultModel>(unit.UnitResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == courseId))
-            };
+            var unitModel = _mapper.Map<UnitModel>(unit);
+            unitModel.IsActive = unit.CourseUnitMockTests.Any();
+            unitModel.UnitResult = _mapper.Map<UnitResultModel>(unit.UnitResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == courseId));
+            return unitModel;
         }
 
         public MockTestModel? GetMockTest(MockTest? mockTest, Guid? studentId, Guid courseId)
@@ -227,17 +249,10 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 return null;
             }
-            return new MockTestModel
-            {
-                Id = mockTest.Id,
-                Name = mockTest.Name,
-                MockTestType = mockTest.MockTestType,
-                CreatedDate = mockTest.CreatedDate,
-                CreatedFullName = mockTest.CreatedFullName,
-                CreatedUserId = mockTest.CreatedUserId,
-                IsActive = mockTest.CourseUnitMockTests.Any(),
-                MockTestResult = _mapper.Map<MockTestResultModel>(mockTest.MockTestResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == courseId))
-            };
+            var mockTestModel = _mapper.Map<MockTestModel>(mockTest);
+            mockTestModel.IsActive = mockTest.CourseUnitMockTests.Any();
+            mockTestModel.MockTestResult = _mapper.Map<MockTestResultModel>(mockTest.MockTestResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == courseId));
+            return mockTestModel;
         }
 
         public FinalTestModel? GetFinalTest(FinalTest? finalTest, Guid? studentId, Guid courseId)
@@ -246,17 +261,10 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 return null;
             }
-            return new FinalTestModel
-            {
-                Id = finalTest.Id,
-                Name = finalTest.Name,
-                IsActive = finalTest.CourseUnitMockTests.Any(),
-                FinalTestLevel = finalTest.FinalTestLevel,
-                CreatedDate = finalTest.CreatedDate,
-                CreatedFullName = finalTest.CreatedFullName,
-                ExecutionTime = finalTest.ExecutionTime,
-                FinalTestResult = _mapper.Map<FinalTestResultModel>(finalTest.FinalTestResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == courseId))
-            };
+            var finalTestModel = _mapper.Map<FinalTestModel>(finalTest);
+            finalTestModel.IsActive = finalTest.CourseUnitMockTests.Any();
+            finalTestModel.FinalTestResult = _mapper.Map<FinalTestResultModel>(finalTest.FinalTestResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == courseId));
+            return finalTestModel;
         }
     }
 }
