@@ -13,7 +13,6 @@ namespace Fsel.Interaction.Application.Commands.FlagCmd
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.TrainingServices;
     using Fsel.Interaction.Domain.Entities;
-    using Fsel.Interaction.Domain.Enums;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Flags;
     using Fsel.Interaction.Domain.Models.EntityModels;
