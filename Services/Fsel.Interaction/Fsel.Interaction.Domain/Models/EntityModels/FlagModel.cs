@@ -2,9 +2,7 @@
 
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
-    using System;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Interaction.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class FlagModel : BaseModel
@@ -17,5 +15,12 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
         public EnumInteractionType Type { get; set; }
         public Guid? ObjectId { get; set; }
+
+        public string? Content { get; set; }
+
+        public string? CreatedUserName { get; set; }
+        public Guid? StudentId { get; set; }
+        public Guid? UserId { get; set; }
+        public string? AvatarPath { get; set; }
     }
 }

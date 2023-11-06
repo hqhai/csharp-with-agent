@@ -1,17 +1,19 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Domain.Models.CommandModels.Flags
+namespace Fsel.Shared.Models.ShareModels
 {
-    using System;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class RateFlagCommandModel
+    public class DeleteClassForumByFlagQueueModel : BaseModel
     {
         public EnumFlagIssue FlagIssue { get; set; }
 
         public string? FeedBack { get; set; }
 
+        public EnumFlagStatus Status { get; set; }
+
         public EnumInteractionType Type { get; set; }
-        public Guid ObjectId { get; set; }
+        public IList<Guid>? ObjectIds { get; set; }
     }
 }

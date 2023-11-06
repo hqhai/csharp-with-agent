@@ -15,5 +15,6 @@ namespace Fsel.Training.Domain.Entities
 
         public bool Priority { get; set; }
         public TeacherFreeDate? TeacherFreeDate { get; set; }
+        public ICollection<TeacherFreeTimeLive> TeacherFreeTimeLives { get; set; } = new List<TeacherFreeTimeLive>();
     }
 }
