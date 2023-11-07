@@ -41,24 +41,13 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult?.Content?.Result;
-            if (student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
 
             var questBoardNotDaily = await _questBoardStudentRepository.Queryable.Where(x => x.StudentId == request.StudentId && x.Status != EnumQuestBoardStudentStatus.Achieved).ToListAsync(cancellationToken);
 
             var questBoardQuery = from item in request.Categories
                                   join item2 in _questBoardRepository.Queryable on item equals item2.Category
                                   select item2;
+
             var listQuestBoard = questBoardQuery.ToList();
 
 
@@ -87,7 +76,6 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                             AchievedPoints = request.AchievedPoints,
                             ObjectId = request.ObjectId,
                         };
-
                         questBoardStudentToAdd.Add(questBoardStudentAdd);
                     }
                 }
