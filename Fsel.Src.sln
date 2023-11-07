@@ -142,7 +142,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Notification.Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Notification.Domain", "Services\Fsel.Notification\Fsel.Notification.Domain\Fsel.Notification.Domain.csproj", "{8B1C6EF9-3383-4929-AD40-9B4E83AFB45A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.CMS.PlanetDefender", "Fsel.CMS.PlanetDefender", "{50DA47A2-4089-49C6-B722-BEF748FCE4BF}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Cms.PlanetDefender", "Fsel.Cms.PlanetDefender", "{50DA47A2-4089-49C6-B722-BEF748FCE4BF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Cms.PlanetDefender.Api", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Api\Fsel.Cms.PlanetDefender.Api.csproj", "{76F333BF-314F-4B86-AA27-490C3663A6A2}"
 EndProject
