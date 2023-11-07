@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Domain.Entities
 {
+    using Fsel.Shared.Enums;
+
     public class ExtraPracticeAnswer : BaseAnswer
     {
         public Question? Question { get; set; }
@@ -16,5 +18,6 @@ namespace Fsel.Course.Domain.Entities
         public Guid? QuestionId { get; set; }
         public Guid? VideoTimeCodeId { get; set; }
         public Guid? SectionId { get; set; }
+        public EnumAnswerStatus? Status { get; set; }
     }
 }

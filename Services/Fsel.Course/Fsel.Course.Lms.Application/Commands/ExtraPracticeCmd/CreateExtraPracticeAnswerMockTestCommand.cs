@@ -211,13 +211,13 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     }
                     var questionIds = item.Answers.Where(x => x.QuestionId != null).Select(x => x.QuestionId ?? default).ToList();
                     var questions = await _questionRepository.GetByIdsAsync(questionIds);
-                    double correctCountTotal = 0;
+                    var correctCountTotal = 0;
                     foreach (var answer in item.Answers)
                     {
                         if (answer.QuestionId != null)
                         {
                             var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                            var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit, true);
+                            var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, true);
                             if (!questionResult.IsOK)
                             {
                                 methodResult.AddErrorBadRequest(questionResult.ErrorMessages);

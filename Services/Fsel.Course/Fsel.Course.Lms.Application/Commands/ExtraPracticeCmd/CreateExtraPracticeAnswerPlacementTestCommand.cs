@@ -155,7 +155,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                 foreach (var answer in answers)
                 {
                     var question = await _questionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == answer.QuestionId, cancellationToken);
-                    var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit, true);
+                    var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, true);
                     if (!questionResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);

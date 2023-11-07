@@ -15,12 +15,6 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.Property(e => e.Status)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumAnswerStatus>());
-
             builder.HasOne(a => a.Question)
                 .WithMany(b => b.ExtraPracticeAnswers)
                 .HasForeignKey(b => b.QuestionId)

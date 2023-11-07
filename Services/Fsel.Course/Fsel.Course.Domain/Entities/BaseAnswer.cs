@@ -7,7 +7,6 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
-    using Fsel.Shared.Enums;
 
     public class BaseAnswer : Entity
     {
@@ -29,7 +28,5 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectCount { get; set; }
-
-        public EnumAnswerStatus Status { get; set; }
     }
 }

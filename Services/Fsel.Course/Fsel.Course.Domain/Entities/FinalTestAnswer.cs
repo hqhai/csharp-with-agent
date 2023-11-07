@@ -16,5 +16,10 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid SectionQuestionId { get; set; }
+
+        public SectionGroupResult? SectionGroupResult { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid SectionGroupResultId { get; set; }
     }
 }

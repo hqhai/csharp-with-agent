@@ -101,8 +101,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         return methodResult;
                     }
 
-                    double count = 0;
-                    double questionCount = 0;
+                    var count = 0;
+                    var questionCount = 0;
                     foreach (var answer in item.Answers)
                     {
                         if (answer.QuestionId != null && questions != null)

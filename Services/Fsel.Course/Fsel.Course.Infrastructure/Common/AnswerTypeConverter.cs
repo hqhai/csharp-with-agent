@@ -76,9 +76,9 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<MultipleOptionSentenceCompletionQuestion>();
             int number = 0;
             bool isAnswerMissing = false;
-            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null)
             {
-                if (isMandatoryAnswer && IsNullOrEmptyDataHasValue(dataAnswer.Answers, "AnswerId"))
+                if (isMandatoryAnswer && isSubmit && IsNullOrEmptyDataHasValue(dataAnswer.Answers, "AnswerId"))
                 {
                     isAnswerMissing = true;
                 }
@@ -109,9 +109,9 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<MatchingTypeQuestion>();
             int number = default;
             bool isAnswerMissing = default;
-            if (dataAnswer != null && dataQuestion != null && dataQuestion.From != null && dataQuestion.To != null && dataQuestion.Link != null && isSubmit)
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.From != null && dataQuestion.To != null && dataQuestion.Link != null)
             {
-                if (isMandatoryAnswer && (!CheckAnswerCount(dataAnswer.Answers, dataQuestion.Link) || IsNullOrEmptyDataHasValue(dataAnswer.Answers, "ToId")))
+                if (isMandatoryAnswer && isSubmit && (!CheckAnswerCount(dataAnswer.Answers, dataQuestion.Link) || IsNullOrEmptyDataHasValue(dataAnswer.Answers, "ToId")))
                 {
                     isAnswerMissing = true;
                 }
@@ -141,9 +141,9 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<MutipleChoiceQuestion>();
             int number = 0;
             bool isAnswerMissing = default;
-            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null)
             {
-                if (isMandatoryAnswer && (!CheckAnswerCount(dataAnswer.Answers, dataQuestion.Contents) || !IsNullOrEmptyDataValueBool(dataAnswer.Answers, "IsChecked")))
+                if (isMandatoryAnswer && isSubmit && (!CheckAnswerCount(dataAnswer.Answers, dataQuestion.Contents) || !IsNullOrEmptyDataValueBool(dataAnswer.Answers, "IsChecked")))
                 {
                     isAnswerMissing = true;
                 }
@@ -170,9 +170,9 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
             int number = 0;
             bool isAnswerMissing = default;
-            if (dataQuestion != null && dataAnswer != null && isSubmit)
+            if (dataQuestion != null && dataAnswer != null)
             {
-                if (isMandatoryAnswer && IsNullOrEmptyData(dataAnswer.Answers, "Answers"))
+                if (isMandatoryAnswer && IsNullOrEmptyData(dataAnswer.Answers, "Answers") && isSubmit)
                 {
                     isAnswerMissing = true;
                 }
@@ -195,9 +195,9 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
             int number = 0;
             bool isAnswerMissing = default;
-            if (dataAnswer != null && dataQuestion != null && isSubmit)
+            if (dataAnswer != null && dataQuestion != null)
             {
-                if (isMandatoryAnswer && string.IsNullOrEmpty(dataAnswer.Answers))
+                if (isMandatoryAnswer && string.IsNullOrEmpty(dataAnswer.Answers) && isSubmit)
                 {
                     isAnswerMissing = true;
                 }
@@ -228,9 +228,9 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
             int number = 0;
             bool isAnswerMissing = default;
-            if (dataAnswer != null && dataQuestion != null && dataQuestion.Content != null && dataQuestion.Content.Any() && isSubmit)
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Content != null && dataQuestion.Content.Any())
             {
-                if (isMandatoryAnswer && string.IsNullOrEmpty(dataAnswer.Answers))
+                if (isMandatoryAnswer && string.IsNullOrEmpty(dataAnswer.Answers) && isSubmit)
                 {
                     isAnswerMissing = true;
                 }
@@ -253,9 +253,9 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
             int number = 0;
             bool isAnswerMissing = default;
-            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null)
             {
-                if (isMandatoryAnswer && (!CheckAnswerCount(dataAnswer.Answers, dataQuestion.Contents) || IsNullOrEmptyData(dataAnswer.Answers, "Answer")))
+                if (isMandatoryAnswer && isSubmit && (!CheckAnswerCount(dataAnswer.Answers, dataQuestion.Contents) || IsNullOrEmptyData(dataAnswer.Answers, "Answer")))
                 {
                     isAnswerMissing = true;
                 }
@@ -264,7 +264,7 @@ namespace Fsel.Course.Infrastructure.Common
                     foreach (var item in dataAnswer.Answers)
                     {
                         var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
-                        if (question != null && question.Words != null && question.Words.Count > 0 && item.Answer != null && item.Answer.Count > 0 && isSubmit)
+                        if (question != null && question.Words != null && question.Words.Count > 0 && item.Answer != null && item.Answer.Count > 0)
                         {
                             var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
                             item.IsExacts = isExacts;
@@ -391,9 +391,9 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
             int number = 0;
             bool isAnswerMissing = default;
-            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null)
             {
-                if (isMandatoryAnswer && (!CheckAnswerCount(dataAnswer.Answers, dataQuestion.Contents) || IsNullOrEmptyData(dataAnswer.Answers, "Answer")))
+                if (isMandatoryAnswer && isSubmit && (!CheckAnswerCount(dataAnswer.Answers, dataQuestion.Contents) || IsNullOrEmptyData(dataAnswer.Answers, "Answer")))
                 {
                     isAnswerMissing = true;
                 }
@@ -425,9 +425,9 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<DragAndDropSentenceOrderQuestion>();
             int number = 0;
             bool isAnswerMissing = default;
-            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null && isSubmit)
+            if (dataAnswer != null && dataQuestion != null && dataQuestion.Contents != null)
             {
-                if (isMandatoryAnswer && (!CheckAnswerCount(dataAnswer.Answers, dataQuestion.Contents) || IsNullOrEmptyData(dataAnswer.Answers, "Answer")))
+                if (isMandatoryAnswer && isSubmit && (!CheckAnswerCount(dataAnswer.Answers, dataQuestion.Contents) || IsNullOrEmptyData(dataAnswer.Answers, "Answer")))
                 {
                     isAnswerMissing = true;
                 }

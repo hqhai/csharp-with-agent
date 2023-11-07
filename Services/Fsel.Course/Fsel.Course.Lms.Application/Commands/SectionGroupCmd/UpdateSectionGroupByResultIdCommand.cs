@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.SectionGroupCmd
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -20,12 +21,16 @@ namespace Fsel.Course.Lms.Application.Commands.SectionGroupCmd
     public class UpdateSectionGroupByObjectResultCommandHandler : IRequestHandler<UpdateSectionGroupByResultIdCommand, MethodResult<bool>>
     {
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly IPlacementTestResultRepository _placementTestResultRepository;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
 
-        public UpdateSectionGroupByObjectResultCommandHandler(ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, IFinalTestResultRepository finalTestResultRepository)
+        public UpdateSectionGroupByObjectResultCommandHandler(ISectionGroupResultRepository sectionGroupResultRepository, IPlacementTestResultRepository placementTestResultRepository, SectionGroupConverter sectionGroupConverter, IMockTestResultRepository mockTestResultRepository, IFinalTestResultRepository finalTestResultRepository)
         {
             _sectionGroupResultRepository = sectionGroupResultRepository;
+            _placementTestResultRepository = placementTestResultRepository;
+            _sectionGroupConverter = sectionGroupConverter;
             _mockTestResultRepository = mockTestResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
         }
@@ -47,13 +52,21 @@ namespace Fsel.Course.Lms.Application.Commands.SectionGroupCmd
         }
 
         private async Task UpdateSectionGroupByFinalTest(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(sectionGroup);
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
+            await _sectionGroupConverter.UpdatePlacementTestAnswers(sectionGroup, sectionGroupResult);
 
+            _sectionGroupResultRepository.Update(sectionGroupResult);
+            await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task UpdateFinalTestResult(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             var maxSkillFullMockTest = 3;
-            _sectionGroupResultRepository.Update(sectionGroupResult);
-            await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await UpdateSectionGroupByFinalTest(sectionGroup, sectionGroupResult, cancellationToken);
 
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(x => x.FinalTestResultId == sectionGroupResult.FinalTestResultId).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && sectionGroupResults.Count == maxSkillFullMockTest && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
@@ -68,12 +81,51 @@ namespace Fsel.Course.Lms.Application.Commands.SectionGroupCmd
             }
         }
 
+        private async Task UpdateSectionGroupByPlacementTest(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(sectionGroup);
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
+            await _sectionGroupConverter.UpdatePlacementTestAnswers(sectionGroup, sectionGroupResult);
+
+            _sectionGroupResultRepository.Update(sectionGroupResult);
+            await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task UpdatePlacementTestResult(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(sectionGroup);
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
+            await UpdateSectionGroupByPlacementTest(sectionGroup, sectionGroupResult, cancellationToken);
+            var maxSkillTest = 4;
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(x => x.PlacementTestResultId == sectionGroupResult.PlacementTestResultId).ToListAsync(cancellationToken);
+            if (sectionGroupResults != null && sectionGroupResults.Count == maxSkillTest && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
+            {
+                var placementTestResult = await _placementTestResultRepository.GetByIdAsync(sectionGroupResult.FinalTestResultId ?? default);
+                if (placementTestResult != null)
+                {
+                    placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
+                    _placementTestResultRepository.Update(placementTestResult);
+                    await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+            }
+        }
+
         private async Task UpdateSectionGroupByMockTest(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
-            var maxSkillFinalTest = 4;
+            await _sectionGroupConverter.UpdatePlacementTestAnswers(sectionGroup, sectionGroupResult);
 
+            _sectionGroupResultRepository.Update(sectionGroupResult);
+            await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task UpdateMockTestResult(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(sectionGroup);
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
+            await UpdateSectionGroupByPlacementTest(sectionGroup, sectionGroupResult, cancellationToken);
+            var maxSkillFinalTest = 4;
             var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).FirstOrDefaultAsync(x => x.Id == sectionGroupResult.MockTestResultId, cancellationToken);
             var mockTest = mockTestResult?.MockTest;
             if (mockTest == null || mockTestResult == null)
@@ -120,6 +172,16 @@ namespace Fsel.Course.Lms.Application.Commands.SectionGroupCmd
             finalTestResult.Status = EnumResultStatus.Done;
             finalTestResult.SkillScores = skillScores;
             return finalTestResult;
+        }
+
+        private static PlacementTestResult GetPlacementTestResult(IList<SkillScores>? skillScores, PlacementTestResult placementTestResult)
+        {
+            ArgumentNullException.ThrowIfNull(skillScores);
+            placementTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+            placementTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+            placementTestResult.Status = EnumResultStatus.Done;
+            placementTestResult.SkillScores = skillScores;
+            return placementTestResult;
         }
     }
 }

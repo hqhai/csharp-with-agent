@@ -3,10 +3,7 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
-    using Fsel.Core.Entities;
 
     public class PlacementTestAnswer : BaseAnswer
     {
@@ -19,5 +16,10 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid SectionQuestionId { get; set; }
+
+        public SectionGroupResult? SectionGroupResult { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid SectionGroupResultId { get; set; }
     }
 }

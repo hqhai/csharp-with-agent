@@ -4,9 +4,12 @@ namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Enums;
 
     public class VideoTimeCodeAnswer : BaseAnswer
     {
+        public EnumAnswerStatus Status { get; set; }
+
         public Question? Question { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
