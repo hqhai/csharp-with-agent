@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;

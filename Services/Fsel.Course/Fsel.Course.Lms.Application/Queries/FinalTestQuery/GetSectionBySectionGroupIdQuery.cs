@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             var (sections, totalCount) = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
 
             var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
-            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId));
+            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId, sectionGroup));
             sectonGroupDetail.Sections = GetSections(sections);
             sectonGroupDetail.TotalQuestion = totalCount;
             methodResult.StatusCode = StatusCodes.Status200OK;

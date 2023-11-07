@@ -129,10 +129,9 @@ builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.Noti
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.LmsQueue.NameQueue.UpdateTeacherGradingInClassForumAndMockTest, typeof(UpdateOcCheckInClassForumResultConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.UpdateOcCheckInClassForumResult, typeof(UpdateOcCheckInClassForumResultConsumer) },
     { QueueSettings.LmsQueue.NameQueue.CompleteTestWhenTimeOut, typeof(CompleteTestWhenTimeOutConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.UpdateOcCheckInClassForumResult, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) }
-    { QueueSettings.LmsQueue.NameQueue.UpdateOcCheckInClassForumResult, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.UpdateTeacherGradingInClassForumAndMockTest, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DeleteClassForumByFlag, typeof(DeleteClassForumByFlagConsumer) }
 });
 

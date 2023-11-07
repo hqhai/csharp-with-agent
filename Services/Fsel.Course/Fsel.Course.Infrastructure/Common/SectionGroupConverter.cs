@@ -40,31 +40,31 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var sectionQuestions = sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).ToList();
                     var sectionQuestionCompleteIds = sectionQuestions.SelectMany(x => x.MockTestAnswers).Where(x => x.SectionQuestionId.HasValue).Select(x => x.SectionQuestionId!.Value).ToList();
-                    return (sectionQuestionCompleteIds.Except(sectionQuestions.Select(x => x.Id)).ToList(), default, default);
+                    return (sectionQuestions.Select(x => x.Id).Except(sectionQuestionCompleteIds).ToList(), default, default);
                 }
                 else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
                 {
                     var sectionCompleteIds = sections.SelectMany(x => x.MockTestAnswers).Where(x => x.SectionId.HasValue).Select(x => x.SectionId!.Value).ToList();
-                    return (default, sectionCompleteIds.Except(sections.Select(x => x.Id)).ToList(), default);
+                    return (default, sections.Select(x => x.Id).Except(sectionCompleteIds).ToList(), default);
                 }
                 else
                 {
                     var sectionTimeCodes = sections.SelectMany(x => x.SectionTimeCodes).ToList();
                     var sectionTimeCodeCompleteIds = sectionTimeCodes.SelectMany(x => x.MockTestAnswers).Where(x => x.SectionTimeCodeId.HasValue).Select(x => x.SectionTimeCodeId!.Value).ToList();
-                    return (default, default, sectionTimeCodeCompleteIds.Except(sectionTimeCodes.Select(x => x.Id)).ToList());
+                    return (default, default, sectionTimeCodes.Select(x => x.Id).Except(sectionTimeCodeCompleteIds).ToList());
                 }
             }
             else if (type == nameof(FinalTest))
             {
                 var sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
                 var sectionQuestionCompleteIds = sectionQuestions.SelectMany(x => x.FinalTestAnswers).Select(x => x.SectionQuestionId).ToList();
-                return (sectionQuestionCompleteIds.Except(sectionQuestions.Select(x => x.Id)).ToList(), default, default);
+                return (sectionQuestions.Select(x => x.Id).Except(sectionQuestionCompleteIds).ToList(), default, default);
             }
             else
             {
                 var sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
                 var sectionQuestionCompleteIds = sectionQuestions.SelectMany(x => x.PlacementTestAnswers).Select(x => x.SectionQuestionId).ToList();
-                return (sectionQuestionCompleteIds.Except(sectionQuestions.Select(x => x.Id)).ToList(), default, default);
+                return (sectionQuestions.Select(x => x.Id).Except(sectionQuestionCompleteIds).ToList(), default, default);
             }
         }
 
@@ -160,6 +160,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     Answer = null,
                     SectionQuestionId = x,
+                    SectionGroupResultId = sectionGroupResult.Id,
                     MockTestResultId = sectionGroupResult.MockTestResultId ?? default
                 }).ToList();
             }
@@ -169,6 +170,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     Answer = null,
                     SectionId = x,
+                    SectionGroupResultId = sectionGroupResult.Id,
                     MockTestResultId = sectionGroupResult.MockTestResultId ?? default
                 }).ToList();
             }
@@ -178,6 +180,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     Answer = null,
                     SectionTimeCodeId = x,
+                    SectionGroupResultId = sectionGroupResult.Id,
                     MockTestResultId = sectionGroupResult.MockTestResultId ?? default
                 }).ToList();
             }

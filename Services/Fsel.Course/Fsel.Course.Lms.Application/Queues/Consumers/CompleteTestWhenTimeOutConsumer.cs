@@ -4,7 +4,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
+    using Fsel.Course.Lms.Application.Commands.SectionGroupCmd;
     using Fsel.Shared.Models.ShareModels;
     using MassTransit;
     using MediatR;
@@ -28,13 +28,15 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             switch (messeger.ObjectResultType)
             {
                 case nameof(MockTest):
-                    await _mediator.Send(new UpdateOcCheckInClassForumResultCommand()).ConfigureAwait(false);
+                    await _mediator.Send(new UpdateSectionGroupByResultIdCommand { ObjectResultId = messeger.ObjectResultId, ObjectResultType = messeger.ObjectResultType }).ConfigureAwait(false);
                     break;
 
                 case nameof(PlacementTest):
+                    await _mediator.Send(new UpdateSectionGroupByResultIdCommand { ObjectResultId = messeger.ObjectResultId, ObjectResultType = messeger.ObjectResultType }).ConfigureAwait(false);
                     break;
 
                 case nameof(FinalTest):
+                    await _mediator.Send(new UpdateSectionGroupByResultIdCommand { ObjectResultId = messeger.ObjectResultId, ObjectResultType = messeger.ObjectResultType }).ConfigureAwait(false);
                     break;
 
                 case nameof(EnumTimeCodeType.SkillTest):

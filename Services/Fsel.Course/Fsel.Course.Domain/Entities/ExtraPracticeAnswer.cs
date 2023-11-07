@@ -18,6 +18,8 @@ namespace Fsel.Course.Domain.Entities
         public Guid? QuestionId { get; set; }
         public Guid? VideoTimeCodeId { get; set; }
         public Guid? SectionId { get; set; }
+        public SectionGroupResult? SectionGroupResult { get; set; }
+        public Guid? SectionGroupResultId { get; set; }
         public EnumAnswerStatus? Status { get; set; }
     }
 }

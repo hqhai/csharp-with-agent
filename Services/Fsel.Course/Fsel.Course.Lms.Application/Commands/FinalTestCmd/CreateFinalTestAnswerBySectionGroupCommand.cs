@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             {
                 if (request.Answers != null && request.Answers.Any())
                 {
-                    var answerResult = await CreateAnswerAsync(request, sectionGroup);
+                    var answerResult = await CreateAnswerAsync(request, sectionGroupResult.Id);
                     if (!answerResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
@@ -183,11 +183,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             return skillScore;
         }
 
-        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup)
+        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, Guid sectionGroupResultId)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<IList<FinalTestAnswer>>();
-            var anwserResult = new MethodResult<IList<FinalTestAnswer>>();
             var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
             if (questions == null || !questions.Any())
@@ -195,7 +194,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
-            anwserResult = await CreateAnswer(request, questions);
+            var anwserResult = await CreateAnswer(request, questions, sectionGroupResultId);
             if (!anwserResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(anwserResult.ErrorMessages);
@@ -211,7 +210,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, IList<Question>? questions)
+        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, IList<Question>? questions, Guid sectionGroupResultId)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
@@ -233,7 +232,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (finalTestAnswer == null)
                     {
-                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, request, sectionQuestionId));
+                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, request, sectionQuestionId, sectionGroupResultId));
                     }
                 }
             }
@@ -241,13 +240,14 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             return methodResult;
         }
 
-        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Guid? sectionQuestionId)
+        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Guid? sectionQuestionId, Guid sectionGroupResultId)
         {
             return new FinalTestAnswer
             {
                 Answer = answer,
                 CorrectCount = correctCount,
                 FinalTestResultId = request.FinalTestResultId,
+                SectionGroupResultId = sectionGroupResultId,
                 SectionQuestionId = sectionQuestionId ?? default,
             };
         }

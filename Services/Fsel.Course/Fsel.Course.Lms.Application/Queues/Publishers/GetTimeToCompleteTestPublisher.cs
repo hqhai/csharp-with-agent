@@ -22,7 +22,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.CompleteTestWhenTimeOut, request, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.SetTimeToCompleteTest, request, cancellationToken);
         }
     }
 }
