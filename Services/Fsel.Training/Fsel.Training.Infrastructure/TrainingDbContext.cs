@@ -27,6 +27,7 @@ namespace Fsel.Training.Infrastructure
             modelBuilder.ApplyConfiguration(new TeacherFreeDateEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassLiveWorkFlowEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassLiveWorkFlowPlanEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TeacherFreeTimeLiveEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -37,6 +38,7 @@ namespace Fsel.Training.Infrastructure
         public DbSet<TeacherFreeDate> TeacherFreeDates { get; set; }
         public DbSet<ClassLiveWorkFlow> ClassLiveWorkFlows { get; set; }
         public DbSet<ClassLiveWorkFlowPlan> ClassLiveWorkFlowPlans { get; set; }
+        public DbSet<TeacherFreeTimeLive> TeacherFreeTimeLives { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
