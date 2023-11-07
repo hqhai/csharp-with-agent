@@ -15,7 +15,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -78,14 +77,10 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 return methodResult;
             }
 
-            var (sections, totalCount) = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
-
-            var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
-            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId, sectionGroup));
-            sectonGroupDetail.Sections = GetSections(sections);
-            sectonGroupDetail.TotalQuestion = totalCount;
+            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
+            var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId, sectionGroup);
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = sectonGroupDetail;
+            methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult);
             return methodResult;
         }
 
@@ -98,27 +93,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
                 {
-                    ExecutionTime = sectionGroup.ExecutionTime + 20,
+                    ExecutionTime = sectionGroup.ExecutionTime,
                     ObjectResultId = sectionGroupResult.Id,
                     ObjectResultType = nameof(FinalTest)
                 },
                 CancellationToken.None).ConfigureAwait(false);
             }
             return sectionGroupResult;
-        }
-
-        private IList<SectionDtoModel> GetSections(IList<Section> sections)
-        {
-            var listSection = new List<SectionDtoModel>();
-            return sections.Select(x => _mapper.Map<SectionDtoModel>(x)).ToList();
-        }
-
-        private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
-        {
-            var sections = await _sectionRepository.Queryable.Include(x => x.SectionQuestions)
-                                                                .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
-                                                                .ToListAsync();
-            return (sections, _sectionConverter.GetTotalQuestion(sections, skill));
         }
     }
 }

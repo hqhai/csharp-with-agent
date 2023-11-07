@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
+    using AutoMapper;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
@@ -12,14 +13,16 @@ namespace Fsel.Course.Infrastructure.Common
     public class SectionGroupConverter
     {
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly IMapper _mapper;
         private readonly ISectionRepository _sectionRepository;
         private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
 
-        public SectionGroupConverter(ISectionGroupRepository sectionGroupRepository, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
+        public SectionGroupConverter(ISectionGroupRepository sectionGroupRepository, IMapper mapper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
         {
             _sectionGroupRepository = sectionGroupRepository;
+            _mapper = mapper;
             _sectionRepository = sectionRepository;
             _finalTestAnswerRepository = finalTestAnswerRepository;
             _placementTestAnswerRepository = placementTestAnswerRepository;

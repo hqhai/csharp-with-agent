@@ -12,7 +12,8 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public SectionTimeCodeProfile()
         {
-            CreateMap<SectionTimeCode, SectionTimeCodeModel>().IgnoreAllNonExisting();
+            CreateMap<SectionTimeCode, SectionTimeCodeModel>()
+                .ForMember(p => p.Answer, x => x.MapFrom(n => n.MockTestAnswers.Select(x => x.Answer).FirstOrDefault() ?? n.ExtraPracticeAnswers.Select(x => x.Answer).FirstOrDefault() ?? default));
             CreateMap<CreateSectionTimeCodeCommandModel, SectionTimeCode>().IgnoreAllNonExisting();
             CreateMap<UpdateSectionTimeCodeCommandModel, SectionTimeCode>();
             CreateMap<SectionTimeCode, SectionTimeCodeDtoModel>()

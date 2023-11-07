@@ -15,7 +15,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -78,14 +77,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 return methodResult;
             }
 
-            var (sections, totalCount) = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
-
-            var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
-            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId, sectionGroup));
-            sectonGroupDetail.Sections = GetSections(sections, sectionGroup.CourseSkill);
-            sectonGroupDetail.TotalQuestion = totalCount;
+            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill, true);
+            var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId, sectionGroup);
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = sectonGroupDetail;
+            methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult, true);
             return methodResult;
         }
 
@@ -104,49 +99,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 }, CancellationToken.None).ConfigureAwait(false);
             }
             return sectionGroupResult;
-        }
-
-        private IList<SectionDtoModel> GetSections(IList<Section> sections, EnumCourseSkill skill)
-        {
-            var listSection = new List<SectionDtoModel>();
-            return sections.Select(x => GetSection(x, skill)).ToList();
-        }
-
-        private SectionDtoModel GetSection(Section section, EnumCourseSkill skill)
-        {
-            var sectionDetail = _mapper.Map<SectionDtoModel>(section);
-            if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
-            {
-                sectionDetail.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => _mapper.Map<SectionPartDtoModel>(x)).ToList();
-            }
-            else if (skill == EnumCourseSkill.Speaking)
-            {
-                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => _mapper.Map<SectionTimeCodeDtoModel>(x)).ToList();
-            }
-            return sectionDetail;
-        }
-
-        private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
-        {
-            var sections = new List<Section>();
-            if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
-            {
-                sections = await _sectionRepository.Queryable.Include(x => x.SectionParts).ThenInclude(x => x.SectionQuestions)
-                                                                    .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
-                                                                    .ToListAsync();
-            }
-            else if (skill == EnumCourseSkill.Writing)
-            {
-                sections = await _sectionRepository.Queryable.Include(x => x.MockTestAnswers).Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
-                                                                    .ToListAsync();
-            }
-            else
-            {
-                sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).ThenInclude(x => x.MockTestAnswers)
-                                                            .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
-                                                            .ToListAsync();
-            }
-            return (sections, _sectionConverter.GetTotalQuestion(sections, skill));
         }
     }
 }

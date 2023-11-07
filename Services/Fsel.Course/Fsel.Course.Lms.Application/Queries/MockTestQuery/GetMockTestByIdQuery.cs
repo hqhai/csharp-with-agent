@@ -72,70 +72,24 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private async Task<MockTestModel> GetMockTest(MockTest mockTest, Guid studentId, GetMockTestByIdQuery request)
         {
             var mockTestDetail = _mapper.Map<MockTestModel>(mockTest);
-            var mockTestResult = await GetMockTestResult(request, studentId);
             var sectionGroups = mockTest.MockTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             mockTestDetail.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
             mockTestDetail.ExecutionTime = _sectionConverter.GetExecutionTime(sectionGroups);
-            mockTestDetail.MockTestResult = mockTestResult;
+            mockTestDetail.MockTestResult = await GetAndAddMockTestResult(request, studentId);
             mockTestDetail.CourseSkills = _sectionConverter.GetCourseSkill(sectionGroups);
-            mockTestDetail.SectionGroups = GetSectionGroups(sectionGroups, mockTestResult.Id);
+            mockTestDetail.SectionGroups = _sectionConverter.GetSectionGroups(sectionGroups, mockTestDetail.MockTestResult.Id, "MockTestResultId");
             return mockTestDetail;
         }
 
-        private async Task<MockTestResultModel> GetMockTestResult(GetMockTestByIdQuery request, Guid studentId)
+        private async Task<MockTestResultModel> GetAndAddMockTestResult(GetMockTestByIdQuery request, Guid studentId)
         {
-            var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.MockTestId == request.MockTestId && x.StudentId == studentId)
-                .FirstOrDefaultAsync(x => !request.UnitId.HasValue || x.UnitId == request.UnitId.Value);
+            var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.MockTestId == request.MockTestId && x.StudentId == studentId).FirstOrDefaultAsync(x => !request.UnitId.HasValue || x.UnitId == request.UnitId.Value);
             if (mockTestResult == null)
             {
                 mockTestResult = _mockTestResultRepository.Add(new MockTestResult { StudentId = studentId, CourseId = request.CourseId, UnitId = request.UnitId, MockTestId = request.MockTestId });
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
             return _mapper.Map<MockTestResultModel>(mockTestResult);
-        }
-
-        private IList<SectionGroupModel> GetSectionGroups(IList<SectionGroup>? sectionGroups, Guid mockTestResultId)
-        {
-            ArgumentNullException.ThrowIfNull(sectionGroups);
-
-            var indexProcess = GetIndexProcess(sectionGroups, mockTestResultId);
-            return sectionGroups.Select(x =>
-            {
-                var index = sectionGroups.IndexOf(x);
-                var sectionGroup = _mapper.Map<SectionGroupModel>(x);
-                sectionGroup.Status = GetResultStatus(indexProcess, index);
-                sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
-                return sectionGroup;
-            }).ToList();
-        }
-
-        private static EnumResultStatus GetResultStatus(int? indexProcess, int index)
-        {
-            var resultStatus = EnumResultStatus.Unfinished;
-            if (indexProcess < index)
-            {
-                return resultStatus;
-            }
-            else if (indexProcess == index)
-            {
-                resultStatus = EnumResultStatus.Process;
-            }
-            else if (indexProcess > index || indexProcess == null)
-            {
-                resultStatus = EnumResultStatus.Done;
-            }
-            return resultStatus;
-        }
-
-        private static int? GetIndexProcess(IList<SectionGroup>? sectionGroups, Guid mockTestResultId)
-        {
-            ArgumentNullException.ThrowIfNull(sectionGroups);
-            var sectionGroup = sectionGroups.Where(x => !x.SectionGroupResults.Any() || x.SectionGroupResults.Any(x => x.MockTestResultId == mockTestResultId && x.Status != EnumResultStatus.Done)).FirstOrDefault();
-            if (sectionGroup == null)
-            {
-                return null;
-            }
-            return sectionGroups.IndexOf(sectionGroup);
         }
     }
 }
