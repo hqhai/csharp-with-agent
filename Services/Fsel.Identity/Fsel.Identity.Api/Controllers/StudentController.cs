@@ -6,6 +6,7 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Queries.StudentQuery;
@@ -17,7 +18,7 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/student")]
     [ApiController]
-    public class StudentController : ControllerBase
+    public class StudentController : BaseController
     {
         private readonly IMediator _mediator;
         private readonly IStudentRepository _studentRepository;
@@ -31,12 +32,13 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Execute-list-query
         /// </summary>
-        [HttpPost("execute-list-query")]
+        [HttpGet("execute-list-query")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission]
-        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
+        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
         {
+            SetQuery(query);
             var result = await _studentRepository.GetListResultAsync<StudentModel>(query);
             return result.GetActionResult();
         }
