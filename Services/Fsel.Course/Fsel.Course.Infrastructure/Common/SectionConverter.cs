@@ -45,7 +45,7 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             ArgumentNullException.ThrowIfNull(sectionGroup);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
-            sectionGroupResultDto.ExecutionTime = (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalSeconds >= sectionGroup.ExecutionTime ? sectionGroup.ExecutionTime : (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalSeconds;
+            sectionGroupResultDto.WorkingTime = (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalSeconds >= sectionGroup.ExecutionTime ? sectionGroup.ExecutionTime : (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalSeconds;
             return sectionGroupResultDto;
         }
 
