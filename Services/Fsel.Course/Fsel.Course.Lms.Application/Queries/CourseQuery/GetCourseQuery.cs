@@ -222,22 +222,22 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         public static void AddUnit(int index, List<UnitResult> checkUnitResultAll, List<MockTestResult> checkMockTestResultAll, List<CourseUnitMockTest> courseUnitMockTests, Course? course, CourseUnitMockTest courseUnitMockTest, Guid? studentId)
         {
 
-            var courseUnitMockTestFirt = index != 0 ? courseUnitMockTests[index - 1] : new CourseUnitMockTest();
+            var courseUnitMockTestFirst = index != 0 ? courseUnitMockTests[index - 1] : new CourseUnitMockTest();
             // index !=0 ktra unit trc nó có trong result với status = done thì add result mới với Status new 
-            bool checkFirt = false;
-            if (courseUnitMockTestFirt.UnitId.HasValue && index != 0)
+            bool checkFirstDone = false;
+            if (courseUnitMockTestFirst.UnitId.HasValue && index != 0)
             {
-                checkFirt = checkUnitResultAll.Any(x => x.UnitId == courseUnitMockTestFirt.UnitId && x.CourseId == courseUnitMockTestFirt.CourseId && x.Status == EnumResultStatus.Done);
+                checkFirstDone = checkUnitResultAll.Any(x => x.UnitId == courseUnitMockTestFirst.UnitId && x.CourseId == courseUnitMockTestFirst.CourseId && x.Status == EnumResultStatus.Done);
             }
-            else if (courseUnitMockTestFirt.MockTestId.HasValue && index != 0)
+            else if (courseUnitMockTestFirst.MockTestId.HasValue && index != 0)
             {
-                checkFirt = checkMockTestResultAll.Any(x => x.MockTestId == courseUnitMockTestFirt.MockTestId && x.CourseId == courseUnitMockTestFirt.CourseId && x.Status == EnumResultStatus.Done);
+                checkFirstDone = checkMockTestResultAll.Any(x => x.MockTestId == courseUnitMockTestFirst.MockTestId && x.CourseId == courseUnitMockTestFirst.CourseId && x.Status == EnumResultStatus.Done);
             }
             course.UnitResults.Add(new UnitResult
             {
                 UnitId = courseUnitMockTest != null ? courseUnitMockTest.UnitId!.Value : default,
                 StudentId = studentId ?? default,
-                Status = (index == 0 || checkFirt) ? EnumResultStatus.New : EnumResultStatus.Unfinished
+                Status = (index == 0 || checkFirstDone) ? EnumResultStatus.New : EnumResultStatus.Unfinished
             });
 
         }
@@ -245,12 +245,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         public static void AddMockTest(int index, List<UnitResult> checkUnitResultAll, List<CourseUnitMockTest> courseUnitMockTests, Course? course, CourseUnitMockTest courseUnitMockTest, Guid? studentId)
         {
             var courseUnitMockTestFirt =( index != 0) ? courseUnitMockTests[index - 1] : new CourseUnitMockTest();
-            var checkFirt = checkUnitResultAll.Any(x => x.UnitId == courseUnitMockTestFirt.UnitId && x.CourseId == courseUnitMockTestFirt.CourseId && x.Status == EnumResultStatus.Done);
+            var checkFirstDone = checkUnitResultAll.Any(x => x.UnitId == courseUnitMockTestFirt.UnitId && x.CourseId == courseUnitMockTestFirt.CourseId && x.Status == EnumResultStatus.Done);
                 course.MockTestResults.Add(new MockTestResult
                 {
                     MockTestId = courseUnitMockTest != null ? courseUnitMockTest.MockTestId!.Value : default,
                     StudentId = studentId ?? default,
-                    Status = checkFirt ? EnumResultStatus.New : EnumResultStatus.Unfinished
+                    Status = checkFirstDone ? EnumResultStatus.New : EnumResultStatus.Unfinished
                 });
             
           
@@ -259,12 +259,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         public static void AddFinal(int index, List<UnitResult> checkUnitResultAll, List<CourseUnitMockTest> courseUnitMockTests, Course? course, CourseUnitMockTest courseUnitMockTest, Guid? studentId)
         {
             var courseUnitMockTestFirt = index != 0 ? courseUnitMockTests[index - 1] : new CourseUnitMockTest();
-            var checkFirt = checkUnitResultAll.Any(x => x.UnitId == courseUnitMockTestFirt.UnitId && x.CourseId == courseUnitMockTestFirt.CourseId && x.Status == EnumResultStatus.Done);
+            var checkFirstDone = checkUnitResultAll.Any(x => x.UnitId == courseUnitMockTestFirt.UnitId && x.CourseId == courseUnitMockTestFirt.CourseId && x.Status == EnumResultStatus.Done);
             course?.FinalTestResults.Add(new FinalTestResult
             {
                 FinalTestId = courseUnitMockTest != null ? courseUnitMockTest.FinalTestId!.Value : default,
                 StudentId = studentId ?? default,
-                Status = checkFirt ? EnumResultStatus.New : EnumResultStatus.Unfinished
+                Status = checkFirstDone ? EnumResultStatus.New : EnumResultStatus.Unfinished
             });
         }
 
@@ -275,7 +275,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return null;
             }
             var unitModel = _mapper.Map<UnitModel>(unit);
-            unitModel.IsActive = unit.CourseUnitMockTests.Any();
             unitModel.UnitResult = _mapper.Map<UnitResultModel>(unit.UnitResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == courseId));
             return unitModel;
         }
@@ -287,7 +286,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return null;
             }
             var mockTestModel = _mapper.Map<MockTestModel>(mockTest);
-            mockTestModel.IsActive = mockTest.CourseUnitMockTests.Any();
             mockTestModel.MockTestResult = _mapper.Map<MockTestResultModel>(mockTest.MockTestResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == courseId));
             return mockTestModel;
         }
@@ -299,7 +297,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return null;
             }
             var finalTestModel = _mapper.Map<FinalTestModel>(finalTest);
-            finalTestModel.IsActive = finalTest.CourseUnitMockTests.Any();
             finalTestModel.FinalTestResult = _mapper.Map<FinalTestResultModel>(finalTest.FinalTestResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == courseId));
             return finalTestModel;
         }
