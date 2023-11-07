@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-api
+  name: cms-planet-defender-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth-api
+      app: interaction-api
   template:
     metadata:
       labels:
-        app: auth-api
+        app: interaction-api
     spec:
       containers:
-      - name: auth
-        image: fselacr.azurecr.io/authapi
+      - name: interaction
+        image: fselacr.azurecr.io/interactionapi
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -23,10 +23,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-api-svc
+  name: interaction-api-svc
 spec:
   selector:
-    app: auth-api
+    app: interaction-api
   ports:
     - protocol: TCP
       port: 80

@@ -19,13 +19,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDetailModel>>
+    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDtoModel>>
     {
         public Guid SectionGroupId { get; set; }
         public Guid MockTestResultId { get; set; }
     }
 
-    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDetailModel>>
+    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
         private readonly ISectionRepository _sectionRepository;
         private readonly SectionConverter _sectionConverter;
@@ -48,10 +48,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             _sectionGroupRepository = sectionGroupRepository;
         }
 
-        public async Task<MethodResult<SectionGroupDetailModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SectionGroupDtoModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<SectionGroupDetailModel>();
+            var methodResult = new MethodResult<SectionGroupDtoModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
 
             var (sections, totalCount) = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
 
-            var sectonGroupDetail = _mapper.Map<SectionGroupDetailModel>(sectionGroup);
+            var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
             sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId));
             sectonGroupDetail.Sections = GetSections(sections, sectionGroup.CourseSkill);
             sectonGroupDetail.TotalQuestion = totalCount;
@@ -96,36 +96,29 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             return sectionGroupResult;
         }
 
-        private IList<SectionDetailModel> GetSections(IList<Domain.Entities.Section> sections, EnumCourseSkill skill)
+        private IList<SectionDtoModel> GetSections(IList<Section> sections, EnumCourseSkill skill)
         {
-            var listSection = new List<SectionDetailModel>();
+            var listSection = new List<SectionDtoModel>();
             return sections.Select(x => GetSection(x, skill)).ToList();
         }
 
-        private SectionDetailModel GetSection(Domain.Entities.Section section, EnumCourseSkill skill)
+        private SectionDtoModel GetSection(Section section, EnumCourseSkill skill)
         {
-            var sectionDetail = _mapper.Map<SectionDetailModel>(section);
+            var sectionDetail = _mapper.Map<SectionDtoModel>(section);
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
             {
-                sectionDetail.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPart(x)).ToList();
+                sectionDetail.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => _mapper.Map<SectionPartDtoModel>(x)).ToList();
             }
             else if (skill == EnumCourseSkill.Speaking)
             {
-                sectionDetail.SectionTimeCodes = _mapper.Map<IList<SectionTimeCodeModel>>(section.SectionTimeCodes.ToList());
+                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => _mapper.Map<SectionTimeCodeDtoModel>(x)).ToList();
             }
             return sectionDetail;
         }
 
-        private SectionPartDetailModel GetSectionPart(SectionPart sectionPart)
+        private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
         {
-            var sectionPartModel = _mapper.Map<SectionPartDetailModel>(sectionPart);
-            sectionPartModel.QuestionIds = sectionPart.SectionQuestions.OrderBy(x => x.CreatedDate).Select(x => x.QuestionId ?? default).ToList();
-            return sectionPartModel;
-        }
-
-        private async Task<(IList<Domain.Entities.Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
-        {
-            var sections = new List<Domain.Entities.Section>();
+            var sections = new List<Section>();
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
             {
                 sections = await _sectionRepository.Queryable.Include(x => x.SectionParts).ThenInclude(x => x.SectionQuestions)
@@ -134,12 +127,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             }
             else if (skill == EnumCourseSkill.Writing)
             {
-                sections = await _sectionRepository.Queryable.Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
+                sections = await _sectionRepository.Queryable.Include(x => x.MockTestAnswers).Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
                                                                     .ToListAsync();
             }
             else
             {
-                sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes)
+                sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).ThenInclude(x => x.MockTestAnswers)
                                                             .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
                                                             .ToListAsync();
             }
