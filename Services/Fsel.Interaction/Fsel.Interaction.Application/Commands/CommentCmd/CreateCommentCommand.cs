@@ -10,6 +10,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Managers;
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.SystemService;
@@ -185,29 +186,11 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             return methodResult;
         }
 
-
         public async Task DoQuestBoard(CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneClassForumPost };
-
-            var studentByPackage = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-
-            var packageId = studentByPackage?.Content?.Result?.PackageId ?? default;
-            string listCategory = ConvertHelper.Serialize(categories);
-
-            var studentId = studentByPackage?.Content?.Result?.Id;
-            var questBoards = await _systemService.GetListQuestBoardQuery(packageId, listCategory);
-
-            var questBoard = questBoards?.Content?.Result != null ? questBoards?.Content?.Result.FirstOrDefault() : default;
-            var questBoardId = questBoard?.Id ?? default;
-
-            GetListQuestBoardStudentModel questBoardQuery = new GetListQuestBoardStudentModel()
-            {
-                QuestBoardId = questBoardId,
-                StudentId = studentId
-            };
-           // var quesBoardStudent = await _systemService.GetListQuestBoardStudent(questBoardQuery);
-
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentId = student?.Content?.Result?.Id;
 
             await _questBoardPublisher.Publish(new QuestBoardQueueModel
             {
@@ -215,16 +198,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 Categories = categories,
                 AchievedPoint = Archieve_Point,
             }, cancellationToken);
-
-            //if (quesBoardStudent?.Content?.Result?.Count == 0 || quesBoardStudent?.Content?.Result == null)
-            //{
-            //    await _systemService.CreateQuestBoardStudent(questBoardId);
-            //}
-            //else
-            //{
-            //    var questBoardStudentId = quesBoardStudent!.Content?.Result?.FirstOrDefault()?.Id ?? default;
-            //    await _systemService.UpdateQuestBoardStudentCommand(questBoardStudentId);
-            //}
         }
     }
 }

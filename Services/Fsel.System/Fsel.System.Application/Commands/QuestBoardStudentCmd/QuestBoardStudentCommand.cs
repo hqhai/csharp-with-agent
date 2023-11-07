@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
@@ -53,7 +54,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                 return methodResult;
             }
 
-            var questBoardNotDaily = await _questBoardStudentRepository.Queryable.Where(x => x.StudentId == request.StudentId).ToListAsync(cancellationToken);
+            var questBoardNotDaily = await _questBoardStudentRepository.Queryable.Where(x => x.StudentId == request.StudentId && x.Status != EnumQuestBoardStudentStatus.Achieved).ToListAsync(cancellationToken);
 
             var questBoardQuery = from item in request.Categories
                                   join item2 in _questBoardRepository.Queryable on item equals item2.Category

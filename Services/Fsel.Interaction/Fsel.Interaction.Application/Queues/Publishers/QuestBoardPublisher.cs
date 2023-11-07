@@ -27,7 +27,6 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 Categories = model.Categories,
                 ObjectId = model.ObjectId,
             }, cancellationToken);
-
         }
     }
 }
