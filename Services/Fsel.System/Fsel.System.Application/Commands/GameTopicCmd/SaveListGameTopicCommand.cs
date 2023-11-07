@@ -41,7 +41,6 @@ namespace Fsel.System.Application.Commands.GameTopicCmd
                 return methodResult;
             }
             var gameTopicIds = request.GameTopics.Select(x => x.Id).ToArray();
-            var deleteGameTopics = await _gameTopicRepository.Queryable.Where(x => !gameTopicIds.Contains(x.Id)).ToListAsync(cancellationToken);
             var gameTopics = await _gameTopicRepository.GetByIdsAsync(request.GameTopics.Select(x => x.Id ?? default).ToList());
 
             foreach (var item in request.GameTopics)
@@ -71,10 +70,6 @@ namespace Fsel.System.Application.Commands.GameTopicCmd
                 gameTopic = item.Id.HasValue ? _gameTopicRepository.Update(gameTopic) : _gameTopicRepository.Add(gameTopic);
             }
 
-            foreach (var item in deleteGameTopics)
-            {
-                await _gameTopicRepository.DeleteAsync(item);
-            }
             await _gameTopicRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
 
             methodResult.Result = true;

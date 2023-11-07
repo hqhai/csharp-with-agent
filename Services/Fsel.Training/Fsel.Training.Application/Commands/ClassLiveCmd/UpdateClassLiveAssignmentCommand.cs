@@ -7,6 +7,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
+    using Fsel.Training.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -20,15 +21,18 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
         private readonly IClassRepository _classRepository;
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
+        private readonly ITeacherFreeDateRepository _teacherFreeDateRepository;
 
         public UpdateClassLiveAssignmentCommandHandler(
             IClassRepository classRepository,
             IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
-            IClassLiveCalendarRepository classLiveCalendarRepository)
+            IClassLiveCalendarRepository classLiveCalendarRepository,
+            ITeacherFreeDateRepository teacherFreeDateRepository)
         {
             _classRepository = classRepository;
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _classLiveCalendarRepository = classLiveCalendarRepository;
+            _teacherFreeDateRepository = teacherFreeDateRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateClassLiveAssignmentCommand request, CancellationToken cancellationToken)
@@ -99,6 +103,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
             {
                 var classLiveWordFlows = await _classLiveWorkFlowRepository.Queryable.Include(x => x.ClassLiveCalendar).Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
                 var classes = await _classRepository.Queryable.Include(x => x.ClassLiveCalendars).Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
+                var listTeacherFreeDates = new List<TeacherFreeDate>();
                 if (classes.Count > 0)
                 {
                     classes.ForEach(x =>
@@ -122,6 +127,22 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                     });
                     _classRepository.UpdateList(classes);
                     await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                    foreach (var @class in classes)
+                    {
+                        var teacherFreeDates = await _teacherFreeDateRepository.Queryable
+                                   .Where(x => x.TeacherId == @class.TeacherId).Include(x => x.TeacherFreeTimes).ThenInclude(tfl => tfl.TeacherFreeTimeLives)
+                                   .ToListAsync(cancellationToken);
+
+                        foreach (var item in teacherFreeDates.SelectMany(p => p.TeacherFreeTimes).SelectMany(x => x.TeacherFreeTimeLives))
+                        {
+                            if (@class.ClassLiveCalendars != null && @class.ClassLiveCalendars.Where(m => m.Status == EnumClassLiveCalendarStatus.NotStudied).Any(p => p.LiveTimeFrameId == item.TeacherFreeTime?.LiveTimeFrameId && p.LiveDate.Date == item.LiveDate.Date))
+                            {
+                                item.IsUsed = true;
+                            }
+                        }
+                        listTeacherFreeDates.AddRange(teacherFreeDates);
+                    }
                 }
                 if (classLiveWordFlows.Count > 0)
                 {
@@ -135,7 +156,21 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                     });
                     _classLiveWorkFlowRepository.UpdateList(classLiveWordFlows);
                     await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                    foreach (var item in classLiveWordFlows)
+                    {
+                        var teacherFreeDates = await _teacherFreeDateRepository.Queryable.Where(n => n.TeacherId == item.TeacherId).Include(p => p.TeacherFreeTimes).ThenInclude(x => x.TeacherFreeTimeLives).ToListAsync(cancellationToken);
+
+                        foreach (var tf in teacherFreeDates.SelectMany(p => p.TeacherFreeTimes).SelectMany(tf => tf.TeacherFreeTimeLives.Where(tfl => tfl.LiveDate == item.ClassLiveCalendar?.LiveDate && tfl.TeacherFreeTime?.LiveTimeFrameId == item.ClassLiveCalendar.LiveTimeFrameId)))
+                        {
+                            tf.IsUsed = true;
+                        }
+
+                        listTeacherFreeDates.AddRange(teacherFreeDates);
+                    }
                 }
+                _teacherFreeDateRepository.UpdateList(listTeacherFreeDates);
+                await _teacherFreeDateRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

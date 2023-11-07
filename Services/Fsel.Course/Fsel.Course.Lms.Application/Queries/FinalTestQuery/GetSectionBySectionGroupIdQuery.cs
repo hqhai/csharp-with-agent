@@ -21,13 +21,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDetailModel>>
+    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDtoModel>>
     {
         public Guid SectionGroupId { get; set; }
         public Guid FinalTestResultId { get; set; }
     }
 
-    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDetailModel>>
+    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
         private readonly ISectionRepository _sectionRepository;
         private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
@@ -52,10 +52,10 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             _sectionGroupRepository = sectionGroupRepository;
         }
 
-        public async Task<MethodResult<SectionGroupDetailModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SectionGroupDtoModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<SectionGroupDetailModel>();
+            var methodResult = new MethodResult<SectionGroupDtoModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -80,8 +80,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 
             var (sections, totalCount) = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
 
-            var sectonGroupDetail = _mapper.Map<SectionGroupDetailModel>(sectionGroup);
-            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId, sectionGroup));
+            var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
+            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId));
             sectonGroupDetail.Sections = GetSections(sections);
             sectonGroupDetail.TotalQuestion = totalCount;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -107,24 +107,17 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             return sectionGroupResult;
         }
 
-        private IList<SectionDetailModel> GetSections(IList<Section> sections)
+        private IList<SectionDtoModel> GetSections(IList<Section> sections)
         {
-            var listSection = new List<SectionDetailModel>();
-            return sections.Select(x => GetSection(x)).ToList();
-        }
-
-        private SectionDetailModel GetSection(Section section)
-        {
-            var sectionDetail = _mapper.Map<SectionDetailModel>(section);
-            sectionDetail.QuestionIds = section.SectionQuestions.OrderBy(x => x.CreatedDate).Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
-            return sectionDetail;
+            var listSection = new List<SectionDtoModel>();
+            return sections.Select(x => _mapper.Map<SectionDtoModel>(x)).ToList();
         }
 
         private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
         {
             var sections = await _sectionRepository.Queryable.Include(x => x.SectionQuestions)
-                                                                    .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
-                                                                    .ToListAsync();
+                                                                .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
+                                                                .ToListAsync();
             return (sections, _sectionConverter.GetTotalQuestion(sections, skill));
         }
     }
