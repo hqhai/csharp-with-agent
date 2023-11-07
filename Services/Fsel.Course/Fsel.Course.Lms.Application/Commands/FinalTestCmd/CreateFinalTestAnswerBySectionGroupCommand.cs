@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            var studentId = student?.Id ?? default;
+            var studentId = student?.Id ?? request.StudentId ?? default;
 
             var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
             if (finalTestResult == null)
@@ -179,7 +179,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.FinalTestResultId == sectionGroupResult.FinalTestResultId).ToListAsync(cancellationToken);
             var questionIds = finalTestAnswers.Select(x => x.SectionQuestion).Select(x => x.QuestionId).ToList();
             var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
-            var skillScore = _sectionGroupConverter.GetSkillScore(sectionGroup, finalTestAnswers.Sum(x => x.CorrectCount), finalTestAnswers.Count, questionIds.Count, totalCorrect);
+            var skillScore = _sectionGroupConverter.GetSkillScore(sectionGroup, finalTestAnswers.Sum(x => x.CorrectCount), finalTestAnswers.Count, totalCorrect, questionIds.Count);
             return skillScore;
         }
 

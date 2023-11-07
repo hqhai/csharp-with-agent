@@ -98,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
                 {
-                    ExecutionTime = sectionGroup.ExecutionTime,
+                    ExecutionTime = sectionGroup.ExecutionTime + 20,
                     ObjectResultId = sectionGroupResult.Id,
                     ObjectResultType = nameof(FinalTest)
                 },

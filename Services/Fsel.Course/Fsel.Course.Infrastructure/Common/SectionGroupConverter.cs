@@ -26,13 +26,14 @@ namespace Fsel.Course.Infrastructure.Common
             _mockTestAnswerRepository = mockTestAnswerRepository;
         }
 
-        private async Task<(IList<Guid>?, IList<Guid>?, IList<Guid>?)> GetUnansweredQuestionIds(SectionGroup? sectionGroup, string? type)
+        private async Task<(IList<Guid>?, IList<Guid>?, IList<Guid>?)> GetUnansweredQuestionIds(SectionGroup? sectionGroup, string? type, SectionGroupResult sectionGroupResult)
+
         {
             if (string.IsNullOrEmpty(type) || sectionGroup == null)
             {
                 return default;
             }
-            var sections = await GetSectionsAsync(sectionGroup.Id, type, sectionGroup.CourseSkill);
+            var sections = await GetSectionsAsync(sectionGroup.Id, type, sectionGroup.CourseSkill, sectionGroupResult);
 
             if (type == nameof(MockTest))
             {
@@ -68,17 +69,17 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        private async Task<IList<Section>> GetSectionsAsync(Guid sectionGroupId, string? type, EnumCourseSkill skill)
+        private async Task<IList<Section>> GetSectionsAsync(Guid sectionGroupId, string? type, EnumCourseSkill skill, SectionGroupResult sectionGroupResult)
         {
             if (type == nameof(FinalTest))
             {
-                return await _sectionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.FinalTestAnswers)
+                return await _sectionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.FinalTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id))
                                                         .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
                                                         .ToListAsync();
             }
             else if (type == nameof(PlacementTest))
             {
-                return await _sectionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.PlacementTestAnswers)
+                return await _sectionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.PlacementTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id))
                                                         .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
                                                         .ToListAsync();
             }
@@ -88,7 +89,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     return await _sectionRepository.Queryable.Include(x => x.SectionParts)
                                                                 .ThenInclude(x => x.SectionQuestions)
-                                                                .ThenInclude(x => x.MockTestAnswers)
+                                                                .ThenInclude(x => x.MockTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id))
                                                                 .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
                                                                 .ToListAsync();
                 }
@@ -99,7 +100,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 else
                 {
-                    return await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).ThenInclude(x => x.MockTestAnswers)
+                    return await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).ThenInclude(x => x.MockTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id))
                                                                 .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
                                                                 .ToListAsync();
                 }
@@ -108,13 +109,14 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task UpdateFinalTestAnswers(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
         {
-            var questionIds = await GetUnansweredQuestionIds(sectionGroup, nameof(FinalTest));
+            var questionIds = await GetUnansweredQuestionIds(sectionGroup, nameof(FinalTest), sectionGroupResult);
             if (questionIds.Item1 != null && questionIds.Item1.Any())
             {
                 await _finalTestAnswerRepository.AddList(questionIds.Item1.Select(x => new FinalTestAnswer
                 {
                     Answer = null,
                     SectionQuestionId = x,
+                    SectionGroupResultId = sectionGroupResult.Id,
                     FinalTestResultId = sectionGroupResult.FinalTestResultId ?? default
                 }).ToList());
                 await _finalTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
@@ -123,13 +125,14 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task UpdatePlacementTestAnswers(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
         {
-            var questionIds = await GetUnansweredQuestionIds(sectionGroup, nameof(PlacementTest));
+            var questionIds = await GetUnansweredQuestionIds(sectionGroup, nameof(PlacementTest), sectionGroupResult);
             if (questionIds.Item1 != null && questionIds.Item1.Any())
             {
                 await _placementTestAnswerRepository.AddList(questionIds.Item1.Select(x => new PlacementTestAnswer
                 {
                     Answer = null,
                     SectionQuestionId = x,
+                    SectionGroupResultId = sectionGroupResult.Id,
                     PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default
                 }).ToList());
                 await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
@@ -152,7 +155,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task UpdateMockTestAnswers(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
         {
-            var questionIds = await GetUnansweredQuestionIds(sectionGroup, nameof(MockTest));
+            var questionIds = await GetUnansweredQuestionIds(sectionGroup, nameof(MockTest), sectionGroupResult);
             var mockTestAnswers = new List<MockTestAnswer>();
             if (questionIds.Item1 != null && questionIds.Item1.Any())
             {
