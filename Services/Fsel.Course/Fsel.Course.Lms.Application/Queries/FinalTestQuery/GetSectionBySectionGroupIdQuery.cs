@@ -99,14 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
         private IList<SectionDtoModel> GetSections(IList<Section> sections)
         {
             var listSection = new List<SectionDtoModel>();
-            return sections.Select(x => GetSection(x)).ToList();
-        }
-
-        private SectionDtoModel GetSection(Section section)
-        {
-            var sectionDetail = _mapper.Map<SectionDtoModel>(section);
-            sectionDetail.QuestionIds = section.SectionQuestions.OrderBy(x => x.CreatedDate).Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
-            return sectionDetail;
+            return sections.Select(x => _mapper.Map<SectionDtoModel>(x)).ToList();
         }
 
         private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)

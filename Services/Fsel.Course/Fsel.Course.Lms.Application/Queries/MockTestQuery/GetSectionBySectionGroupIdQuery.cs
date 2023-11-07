@@ -107,25 +107,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             var sectionDetail = _mapper.Map<SectionDtoModel>(section);
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
             {
-                sectionDetail.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPart(x)).ToList();
+                sectionDetail.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => _mapper.Map<SectionPartDtoModel>(x)).ToList();
             }
             else if (skill == EnumCourseSkill.Speaking)
             {
-                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => GetSectionTimeCode(x)).ToList();
+                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => _mapper.Map<SectionTimeCodeDtoModel>(x)).ToList();
             }
             return sectionDetail;
-        }
-
-        private SectionTimeCodeDtoModel GetSectionTimeCode(SectionTimeCode sectionTimeCode)
-        {
-            var sectionTimeCodeModel = _mapper.Map<SectionTimeCodeDtoModel>(sectionTimeCode);
-            return sectionTimeCodeModel;
-        }
-
-        private SectionPartDtoModel GetSectionPart(SectionPart sectionPart)
-        {
-            var sectionPartModel = _mapper.Map<SectionPartDtoModel>(sectionPart);
-            return sectionPartModel;
         }
 
         private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
