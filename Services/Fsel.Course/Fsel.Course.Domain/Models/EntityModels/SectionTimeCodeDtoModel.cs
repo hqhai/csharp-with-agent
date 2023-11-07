@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class SectionTimeCodeDetailModel
+    public class SectionTimeCodeDtoModel
     {
         public Guid Id { get; set; }
         public string? Name { get; set; }

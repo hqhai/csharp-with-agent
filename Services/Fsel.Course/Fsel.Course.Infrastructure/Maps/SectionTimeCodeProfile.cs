@@ -13,9 +13,11 @@ namespace Fsel.Course.Infrastructure.Maps
         public SectionTimeCodeProfile()
         {
             CreateMap<SectionTimeCode, SectionTimeCodeModel>().IgnoreAllNonExisting();
-            CreateMap<SectionTimeCode, SectionTimeCodeDetailModel>().IgnoreAllNonExisting();
             CreateMap<CreateSectionTimeCodeCommandModel, SectionTimeCode>().IgnoreAllNonExisting();
-            CreateMap<UpdateSectionTimeCodeCommandModel, SectionTimeCode>().IgnoreAllNonExisting();
+            CreateMap<UpdateSectionTimeCodeCommandModel, SectionTimeCode>();
+            CreateMap<SectionTimeCode, SectionTimeCodeDtoModel>().ForMember(p => p.Answer, x => x.MapFrom(n =>
+            n.MockTestAnswers.Any() ? n.MockTestAnswers.Select(x => x.Answer).FirstOrDefault() :
+            n.ExtraPracticeAnswers.Any() ? n.ExtraPracticeAnswers.Select(x => x.Answer).FirstOrDefault() : default));
         }
     }
 }

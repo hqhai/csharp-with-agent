@@ -19,13 +19,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDetailModel>>
+    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDtoModel>>
     {
         public Guid SectionGroupId { get; set; }
         public Guid FinalTestResultId { get; set; }
     }
 
-    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDetailModel>>
+    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
         private readonly ISectionRepository _sectionRepository;
         private readonly SectionConverter _sectionConverter;
@@ -48,10 +48,10 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             _sectionGroupRepository = sectionGroupRepository;
         }
 
-        public async Task<MethodResult<SectionGroupDetailModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SectionGroupDtoModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<SectionGroupDetailModel>();
+            var methodResult = new MethodResult<SectionGroupDtoModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 
             var (sections, totalCount) = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
 
-            var sectonGroupDetail = _mapper.Map<SectionGroupDetailModel>(sectionGroup);
+            var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
             sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId));
             sectonGroupDetail.Sections = GetSections(sections);
             sectonGroupDetail.TotalQuestion = totalCount;
@@ -96,15 +96,15 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             return sectionGroupResult;
         }
 
-        private IList<SectionDetailModel> GetSections(IList<Section> sections)
+        private IList<SectionDtoModel> GetSections(IList<Section> sections)
         {
-            var listSection = new List<SectionDetailModel>();
+            var listSection = new List<SectionDtoModel>();
             return sections.Select(x => GetSection(x)).ToList();
         }
 
-        private SectionDetailModel GetSection(Section section)
+        private SectionDtoModel GetSection(Section section)
         {
-            var sectionDetail = _mapper.Map<SectionDetailModel>(section);
+            var sectionDetail = _mapper.Map<SectionDtoModel>(section);
             sectionDetail.QuestionIds = section.SectionQuestions.OrderBy(x => x.CreatedDate).Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
             return sectionDetail;
         }

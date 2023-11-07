@@ -19,13 +19,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDetailModel>>
+    public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDtoModel>>
     {
         public Guid SectionGroupId { get; set; }
         public Guid MockTestResultId { get; set; }
     }
 
-    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDetailModel>>
+    public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
         private readonly ISectionRepository _sectionRepository;
         private readonly SectionConverter _sectionConverter;
@@ -48,10 +48,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             _sectionGroupRepository = sectionGroupRepository;
         }
 
-        public async Task<MethodResult<SectionGroupDetailModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SectionGroupDtoModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<SectionGroupDetailModel>();
+            var methodResult = new MethodResult<SectionGroupDtoModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
 
             var (sections, totalCount) = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
 
-            var sectonGroupDetail = _mapper.Map<SectionGroupDetailModel>(sectionGroup);
+            var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
             sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId));
             sectonGroupDetail.Sections = GetSections(sections, sectionGroup.CourseSkill);
             sectonGroupDetail.TotalQuestion = totalCount;
@@ -96,16 +96,15 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             return sectionGroupResult;
         }
 
-        private IList<SectionDetailModel> GetSections(IList<Section> sections, EnumCourseSkill skill)
+        private IList<SectionDtoModel> GetSections(IList<Section> sections, EnumCourseSkill skill)
         {
-            var listSection = new List<SectionDetailModel>();
+            var listSection = new List<SectionDtoModel>();
             return sections.Select(x => GetSection(x, skill)).ToList();
         }
 
-        private SectionDetailModel GetSection(Section section, EnumCourseSkill skill)
+        private SectionDtoModel GetSection(Section section, EnumCourseSkill skill)
         {
-            var sectionDetail = _mapper.Map<SectionDetailModel>(section);
-            sectionDetail.Answer = section.MockTestAnswers.FirstOrDefault()?.Answer;
+            var sectionDetail = _mapper.Map<SectionDtoModel>(section);
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
             {
                 sectionDetail.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPart(x)).ToList();
@@ -117,17 +116,15 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             return sectionDetail;
         }
 
-        private SectionTimeCodeDetailModel GetSectionTimeCode(SectionTimeCode sectionTimeCode)
+        private SectionTimeCodeDtoModel GetSectionTimeCode(SectionTimeCode sectionTimeCode)
         {
-            var sectionTimeCodeModel = _mapper.Map<SectionTimeCodeDetailModel>(sectionTimeCode);
-            sectionTimeCodeModel.Answer = sectionTimeCode.MockTestAnswers.FirstOrDefault()?.Answer;
+            var sectionTimeCodeModel = _mapper.Map<SectionTimeCodeDtoModel>(sectionTimeCode);
             return sectionTimeCodeModel;
         }
 
-        private SectionPartDetailModel GetSectionPart(SectionPart sectionPart)
+        private SectionPartDtoModel GetSectionPart(SectionPart sectionPart)
         {
-            var sectionPartModel = _mapper.Map<SectionPartDetailModel>(sectionPart);
-            sectionPartModel.QuestionIds = sectionPart.SectionQuestions.OrderBy(x => x.CreatedDate).Select(x => x.QuestionId ?? default).ToList();
+            var sectionPartModel = _mapper.Map<SectionPartDtoModel>(sectionPart);
             return sectionPartModel;
         }
 

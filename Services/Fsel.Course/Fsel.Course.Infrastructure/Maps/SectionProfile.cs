@@ -15,7 +15,9 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<Section, SectionModel>().IgnoreAllNonExisting();
             CreateMap<CreateSectionCommandModel, Section>().IgnoreAllNonExisting();
             CreateMap<UpdateSectionCommandModel, Section>().IgnoreAllNonExisting();
-            CreateMap<Section, SectionDetailModel>().IgnoreAllNonExisting();
+            CreateMap<Section, SectionDtoModel>().ForMember(p => p.Answer, x => x.MapFrom(n =>
+            n.MockTestAnswers.Any() ? n.MockTestAnswers.Select(x => x.Answer).FirstOrDefault() :
+            n.ExtraPracticeAnswers.Any() ? n.ExtraPracticeAnswers.Select(x => x.Answer).FirstOrDefault() : default));
         }
     }
 }
