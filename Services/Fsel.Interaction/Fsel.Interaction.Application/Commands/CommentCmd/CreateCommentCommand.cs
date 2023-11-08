@@ -23,7 +23,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
-    using MassTransit.Initializers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -92,7 +91,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         break;
 
                     case EnumInteractionType.ClassForum:
-                        var postOwner = await _courseService.GetClassForumResultByIdAsync(request.ObjectId).Select(x => x.Content?.Result?.ClassForum?.ClassForumResults?.FirstOrDefault()).ConfigureAwait(false);
+                        var postOwnerResult = await _courseService.GetClassForumResultByIdAsync(request.ObjectId).ConfigureAwait(false);
+                        var postOwner = postOwnerResult.Content?.Result;
 
                         //Không tìm thấy postOwner và Không thông báo khi comment bài viết của chính mình
                         if (postOwner == null || postOwner!.CreatedUserId == _authContext.CurrentUserId)
@@ -188,7 +188,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
         public async Task DoQuestBoard(CancellationToken cancellationToken)
         {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneClassForumPost };
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var studentId = student?.Content?.Result?.Id;
 
