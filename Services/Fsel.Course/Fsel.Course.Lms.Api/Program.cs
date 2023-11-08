@@ -94,6 +94,8 @@ builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository
 builder.Services.AddScoped<IMockTestScoreRepository, MockTestScoreRepository>();
 builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRandomRepository>();
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
+builder.Services.AddScoped<QuestBoardPublisher>();
+
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();

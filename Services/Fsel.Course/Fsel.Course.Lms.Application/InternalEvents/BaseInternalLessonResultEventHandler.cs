@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
     using System.Threading;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -11,7 +12,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -20,13 +23,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyHomeWork = 30;
         private const int PercentOccupyVideo = 40;
         private const int PercentOccupyClassForum = 30;
-        private readonly FinishOneLessonPublisher _finishOneLessonPublisher;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private const float Archieve_Point = 1; // Nhiệm vụ làm 1 lần thì achieved point có giá trị là 1
 
-        public BaseInternalLessonResultEventHandler(FinishOneLessonPublisher finishOneLessonPublisher, ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, FinishOneLevelPassPublisher finishOneLevelPassPublisher, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(systemService, appSetting, finishOneLevelPassPublisher, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
+        public BaseInternalLessonResultEventHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, FinishOneLevelPassPublisher finishOneLevelPassPublisher, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher) : base(systemService, appSetting, finishOneLevelPassPublisher, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
-            _finishOneLessonPublisher = finishOneLessonPublisher;
             _lessonResultRepository = lessonResultRepository;
+            _questBoardPublisher = questBoardPublisher;
+
         }
 
         public async Task UpdateLessonResultAsync(LessonResult? lessonResult, CancellationToken cancellationToken)
@@ -36,7 +41,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var isClassForumDone = lessonResult.ClassForumResults.Any(x => (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
             if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
             {
-                await _finishOneLessonPublisher.Publish(lessonResult, cancellationToken).ConfigureAwait(false);
+                //làm nhiệm vụ
+                var courseId = lessonResult.CourseId;
+                var userId = lessonResult.CreatedUserId;
+                await DoQuestBoard(userId, courseId, cancellationToken);
+                //
+
                 lessonResult.Status = EnumResultStatus.Done;
                 await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
             }
@@ -139,6 +149,27 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             else
             {
                 return (default, default, default, null);
+            }
+        }
+
+
+        public async Task DoQuestBoard(Guid userId, Guid courseId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
+            var student = await _userService.GetStudentByUserIdAsync(userId);
+            var studentId = student?.Content?.Result?.Id;
+
+            bool checkFirstTimeDoneLesson = _lessonResultRepository.Queryable.Any(l => l.CourseId == courseId && l.Status == EnumResultStatus.Done);
+
+            if (!checkFirstTimeDoneLesson)
+            {
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId!,
+                    Categories = categories,
+                    AchievedPoint = Archieve_Point,
+                    CourseId = courseId
+                }, cancellationToken);
             }
         }
     }
