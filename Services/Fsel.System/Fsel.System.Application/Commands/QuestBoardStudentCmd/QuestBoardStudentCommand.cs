@@ -19,20 +19,14 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
 
     public class QuestBoardStudentCommandHandler : IRequestHandler<QuestBoardStudentCommand, MethodResult<bool>>
     {
-        private readonly IUserService _userService;
         private readonly IQuestBoardRepository _questBoardRepository;
         private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
-        private readonly AuthContext _authContext;
 
-        public QuestBoardStudentCommandHandler(IUserService userService
-            , IQuestBoardRepository questBoardRepository
-            , IQuestBoardStudentRepository questBoardStudentRepository
-            , AuthContext authContext)
+        public QuestBoardStudentCommandHandler(IQuestBoardRepository questBoardRepository
+            , IQuestBoardStudentRepository questBoardStudentRepository)
         {
-            _userService = userService;
             _questBoardRepository = questBoardRepository;
             _questBoardStudentRepository = questBoardStudentRepository;
-            _authContext = authContext;
         }
 
         public async Task<MethodResult<bool>> Handle(QuestBoardStudentCommand request, CancellationToken cancellationToken)
@@ -61,6 +55,11 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
 
                     if (questBoardNotDailyUpdate != null)
                     {
+
+                        if (questBoardNotDailyUpdate.AchievedPoints >= request.AchievedPoints)
+                        {
+                            continue;
+                        }
                         questBoardNotDailyUpdate.AchievedPoints = request.AchievedPoints;
                         questBoardStudentToUpdate.Add(questBoardNotDailyUpdate);
                     }
@@ -73,6 +72,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                             StudentId = request.StudentId,
                             AchievedPoints = request.AchievedPoints,
                             ObjectId = request.ObjectId,
+                            CourseId = request.CourseId,
                         };
                         questBoardStudentToAdd.Add(questBoardStudentAdd);
                     }

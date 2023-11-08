@@ -13,5 +13,7 @@ namespace Fsel.System.Domain.Models.CommandModels.QuestBoards
         public float AchievedPoints { get; set; }
 
         public Guid? ObjectId { get; set; }
+
+        public Guid CourseId { get; set; }
     }
 }

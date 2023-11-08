@@ -22,5 +22,7 @@ namespace Fsel.System.Domain.Entities
         public Guid StudentId { get; set; }
 
         public Guid? ObjectId { get; set; }
+
+        public Guid CourseId { get; set; }
     }
 }
