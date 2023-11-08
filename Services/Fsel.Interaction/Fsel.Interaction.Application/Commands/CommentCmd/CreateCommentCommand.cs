@@ -197,7 +197,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 StudentId = (Guid)studentId!,
                 Categories = categories,
                 AchievedPoint = Archieve_Point,
-            }, cancellationToken);
+            }, cancellationToken);  
         }
     }
 }

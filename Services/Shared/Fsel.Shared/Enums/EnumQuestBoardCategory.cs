@@ -29,5 +29,20 @@ namespace Fsel.Shared.Enums
 
         [Description("Bình luận vào một bài class forum của học sinh khác")]
         CommentOnOtherPost,
+
+        [Description("Ba mươi phút / một lần")]
+        DoneThirtyMinutesFocusMode,
+
+        [Description("Sáu mươi phút / một lần")]
+        DoneSixtyMinutesFocusMode,
+
+        [Description("Chín mươi phút / một lần")]
+        DoneNinetyMinutesFocusMode,
+
+        [Description("Trăm hai mươi phút / một lần")]
+        DoneOneHundredTwentytyMinutesFocusMode,
+
+        [Description("Trăm tám mươi phút / một Lần ")]
+        DoneOneHundredEightyMinutesFocusMode,
     }
 }

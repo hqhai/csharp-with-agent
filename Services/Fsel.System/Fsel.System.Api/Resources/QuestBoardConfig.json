@@ -70,5 +70,50 @@
     "maxPoints": 1,
     "displayType": "Number",
     "createdDate": "2023-07-21"
+  },
+  {
+    "id": "7CAB5602-C49E-4619-9928-D1A2A9B63FEB",
+    "type": "SideQuests",
+    "category": "DoneThirtyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "5DD2A169-C8CC-47F3-93F3-1D6D73E02655",
+    "type": "SideQuests",
+    "category": "DoneNinetyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "55C8D2C2-85E0-40DA-A3E2-42F17E902EC2",
+    "type": "SideQuests",
+    "category": "DoneOneHundredTwentytyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "57E3E603-824E-4B40-AEED-EC8FC75174CD",
+    "type": "SideQuests",
+    "category": "DoneOneHundredEightyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "818E1492-F24B-4137-B199-D99B70B6A938",
+    "type": "SideQuests",
+    "category": "DoneSixtyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
   }
 ]

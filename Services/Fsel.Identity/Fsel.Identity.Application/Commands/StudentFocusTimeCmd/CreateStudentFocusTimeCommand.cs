@@ -2,18 +2,18 @@
 
 namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.StudentFocusTime;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,14 +31,17 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly ISystemService _systemService;
         private const int NUMBER_OF_WEEKDAY = 7;
         private const double DEFAULT_TARGET_TIME = 1800; // 1800s tương ứng với 30p
+        private const float Archieve_Point = 1;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreateStudentFocusTimeCommandHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService)
+        public CreateStudentFocusTimeCommandHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher)
         {
             _mapper = mapper;
             _studentFocusTimeRepository = studentFocusTimeRepository;
             _studentRepository = studentRepository;
             _authContext = authContext;
             _systemService = systemService;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<StudentFocusTimeModel>> Handle(CreateStudentFocusTimeCommand request, CancellationToken cancellationToken)
@@ -92,7 +95,35 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                     var systemConfigMap = systemConfigResult!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
                     studentFocusTime.ExecuteTime = request.ExecuteTime;
 
+                    IList<EnumQuestBoardCategory> categories;
 
+
+                    switch (DEFAULT_TARGET_TIME)
+                    {
+                        case (double)EnumQuestBoardFocusMode.FocusModeThirtyMinutes:
+                            categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.DoneThirtyMinutesFocusMode };
+                            break;
+                        case (double)EnumQuestBoardFocusMode.FocusModeSixtyMinutes:
+                            categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.DoneSixtyMinutesFocusMode };
+                            break;
+                        case (double)EnumQuestBoardFocusMode.FocusModeNinetyMinutes:
+                            categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.DoneNinetyMinutesFocusMode };
+                            break;
+                        case (double)EnumQuestBoardFocusMode.FocusModeOneHundredTwentytyMinutes:
+                            categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.DoneOneHundredTwentytyMinutesFocusMode };
+                            break;
+                        case (double)EnumQuestBoardFocusMode.FocusModeOneHundredEightyMinutes:
+                            categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.DoneOneHundredEightyMinutesFocusMode };
+                            break;
+
+                    }
+
+                    if(request.ExecuteTime >= DEFAULT_TARGET_TIME)
+                    {
+                        await DoQuestBoard(cancellationToken, student ,categories);
+                    }    
+
+                 
                     if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime)
                     {
                         student.NumberOfToken += CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token
@@ -142,6 +173,19 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             }
 
             return hasStreak;
+        }
+
+        public async Task DoQuestBoard(CancellationToken cancellationToken, Student student, IList<EnumQuestBoardCategory> categories)
+        {
+
+            QuestBoardQueueModel questBoardStudentCommand = new QuestBoardQueueModel
+            {
+                StudentId = student.Id,
+                Categories = categories,
+                AchievedPoint = Archieve_Point,
+            };
+
+            await _questBoardPublisher.Publish(questBoardStudentCommand, cancellationToken);
         }
 
 
