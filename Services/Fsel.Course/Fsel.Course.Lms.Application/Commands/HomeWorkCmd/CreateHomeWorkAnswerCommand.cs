@@ -33,7 +33,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
         private readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
-        private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly AuthContext _authContext;
@@ -46,7 +45,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             IHomeWorkQuestionRepository homeWorkQuestionRepository,
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
             IHomeWorkRepository homeWorkRepository,
-            FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
             AnswerTypeConverter answerTypeConverter,
             IQuestionRepository questionRepository
 ,
@@ -58,7 +56,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
             _homeWorkAnswerRepository = homeWorkAnswerRepository;
             _homeWorkRepository = homeWorkRepository;
-            _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -168,12 +165,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     Percent = homeWorkResult.Percent,
                     Scores = 0
                 };
-                await _finishOneHomeWorkPublisher.Publish(homeWorkResult, cancellationToken);
 
 
                 // làm nhiệm vụ
                 var courseId = homeWorkResult!.LessonResult?.CourseId ?? default;
-                await DoQuestBoard(courseId,request.Answers.Count,cancellationToken);
+                await DoQuestBoard(courseId, request.Answers.Count, cancellationToken);
 
                 homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
             }
@@ -204,7 +200,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         }
 
 
-        private async Task DoQuestBoard(Guid courseId,int correctCount, CancellationToken cancellationToken)
+        private async Task DoQuestBoard(Guid courseId, int correctCount, CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneHomeworkMiniProject };
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
