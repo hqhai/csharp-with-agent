@@ -181,16 +181,16 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        public long GetTotalQuestion(SectionGroup? sectionGroup)
+        public long GetTotalQuestion(SectionGroup? sectionGroup, bool isMockTest = false)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
 
-            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && isMockTest)
             {
                 var sectionTimeCode = sectionGroup.Sections.SelectMany(x => x.SectionTimeCodes);
                 return sectionTimeCode.Any() ? sectionTimeCode.Count() : 0;
             }
-            else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
+            else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && isMockTest)
             {
                 return sectionGroup.Sections.Any() ? sectionGroup.Sections.Count : 0;
             }

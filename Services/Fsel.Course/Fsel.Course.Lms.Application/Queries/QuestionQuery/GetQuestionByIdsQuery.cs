@@ -31,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
     public class GetQuestionByIdQueryHandler : IRequestHandler<GetQuestionByIdsQuery, MethodResult<IList<QuestionModel>>>
     {
         private readonly IQuestionRepository _questionRepository;
+        private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
@@ -38,9 +39,10 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
 
-        public GetQuestionByIdQueryHandler(IQuestionRepository questionRepository, AnswerTypeConverter answerTypeConverter, IFinalTestResultRepository finalTestResultRepository, IExtraPracticeResultRepository extraPracticeResultRepository, IMockTestResultRepository mockTestResultRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper)
+        public GetQuestionByIdQueryHandler(IQuestionRepository questionRepository, IPlacementTestResultRepository placementTestResultRepository, AnswerTypeConverter answerTypeConverter, IFinalTestResultRepository finalTestResultRepository, IExtraPracticeResultRepository extraPracticeResultRepository, IMockTestResultRepository mockTestResultRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper)
         {
             _questionRepository = questionRepository;
+            _placementTestResultRepository = placementTestResultRepository;
             _answerTypeConverter = answerTypeConverter;
             _finalTestResultRepository = finalTestResultRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
@@ -64,13 +66,13 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
         private async Task<IList<QuestionModel>?> GetQuestionAsync(GetQuestionByIdsQuery request)
         {
-            return await GetQuestionByMockTest(request) ?? await GetQuestionByFinalTest(request) ?? await GetQuestionByExtraPratice(request);
+            return await GetQuestionByMockTest(request) ?? await GetQuestionByFinalTest(request) ?? await GetQuestionByPlacementTest(request) ?? await GetQuestionByExtraPratice(request);
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByMockTest(GetQuestionByIdsQuery request)
         {
             ArgumentNullException.ThrowIfNull(request.ListQuestionIds);
-            var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.Id == request.ObjectResultId).FirstOrDefaultAsync();
+            var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.ObjectResultId);
             if (mockTestResult == null)
             {
                 return default;
@@ -88,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         private async Task<IList<QuestionModel>?> GetQuestionByExtraPratice(GetQuestionByIdsQuery request)
         {
             ArgumentNullException.ThrowIfNull(request.ListQuestionIds);
-            var extraPracticeResult = await _extraPracticeResultRepository.Queryable.Where(x => x.Id == request.ObjectResultId).FirstOrDefaultAsync();
+            var extraPracticeResult = await _extraPracticeResultRepository.GetByIdAsync(request.ObjectResultId);
             if (extraPracticeResult == null)
             {
                 return default;
@@ -105,7 +107,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         private async Task<IList<QuestionModel>?> GetQuestionByFinalTest(GetQuestionByIdsQuery request)
         {
             ArgumentNullException.ThrowIfNull(request.ListQuestionIds);
-            var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.Id == request.ObjectResultId).FirstOrDefaultAsync();
+            var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.ObjectResultId);
             if (finalTestResult == null)
             {
                 return default;
@@ -119,6 +121,25 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 return default;
             }
             return questions.Select(x => GetQuestion(x, finalTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.FinalTestAnswers).FirstOrDefault())).ToList();
+        }
+
+        private async Task<IList<QuestionModel>?> GetQuestionByPlacementTest(GetQuestionByIdsQuery request)
+        {
+            ArgumentNullException.ThrowIfNull(request.ListQuestionIds);
+            var placementTestResult = await _placementTestResultRepository.GetByIdAsync(request.ObjectResultId);
+            if (placementTestResult == null)
+            {
+                return default;
+            }
+            var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.Section)
+                                .Include(x => x.SectionQuestions)
+                                .ThenInclude(x => x.PlacementTestAnswers.Where(x => placementTestResult != null && x.PlacementTestResultId == placementTestResult.Id))
+                                .Where(x => request.ListQuestionIds.Contains(x.Id)).ToListAsync();
+            if (questions == null || !questions.Any())
+            {
+                return default;
+            }
+            return questions.Select(x => GetQuestion(x, placementTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.PlacementTestAnswers).FirstOrDefault())).ToList();
         }
 
         private QuestionModel GetQuestion(Question question, bool isShowAnswer = false, object? answer = null)

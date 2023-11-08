@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -70,6 +71,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
+            if (mockTestResult.Status == EnumResultStatus.New)
+            {
+                await UpdateMockTestResult(mockTestResult);
+            }
             var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
             if (sectionGroup == null)
             {
@@ -82,6 +87,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult, true);
             return methodResult;
+        }
+
+        private async Task UpdateMockTestResult(MockTestResult mockTestResult)
+        {
+            mockTestResult.Status = EnumResultStatus.Process;
+            _mockTestResultRepository.Update(mockTestResult);
+            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
         private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, Guid studentId, SectionGroup sectionGroup)
