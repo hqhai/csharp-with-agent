@@ -70,5 +70,69 @@
     "maxPoints": 1,
     "displayType": "Number",
     "createdDate": "2023-07-21"
+  },
+  {
+    "id": "8333c5e5-e853-45fb-8abf-1a09336af78e",
+    "type": "PremiumQuests",
+    "category": "SeeFiveTeacherReview",
+    "operator": "Equal",
+    "maxPoints": 5,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "ac0f0c74-cc2a-41a2-a82f-748ed5f2c75c",
+    "type": "PremiumQuests",
+    "category": "SeeTenTeacherReview",
+    "operator": "Equal",
+    "maxPoints": 10,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "7a37fa61-1a04-4d70-8590-90fa3d563d8e",
+    "type": "PremiumQuests",
+    "category": "SeeAllTeacherReview",
+    "operator": "Equal",
+    "maxPoints": 100,
+    "displayType": "Percent",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "f31d44ff-226e-4244-a9a0-a06ed397368a",
+    "type": "PremiumQuests",
+    "category": "PostOneDiscussionBoard",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "0c1633d5-f145-44c7-80c3-a167c0bbd1a1",
+    "type": "PremiumQuests",
+    "category": "PostThreeDiscussionBoard",
+    "operator": "Equal",
+    "maxPoints": 3,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "85659470-7d45-4ddf-8b3c-dba6458bf4f4",
+    "type": "PremiumQuests",
+    "category": "PostFiveDiscussionBoard",
+    "operator": "Equal",
+    "maxPoints": 5,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "0407d174-a779-46e9-bbe4-5f27ae6075b6",
+    "type": "PremiumQuests",
+    "category": "ParticipationScore",
+    "operator": "Equal",
+    "maxPoints": 100,
+    "displayType": "Percent",
+    "createdDate": "2023-07-21"
   }
+
 ]
