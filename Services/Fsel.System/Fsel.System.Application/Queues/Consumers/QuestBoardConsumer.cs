@@ -24,6 +24,7 @@ namespace Fsel.System.Application.Queues.Consumers
                     StudentId = context.Message.StudentId,
                     Categories = context.Message.Categories,
                     ObjectId = context.Message.ObjectId,
+                    CourseId = context.Message.CourseId,
                 }).ConfigureAwait(false);
             }
         }

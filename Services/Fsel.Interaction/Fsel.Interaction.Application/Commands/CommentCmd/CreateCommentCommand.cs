@@ -130,7 +130,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         #region DoQuestBoard
                         if (_authContext.CurrentUserId != postOwner!.CreatedUserId)
                         {
-                            await DoQuestBoard(cancellationToken);
+                            await DoQuestBoard(classForumResult!.CourseId, cancellationToken);
                         }
                         #endregion
 
@@ -186,7 +186,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             return methodResult;
         }
 
-        public async Task DoQuestBoard(CancellationToken cancellationToken)
+        public async Task DoQuestBoard(Guid courseId, CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
@@ -197,6 +197,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 StudentId = (Guid)studentId!,
                 Categories = categories,
                 AchievedPoint = Archieve_Point,
+                CourseId = courseId
             }, cancellationToken);
         }
     }
