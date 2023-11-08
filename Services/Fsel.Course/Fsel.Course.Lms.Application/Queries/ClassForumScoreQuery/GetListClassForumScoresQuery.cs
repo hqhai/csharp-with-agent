@@ -50,18 +50,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<ClassForumScoreModel>> methodResult = new MethodResult<IList<ClassForumScoreModel>>();
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id;
-
             var isClassForumResult = await _classForumResultRepository.AnyAsync(request.ClassForumResultId);
             if (!isClassForumResult)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isClassForumResult));
                 return methodResult;
             }
-            var classForumScores = await _classForumScoreRepository.Queryable
-                                            .Where(x => x.ClassForumResultId == request.ClassForumResultId)
-                                            .ToListAsync(cancellationToken);
 
             var classForumResult = await _classForumResultRepository.Queryable.Where(x => x.Id == request.ClassForumResultId).FirstOrDefaultAsync(cancellationToken);
             if (classForumResult?.IsViewed == false)
@@ -72,21 +66,27 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            var archievePoint = await _classForumResultRepository.Queryable
-                            .Where(x => x.Id == request.ClassForumResultId && x.IsViewed && x.StudentId == studentId)
-                            .Select(x => x.Id).ToListAsync(cancellationToken);
-            var archievePointCount = archievePoint.Count;
+            var classForumScores = await _classForumScoreRepository.Queryable
+                                            .Where(x => x.ClassForumResultId == request.ClassForumResultId)
+                                            .ToListAsync(cancellationToken);
+
+            await DoQuestBoard(request.ClassForumResultId, cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumScores);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        public async Task DoQuestBoard(CancellationToken cancellationToken)
+        public async Task DoQuestBoard(Guid classForumResultId, CancellationToken cancellationToken)
         {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeFiveTeacherReview, EnumQuestBoardCategory.SeeTenTeacherReview, EnumQuestBoardCategory.SeeAllTeacherReview };
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeFiveTeacherReview, EnumQuestBoardCategory.SeeTenTeacherReview };
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var studentId = student?.Content?.Result?.Id;
+
+            var archievePoint = await _classForumResultRepository.Queryable
+                            .Where(x => x.Id == classForumResultId && x.IsViewed && x.StudentId == studentId)
+                            .ToListAsync(cancellationToken);
+            var archievePointCount = archievePoint.Count;
 
             await _questBoardPublisher.Publish(new QuestBoardQueueModel
             {
