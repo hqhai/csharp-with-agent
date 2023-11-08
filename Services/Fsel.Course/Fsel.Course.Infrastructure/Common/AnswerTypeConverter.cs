@@ -70,6 +70,145 @@ namespace Fsel.Course.Infrastructure.Common
             return (configAnswer, totalCorrect, isAnswerMissing);
         }
 
+        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false)
+        {
+            object? result;
+            switch (type)
+            {
+                case EnumQuestionType.Multichoice:
+                case EnumQuestionType.Dropdown:
+                case EnumQuestionType.Checklist:
+                    var multichoice = configAnswer.Deserialize<MultipleChoiceAnswer>();
+                    result = isDisableAnswers ? ClearAnswers(multichoice) : multichoice;
+                    break;
+
+                case EnumQuestionType.Listing:
+                    var listingQuestion = configAnswer.Deserialize<ListingAnswer>();
+                    result = isDisableAnswers ? ClearAnswers(listingQuestion) : listingQuestion;
+                    break;
+
+                case EnumQuestionType.MatchingType1:
+                case EnumQuestionType.MatchingType2:
+                case EnumQuestionType.DragAndDropPicture:
+                    var matchingTypeQuestion = configAnswer.Deserialize<MatchingTypeAnswer>();
+                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion) : matchingTypeQuestion;
+                    break;
+
+                case EnumQuestionType.ShortAnswerWordBase:
+                    var shortAnswerQuestionWordBaseQuestion = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion) : shortAnswerQuestionWordBaseQuestion;
+                    break;
+
+                case EnumQuestionType.ShortAnswerWordCount:
+                    var shortAnswerWordCount = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount) : shortAnswerWordCount;
+                    break;
+
+                case EnumQuestionType.GapFillScoreByQuestion:
+                case EnumQuestionType.GapFillWordBankScoreByQuestion:
+                case EnumQuestionType.GapFillWordBankScoreByGap:
+                case EnumQuestionType.GapFillScoreByGap:
+                    var gapFillQuestion = configAnswer.Deserialize<GapFillAnswer>();
+                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion) : gapFillQuestion;
+                    break;
+
+                case EnumQuestionType.DragAndDropSentenceOrder:
+                    var dragAndDropSentenceOrderQuestion = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
+                    result = dragAndDropSentenceOrderQuestion;
+                    break;
+
+                case EnumQuestionType.MultipleOptionSentenceCompletion:
+                    var multipleOption = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
+                    result = isDisableAnswers ? ClearAnswers(multipleOption) : multipleOption;
+                    break;
+
+                case EnumQuestionType.ExercisePreparation:
+                    var exercisePreparation = configAnswer.Deserialize<ExercisePreparationQuestion>();
+                    result = exercisePreparation;
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid question type");
+            }
+
+            return result;
+        }
+
+        private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                foreach (var item in data.Answers)
+                {
+                    item.IsExact = default;
+                }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(ShortAnswerWordBaseAnswer? data)
+        {
+            if (data != null && !string.IsNullOrEmpty(data.Answers))
+            {
+                data.IsExact = default;
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(ListingAnswer? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                data.IsExact = default;
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(MultipleChoiceAnswer? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                foreach (var item in data.Answers)
+                {
+                    item.IsExact = default;
+                }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(ShortAnswerWordCountBaseAnswer? data)
+        {
+            if (data != null)
+            {
+                data.IsExact = default;
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(MatchingTypeAnswer? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                foreach (var item in data.Answers)
+                {
+                    item.IsExact = default;
+                }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(GapFillAnswer? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                foreach (var item in data.Answers)
+                {
+                    item.IsExacts = item.IsExacts != null ? item.IsExacts.Select(x => x = default).ToList() : default;
+                }
+            }
+            return data;
+        }
+
         private static (int, bool) GetTotalCorrectTypeMultipleOptionAnswer(ref object? configAnswer, object? configQuestion, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();

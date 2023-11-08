@@ -14,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Sections;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
     public class SectionConverter
@@ -45,8 +46,22 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             ArgumentNullException.ThrowIfNull(sectionGroup);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
-            sectionGroupResultDto.WorkingTime = (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalSeconds >= sectionGroup.ExecutionTime ? sectionGroup.ExecutionTime : (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalSeconds;
+            sectionGroupResultDto.RemainingTime = GetRemainingTime(sectionGroupResult, sectionGroup);
             return sectionGroupResultDto;
+        }
+
+        private static double GetRemainingTime(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
+        {
+            if (sectionGroupResult.Status == EnumResultStatus.Done && sectionGroupResult.UpdatedDate.HasValue)
+            {
+                return GetRemainingTime(sectionGroupResult.CreatedDate, sectionGroupResult.UpdatedDate.Value, sectionGroup.ExecutionTime);
+            }
+            return GetRemainingTime(sectionGroupResult.CreatedDate, DateTime.UtcNow, sectionGroup.ExecutionTime);
+        }
+
+        private static double GetRemainingTime(DateTime inputDate, DateTime outputDate, double executionTime)
+        {
+            return (outputDate - inputDate).TotalSeconds >= executionTime ? executionTime : NumberHelper.ConvertRound((outputDate - inputDate).TotalSeconds);
         }
 
         public async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill, bool isMockTest = false)

@@ -12,10 +12,10 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Fsel.Shared.Helpers;
 
     public class GetQuestionByIdsQuery : IRequest<MethodResult<IList<QuestionModel>>>
     {
@@ -31,15 +31,17 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
     public class GetQuestionByIdQueryHandler : IRequestHandler<GetQuestionByIdsQuery, MethodResult<IList<QuestionModel>>>
     {
         private readonly IQuestionRepository _questionRepository;
+        private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
 
-        public GetQuestionByIdQueryHandler(IQuestionRepository questionRepository, IFinalTestResultRepository finalTestResultRepository, IExtraPracticeResultRepository extraPracticeResultRepository, IMockTestResultRepository mockTestResultRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper)
+        public GetQuestionByIdQueryHandler(IQuestionRepository questionRepository, AnswerTypeConverter answerTypeConverter, IFinalTestResultRepository finalTestResultRepository, IExtraPracticeResultRepository extraPracticeResultRepository, IMockTestResultRepository mockTestResultRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper)
         {
             _questionRepository = questionRepository;
+            _answerTypeConverter = answerTypeConverter;
             _finalTestResultRepository = finalTestResultRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -123,8 +125,13 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         {
             var questionModel = _mapper.Map<QuestionModel>(question);
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
-            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
-            questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.Section?.Id ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
+            questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.SectionId ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
+            if (answer != null)
+            {
+                var answerDto = _mapper.Map<AnswerModel>(answer);
+                answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, !isShowAnswer);
+                questionModel.ResultAnswer = answerDto;
+            }
             return questionModel;
         }
     }

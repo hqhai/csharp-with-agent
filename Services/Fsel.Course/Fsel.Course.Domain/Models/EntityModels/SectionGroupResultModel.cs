@@ -11,6 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? MockTestResultId { get; set; }
         public Guid? FinalTestResultId { get; set; }
         public Guid? ExtraPracticeResultId { get; set; }
-        public double WorkingTime { get; set; }
+        public double RemainingTime { get; set; }
     }
 }
