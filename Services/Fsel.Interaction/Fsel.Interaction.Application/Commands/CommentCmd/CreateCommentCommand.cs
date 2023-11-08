@@ -6,15 +6,12 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Base.Managers;
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.SystemService;
-    using Fsel.Interaction.Application.Services.SystemService.Models;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
@@ -42,7 +39,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
         private readonly QuestBoardPublisher _questBoardPublisher;
-        private const float Archieve_Point = 1;
+        private const float Achieved_Point = 1; // nhiệm vụ làm 1 lần nên achievepoint luôn là 1
 
         public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, IUserService userService, QuestBoardPublisher questBoardPublisher)
         {
@@ -130,7 +127,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         #region DoQuestBoard
                         if (_authContext.CurrentUserId != postOwner!.CreatedUserId)
                         {
-                            await DoQuestBoard(cancellationToken);
+                            await DoQuestBoard(comment.Id, cancellationToken);
                         }
                         #endregion
 
@@ -186,18 +183,24 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             return methodResult;
         }
 
-        public async Task DoQuestBoard(CancellationToken cancellationToken)
+        public async Task DoQuestBoard(Guid commentId, CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var studentId = student?.Content?.Result?.Id;
 
-            await _questBoardPublisher.Publish(new QuestBoardQueueModel
+            var hasFirstComment = _commentRepository.Queryable.Any(c => c.CreatedUserId == _authContext.CurrentUserId && c.Type == EnumInteractionType.ClassForum);
+
+            if (!hasFirstComment)
             {
-                StudentId = (Guid)studentId!,
-                Categories = categories,
-                AchievedPoint = Archieve_Point,
-            }, cancellationToken);
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId!,
+                    Categories = categories,
+                    AchievedPoint = Achieved_Point,
+                    ObjectId = commentId
+                }, cancellationToken);
+            }
         }
     }
 }
