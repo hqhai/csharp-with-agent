@@ -133,7 +133,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var isDone = finalTestResult.Status == EnumResultStatus.Done;
 
             finalStudentProgress.Status = finalTestResult.Status;
-            finalStudentProgress.CorrectPercent = Math.Round(finalStudentProgress.SkillScores.Average(x => x.Percent), 0);
             finalStudentProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
             if (skillScores.Any())
             {
