@@ -84,13 +84,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
-            }
-            var lesson = await _lessonRepository.Queryable.Include(x => x.LessonVideos).FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
-            if (lesson == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
                 return methodResult;
             }
+            var lesson = method.Result;
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.New)
             {
@@ -102,8 +98,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             return methodResult;
         }
 
-        private async Task<LessonResult> UpdateLessonResult(Lesson lesson, LessonResult lessonResult, CancellationToken cancellationToken)
+        private async Task<LessonResult> UpdateLessonResult(Lesson? lesson, LessonResult lessonResult, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(lesson);
             lessonResult.VideoResult = new VideoResult
             {
                 VideoId = lesson.LessonVideos.FirstOrDefault()?.VideoId ?? default,
@@ -142,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
 
         private async Task UpdateCourseStatusNew(Course course, Guid? studentId, CancellationToken cancellationToken)
         {
-            var courseResult = course.CourseResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == studentId);
+            var courseResult = course.CourseResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == course.Id);
             if (courseResult != null && courseResult.Status == EnumResultStatus.New)
             {
                 courseResult.Status = EnumResultStatus.Process;
@@ -151,9 +148,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             }
         }
 
-        private async Task<VoidMethodResult> Validate(StartLessonCommand request, Guid? studentId, CancellationToken cancellationToken)
+        private async Task<MethodResult<Lesson>> Validate(StartLessonCommand request, Guid? studentId, CancellationToken cancellationToken)
         {
-            VoidMethodResult methodResult = new VoidMethodResult();
+            MethodResult<Lesson> methodResult = new MethodResult<Lesson>();
             var course = await _courseRepository.Queryable.Include(x => x.CourseResults).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
             if (course == null)
             {
@@ -172,8 +169,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
-            await UpdateUnitStatusNew(unit, studentId, cancellationToken).ConfigureAwait(false);
-            await UpdateCourseStatusNew(course, studentId, cancellationToken).ConfigureAwait(false);
+
             var lessonResultNew = unit.LessonResults.FirstOrDefault(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId);
             if (lessonResultNew == null)
             {
@@ -181,11 +177,32 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (lessonResultNew.Status == EnumResultStatus.New)
+            if (lessonResultNew.Status != EnumResultStatus.New)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultNotNew));
                 return methodResult;
             }
+
+            var lesson = await _lessonRepository.Queryable.Include(x => x.LessonVideos).Include(x => x.LessonHomeWorks).FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
+            if (lesson == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
+                return methodResult;
+            }
+            var videoId = lesson.LessonVideos.FirstOrDefault()?.VideoId;
+            if (videoId == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoId));
+                return methodResult;
+            }
+            if (!lesson.LessonHomeWorks.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson.LessonHomeWorks));
+                return methodResult;
+            }
+            await UpdateUnitStatusNew(unit, studentId, cancellationToken).ConfigureAwait(false);
+            await UpdateCourseStatusNew(course, studentId, cancellationToken).ConfigureAwait(false);
+            methodResult.Result = lesson;
             return methodResult;
         }
     }

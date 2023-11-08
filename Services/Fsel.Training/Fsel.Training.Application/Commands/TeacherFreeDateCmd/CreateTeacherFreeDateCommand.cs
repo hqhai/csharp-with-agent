@@ -2,10 +2,12 @@
 
 namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
 {
+    using System.Data;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
@@ -80,6 +82,20 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
             {
                 methodResult.AddErrorBadRequest(teacherFreeDate.ErrorMessages);
                 return methodResult;
+            }
+            foreach (var item in teacherFreeDate.TeacherFreeTimes)
+            {
+                for (DateTime date = request.StartDate.Date; date <= request.EndDate.Date; date = date.AddDays(1))
+                {
+                    if (date.DayOfWeek == item.DayOfWeek)
+                    {
+                        TeacherFreeTimeLive teacherFreeTimeLive = new TeacherFreeTimeLive()
+                        {
+                            LiveDate = date,
+                        };
+                        item.TeacherFreeTimeLives.Add(teacherFreeTimeLive);
+                    }
+                }
             }
 
             #endregion Validate
