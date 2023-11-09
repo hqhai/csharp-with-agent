@@ -105,8 +105,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     var csoId = csoResults.Content?.Result?.Id;
                     classForumResult.CheckCsoId = csoId;
 
-
-                    await DoQuestBoard(classForumResult.Id, classForumResult.CreatedUserId, cancellationToken);
+                    var courseId = classForumResult.LessonResult?.CourseId;
+                    if (classForumResult != null && courseId != null)
+                    {
+                        await DoQuestBoard(classForumResult.Id, (Guid)courseId, classForumResult.CreatedUserId, cancellationToken);
+                    }
                 }
                 else
                 {
@@ -125,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         }
 
 
-        public async Task DoQuestBoard(Guid classForumResultId, Guid userId, CancellationToken cancellationToken)
+        public async Task DoQuestBoard(Guid classForumResultId, Guid courseId, Guid userId, CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
             var student = await _userService.GetStudentByUserIdAsync(userId);
@@ -140,7 +143,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     StudentId = (Guid)studentId!,
                     Categories = categories,
                     AchievedPoint = Achieved_Point,
-                    ObjectId = classForumResultId
+                    ObjectId = classForumResultId,
+                    CourseId = courseId
                 }, cancellationToken);
             }
         }

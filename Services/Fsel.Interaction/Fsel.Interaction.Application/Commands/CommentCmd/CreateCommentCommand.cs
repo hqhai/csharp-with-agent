@@ -127,7 +127,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         #region DoQuestBoard
                         if (_authContext.CurrentUserId != postOwner!.CreatedUserId)
                         {
-                            await DoQuestBoard(classForumResult!.CourseId,comment.Id, cancellationToken);
+                            await DoQuestBoard(classForumResult!.CourseId, comment.Id, cancellationToken);
                         }
                         #endregion
 
@@ -199,7 +199,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                     Categories = categories,
                     AchievedPoint = Achieved_Point,
                     ObjectId = commentId,
-                    courseId = courseId,
+                    CourseId = courseId,
                 }, cancellationToken);
             }
         }
