@@ -51,6 +51,8 @@ namespace Fsel.Course.Domain.Entities
 
         public string? RetryGradingAlFeedBack { get; set; }
 
+        public bool IsViewed { get; set; }
+
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
