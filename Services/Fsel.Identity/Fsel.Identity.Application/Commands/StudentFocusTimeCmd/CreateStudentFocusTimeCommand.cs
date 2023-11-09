@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.StudentFocusTime;
@@ -33,8 +34,10 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private const double DEFAULT_TARGET_TIME = 1800; // 1800s tương ứng với 30p
         private const float Archieve_Point = 1; // Những nhiệm vụ làm 1 lần thì achieve point sẽ là 1
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly ITrainingService _trainingService;
 
-        public CreateStudentFocusTimeCommandHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher)
+        public CreateStudentFocusTimeCommandHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher,
+            ITrainingService trainingService)
         {
             _mapper = mapper;
             _studentFocusTimeRepository = studentFocusTimeRepository;
@@ -42,6 +45,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             _authContext = authContext;
             _systemService = systemService;
             _questBoardPublisher = questBoardPublisher;
+            _trainingService=trainingService;
         }
 
         public async Task<MethodResult<StudentFocusTimeModel>> Handle(CreateStudentFocusTimeCommand request, CancellationToken cancellationToken)
@@ -152,6 +156,9 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
         public async Task DoQuestBoard(Student student, double executeTime, double targetTime, CancellationToken cancellationToken)
         {
+            var classModel = await _trainingService.GetClassById(student.ClassId);
+            var courseId = classModel.Content!.Result!.CourseId;
+            
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>();
             var categoryToElement = EnumQuestBoardCategory.ThirtyMinutesFocusMode;
 
@@ -182,6 +189,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 StudentId = student.Id,
                 Categories = categories,
                 AchievedPoint = Archieve_Point,
+                CourseId = courseId
             };
 
             if (executeTime >= targetTime)
