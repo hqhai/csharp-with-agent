@@ -4,9 +4,12 @@ namespace Fsel.Interaction.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Commands.ActionCmd;
     using Fsel.Interaction.Application.Queries.InterationActionQuery;
+    using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -17,10 +20,27 @@ namespace Fsel.Interaction.Api.Controllers
     public class InteractionActionController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IInteractionActionRepository _interactionActionRepository;
 
-        public InteractionActionController(IMediator mediator)
+        public InteractionActionController(IMediator mediator, IInteractionActionRepository interactionActionRepository)
         {
             _mediator = mediator;
+            _interactionActionRepository = interactionActionRepository;
+        }
+
+
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpPost("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<InteractionActionModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
+        {
+            var result = await _interactionActionRepository.GetListResultAsync<InteractionActionModel>(query);
+            return result.GetActionResult();
         }
 
         /// <summary>

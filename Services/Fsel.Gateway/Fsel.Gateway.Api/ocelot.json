@@ -129,6 +129,34 @@
         }
       ]
     },
+    // System Service
+    {
+      "SwaggerKey": "system",
+      "UpstreamPathTemplate": "/system-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 52010
+        }
+      ]
+    },
+    // Cms Planet Defender Service
+    {
+      "SwaggerKey": "cms-planet-defender",
+      "UpstreamPathTemplate": "/cms-planet-defender-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 52011
+        }
+      ]
+    },
     // Realtime Service
     {
       "SwaggerKey": "realtime",
@@ -256,6 +284,16 @@
           "Name": "System API",
           "Version": "v1",
           "Url": "http://localhost:52010/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "cms-planet-defender",
+      "Config": [
+        {
+          "Name": "Cms Planet Defender API",
+          "Version": "v1",
+          "Url": "http://localhost:52011/swagger/v1/swagger.json"
         }
       ]
     },

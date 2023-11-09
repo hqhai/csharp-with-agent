@@ -40,7 +40,7 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var finalTestQuery = _finalTestRepository.Queryable
+            var finalTestQuery = _finalTestRepository.Queryable.Include(p => p.CourseUnitMockTests)
                                                 .Select(x => new FinalTestSearchModel
                                                 {
                                                     Id = x.Id,
@@ -49,7 +49,7 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
                                                     CreatedDate = x.CreatedDate,
                                                     CreatedFullName = x.CreatedFullName,
                                                     ExecutionTime = x.ExecutionTime,
-                                                    IsActive = x.IsActive,
+                                                    IsActive = x.CourseUnitMockTests.Count > 0,
                                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {

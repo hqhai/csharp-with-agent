@@ -1092,8 +1092,11 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<int>("AchievedPoints")
-                        .HasColumnType("int");
+                    b.Property<float>("AchievedPoints")
+                        .HasColumnType("real");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")

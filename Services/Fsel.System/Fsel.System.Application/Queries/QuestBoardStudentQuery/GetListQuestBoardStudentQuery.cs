@@ -4,19 +4,15 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.System.Application.Queries.QuestBoardQuery;
-    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System;
     using global::System.Collections.Generic;
     using global::System.Linq;
-    using global::System.Text;
     using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using static global::System.Runtime.InteropServices.JavaScript.JSType;
 
     public class GetListQuestBoardStudentQuery : IRequest<MethodResult<List<QuestBoardStudentModel>>>
     {
