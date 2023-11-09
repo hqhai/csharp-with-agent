@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -17,7 +16,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
-    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -39,6 +37,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ISystemService _systemService;
+        private QuestBoardPublisher _questBoardPublisher;
+        private const float Achieved_Point = 1; // Những nhiệm vụ chỉ làm 1 lần thì Achieved Point sẽ là 1
         public CreateClassForumResultCommandHandler(IMapper mapper
             , AuthContext authContext
             , IUserService userService
@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             , ILessonResultRepository lessonResultRepository
             , NotificationMessagePublisher notificationMessagePublisher
             , ISystemService systemService
-            )
+            , QuestBoardPublisher questBoardPublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -57,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _lessonResultRepository = lessonResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
             _systemService = systemService;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -76,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords), string.Join(", ", containsForbiddenWord));
                 return methodResult;
             }
-            
+
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
 
             if (!student.IsSuccessStatusCode)
@@ -90,8 +91,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-            
-                 
+
+
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.LessonId, cancellationToken);
             if (classForum == null)
             {
@@ -104,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
 
-           
+
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
@@ -139,7 +140,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     }
 
                     // check QuestBoardStudent
-                     DoQuestBoard();
+                    var courseId = classForumResult?.LessonResult?.CourseId;
+                    if (courseId != null && classForumResult != null)
+                    {
+                        await DoQuestBoard(classForumResult.Id, (Guid)courseId, cancellationToken);
+                    }
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
                 {
@@ -186,44 +191,22 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             return methodResult;
         }
 
-        public async void DoQuestBoard()
+        public async Task DoQuestBoard(Guid classForumResultId, Guid courseId, CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneClassForumPost };
 
-            var studentByPackage = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentId = student?.Content?.Result?.Id ?? default;
 
-            var packageId = studentByPackage?.Content?.Result?.PackageId ?? default;
-            string listCategory = ConvertHelper.Serialize(categories);
-
-            var studentId = studentByPackage?.Content?.Result?.Id;
-            var questBoards = await _systemService.GetListQuestBoardQuery(packageId, listCategory);
-
-            var questBoard = questBoards?.Content?.Result != null ? questBoards?.Content?.Result.FirstOrDefault() : default;
-            var questBoardId = questBoard?.Id ?? default;
-
-            GetListQuestBoardStudentModel questBoardQuery = new GetListQuestBoardStudentModel()
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel
             {
-                QuestBoardId = questBoardId,
-                StudentId = studentId
-            };
-            var quesBoardStudent = await _systemService.GetListQuestBoardStudent(questBoardQuery);
-
-
-
-            if (quesBoardStudent?.Content?.Result?.Count == 0 || quesBoardStudent?.Content?.Result == null)
-            {
-                await _systemService.CreateQuestBoardStudent(questBoardId);
-            }
-            else
-            {
-                var questBoardStudentId = quesBoardStudent!.Content?.Result?.FirstOrDefault()?.Id ?? default;
-                await _systemService.UpdateQuestBoardStudentCommand(questBoardStudentId);
-            }
-
-
+                StudentId = studentId,
+                Categories = categories,
+                AchievedPoint = Achieved_Point,
+                ObjectId = classForumResultId,
+                CourseId = courseId,
+            }, cancellationToken);
         }
-
-
 
     }
 }
