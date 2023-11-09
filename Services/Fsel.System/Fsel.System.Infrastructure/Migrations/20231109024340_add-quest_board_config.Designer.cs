@@ -4,6 +4,7 @@ using Fsel.System.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    partial class SystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231109024340_add-quest_board_config")]
+    partial class addquest_board_config
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1147,97 +1150,6 @@ namespace Fsel.System.Infrastructure.Migrations
                             MaxPoints = 1,
                             Operator = "Equal",
                             Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("8333c5e5-e853-45fb-8abf-1a09336af78e"),
-                            Category = "SeeFiveTeacherReview",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 5,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("ac0f0c74-cc2a-41a2-a82f-748ed5f2c75c"),
-                            Category = "SeeTenTeacherReview",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 10,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("7a37fa61-1a04-4d70-8590-90fa3d563d8e"),
-                            Category = "SeeAllTeacherReview",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Percent",
-                            IsDeleted = false,
-                            MaxPoints = 100,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("f31d44ff-226e-4244-a9a0-a06ed397368a"),
-                            Category = "PostOneDiscussionBoard",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("0c1633d5-f145-44c7-80c3-a167c0bbd1a1"),
-                            Category = "PostThreeDiscussionBoard",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 3,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("85659470-7d45-4ddf-8b3c-dba6458bf4f4"),
-                            Category = "PostFiveDiscussionBoard",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 5,
-                            Operator = "Equal",
-                            Type = "PremiumQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("0407d174-a779-46e9-bbe4-5f27ae6075b6"),
-                            Category = "ParticipationScore",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Percent",
-                            IsDeleted = false,
-                            MaxPoints = 80,
-                            Operator = "GreaterThan",
-                            Type = "PremiumQuests"
                         });
                 });
 
@@ -1250,9 +1162,6 @@ namespace Fsel.System.Infrastructure.Migrations
 
                     b.Property<float>("AchievedPoints")
                         .HasColumnType("real");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")

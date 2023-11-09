@@ -133,6 +133,51 @@
     "maxPoints": 80,
     "displayType": "Percent",
     "createdDate": "2023-07-21"
+  },
+  {
+    "id": "0A20CB15-8629-41D9-88D9-890A3B487496",
+    "type": "SideQuests",
+    "category": "ThirtyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "2CA29E0C-4F81-40C6-9A0C-040D270D0433",
+    "type": "SideQuests",
+    "category": "NinetyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "406C775B-51E8-4742-8C4B-A898AE2B8924",
+    "type": "SideQuests",
+    "category": "OneHundredTwentytyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "E1C02BBC-0C98-40A0-B7E0-807B5F137C3B",
+    "type": "SideQuests",
+    "category": "OneHundredEightyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "62767C8D-6E18-4D11-A74E-FE38EAB7FA58",
+    "type": "SideQuests",
+    "category": "SixtyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
   }
 
 ]
