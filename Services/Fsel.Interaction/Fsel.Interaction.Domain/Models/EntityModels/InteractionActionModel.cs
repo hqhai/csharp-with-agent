@@ -18,5 +18,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public bool IsDisable { get; set; }
 
         public bool IsLiked { get; set; }
+
+        public bool IsFlagged { get; set; }
     }
 }

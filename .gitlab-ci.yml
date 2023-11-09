@@ -47,3 +47,6 @@ include:
   - project: 'ci-templates/gitlab-ci-projects'
     ref: master
     file: fsel/api/user-api.yaml
+  - project: 'ci-templates/gitlab-ci-projects'
+    ref: master
+    file: fsel/api/cms-planetdefender.yaml

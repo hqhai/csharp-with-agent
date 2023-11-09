@@ -29,7 +29,10 @@ namespace Fsel.Interaction.Application.Services.CourseServices
         [Get("/class-forum-result/{id}")]
         Task<IApiResponse<MethodResult<ClassForumResultModel>>> GetClassForumResultByIdAsync([FromRoute] Guid id);
 
+        [Post("/class-forum-result/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<ClassForumResultModel>>>> ExecuteListClassForumResultQueryAsync([Body] BaseQueryModel query);
+
         [Get("/class-forum-result/execute-query")]
-        Task<IApiResponse<MethodResult<ClassForumResultModel>>> GetClassForumResultInfoByIdAsync([FromQuery] BaseQueryModel query);
+        Task<IApiResponse<MethodResult<ClassForumResultInfoModel>>> GetClassForumResultInfoByIdAsync([FromQuery] BaseQueryModel query);
     }
 }
