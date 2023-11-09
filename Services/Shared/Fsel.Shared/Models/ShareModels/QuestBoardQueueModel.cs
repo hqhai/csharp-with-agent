@@ -12,6 +12,8 @@ namespace Fsel.Shared.Models.ShareModels
 
         public float AchievedPoint { get; set; }
 
-        public Guid ObjectId { get; set; }
+        public Guid? ObjectId { get; set; }
+
+        public Guid CourseId { get; set; }
     }
 }

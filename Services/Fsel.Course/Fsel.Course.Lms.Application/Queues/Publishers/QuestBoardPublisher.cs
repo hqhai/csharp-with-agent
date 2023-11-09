@@ -28,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
                 AchievedPoint = model.AchievedPoint,
                 Categories = model.Categories,
                 ObjectId = model.ObjectId,
+                CourseId = model.CourseId,
             }, cancellationToken);
         }
     }

@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -17,7 +16,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
-    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -46,8 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             , IClassForumRepository classForumRepository
             , ILessonResultRepository lessonResultRepository
             , NotificationMessagePublisher notificationMessagePublisher
-            , ISystemService systemService
-            )
+            , ISystemService systemService)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -76,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords), string.Join(", ", containsForbiddenWord));
                 return methodResult;
             }
-            
+
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
 
             if (!student.IsSuccessStatusCode)
@@ -90,8 +87,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-            
-                 
+
+
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.LessonId, cancellationToken);
             if (classForum == null)
             {
@@ -104,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
 
-           
+
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
@@ -137,9 +134,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     {
                         await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
-
-                    // check QuestBoardStudent
-                     DoQuestBoard();
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
                 {
@@ -185,45 +179,5 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             return methodResult;
         }
-
-        public async void DoQuestBoard()
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneClassForumPost };
-
-            var studentByPackage = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-
-            var packageId = studentByPackage?.Content?.Result?.PackageId ?? default;
-            string listCategory = ConvertHelper.Serialize(categories);
-
-            var studentId = studentByPackage?.Content?.Result?.Id;
-            var questBoards = await _systemService.GetListQuestBoardQuery(packageId, listCategory);
-
-            var questBoard = questBoards?.Content?.Result != null ? questBoards?.Content?.Result.FirstOrDefault() : default;
-            var questBoardId = questBoard?.Id ?? default;
-
-            GetListQuestBoardStudentModel questBoardQuery = new GetListQuestBoardStudentModel()
-            {
-                QuestBoardId = questBoardId,
-                StudentId = studentId
-            };
-            var quesBoardStudent = await _systemService.GetListQuestBoardStudent(questBoardQuery);
-
-
-
-            if (quesBoardStudent?.Content?.Result?.Count == 0 || quesBoardStudent?.Content?.Result == null)
-            {
-                await _systemService.CreateQuestBoardStudent(questBoardId);
-            }
-            else
-            {
-                var questBoardStudentId = quesBoardStudent!.Content?.Result?.FirstOrDefault()?.Id ?? default;
-                await _systemService.UpdateQuestBoardStudentCommand(questBoardStudentId);
-            }
-
-
-        }
-
-
-
     }
 }
