@@ -156,7 +156,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
         public async Task DoQuestBoard(Student student, double executeTime, double targetTime, CancellationToken cancellationToken)
         {
-            var classModel = await _trainingService.GetClassById(student.ClassId);
+            var classModel = await _trainingService.GetClassByStudentId(student.Id);
             var courseId = classModel.Content!.Result!.CourseId;
             
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>();

@@ -51,19 +51,19 @@ namespace Fsel.Shared.Enums
         [Description("Điểm tham gia")]
         ParticipationScore,
 
-        [Description("Ba mươi phút / một lần")]
+        [Description("Focus Mode I: Bạn cần lựa chọn mốc tập trung 30 phút và hoàn thành mốc tập trung này một lần")]
         ThirtyMinutesFocusMode,
 
-        [Description("Sáu mươi phút / một lần")]
+        [Description("Focus Mode II: Bạn cần lựa chọn mốc tập trung 60 phút và hoàn thành mốc tập trung này một lần")]
         SixtyMinutesFocusMode,
 
-        [Description("Chín mươi phút / một lần")]
+        [Description("Focus Mode III: Bạn cần lựa chọn mốc tập trung 90 phút và hoàn thành mốc tập trung này một lần")]
         NinetyMinutesFocusMode,
 
-        [Description("Trăm hai mươi phút / một lần")]
+        [Description("Focus Mode IV: Bạn cần lựa chọn mốc tập trung 120 phút và hoàn thành mốc tập trung này một lần")]
         OneHundredTwentytyMinutesFocusMode,
 
-        [Description("Trăm tám mươi phút / một Lần ")]
+        [Description("Focus Mode V: Bạn cần lựa chọn mốc tập trung 180 phút và hoàn thành mốc tập trung này một lần")]
         OneHundredEightyMinutesFocusMode,
     }
 }
