@@ -129,8 +129,8 @@
     "id": "0407d174-a779-46e9-bbe4-5f27ae6075b6",
     "type": "PremiumQuests",
     "category": "ParticipationScore",
-    "operator": "Equal",
-    "maxPoints": 100,
+    "operator": "GreaterThan",
+    "maxPoints": 80,
     "displayType": "Percent",
     "createdDate": "2023-07-21"
   }
