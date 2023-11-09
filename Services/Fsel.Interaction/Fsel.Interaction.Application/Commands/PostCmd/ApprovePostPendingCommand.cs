@@ -7,13 +7,10 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Interaction.Application.Queues.Publishers;
-    using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -25,15 +22,11 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
     {
         private readonly IMapper _mapper;
         private readonly IPostRepository _postRepository;
-        private readonly QuestBoardPublisher _questBoardPublisher;
-        private readonly IUserService _userService;
 
-        public ApprovePostPendingCommandHandler(IMapper mapper, IPostRepository postRepository, QuestBoardPublisher questBoardPublisher, IUserService userService)
+        public ApprovePostPendingCommandHandler(IMapper mapper, IPostRepository postRepository)
         {
             _mapper = mapper;
             _postRepository = postRepository;
-            _questBoardPublisher = questBoardPublisher;
-            _userService = userService;
         }
 
         public async Task<MethodResult<PostModel>> Handle(ApprovePostPendingCommand request, CancellationToken cancellationToken)
@@ -65,24 +58,5 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
 
             return methodResult;
         }
-
-        /*public async Task DoQuestBoard(Guid classForumResultId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeFiveTeacherReview, EnumQuestBoardCategory.SeeTenTeacherReview };
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id;
-
-            var archievePoint = await _classForumResultRepository.Queryable
-                            .Where(x => x.Id == classForumResultId && x.IsViewed && x.StudentId == studentId)
-                            .ToListAsync(cancellationToken);
-            var archievePointCount = archievePoint.Count;
-
-            await _questBoardPublisher.Publish(new QuestBoardQueueModel
-            {
-                StudentId = (Guid)studentId!,
-                Categories = categories,
-                AchievedPoint = archievePointCount,
-            }, cancellationToken);
-        }*/
     }
 }

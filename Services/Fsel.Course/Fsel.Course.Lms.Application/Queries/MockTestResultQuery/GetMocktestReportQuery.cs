@@ -145,11 +145,15 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                             .ToListAsync(cancellationToken);
             var archievePointCount = archievePoint.Count;
 
+            var courseId = await _mockTestResultRepository.Queryable.Where(x => x.Id == mockTestResultId).Select(x => x.CourseId).FirstOrDefaultAsync(cancellationToken);
+
             await _questBoardPublisher.Publish(new QuestBoardQueueModel
             {
                 StudentId = (Guid)studentId!,
                 Categories = categories,
                 AchievedPoint = archievePointCount,
+                ObjectId = mockTestResultId,
+                CourseId = courseId
             }, cancellationToken);
         }
     }

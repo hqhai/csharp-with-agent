@@ -81,18 +81,22 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeFiveTeacherReview, EnumQuestBoardCategory.SeeTenTeacherReview };
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id;
+            var studentId = student?.Content?.Result?.Id ?? default;
 
             var archievePoint = await _classForumResultRepository.Queryable
                             .Where(x => x.Id == classForumResultId && x.IsViewed && x.StudentId == studentId)
                             .ToListAsync(cancellationToken);
             var archievePointCount = archievePoint.Count;
 
+            var courseId = await _classForumResultRepository.Queryable.Include(x => x.LessonResult).Where(x => x.Id == classForumResultId && x.IsViewed && x.StudentId == studentId).Select(x => x.LessonResult!.CourseId).FirstOrDefaultAsync(cancellationToken);
+
             await _questBoardPublisher.Publish(new QuestBoardQueueModel
             {
-                StudentId = (Guid)studentId!,
+                StudentId = studentId,
                 Categories = categories,
                 AchievedPoint = archievePointCount,
+                ObjectId = classForumResultId,
+                CourseId = courseId,
             }, cancellationToken);
         }
     }
