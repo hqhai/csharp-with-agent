@@ -40,17 +40,6 @@ namespace Fsel.System.Api.Controllers.Student
             return queryResult.GetActionResult();
         }
 
-        /// <summary>
-        /// List Quest Board
-        /// </summary>
-        [HttpGet("get-list-quest-board-student")]
-        [ProducesResponseType(typeof(MethodResult<IList<QuestBoardByStudentModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListQuestBoardStudent([FromQuery] GetListQuestBoardStudentQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
 
         /// <summary>
         /// QuestBoard Reward Student
@@ -63,32 +52,5 @@ namespace Fsel.System.Api.Controllers.Student
             var queryResult = await _mediator.Send(new QuestRewardCommand { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
-        /// <summary>
-        /// QuestBoard Reward Student
-        /// </summary>
-        [HttpPut("update-achieved-points/{questBoardStudent}")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<bool>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateQuestBoardStudentCommand([FromRoute] Guid questBoardStudent)
-        {
-            var queryResult = await _mediator.Send(new UpdateQuestBoardStudentCommand { QuestBoardStudent = questBoardStudent }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Taking Mission Student
-        /// </summary>
-        [HttpPost("taking-mission/{questBoardId}")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<bool>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TakingMissionStudent([FromRoute] Guid questBoardId)
-        {
-            var queryResult = await _mediator.Send(new TakingMissionCommand { Id = questBoardId }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-
-
     }
 }
