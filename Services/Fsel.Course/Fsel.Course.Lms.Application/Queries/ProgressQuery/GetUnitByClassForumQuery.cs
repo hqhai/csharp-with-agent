@@ -65,9 +65,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var classForums = await _classForumRepository.Queryable
                                             .Include(x => x.Lesson)
                                             .ThenInclude(x => x.LessonResults.Where(x => x.StudentId == studentId))
+                                            .Include(x => x.Lesson)
+                                            .ThenInclude(x => x.UnitLessons)
                                             .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                             .ThenInclude(x => x.ClassForumScores)
                                             .Where(x => lessonIds.Contains(x.LessonId))
+                                            .OrderBy(x => x.Lesson!.UnitLessons.Where(n => n.UnitId == unit.Id).Select(n => n.DisplayOrder).FirstOrDefault())
                                             .ToListAsync(cancellationToken);
             if (classForums == null || classForums.Count == 0)
             {
