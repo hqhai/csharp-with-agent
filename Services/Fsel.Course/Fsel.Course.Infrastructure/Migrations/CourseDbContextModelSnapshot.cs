@@ -562,6 +562,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<string>("InstructionContent")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsArchive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -1046,6 +1049,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsArchive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
@@ -1557,7 +1563,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("IsArchive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
@@ -1861,6 +1867,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<bool>("IsArchive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -2159,6 +2168,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("InstructionContent")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsArchive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -2659,6 +2671,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<bool>("IsArchive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -3051,6 +3066,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsArchive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
@@ -4099,6 +4117,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<bool>("IsArchive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -4388,6 +4409,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
+
+                    b.Property<bool>("IsArchive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")

@@ -33,7 +33,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<MockTestSearchModel>> methodResult = new MethodResult<IList<MockTestSearchModel>>();
 
-            var mockTests = await _mockTestRepository.Queryable.Include(x => x.ExtraPractice)
+            var mockTests = await _mockTestRepository.Queryable.Where(p => !p.IsArchive).Include(x => x.ExtraPractice)
                                       .Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
                                       .ThenInclude(x => x.SectionGroup)
                                       .Include(x => x.CourseUnitMockTests)

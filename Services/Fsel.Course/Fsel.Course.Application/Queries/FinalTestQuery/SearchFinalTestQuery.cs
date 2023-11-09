@@ -40,7 +40,7 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var finalTestQuery = _finalTestRepository.Queryable.Include(p => p.CourseUnitMockTests)
+            var finalTestQuery = _finalTestRepository.Queryable.Where(p => !p.IsArchive).Include(cum => cum.CourseUnitMockTests)
                                                 .Select(x => new FinalTestSearchModel
                                                 {
                                                     Id = x.Id,

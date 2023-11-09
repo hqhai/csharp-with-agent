@@ -58,7 +58,7 @@ ICourseUnitMockTestRepository courseUnitMockTestRepository)
             }
             if (await _courseUnitMockTestRepository.Queryable.AnyAsync(p => p.FinalTestId == finalTest.Id, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState), nameof(finalTest.IsActive), finalTest.IsActive);
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState));
                 return methodResult;
             }
             if (await _finalTestRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken))
