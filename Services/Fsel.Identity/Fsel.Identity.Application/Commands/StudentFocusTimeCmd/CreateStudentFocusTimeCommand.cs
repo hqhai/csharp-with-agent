@@ -31,7 +31,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly ISystemService _systemService;
         private const int NUMBER_OF_WEEKDAY = 7;
         private const double DEFAULT_TARGET_TIME = 1800; // 1800s tương ứng với 30p
-        private const float Archieve_Point = 1;
+        private const float Archieve_Point = 1; // Những nhiệm vụ làm 1 lần thì achieve point sẽ là 1
         private readonly QuestBoardPublisher _questBoardPublisher;
 
         public CreateStudentFocusTimeCommandHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher)
@@ -81,7 +81,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 }
                 else
                 {
-                    // Set TargetTime
+                    // Set targetTime
                     bool confitionChangeTarget = request.TargetTime != nearestConfigTargetTime && request.TargetTime != 0;
 
                     if (!studentFocusTime.IsEstablished && confitionChangeTarget)
@@ -95,35 +95,10 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                     var systemConfigMap = systemConfigResult!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
                     studentFocusTime.ExecuteTime = request.ExecuteTime;
 
-                    IList<EnumQuestBoardCategory> categories;
+                    // làm nhiệm vụ
+                    await DoQuestBoard(student, request.ExecuteTime, studentFocusTime.TargetTime, cancellationToken);
 
 
-                    switch (DEFAULT_TARGET_TIME)
-                    {
-                        case (double)EnumQuestBoardFocusMode.FocusModeThirtyMinutes:
-                            categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.DoneThirtyMinutesFocusMode };
-                            break;
-                        case (double)EnumQuestBoardFocusMode.FocusModeSixtyMinutes:
-                            categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.DoneSixtyMinutesFocusMode };
-                            break;
-                        case (double)EnumQuestBoardFocusMode.FocusModeNinetyMinutes:
-                            categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.DoneNinetyMinutesFocusMode };
-                            break;
-                        case (double)EnumQuestBoardFocusMode.FocusModeOneHundredTwentytyMinutes:
-                            categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.DoneOneHundredTwentytyMinutesFocusMode };
-                            break;
-                        case (double)EnumQuestBoardFocusMode.FocusModeOneHundredEightyMinutes:
-                            categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.DoneOneHundredEightyMinutesFocusMode };
-                            break;
-
-                    }
-
-                    if(request.ExecuteTime >= DEFAULT_TARGET_TIME)
-                    {
-                        await DoQuestBoard(cancellationToken, student ,categories);
-                    }    
-
-                 
                     if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime)
                     {
                         student.NumberOfToken += CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token
@@ -175,18 +150,47 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             return hasStreak;
         }
 
-        public async Task DoQuestBoard(CancellationToken cancellationToken, Student student, IList<EnumQuestBoardCategory> categories)
+        public async Task DoQuestBoard(Student student, double executeTime, double targetTime, CancellationToken cancellationToken)
         {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>();
+            var categoryToElement = EnumQuestBoardCategory.ThirtyMinutesFocusMode;
 
-            QuestBoardQueueModel questBoardStudentCommand = new QuestBoardQueueModel
+            switch (targetTime)
+            {
+                case (double)EnumQuestBoardFocusMode.FocusModeThirtyMinutes:
+                    categoryToElement = EnumQuestBoardCategory.ThirtyMinutesFocusMode;
+                    break;
+                case (double)EnumQuestBoardFocusMode.FocusModeSixtyMinutes:
+                    categoryToElement = EnumQuestBoardCategory.SixtyMinutesFocusMode;
+                    break;
+                case (double)EnumQuestBoardFocusMode.FocusModeNinetyMinutes:
+                    categoryToElement = EnumQuestBoardCategory.NinetyMinutesFocusMode;
+                    break;
+                case (double)EnumQuestBoardFocusMode.FocusModeOneHundredTwentytyMinutes:
+                    categoryToElement = EnumQuestBoardCategory.OneHundredTwentytyMinutesFocusMode;
+                    break;
+                case (double)EnumQuestBoardFocusMode.FocusModeOneHundredEightyMinutes:
+                    categoryToElement = EnumQuestBoardCategory.OneHundredEightyMinutesFocusMode;
+                    break;
+
+            };
+
+            categories.Add(categoryToElement);
+
+            QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
             {
                 StudentId = student.Id,
                 Categories = categories,
                 AchievedPoint = Archieve_Point,
             };
 
-            await _questBoardPublisher.Publish(questBoardStudentCommand, cancellationToken);
+            if (executeTime >= targetTime)
+            {
+                await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
+            }
+
         }
+
 
 
         /// <summary>
@@ -197,7 +201,9 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private static double GetNearestConfigTime(IStudentFocusTimeRepository studentFocusTimeRepository, Guid? studentId)
         {
 
-            var nearestConfigTargetTime = studentFocusTimeRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date)?.TargetTime ?? DEFAULT_TARGET_TIME;
+            var nearestConfigTargetTime = studentFocusTimeRepository.Queryable
+                                                                    .OrderByDescending(x => x.CreatedDate)
+                                                                    .FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date)?.TargetTime ?? DEFAULT_TARGET_TIME;
 
             return nearestConfigTargetTime;
         }

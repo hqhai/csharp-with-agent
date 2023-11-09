@@ -31,18 +31,18 @@ namespace Fsel.Shared.Enums
         CommentOnOtherPost,
 
         [Description("Ba mươi phút / một lần")]
-        DoneThirtyMinutesFocusMode,
+        ThirtyMinutesFocusMode,
 
         [Description("Sáu mươi phút / một lần")]
-        DoneSixtyMinutesFocusMode,
+        SixtyMinutesFocusMode,
 
         [Description("Chín mươi phút / một lần")]
-        DoneNinetyMinutesFocusMode,
+        NinetyMinutesFocusMode,
 
         [Description("Trăm hai mươi phút / một lần")]
-        DoneOneHundredTwentytyMinutesFocusMode,
+        OneHundredTwentytyMinutesFocusMode,
 
         [Description("Trăm tám mươi phút / một Lần ")]
-        DoneOneHundredEightyMinutesFocusMode,
+        OneHundredEightyMinutesFocusMode,
     }
 }
