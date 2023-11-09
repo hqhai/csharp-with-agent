@@ -95,14 +95,17 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
 
             var post = await _postRepository.Queryable.Where(c => c.CreatedUserId == userId && c.Status != EnumPostStatus.Pending && c.Status != EnumPostStatus.Draft).ToListAsync(cancellationToken);
             var postCount = post.Count;
-            await _questBoardPublisher.Publish(new QuestBoardQueueModel
+            if (postCount > 0)
             {
-                StudentId = (Guid)studentId!,
-                Categories = categories,
-                AchievedPoint = postCount,
-                ObjectId = postId,
-                CourseId = courseId
-            }, cancellationToken);
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId!,
+                    Categories = categories,
+                    AchievedPoint = postCount,
+                    ObjectId = postId,
+                    CourseId = courseId
+                }, cancellationToken);
+            }
         }
     }
 }
