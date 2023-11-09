@@ -69,32 +69,34 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
             var classForumScores = await _classForumScoreRepository.Queryable
                                             .Where(x => x.ClassForumResultId == request.ClassForumResultId)
                                             .ToListAsync(cancellationToken);
+            var courseId = classForumResult?.LessonResult?.CourseId;
 
-            await DoQuestBoard(request.ClassForumResultId, cancellationToken);
+            if (courseId != null)
+            {
+                await DoQuestBoard(request.ClassForumResultId, classForumResult!.LessonResult!.CourseId, cancellationToken);
+            }
 
             methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumScores);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        public async Task DoQuestBoard(Guid classForumResultId, CancellationToken cancellationToken)
+        public async Task DoQuestBoard(Guid classForumResultId, Guid courseId, CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeFiveTeacherReview, EnumQuestBoardCategory.SeeTenTeacherReview };
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var studentId = student?.Content?.Result?.Id ?? default;
 
-            var archievePoint = await _classForumResultRepository.Queryable
+            var classForumResultsViewed = await _classForumResultRepository.Queryable
                             .Where(x => x.Id == classForumResultId && x.IsViewed && x.StudentId == studentId)
                             .ToListAsync(cancellationToken);
-            var archievePointCount = archievePoint.Count;
-
-            var courseId = await _classForumResultRepository.Queryable.Include(x => x.LessonResult).Where(x => x.Id == classForumResultId && x.IsViewed && x.StudentId == studentId).Select(x => x.LessonResult!.CourseId).FirstOrDefaultAsync(cancellationToken);
+            var classForumResultsViewedCount = classForumResultsViewed.Count;
 
             await _questBoardPublisher.Publish(new QuestBoardQueueModel
             {
                 StudentId = studentId,
                 Categories = categories,
-                AchievedPoint = archievePointCount,
+                AchievedPoint = classForumResultsViewedCount,
                 ObjectId = classForumResultId,
                 CourseId = courseId,
             }, cancellationToken);

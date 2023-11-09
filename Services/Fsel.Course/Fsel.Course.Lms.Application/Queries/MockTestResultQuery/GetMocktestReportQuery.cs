@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 mockTestResultModel.IsTeacherGraded = await IsTeacherGraded(mockTestResult);
             }
 
-            await DoQuestBoard(request.MockTestResultId, cancellationToken);
+            await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken);
 
             methodResult.Result = mockTestResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -134,24 +134,22 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             return true;
         }
 
-        public async Task DoQuestBoard(Guid mockTestResultId, CancellationToken cancellationToken)
+        public async Task DoQuestBoard(Guid mockTestResultId, Guid courseId, CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeFiveTeacherReview, EnumQuestBoardCategory.SeeTenTeacherReview };
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var studentId = student?.Content?.Result?.Id;
 
-            var archievePoint = await _mockTestResultRepository.Queryable
+            var mockTestResultsViewed = await _mockTestResultRepository.Queryable
                             .Where(x => x.Id == mockTestResultId && x.IsViewed && x.StudentId == studentId)
                             .ToListAsync(cancellationToken);
-            var archievePointCount = archievePoint.Count;
-
-            var courseId = await _mockTestResultRepository.Queryable.Where(x => x.Id == mockTestResultId).Select(x => x.CourseId).FirstOrDefaultAsync(cancellationToken);
+            var mockTestResultsViewedCount = mockTestResultsViewed.Count;
 
             await _questBoardPublisher.Publish(new QuestBoardQueueModel
             {
                 StudentId = (Guid)studentId!,
                 Categories = categories,
-                AchievedPoint = archievePointCount,
+                AchievedPoint = mockTestResultsViewedCount,
                 ObjectId = mockTestResultId,
                 CourseId = courseId
             }, cancellationToken);
