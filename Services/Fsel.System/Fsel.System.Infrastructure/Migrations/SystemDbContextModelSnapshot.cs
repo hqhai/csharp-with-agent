@@ -936,9 +936,25 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("DisplayType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<int>("MaxPoints")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Operator")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TaskPageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -970,7 +986,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -980,7 +999,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -990,7 +1012,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -1000,7 +1025,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -1010,7 +1038,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -1020,8 +1051,193 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("1b35cdbf-98a7-4ce7-9b71-f457b386d62c"),
+                            Category = "FinishOneClassForumPost",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("9935cdbf-98a7-4ce7-9b71-f457b386d64c"),
+                            Category = "CommentOnOtherPost",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0a20cb15-8629-41d9-88d9-890a3b487496"),
+                            Category = "ThirtyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("2ca29e0c-4f81-40c6-9a0c-040d270d0433"),
+                            Category = "NinetyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("406c775b-51e8-4742-8c4b-a898ae2b8924"),
+                            Category = "OneHundredTwentytyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("e1c02bbc-0c98-40a0-b7e0-807b5f137c3b"),
+                            Category = "OneHundredEightyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("62767c8d-6e18-4d11-a74e-fe38eab7fa58"),
+                            Category = "SixtyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("8333c5e5-e853-45fb-8abf-1a09336af78e"),
+                            Category = "SeeFiveTeacherReview",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 5,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("ac0f0c74-cc2a-41a2-a82f-748ed5f2c75c"),
+                            Category = "SeeTenTeacherReview",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 10,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("7a37fa61-1a04-4d70-8590-90fa3d563d8e"),
+                            Category = "SeeAllTeacherReview",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Percent",
+                            IsDeleted = false,
+                            MaxPoints = 100,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("f31d44ff-226e-4244-a9a0-a06ed397368a"),
+                            Category = "PostOneDiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0c1633d5-f145-44c7-80c3-a167c0bbd1a1"),
+                            Category = "PostThreeDiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 3,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("85659470-7d45-4ddf-8b3c-dba6458bf4f4"),
+                            Category = "PostFiveDiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 5,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0407d174-a779-46e9-bbe4-5f27ae6075b6"),
+                            Category = "ParticipationScore",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Percent",
+                            IsDeleted = false,
+                            MaxPoints = 80,
+                            Operator = "GreaterThan",
+                            Type = "PremiumQuests"
                         });
                 });
 
@@ -1031,6 +1247,12 @@ namespace Fsel.System.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
+
+                    b.Property<float>("AchievedPoints")
+                        .HasColumnType("real");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")

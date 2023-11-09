@@ -3,36 +3,181 @@
     "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
     "type": "MainQuests",
     "category": "FinishOneLesson",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   },
   {
     "id": "72933280-e14b-4715-a802-dcd88e031e79",
     "type": "MainQuests",
     "category": "FinishOneHomeworkMiniProject",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   },
   {
     "id": "cfce3f4b-66d5-467d-8f57-50a089257bcb",
     "type": "MainQuests",
     "category": "FinishOneUnitTest",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   },
   {
     "id": "7b436441-ef2f-4a83-be79-ee5ec5f18355",
     "type": "MainQuests",
     "category": "FinishOneUnit",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   },
   {
     "id": "64c0a3a5-849c-412d-86b6-3f5e4809cc84",
     "type": "MainQuests",
     "category": "FinishOneFinalTest",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
   },
   {
     "id": "bb35cdbf-98a7-4ce7-9b71-f457b386d64c",
     "type": "MainQuests",
     "category": "FinishOneLevelPass",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
     "createdDate": "2023-07-21"
+  },
+  {
+    "id": "1b35cdbf-98a7-4ce7-9b71-f457b386d62c",
+    "type": "MainQuests",
+    "category": "FinishOneClassForumPost",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "9935cdbf-98a7-4ce7-9b71-f457b386d64c",
+    "type": "MainQuests",
+    "category": "CommentOnOtherPost",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "8333c5e5-e853-45fb-8abf-1a09336af78e",
+    "type": "PremiumQuests",
+    "category": "SeeFiveTeacherReview",
+    "operator": "Equal",
+    "maxPoints": 5,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "ac0f0c74-cc2a-41a2-a82f-748ed5f2c75c",
+    "type": "PremiumQuests",
+    "category": "SeeTenTeacherReview",
+    "operator": "Equal",
+    "maxPoints": 10,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "7a37fa61-1a04-4d70-8590-90fa3d563d8e",
+    "type": "PremiumQuests",
+    "category": "SeeAllTeacherReview",
+    "operator": "Equal",
+    "maxPoints": 100,
+    "displayType": "Percent",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "f31d44ff-226e-4244-a9a0-a06ed397368a",
+    "type": "PremiumQuests",
+    "category": "PostOneDiscussionBoard",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "0c1633d5-f145-44c7-80c3-a167c0bbd1a1",
+    "type": "PremiumQuests",
+    "category": "PostThreeDiscussionBoard",
+    "operator": "Equal",
+    "maxPoints": 3,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "85659470-7d45-4ddf-8b3c-dba6458bf4f4",
+    "type": "PremiumQuests",
+    "category": "PostFiveDiscussionBoard",
+    "operator": "Equal",
+    "maxPoints": 5,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "0407d174-a779-46e9-bbe4-5f27ae6075b6",
+    "type": "PremiumQuests",
+    "category": "ParticipationScore",
+    "operator": "GreaterThan",
+    "maxPoints": 80,
+    "displayType": "Percent",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "0A20CB15-8629-41D9-88D9-890A3B487496",
+    "type": "SideQuests",
+    "category": "ThirtyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "2CA29E0C-4F81-40C6-9A0C-040D270D0433",
+    "type": "SideQuests",
+    "category": "NinetyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "406C775B-51E8-4742-8C4B-A898AE2B8924",
+    "type": "SideQuests",
+    "category": "OneHundredTwentytyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "E1C02BBC-0C98-40A0-B7E0-807B5F137C3B",
+    "type": "SideQuests",
+    "category": "OneHundredEightyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "62767C8D-6E18-4D11-A74E-FE38EAB7FA58",
+    "type": "SideQuests",
+    "category": "SixtyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
   }
+
 ]
