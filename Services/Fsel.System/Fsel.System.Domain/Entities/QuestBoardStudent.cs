@@ -10,9 +10,6 @@ namespace Fsel.System.Domain.Entities
     public class QuestBoardStudent : Entity
     {
         public EnumQuestBoardStudentStatus Status { get; set; }
-
-        public float AchievedPoints { get; set; }
-
         public QuestBoard? QuestBoard { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
@@ -22,7 +19,5 @@ namespace Fsel.System.Domain.Entities
         public Guid StudentId { get; set; }
 
         public Guid? ObjectId { get; set; }
-
-        public Guid CourseId { get; set; }
     }
 }

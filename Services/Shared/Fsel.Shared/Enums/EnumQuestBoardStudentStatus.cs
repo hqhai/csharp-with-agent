@@ -6,6 +6,6 @@ namespace Fsel.Shared.Enums
     {
         Process,
         Done,
-        Achieved
+        Completed
     }
 }

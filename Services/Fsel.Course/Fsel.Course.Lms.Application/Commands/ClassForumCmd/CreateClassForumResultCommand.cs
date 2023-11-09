@@ -5,6 +5,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
+    using Azure.Core;
+    using Deepgram.Models;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -16,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -37,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ISystemService _systemService;
+
         public CreateClassForumResultCommandHandler(IMapper mapper
             , AuthContext authContext
             , IUserService userService
@@ -44,7 +48,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             , IClassForumRepository classForumRepository
             , ILessonResultRepository lessonResultRepository
             , NotificationMessagePublisher notificationMessagePublisher
-            , ISystemService systemService)
+            , ISystemService systemService
+            )
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -75,7 +80,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             }
 
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
@@ -88,7 +92,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 return methodResult;
             }
 
-
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.LessonId, cancellationToken);
             if (classForum == null)
             {
@@ -100,8 +103,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     .Include(x => x.ClassForumResultFiles)
                     .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
-
-
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
