@@ -30,6 +30,27 @@ namespace Fsel.Shared.Enums
         [Description("Bình luận vào một bài class forum của học sinh khác")]
         CommentOnOtherPost,
 
+        [Description("Xem phản 5 hồi giáo viên")]
+        SeeFiveTeacherReview,
+
+        [Description("Xem phản 10 hồi giáo viên")]
+        SeeTenTeacherReview,
+
+        [Description("Xem phản all hồi giáo viên")]
+        SeeAllTeacherReview,
+
+        [Description("Viết 1 bài discussion board")]
+        PostOneDiscussionBoard,
+
+        [Description("Viết 3 bài discussion board")]
+        PostThreeDiscussionBoard,
+
+        [Description("Viết 5 bài discussion board")]
+        PostFiveDiscussionBoard,
+
+        [Description("Điểm tham gia")]
+        ParticipationScore,
+
         [Description("Ba mươi phút / một lần")]
         ThirtyMinutesFocusMode,
 

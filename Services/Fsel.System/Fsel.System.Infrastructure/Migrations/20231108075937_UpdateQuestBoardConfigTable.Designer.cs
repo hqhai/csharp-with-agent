@@ -4,6 +4,7 @@ using Fsel.System.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    partial class SystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231108075937_UpdateQuestBoardConfigTable")]
+    partial class UpdateQuestBoardConfigTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1085,71 +1088,6 @@ namespace Fsel.System.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("0a20cb15-8629-41d9-88d9-890a3b487496"),
-                            Category = "ThirtyMinutesFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("2ca29e0c-4f81-40c6-9a0c-040d270d0433"),
-                            Category = "NinetyMinutesFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("406c775b-51e8-4742-8c4b-a898ae2b8924"),
-                            Category = "OneHundredTwentytyMinutesFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("e1c02bbc-0c98-40a0-b7e0-807b5f137c3b"),
-                            Category = "OneHundredEightyMinutesFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
-                            Id = new Guid("62767c8d-6e18-4d11-a74e-fe38eab7fa58"),
-                            Category = "SixtyMinutesFocusMode",
-                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayType = "Number",
-                            IsDeleted = false,
-                            MaxPoints = 1,
-                            Operator = "Equal",
-                            Type = "SideQuests"
-                        },
-                        new
-                        {
                             Id = new Guid("8333c5e5-e853-45fb-8abf-1a09336af78e"),
                             Category = "SeeFiveTeacherReview",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -1235,8 +1173,8 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayType = "Percent",
                             IsDeleted = false,
-                            MaxPoints = 80,
-                            Operator = "GreaterThan",
+                            MaxPoints = 100,
+                            Operator = "Equal",
                             Type = "PremiumQuests"
                         });
                 });
@@ -1250,9 +1188,6 @@ namespace Fsel.System.Infrastructure.Migrations
 
                     b.Property<float>("AchievedPoints")
                         .HasColumnType("real");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
