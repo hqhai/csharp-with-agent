@@ -4,6 +4,7 @@ using Fsel.System.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    partial class SystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231108075937_UpdateQuestBoardConfigTable")]
+    partial class UpdateQuestBoardConfigTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1170,8 +1173,8 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayType = "Percent",
                             IsDeleted = false,
-                            MaxPoints = 80,
-                            Operator = "GreaterThan",
+                            MaxPoints = 100,
+                            Operator = "Equal",
                             Type = "PremiumQuests"
                         });
                 });
@@ -1185,9 +1188,6 @@ namespace Fsel.System.Infrastructure.Migrations
 
                     b.Property<float>("AchievedPoints")
                         .HasColumnType("real");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
