@@ -93,7 +93,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
 
             questBoards = questBoards.Where(baseQ => baseQ.PackageIds != null && baseQ.PackageIds.Count > 0 && baseQ.PackageIds.Any(x => x == student.PackageId)).ToList();
 
-            var questBoardDepentDoneIds = questBoards.Where(x => x.Status == EnumQuestBoardStudentStatus.Completed).Select(x => x.Id).ToList();
+            var questBoardDepentDoneIds = questBoards.Select(x => x.Id).ToList();
             if (questBoardDepentDoneIds.Any())
             {
                 var questBoardDepents = await _questBoardRepository.Queryable
