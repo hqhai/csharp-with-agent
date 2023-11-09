@@ -43,18 +43,6 @@ namespace Fsel.System.Api.Controllers.Student
         /// <summary>
         /// List Quest Board
         /// </summary>
-        [HttpGet("get-list-by-category/{packageId}/{categoryBoards}")]
-        [ProducesResponseType(typeof(MethodResult<IList<QuestBoardModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetList([FromRoute] Guid packageId, string categoryBoards)
-        {
-            var queryResult = await _mediator.Send(new GetListQuestBoardQuery { PackageId = packageId, CategoryBoardStr = categoryBoards }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// List Quest Board
-        /// </summary>
         [HttpGet("get-list-quest-board-student")]
         [ProducesResponseType(typeof(MethodResult<IList<QuestBoardByStudentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

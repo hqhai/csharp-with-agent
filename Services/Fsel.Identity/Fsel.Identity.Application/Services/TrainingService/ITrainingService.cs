@@ -24,8 +24,5 @@ namespace Fsel.Identity.Application.Services.TrainingService
 
         [Post("/admin/class/user-class-by-csoids")]
         Task<IApiResponse<MethodResult<List<UserClassModel>>>> GetUserClassByCSOIdsAsync([FromBody] IList<Guid> ids);
-
-        [Get("/admin/class/get-by-id/{id}")]
-        Task<IApiResponse<MethodResult<ClassModel>>> GetClassById([FromRoute] Guid? Id);
     }
 }
