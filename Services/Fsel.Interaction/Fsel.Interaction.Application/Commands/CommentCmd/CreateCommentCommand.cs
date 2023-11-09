@@ -12,7 +12,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.SystemService;
-    using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
@@ -37,11 +36,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly AuthContext _authContext;
         private readonly ICourseService _courseService;
         private readonly ISystemService _systemService;
-        private readonly IUserService _userService;
-        private readonly QuestBoardPublisher _questBoardPublisher;
-        private const float Achieved_Point = 1; // nhiệm vụ làm 1 lần nên achievepoint luôn là 1
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, IUserService userService, QuestBoardPublisher questBoardPublisher)
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
@@ -50,8 +46,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _classForumCommentPublisher = classForumCommentPublisher;
             _courseService = courseService;
             _systemService = systemService;
-            _userService = userService;
-            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -80,6 +74,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 NotificationQueueModel model = new NotificationQueueModel();
+
                 switch (request.Type)
                 {
                     case EnumInteractionType.DiscussionBoard:
@@ -123,16 +118,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, request.ObjectId, comment.Id },
                             PlatformCode = EnumPlatformCode.LMS
                         };
-
-                        #region DoQuestBoard
-                        if (_authContext.CurrentUserId != postOwner!.CreatedUserId)
-                        {
-                            await DoQuestBoard(classForumResult!.CourseId, comment.Id, cancellationToken);
-                        }
-                        #endregion
-
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
-
                         break;
 
                     case EnumInteractionType.ReplyComment:
@@ -181,27 +167,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             });
 
             return methodResult;
-        }
-
-        public async Task DoQuestBoard(Guid courseId, Guid commentId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id;
-
-            var hasFirstComment = _commentRepository.Queryable.Any(c => c.CreatedUserId == _authContext.CurrentUserId && c.Type == EnumInteractionType.ClassForum);
-
-            if (!hasFirstComment)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = Achieved_Point,
-                    ObjectId = commentId,
-                    CourseId = courseId,
-                }, cancellationToken);
-            }
         }
     }
 }

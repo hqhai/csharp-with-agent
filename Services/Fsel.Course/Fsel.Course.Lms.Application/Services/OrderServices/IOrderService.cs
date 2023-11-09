@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
     using Fsel.Common.ActionResults;
     using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Shared.Enums;
-    using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface IOrderService
@@ -18,8 +17,5 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
 
         [Post("/order")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
-
-        [Get("/order/get-list-order")]
-        Task<IApiResponse<MethodResult<Guid>>> GetPackageId([FromRoute] Guid userId);
     }
 }
