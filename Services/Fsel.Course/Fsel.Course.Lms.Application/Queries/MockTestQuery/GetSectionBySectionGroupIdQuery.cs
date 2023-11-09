@@ -74,10 +74,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 return methodResult;
             }
 
-            var (sections, totalCount) = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
+            var (sections, totalCount) = await GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill, mockTestResult);
 
             var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
-            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(await GetAndAddSectionGroupResult(request, studentId));
+            var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId);
+            sectonGroupDetail.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectonGroupDetail.Sections = GetSections(sections, sectionGroup.CourseSkill);
             sectonGroupDetail.TotalQuestion = totalCount;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -116,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             return sectionDetail;
         }
 
-        private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill)
+        private async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill, MockTestResult mockTestResult)
         {
             var sections = new List<Section>();
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
@@ -127,12 +128,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             }
             else if (skill == EnumCourseSkill.Writing)
             {
-                sections = await _sectionRepository.Queryable.Include(x => x.MockTestAnswers).Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
+                sections = await _sectionRepository.Queryable.Include(x => x.MockTestAnswers.Where(x => x.MockTestResultId == mockTestResult.Id)).Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
                                                                     .ToListAsync();
             }
             else
             {
-                sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).ThenInclude(x => x.MockTestAnswers)
+                sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).ThenInclude(x => x.MockTestAnswers.Where(x => x.MockTestResultId == mockTestResult.Id))
                                                             .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
                                                             .ToListAsync();
             }
