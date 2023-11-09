@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
@@ -19,7 +20,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     {
         private readonly IMediator _mediator;
 
-        public ClassForumResultController(IMediator mediator)
+        public ClassForumResultController(IMediator mediator, IClassForumResultRepository classForumResultRepository)
         {
             _mediator = mediator;
         }
@@ -50,17 +51,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
             return commandResult.GetActionResult();
         }
 
-        /// <summary>
-        /// approve flagged class forum
-        /// </summary>
-        [HttpPost("approve-flagged")]
-        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ApproveFlagged([FromBody] ApproveFlaggedClassForumResultCommand command)
-        {
-            MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
 
         /// <summary>
         /// Get Class Forum Result
@@ -87,15 +77,15 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Search Class forum result
+        /// Get Class Forum Result
         /// </summary>
-        [HttpGet("search-by-flagged")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-by-id")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchByFlagged([FromQuery] SearchClassForumResultHasBeenFlaggedQuery query)
+        public async Task<IActionResult> GetClassForumResult([FromQuery] GetClassForumResultByIdQuery query)
         {
-            MethodResult<PagingItemsModel<ClassForumResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
