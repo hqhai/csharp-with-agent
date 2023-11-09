@@ -5,6 +5,7 @@ namespace Fsel.Interaction.Application.Services.UserServices
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Services.UserServices.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -22,5 +23,8 @@ namespace Fsel.Interaction.Application.Services.UserServices
 
         [Post("/user/get-users-by-ids")]
         Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetUsersByIdsAsync([Body] GetUsersByIdsQueryModel model);
+
+        [Get("/student/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> ExecuteListStudentQueryAsync([Query] BaseQueryModel query);
     }
 }

@@ -143,6 +143,20 @@
         }
       ]
     },
+    // Cms Planet Defender Service
+    {
+      "SwaggerKey": "cms-planet-defender",
+      "UpstreamPathTemplate": "/cms-planet-defender-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "cms-planet-defender-testing.fsel-testing.svc",
+          "Port": 80
+        }
+      ]
+    },
     // Realtime Service
     {
       "SwaggerKey": "realtime",
@@ -270,6 +284,16 @@
           "Name": "System API",
           "Version": "v1",
           "Url": "http://system-testing.fsel-testing.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "cms-planet-defender",
+      "Config": [
+        {
+          "Name": "Cms Planet Defender API",
+          "Version": "v1",
+          "Url": "http://cms-planet-defender-testing.fsel-testing.svc/swagger/v1/swagger.json"
         }
       ]
     },
