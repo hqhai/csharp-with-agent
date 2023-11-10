@@ -8,6 +8,9 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.StudentCmd;
+using Fsel.Identity.Application.Queries.StudentQuery;
+using Fsel.Identity.Application.Queues.Publishers;
+using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -18,6 +21,7 @@ using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
+using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +42,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly ITrainingService _trainingService;
+        private const float Archieve_Point = 1; // Những nhiệm vụ làm 1 lần thì achieve point sẽ là 1
+        private readonly IHumanRepository _humanRepository;
+
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
@@ -45,7 +54,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IMediator mediator,
             IUserOtpCodeRepository userOtpCodeRepository,
             AppSetting appSetting,
-            IPlatformRepository platformRepository)
+            IPlatformRepository platformRepository,
+            QuestBoardPublisher questBoardPublisher,
+            ITrainingService trainingService,
+            IHumanRepository humanRepository
+            )
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -54,6 +67,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
             _platformRepository = platformRepository;
+            _questBoardPublisher = questBoardPublisher;
+            _trainingService = trainingService;
+            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -145,12 +161,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                                 if (!string.IsNullOrEmpty(request.ReferralCode))
                                 {
+
                                     var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
                                     if (!updateReferralCodeResult.IsOK)
                                     {
                                         methodResult.AddError(updateReferralCodeResult.ErrorMessages);
                                         return methodResult;
                                     }
+                                    // làm nhiệm vụ
+                                    await DoQuestBoard(request.ReferralCode, cancellationToken);
+
                                 }
                             }
 
@@ -231,6 +251,34 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
+        }
+        public async Task DoQuestBoard(string code, CancellationToken cancellationToken)
+        {
+            var humanId = _humanRepository!.Queryable!.FirstOrDefault(x => x.Code == code)!.Id;
+
+            var humanInfo = await _humanRepository.GetIncludeByIdAsync(humanId);
+            if (humanInfo?.Student != null)
+            {
+                IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SuccessfulIntroduceCode };
+                var studentId = humanInfo!.Student!.Id;
+                var classModel = await _trainingService.GetClassByStudentId(studentId!);
+
+
+
+                if (classModel?.Content?.Result != null && classModel?.Content?.Result.CourseId != null)
+                {
+                    var courseId = classModel.Content!.Result!.CourseId;
+                    QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
+                    {
+                        StudentId = studentId!,
+                        Categories = categories,
+                        AchievedPoint = Archieve_Point,
+                        CourseId = courseId
+                    };
+
+                    await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
+                }
+            }
         }
     }
 }

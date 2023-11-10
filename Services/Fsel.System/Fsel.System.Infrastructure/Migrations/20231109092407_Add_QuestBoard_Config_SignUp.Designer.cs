@@ -4,6 +4,7 @@ using Fsel.System.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    partial class SystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231109092407_Add_QuestBoard_Config_SignUp")]
+    partial class Add_QuestBoard_Config_SignUp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1241,8 +1244,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("0ddf9f6f-d2cb-49c2-858a-f4afb3233dee"),
-                            Category = "SuccessfulIntroduceCode",
+                            Id = new Guid("1578bd50-d750-4f72-96f7-034572258335"),
+                            Category = "LoggedInSuccessfully",
                             CreatedDate = new DateTime(2023, 11, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
