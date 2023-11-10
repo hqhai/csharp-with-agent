@@ -67,6 +67,6 @@ namespace Fsel.Shared.Enums
         OneHundredEightyMinutesFocusMode,
 
         [Description("Mã giới thiệu của bạn được nhập thành công 1 lần")]
-        LoggedInSuccessfully,
+        SuccessfulIntroduceCode,
     }
 }

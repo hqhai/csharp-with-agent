@@ -256,22 +256,29 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             var humanId = _humanRepository!.Queryable!.FirstOrDefault(x => x.Code == code)!.Id;
 
-            var humanInfo =  await _humanRepository.GetIncludeByIdAsync(humanId);
-
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.LoggedInSuccessfully };
-            var studentId = humanInfo!.Student!.Id;
-            var classModel = await _trainingService.GetClassByStudentId(studentId!);
-            var courseId = classModel.Content!.Result!.CourseId;
-
-            QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
+            var humanInfo = await _humanRepository.GetIncludeByIdAsync(humanId);
+            if (humanInfo?.Student != null)
             {
-                StudentId = studentId!,
-                Categories = categories,
-                AchievedPoint = Archieve_Point,
-                CourseId = courseId
-            };
-            await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
+                IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SuccessfulIntroduceCode };
+                var studentId = humanInfo!.Student!.Id;
+                var classModel = await _trainingService.GetClassByStudentId(studentId!);
 
+
+
+                if (classModel?.Content?.Result != null && classModel?.Content?.Result.CourseId != null)
+                {
+                    var courseId = classModel.Content!.Result!.CourseId;
+                    QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
+                    {
+                        StudentId = studentId!,
+                        Categories = categories,
+                        AchievedPoint = Archieve_Point,
+                        CourseId = courseId
+                    };
+
+                    await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
+                }
+            }
         }
     }
 }

@@ -180,9 +180,9 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "1578BD50-D750-4F72-96F7-034572258335",
+    "id": "0DDF9F6F-D2CB-49C2-858A-F4AFB3233DEE",
     "type": "SideQuests",
-    "category": "LoggedInSuccessfully",
+    "category": "SuccessfulIntroduceCode",
     "operator": "Equal",
     "maxPoints": 1,
     "displayType": "Number",
