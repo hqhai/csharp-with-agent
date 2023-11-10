@@ -178,6 +178,15 @@
     "maxPoints": 1,
     "displayType": "Number",
     "createdDate": "2023-11-07"
+  },
+  {
+    "id": "1578BD50-D750-4F72-96F7-034572258335",
+    "type": "SideQuests",
+    "category": "LoggedInSuccessfully",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-09"
   }
 
 ]

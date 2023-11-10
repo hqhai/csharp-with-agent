@@ -65,5 +65,8 @@ namespace Fsel.Shared.Enums
 
         [Description("Focus Mode V: Bạn cần lựa chọn mốc tập trung 180 phút và hoàn thành mốc tập trung này một lần")]
         OneHundredEightyMinutesFocusMode,
+
+        [Description("Mã giới thiệu của bạn được nhập thành công 1 lần")]
+        LoggedInSuccessfully,
     }
 }
