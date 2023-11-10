@@ -105,14 +105,16 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             Random random = new Random();
             var placementTest = new PlacementTest();
             var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Level == level).FirstOrDefaultAsync(cancellationToken);
+            var placementTestQuery = _placementTestRepository.Queryable.Include(x => x.PlacementTestSections)
+                                                            .ThenInclude(x => x.SectionGroup)
+                                                            .ThenInclude(x => x!.Sections)
+                                                            .ThenInclude(x => x.SectionQuestions)
+                                                           .Include(x => x.PlacementTestSections)
+                                                           .ThenInclude(x => x.SectionGroup)
+                                                           .ThenInclude(x => x!.SectionGroupResults.Where(x => x.StudentId == studentId));
             if (placementTestResult == null)
             {
-                var placementTests = await _placementTestRepository.Queryable.Include(x => x.PlacementTestSections)
-                                                            .ThenInclude(x => x.SectionGroup)
-                                                            .ThenInclude(x => x.Sections)
-                                                            .ThenInclude(x => x.SectionQuestions)
-                                                            .Where(x => x.Level == level && x.IsActive)
-                                                            .ToListAsync(cancellationToken);
+                var placementTests = await placementTestQuery.Where(x => x.Level == level && x.IsActive).ToListAsync(cancellationToken);
                 placementTest = placementTests.OrderBy(x => random.Next()).FirstOrDefault();
                 if (placementTest != null)
                 {
@@ -123,12 +125,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             }
             else
             {
-                placementTest = await _placementTestRepository.Queryable.Include(x => x.PlacementTestSections)
-                                                           .ThenInclude(x => x.SectionGroup)
-                                                           .ThenInclude(x => x.Sections)
-                                                           .ThenInclude(x => x.SectionQuestions)
-                                                           .Where(x => x.Id == placementTestResult.PlacementTestId)
-                                                           .FirstOrDefaultAsync(cancellationToken);
+                placementTest = await placementTestQuery.Where(x => x.Id == placementTestResult.PlacementTestId).FirstOrDefaultAsync(cancellationToken);
             }
             return (placementTest, placementTestResult);
         }

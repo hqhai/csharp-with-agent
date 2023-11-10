@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.PlacementTestCmd;
     using Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -46,6 +47,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetSectionsBySectionGroup([FromQuery] GetSectionBySectionGroupIdQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create PlacementTest Answers
+        /// </summary>
+        [HttpPost("create-answers")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [ProducesResponseType(typeof(MethodResult<SectionGroupResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateAnswer([FromBody] CreatePlacementTestAnswerBySectionGroupCommand command)
+        {
+            MethodResult<SectionGroupResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
