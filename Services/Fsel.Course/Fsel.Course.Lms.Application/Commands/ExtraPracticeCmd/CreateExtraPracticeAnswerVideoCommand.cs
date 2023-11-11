@@ -98,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             if (request.Answers != null && request.Answers.Count != 0)
             {
                 var questionIds = request.Answers.Where(x => x.QuestionId != null).Select(x => x.QuestionId ?? default).ToList();
-                var questions = await _questionRepository.GetIncludeTimeCodeByIdAsync(questionIds);
+                var questions = await _questionRepository.GetListAsync(questionIds);
                 int correctCountStudent = 0;
                 int correctTotal = 0;
                 foreach (var item in request.Answers)

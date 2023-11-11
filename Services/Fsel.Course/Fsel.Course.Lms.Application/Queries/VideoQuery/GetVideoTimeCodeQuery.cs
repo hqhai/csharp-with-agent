@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -19,7 +20,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     public class GetVideoTimeCodeQuery : IRequest<MethodResult<VideoModel>>
     {
         public Guid VideoId { get; set; }
-        public Guid? LessonResultId { get; set; }
+        public Guid LessonResultId { get; set; }
     }
 
     public class GetVideoTimeCodeQueryHandler : IRequestHandler<GetVideoTimeCodeQuery, MethodResult<VideoModel>>
@@ -28,18 +29,21 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly AuthContext _authContext;
         private readonly VideoConverter _videoConverter;
+        private readonly IMapper _mapper;
         private readonly IUserService _userService;
 
         public GetVideoTimeCodeQueryHandler(IVideoRepository videoRepository,
             IVideoResultRepository videoResultRepository,
             AuthContext authContext,
             VideoConverter videoConverter,
+            IMapper mapper,
             IUserService userService)
         {
             _videoRepository = videoRepository;
             _videoResultRepository = videoResultRepository;
             _authContext = authContext;
             _videoConverter = videoConverter;
+            _mapper = mapper;
             _userService = userService;
         }
 
@@ -56,8 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             }
             var studentId = studentsResult.Content?.Result?.Id;
 
-            var videoResult = await _videoResultRepository.Queryable.Where(x => !request.LessonResultId.HasValue || x.LessonResultId == request.LessonResultId)
-                .FirstOrDefaultAsync(x => x.VideoId == request.VideoId && x.StudentId == studentId, cancellationToken);
+            var videoResult = await _videoResultRepository.Queryable.Where(x => x.LessonResultId == request.LessonResultId && x.VideoId == request.VideoId && x.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
@@ -68,7 +71,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                 .Include(x => x.LessonVideos)
                                 .Include(i => i.VideoTimeCodes)
                                 .ThenInclude(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
-                                .Include(i => i.VideoResults)
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -78,33 +80,9 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
-
-            var videoModel = new VideoModel
-            {
-                Id = video.Id,
-                Name = video.Name,
-                VideoFilePath = video.VideoFilePath,
-                IsActive = video.LessonVideos.Any(),
-                TeacherId = video.TeacherId,
-                CourseLevel = video.CourseLevel,
-                SubFilePath = video.SubFilePath,
-                Type = video.Type,
-                VideoTimeCodes = _videoConverter.GetTimeCodes(video, videoResult.Id),
-                VideoResult = video.VideoResults.Where(x => x.Id == videoResult.Id).Select(x => new VideoResultModel
-                {
-                    Id = x.Id,
-                    CorrectCount = x.CorrectCount,
-                    CorrectTotal = x.CorrectTotal,
-                    Feedback = x.Feedback,
-                    CurrentVideoTimeCodeId = x.CurrentVideoTimeCodeId,
-                    NumberOfStars = x.NumberOfStars,
-                    Percent = x.Percent,
-                    Status = x.Status,
-                    LessonResultId = x.LessonResultId,
-                    StudentId = x.StudentId,
-                    VideoId = x.VideoId,
-                }).FirstOrDefault(),
-            };
+            var videoModel = _mapper.Map<VideoModel>(video);
+            videoModel.VideoTimeCodes = _videoConverter.GetTimeCodes(video, videoResult.Id);
+            videoModel.VideoResult = _mapper.Map<VideoResultModel>(videoResult);
             methodResult.Result = videoModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

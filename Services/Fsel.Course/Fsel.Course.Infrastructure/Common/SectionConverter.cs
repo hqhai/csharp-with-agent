@@ -54,14 +54,9 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (sectionGroupResult.Status == EnumResultStatus.Done && sectionGroupResult.UpdatedDate.HasValue)
             {
-                return GetRemainingTime(sectionGroupResult.CreatedDate, sectionGroupResult.UpdatedDate.Value, sectionGroup.ExecutionTime);
+                return sectionGroup.ExecutionTime - Shared.Helpers.DateTimeHelper.GetWorkingTime(sectionGroupResult.CreatedDate, sectionGroupResult.UpdatedDate.Value, sectionGroup.ExecutionTime);
             }
-            return GetRemainingTime(sectionGroupResult.CreatedDate, DateTime.UtcNow, sectionGroup.ExecutionTime);
-        }
-
-        private static double GetRemainingTime(DateTime inputDate, DateTime outputDate, double executionTime)
-        {
-            return (outputDate - inputDate).TotalSeconds >= executionTime ? executionTime : NumberHelper.ConvertRound((outputDate - inputDate).TotalSeconds);
+            return sectionGroup.ExecutionTime - Shared.Helpers.DateTimeHelper.GetWorkingTime(sectionGroupResult.CreatedDate, DateTime.UtcNow, sectionGroup.ExecutionTime);
         }
 
         public async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill, bool isMockTest = false)
