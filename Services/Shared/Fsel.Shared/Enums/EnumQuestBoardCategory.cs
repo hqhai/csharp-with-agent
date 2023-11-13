@@ -65,5 +65,23 @@ namespace Fsel.Shared.Enums
 
         [Description("Focus Mode V: Bạn cần lựa chọn mốc tập trung 180 phút và hoàn thành mốc tập trung này một lần")]
         OneHundredEightyMinutesFocusMode,
+
+        [Description("Tương tác (Comment/React) trong Discussion Board ")]
+        DiscussionBoardInteract,
+
+        [Description("Hoàn thành mốc Focus Mode hôm nay")]
+        FinishDailyFocusMode,
+
+        [Description("Tương tác tính năng \"Học\" trong 20 phút")]
+        LearnInteractTwentyMinutes,
+
+        [Description("Comment on two of the classmates' submissions for the Newest lesson")]
+        CommentOnNewLessonOfTwoClassMate,
+
+        [Description("Complete your homework with an overall score of (a score of 50%) or over ")]
+        CompleteHomeWorkAtLeastFiftyPercent,
+
+        [Description("Revise your notes")]
+        ReviseYourNotes
     }
 }

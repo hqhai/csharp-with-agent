@@ -15,5 +15,7 @@ namespace Fsel.System.Domain.Models.CommandModels.QuestBoards
         public Guid? ObjectId { get; set; }
 
         public Guid CourseId { get; set; }
+
+        public DateTime? ImplementTime { get; set; }
     }
 }

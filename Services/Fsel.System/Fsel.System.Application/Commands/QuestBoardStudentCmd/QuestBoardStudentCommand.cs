@@ -3,9 +3,7 @@
 namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Shared.Enums;
-    using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.QuestBoards;
@@ -21,12 +19,16 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
     {
         private readonly IQuestBoardRepository _questBoardRepository;
         private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
+        private readonly IQuestBoardConfigRepository _questBoardConfigRepository;
 
-        public QuestBoardStudentCommandHandler(IQuestBoardRepository questBoardRepository
-            , IQuestBoardStudentRepository questBoardStudentRepository)
+        public QuestBoardStudentCommandHandler(
+            IQuestBoardRepository questBoardRepository,
+            IQuestBoardStudentRepository questBoardStudentRepository,
+            IQuestBoardConfigRepository questBoardConfigRepository)
         {
             _questBoardRepository = questBoardRepository;
             _questBoardStudentRepository = questBoardStudentRepository;
+            _questBoardConfigRepository = questBoardConfigRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(QuestBoardStudentCommand request, CancellationToken cancellationToken)
@@ -40,11 +42,32 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                                   join item2 in _questBoardRepository.Queryable on item equals item2.Category
                                   select item2;
 
-            var listQuestBoard = questBoardQuery.ToList();
+            var questBoardDaily = from item in request.Categories
+                                  join item2 in _questBoardRepository.Queryable on item equals item2.Category
+                                  join item3 in _questBoardConfigRepository.Queryable on item equals item3.Category
+                                  select item2;
 
+            List<QuestBoard> listQuestBoard = new List<QuestBoard>();
+
+            if (questBoardDaily.ToList().Count > 0)
+            {
+                listQuestBoard = questBoardDaily.ToList();
+                if (request.ImplementTime != null && !CheckDailyQuest((DateTime)request.ImplementTime))
+                {
+                    methodResult.Result = false;
+                    return methodResult;
+                }
+
+            }
+            else
+            {
+                listQuestBoard = questBoardQuery.ToList();
+            }
 
             IList<QuestBoardStudent> questBoardStudentToUpdate = new List<QuestBoardStudent>();
             IList<QuestBoardStudent> questBoardStudentToAdd = new List<QuestBoardStudent>();
+
+
 
             //check exists questboard
             if (request.Categories != null && request.Categories.Count > 0)
@@ -91,6 +114,17 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
             });
 
             return methodResult;
+        }
+
+        private static bool CheckDailyQuest(DateTime date)
+        {
+            var currentDate = DateTime.UtcNow;
+            bool result = false;
+            if (date.Date == currentDate.Date && date.Month == currentDate.Month && date.Year == currentDate.Year)
+            {
+                result = true;
+            }
+            return result;
         }
     }
 }

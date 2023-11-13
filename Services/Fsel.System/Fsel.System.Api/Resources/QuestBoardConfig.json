@@ -178,6 +178,69 @@
     "maxPoints": 1,
     "displayType": "Number",
     "createdDate": "2023-11-07"
+  },
+  {
+    "id": "82d67C8D-6E18-4D11-A74E-FE38EAB7FA58",
+    "type": "DailyQuests",
+    "category": "DiscussionBoardInteract",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "82d67C2R-6E18-4D11-A74E-FE38EAB7FA58",
+    "type": "DailyQuests",
+    "category": "DiscussionBoardInteract",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "82d67C2R-6E18-4D11-A74E-FE28EAB7FA48",
+    "type": "DailyQuests",
+    "category": "FinishDailyFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "82d67C2R-6E18-4D11-A74E-FE28EAB7FA22",
+    "type": "DailyQuests",
+    "category": "LearnInteractTwentyMinutes",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "82d67C2R-6E18-4D11-A74E-FE28EAB7FA33",
+    "type": "DailyQuests",
+    "category": "CommentOnNewLessonOfTwoClassMate",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "82d67C2R-6E18-4D11-A74E-FE28EAB7FA55",
+    "type": "DailyQuests",
+    "category": "CompleteHomeWorkAtLeastFiftyPercent",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "82d67C2R-6E18-4D11-A74E-FE28EAB7FA44",
+    "type": "DailyQuests",
+    "category": "ReviseYourNotes",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
   }
 
 ]
