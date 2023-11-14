@@ -28,6 +28,9 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
     public class GetLessonOverviewQueryHandler : IRequestHandler<GetLessonOverviewQuery, MethodResult<LessonOverviewModel>>
     {
+        private const int PercentVideo = 50;
+        private const int PercentClassForum = 20;
+        private const int PercentHomeWork = 30;
         private readonly IUserService _userService;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ILessonRepository _lessonRepository;
@@ -35,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly IUnitRepository _unitRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMapper _mapper;
+        private readonly IVideoRepository _videoRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly ITrainingService _trainingService;
@@ -47,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             IUnitRepository unitRepository,
             IMockTestResultRepository mockTestResultRepository,
             IMapper mapper,
+            IVideoRepository videoRepository,
             IUnitResultRepository unitResultRepository,
             IFinalTestResultRepository finalTestResultRepository,
             ITrainingService trainingService,
@@ -59,6 +64,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             _unitRepository = unitRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _mapper = mapper;
+            _videoRepository = videoRepository;
             _unitResultRepository = unitResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
             _trainingService = trainingService;
@@ -90,19 +96,19 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 return methodResult;
             }
             var course = await GetCourse(@class.CourseId, studentId, cancellationToken);
-            var courseResult = course?.CourseResults.FirstOrDefault();
             if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            var courseResult = course.CourseResults.FirstOrDefault();
             if (courseResult == null || courseResult.Status == EnumResultStatus.New)
             {
                 var (lesson, objectId, type, objectStatus) = await GetLesson(default, studentId, course, cancellationToken);
-                lessonOverview = GetLessonOverview(lesson, default, studentId, objectId, type, objectStatus);
+                lessonOverview = await GetLessonOverview(lesson, default, studentId, objectId, type, objectStatus);
                 if (courseResult == null)
                 {
-                    lessonOverview = GetLessonOverview(lesson, default, studentId, course.Id, nameof(Course), EnumResultStatus.New);
+                    lessonOverview = await GetLessonOverview(lesson, default, studentId, course.Id, nameof(Course), EnumResultStatus.New);
                 }
             }
             else
@@ -113,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 Guid? objectId = lesson?.Id;
                 EnumResultStatus? objectStatus = lessonResult?.Status;
 
-                if ((lessonResult != null && lessonResult.Status == EnumResultStatus.Done) || lessonResult == null)
+                if (lessonResult == null || lessonResult.Status == EnumResultStatus.Done)
                 {
                     (lesson, objectId, type, objectStatus) = await GetLesson(lessonResult, studentId, course, cancellationToken);
                     if (lessonResult != null)
@@ -123,11 +129,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 }
                 if (courseResult.Status == EnumResultStatus.Done)
                 {
-                    lessonOverview = GetLessonOverview(lesson, lessonResult, studentId, @class.CourseId, nameof(Course), EnumResultStatus.Done, courseResult.SkillScores);
+                    lessonOverview = await GetLessonOverview(lesson, lessonResult, studentId, @class.CourseId, nameof(Course), EnumResultStatus.Done, courseResult.SkillScores);
                 }
                 else
                 {
-                    lessonOverview = GetLessonOverview(lesson, lessonResult, studentId, objectId, type, objectStatus);
+                    lessonOverview = await GetLessonOverview(lesson, lessonResult, studentId, objectId, type, objectStatus);
                 }
             }
             methodResult.Result = lessonOverview;
@@ -148,12 +154,16 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             }
             else if (lessonResult != null && lessonResult.UnitId != unit.Id)
             {
-                return (lessonResult.LessonId, nameof(Domain.Entities.Unit), lessonResult.UnitId, EnumResultStatus.New);
+                if (lessonResult.UnitId != unit.Id)
+                {
+                    return (lessonResult.LessonId, nameof(Domain.Entities.Unit), lessonResult.UnitId, EnumResultStatus.New);
+                }
+                else
+                {
+                    return (lessonResult.LessonId, nameof(Lesson), lessonResult.LessonId, EnumResultStatus.New);
+                }
             }
-            else
-            {
-                return (lessonResult?.LessonId, nameof(Lesson), lessonResult?.LessonId, EnumResultStatus.New);
-            }
+            return default;
         }
 
         private (Guid?, string?, Guid?, EnumResultStatus?) HandleLessonResult(Domain.Entities.Unit unit, LessonResult? lessonResult, Guid? studentId)
@@ -266,7 +276,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return (nextUnit?.MockTestId.HasValue ?? default) ? nameof(EnumMockTestType.FullMockTest) : (nextUnit?.FinalTestId.HasValue ?? default) ? nameof(FinalTest) : (nextUnit?.UnitId.HasValue ?? default) ? nameof(Domain.Entities.Unit) : default;
         }
 
-        private LessonOverviewModel GetLessonOverview(Lesson? lesson, LessonResult? lessonResult, Guid? studentId, Guid? objectId, string? type, EnumResultStatus? status, IList<SkillScores>? skillScores = default)
+        private async Task<LessonOverviewModel> GetLessonOverview(Lesson? lesson, LessonResult? lessonResult, Guid? studentId, Guid? objectId, string? type, EnumResultStatus? status, IList<SkillScores>? skillScores = default)
         {
             ArgumentNullException.ThrowIfNull(lesson);
             var lessonDashBoard = _mapper.Map<LessonOverviewModel>(lesson);
@@ -281,52 +291,62 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             {
                 var homeWorks = lessonResult.HomeWorkResults.Where(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id).ToList();
                 var classForumResult = lessonResult.ClassForumResults.FirstOrDefault(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id);
-                var (statusVideo, numberVideo) = GetStatus(lessonResult.VideoResult);
+                var (statusVideo, numberVideo) = await GetStatus(lessonResult.VideoResult);
                 var (statusClassForum, numberClassForum) = GetStatus(classForumResult, statusVideo);
                 var (statusHomeWork, numberHomeWork) = GetStatus(homeWorks, statusClassForum);
-                var numbers = new List<int> { numberClassForum, numberVideo, numberHomeWork };
+                var numbers = new List<double> { numberClassForum, numberVideo, numberHomeWork };
                 lessonDashBoard.StatusVideo = statusVideo;
                 lessonDashBoard.StatusClassForum = statusClassForum;
                 lessonDashBoard.StatusHomeWork = statusHomeWork;
-                lessonDashBoard.PercentProgress = NumberHelper.ConvertPercentDouble((double)numbers.Average());
+                lessonDashBoard.PercentProgress = numbers.Sum();
             }
             return lessonDashBoard;
         }
 
-        private static (EnumResultStatus, int) GetStatus(VideoResult? videoResult)
+        private async Task<(EnumResultStatus, double)> GetStatus(VideoResult? videoResult)
         {
             if (videoResult != null)
             {
-                if (videoResult.Status == EnumResultStatus.Process || videoResult.Status == EnumResultStatus.New)
+                var video = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
+                                        .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.StudentId == videoResult.StudentId))
+                                        .FirstOrDefaultAsync(x => x.Id == videoResult.VideoId);
+                if (video != null)
                 {
-                    return (EnumResultStatus.Process, 0);
-                }
-                else
-                {
-                    return (EnumResultStatus.Done, 1);
+                    var videoTimeCodes = video.VideoTimeCodes.ToList();
+                    var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).ToList();
+
+                    if (videoResult.Status == EnumResultStatus.Process || videoResult.Status == EnumResultStatus.New)
+                    {
+                        return (EnumResultStatus.Process, PercentVideo * NumberHelper.GetPercent(videoTimeCodes.Count, videoTimeCodeResults.Count));
+                    }
+                    else
+                    {
+                        return (EnumResultStatus.Done, NumberHelper.GetPercent(videoTimeCodes.Count, videoTimeCodeResults.Count));
+                    }
                 }
             }
             return (EnumResultStatus.Unfinished, 0);
         }
 
-        private static (EnumResultStatus, int) GetStatus(IList<HomeWorkResult>? homeWorkResults, EnumResultStatus status)
+        private static (EnumResultStatus, double) GetStatus(IList<HomeWorkResult>? homeWorkResults, EnumResultStatus status)
         {
             var statusHomeWork = EnumResultStatus.Unfinished;
             if (status == EnumResultStatus.Process || status == EnumResultStatus.Done)
             {
                 statusHomeWork = EnumResultStatus.Process;
             }
-            if (homeWorkResults != null && homeWorkResults.Count > 0)
+            if (homeWorkResults != null && homeWorkResults.Any())
             {
-                if (homeWorkResults.All(x => x.Status == EnumResultStatus.Done))
+                var countDone = homeWorkResults.Where(x => x.Status == EnumResultStatus.Done).Count();
+                if (homeWorkResults.Count == countDone)
                 {
-                    return (EnumResultStatus.Done, 1);
+                    return (EnumResultStatus.Done, PercentHomeWork * NumberHelper.GetPercent(countDone, homeWorkResults.Count));
                 }
             }
             return (statusHomeWork, 0);
         }
 
-        private static (EnumResultStatus, int) GetStatus(ClassForumResult? classForumResult, EnumResultStatus status)
+        private static (EnumResultStatus, double) GetStatus(ClassForumResult? classForumResult, EnumResultStatus status)
         {
             var statusClassForum = EnumResultStatus.Unfinished;
             if (status == EnumResultStatus.Done)
@@ -337,7 +357,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             {
                 if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
                 {
-                    return (EnumResultStatus.Done, 1);
+                    return (EnumResultStatus.Done, PercentClassForum * 1);
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Pending)
                 {
