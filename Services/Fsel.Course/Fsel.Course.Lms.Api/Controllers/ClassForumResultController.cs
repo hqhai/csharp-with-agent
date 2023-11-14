@@ -34,6 +34,20 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Execute-list-query
         /// </summary>
+        [HttpGet("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
+        {
+            SetQuery(query);
+            var result = await _classForumResultRepository.GetListResultAsync<ClassForumResultModel>(query);
+            return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
         [HttpGet("execute-query")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

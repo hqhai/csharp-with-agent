@@ -19,6 +19,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<FinalTestResult, FinalTestResultModel>().IgnoreAllNonExisting();
             CreateMap<FinalTestAnswer, FinalTestAnswerModel>().IgnoreAllNonExisting();
             CreateMap<FinalTestAnswer, AnswerModel>().IgnoreAllNonExisting();
+            CreateMap<FinalTest, FinalTestModel>()
+                 .ForMember(x => x.IsActive, p => p.MapFrom(o => o.CourseUnitMockTests.Any()));
         }
     }
 }

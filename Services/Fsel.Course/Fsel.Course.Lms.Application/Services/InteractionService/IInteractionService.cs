@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Shared.Enums;
     using Refit;
@@ -16,5 +17,9 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
 
         [Get("/review/student-reviews")]
         Task<IApiResponse<MethodResult<IList<StudentReviewModel>>>> GetStudentReviewsAsync([Query] EnumReviewType reviewType);
+
+        [Post("/interaction-action/execute-list-query")]
+        Task<IApiResponse<MethodResult<InteractionActionModel>>> ExecuteListActionQueryAsync([Body] BaseQueryModel query);
+
     }
 }
