@@ -7,8 +7,9 @@ namespace Fsel.Course.Lms.Application.Commands.SectionGroupCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Lms.Application.Commands.FinalTestCmd;
-    using Fsel.Course.Lms.Application.Commands.MockTestCmd;
+    using Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd;
+    using Fsel.Course.Lms.Application.Commands.MockTestAnswerV1i1Cmd;
+    using Fsel.Course.Lms.Application.Commands.PlacementTestAnswerV1i1Cmd;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -51,8 +52,8 @@ namespace Fsel.Course.Lms.Application.Commands.SectionGroupCmd
             }
             else if (request.ObjectResultType == nameof(PlacementTest))
             {
+                await _mediator.Send(new CreatePlacementTestAnswerBySectionGroupCommand { PlacementTestResultId = objectResultId, IsSubmit = true, SectionGroupId = sectionGroupResult.SectionGroupId, StudentId = sectionGroupResult.StudentId }, cancellationToken).ConfigureAwait(false);
             }
-
             return methodResult;
         }
     }

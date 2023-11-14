@@ -6,7 +6,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.PlacementTestCmd;
+    using Fsel.Course.Lms.Application.Commands.PlacementTestAnswerV1i1Cmd;
     using Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;

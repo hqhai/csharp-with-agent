@@ -75,6 +75,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     VideoResultId = request.VideoResultId,
                     StudentId = request.StudentId,
                     IsWorking = true,
+                    Status = EnumResultStatus.New,
                     RemainingTime = videoTimeCode.ExecutionTime,
                     VideoTimeCodeId = request.VideoTimeCodeId,
                 };
@@ -92,13 +93,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             }
             else
             {
-                if (videoTimeCodeResult.Status != EnumResultStatus.Done)
+                if (videoTimeCodeResult.Status != EnumResultStatus.Done && videoTimeCode.ExecutionTime != 0)
                 {
                     if (!videoTimeCodeResult.IsWorking)
                     {
                         videoTimeCodeResult.IsWorking = true;
                     }
-                    videoTimeCodeResult.RemainingTime = videoTimeCodeResult.RemainingTime - Shared.Helpers.DateTimeHelper.GetWorkingTime(GetDate(videoTimeCodeResult, videoTimeCode.TimeCodeType), DateTime.UtcNow, videoTimeCode.ExecutionTime);
+                    else
+                    {
+                        videoTimeCodeResult.RemainingTime = videoTimeCodeResult.RemainingTime - Shared.Helpers.DateTimeHelper.GetWorkingTimeVideo(GetDate(videoTimeCodeResult, videoTimeCode.TimeCodeType), DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
+                    }
                     videoTimeCodeResult = _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
                     await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 }

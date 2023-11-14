@@ -4,7 +4,9 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Infrastructure.Migrations;
     using Fsel.Course.Lms.Application.Commands.SectionGroupCmd;
+    using Fsel.Course.Lms.Application.Commands.VideoTimeCodeCmd;
     using Fsel.Shared.Models.ShareModels;
     using MassTransit;
     using MediatR;
@@ -40,9 +42,11 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                     break;
 
                 case nameof(EnumTimeCodeType.SkillTest):
+                    await _mediator.Send(new UpdateVideoTimeCodeByResultIdCommand { ObjectResultId = messeger.ObjectResultId, ObjectResultType = messeger.ObjectResultType }).ConfigureAwait(false);
                     break;
 
                 case nameof(EnumTimeCodeType.UnitTest):
+                    await _mediator.Send(new UpdateVideoTimeCodeByResultIdCommand { ObjectResultId = messeger.ObjectResultId, ObjectResultType = messeger.ObjectResultType }).ConfigureAwait(false);
                     break;
             }
         }

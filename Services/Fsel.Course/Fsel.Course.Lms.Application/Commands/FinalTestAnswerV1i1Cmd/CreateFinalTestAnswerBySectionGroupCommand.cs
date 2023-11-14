@@ -1,7 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
+namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -11,39 +16,40 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
+    using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreatePlacementTestAnswerBySectionGroupCommand : CreatePlacementTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
+    public class CreateFinalTestAnswerBySectionGroupCommand : CreateFinalTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
     {
     }
 
-    public class CreatePlacementTestAnswerBySectionGroupCommandHandler : IRequestHandler<CreatePlacementTestAnswerBySectionGroupCommand, MethodResult<SectionGroupResultModel>>
+    public class CreateFinalTestAnswerBySectionGroupCommandHandler : IRequestHandler<CreateFinalTestAnswerBySectionGroupCommand, MethodResult<SectionGroupResultModel>>
     {
         private readonly IQuestionRepository _questionRepository;
         private readonly AuthContext _authContext;
         private readonly QuestionConverter _questionConverter;
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IUserService _userService;
-        private readonly IPlacementTestResultRepository _placementTestResultRepository;
-        private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
+        private readonly IFinalTestResultRepository _finalTestResultRepository;
+        private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
 
-        public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
+        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
             , AuthContext authContext
             , QuestionConverter questionConverter
             , SectionGroupConverter sectionGroupConverter
             , IUserService userService
-            , IPlacementTestResultRepository placementTestResultRepository
-            , IPlacementTestAnswerRepository placementTestAnswerRepository
+            , IFinalTestResultRepository finalTestResultRepository
+            , IFinalTestAnswerRepository finalTestAnswerRepository
             , ISectionGroupResultRepository sectionGroupResultRepository
             , ISectionGroupRepository sectionGroupRepository
             , IMapper mapper)
@@ -53,17 +59,17 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _questionConverter = questionConverter;
             _sectionGroupConverter = sectionGroupConverter;
             _userService = userService;
-            _placementTestResultRepository = placementTestResultRepository;
-            _placementTestAnswerRepository = placementTestAnswerRepository;
+            _finalTestResultRepository = finalTestResultRepository;
+            _finalTestAnswerRepository = finalTestAnswerRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<SectionGroupResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<SectionGroupResultModel> methodResult = new MethodResult<SectionGroupResultModel>();
+            var methodResult = new MethodResult<SectionGroupResultModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -73,17 +79,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             var student = studentResult?.Content?.Result;
             var studentId = student?.Id ?? request.StudentId ?? default;
 
-            #region Validate
-
-            var placementTestResult = await _placementTestResultRepository.GetByIdAsync(request.PlacementTestResultId);
-            if (placementTestResult == null)
+            var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
+            if (finalTestResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTestResult));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
                 return methodResult;
             }
-            else if (placementTestResult.Status == EnumResultStatus.Done)
+            else if (finalTestResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestDone), nameof(placementTestResult.Status));
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.FinalTestResultsDone), nameof(finalTestResult.Status));
                 return methodResult;
             }
             var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
@@ -92,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.StudentId == studentId && x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == placementTestResult.Id).FirstOrDefaultAsync(cancellationToken);
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.StudentId == studentId && x.SectionGroupId == request.SectionGroupId && x.FinalTestResultId == finalTestResult.Id).FirstOrDefaultAsync(cancellationToken);
             if (sectionGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResult));
@@ -100,13 +104,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
             else if (sectionGroupResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.SectionGroupResultDone), nameof(sectionGroupResult.Status));
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.SectionGroupResultDone), nameof(sectionGroupResult.Status));
                 return methodResult;
             }
-
-            #endregion Validate
-
-            await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
+            await _finalTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 if (request.Answers != null && request.Answers.Any())
                 {
@@ -120,7 +121,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
                 if (request.IsSubmit)
                 {
-                    await _sectionGroupConverter.UpdatePlacementTestAnswers(sectionGroup, sectionGroupResult);
+                    await _sectionGroupConverter.UpdateFinalTestAnswers(sectionGroup, sectionGroupResult);
                     sectionGroupResult = await UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -128,30 +129,30 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return methodResult;
             });
 
-            await UpdatePlacementTestResultAsync(placementTestResult, cancellationToken);
+            await UpdateFinalTestResultAsync(finalTestResult, cancellationToken);
             return methodResult;
         }
 
-        private async Task UpdatePlacementTestResultAsync(PlacementTestResult placementTestResult, CancellationToken cancellationToken)
+        private async Task UpdateFinalTestResultAsync(FinalTestResult finalTestResult, CancellationToken cancellationToken)
         {
-            var numberOfDone = 4;
-            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.PlacementTestResultId == placementTestResult.Id).ToListAsync(cancellationToken);
+            var numberOfDone = 3;
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.FinalTestResultId == finalTestResult.Id).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
-                _placementTestResultRepository.Update(placementTestResult);
-                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                finalTestResult = GetFinalTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), finalTestResult);
+                _finalTestResultRepository.Update(finalTestResult);
+                await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private static PlacementTestResult GetPlacementTestResult(IList<SkillScores>? skillScores, PlacementTestResult placementTestResult)
+        private static FinalTestResult GetFinalTestResult(IList<SkillScores>? skillScores, FinalTestResult finalTestResult)
         {
             ArgumentNullException.ThrowIfNull(skillScores);
-            placementTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
-            placementTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-            placementTestResult.Status = EnumResultStatus.Done;
-            placementTestResult.SkillScores = skillScores;
-            return placementTestResult;
+            finalTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+            finalTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+            finalTestResult.Status = EnumResultStatus.Done;
+            finalTestResult.SkillScores = skillScores;
+            return finalTestResult;
         }
 
         private async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
@@ -175,17 +176,17 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
         private async Task<SkillScores> GetSkillScore(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
         {
-            var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.PlacementTestResultId == sectionGroupResult.PlacementTestResultId).ToListAsync(cancellationToken);
-            var questionIds = placementTestAnswers.Select(x => x.SectionQuestion).Select(x => x.QuestionId).ToList();
+            var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.FinalTestResultId == sectionGroupResult.FinalTestResultId).ToListAsync(cancellationToken);
+            var questionIds = finalTestAnswers.Select(x => x.SectionQuestion).Select(x => x.QuestionId).ToList();
             var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
-            var skillScore = _sectionGroupConverter.GetSkillScore(sectionGroup, placementTestAnswers.Sum(x => x.CorrectCount), placementTestAnswers.Count, totalCorrect, questionIds.Count);
+            var skillScore = _sectionGroupConverter.GetSkillScore(sectionGroup, finalTestAnswers.Sum(x => x.CorrectCount), finalTestAnswers.Count, totalCorrect, questionIds.Count);
             return skillScore;
         }
 
-        private async Task<MethodResult<IList<PlacementTestAnswer>>> CreateAnswerAsync(CreatePlacementTestAnswerBySectionGroupCommand request, Guid sectionGroupResultId)
+        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, Guid sectionGroupResultId)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
-            var methodResult = new MethodResult<IList<PlacementTestAnswer>>();
+            var methodResult = new MethodResult<IList<FinalTestAnswer>>();
             var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
             if (questions == null || !questions.Any())
@@ -199,22 +200,22 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(anwserResult.ErrorMessages);
                 return methodResult;
             }
-            var placementTestAnswers = anwserResult.Result;
-            if (placementTestAnswers != null && placementTestAnswers.Any())
+            var finalTestAnswers = anwserResult.Result;
+            if (finalTestAnswers != null && finalTestAnswers.Any())
             {
-                await _placementTestAnswerRepository.AddList(placementTestAnswers);
-                await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _finalTestAnswerRepository.AddList(finalTestAnswers);
+                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             methodResult.Result = anwserResult.Result;
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<PlacementTestAnswer>>> CreateAnswer(CreatePlacementTestAnswerBySectionGroupCommand request, IList<Question>? questions, Guid sectionGroupResultId)
+        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, IList<Question>? questions, Guid sectionGroupResultId)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
-            var methodResult = new MethodResult<IList<PlacementTestAnswer>>();
-            var placementTestAnswers = new List<PlacementTestAnswer>();
+            var methodResult = new MethodResult<IList<FinalTestAnswer>>();
+            var finalTestAnswers = new List<FinalTestAnswer>();
             if (questions != null && questions.Any())
             {
                 foreach (var item in request.Answers)
@@ -228,24 +229,24 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     }
                     var (questionItem, answerConfig, correctCount) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
-                    var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == request.PlacementTestResultId && x.SectionQuestionId == request.SectionGroupId);
-                    if (placementTestAnswer == null)
+                    var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == request.SectionGroupId);
+                    if (finalTestAnswer == null)
                     {
-                        placementTestAnswers.Add(GetPlacementTestAnswer(answerConfig, correctCount, request, sectionQuestionId, sectionGroupResultId));
+                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, request, sectionQuestionId, sectionGroupResultId));
                     }
                 }
             }
-            methodResult.Result = placementTestAnswers;
+            methodResult.Result = finalTestAnswers;
             return methodResult;
         }
 
-        private static PlacementTestAnswer GetPlacementTestAnswer(object? answer, int correctCount, CreatePlacementTestAnswerBySectionGroupCommand request, Guid? sectionQuestionId, Guid sectionGroupResultId)
+        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Guid? sectionQuestionId, Guid sectionGroupResultId)
         {
-            return new PlacementTestAnswer
+            return new FinalTestAnswer
             {
                 Answer = answer,
                 CorrectCount = correctCount,
-                PlacementTestResultId = request.PlacementTestResultId,
+                FinalTestResultId = request.FinalTestResultId,
                 SectionGroupResultId = sectionGroupResultId,
                 SectionQuestionId = sectionQuestionId ?? default,
             };

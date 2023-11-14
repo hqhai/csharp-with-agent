@@ -52,5 +52,21 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
+
+        public async Task<List<Question>?> GetIncludeTimeCodeByIdAsync(IEnumerable<Guid> ids)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.ExerciseQuestions)
+                                    .ThenInclude(x => x.Exercise)
+                                    .ThenInclude(x => x.TimeCodeExercises)
+                                    .ThenInclude(x => x.VideoTimeCode)
+                                    .Where(x => ids.Contains(x.Id)).ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

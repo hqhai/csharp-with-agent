@@ -3,6 +3,7 @@ using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Lms.Application.Commands.MockTestAnswerV1i1Cmd;
 using Fsel.Course.Lms.Application.Commands.MockTestCmd;
 using Fsel.Course.Lms.Application.Queries.MockTestQuery;
 using Fsel.Shared.Enums;
@@ -33,18 +34,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> CreateMockTestAnswers([FromBody] CreateMockTestAnswerCommand command)
         {
             MethodResult<MockTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Create MockTestAnswers
-        /// </summary>
-        [HttpPost("create-answer")]
-        [ProducesResponseType(typeof(MethodResult<SectionGroupResultModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateAnswers([FromBody] CreateMockTestAnswerBySectionGroupCommand command)
-        {
-            MethodResult<SectionGroupResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

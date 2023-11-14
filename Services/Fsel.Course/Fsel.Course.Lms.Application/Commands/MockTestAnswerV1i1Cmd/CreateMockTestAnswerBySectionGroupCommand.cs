@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
+namespace Fsel.Course.Lms.Application.Commands.MockTestAnswerV1i1Cmd
 {
     using System;
     using System.Collections.Generic;
@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<SectionGroupResultModel> methodResult = new MethodResult<SectionGroupResultModel>();
+            var methodResult = new MethodResult<SectionGroupResultModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
