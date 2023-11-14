@@ -114,7 +114,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
-                    result = dragAndDropSentenceOrderQuestion;
+                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion) : dragAndDropSentenceOrderQuestion;
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
@@ -135,6 +135,18 @@ namespace Fsel.Course.Infrastructure.Common
         }
 
         private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data)
+        {
+            if (data != null && data.Answers != null)
+            {
+                foreach (var item in data.Answers)
+                {
+                    item.IsExact = default;
+                }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(DragAndDropSentenceOrderAnswer? data)
         {
             if (data != null && data.Answers != null)
             {
@@ -407,14 +419,14 @@ namespace Fsel.Course.Infrastructure.Common
                         {
                             var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
                             item.IsExacts = isExacts;
-                            if (isExacts.All(x => x))
+                            if (isExacts.All(x => x == true))
                             {
                                 number++;
                             }
                         }
                         else
                         {
-                            item.IsExacts = new List<bool>();
+                            item.IsExacts = new List<bool?>();
                         }
                     }
                 }
@@ -503,7 +515,7 @@ namespace Fsel.Course.Infrastructure.Common
             return false;
         }
 
-        private static bool CheckAnswer(IList<string> words, string word, int index)
+        private static bool? CheckAnswer(IList<string> words, string word, int index)
         {
             if (words[index].IndexOf('|', StringComparison.Ordinal) != -1)
             {
@@ -545,11 +557,11 @@ namespace Fsel.Course.Infrastructure.Common
                         {
                             var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
                             item.IsExacts = isExacts;
-                            number += isExacts.Count(x => x);
+                            number += isExacts.Count(x => x == true);
                         }
                         else
                         {
-                            item.IsExacts = new List<bool>();
+                            item.IsExacts = new List<bool?>();
                         }
                     }
                 }

@@ -51,32 +51,21 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-
-            #region Validation
-
             if (request.Answers == null || !request.Answers.Any())
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var homeWorkResult = await _homeWorkResultRepository.GetByIdAsync(request.HomeWorkResultId);
-            if (homeWorkResult == null)
+
+            #region Validation
+
+            var method = await Validate(request, cancellationToken);
+            if (!method.IsOK)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            else if (homeWorkResult.Status == EnumResultStatus.Done)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultDone));
-                return methodResult;
-            }
-            var questionIds = request.Answers.Select(x => x.QuestionId).Distinct().ToList();
-            if (questionIds == null || !questionIds.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionIds));
-                return methodResult;
-            }
-            var questions = await _questionRepository.GetIncludeByHomeWorkAsync(questionIds);
+            var (listQuestion, questions, homeWorkResult, homeWork) = method.Result;
             var homeWorkAnswers = new List<HomeWorkAnswer>();
             int correctTotal = default;
             foreach (var item in request.Answers)
@@ -112,17 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
                 homeWorkAnswer.CorrectCount = correctCount;
             }
 
-            var homeWork = await _homeWorkRepository.Queryable
-                            .Include(x => x!.HomeWorkQuestions)
-                            .ThenInclude(x => x.Question)
-                            .Where(x => x.Id == homeWorkResult.HomeWorkId).FirstOrDefaultAsync(cancellationToken);
-            if (homeWork == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
-                return methodResult;
-            }
-            var listQuestion = homeWork.HomeWorkQuestions.Select(x => x.Question).ToList();
-            if (request.Answers.Count == listQuestion.Count && request.IsSubmit)
+            if (request.IsSubmit)
             {
                 homeWorkResult.CorrectCount = correctTotal;
                 homeWorkResult.Status = EnumResultStatus.Done;
@@ -141,7 +120,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
             else
             {
                 homeWorkResult.Status = EnumResultStatus.Process;
-                homeWorkResult.CorrectCount = correctTotal;
             }
 
             #endregion Validation
@@ -160,6 +138,58 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
                 return methodResult;
             });
 
+            return methodResult;
+        }
+
+        public async Task<MethodResult<(IList<Question>, IList<Question>, HomeWorkResult, HomeWork)>> Validate(CreateHomeWorkAnswerV1i1Command request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<(IList<Question>, IList<Question>, HomeWorkResult, HomeWork)>();
+            if (request.Answers == null || !request.Answers.Any())
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var homeWorkResult = await _homeWorkResultRepository.GetByIdAsync(request.HomeWorkResultId);
+            if (homeWorkResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));
+                return methodResult;
+            }
+            else if (homeWorkResult.Status == EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultDone));
+                return methodResult;
+            }
+            var questionIds = request.Answers.Select(x => x.QuestionId).Distinct().ToList();
+            if (questionIds == null || !questionIds.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionIds));
+                return methodResult;
+            }
+
+            var homeWork = await _homeWorkRepository.Queryable
+                           .Include(x => x!.HomeWorkQuestions)
+                           .ThenInclude(x => x.Question)
+                           .Where(x => x.Id == homeWorkResult.HomeWorkId).FirstOrDefaultAsync(cancellationToken);
+            if (homeWork == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
+                return methodResult;
+            }
+            var listQuestion = homeWork.HomeWorkQuestions.Select(x => x.Question!).ToList();
+            if (request.Answers.Count != listQuestion.Count && request.IsSubmit)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.NotAnsweredEnough), nameof(request.Answers));
+                return methodResult;
+            }
+            var questions = await _questionRepository.GetIncludeByHomeWorkAsync(questionIds);
+            if (questions == null || !questions.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
+                return methodResult;
+            }
+            methodResult.Result = (listQuestion, questions, homeWorkResult, homeWork);
             return methodResult;
         }
     }

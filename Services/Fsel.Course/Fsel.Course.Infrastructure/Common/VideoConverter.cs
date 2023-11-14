@@ -412,13 +412,14 @@ namespace Fsel.Course.Infrastructure.Common
         private QuestionModel GetQuestion(Question? question)
         {
             ArgumentNullException.ThrowIfNull(question);
-            var isCheck = question.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumAnswerStatus.Done;
+            var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
+            var isCheck = videoTimeCodeAnswer?.Status == EnumAnswerStatus.Done;
             var questionModel = _mapper.Map<QuestionModel>(question);
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
-            var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
             if (videoTimeCodeAnswer != null)
             {
                 videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, !isCheck);
+                videoTimeCodeAnswer.CorrectCount = isCheck ? videoTimeCodeAnswer.CorrectCount : default;
                 questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
             }
             return questionModel;

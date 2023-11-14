@@ -30,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly AuthContext _authContext;
+        private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly QuestionConverter _questionConverter;
         private readonly IUserService _userService;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
@@ -37,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         public GetHomeWorkQueryHandler(IMapper mapper
             , IHomeWorkRepository homeWorkRepository
             , AuthContext authContext
+            , AnswerTypeConverter answerTypeConverter
             , QuestionConverter questionConverter
             , IHomeWorkResultRepository homeWorkResult
             , IUserService userService)
@@ -44,6 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
             _authContext = authContext;
+            _answerTypeConverter = answerTypeConverter;
             _questionConverter = questionConverter;
             _userService = userService;
             _homeWorkResultRepository = homeWorkResult;
@@ -86,6 +89,11 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             homeWorkModel.Questions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).Select(n =>
             {
                 var answer = n.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id);
+                if (answer != null)
+                {
+                    answer.CorrectCount = checkDone ? answer.CorrectCount : default;
+                    answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, n.Question!.QuestionType, !checkDone);
+                }
                 return _questionConverter.GetQuestion(n.Question ?? new Question(), answer, checkDone);
             }).ToList();
             homeWorkModel.HomeWorkResult = _mapper.Map<HomeWorkResultModel>(homeWorkResult);

@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
     using Fsel.Course.Infrastructure.Common;
@@ -138,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
                         VideoTimeCodeResultId = videoTimeCodeResult.Id,
                         VideoResultId = videoTimeCodeResult.VideoResultId,
                         CorrectCount = questionItem.Ungraded ? default : correctCount,
-                        Status = GetAnswerStatus(videoTimeCode.TimeCodeType, request.IsSubmit, correctCount, questionItem.CorrectTotal)
+                        Status = GetAnswerStatus(request.IsSubmit, correctCount, questionItem.CorrectTotal)
                     };
                     videoTimeCodeAnswers.Add(answer);
                 }
@@ -184,17 +185,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
             return videoResult.VideoTimeCodeResults.FirstOrDefault(x => x.VideoTimeCodeId == videoTimeCodeId && x.VideoResultId == videoResult.Id);
         }
 
-        private static EnumAnswerStatus GetAnswerStatus(EnumTimeCodeType? timeCodeType, bool isSubmit, int correctCount, int correctTotal)
+        private static EnumAnswerStatus GetAnswerStatus(bool isSubmit, int correctCount, int correctTotal)
         {
-            if (timeCodeType == EnumTimeCodeType.Standalone)
+            if (correctCount == correctTotal && isSubmit)
             {
-                if (correctCount == correctTotal && isSubmit)
-                {
-                    return EnumAnswerStatus.Done;
-                }
-                return EnumAnswerStatus.Process;
+                return EnumAnswerStatus.Done;
             }
-            return EnumAnswerStatus.Done;
+            return EnumAnswerStatus.Process;
         }
 
         public async Task<MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult, IList<Question>)>> Validate(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
@@ -217,6 +214,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
             if (videoTimeCodeResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeResult));
+                return methodResult;
+            }
+            if (videoTimeCodeResult.Status == EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoTimeCodeResultDone), nameof(videoTimeCodeResult));
                 return methodResult;
             }
             videoResult.CurrentVideoTimeCodeId = request.VideoTimeCodeId;

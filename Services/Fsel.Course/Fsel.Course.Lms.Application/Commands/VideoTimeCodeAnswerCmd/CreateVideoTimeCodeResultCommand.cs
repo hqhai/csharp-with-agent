@@ -95,13 +95,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             {
                 if (videoTimeCodeResult.Status != EnumResultStatus.Done && videoTimeCode.ExecutionTime != 0)
                 {
-                    if (!videoTimeCodeResult.IsWorking)
+                    if (videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
                     {
-                        videoTimeCodeResult.IsWorking = true;
+                        videoTimeCodeResult.RemainingTime = videoTimeCodeResult.RemainingTime - Shared.Helpers.DateTimeHelper.GetWorkingTimeVideo(GetDate(videoTimeCodeResult, videoTimeCode.TimeCodeType), DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
                     }
                     else
                     {
-                        videoTimeCodeResult.RemainingTime = videoTimeCodeResult.RemainingTime - Shared.Helpers.DateTimeHelper.GetWorkingTimeVideo(GetDate(videoTimeCodeResult, videoTimeCode.TimeCodeType), DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
+                        videoTimeCodeResult.IsWorking = true;
                     }
                     videoTimeCodeResult = _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
                     await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
