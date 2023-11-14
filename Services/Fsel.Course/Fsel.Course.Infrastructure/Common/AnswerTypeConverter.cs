@@ -392,6 +392,10 @@ namespace Fsel.Course.Infrastructure.Common
                         dataAnswer.IsExact = true;
                         number++;
                     }
+                    else
+                    {
+                        dataAnswer.IsExact = false;
+                    }
                 }
             }
             configAnswer = dataAnswer;

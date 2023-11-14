@@ -17,7 +17,7 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
         {
             if (context != null)
             {
-                JobExtensions.SetScheduleJob<CompleteTestWhenTimeOutWorker, SetTimeToCompleteTestModel>(TimeSpan.FromSeconds(context.Message.ExecutionTime), context.Message);
+                JobExtensions.SetScheduleJob<CompleteTestWhenTimeOutWorker, SetTimeToCompleteTestModel>(TimeSpan.FromSeconds(context.Message.ExecutionTime + 60), context.Message);
             }
             return Task.CompletedTask;
         }
