@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     }
                     listUnit.Add(GetUnitModel(unit, request.CourseId, percent));
                 }
-                return listUnit;
+                return listUnit.OrderBy(x => x.DisplayOrder).ToList();
             }
             return default;
         }

@@ -89,6 +89,7 @@ namespace Fsel.Notification.Application.Commands
                 listUserId = listUserId.Where(id => !listUserOffNotification.Contains(id)).ToList();
             }
 
+
             #endregion Validation
 
             List<NotificationMessage> listNotificationMessage = new List<NotificationMessage>();
@@ -106,12 +107,15 @@ namespace Fsel.Notification.Application.Commands
 
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
+                // Check xem nếu có 1 user thì User có bị tắt thông báo hay không
+                bool checkUserOffNotification = listUserOffNotification.Any(x => x == notificationNew.UserId);
+
                 //Save into Database
                 if (listNotificationMessage.Count > 0)
                 {
                     await _notificationsRepository.AddList(listNotificationMessage);
                 }
-                else
+                else if (!checkUserOffNotification)
                 {
                     notificationNew = _notificationsRepository.Add(notificationNew);
                 }
