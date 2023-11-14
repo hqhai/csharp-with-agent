@@ -46,17 +46,24 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             var methodResult = new MethodResult<bool>();
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);
-            if (user != null)
+            var user = new User();
+            if (!string.IsNullOrEmpty(request.Email))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
-                return methodResult;
+                user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);
+                if (user != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
+                    return methodResult;
+                }
             }
-            user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);
-            if (user != null)
+            if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
-                return methodResult;
+                user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);
+                if (user != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
             }
 
             user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
@@ -70,6 +77,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 else if (!string.IsNullOrEmpty(request.PhoneNumber))
                 {
                     user.PhoneNumber = request.PhoneNumber;
+                    user.PhoneNumberConfirmed = true;
                     user.Human!.PhoneNumber = request.PhoneNumber;
                 }
                 if (!user.Human!.IsValid())
