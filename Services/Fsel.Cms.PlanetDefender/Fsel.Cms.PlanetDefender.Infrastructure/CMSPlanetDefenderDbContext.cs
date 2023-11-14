@@ -33,7 +33,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             modelBuilder.ApplyConfiguration(new AvatarImageEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentSpaceShipEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTagNameEntityTypeConfiguration());
-
+            modelBuilder.ApplyConfiguration(new GameAnswerEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
@@ -48,6 +48,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         public DbSet<AvatarImage> AvatarImages { get; set; }
         public DbSet<StudentSpaceShip> StudentSpaceShips { get; set; }
         public DbSet<StudentTagName> StudentTagNames { get; set; }
+        public DbSet<GameAnswer> GameAnswers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

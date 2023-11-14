@@ -4,6 +4,7 @@ namespace Fsel.Shared.Helpers
 {
     using System.ComponentModel;
     using System.Globalization;
+    using System.Text;
     using System.Text.RegularExpressions;
 
     public static class StringHelper
@@ -38,6 +39,47 @@ namespace Fsel.Shared.Helpers
                 }
                 return default;
             }).Where(x => x != null).Select(x => x!).ToList();
+        }
+
+        public static string ShuffleCharactersWithinWords(string str)
+        {
+            char[] characters = str.ToCharArray();
+            Random rng = new Random();
+
+            int n = characters.Length;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                char temp = characters[k];
+                characters[k] = characters[n];
+                characters[n] = temp;
+            }
+            return new string(characters);
+        }
+
+        public static string RandomCharacters(string str)
+        {
+            string[] words = str.Split(' ');
+            StringBuilder result = new StringBuilder();
+
+            foreach (string word in words)
+            {
+                string shuffledWord = ShuffleCharactersWithinWords(word);
+                int count = 0;
+                while (count < 3)
+                {
+                    shuffledWord = ShuffleCharactersWithinWords(word);
+                    count++;
+                }
+
+                result.Append(shuffledWord);
+                result.Append(' ');
+            }
+
+            result.Length--;
+
+            return result.ToString();
         }
     }
 }
