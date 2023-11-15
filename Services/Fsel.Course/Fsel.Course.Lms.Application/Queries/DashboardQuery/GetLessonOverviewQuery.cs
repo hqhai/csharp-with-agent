@@ -3,6 +3,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Dynamic.Core;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -38,6 +39,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly IUnitRepository _unitRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMapper _mapper;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
@@ -51,6 +54,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             IUnitRepository unitRepository,
             IMockTestResultRepository mockTestResultRepository,
             IMapper mapper,
+            IVideoTimeCodeRepository videoTimeCodeRepository,
+            IVideoResultRepository videoResultRepository,
             IVideoRepository videoRepository,
             IUnitResultRepository unitResultRepository,
             IFinalTestResultRepository finalTestResultRepository,
@@ -64,6 +69,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             _unitRepository = unitRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _mapper = mapper;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _videoResultRepository = videoResultRepository;
             _videoRepository = videoRepository;
             _unitResultRepository = unitResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
@@ -76,6 +83,63 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonOverviewModel> methodResult = new MethodResult<LessonOverviewModel>();
             var lessonOverview = new LessonOverviewModel();
+
+            #region Validate
+
+            var method = await Validate();
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+            var (studentId, courseId) = method.Result;
+
+            #endregion Validate
+
+            var course = await _courseRepository.GetAsync(courseId, studentId);
+            if (course == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var courseResult = course.CourseResults.FirstOrDefault();
+
+            var (lesson, type, objectId, objectStatus, lessonResult, skillScores) = GetInitValue();
+            if (courseResult == null || courseResult.Status == EnumResultStatus.New)
+            {
+                // Next Unit
+                (lesson, objectId, type, objectStatus) = await GetLesson(lessonResult, studentId, course, cancellationToken);
+                if (courseResult == null)
+                {
+                    //Start Now
+                    (objectId, type, objectStatus) = (course.Id, nameof(Course), EnumResultStatus.New);
+                }
+            }
+            else
+            {
+                lessonResult = await _lessonResultRepository.GetAsync(studentId, course.Id);
+                (lesson, objectId, type, objectStatus) = (lessonResult?.Lesson, lessonResult?.Lesson?.Id, nameof(Lesson), lessonResult?.Status);
+                if (lessonResult == null || lessonResult.Status == EnumResultStatus.Done)
+                {
+                    (lesson, objectId, type, objectStatus) = await GetLesson(lessonResult, studentId, course, cancellationToken);
+                    lesson = lessonResult != null ? lessonResult.Lesson : lesson;
+                }
+                if (courseResult.Status == EnumResultStatus.Done)
+                {
+                    //Course Done
+                    (objectId, type, objectStatus, skillScores) = (course.Id, nameof(Course), EnumResultStatus.Done, courseResult.SkillScores);
+                }
+            }
+            lessonOverview = await GetLessonOverview(lesson, lessonResult, objectId, type, objectStatus, skillScores);
+
+            methodResult.Result = lessonOverview;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        public async Task<MethodResult<(Guid?, Guid)>> Validate()
+        {
+            MethodResult<(Guid?, Guid)> methodResult = new MethodResult<(Guid?, Guid)>();
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
@@ -95,62 +159,20 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var course = await GetCourse(@class.CourseId, studentId, cancellationToken);
-            if (course == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-            var courseResult = course.CourseResults.FirstOrDefault();
-            if (courseResult == null || courseResult.Status == EnumResultStatus.New)
-            {
-                var (lesson, objectId, type, objectStatus) = await GetLesson(default, studentId, course, cancellationToken);
-                lessonOverview = await GetLessonOverview(lesson, default, studentId, objectId, type, objectStatus);
-                if (courseResult == null)
-                {
-                    lessonOverview = await GetLessonOverview(lesson, default, studentId, course.Id, nameof(Course), EnumResultStatus.New);
-                }
-            }
-            else
-            {
-                var lessonResult = await _lessonResultRepository.GetAsync(studentId, @class.CourseId);
-                var lesson = lessonResult?.Lesson;
-                string? type = nameof(Lesson);
-                Guid? objectId = lesson?.Id;
-                EnumResultStatus? objectStatus = lessonResult?.Status;
-
-                if (lessonResult == null || lessonResult.Status == EnumResultStatus.Done)
-                {
-                    (lesson, objectId, type, objectStatus) = await GetLesson(lessonResult, studentId, course, cancellationToken);
-                    if (lessonResult != null)
-                    {
-                        lesson = lessonResult.Lesson;
-                    }
-                }
-                if (courseResult.Status == EnumResultStatus.Done)
-                {
-                    lessonOverview = await GetLessonOverview(lesson, lessonResult, studentId, @class.CourseId, nameof(Course), EnumResultStatus.Done, courseResult.SkillScores);
-                }
-                else
-                {
-                    lessonOverview = await GetLessonOverview(lesson, lessonResult, studentId, objectId, type, objectStatus);
-                }
-            }
-            methodResult.Result = lessonOverview;
-            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = (studentId, @class.CourseId);
             return methodResult;
         }
 
-        private async Task<Course?> GetCourse(Guid courseId, Guid? studentId, CancellationToken cancellationToken)
+        private static (Lesson?, string?, Guid?, EnumResultStatus?, LessonResult?, IList<SkillScores>?) GetInitValue()
         {
-            return await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseResults.Where(x => x.StudentId == studentId)).FirstOrDefaultAsync(x => x.Id == courseId, cancellationToken);
+            return (default, default, default, default, default, default);
         }
 
-        private (Guid?, string?, Guid?, EnumResultStatus?) HandleUnit(Domain.Entities.Unit unit, LessonResult? lessonResult, Guid? studentId)
+        private async Task<(Guid?, string?, Guid?, EnumResultStatus?)> HandleUnit(Domain.Entities.Unit unit, LessonResult? lessonResult, Guid? studentId)
         {
             if (unit.LessonResults.Any() && lessonResult?.UnitId == unit.Id)
             {
-                return HandleLessonResult(unit, lessonResult, studentId);
+                return await HandleLessonResult(unit, lessonResult, studentId);
             }
             else if (lessonResult != null && lessonResult.UnitId != unit.Id)
             {
@@ -166,7 +188,9 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return default;
         }
 
-        private (Guid?, string?, Guid?, EnumResultStatus?) HandleLessonResult(Domain.Entities.Unit unit, LessonResult? lessonResult, Guid? studentId)
+        #region Degree with Lesson
+
+        private async Task<(Guid?, string?, Guid?, EnumResultStatus?)> HandleLessonResult(Domain.Entities.Unit unit, LessonResult? lessonResult, Guid? studentId)
         {
             var lessonResultCurrent = unit.LessonResults.Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished).OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.UpdatedDate).FirstOrDefault();
             var lessonId = lessonResultCurrent?.LessonId;
@@ -175,10 +199,28 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             {
                 return (unit.UnitSkillMockTests.Select(x => x.MockTestId).FirstOrDefault(), nameof(EnumMockTestType.SkillMockTest), unit.UnitSkillMockTests.Select(x => x.MockTestId).FirstOrDefault(), EnumResultStatus.New);
             }
-            else
+            else if (lessonResultCurrent != null)
             {
-                return (lessonId, nameof(Lesson), lessonId, lessonResultCurrent?.Status);
+                var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultCurrent.Id);
+                if (videoResult != null && videoResult.Status != EnumResultStatus.Done && videoResult.CurrentVideoTimeCodeId.HasValue)
+                {
+                    var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id)).FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId.Value);
+                    var videoTimeCodeResult = videoTimeCode?.VideoTimeCodeResults.FirstOrDefault();
+                    if (videoTimeCode != null && videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone && videoTimeCodeResult != null)
+                    {
+                        if (videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest)
+                        {
+                            return (lessonId, nameof(EnumTimeCodeType.UnitTest), videoTimeCode.Id, videoTimeCodeResult.Status);
+                        }
+                        else
+                        {
+                            return (lessonId, nameof(EnumTimeCodeType.SkillTest), videoTimeCode.Id, videoTimeCodeResult.Status);
+                        }
+                    }
+                }
+                return (lessonId, nameof(Lesson), lessonId, lessonResultCurrent.Status);
             }
+            return default;
         }
 
         private async Task<(Lesson?, Guid?, string?, EnumResultStatus?)> GetLesson(LessonResult? lessonResult, Guid? studentId, Course course, CancellationToken cancellationToken)
@@ -190,17 +232,82 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 return default;
             }
 
-            Guid? lessonId = lessonResult?.LessonId ?? unit.UnitLessons.OrderBy(x => x.DisplayOrder).FirstOrDefault()?.LessonId;
+            var lessonId = lessonResult?.LessonId ?? unit.UnitLessons.OrderBy(x => x.DisplayOrder).FirstOrDefault()?.LessonId;
             if (type == nameof(Domain.Entities.Unit) && objectStatus != EnumResultStatus.New)
             {
-                (lessonId, type, objectId, objectStatus) = HandleUnit(unit, lessonResult, studentId);
+                (lessonId, type, objectId, objectStatus) = await HandleUnit(unit, lessonResult, studentId);
             }
-            return (await GetLessonAsync(lessonId, cancellationToken), objectId, type, objectStatus);
+            return (await _lessonRepository.GetAsync(lessonId), objectId, type, objectStatus);
         }
 
-        private async Task<Lesson?> GetLessonAsync(Guid? lessonId, CancellationToken cancellationToken)
+        #endregion Degree with Lesson
+
+        #region Degree with Unit
+
+        private static CourseUnitMockTest? GetNextUnitWithMockTest(IList<CourseUnitMockTest> courseUnitMockTests, int currentIndex)
         {
-            return await _lessonRepository.Queryable.Include(x => x.LessonInstructions).FirstOrDefaultAsync(x => x.Id == lessonId, cancellationToken);
+            return courseUnitMockTests.Skip(currentIndex + 1).FirstOrDefault();
+        }
+
+        private async Task<(Guid?, Guid?, string?, EnumResultStatus?)> GetUnitId(LessonResult? lessonResult, Course course, Guid? studentId)
+        {
+            var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
+            var courseUnitMockTest = courseUnitMockTests.FirstOrDefault();
+            var unitId = lessonResult?.UnitId ?? courseUnitMockTest?.UnitId;
+            if (lessonResult != null && await _unitResultRepository.IsDoneAsync(lessonResult))
+            {
+                courseUnitMockTest = await GetCourseUnitMockTestFollow(courseUnitMockTests, unitId, studentId);
+                return (unitId, GetObjectId(courseUnitMockTest), GetObjectType(courseUnitMockTest), courseUnitMockTest != null ? await GetStatus(courseUnitMockTest, studentId) : EnumResultStatus.Done);
+            }
+            return (unitId, unitId, nameof(Domain.Entities.Unit), await GetStatus(courseUnitMockTest, studentId));
+        }
+
+        private async Task<CourseUnitMockTest?> GetCourseUnitMockTestFollow(IList<CourseUnitMockTest>? courseUnitMockTests, Guid? unitId, Guid? studentId)
+        {
+            ArgumentNullException.ThrowIfNull(courseUnitMockTests);
+            var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => x.UnitId == unitId);
+            var index = courseUnitMockTests.IndexOf(courseUnitMockTest ?? new CourseUnitMockTest());
+            var courseUnitMockTestNext = GetNextUnitWithMockTest(courseUnitMockTests, index);
+            var objectStatus = await GetStatus(courseUnitMockTestNext, studentId);
+            if (objectStatus == EnumResultStatus.Done && courseUnitMockTestNext != null)
+            {
+                courseUnitMockTestNext = GetNextUnitWithMockTest(courseUnitMockTests, courseUnitMockTests.IndexOf(courseUnitMockTestNext));
+            }
+            return courseUnitMockTestNext;
+        }
+
+        private static Guid? GetObjectId(CourseUnitMockTest? nextUnit)
+        {
+            return nextUnit?.MockTestId ?? nextUnit?.FinalTestId ?? nextUnit?.UnitId;
+        }
+
+        private string? GetObjectType(CourseUnitMockTest? nextUnit)
+        {
+            return (nextUnit?.MockTestId.HasValue ?? default) ? nameof(EnumMockTestType.FullMockTest) : (nextUnit?.FinalTestId.HasValue ?? default) ? nameof(FinalTest) : (nextUnit?.UnitId.HasValue ?? default) ? nameof(Domain.Entities.Unit) : default;
+        }
+
+        #endregion Degree with Unit
+
+        private async Task<LessonOverviewModel> GetLessonOverview(Lesson? lesson, LessonResult? lessonResult, Guid? objectId, string? type, EnumResultStatus? status, IList<SkillScores>? skillScores = default)
+        {
+            ArgumentNullException.ThrowIfNull(lesson);
+            var lessonDashBoard = _mapper.Map<LessonOverviewModel>(lesson);
+            lessonDashBoard.LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(lesson.LessonInstructions.OrderBy(x => x.CreatedDate).ToList());
+            lessonDashBoard.LessonResult = _mapper.Map<LessonResultModel>(lessonResult);
+            lessonDashBoard.UnitId = lesson.UnitLessons.FirstOrDefault()?.UnitId ?? (lessonResult?.UnitId ?? default);
+            lessonDashBoard.ObjectId = objectId;
+            lessonDashBoard.Type = type;
+            lessonDashBoard.Status = status;
+            lessonDashBoard.SkillScores = skillScores;
+            if (lessonResult != null)
+            {
+                var (statusVideo, statusClassForum, statusHomeWork, percent) = await GetStatus(lessonResult);
+                lessonDashBoard.StatusVideo = statusVideo;
+                lessonDashBoard.StatusClassForum = statusClassForum;
+                lessonDashBoard.StatusHomeWork = statusHomeWork;
+                lessonDashBoard.PercentProgress = percent;
+            }
+            return lessonDashBoard;
         }
 
         private async Task<EnumResultStatus?> GetStatus(CourseUnitMockTest? courseUnitMockTest, Guid? studentId)
@@ -225,86 +332,20 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return default;
         }
 
-        private async Task<bool> IsDoneUnit(LessonResult lessonResult)
+        private async Task<(EnumResultStatus, EnumResultStatus, EnumResultStatus, double)> GetStatus(LessonResult lessonResult)
         {
-            return await _unitResultRepository.Queryable.AnyAsync(x => x.StudentId == lessonResult.StudentId && x.UnitId == lessonResult.UnitId && x.CourseId == lessonResult.CourseId && x.Status == EnumResultStatus.Done);
-        }
-
-        private static CourseUnitMockTest? GetNextUnitWithMockTest(IList<CourseUnitMockTest>? courseUnitMockTests, int currentIndex)
-        {
-            return courseUnitMockTests?.Skip(currentIndex + 1).FirstOrDefault();
-        }
-
-        private async Task<(Guid?, Guid?, string?, EnumResultStatus?)> GetUnitId(LessonResult? lessonResult, Course course, Guid? studentId)
-        {
-            var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
-            var courseUnitMockTest = courseUnitMockTests.FirstOrDefault();
-            var unitId = lessonResult?.UnitId ?? courseUnitMockTest?.UnitId;
-            if (lessonResult != null && await IsDoneUnit(lessonResult))
-            {
-                courseUnitMockTest = await GetCourseUnitMockTestFollow(courseUnitMockTests, unitId, studentId);
-                return (unitId, GetObjectId(courseUnitMockTest), GetObjectType(courseUnitMockTest), courseUnitMockTest != null ? await GetStatus(courseUnitMockTest, studentId) : EnumResultStatus.Done);
-            }
-            return (unitId, unitId, nameof(Domain.Entities.Unit), await GetStatus(courseUnitMockTest, studentId));
-        }
-
-        private async Task<CourseUnitMockTest?> GetCourseUnitMockTestFollow(IList<CourseUnitMockTest>? courseUnitMockTests, Guid? unitId, Guid? studentId)
-        {
-            ArgumentNullException.ThrowIfNull(courseUnitMockTests);
-            var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => x.UnitId == unitId);
-            if (courseUnitMockTest != null)
-            {
-                var index = courseUnitMockTests.IndexOf(courseUnitMockTest);
-                var courseUnitMockTestNext = GetNextUnitWithMockTest(courseUnitMockTests, index);
-                var objectStatus = await GetStatus(courseUnitMockTestNext, studentId);
-                if (objectStatus == EnumResultStatus.Done && courseUnitMockTestNext != null)
-                {
-                    courseUnitMockTestNext = GetNextUnitWithMockTest(courseUnitMockTests, courseUnitMockTests.IndexOf(courseUnitMockTestNext));
-                }
-                return courseUnitMockTestNext;
-            }
-            return default;
-        }
-
-        private static Guid? GetObjectId(CourseUnitMockTest? nextUnit)
-        {
-            return nextUnit?.MockTestId ?? nextUnit?.FinalTestId ?? nextUnit?.UnitId;
-        }
-
-        private string? GetObjectType(CourseUnitMockTest? nextUnit)
-        {
-            return (nextUnit?.MockTestId.HasValue ?? default) ? nameof(EnumMockTestType.FullMockTest) : (nextUnit?.FinalTestId.HasValue ?? default) ? nameof(FinalTest) : (nextUnit?.UnitId.HasValue ?? default) ? nameof(Domain.Entities.Unit) : default;
-        }
-
-        private async Task<LessonOverviewModel> GetLessonOverview(Lesson? lesson, LessonResult? lessonResult, Guid? studentId, Guid? objectId, string? type, EnumResultStatus? status, IList<SkillScores>? skillScores = default)
-        {
-            ArgumentNullException.ThrowIfNull(lesson);
-            var lessonDashBoard = _mapper.Map<LessonOverviewModel>(lesson);
-            lessonDashBoard.LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(lesson.LessonInstructions.OrderBy(x => x.CreatedDate).ToList());
-            lessonDashBoard.LessonResult = _mapper.Map<LessonResultModel>(lessonResult);
-            lessonDashBoard.UnitId = lesson.UnitLessons.FirstOrDefault()?.UnitId ?? (lessonResult?.UnitId ?? default);
-            lessonDashBoard.ObjectId = objectId;
-            lessonDashBoard.Type = type;
-            lessonDashBoard.Status = status;
-            lessonDashBoard.SkillScores = skillScores;
-            if (lessonResult != null)
-            {
-                var homeWorks = lessonResult.HomeWorkResults.Where(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id).ToList();
-                var classForumResult = lessonResult.ClassForumResults.FirstOrDefault(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id);
-                var (statusVideo, numberVideo) = await GetStatus(lessonResult.VideoResult);
-                var (statusClassForum, numberClassForum) = GetStatus(classForumResult, statusVideo);
-                var (statusHomeWork, numberHomeWork) = GetStatus(homeWorks, statusClassForum);
-                var numbers = new List<double> { numberClassForum, numberVideo, numberHomeWork };
-                lessonDashBoard.StatusVideo = statusVideo;
-                lessonDashBoard.StatusClassForum = statusClassForum;
-                lessonDashBoard.StatusHomeWork = statusHomeWork;
-                lessonDashBoard.PercentProgress = numbers.Sum();
-            }
-            return lessonDashBoard;
+            var homeWorks = lessonResult.HomeWorkResults.Where(x => x.LessonResultId == lessonResult.Id).ToList();
+            var classForumResult = lessonResult.ClassForumResults.FirstOrDefault(x => x.LessonResultId == lessonResult.Id);
+            var (statusVideo, numberVideo) = await GetStatus(lessonResult.VideoResult);
+            var (statusClassForum, numberClassForum) = GetStatus(classForumResult, statusVideo);
+            var (statusHomeWork, numberHomeWork) = GetStatus(homeWorks, statusClassForum);
+            var numbers = new List<double> { numberClassForum, numberVideo, numberHomeWork };
+            return (statusVideo, statusClassForum, statusHomeWork, numbers.Sum());
         }
 
         private async Task<(EnumResultStatus, double)> GetStatus(VideoResult? videoResult)
         {
+            var status = EnumResultStatus.Unfinished;
             if (videoResult != null)
             {
                 var video = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
@@ -314,18 +355,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 {
                     var videoTimeCodes = video.VideoTimeCodes.ToList();
                     var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).ToList();
-
-                    if (videoResult.Status == EnumResultStatus.Process || videoResult.Status == EnumResultStatus.New)
-                    {
-                        return (EnumResultStatus.Process, PercentVideo * NumberHelper.GetPercent(videoTimeCodes.Count, videoTimeCodeResults.Count));
-                    }
-                    else
-                    {
-                        return (EnumResultStatus.Done, NumberHelper.GetPercent(videoTimeCodes.Count, videoTimeCodeResults.Count));
-                    }
+                    status = (videoResult.Status == EnumResultStatus.Process || videoResult.Status == EnumResultStatus.New) ? EnumResultStatus.Process : EnumResultStatus.Done;
+                    return (status, PercentVideo * NumberHelper.GetPercent(videoTimeCodes.Count, videoTimeCodeResults.Count));
                 }
             }
-            return (EnumResultStatus.Unfinished, 0);
+            return (status, default);
         }
 
         private static (EnumResultStatus, double) GetStatus(IList<HomeWorkResult>? homeWorkResults, EnumResultStatus status)
@@ -343,7 +377,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                     return (EnumResultStatus.Done, PercentHomeWork * NumberHelper.GetPercent(countDone, homeWorkResults.Count));
                 }
             }
-            return (statusHomeWork, 0);
+            return (statusHomeWork, default);
         }
 
         private static (EnumResultStatus, double) GetStatus(ClassForumResult? classForumResult, EnumResultStatus status)
@@ -361,10 +395,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Pending)
                 {
-                    return (EnumResultStatus.Process, 0);
+                    return (EnumResultStatus.Process, default);
                 }
             }
-            return (statusClassForum, 0);
+            return (statusClassForum, default);
         }
     }
 }
