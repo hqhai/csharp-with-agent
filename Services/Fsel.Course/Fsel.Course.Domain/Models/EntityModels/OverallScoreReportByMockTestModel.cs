@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? Name { get; set; }
         public double Percent { get; set; }
+        public EnumResultStatus Status { get; set; }
         public IList<OverallScoreReportSkillModel>? OverallScoreReportSkills { get; set; }
     }
 
@@ -18,6 +19,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? Id { get; set; }
         public double Percent { get; set; }
         public EnumResultStatus Status { get; set; }
-        public IList<SkillScores>? SkillScores { get; set; }
+        public IList<TestSkillScores>? SkillScores { get; set; }
     }
 }

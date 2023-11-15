@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
@@ -22,10 +23,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Hosting;
     using OtpNet;
 
     public class UpdateStudentByAdminCommand : UpdateStudentByAdminCommandModel, IRequest<MethodResult<StudentModel>>
@@ -40,6 +43,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly IOrderService _orderService;
         private readonly AppSetting _appSetting;
         private readonly IMediator _mediator;
+        private readonly IHostEnvironment _environment;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IHumanRepository _humanRepository;
 
@@ -49,6 +53,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             IOrderService orderService,
             AppSetting appSetting,
             IMediator mediator,
+            IHostEnvironment environment,
             IUserOtpCodeRepository userOtpCodeRepository,
             IHumanRepository humanRepository)
         {
@@ -58,6 +63,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _orderService = orderService;
             _appSetting = appSetting;
             _mediator = mediator;
+            _environment = environment;
             _userOtpCodeRepository = userOtpCodeRepository;
             _humanRepository = humanRepository;
         }
@@ -121,9 +127,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 var userOtpCode = await _userOtpCodeRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
                 if (userOtpCode == null)
                 {
-                    var randomSecure = new RandomSecureHelper();
-                    var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-                    var otp = totp.ComputeTotp();
+                    var otp = (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)) ? ValueSettings.OtpDefault : NumberHelper.GetRandomCode();
 
                     userOtpCode = new UserOtpCode
                     {
