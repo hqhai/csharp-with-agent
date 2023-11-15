@@ -2,11 +2,11 @@
 
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
-    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -54,9 +54,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                         .ThenInclude(x => x!.MockTestSections)
                                                                         .ThenInclude(x => x!.SectionGroup)
                                                                         .Include(x => x.MockTest)
-                                                                        .ThenInclude(x => x!.MockTestResults)
-                                                                        .ThenInclude(x => x.Course)
                                                                         .ThenInclude(x => x!.CourseUnitMockTests)
+                                                                        .ThenInclude(x => x.Course)
+                                                                        .Include(x => x.MockTest)
+                                                                        .ThenInclude(x => x!.UnitSkillMockTests)
+                                                                        .ThenInclude(x => x.Unit)
+                                                                        .ThenInclude(x => x.CourseUnitMockTests)
+                                                                        .ThenInclude(x => x.Course)
                                                                         .Include(x => x.MockTestScores)
                                                                         .Where(x => x.Status == EnumResultStatus.Done && !x.MockTestScores.Any() && (x.GradingTeacherId == null || x.GradingTeacherId == teacherId))
                                                                         .AsNoTracking()
@@ -71,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                             CreatedUserId = x.CreatedUserId,
                                                                             Type = x.MockTest!.MockTestType,
                                                                             CourseSkill = x.MockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault(),
-                                                                            UnitDisplayOrder = x.MockTest.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
+                                                                            UnitDisplayOrder = x.MockTest.MockTestType == EnumMockTestType.FullMockTest ? x.MockTest.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault() : x.MockTest.UnitSkillMockTests.Where(y => y.UnitId == x.UnitId).Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.Number).FirstOrDefault(),
                                                                             CourseCode = x.MockTest.MockTestResults.Select(x => x.Course!.Code).FirstOrDefault(),
                                                                         });
             mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing || x.Type == EnumMockTestType.FullMockTest);
