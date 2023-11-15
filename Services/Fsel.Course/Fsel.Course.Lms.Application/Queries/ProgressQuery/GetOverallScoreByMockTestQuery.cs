@@ -120,7 +120,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return await _unitRepository.Queryable.Include(x => x.UnitSkillMockTests).Where(x => unitIds.Contains(x.Id)).ToListAsync();
         }
 
-        private (IList<Guid>, IList<CourseUnitMockTest>) GetMockTestIds(CourseUnitMockTest? courseUnitMockTest, IList<CourseUnitMockTest> courseUnitMockTests, IList<Domain.Entities.Unit> units)
+        private static (IList<Guid>, IList<CourseUnitMockTest>) GetMockTestIds(CourseUnitMockTest? courseUnitMockTest, IList<CourseUnitMockTest> courseUnitMockTests, IList<Domain.Entities.Unit> units)
         {
             ArgumentNullException.ThrowIfNull(courseUnitMockTest);
             var displayOrder = courseUnitMockTests[courseUnitMockTests.IndexOf(courseUnitMockTest)].DisplayOrder;
