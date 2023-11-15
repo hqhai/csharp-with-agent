@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
             var course = await _courseRepository.Queryable
-                             .Include(x => x.CourseResults)
+                             .Include(x => x.CourseResults.Where(x => x.CourseId == @class.CourseId && x.StudentId == studentId))
                              .Include(x => x.CourseUnitMockTests)
                              .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
 

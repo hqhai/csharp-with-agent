@@ -137,17 +137,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             }
         }
 
-        private async Task UpdateCourseStatusNew(Course course, Guid? studentId, CancellationToken cancellationToken)
-        {
-            var courseResult = course.CourseResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == course.Id);
-            if (courseResult != null && courseResult.Status == EnumResultStatus.New)
-            {
-                courseResult.Status = EnumResultStatus.Process;
-                _courseResultRepository.Update(courseResult);
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
-        }
-
         private async Task<MethodResult<Lesson>> Validate(StartLessonCommand request, Guid? studentId, CancellationToken cancellationToken)
         {
             MethodResult<Lesson> methodResult = new MethodResult<Lesson>();
@@ -201,7 +190,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 return methodResult;
             }
             await UpdateUnitStatusNew(unit, studentId, cancellationToken).ConfigureAwait(false);
-            await UpdateCourseStatusNew(course, studentId, cancellationToken).ConfigureAwait(false);
             methodResult.Result = lesson;
             return methodResult;
         }
