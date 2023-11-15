@@ -66,6 +66,8 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.GameHistoryQuery
                         Score = x.Score,
                         SpaceShipId = x.SpaceShipId,
                         SpaceShipCode = x.SpaceShip!.Code,
+                        ComboNumber = x.ComboNumber,
+                        ZPlanetNumber = x.ZPlanetNumber,
                     });
 
             int totalItem = await gameHistory.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
