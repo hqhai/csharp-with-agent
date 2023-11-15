@@ -84,10 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         {
             if (mockTest != null)
             {
-                if (mockTest.MockTestType == EnumMockTestType.SkillMockTest)
-                {
-                    mockTest = await _mockTestRepository.Queryable
-                                          .Include(x => x!.MockTestSections)
+                var query = _mockTestRepository.Queryable.Include(x => x!.MockTestSections)
                                               .ThenInclude(x => x.SectionGroup)
                                               .ThenInclude(x => x!.Sections)
                                               .ThenInclude(x => x.SectionTimeCodes)
@@ -98,8 +95,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                               .ThenInclude(x => x.MockTestAnswers.Where(x => x.MockTestResultId == mockTestResult.Id))
                                           .Include(x => x!.MockTestSections)
                                               .ThenInclude(x => x.SectionGroup)
-                                              .ThenInclude(x => x!.MockTestScores)
-                                          .Include(x => x.CourseUnitMockTests)
+                                              .ThenInclude(x => x!.MockTestScores.Where(x => x.MockTestResultId == mockTestResult.Id));
+
+                if (mockTest.MockTestType == EnumMockTestType.SkillMockTest)
+                {
+                    mockTest = await query.Include(x => x.CourseUnitMockTests)
                                               .ThenInclude(x => x.Course)
                                           .Where(x => x.Id == mockTestResult.MockTestId)
                                           .AsNoTracking()
@@ -107,22 +107,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 }
                 else
                 {
-                    mockTest = await _mockTestRepository.Queryable
-                                          .Include(x => x!.MockTestSections)
-                                              .ThenInclude(x => x.SectionGroup)
-                                              .ThenInclude(x => x!.Sections)
-                                              .ThenInclude(x => x.SectionTimeCodes)
-                                              .ThenInclude(x => x.MockTestAnswers.Where(x => x.MockTestResultId == mockTestResult.Id))
-                                          .Include(x => x!.MockTestSections)
-                                              .ThenInclude(x => x.SectionGroup)
-                                              .ThenInclude(x => x!.Sections)
-                                              .ThenInclude(x => x.MockTestAnswers.Where(x => x.MockTestResultId == mockTestResult.Id))
-                                          .Include(x => x!.MockTestSections)
-                                              .ThenInclude(x => x.SectionGroup)
-                                              .ThenInclude(x => x!.MockTestScores.Where(x => x.MockTestResultId == mockTestResult.Id))
-                                          .Include(x => x.UnitSkillMockTests)
+                    mockTest = await query.Include(x => x.UnitSkillMockTests)
                                               .ThenInclude(x => x.Unit)
-                                              .ThenInclude(x => x.CourseUnitMockTests)
+                                              .ThenInclude(x => x!.CourseUnitMockTests)
                                               .ThenInclude(x => x.Course)
                                            .Where(x => x.Id == mockTestResult.MockTestId)
                                           .AsNoTracking()
