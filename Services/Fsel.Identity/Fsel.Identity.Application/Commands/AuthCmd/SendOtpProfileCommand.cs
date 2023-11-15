@@ -4,9 +4,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 {
     using System;
     using System.Globalization;
-    using System.Text;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
@@ -18,11 +18,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using OtpNet;
+    using Microsoft.Extensions.Hosting;
 
     public class SendOtpProfileCommand : IRequest<MethodResult<bool>>
     {
@@ -38,18 +39,21 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
+        private readonly IHostEnvironment _environment;
 
         public SendOTpEmailUserCommandHandler(UserManager<User> userManager,
             AuthContext authContext,
             IUserOtpCodeRepository userOtpCodeRepository,
             IMediator mediator,
-            AppSetting appSetting)
+            AppSetting appSetting,
+            IHostEnvironment environment)
         {
             _userManager = userManager;
             _authContext = authContext;
             _userOtpCodeRepository = userOtpCodeRepository;
             _mediator = mediator;
             _appSetting = appSetting;
+            _environment = environment;
         }
 
         public async Task<MethodResult<bool>> Handle(SendOtpProfileCommand request, CancellationToken cancellationToken)
@@ -96,16 +100,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             var userOtpCode = await _userOtpCodeRepository.Queryable
                                   .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
+            var otp = (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)) ? ValueSettings.OtpDefault : NumberHelper.GetRandomCode();
             if (userOtpCode != null && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
-                userOtpCode.OTPCode = GetRandomCode();
+                userOtpCode.OTPCode = otp;
                 userOtpCode.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
                 _userOtpCodeRepository.Update(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             if (userOtpCode == null)
             {
-                var otp = GetRandomCode();
                 userOtpCode = new UserOtpCode
                 {
                     UserId = user.Id,
@@ -141,13 +145,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;
             return methodResult;
-        }
-
-        private static string GetRandomCode()
-        {
-            var randomSecure = new RandomSecureHelper();
-            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-            return totp.ComputeTotp();
         }
     }
 }
