@@ -180,25 +180,7 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "82d67C8D-6E18-4D11-A74E-FE38EAB7FA58",
-    "type": "DailyQuests",
-    "category": "DiscussionBoardInteract",
-    "operator": "Equal",
-    "maxPoints": 1,
-    "displayType": "Number",
-    "createdDate": "2023-11-07"
-  },
-  {
-    "id": "82d67C2R-6E18-4D11-A74E-FE38EAB7FA58",
-    "type": "DailyQuests",
-    "category": "DiscussionBoardInteract",
-    "operator": "Equal",
-    "maxPoints": 1,
-    "displayType": "Number",
-    "createdDate": "2023-11-07"
-  },
-  {
-    "id": "82d67C2R-6E18-4D11-A74E-FE28EAB7FA48",
+    "id": "38045664-20F8-4780-9C62-9736C2BCE90C",
     "type": "DailyQuests",
     "category": "FinishDailyFocusMode",
     "operator": "Equal",
@@ -207,7 +189,7 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "82d67C2R-6E18-4D11-A74E-FE28EAB7FA22",
+    "id": "31C2D3AA-EC1D-4EBB-99D1-5A8A2AE391C7",
     "type": "DailyQuests",
     "category": "LearnInteractTwentyMinutes",
     "operator": "Equal",
@@ -216,7 +198,7 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "82d67C2R-6E18-4D11-A74E-FE28EAB7FA33",
+    "id": "2EA59046-EA24-4F3F-B390-36D9629AE11E",
     "type": "DailyQuests",
     "category": "CommentOnNewLessonOfTwoClassMate",
     "operator": "Equal",
@@ -225,7 +207,7 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "82d67C2R-6E18-4D11-A74E-FE28EAB7FA55",
+    "id": "9D333771-8C0D-481C-95E7-542A12002684",
     "type": "DailyQuests",
     "category": "CompleteHomeWorkAtLeastFiftyPercent",
     "operator": "Equal",
@@ -234,7 +216,7 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "82d67C2R-6E18-4D11-A74E-FE28EAB7FA44",
+    "id": "F8C5416C-118E-45DC-942C-F61E985B9827",
     "type": "DailyQuests",
     "category": "ReviseYourNotes",
     "operator": "Equal",

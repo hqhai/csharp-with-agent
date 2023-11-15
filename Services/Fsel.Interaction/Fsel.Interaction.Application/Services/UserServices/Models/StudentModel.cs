@@ -8,17 +8,10 @@ namespace Fsel.Interaction.Application.Services.UserServices.Models
 
     public class StudentModel : BaseModel
     {
-        public Guid PackageId { get; set; }
-        public string? Membership { get; set; }
-
-        public string? Occupation { get; set; }
-
-        public string? School { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
 
         public Guid? ClassId { get; set; }
 
-        public HumanModel? Human { get; set; }
+        public HumanProfileModel? Human { get; set; }
     }
 }

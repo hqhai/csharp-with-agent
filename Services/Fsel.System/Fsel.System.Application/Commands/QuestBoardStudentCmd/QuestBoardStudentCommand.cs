@@ -36,59 +36,56 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var questBoardNotDaily = await _questBoardStudentRepository.Queryable.Where(x => x.StudentId == request.StudentId && x.Status != EnumQuestBoardStudentStatus.Achieved).ToListAsync(cancellationToken);
+            var questBoardStudent = await _questBoardStudentRepository.Queryable
+                .Where(x => x.StudentId == request.StudentId && x.Status != EnumQuestBoardStudentStatus.Achieved)
+                .ToListAsync(cancellationToken);
 
-            var questBoardQuery = from item in request.Categories
-                                  join item2 in _questBoardRepository.Queryable on item equals item2.Category
-                                  select item2;
+            var questBoardQuery = _questBoardRepository.Queryable
+                .Where(x => request.Categories!.Contains(x.Category));
 
-            var questBoardDaily = from item in request.Categories
-                                  join item2 in _questBoardRepository.Queryable on item equals item2.Category
-                                  join item3 in _questBoardConfigRepository.Queryable on item equals item3.Category
-                                  select item2;
+            var questBoardConfig = _questBoardConfigRepository.Queryable
+                .Where(x => request.Categories!.Contains(x.Category));
 
-            List<QuestBoard> listQuestBoard = new List<QuestBoard>();
+            var listQuestBoard = await questBoardQuery.ToListAsync(cancellationToken);
 
-            if (questBoardDaily.ToList().Count > 0)
-            {
-                listQuestBoard = questBoardDaily.ToList();
-                if (request.ImplementTime != null && !CheckDailyQuest((DateTime)request.ImplementTime))
-                {
-                    methodResult.Result = false;
-                    return methodResult;
-                }
+            var questBoardStudentToUpdate = new List<QuestBoardStudent>();
+            var questBoardStudentToAdd = new List<QuestBoardStudent>();
 
-            }
-            else
-            {
-                listQuestBoard = questBoardQuery.ToList();
-            }
-
-            IList<QuestBoardStudent> questBoardStudentToUpdate = new List<QuestBoardStudent>();
-            IList<QuestBoardStudent> questBoardStudentToAdd = new List<QuestBoardStudent>();
-
-
-
-            //check exists questboard
             if (request.Categories != null && request.Categories.Count > 0)
             {
                 foreach (var item in request.Categories)
                 {
-                    var questBoardNotDailyUpdate = questBoardNotDaily.FirstOrDefault(x => x.QuestBoard?.Category == item);
+                    QuestBoardStudent? questBoardStudentUpdate = questBoardStudent.FirstOrDefault(x => x.QuestBoard?.Category == item);
+                    var questType = questBoardConfig.FirstOrDefault(x => x.Category == item)?.Type;
 
-                    if (questBoardNotDailyUpdate != null)
+                    switch (questType)
                     {
+                        case EnumQuestBoardType.MainQuests:
+                            questBoardStudentUpdate = CustomizeDataMainQuestBoard(questBoardStudent, item, request);
+                            break;
+                        case EnumQuestBoardType.DailyQuests:
+                            questBoardStudentUpdate = CustomizeDataDailyQuestBoard(questBoardStudent, item, request);
+                            break;
+                    }
 
-                        if (questBoardNotDailyUpdate.AchievedPoints >= request.AchievedPoints)
+                    if (questBoardStudentUpdate != null)
+                    {
+                        if (questBoardStudentUpdate.AchievedPoints >= request.AchievedPoints)
                         {
                             continue;
                         }
-                        questBoardNotDailyUpdate.AchievedPoints = request.AchievedPoints;
-                        questBoardStudentToUpdate.Add(questBoardNotDailyUpdate);
+
+                        questBoardStudentUpdate.AchievedPoints = request.AchievedPoints;
+                        questBoardStudentToUpdate.Add(questBoardStudentUpdate);
                     }
                     else
                     {
                         var questBoardAdd = listQuestBoard.FirstOrDefault(x => x.Category == item);
+
+                        if (questBoardAdd == null)
+                        {
+                            continue;
+                        }
                         var questBoardStudentAdd = new QuestBoardStudent()
                         {
                             QuestBoardId = questBoardAdd!.Id,
@@ -97,6 +94,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                             ObjectId = request.ObjectId,
                             CourseId = request.CourseId,
                         };
+
                         questBoardStudentToAdd.Add(questBoardStudentAdd);
                     }
                 }
@@ -106,8 +104,8 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
             {
                 await _questBoardStudentRepository.AddList(questBoardStudentToAdd);
                 _questBoardStudentRepository.UpdateList(questBoardStudentToUpdate);
-                await _questBoardStudentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+                await _questBoardStudentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;
@@ -116,15 +114,27 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
             return methodResult;
         }
 
+        private static QuestBoardStudent CustomizeDataDailyQuestBoard(List<QuestBoardStudent> questBoardStudents, EnumQuestBoardCategory category, QuestBoardStudentCommand request)
+        {
+            var questBoardTemp = CustomizeDataMainQuestBoard(questBoardStudents, category, request);
+
+            if (questBoardStudents != null && questBoardTemp != null && !CheckDailyQuest(questBoardTemp.CreatedDate))
+            {
+                questBoardTemp = null;
+            }
+
+            return questBoardTemp!;
+        }
+
+        private static QuestBoardStudent CustomizeDataMainQuestBoard(List<QuestBoardStudent> questBoardStudents, EnumQuestBoardCategory category, QuestBoardStudentCommand request)
+        {
+            return questBoardStudents!.FirstOrDefault(x => x.QuestBoard?.Category == category && x.StudentId == request.StudentId)!;
+        }
+
         private static bool CheckDailyQuest(DateTime date)
         {
             var currentDate = DateTime.UtcNow;
-            bool result = false;
-            if (date.Date == currentDate.Date && date.Month == currentDate.Month && date.Year == currentDate.Year)
-            {
-                result = true;
-            }
-            return result;
+            return date.Date == currentDate.Date && date.Month == currentDate.Month && date.Year == currentDate.Year;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Fsel.Interaction.Application.Services.UserServices
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid> studentIds);
 
         [Post("/user/get-users-by-ids")]
-        Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetUsersByIdsAsync([Body] GetUsersByIdsQueryModel model);
+        Task<IApiResponse<MethodResult<IList<HumanProfileModel>>>> GetUsersByIdsAsync([Body] GetUsersByIdsQueryModel model);
 
         [Get("/student/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> ExecuteListStudentQueryAsync([Query] BaseQueryModel query);

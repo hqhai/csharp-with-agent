@@ -34,14 +34,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Execute-list-query
         /// </summary>
-        [HttpGet("execute-list-query")]
+        [HttpPost("execute-list-query")]
         [ProducesResponseType(typeof(MethodResult<IList<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission]
-        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
+        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel cmd)
         {
-            SetQuery(query);
-            var result = await _classForumResultRepository.GetListResultAsync<ClassForumResultModel>(query);
+            SetQuery(cmd);
+            var result = await _classForumResultRepository.GetListResultAsync<ClassForumResultModel>(cmd);
             return result.GetActionResult();
         }
 

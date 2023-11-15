@@ -41,6 +41,7 @@ builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>(
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
+builder.Services.AddScoped<QuestBoardPublisher>();
 
 
 

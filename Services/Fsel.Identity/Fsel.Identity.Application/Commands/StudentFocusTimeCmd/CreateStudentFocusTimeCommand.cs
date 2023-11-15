@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             _authContext = authContext;
             _systemService = systemService;
             _questBoardPublisher = questBoardPublisher;
-            _trainingService=trainingService;
+            _trainingService = trainingService;
         }
 
         public async Task<MethodResult<StudentFocusTimeModel>> Handle(CreateStudentFocusTimeCommand request, CancellationToken cancellationToken)
@@ -158,7 +158,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         {
             var classModel = await _trainingService.GetClassByStudentId(student.Id);
             var courseId = classModel.Content!.Result!.CourseId;
-            
+
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>();
             var categoryToElement = EnumQuestBoardCategory.ThirtyMinutesFocusMode;
 
