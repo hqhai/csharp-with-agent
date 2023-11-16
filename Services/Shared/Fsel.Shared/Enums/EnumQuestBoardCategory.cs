@@ -82,6 +82,8 @@ namespace Fsel.Shared.Enums
         CompleteHomeWorkAtLeastFiftyPercent,
 
         [Description("Revise your notes")]
-        ReviseYourNotes
+        ReviseYourNotes,
+        [Description("Mã giới thiệu của bạn được nhập thành công 1 lần")]
+        SuccessfulIntroduceCode,
     }
 }

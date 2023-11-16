@@ -180,6 +180,15 @@
     "createdDate": "2023-11-07"
   },
   {
+    "id": "0DDF9F6F-D2CB-49C2-858A-F4AFB3233DEE",
+    "type": "SideQuests",
+    "category": "SuccessfulIntroduceCode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-09"
+  },
+  {
     "id": "38045664-20F8-4780-9C62-9736C2BCE90C",
     "type": "DailyQuests",
     "category": "FinishDailyFocusMode",
