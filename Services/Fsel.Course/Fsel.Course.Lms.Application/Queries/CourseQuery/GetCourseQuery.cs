@@ -139,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
 
             var courseModel = _mapper.Map<CourseModel>(course);
-            courseModel.CourseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder).Select(x => new CourseUnitMockTestModel
+            courseModel.CourseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder).ThenBy(x => x.CreatedDate).Select(x => new CourseUnitMockTestModel
             {
                 DisplayOrder = x.DisplayOrder,
                 CourseId = x.CourseId,
