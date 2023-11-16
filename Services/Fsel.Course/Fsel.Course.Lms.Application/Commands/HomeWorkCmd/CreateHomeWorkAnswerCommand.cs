@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -14,7 +15,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,6 +35,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
+        private readonly AuthContext _authContext;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private const int FIFTY_PERCENT_DONE = 50;
+        private const float ACHIEVED_POINT = 1;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             IHomeWorkQuestionRepository homeWorkQuestionRepository,
@@ -40,7 +47,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
             AnswerTypeConverter answerTypeConverter,
             IQuestionRepository questionRepository
-            )
+,
+            AuthContext authContext,
+            QuestBoardPublisher questBoardPublisher)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
@@ -49,6 +58,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
+            _authContext = authContext;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
@@ -169,11 +180,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             await _homeWorkAnswerRepository.ExecuteTransactionAsync(async () =>
             {
+                var homeworkresulttoday = _homeWorkResultRepository.Queryable.Where(x => x.CreatedUserId == _authContext.CurrentUserId);
+                var homeworkTest = homeworkresulttoday.ToList();
+
                 if (homeWorkAnswers.Any())
                 {
+                    await DoDailyQuest(cancellationToken);
                     _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
                     await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;
@@ -181,5 +197,31 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             return methodResult;
         }
+        public async Task DoDailyQuest(CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CompleteHomeWorkAtLeastFiftyPercent };
+
+            var checkHomeWorkDoneAtLeastFiftyPercent = _homeWorkResultRepository.Queryable.Any(x => x.CreatedUserId == _authContext.CurrentUserId && x.CreatedDate.Date == DateTime.UtcNow.Date && x.CreatedDate.Month == DateTime.UtcNow.Month && x.CreatedDate.Year == DateTime.UtcNow.Year && x.Percent >= FIFTY_PERCENT_DONE);
+
+            var homeWorkResultDaily = _homeWorkResultRepository.Queryable.FirstOrDefault(x => x.CreatedUserId == _authContext.CurrentUserId);
+
+            var courseId = homeWorkResultDaily?.LessonResult?.CourseId;
+            var studentId = homeWorkResultDaily?.StudentId;
+
+            if (checkHomeWorkDoneAtLeastFiftyPercent && homeWorkResultDaily != null)
+            {
+                QuestBoardQueueModel questBoardModel = new QuestBoardQueueModel()
+                {
+                    StudentId = homeWorkResultDaily.StudentId!,
+                    Categories = categories,
+                    AchievedPoint = ACHIEVED_POINT,
+                    ObjectId = homeWorkResultDaily.Id,
+                    CourseId = homeWorkResultDaily.LessonResult!.CourseId,
+                };
+
+                await _questBoardPublisher.Publish(questBoardModel, cancellationToken);
+            }
+        }
+
     }
 }
