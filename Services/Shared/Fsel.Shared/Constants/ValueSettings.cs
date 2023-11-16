@@ -4,6 +4,5 @@ namespace Fsel.Shared.Constants
 {
     public static class ValueSettings
     {
-        public const string OtpDefault = "123456";
     }
 }
