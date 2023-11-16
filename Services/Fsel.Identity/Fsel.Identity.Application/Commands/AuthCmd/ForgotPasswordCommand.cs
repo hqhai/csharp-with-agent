@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Globalization;
-using System.Text;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Constants;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
@@ -13,11 +13,12 @@ using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using OtpNet;
+using Microsoft.Extensions.Hosting;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -30,16 +31,19 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
+        private readonly IHostEnvironment _environment;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
 
         public ForgotPasswordCommandHandler(UserManager<User> userManager
             , IMediator mediator
+            , IHostEnvironment environment
             , IUserOtpCodeRepository userOtpCodeRepository
             , AppSetting appSetting)
         {
             _userManager = userManager;
             _mediator = mediator;
+            _environment = environment;
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
         }
@@ -69,9 +73,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var userOtpCode = await _userOtpCodeRepository.Queryable
                                   .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
 
-            RandomSecureHelper randomSecure = new RandomSecureHelper();
-            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-            var otp = totp.ComputeTotp();
+            var otp = (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)) ? ValueSettings.OtpDefault : NumberHelper.GetRandomCode();
             if (userOtpCode == null)
             {
                 userOtpCode = new UserOtpCode
