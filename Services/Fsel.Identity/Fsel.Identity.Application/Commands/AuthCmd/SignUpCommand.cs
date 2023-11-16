@@ -1,16 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Globalization;
-using System.Text;
 using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.StudentCmd;
+using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
@@ -18,14 +16,10 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
-using Fsel.Shared.Helpers;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using OtpNet;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -42,7 +36,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
-        private readonly IHostEnvironment _environment;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
@@ -50,8 +43,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IMediator mediator,
             IUserOtpCodeRepository userOtpCodeRepository,
             AppSetting appSetting,
-            IPlatformRepository platformRepository,
-            IHostEnvironment environment)
+            IPlatformRepository platformRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -60,7 +52,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
             _platformRepository = platformRepository;
-            _environment = environment;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -173,33 +164,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                             #region Send Code OTP
 
-                            var userOtpCode = await _userOtpCodeRepository.Queryable
-                                    .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
-
-                            var otp = (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)) ? ValueSettings.OtpDefault : NumberHelper.GetRandomCode();
-                            if (userOtpCode == null)
-                            {
-                                userOtpCode = new UserOtpCode
-                                {
-                                    UserId = user.Id,
-                                    OTPCode = otp,
-                                    Status = EnumOtpCodeStatus.New,
-                                    ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime)
-                                };
-                                _userOtpCodeRepository.Add(userOtpCode);
-                                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                            }
-                            else
-                            {
-                                userOtpCode.OTPCode = otp;
-                                userOtpCode.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
-                                _userOtpCodeRepository.Update(userOtpCode);
-                                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                            }
-
+                            var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
                             var param = new SendOtpTemplateModel
                             {
-                                OtpCode = userOtpCode.OTPCode,
+                                OtpCode = userOtpCode.Result,
                                 OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
                             };
                             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
