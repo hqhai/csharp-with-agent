@@ -5,6 +5,7 @@ using System.Text;
 using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.StudentCmd;
@@ -17,10 +18,13 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using OtpNet;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
@@ -38,6 +42,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
+        private readonly IHostEnvironment _environment;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
@@ -45,7 +50,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IMediator mediator,
             IUserOtpCodeRepository userOtpCodeRepository,
             AppSetting appSetting,
-            IPlatformRepository platformRepository)
+            IPlatformRepository platformRepository,
+            IHostEnvironment environment)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -54,6 +60,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
             _platformRepository = platformRepository;
+            _environment = environment;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -63,6 +70,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             User? user = null;
             if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
+                if (!request.PhoneNumber.IsValidPhoneNumber())
+                {
+                    methodResult.AddError(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
+                    return methodResult;
+                }
                 user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
                 if (user != null)
                 {
@@ -72,6 +84,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
             if (!string.IsNullOrEmpty(request.Email))
             {
+                if (!request.Email.IsValidEmail())
+                {
+                    methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    return methodResult;
+                }
                 user = await _userManager.FindByEmailAsync(request.Email);
                 if (user != null && user.EmailConfirmed)
                 {
@@ -159,9 +176,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             var userOtpCode = await _userOtpCodeRepository.Queryable
                                     .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
 
-                            RandomSecureHelper randomSecure = new RandomSecureHelper();
-                            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-                            var otp = totp.ComputeTotp();
+                            var otp = (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)) ? ValueSettings.OtpDefault : NumberHelper.GetRandomCode();
                             if (userOtpCode == null)
                             {
                                 userOtpCode = new UserOtpCode
