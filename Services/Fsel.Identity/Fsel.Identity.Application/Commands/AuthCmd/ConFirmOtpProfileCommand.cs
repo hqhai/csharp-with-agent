@@ -7,10 +7,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
-    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -27,17 +26,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
 
         public ConfirmOtpProfileCommandHandler(UserManager<User> userManager
             , AuthContext authContext
-            , IUserOtpCodeRepository userOtpCodeRepository
+            , IMediator mediator
             , AppSetting appSetting)
         {
             _userManager = userManager;
             _authContext = authContext;
-            _userOtpCodeRepository = userOtpCodeRepository;
+            _mediator = mediator;
             _appSetting = appSetting;
         }
 
@@ -91,24 +90,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
 
+                var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.OTP }, cancellationToken);
+                if (!method.IsOK)
+                {
+                    methodResult.AddError(method.ErrorMessages);
+                    return methodResult;
+                }
                 await _userManager.UpdateAsync(user);
-                var userOtpCode = await _userOtpCodeRepository.Queryable
-                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
-                if (userOtpCode == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.OTP), request.OTP);
-                    return methodResult;
-                }
-
-                if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
-                    return methodResult;
-                }
-
-                userOtpCode.Status = EnumOtpCodeStatus.Verified;
-                _userOtpCodeRepository.Update(userOtpCode);
-                await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
