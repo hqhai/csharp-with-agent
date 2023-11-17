@@ -99,5 +99,17 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
             MethodResult<StudentGameInfoModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get info account
+        /// </summary>
+        [HttpGet("get-in-account/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<AccountModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetInfoAccount([FromRoute] Guid studentId)
+        {
+            var commandResult = await _mediator.Send(new GetInfoAccountQuery { StudentId = studentId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

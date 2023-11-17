@@ -7,9 +7,7 @@ using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.UserCmd;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Shared.Enums;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Identity.Api.Controllers
@@ -110,6 +108,18 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetUsersByIds([FromQuery] GetUserByIdQuery query)
         {
             MethodResult<HumanModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get info student or guest by student id
+        /// </summary>
+        [HttpGet("get-info-student-or-guest-by-student-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetInfoStudentOrGuest([FromRoute] Guid id)
+        {
+            MethodResult<StudentModel> commandResult = await _mediator.Send(new GetInfoStudentOrGuestByStudentIdQuery { StudentId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
