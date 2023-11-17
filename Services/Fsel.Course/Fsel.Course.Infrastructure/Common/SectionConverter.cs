@@ -242,6 +242,7 @@ namespace Fsel.Course.Infrastructure.Common
             sectionDto.SectionParts = GetSectionPartDtos(section.SectionParts.ToList(), isDisableAnswers);
             sectionDto.Questions = GetQuestionDtos(section.SectionQuestions.ToList(), isDisableAnswers);
             sectionDto.SectionTimeCodes = GetSectionTimeCodeDtos(section.SectionTimeCodes.ToList());
+            sectionDto.MockTestAnswer = _mapper.Map<MockTestAnswerModel>(section.MockTestAnswers.FirstOrDefault());
             return sectionDto;
         }
 

@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             videoTimeCodeResult.SkillScores = skillScores;
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                if (videoTimeCode?.TimeCodeType == EnumTimeCodeType.UnitTest)
+                if (videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest)
                 {
                     await _finishOneUnitTestPublisher.Publish(videoResult, cancellationToken);
                 }
