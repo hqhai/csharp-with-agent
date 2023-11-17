@@ -1,4 +1,4 @@
-// Copyright (c) Atlantic. All rights reserved.
+// Copyright (classForumResults) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
 {
@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -34,6 +35,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
         private readonly AuthContext _authContext;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IUserService _userService;
+        private float Default_Achieved_Point = 1;
+        private const double Standard_Ratio = 1; // tỉ lệ xem đánh giá 100/100
 
         public GetListClassForumScoresQueryHandler(IClassForumScoreRepository classForumScoreRepository, IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, QuestBoardPublisher questBoardPublisher, IUserService userService)
         {
@@ -70,10 +73,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
                                             .Where(x => x.ClassForumResultId == request.ClassForumResultId)
                                             .ToListAsync(cancellationToken);
             var courseId = classForumResult?.LessonResult?.CourseId;
-
+            
             if (courseId != null)
             {
                 await DoQuestBoard(request.ClassForumResultId, classForumResult!.LessonResult!.CourseId, cancellationToken);
+                await DoQuestBoardAllReviewsAndFeedback(request.ClassForumResultId, classForumResult!.LessonResult!.CourseId, cancellationToken);
             }
 
             methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumScores);
@@ -100,6 +104,33 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
                 ObjectId = classForumResultId,
                 CourseId = courseId,
             }, cancellationToken);
+        }
+
+        public async Task DoQuestBoardAllReviewsAndFeedback(Guid classForumResultId, Guid courseId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeAllReviewsAndFeedback };
+
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentId = student?.Content?.Result?.Id ?? default;
+
+            var classForumResults = await _classForumResultRepository.Queryable
+                            .Where(x => x.StudentId == studentId && x.Status == EnumClassForumResultStatus.Graded)
+                            .ToListAsync(cancellationToken);
+
+            double checkViewedAllRatio = (double)classForumResults.Count(x => x.IsViewed) / classForumResults.Count;
+
+
+            if (checkViewedAllRatio == Standard_Ratio)
+            {
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = studentId,
+                    Categories = categories,
+                    ObjectId = classForumResultId,
+                    CourseId = courseId,
+                    AchievedPoint = Default_Achieved_Point,
+                }, cancellationToken);
+            }
         }
     }
 }

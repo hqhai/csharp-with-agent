@@ -135,7 +135,7 @@
     "createdDate": "2023-07-21"
   },
   {
-    "id": "0A20CB15-8629-41D9-88D9-890A3B487496",
+    "id": "0AEE60FF-65BC-4277-803C-8A21C38B2B84",
     "type": "SideQuests",
     "category": "ThirtyMinutesFocusMode",
     "operator": "Equal",
@@ -144,7 +144,7 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "2CA29E0C-4F81-40C6-9A0C-040D270D0433",
+    "id": "D34CF82A-8582-4DD8-B76B-E89857F4C910",
     "type": "SideQuests",
     "category": "NinetyMinutesFocusMode",
     "operator": "Equal",
@@ -153,7 +153,7 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "406C775B-51E8-4742-8C4B-A898AE2B8924",
+    "id": "E0608CE3-6514-4FD2-88F6-F62DB89E5FA7",
     "type": "SideQuests",
     "category": "OneHundredTwentytyMinutesFocusMode",
     "operator": "Equal",
@@ -162,7 +162,7 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "E1C02BBC-0C98-40A0-B7E0-807B5F137C3B",
+    "id": "E527E048-F02E-4A22-BEC4-427B67C93D63",
     "type": "SideQuests",
     "category": "OneHundredEightyMinutesFocusMode",
     "operator": "Equal",
@@ -171,7 +171,7 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "62767C8D-6E18-4D11-A74E-FE38EAB7FA58",
+    "id": "F62373AA-3FDE-4848-8FEF-7567FD0C7E8B",
     "type": "SideQuests",
     "category": "SixtyMinutesFocusMode",
     "operator": "Equal",
@@ -180,13 +180,31 @@
     "createdDate": "2023-11-07"
   },
   {
-    "id": "0DDF9F6F-D2CB-49C2-858A-F4AFB3233DEE",
+    "id": "C3C2C8AA-FC4A-4B01-8D55-1026062A47C6",
     "type": "SideQuests",
     "category": "SuccessfulIntroduceCode",
     "operator": "Equal",
     "maxPoints": 1,
     "displayType": "Number",
     "createdDate": "2023-11-09"
+  },
+  {
+    "id": "0417A848-1CD0-4AEF-AE33-2757652701D0",
+    "type": "SideQuests",
+    "category": "RateAndComment",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-09"
+  },
+  {
+    "id": "012A3990-47BC-436F-8D7D-10FD824BD579",
+    "type": "PremiumQuests",
+    "category": "SeeAllReviewsAndFeedback",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-13"
   },
   {
     "id": "38045664-20F8-4780-9C62-9736C2BCE90C",

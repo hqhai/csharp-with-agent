@@ -85,5 +85,11 @@ namespace Fsel.Shared.Enums
         ReviseYourNotes,
         [Description("Mã giới thiệu của bạn được nhập thành công 1 lần")]
         SuccessfulIntroduceCode,
+
+        [Description("Đánh giá và viết nhận xét về khóa học")]
+        RateAndComment,
+
+        [Description("Xem X(ALL) đánh giá phản hồi của giáo viên về bài của bạn (Mock Test/Class Forum)")]
+        SeeAllReviewsAndFeedback,
     }
 }
