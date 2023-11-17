@@ -7,12 +7,10 @@ namespace Fsel.System.Api.Controllers.Student
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.QuestBoardStudentCmd;
-    using Fsel.System.Application.Queries.QuestBoardQuery;
     using Fsel.System.Application.Queries.QuestBoardStudentQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
@@ -40,6 +38,18 @@ namespace Fsel.System.Api.Controllers.Student
             return queryResult.GetActionResult();
         }
 
+        /// <summary>
+        /// Search Quest Board by Student
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddQuestBoardStudent([FromBody] QuestBoardStudentCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
 
         /// <summary>
         /// QuestBoard Reward Student
@@ -50,18 +60,6 @@ namespace Fsel.System.Api.Controllers.Student
         public async Task<IActionResult> QuestBoardRewardStudent([FromRoute] Guid id)
         {
             var queryResult = await _mediator.Send(new QuestRewardCommand { Id = id }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Search Quest Board by Student
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> AddQuestBoardStudent([FromBody] QuestBoardStudentCommand cmd)
-        {
-            var queryResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
