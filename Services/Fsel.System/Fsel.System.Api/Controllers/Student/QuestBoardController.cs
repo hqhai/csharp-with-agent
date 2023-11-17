@@ -63,17 +63,5 @@ namespace Fsel.System.Api.Controllers.Student
             return queryResult.GetActionResult();
         }
 
-        /// <summary>
-        /// Search Quest Board by Student
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> AddQuestBoardStudent([FromBody] QuestBoardStudentCommand cmd)
-        {
-            var queryResult = await _mediator.Send(cmd).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
     }
 }
