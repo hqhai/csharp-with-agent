@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         if (answer.QuestionId != null && questions != null)
                         {
                             var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                            var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit);
+                            var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, true);
                             if (!questionResult.IsOK)
                             {
                                 methodResult.AddErrorBadRequest(questionResult.ErrorMessages);

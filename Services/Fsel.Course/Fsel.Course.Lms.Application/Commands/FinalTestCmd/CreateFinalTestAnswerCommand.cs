@@ -134,7 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 foreach (var answer in item.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                    var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit);
+                    var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, true);
                     if (!questionResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);

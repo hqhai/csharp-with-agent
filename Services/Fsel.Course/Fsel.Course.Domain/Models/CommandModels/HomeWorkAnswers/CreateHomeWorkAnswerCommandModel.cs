@@ -5,7 +5,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers
     public class CreateHomeWorkAnswerCommandModel
     {
         public Guid HomeWorkResultId { get; set; }
-        public bool IsSubmit { get; set; }
         public IList<HomeWorkAnswerQuestionModel>? Answers { get; set; }
     }
 

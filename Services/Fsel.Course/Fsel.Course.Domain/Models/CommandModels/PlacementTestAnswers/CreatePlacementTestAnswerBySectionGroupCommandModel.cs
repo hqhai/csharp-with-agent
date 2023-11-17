@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers
 {
+    using System.Text.Json.Serialization;
+
     public class CreatePlacementTestAnswerBySectionGroupCommandModel
     {
         public double TotalQuestion { get; set; }
@@ -9,6 +11,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers
         public Guid PlacementTestResultId { get; set; }
         public Guid SectionGroupId { get; set; }
         public bool IsSubmit { get; set; }
+        [JsonIgnore]
         public Guid? StudentId { get; set; }
         public IList<PlacementTestAnswerQuestionModel>? Answers { get; set; }
     }
