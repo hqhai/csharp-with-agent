@@ -1,18 +1,17 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Globalization;
-using System.Text;
 using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.StudentCmd;
+using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Queries.StudentQuery;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
@@ -25,7 +24,6 @@ using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using OtpNet;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -79,6 +77,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             User? user = null;
             if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
+                if (!request.PhoneNumber.IsValidPhoneNumber())
+                {
+                    methodResult.AddError(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
+                    return methodResult;
+                }
                 user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
                 if (user != null)
                 {
@@ -88,6 +91,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
             if (!string.IsNullOrEmpty(request.Email))
             {
+                if (!request.Email.IsValidEmail())
+                {
+                    methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    return methodResult;
+                }
                 user = await _userManager.FindByEmailAsync(request.Email);
                 if (user != null && user.EmailConfirmed)
                 {
@@ -176,35 +184,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                             #region Send Code OTP
 
-                            var userOtpCode = await _userOtpCodeRepository.Queryable
-                                    .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
-
-                            RandomSecureHelper randomSecure = new RandomSecureHelper();
-                            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-                            var otp = totp.ComputeTotp();
-                            if (userOtpCode == null)
-                            {
-                                userOtpCode = new UserOtpCode
-                                {
-                                    UserId = user.Id,
-                                    OTPCode = otp,
-                                    Status = EnumOtpCodeStatus.New,
-                                    ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime)
-                                };
-                                _userOtpCodeRepository.Add(userOtpCode);
-                                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                            }
-                            else
-                            {
-                                userOtpCode.OTPCode = otp;
-                                userOtpCode.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
-                                _userOtpCodeRepository.Update(userOtpCode);
-                                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                            }
-
+                            var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
                             var param = new SendOtpTemplateModel
                             {
-                                OtpCode = userOtpCode.OTPCode,
+                                OtpCode = userOtpCode.Result,
                                 OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
                             };
                             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);

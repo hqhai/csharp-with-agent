@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.SenderTemplates;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -27,12 +28,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyHomeWork = 22;
         private const int PercentOccupyClassForum = 20;
         private readonly ITrainingService _trainingService;
-        private readonly FinishOneUnitPublisher _finishOneUnitPublisher;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private const float Achieved_Point = 1; // Những nhiệm vụ làm 1 lần chỉ có achieve_point là 1;
 
-        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, FinishOneLevelPassPublisher finishOneLevelPassPublisher, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, ITrainingService trainingService, FinishOneUnitPublisher finishOneUnitPublisher) : base(systemService, appSetting, finishOneLevelPassPublisher, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
+        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, ITrainingService trainingService, QuestBoardPublisher questBoardPublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
         {
             _trainingService = trainingService;
-            _finishOneUnitPublisher = finishOneUnitPublisher;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task UpdateUnitResultAsync(IList<Guid>? lessonResultIds, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
@@ -51,7 +53,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (isDone)
                     {
                         unitResult.Status = EnumResultStatus.Done;
-                        await _finishOneUnitPublisher.Publish(unitResult, cancellationToken);
+
+                        // Làm nhiệm vụ
+                        var unitId = unit.Id;
+                        var userId = unitResult.CreatedUserId;
+                        await DoQuestBoard(userId, unitId, courseId, cancellationToken);
+                        //
+
                         await SendStudentCompleteUnit(studentId, unit, courseId, skillScores, percent, cancellationToken);
                     }
                     unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
@@ -130,6 +138,27 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Scores = string.Join("", groupedSkillScores.Select(item => $"<li style=\"line-height: 1.5rem\">{item.Skill}: {item.Percent}%</li>"))
             };
             return parameter;
+        }
+
+
+        public async Task DoQuestBoard(Guid userId, Guid unitId, Guid courseId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
+            var student = await _userService.GetStudentByUserIdAsync(userId);
+            var studentId = student?.Content?.Result?.Id;
+
+            bool checkFirstTimeDoneLesson = _unitResultRepository.Queryable.Any(u => u.UnitId == unitId && u.CourseId == courseId && u.Status == EnumResultStatus.Done);
+
+            if (!checkFirstTimeDoneLesson)
+            {
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId!,
+                    Categories = categories,
+                    AchievedPoint = Achieved_Point,
+                    CourseId = courseId
+                }, cancellationToken);
+            }
         }
     }
 }

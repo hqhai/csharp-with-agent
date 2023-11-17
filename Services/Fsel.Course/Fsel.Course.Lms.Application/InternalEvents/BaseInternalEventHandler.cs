@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Globalization;
     using System.Linq;
     using System.Threading;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -19,6 +20,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -36,9 +38,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly IUserService _userService;
         protected readonly IMediator _mediator;
         protected readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
-        protected readonly FinishOneLevelPassPublisher _finishOneLevelPassPublisher;
         protected readonly AppSetting _appSetting;
         protected readonly ISystemService _systemService;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private const float Achieved_Point = 1; //Nhiệm vụ chỉ làm 1 lần thì có achieved_point là 1
         private const int TotalScoreClassForum = 36;
         private const int PercentClassForumAcademic = 20;
         private const int PercentClassForumIELST = 32;
@@ -52,7 +55,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentSkillTest = 18;
 
         public BaseInternalEventHandler(ISystemService systemService, AppSetting appSetting,
-            FinishOneLevelPassPublisher finishOneLevelPassPublisher,
             ICourseUnitMockTestRepository courseUnitMockTestRepository,
             IMediator mediator,
             IUserService userService,
@@ -64,7 +66,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IUnitRepository unitRepository,
             IFinalTestResultRepository finalTestResultRepository,
             IMockTestResultRepository mockTestResultRepository,
-            IHomeWorkResultRepository homeWorkResultRepository)
+            IHomeWorkResultRepository homeWorkResultRepository,
+            QuestBoardPublisher questBoardPublisher)
         {
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -76,11 +79,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _mockTestResultRepository = mockTestResultRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
-            _finishOneLevelPassPublisher = finishOneLevelPassPublisher;
             _userService = userService;
             _mediator = mediator;
             _appSetting = appSetting;
             _systemService = systemService;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         private async Task<(List<SkillScores>, double)> GetCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
@@ -312,14 +315,31 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var course = await _courseRepository.GetIncludeCourseUnitMockTestByIdAsync(courseId);
                 if (course != null)
                 {
-                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
-                    var index = courseUnitMockTests.FindIndex(x => x.UnitId == unitResult.UnitId) + 1;
-                    if (index < courseUnitMockTests.Count)
+                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate).ToList();
+                    var courseUnitMockTest = GetCourseUnitMockTest(courseUnitMockTests, unitResult.UnitId, "UnitId");
+                    if (courseUnitMockTest != null)
                     {
-                        await UpdateStatusProcess(courseUnitMockTests[index], unitResult.StudentId, cancellationToken);
+                        await UpdateStatusProcess(courseUnitMockTest, unitResult.StudentId, cancellationToken);
                     }
                 }
             }
+        }
+
+        private static CourseUnitMockTest? GetCourseUnitMockTest(IList<CourseUnitMockTest>? courseUnitMockTests, Guid objectId, string? type)
+        {
+            if (courseUnitMockTests != null && courseUnitMockTests.Any())
+            {
+                var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => (Guid)x.GetPropValue(type) == objectId);
+                if (courseUnitMockTest != null)
+                {
+                    var index = courseUnitMockTests.IndexOf(courseUnitMockTest) + 1;
+                    if (index < courseUnitMockTests.Count)
+                    {
+                        return courseUnitMockTests[index];
+                    }
+                }
+            }
+            return default;
         }
 
         public async Task UpdateProcessMockTest(MockTestResult? mockTestResult, CancellationToken cancellationToken)
@@ -330,10 +350,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var course = await _courseRepository.GetIncludeCourseUnitMockTestByIdAsync(courseId);
                 if (course != null)
                 {
+                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate).ToList();
+                    var courseUnitMockTest = GetCourseUnitMockTest(courseUnitMockTests, mockTestResult.MockTestId, "MockTestId");
                     var isCheckUnitResults = course.UnitResults.Where(x => x.StudentId == mockTestResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
                     var isCheckDone = isCheckUnitResults && course.MockTestResults.Where(x => x.StudentId == mockTestResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
-                    var displayOrder = course.CourseUnitMockTests.FirstOrDefault(x => x.MockTestId == mockTestResult.MockTestId)?.DisplayOrder;
-                    var courseUnitMockTest = course.CourseUnitMockTests.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1);
                     if (!isCheckDone && courseUnitMockTest != null)
                     {
                         await UpdateStatusProcess(courseUnitMockTest, mockTestResult.StudentId, cancellationToken);
@@ -417,7 +437,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == courseId && x.StudentId == studentId, cancellationToken);
             if (courseResult != null)
             {
-                await _finishOneLevelPassPublisher.Publish(courseResult, cancellationToken);
+                var userId = courseResult.CreatedUserId;
+                await DoQuestBoard(courseId, userId, cancellationToken);
+
+
                 courseResult.Status = EnumResultStatus.Done;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -464,6 +487,27 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Params = sendStudentCompleteCourseModel,
                 Template = course?.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
             }, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task DoQuestBoard(Guid courseId, Guid userId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneHomeworkMiniProject };
+            var student = await _userService.GetStudentByUserIdAsync(userId);
+            var studentId = student?.Content?.Result?.Id;
+
+            //Chỉ bài finaltest đầu tiên hoàn thành của khóa mới được tính là hoàn thành nhiệm vụ
+            bool checkFirstCourseResult = _courseResultRepository.Queryable.Any(c => c.CourseId == courseId && c.Status == EnumResultStatus.Done);
+
+            if (!checkFirstCourseResult)
+            {
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId!,
+                    Categories = categories,
+                    AchievedPoint = Achieved_Point,
+                    CourseId = courseId
+                }, cancellationToken);
+            }
         }
     }
 }

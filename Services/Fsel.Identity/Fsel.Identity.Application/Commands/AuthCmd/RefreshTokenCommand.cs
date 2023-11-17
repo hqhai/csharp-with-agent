@@ -65,14 +65,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 }
             }
 
-            var checkExpireDate = long.TryParse(tokenValidationResult.ClaimsIdentity.Claims.FirstOrDefault(x => x.Type == JwtClaimNames.Exp)?.Value, out long utcExpireDate);
+            //var checkExpireDate = long.TryParse(tokenValidationResult.ClaimsIdentity.Claims.FirstOrDefault(x => x.Type == JwtClaimNames.Exp)?.Value, out long utcExpireDate);
 
-            var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
-            if (!checkExpireDate || expireDate < DateTime.UtcNow)
-            {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccessTokenNotYetExpired));
-                return methodResult;
-            }
+            //var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
+            //if (!checkExpireDate || expireDate < DateTime.UtcNow)
+            //{
+            //    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccessTokenNotYetExpired));
+            //    return methodResult;
+            //}
 
             var refreshToken = await _userTokenRepository.GetByRefreshTokenAsync(request.RefreshToken);
             if (refreshToken == null)

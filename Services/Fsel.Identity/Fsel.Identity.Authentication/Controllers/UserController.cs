@@ -4,6 +4,7 @@ using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.AuthCmd;
+using Fsel.Identity.Application.Commands.UserOtpCodeQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

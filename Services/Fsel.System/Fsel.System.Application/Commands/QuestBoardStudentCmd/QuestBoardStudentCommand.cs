@@ -43,7 +43,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
             var questBoardQuery = _questBoardRepository.Queryable
                 .Where(x => request.Categories!.Contains(x.Category));
 
-            var questBoardConfig = _questBoardConfigRepository.Queryable
+            var questBoardConfigQuery = _questBoardConfigRepository.Queryable
                 .Where(x => request.Categories!.Contains(x.Category));
 
             var listQuestBoard = await questBoardQuery.ToListAsync(cancellationToken);
@@ -56,7 +56,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                 foreach (var item in request.Categories)
                 {
                     QuestBoardStudent? questBoardStudentUpdate = questBoardStudent.FirstOrDefault(x => x.QuestBoard?.Category == item);
-                    var questType = questBoardConfig.FirstOrDefault(x => x.Category == item)?.Type;
+                    var questType = questBoardConfigQuery.FirstOrDefault(x => x.Category == item)?.Type;
 
                     switch (questType)
                     {
