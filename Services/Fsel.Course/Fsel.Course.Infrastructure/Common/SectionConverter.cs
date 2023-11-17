@@ -261,7 +261,14 @@ namespace Fsel.Course.Infrastructure.Common
 
         public IList<SectionTimeCodeModel> GetSectionTimeCodeDtos(IList<SectionTimeCode> sectionTimeCodes)
         {
-            return sectionTimeCodes.OrderBy(x => x.DisplayTime).Select(x => _mapper.Map<SectionTimeCodeModel>(x)).ToList();
+            return sectionTimeCodes.OrderBy(x => x.DisplayTime).Select(x => GetSectionTimeCode(x)).ToList();
+        }
+
+        private SectionTimeCodeModel GetSectionTimeCode(SectionTimeCode sectionTimeCode)
+        {
+            var sectionTimeCodeDto = _mapper.Map<SectionTimeCodeModel>(sectionTimeCode);
+            sectionTimeCodeDto.MockTestAnswer = _mapper.Map<MockTestAnswerModel>(sectionTimeCode.MockTestAnswers.FirstOrDefault());
+            return sectionTimeCodeDto;
         }
 
         public IList<QuestionModel> GetQuestionDtos(IList<SectionQuestion> sectionQuestions, bool isDisableAnswers = false)

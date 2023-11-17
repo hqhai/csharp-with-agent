@@ -16,7 +16,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<SectionQuestionModel>? SectionQuestions { get; set; }
         public IList<SectionTimeCodeModel>? SectionTimeCodes { get; set; }
         public IList<QuestionModel>? Questions { get; set; }
-        public ExtraPracticeAnswerModel? ExtraPracticeAnswer { get; set; }
         public MockTestAnswerModel? MockTestAnswer { get; set; }
         public object? Answer { get; set; }
     }

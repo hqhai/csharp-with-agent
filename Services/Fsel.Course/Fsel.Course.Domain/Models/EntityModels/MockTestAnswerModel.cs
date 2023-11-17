@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     public class MockTestAnswerModel : BaseAnswerModel
     {
-        public Guid SectionQuestionId { get; set; }
+        public Guid? SectionQuestionId { get; set; }
         public Guid MockTestResultId { get; set; }
     }
 }

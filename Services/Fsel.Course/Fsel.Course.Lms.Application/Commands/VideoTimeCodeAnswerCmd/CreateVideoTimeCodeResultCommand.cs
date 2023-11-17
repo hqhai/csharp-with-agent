@@ -60,12 +60,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCode));
                 return methodResult;
             }
-            methodResult.Result = _mapper.Map<VideoTimeCodeResultModel>(await GetAndUpdateVideoTimeCodeResultAsync(request, videoTimeCode));
+            methodResult.Result = _mapper.Map<VideoTimeCodeResultModel>(await GetAndUpdateVideoTimeCodeResultAsync(request, videoTimeCode, videoResult));
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<VideoTimeCodeResult> GetAndUpdateVideoTimeCodeResultAsync(CreateVideoTimeCodeResultCommand request, VideoTimeCode videoTimeCode)
+        private async Task<VideoTimeCodeResult> GetAndUpdateVideoTimeCodeResultAsync(CreateVideoTimeCodeResultCommand request, VideoTimeCode videoTimeCode, VideoResult videoResult)
         {
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId && x.VideoResultId == request.VideoResultId).FirstOrDefaultAsync();
             if (videoTimeCodeResult == null)
@@ -81,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 };
                 videoTimeCodeResult = _videoTimeCodeResultRepository.Add(videoTimeCodeResult);
                 await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                await UpdateVideoResult(videoResult, request.VideoTimeCodeId).ConfigureAwait(false);
                 if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
                 {
                     await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
@@ -118,6 +119,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 return videoTimeCodeResult.UpdatedDate.Value;
             }
             return videoTimeCodeResult.CreatedDate;
+        }
+
+        private async Task UpdateVideoResult(VideoResult videoResult, Guid videoTimeCodeId)
+        {
+            videoResult.CurrentVideoTimeCodeId = videoTimeCodeId;
+            _videoResultRepository.Update(videoResult);
+            await _videoResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
