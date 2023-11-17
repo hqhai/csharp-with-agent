@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -39,7 +40,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly ICourseRepository _courseRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly QuestBoardPublisher _questBoardPublisher;
-        private const float Achieved_Point = 1; // Nhiệm vụ chỉ làm 1 lần thì point luôn là 1
 
         public CreateFinalTestAnswerCommandHandler(
             IQuestionRepository questionRepository
@@ -228,7 +228,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 {
                     StudentId = (Guid)studentId!,
                     Categories = categories,
-                    AchievedPoint = Achieved_Point,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                     CourseId = courseId
                 }, cancellationToken);
             }

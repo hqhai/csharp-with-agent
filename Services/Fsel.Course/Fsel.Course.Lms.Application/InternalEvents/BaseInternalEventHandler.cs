@@ -41,7 +41,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly AppSetting _appSetting;
         protected readonly ISystemService _systemService;
         private readonly QuestBoardPublisher _questBoardPublisher;
-        private const float Achieved_Point = 1; //Nhiệm vụ chỉ làm 1 lần thì có achieved_point là 1
         private const int TotalScoreClassForum = 36;
         private const int PercentClassForumAcademic = 20;
         private const int PercentClassForumIELST = 32;
@@ -504,7 +503,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     StudentId = (Guid)studentId!,
                     Categories = categories,
-                    AchievedPoint = Achieved_Point,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                     CourseId = courseId
                 }, cancellationToken);
             }

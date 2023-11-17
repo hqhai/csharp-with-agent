@@ -19,6 +19,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Comments;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -40,7 +41,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
         private readonly QuestBoardPublisher _questBoardPublisher;
-        private const float Achieved_Point = 1; // nhiệm vụ làm 1 lần nên achievepoint luôn là 1
 
         public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, IUserService userService, QuestBoardPublisher questBoardPublisher)
         {
@@ -77,9 +77,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             }
             await _commentRepository.ExecuteTransactionAsync(async () =>
             {
-                comment = _commentRepository.Add(comment);
-                await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 NotificationQueueModel model = new NotificationQueueModel();
                 switch (request.Type)
                 {
@@ -176,7 +173,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
                 }
-
+                comment = _commentRepository.Add(comment);
+                await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<CommentModel>(comment);
                 return methodResult;
@@ -193,13 +191,13 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
             var hasFirstComment = _commentRepository.Queryable.Any(c => c.CreatedUserId == _authContext.CurrentUserId && c.Type == EnumInteractionType.ClassForum);
 
-            if (!hasFirstComment)
+            if (!hasFirstComment && studentId.HasValue)
             {
                 QuestBoardQueueModel questBoardModel = new QuestBoardQueueModel()
                 {
                     StudentId = (Guid)studentId!,
                     Categories = categories,
-                    AchievedPoint = Achieved_Point,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                     ObjectId = commentId,
                     CourseId = courseId,
                 };

@@ -13,6 +13,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.StudentFocusTime;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -32,7 +33,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly ISystemService _systemService;
         private const int NUMBER_OF_WEEKDAY = 7;
         private const double DEFAULT_TARGET_TIME = 1800; // 1800s tương ứng với 30p
-        private const float Archieve_Point = 1; // Những nhiệm vụ làm 1 lần thì achieve point sẽ là 1
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
 
@@ -188,7 +188,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             {
                 StudentId = student.Id,
                 Categories = categories,
-                AchievedPoint = Archieve_Point,
+                AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                 CourseId = courseId
             };
 

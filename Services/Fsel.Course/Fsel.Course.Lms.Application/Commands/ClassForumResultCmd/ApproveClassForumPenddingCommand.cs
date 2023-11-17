@@ -18,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -35,7 +36,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly QuestBoardPublisher _questBoardPublisher;
-        private const float Achieved_Point = 1; // Nhiệm vụ làm 1 lần nên achievepoint = 1
 
         public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher)
         {
@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 {
                     StudentId = (Guid)studentId!,
                     Categories = categories,
-                    AchievedPoint = Achieved_Point,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                     ObjectId = classForumResultId,
                     CourseId = courseId
                 }, cancellationToken);

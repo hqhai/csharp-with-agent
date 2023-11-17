@@ -4,9 +4,12 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
 {
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
+    using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.QuestBoards;
+    using global::System.Linq;
+    using global::System.Threading;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -20,15 +23,18 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
         private readonly IQuestBoardRepository _questBoardRepository;
         private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
         private readonly IQuestBoardConfigRepository _questBoardConfigRepository;
+        private readonly IUserService _userService;
 
         public QuestBoardStudentCommandHandler(
             IQuestBoardRepository questBoardRepository,
             IQuestBoardStudentRepository questBoardStudentRepository,
-            IQuestBoardConfigRepository questBoardConfigRepository)
+            IQuestBoardConfigRepository questBoardConfigRepository,
+            IUserService userService)
         {
             _questBoardRepository = questBoardRepository;
             _questBoardStudentRepository = questBoardStudentRepository;
             _questBoardConfigRepository = questBoardConfigRepository;
+            _userService = userService;
         }
 
         public async Task<MethodResult<bool>> Handle(QuestBoardStudentCommand request, CancellationToken cancellationToken)
@@ -36,69 +42,17 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var questBoardStudent = await _questBoardStudentRepository.Queryable
-                .Where(x => x.StudentId == request.StudentId && x.Status != EnumQuestBoardStudentStatus.Achieved)
-                .ToListAsync(cancellationToken);
+            #region CustomDataBeforeSave
+            var (questBoardStudentToAdd, questBoardStudentToUpdate) = await CustomizeQuestBoardStudent(request, cancellationToken);
+            #endregion
 
-            var questBoardQuery = _questBoardRepository.Queryable
-                .Where(x => request.Categories!.Contains(x.Category));
-
-            var questBoardConfigQuery = _questBoardConfigRepository.Queryable
-                .Where(x => request.Categories!.Contains(x.Category));
-
-            var listQuestBoard = await questBoardQuery.ToListAsync(cancellationToken);
-
-            var questBoardStudentToUpdate = new List<QuestBoardStudent>();
-            var questBoardStudentToAdd = new List<QuestBoardStudent>();
-
-            if (request.Categories != null && request.Categories.Count > 0)
+            #region Validate
+            if (request.Categories == null || request.Categories.Count == 0)
             {
-                foreach (var item in request.Categories)
-                {
-                    QuestBoardStudent? questBoardStudentUpdate = questBoardStudent.FirstOrDefault(x => x.QuestBoard?.Category == item);
-                    var questType = questBoardConfigQuery.FirstOrDefault(x => x.Category == item)?.Type;
-
-                    switch (questType)
-                    {
-                        case EnumQuestBoardType.MainQuests:
-                            questBoardStudentUpdate = CustomizeDataMainQuestBoard(questBoardStudent, item, request);
-                            break;
-                        case EnumQuestBoardType.DailyQuests:
-                            questBoardStudentUpdate = CustomizeDataDailyQuestBoard(questBoardStudent, item, request);
-                            break;
-                    }
-
-                    if (questBoardStudentUpdate != null)
-                    {
-                        if (questBoardStudentUpdate.AchievedPoints >= request.AchievedPoints)
-                        {
-                            continue;
-                        }
-
-                        questBoardStudentUpdate.AchievedPoints = request.AchievedPoints;
-                        questBoardStudentToUpdate.Add(questBoardStudentUpdate);
-                    }
-                    else
-                    {
-                        var questBoardAdd = listQuestBoard.FirstOrDefault(x => x.Category == item);
-
-                        if (questBoardAdd == null)
-                        {
-                            continue;
-                        }
-                        var questBoardStudentAdd = new QuestBoardStudent()
-                        {
-                            QuestBoardId = questBoardAdd!.Id,
-                            StudentId = request.StudentId,
-                            AchievedPoints = request.AchievedPoints,
-                            ObjectId = request.ObjectId,
-                            CourseId = request.CourseId,
-                        };
-
-                        questBoardStudentToAdd.Add(questBoardStudentAdd);
-                    }
-                }
+                methodResult.Result = true;
+                return methodResult;
             }
+            #endregion
 
             await _questBoardStudentRepository.ExecuteTransactionAsync(async () =>
             {
@@ -130,11 +84,106 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
         {
             return questBoardStudents!.FirstOrDefault(x => x.QuestBoard?.Category == category && x.StudentId == request.StudentId)!;
         }
-
         private static bool CheckDailyQuest(DateTime date)
         {
             var currentDate = DateTime.UtcNow;
             return date.Date == currentDate.Date && date.Month == currentDate.Month && date.Year == currentDate.Year;
+        }
+
+
+        /// <summary>
+        /// Filter dữ liệu listQuestBoard dựa vào packageid của học sinh 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task<List<QuestBoard>> FilterListQuestBoardByPackageId(QuestBoardStudentCommand request, CancellationToken cancellationToken)
+        {
+            var questBoardQuery = _questBoardRepository.Queryable
+                .Where(x => request.Categories!.Contains(x.Category));
+
+            var listQuestBoard = await questBoardQuery.ToListAsync(cancellationToken);
+
+            IList<Guid> studentIds = new List<Guid> { request.StudentId };
+            var studentInfo = await _userService.GetStudentsByStudentIdsAsync(studentIds);
+            var studentInfoPackageId = studentInfo.Content?.Result?.FirstOrDefault()?.PackageId;
+
+            if (studentInfo != null && studentInfoPackageId.HasValue)
+            {
+                listQuestBoard = listQuestBoard.Where(x => x.PackageIds!.Contains((Guid)studentInfoPackageId)).ToList();
+            }
+
+            return listQuestBoard;
+        }
+
+
+        /// <summary>
+        /// Custom dữ liệu trước khi Thêm, Cập nhật vào bảng QuestBoardStudent
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="listQuestBoard"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task<(List<QuestBoardStudent> questBoardStudentToUpdate, List<QuestBoardStudent> questBoardStudentToAdd)> CustomizeQuestBoardStudent(QuestBoardStudentCommand request, CancellationToken cancellationToken)
+        {
+            var questBoardStudentToUpdate = new List<QuestBoardStudent>();
+            var questBoardStudentToAdd = new List<QuestBoardStudent>();
+            var listQuestBoard = await FilterListQuestBoardByPackageId(request, cancellationToken);
+
+
+            var questBoardStudents = await _questBoardStudentRepository.Queryable
+                .Where(x => x.StudentId == request.StudentId && x.Status != EnumQuestBoardStudentStatus.Achieved)
+                .ToListAsync(cancellationToken);
+            var questBoardConfigQuery = _questBoardConfigRepository.Queryable
+                .Where(x => request.Categories!.Contains(x.Category));
+
+            foreach (var item in request.Categories!)
+            {
+                QuestBoardStudent? questBoardStudentUpdate = questBoardStudents.FirstOrDefault(x => x.QuestBoard?.Category == item);
+                var questType = questBoardConfigQuery.FirstOrDefault(x => x.Category == item)?.Type;
+
+                switch (questType)
+                {
+                    case EnumQuestBoardType.MainQuests:
+                        questBoardStudentUpdate = CustomizeDataMainQuestBoard(questBoardStudents, item, request);
+                        break;
+                    case EnumQuestBoardType.DailyQuests:
+                        questBoardStudentUpdate = CustomizeDataDailyQuestBoard(questBoardStudents, item, request);
+                        break;
+                }
+
+                if (questBoardStudentUpdate != null)
+                {
+                    if (questBoardStudentUpdate.AchievedPoints >= request.AchievedPoints)
+                    {
+                        continue;
+                    }
+
+                    questBoardStudentUpdate.AchievedPoints = request.AchievedPoints;
+                    questBoardStudentToUpdate.Add(questBoardStudentUpdate);
+                }
+                else
+                {
+                    var questBoardAdd = listQuestBoard.FirstOrDefault(x => x.Category == item);
+
+                    if (questBoardAdd == null)
+                    {
+                        continue;
+                    }
+                    var questBoardStudentAdd = new QuestBoardStudent()
+                    {
+                        QuestBoardId = questBoardAdd!.Id,
+                        StudentId = request.StudentId,
+                        AchievedPoints = request.AchievedPoints,
+                        ObjectId = request.ObjectId,
+                        CourseId = request.CourseId,
+                    };
+
+                    questBoardStudentToAdd.Add(questBoardStudentAdd);
+                }
+            }
+
+            return (questBoardStudentToUpdate, questBoardStudentToAdd);
         }
     }
 }

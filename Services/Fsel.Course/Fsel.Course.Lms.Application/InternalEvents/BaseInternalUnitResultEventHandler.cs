@@ -29,7 +29,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyClassForum = 20;
         private readonly ITrainingService _trainingService;
         private readonly QuestBoardPublisher _questBoardPublisher;
-        private const float Achieved_Point = 1; // Những nhiệm vụ làm 1 lần chỉ có achieve_point là 1;
 
         public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, ITrainingService trainingService, QuestBoardPublisher questBoardPublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
         {
@@ -155,7 +154,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     StudentId = (Guid)studentId!,
                     Categories = categories,
-                    AchievedPoint = Achieved_Point,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                     CourseId = courseId
                 }, cancellationToken);
             }

@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -39,7 +40,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         private const int FIFTY_PERCENT_DONE = 50;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IUserService _userService;
-        private const int Achieved_Point = 1; // Nhiệm vụ chỉ làm 1 lần thì achieved point sẽ là 1
 
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
@@ -223,7 +223,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 {
                     StudentId = homeWorkResultDaily.StudentId!,
                     Categories = categories,
-                    AchievedPoint = Achieved_Point,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                     ObjectId = homeWorkResultDaily.Id,
                     CourseId = homeWorkResultDaily.LessonResult!.CourseId,
                 };
@@ -249,7 +249,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 {
                     StudentId = (Guid)studentId!,
                     Categories = categories,
-                    AchievedPoint = Achieved_Point,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                     CourseId = courseId
                 }, cancellationToken);
             }

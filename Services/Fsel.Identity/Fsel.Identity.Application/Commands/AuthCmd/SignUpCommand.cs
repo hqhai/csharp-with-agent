@@ -42,7 +42,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly AppSetting _appSetting;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
-        private const float Archieve_Point = 1; // Những nhiệm vụ làm 1 lần thì achieve point sẽ là 1
         private readonly IHumanRepository _humanRepository;
 
 
@@ -255,7 +254,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     {
                         StudentId = studentId!,
                         Categories = categories,
-                        AchievedPoint = Archieve_Point,
+                        AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                         CourseId = courseId
                     };
 

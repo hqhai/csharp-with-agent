@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -42,9 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
-        private const float Achieved_Point = 1; // Những nhiệm vụ làm 1 lần thì achieved point sẽ là 1
-        public CreateVideoTimeCodeAnswerCommandHandler(
-             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
+        public CreateVideoTimeCodeAnswerCommandHandler(IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , IVideoResultRepository videoResultRepository
             , VideoConverter videoConverter
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
@@ -285,7 +284,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     StudentId = (Guid)studentId!,
                     Categories = categories,
-                    AchievedPoint = Achieved_Point,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                     CourseId = courseId
                 }, cancellationToken);
             }
