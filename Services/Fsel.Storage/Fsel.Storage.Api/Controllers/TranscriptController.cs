@@ -4,12 +4,9 @@ using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.Interfaces;
-using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
-using Fsel.Shared.Constants;
-using Fsel.Shared.Models.ShareModels;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fsel.Course.Lms.Api.Controllers
+namespace Fsel.Storage.Api.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/transcript")]
@@ -17,10 +14,12 @@ namespace Fsel.Course.Lms.Api.Controllers
     public class TranscriptController : ControllerBase
     {
         private readonly IDeepgramProvider _deepgramProvider;
+        private readonly ICognitiveProvider _cognitiveProvider;
 
-        public TranscriptController(IDeepgramProvider deepgramProvider)
+        public TranscriptController(IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider)
         {
             _deepgramProvider = deepgramProvider;
+            _cognitiveProvider = cognitiveProvider;
         }
 
         /// <summary>
@@ -33,6 +32,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             MethodResult<string> result = new MethodResult<string>();
             result.Result = await _deepgramProvider.GetTranscriptionAsync(url);
+            return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Transcription
+        /// </summary>
+        [HttpPost("speech")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> PostSpeech(string url)
+        {
+            MethodResult<string> result = new MethodResult<string>();
+            result.Result = await _cognitiveProvider.GetTranscriptionAsync(url);
             return result.GetActionResult();
         }
     }

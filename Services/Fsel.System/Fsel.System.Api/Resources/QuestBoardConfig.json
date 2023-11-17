@@ -70,5 +70,168 @@
     "maxPoints": 1,
     "displayType": "Number",
     "createdDate": "2023-07-21"
+  },
+  {
+    "id": "8333c5e5-e853-45fb-8abf-1a09336af78e",
+    "type": "PremiumQuests",
+    "category": "SeeFiveTeacherReview",
+    "operator": "Equal",
+    "maxPoints": 5,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "ac0f0c74-cc2a-41a2-a82f-748ed5f2c75c",
+    "type": "PremiumQuests",
+    "category": "SeeTenTeacherReview",
+    "operator": "Equal",
+    "maxPoints": 10,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "7a37fa61-1a04-4d70-8590-90fa3d563d8e",
+    "type": "PremiumQuests",
+    "category": "SeeAllTeacherReview",
+    "operator": "Equal",
+    "maxPoints": 100,
+    "displayType": "Percent",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "f31d44ff-226e-4244-a9a0-a06ed397368a",
+    "type": "PremiumQuests",
+    "category": "PostOneDiscussionBoard",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "0c1633d5-f145-44c7-80c3-a167c0bbd1a1",
+    "type": "PremiumQuests",
+    "category": "PostThreeDiscussionBoard",
+    "operator": "Equal",
+    "maxPoints": 3,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "85659470-7d45-4ddf-8b3c-dba6458bf4f4",
+    "type": "PremiumQuests",
+    "category": "PostFiveDiscussionBoard",
+    "operator": "Equal",
+    "maxPoints": 5,
+    "displayType": "Number",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "0407d174-a779-46e9-bbe4-5f27ae6075b6",
+    "type": "PremiumQuests",
+    "category": "ParticipationScore",
+    "operator": "GreaterThan",
+    "maxPoints": 80,
+    "displayType": "Percent",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "0A20CB15-8629-41D9-88D9-890A3B487496",
+    "type": "SideQuests",
+    "category": "ThirtyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "2CA29E0C-4F81-40C6-9A0C-040D270D0433",
+    "type": "SideQuests",
+    "category": "NinetyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "406C775B-51E8-4742-8C4B-A898AE2B8924",
+    "type": "SideQuests",
+    "category": "OneHundredTwentytyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "E1C02BBC-0C98-40A0-B7E0-807B5F137C3B",
+    "type": "SideQuests",
+    "category": "OneHundredEightyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "62767C8D-6E18-4D11-A74E-FE38EAB7FA58",
+    "type": "SideQuests",
+    "category": "SixtyMinutesFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "0DDF9F6F-D2CB-49C2-858A-F4AFB3233DEE",
+    "type": "SideQuests",
+    "category": "SuccessfulIntroduceCode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-09"
+  },
+  {
+    "id": "38045664-20F8-4780-9C62-9736C2BCE90C",
+    "type": "DailyQuests",
+    "category": "FinishDailyFocusMode",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "31C2D3AA-EC1D-4EBB-99D1-5A8A2AE391C7",
+    "type": "DailyQuests",
+    "category": "LearnInteractTwentyMinutes",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "2EA59046-EA24-4F3F-B390-36D9629AE11E",
+    "type": "DailyQuests",
+    "category": "CommentOnNewLessonOfTwoClassMate",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "9D333771-8C0D-481C-95E7-542A12002684",
+    "type": "DailyQuests",
+    "category": "CompleteHomeWorkAtLeastFiftyPercent",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
+  },
+  {
+    "id": "F8C5416C-118E-45DC-942C-F61E985B9827",
+    "type": "DailyQuests",
+    "category": "ReviseYourNotes",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
   }
+
 ]

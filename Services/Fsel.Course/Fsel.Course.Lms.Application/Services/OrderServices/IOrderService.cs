@@ -18,8 +18,5 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
 
         [Post("/order")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
-
-        [Get("/order/get-list-order")]
-        Task<IApiResponse<MethodResult<Guid>>> GetPackageId([FromRoute] Guid userId);
     }
 }

@@ -36,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly AuthContext _authContext;
+        private const int FIFTY_PERCENT_DONE = 50;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IUserService _userService;
         private const int Achieved_Point = 1; // Nhiệm vụ chỉ làm 1 lần thì achieved point sẽ là 1
@@ -46,8 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
             IHomeWorkRepository homeWorkRepository,
             AnswerTypeConverter answerTypeConverter,
-            IQuestionRepository questionRepository
-,
+            IQuestionRepository questionRepository,
             AuthContext authContext,
             QuestBoardPublisher questBoardPublisher,
             IUserService userService)
@@ -186,11 +186,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             await _homeWorkAnswerRepository.ExecuteTransactionAsync(async () =>
             {
+                var homeworkresulttoday = _homeWorkResultRepository.Queryable.Where(x => x.CreatedUserId == _authContext.CurrentUserId);
+                var homeworkTest = homeworkresulttoday.ToList();
+
                 if (homeWorkAnswers.Any())
                 {
+                    await DoDailyQuest(cancellationToken);
                     _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
                     await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;
@@ -198,6 +203,35 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             return methodResult;
         }
+
+
+
+        public async Task DoDailyQuest(CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CompleteHomeWorkAtLeastFiftyPercent };
+
+            var checkHomeWorkDoneAtLeastFiftyPercent = _homeWorkResultRepository.Queryable.Any(x => x.CreatedUserId == _authContext.CurrentUserId && x.CreatedDate.Date == DateTime.UtcNow.Date && x.CreatedDate.Month == DateTime.UtcNow.Month && x.CreatedDate.Year == DateTime.UtcNow.Year && x.Percent >= FIFTY_PERCENT_DONE);
+
+            var homeWorkResultDaily = _homeWorkResultRepository.Queryable.FirstOrDefault(x => x.CreatedUserId == _authContext.CurrentUserId);
+
+            var courseId = homeWorkResultDaily?.LessonResult?.CourseId;
+            var studentId = homeWorkResultDaily?.StudentId;
+
+            if (checkHomeWorkDoneAtLeastFiftyPercent && homeWorkResultDaily != null)
+            {
+                QuestBoardQueueModel questBoardModel = new QuestBoardQueueModel()
+                {
+                    StudentId = homeWorkResultDaily.StudentId!,
+                    Categories = categories,
+                    AchievedPoint = Achieved_Point,
+                    ObjectId = homeWorkResultDaily.Id,
+                    CourseId = homeWorkResultDaily.LessonResult!.CourseId,
+                };
+
+                await _questBoardPublisher.Publish(questBoardModel, cancellationToken);
+            }
+        }
+
 
 
         private async Task DoQuestBoard(Guid courseId, int correctCount, CancellationToken cancellationToken)
