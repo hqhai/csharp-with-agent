@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -15,8 +16,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,29 +34,37 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly VideoConverter _videoConverter;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
-        private readonly FinishOneUnitTestPublisher _finishOneUnitTestPublisher;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
 
+        private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
+        private const float Achieved_Point = 1; // Những nhiệm vụ làm 1 lần thì achieved point sẽ là 1
         public CreateVideoTimeCodeAnswerCommandHandler(
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , IVideoResultRepository videoResultRepository
             , VideoConverter videoConverter
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
-            , FinishOneUnitTestPublisher finishOneUnitTestPublisher
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , IQuestionRepository questionRepository
-            , AnswerTypeConverter answerTypeConverter)
+            , AnswerTypeConverter answerTypeConverter,
+              QuestBoardPublisher questBoardPublisher,
+              IUserService userService,
+              AuthContext authContext)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoResultRepository = videoResultRepository;
             _videoConverter = videoConverter;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
-            _finishOneUnitTestPublisher = finishOneUnitTestPublisher;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _questionRepository = questionRepository;
             _answerTypeConverter = answerTypeConverter;
+            _questBoardPublisher = questBoardPublisher;
+            _userService = userService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<VideoTimeCodeModel>> Handle(CreateVideoTimeCodeAnswerCommand request, CancellationToken cancellationToken)
@@ -165,7 +176,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             {
                 if (videoTimeCode?.TimeCodeType == EnumTimeCodeType.UnitTest)
                 {
-                    await _finishOneUnitTestPublisher.Publish(videoResult, cancellationToken);
+                    var courseId = videoResult.LessonResult?.CourseId;
+                    if (courseId != null)
+                    {
+                        await DoQuestBoard((Guid)courseId, cancellationToken);
+                    }
                 }
 
                 if (videoTimeCodeAnswers.Any())
@@ -253,6 +268,27 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var exercise = questions?.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).FirstOrDefault();
             var videoTimeCode = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
             return (questions, videoTimeCode);
+        }
+
+        private async Task DoQuestBoard(Guid courseId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneHomeworkMiniProject };
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentId = student?.Content?.Result?.Id;
+
+            //Chỉ bài finaltest đầu tiên hoàn thành của khóa mới được tính là hoàn thành nhiệm vụ
+            bool checkFirstTimeDoneUnit = _videoTimeCodeResultRepository.Queryable.Any(v => v.Status == EnumResultStatus.Done);
+
+            if (!checkFirstTimeDoneUnit)
+            {
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId!,
+                    Categories = categories,
+                    AchievedPoint = Achieved_Point,
+                    CourseId = courseId
+                }, cancellationToken);
+            }
         }
     }
 }

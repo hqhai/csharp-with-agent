@@ -1,11 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
+using Fsel.Core.Base.Interfaces;
+using Fsel.Shared.Constants;
+using Fsel.Shared.Models.ShareModels;
 
 namespace Fsel.Course.Lms.Application.Queues.Publishers
 {
-    using Fsel.Core.Base.Interfaces;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Models.ShareModels;
-
     public class QuestBoardPublisher
     {
         private readonly IQueueProvider _queueProvider;
