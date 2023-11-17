@@ -8,8 +8,10 @@ namespace Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers
     {
         public Guid VideoResultId { get; set; }
         public Guid VideoTimeCodeId { get; set; }
+
         [JsonIgnore]
         public Guid? StudentId { get; set; }
+
         public bool IsSubmit { get; set; }
         public IList<VideoTimeCodeAnswerQuestionModel> Answers { get; set; } = new List<VideoTimeCodeAnswerQuestionModel>();
     }

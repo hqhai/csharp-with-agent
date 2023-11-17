@@ -177,7 +177,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             foreach (var item in request.Answers)
             {
                 var question = await _questionRepository.GetByIdAsync(item.QuestionId ?? default);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, false);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit);
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);

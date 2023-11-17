@@ -217,7 +217,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                         if (answer.QuestionId != null)
                         {
                             var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                            var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, true);
+                            var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit);
                             if (!questionResult.IsOK)
                             {
                                 methodResult.AddErrorBadRequest(questionResult.ErrorMessages);

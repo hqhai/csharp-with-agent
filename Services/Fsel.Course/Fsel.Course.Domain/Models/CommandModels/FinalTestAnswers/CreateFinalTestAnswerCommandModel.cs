@@ -9,7 +9,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers
         public Guid CourseId { get; set; }
         public Guid FinalTestId { get; set; }
         public IList<FinalTestAnswerSkillQuestionModel>? FinalTestAnswers { get; set; }
-        public bool IsSubmit { get; set; } = true;
     }
 
     public class FinalTestAnswerQuestionModel

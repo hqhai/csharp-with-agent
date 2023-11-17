@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, videoTimeCode.ExecutionTime == 0);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, true, videoTimeCode.ExecutionTime == 0);
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
