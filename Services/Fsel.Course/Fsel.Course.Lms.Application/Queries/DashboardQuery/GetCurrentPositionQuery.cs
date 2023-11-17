@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
@@ -55,8 +54,34 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             }
             var student = studentResults?.Content?.Result?.Where(x => x.Human!.UserId == _authContext.CurrentUserId);
 
+
+
             LeaderBoardSearchModel leaderBoardSearch = new LeaderBoardSearchModel();
             IList<LeaderBoardModel> leaderBoards = new List<LeaderBoardModel>();
+
+
+
+            //Case này cho tài khoản mới tạo, chưa tham gia bất cứ lớp học nào, chỉ trả về avatar và fullname
+            if (student != null && !student.Any())
+            {
+                var studentQuery = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                var studentInfoResult = studentQuery?.Content?.Result;
+                var studentInfo = new LeaderBoardModel
+                {
+                    AvatarPath = studentInfoResult?.Human?.AvatarPath,
+                    FullName = studentInfoResult?.Human?.FullName,
+                    TotalScore = 0
+                };
+
+                leaderBoards.Add(studentInfo);
+                leaderBoardSearch.LeaderBoards = leaderBoards;
+                methodResult.Result = leaderBoardSearch;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+
+            }
+
+
             var leaderBoardsToAdd = student!.Select(student =>
             {
                 var unitResultCaculate = _unitResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished);
