@@ -114,7 +114,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get info student or guest by student id
         /// </summary>
-        [HttpGet("get-info-student-or-guest-by-student-id/{id}")]
+        [HttpGet("get-by-student-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetInfoStudentOrGuest([FromRoute] Guid id)

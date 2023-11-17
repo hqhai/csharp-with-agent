@@ -103,7 +103,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         /// <summary>
         /// get info account
         /// </summary>
-        [HttpGet("get-in-account/{studentId}")]
+        [HttpGet("get-detail-account/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<AccountModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetInfoAccount([FromRoute] Guid studentId)
