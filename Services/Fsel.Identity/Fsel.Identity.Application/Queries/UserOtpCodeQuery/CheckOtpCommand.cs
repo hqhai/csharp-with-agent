@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.AuthCmd
+namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
 {
     using System;
     using System.Threading.Tasks;

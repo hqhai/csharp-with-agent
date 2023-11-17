@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Globalization;
     using System.Linq;
     using System.Threading;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -308,14 +309,31 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var course = await _courseRepository.GetIncludeCourseUnitMockTestByIdAsync(courseId);
                 if (course != null)
                 {
-                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
-                    var index = courseUnitMockTests.FindIndex(x => x.UnitId == unitResult.UnitId) + 1;
-                    if (index < courseUnitMockTests.Count)
+                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate).ToList();
+                    var courseUnitMockTest = GetCourseUnitMockTest(courseUnitMockTests, unitResult.UnitId, "UnitId");
+                    if (courseUnitMockTest != null)
                     {
-                        await UpdateStatusProcess(courseUnitMockTests[index], unitResult.StudentId, cancellationToken);
+                        await UpdateStatusProcess(courseUnitMockTest, unitResult.StudentId, cancellationToken);
                     }
                 }
             }
+        }
+
+        private static CourseUnitMockTest? GetCourseUnitMockTest(IList<CourseUnitMockTest>? courseUnitMockTests, Guid objectId, string? type)
+        {
+            if (courseUnitMockTests != null && courseUnitMockTests.Any())
+            {
+                var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => (Guid)x.GetPropValue(type) == objectId);
+                if (courseUnitMockTest != null)
+                {
+                    var index = courseUnitMockTests.IndexOf(courseUnitMockTest) + 1;
+                    if (index < courseUnitMockTests.Count)
+                    {
+                        return courseUnitMockTests[index];
+                    }
+                }
+            }
+            return default;
         }
 
         public async Task UpdateProcessMockTest(MockTestResult? mockTestResult, CancellationToken cancellationToken)
@@ -326,10 +344,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var course = await _courseRepository.GetIncludeCourseUnitMockTestByIdAsync(courseId);
                 if (course != null)
                 {
+                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate).ToList();
+                    var courseUnitMockTest = GetCourseUnitMockTest(courseUnitMockTests, mockTestResult.MockTestId, "MockTestId");
                     var isCheckUnitResults = course.UnitResults.Where(x => x.StudentId == mockTestResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
                     var isCheckDone = isCheckUnitResults && course.MockTestResults.Where(x => x.StudentId == mockTestResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
-                    var displayOrder = course.CourseUnitMockTests.FirstOrDefault(x => x.MockTestId == mockTestResult.MockTestId)?.DisplayOrder;
-                    var courseUnitMockTest = course.CourseUnitMockTests.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1);
                     if (!isCheckDone && courseUnitMockTest != null)
                     {
                         await UpdateStatusProcess(courseUnitMockTest, mockTestResult.StudentId, cancellationToken);

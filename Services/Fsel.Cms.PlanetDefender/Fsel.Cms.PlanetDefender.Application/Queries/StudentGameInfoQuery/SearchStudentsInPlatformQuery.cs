@@ -33,7 +33,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
             var studentsInPlatformResult = await _userService.GetStudentsInPlatform(new GetStudentInPlatformQueryModel
             {
                 Keyword = request.Keyword,
-                PlatformCode = request.PlatformCode,
+                PlatformCode = Shared.Enums.EnumPlatformCode.PlanetDefender,
                 Role = request.Role,
                 Status = request.UserPlatformStatus
             });

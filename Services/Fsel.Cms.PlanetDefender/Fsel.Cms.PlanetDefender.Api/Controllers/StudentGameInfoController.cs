@@ -5,9 +5,9 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
     using System.Net;
     using Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery;
     using Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models;
-    using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -15,7 +15,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cms-planet-defender")]
     [ApiController]
-    public class StudentGameInfoController : ControllerBase
+    public class StudentGameInfoController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -32,6 +32,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLevelOfStudentsByStudentids([FromQuery] SearchStudentsInPlatformQuery query)
         {
+            SetQuery(query);
             MethodResult<PagingItemsModel<StudentInPlatformModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }

@@ -21,11 +21,10 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
     {
         public Guid ObjectResultId { get; set; }
 
-        public string? QuestionIds { get; set; }
+        public IList<string>? QuestionIds { get; set; }
 
         [JsonIgnore]
-        public IList<Guid>? ListQuestionIds
-        { get { return QuestionIds.ToList<Guid>(); } }
+        public IList<Guid> ListQuestionIds { get { return QuestionIds.ToList<Guid>(); } }
     }
 
     public class GetQuestionByIdQueryHandler : IRequestHandler<GetQuestionByIdsQuery, MethodResult<IList<QuestionModel>>>

@@ -5,18 +5,23 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class GetListQuestionByIdsQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
     {
-        public IList<Guid> QuestionIds { get; set; } = new List<Guid>();
+        public IList<string>? QuestionIds { get; set; }
+
+        [JsonIgnore]
+        public IList<Guid> ListQuestionIds { get { return QuestionIds.ToList<Guid>(); } }
     }
 
     public class GetListQuestionByIdsQueryHandler : IRequestHandler<GetListQuestionByIdsQuery, MethodResult<IList<SurveyQuestionModel>>>
@@ -33,7 +38,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
             var methodResult = new MethodResult<IList<SurveyQuestionModel>>();
 
             var surveyQuestionquery = await _surveyQuestionRepository.Queryable
-                .Where(x => request.QuestionIds!.Contains(x.Id))
+                .Where(x => request.ListQuestionIds!.Contains(x.Id))
                 .OrderBy(x => x.DisplayOrder)
                 .Select(x => new SurveyQuestionModel
                 {
