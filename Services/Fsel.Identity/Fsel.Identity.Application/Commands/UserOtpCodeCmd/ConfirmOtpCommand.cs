@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -14,6 +15,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     public class ConfirmOtpCommand : IRequest<MethodResult<UserOtpCode>>
     {
         public string? Otp { get; set; }
+        public string? Email { get; set; }
     }
 
     public class ConfirmOtpCommandHandler : IRequestHandler<ConfirmOtpCommand, MethodResult<UserOtpCode>>
@@ -31,6 +33,17 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             MethodResult<UserOtpCode> methodResult = new MethodResult<UserOtpCode>();
             var userOtpCode = await _userOtpCodeRepository.Queryable
                                    .FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
+            if (!string.IsNullOrEmpty(request.Email))
+            {
+                if (!request.Email.IsValidEmail())
+                {
+                    methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    return methodResult;
+                }
+                userOtpCode = await _userOtpCodeRepository.Queryable.Include(x => x.User)
+                                   .FirstOrDefaultAsync(x => x.User != null && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.User.Email == request.Email, cancellationToken);
+            }
+
             if (userOtpCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);

@@ -23,16 +23,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IMapper _mapper;
         private readonly IHumanRepository _humanRepository;
         private readonly IParentRepository _parentRepository;
 
-        public ConfirmOtpResetPasswordCommandHandler(UserManager<User> userManager, IMediator mediator, IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, IHumanRepository humanRepository, IParentRepository parentRepository)
+        public ConfirmOtpResetPasswordCommandHandler(UserManager<User> userManager, IMediator mediator, IMapper mapper, IHumanRepository humanRepository, IParentRepository parentRepository)
         {
             _userManager = userManager;
             _mediator = mediator;
-            _userOtpCodeRepository = userOtpCodeRepository;
             _mapper = mapper;
             _humanRepository = humanRepository;
             _parentRepository = parentRepository;
@@ -54,7 +52,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.Otp }, cancellationToken);
+            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.Otp, Email = request.Email }, cancellationToken);
             if (!method.IsOK || method.Result == null)
             {
                 methodResult.AddError(method.ErrorMessages);

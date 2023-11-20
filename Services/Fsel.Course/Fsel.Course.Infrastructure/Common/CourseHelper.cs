@@ -69,9 +69,9 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            if (await _courseRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.CourseLevel == request.CourseLevel && (request.Id == Guid.Empty || x.Id != request.Id)))
+            if (await _courseRepository.Queryable.AnyAsync(x => x.Code == request.Code && (request.Id == Guid.Empty || x.Id != request.Id)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code));
                 return methodResult;
             }
 

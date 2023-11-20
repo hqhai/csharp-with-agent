@@ -17,11 +17,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Newtonsoft.Json;
 
     public class ConfirmOtpSignUpCommand : IRequest<MethodResult<ConfirmOtpModel>>
     {
         [Required]
         public string? OTP { get; set; }
+
+        [JsonIgnore]
+        public string? Email { get; set; }
     }
 
     public class ConfirmOtpSignUpCommandHandler : IRequestHandler<ConfirmOtpSignUpCommand, MethodResult<ConfirmOtpModel>>
@@ -54,7 +58,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             MethodResult<ConfirmOtpModel> methodResult = new MethodResult<ConfirmOtpModel>();
 
-            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.OTP }, cancellationToken);
+            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.OTP, Email = request.Email }, cancellationToken);
             if (!method.IsOK || method.Result == null)
             {
                 methodResult.AddError(method.ErrorMessages);
