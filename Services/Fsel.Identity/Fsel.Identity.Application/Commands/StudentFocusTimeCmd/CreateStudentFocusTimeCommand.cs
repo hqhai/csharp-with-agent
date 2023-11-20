@@ -194,6 +194,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
             if (executeTime >= targetTime)
             {
+                questBoardQueueModel.Categories.Add(EnumQuestBoardCategory.FinishDailyFocusMode); // Mốc hoàn thành focusmode hàng ngày
                 await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
             }
 

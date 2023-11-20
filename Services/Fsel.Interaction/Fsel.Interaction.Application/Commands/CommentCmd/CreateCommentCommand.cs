@@ -2,6 +2,7 @@
 
 namespace Fsel.Interaction.Application.Commands.CommentCmd
 {
+    using System.ComponentModel.Design;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -14,6 +15,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Interaction.Application.Services.CourseServices.Models;
     using Fsel.Interaction.Application.Services.SystemService;
     using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
@@ -207,35 +209,20 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
         public async Task DoDailyQuest(Guid courseId, Guid commentId, CancellationToken cancellationToken)
         {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnNewLessonOfTwoClassMate };
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var studentResult = student?.Content?.Result;
-            var listOwnerObjectId = _commentRepository.Queryable.Where(c => c.CreatedUserId == _authContext.CurrentUserId &&
-                                                                          c.Type == EnumInteractionType.ClassForum &&
-                                                                          c.CreatedDate.Date == DateTime.UtcNow.Date &&
-                                                                          c.CreatedDate.Month == DateTime.UtcNow.Month &&
-                                                                          c.CreatedDate.Year == DateTime.UtcNow.Year)
-                                                              .Select(x => x.ObjectId)
-                                                              .Distinct()
-                                                              .ToList();
-            var ownerPostIds = await GetListPostOwner(listOwnerObjectId);
 
-            var listStudentOwnerPost = await _userService.GetStudentByUserIdsAsync(ownerPostIds);
-
-            if (listStudentOwnerPost?.Content?.Result != null && studentResult != null)
+            QuestBoardQueueModel questBoardModel = new QuestBoardQueueModel
             {
-                var countCommentOnClassMatePost = listStudentOwnerPost?.Content?.Result.Count(x => x.ClassId == studentResult.ClassId);
-                QuestBoardQueueModel questBoardModel = new QuestBoardQueueModel()
-                {
-                    StudentId = studentResult.Id,
-                    Categories = categories,
-                    AchievedPoint = (countCommentOnClassMatePost ?? 0),
-                    ObjectId = commentId,
-                    CourseId = courseId,
-                };
+                StudentId = studentResult!.Id,
+                Categories = new List<EnumQuestBoardCategory>(),
+                ObjectId = commentId,
+                CourseId = courseId,
+                AchievedPoint = 0
+            };
 
-                await DoQuestBoard(questBoardModel, cancellationToken);
-            }
+            await MissionDailyDiscussionBoard(questBoardModel, cancellationToken);
+            await MissionDailyClassForum(questBoardModel, studentResult, cancellationToken);
         }
 
         private async Task DoQuestBoard(QuestBoardQueueModel questBoardModel, CancellationToken cancellationToken)
@@ -263,5 +250,47 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             return result;
         }
 
+
+        private async Task MissionDailyDiscussionBoard(QuestBoardQueueModel questBoardModel, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { };
+            var isCommentDiscussionBoard = _commentRepository.Queryable.Any(c => c.CreatedUserId == _authContext.CurrentUserId &&
+                                                                         c.Type == EnumInteractionType.DiscussionBoard &&
+                                                                         c.CreatedDate.Date == DateTime.UtcNow.Date &&
+                                                                         c.CreatedDate.Month == DateTime.UtcNow.Month &&
+                                                                         c.CreatedDate.Year == DateTime.UtcNow.Year);
+
+            if (isCommentDiscussionBoard)
+            {
+                questBoardModel.Categories!.Add(EnumQuestBoardCategory.DiscussionBoardInteract);
+                questBoardModel.AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point;
+
+                await DoQuestBoard(questBoardModel, cancellationToken);
+            }
+
+        }
+
+        private async Task MissionDailyClassForum(QuestBoardQueueModel questBoardModel, StudentModel studentResult, CancellationToken cancellationToken)
+        {
+            var listOwnerObjectId = _commentRepository.Queryable.Where(c => c.CreatedUserId == _authContext.CurrentUserId &&
+                                                                          c.Type == EnumInteractionType.ClassForum &&
+                                                                          c.CreatedDate.Date == DateTime.UtcNow.Date &&
+                                                                          c.CreatedDate.Month == DateTime.UtcNow.Month &&
+                                                                          c.CreatedDate.Year == DateTime.UtcNow.Year)
+                                                              .Select(x => x.ObjectId)
+                                                              .Distinct()
+                                                              .ToList();
+
+            var ownerPostIds = await GetListPostOwner(listOwnerObjectId);
+            var listStudentOwnerPost = await _userService.GetStudentByUserIdsAsync(ownerPostIds);
+            if (listStudentOwnerPost?.Content?.Result != null && studentResult != null)
+            {
+                var countCommentOnClassMatePost = listStudentOwnerPost?.Content?.Result.Count(x => x.ClassId == studentResult.ClassId);
+                questBoardModel.AchievedPoint = (countCommentOnClassMatePost ?? 0);
+                questBoardModel.Categories!.Add(EnumQuestBoardCategory.CommentOnNewLessonOfTwoClassMate);
+
+                await DoQuestBoard(questBoardModel, cancellationToken);
+            }
+        }
     }
 }
