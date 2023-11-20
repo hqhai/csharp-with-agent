@@ -11,5 +11,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         Task<MethodResult<string?>> UploadFileAsync(IFormFile file, EnumFolderType folderType, bool isResize = false);
 
         Task<MethodResult<IList<string>>> UploadFilesAsync(IList<IFormFile> files, EnumFolderType folderType, bool isResize = false);
+
+        Task<MethodResult<string>> UploadResolutions(string? url);
     }
 }

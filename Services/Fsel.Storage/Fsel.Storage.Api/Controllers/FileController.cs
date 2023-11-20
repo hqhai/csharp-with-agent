@@ -51,5 +51,17 @@ namespace Fsel.Storage.Api.Controllers
             var commandResult = await _amazonS3Service.UploadFilesAsync(files, type, isResize);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Transcription
+        /// </summary>
+        [HttpPost("resolutions")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UploadResolutions(string url)
+        {
+            var result = await _amazonS3Service.UploadResolutions(url);
+            return result.GetActionResult();
+        }
     }
 }
