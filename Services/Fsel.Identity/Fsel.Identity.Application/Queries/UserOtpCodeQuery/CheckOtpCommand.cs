@@ -6,9 +6,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -17,6 +19,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
     public class CheckOtpCommand : IRequest<MethodResult<bool>>
     {
         public string? Otp { get; set; }
+        public string? Email { get; set; }
     }
 
     public class CheckOtpCommandHandler : IRequestHandler<CheckOtpCommand, MethodResult<bool>>
@@ -38,7 +41,15 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
 
             var user = await _userManager.Users.Include(x => x.UserOtpCodes)
                                .FirstOrDefaultAsync(x => x.UserOtpCodes.Any(x => x.Status == EnumOtpCodeStatus.New && x.OTPCode == request.Otp), cancellationToken);
-
+            if (!string.IsNullOrEmpty(request.Email))
+            {
+                if (!request.Email.IsValidEmail())
+                {
+                    methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    return methodResult;
+                }
+                user = await _userManager.Users.FirstOrDefaultAsync(x => !x.IsDeleted && x.Email == request.Email, cancellationToken);
+            }
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
@@ -46,7 +57,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
             }
 
             var userOtpCode = await _userOtpCodeRepository.Queryable
-                       .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
+                       .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
             if (userOtpCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
