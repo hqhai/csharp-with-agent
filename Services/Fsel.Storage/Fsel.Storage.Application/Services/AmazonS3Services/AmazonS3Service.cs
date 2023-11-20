@@ -220,14 +220,14 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return results;
         }
 
-        public async Task<string> UploadFileAsync(string? file, string? folder)
+        public async Task<string> UploadFileAsync(string? file, string? folderName)
         {
             if (string.IsNullOrEmpty(file))
             {
                 return string.Empty;
             }
 
-            var key = PathHelper.Combine(folder, Path.GetFileName(file));
+            var key = PathHelper.Combine(folderName, Path.GetFileName(file));
             using Stream stream = new FileStream(file, FileMode.Open);
 
             return await UploadFileAsync(stream, key);
@@ -293,7 +293,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return results;
         }
 
-        public async Task<string> UploadFolderAsync(string? folderPath, string? folder)
+        public async Task<string> UploadFolderAsync(string? folderPath, string? folderName)
         {
             var results = new List<string>();
 
@@ -307,7 +307,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             {
                 foreach (var file in files)
                 {
-                    var uploadFile = await UploadFileAsync(file, folder);
+                    var uploadFile = await UploadFileAsync(file, folderName);
                     if (!string.IsNullOrEmpty(uploadFile))
                     {
                         results.Add(uploadFile);
@@ -315,7 +315,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 }
             }
 
-            return GenerateAwsFileUrl(_appSetting.StorageConfig!.BucketName, _appSetting.StorageConfig.AwsS3BaseUrl, folder) ?? string.Empty;
+            return GenerateAwsFileUrl(_appSetting.StorageConfig!.BucketName, _appSetting.StorageConfig.AwsS3BaseUrl, folderName) ?? string.Empty;
         }
 
         public async Task<MethodResult<string>> UploadResolutions(string? url)
@@ -329,8 +329,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             var inputPath = await _systemFileProvider.SaveFileFromUrl(url);
 
             string videoName = Path.GetFileNameWithoutExtension(inputPath).AddSuffix();
-            string rootFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, videoName);
-            Directory.CreateDirectory(rootFolder);
+            string rootFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, videoName);
+            Directory.CreateDirectory(rootFolderPath);
 
             // Generate M3U8 playlists with multiple quality options for each video
             var qualities = new[]
@@ -343,14 +343,14 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
             foreach (var quality in qualities)
             {
-                string outputM3U8 = Path.Combine(rootFolder, $"{quality.Name}.m3u8");
+                string outputM3U8 = Path.Combine(rootFolderPath, $"{quality.Name}.m3u8");
                 string ffmpegArgs = $"-i {inputPath} -c:v libx264 -b:v {quality.Bitrate} -vf \"scale={quality.Resolution}\" -c:a aac -b:a 128k -hls_time 60 -hls_list_size 0 -f hls {outputM3U8}";
 
                 FfmpegStart(ffmpegArgs);
             }
 
             // Create a master M3U8 playlist for each video
-            using (var masterM3U8Writer = new StreamWriter(Path.Combine(rootFolder, $"{videoName}.m3u8")))
+            using (var masterM3U8Writer = new StreamWriter(Path.Combine(rootFolderPath, $"{videoName}.m3u8")))
             {
                 await masterM3U8Writer.WriteLineAsync("#EXTM3U");
                 foreach (var quality in qualities)
@@ -360,11 +360,11 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 }
             }
 
-            var folder = PathHelper.Combine(EnumFolderType.Videos.ToString(), videoName);
-            var folderRemoteUrl = await UploadFolderAsync(rootFolder, folder);
+            var folderPath = PathHelper.Combine(EnumFolderType.Videos.ToString(), videoName);
+            var folderRemoteUrl = await UploadFolderAsync(rootFolderPath, folderPath);
 
             _systemFileProvider.DeleteFiles(inputPath);
-            _systemFileProvider.DeleteFolders(inputPath);
+            _systemFileProvider.DeleteFolders(rootFolderPath);
 
             if (string.IsNullOrEmpty(folderRemoteUrl))
             {
