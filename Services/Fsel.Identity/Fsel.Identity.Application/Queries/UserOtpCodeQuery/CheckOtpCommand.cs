@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
@@ -15,6 +16,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Hosting;
 
     public class CheckOtpCommand : IRequest<MethodResult<bool>>
     {
@@ -25,12 +27,15 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
     public class CheckOtpCommandHandler : IRequestHandler<CheckOtpCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IHostEnvironment _environment;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
 
         public CheckOtpCommandHandler(UserManager<User> userManager
+            , IHostEnvironment environment
             , IUserOtpCodeRepository userOtpCodeRepository)
         {
             _userManager = userManager;
+            _environment = environment;
             _userOtpCodeRepository = userOtpCodeRepository;
         }
 
@@ -41,7 +46,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
 
             var user = await _userManager.Users.Include(x => x.UserOtpCodes)
                                .FirstOrDefaultAsync(x => x.UserOtpCodes.Any(x => x.Status == EnumOtpCodeStatus.New && x.OTPCode == request.Otp), cancellationToken);
-            if (!string.IsNullOrEmpty(request.Email))
+            if (!string.IsNullOrEmpty(request.Email) && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
             {
                 if (!request.Email.IsValidEmail())
                 {

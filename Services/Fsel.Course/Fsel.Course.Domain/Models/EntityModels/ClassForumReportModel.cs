@@ -12,6 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Name { get; set; }
         public Guid LessonId { get; set; }
         public Guid? LessonResultId { get; set; }
+        public bool IsAutoDot { get; set; }
         public ClassForumResultScoreModel? ClassForumResultScore { get; set; }
     }
 }
