@@ -327,7 +327,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             if (courseUnitMockTests != null && courseUnitMockTests.Any())
             {
-                var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => (Guid)x.GetPropValue(type) == objectId);
+                var courseUnitMockTest = courseUnitMockTests.Where(x => x.GetPropValue<Guid>(type) == objectId).FirstOrDefault();
                 if (courseUnitMockTest != null)
                 {
                     var index = courseUnitMockTests.IndexOf(courseUnitMockTest) + 1;
