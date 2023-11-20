@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -85,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 CourseSkill = x.CourseSkill,
                 TotalCorrect = 36,
                 LessonId = x.LessonId,
-                IsAutoDot = x.GradingStyle == EnumGradingStyle.Autodot,
+                GradingStyle = x.GradingStyle,
                 LessonResultId = x.Lesson?.LessonResults.FirstOrDefault(y => y.LessonId == x.LessonId && y.StudentId == studentId)?.Id,
                 ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
                 {
