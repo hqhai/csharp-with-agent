@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -18,20 +17,20 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetUnitDtoQuery : BaseQueryModel, IRequest<MethodResult<UnitModel>>
+    public class GetUnitQuery : IRequest<MethodResult<UnitModel>>
     {
         public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }
     }
 
-    public class GetUnitDtoQueryHandler : IRequestHandler<GetUnitDtoQuery, MethodResult<UnitModel>>
+    public class GetUnitQueryHandler : IRequestHandler<GetUnitQuery, MethodResult<UnitModel>>
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
 
-        public GetUnitDtoQueryHandler(IUnitRepository unitRepository, IUserService userService, AuthContext authContext, IMapper mapper)
+        public GetUnitQueryHandler(IUnitRepository unitRepository, IUserService userService, AuthContext authContext, IMapper mapper)
         {
             _unitRepository = unitRepository;
             _userService = userService;
@@ -39,7 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<UnitModel>> Handle(GetUnitDtoQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<UnitModel>> Handle(GetUnitQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UnitModel>();

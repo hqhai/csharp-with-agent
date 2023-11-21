@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUnitDto([FromQuery] GetUnitDtoQuery query)
+        public async Task<IActionResult> Get([FromQuery] GetUnitQuery query)
         {
             MethodResult<UnitModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
