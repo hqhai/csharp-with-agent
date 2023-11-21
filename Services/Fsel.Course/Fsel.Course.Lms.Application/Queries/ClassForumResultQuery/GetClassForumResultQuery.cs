@@ -110,7 +110,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId);
             var course = classForumResult.LessonResult?.Course;
 
-
             var classForumResultModel = new ClassForumResultModel
             {
                 Id = classForumResult.Id,

@@ -121,10 +121,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         Skill = x.CourseSkill,
                         CorrectCount = correctCount,
                         TotalCount = correctTotal,
-                        Percent = NumberHelper.GetPercent(correctCount, correctTotal),
                         CountQuestion = countQuestion,
                         TotalQuestion = totalQuestion,
-                        PercentProgress = NumberHelper.GetPercent(countQuestion, totalQuestion)
                     };
                     return skillScores;
                 }).ToList();

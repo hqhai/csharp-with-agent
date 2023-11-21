@@ -5,8 +5,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
-    using Azure.Core;
-    using Deepgram.Models;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -18,7 +16,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
-    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;

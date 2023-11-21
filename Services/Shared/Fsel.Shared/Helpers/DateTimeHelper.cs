@@ -29,6 +29,20 @@ namespace Fsel.Shared.Helpers
             return age;
         }
 
+        public static double GetWorkingTime(DateTime? inputDate, DateTime outputDate, double executionTime)
+        {
+            return inputDate.HasValue && (outputDate - inputDate.Value).TotalSeconds <= executionTime ? NumberHelper.ConvertRound((outputDate - inputDate.Value).TotalSeconds) : executionTime;
+        }
+
+        public static double GetWorkingTimeVideo(DateTime? inputDate, DateTime outputDate, double executionTime)
+        {
+            if (executionTime > 0)
+            {
+                return inputDate.HasValue && (outputDate - inputDate.Value).TotalSeconds <= executionTime ? NumberHelper.ConvertRound((outputDate - inputDate.Value).TotalSeconds) : executionTime;
+            }
+            return default;
+        }
+
         public static async Task<(int, bool)> CountContinuousDaysAsync(IList<DateTime>? dates)
         {
             if (dates == null || dates.Count == 0)
@@ -66,6 +80,5 @@ namespace Fsel.Shared.Helpers
                 return (firstDateDifference.Days <= 1 ? consecutiveDays : 0, firstDateDifference.Days <= 1);
             }
         }
-
     }
 }
