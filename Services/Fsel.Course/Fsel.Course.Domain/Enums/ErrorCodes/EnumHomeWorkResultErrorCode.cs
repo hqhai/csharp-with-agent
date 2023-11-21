@@ -7,6 +7,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// HomeWork Result does not exist
         /// </summary>
-        HomeWorkResultDone
+        HomeWorkResultDone,
+
+        /// <summary>
+        /// Not answered enough
+        /// </summary>
+        NotAnsweredEnough,
     }
 }

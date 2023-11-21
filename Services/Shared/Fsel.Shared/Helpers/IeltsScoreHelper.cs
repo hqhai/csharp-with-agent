@@ -67,13 +67,13 @@ namespace Fsel.Shared.Helpers
             new IeltsScoreConfig(40, 9, 9),
         };
 
-        public static double GetIeltsScorePT(this double number, EnumCourseSkill skill)
+        public static double GetIeltsScorePT(this int number, EnumCourseSkill skill)
         {
             double score = number.GetIeltsScore(skill);
             return score >= MaxScorePT ? MaxScorePT : score;
         }
 
-        public static double GetIeltsScore(this double number, EnumCourseSkill skill)
+        public static double GetIeltsScore(this int number, EnumCourseSkill skill)
         {
             var config = s_ieltsScoreConfigs.OrderBy(x => x.Number).FirstOrDefault(x => x.Number == number);
             if (config != null)

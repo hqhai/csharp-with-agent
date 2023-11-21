@@ -109,15 +109,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 {
                     skillScore.CorrectCount = sumScore;
                     skillScore.TotalCount = 36;
-                    skillScore.Percent = NumberHelper.GetPercent(sumScore, 36);
-                    skillScore.Scores = NumberHelper.RoundNumberDouble((double)sumScore / listMockTestScore.Count, true);
                     skillScore.Skill = item.CourseSkill;
+                    skillScore.Scores = NumberHelper.RoundNumberDouble((double)sumScore / listMockTestScore.Count, true);
                     skillScores!.Add(skillScore);
                 }
             }
 
             mockTestResult.SkillScores = skillScores;
-            mockTestResult.Percent = NumberHelper.ConvertRound(mockTestResult.SkillScores?.Average(x => x.Percent) ?? default);
             mockTestResult.MockTestScores = mockTestScores;
             mockTestResult.GradingTeacherId = teacherId;
 

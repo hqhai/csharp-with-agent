@@ -15,6 +15,6 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
         public long? ToId { get; set; }
 
-        public bool IsExact { get; set; }
+        public bool? IsExact { get; set; }
     }
 }

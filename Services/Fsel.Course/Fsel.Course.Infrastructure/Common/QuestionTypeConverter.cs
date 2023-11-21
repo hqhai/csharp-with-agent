@@ -61,13 +61,13 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
                     var gapFillWordBankScoreQuestion = config.Deserialize<GapFillQuestion>();
-                    result = gapFillWordBankScoreQuestion;
+                    result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreQuestion) : gapFillWordBankScoreQuestion;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrectBySubQuestion(gapFillWordBankScoreQuestion) : default;
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                     var gapFillWordBankScoreByGap = config.Deserialize<GapFillQuestion>();
-                    result = gapFillWordBankScoreByGap;
+                    result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreByGap) : gapFillWordBankScoreByGap;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrectByGap(gapFillWordBankScoreByGap) : default;
                     break;
 
@@ -79,7 +79,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = config.Deserialize<DragAndDropSentenceOrderQuestion>();
-                    result = dragAndDropSentenceOrderQuestion;
+                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion) : dragAndDropSentenceOrderQuestion;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropSentenceOrderQuestion) : default;
                     break;
 
@@ -158,6 +158,18 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
+        private static object? ClearAnswers(DragAndDropSentenceOrderQuestion? data)
+        {
+            if (data != null && data.Contents != null)
+            {
+                foreach (var item in data.Contents)
+                {
+                    item.Words = GenerateRandomLoop(item.Words);
+                }
+            }
+            return data;
+        }
+
         private static object? ClearAnswers(MatchingTypeQuestion? data)
         {
             if (data != null && data.Link != null)
@@ -173,7 +185,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Contents)
                 {
-                    item.Words!.Clear();
+                    item.Words = GenerateRandomLoop(item.Words);
                 }
             }
             return data;
@@ -244,6 +256,23 @@ namespace Fsel.Course.Infrastructure.Common
                 return data.Contents.Count;
             }
             return default;
+        }
+
+        private static IList<string>? GenerateRandomLoop(IList<string>? datas)
+        {
+            var rand = new Random();
+            if (datas != null)
+            {
+                for (int i = datas.Count - 1; i > 0; i--)
+                {
+                    var k = rand.Next(i + 1);
+                    var value = datas[k];
+                    datas[k] = datas[i];
+                    datas[i] = value;
+                }
+            }
+
+            return datas;
         }
     }
 }

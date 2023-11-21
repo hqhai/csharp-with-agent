@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.PlacementTestQuery;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
@@ -58,9 +57,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<PlacementTestBankModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetPlacementTestQuery command)
+        public async Task<IActionResult> Get([FromQuery] GetPlacementTestQuery query)
         {
-            MethodResult<PlacementTestBankModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<PlacementTestBankModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
