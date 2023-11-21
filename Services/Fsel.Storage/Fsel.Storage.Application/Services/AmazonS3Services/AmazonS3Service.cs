@@ -328,7 +328,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
             var inputPath = await _systemFileProvider.SaveFileFromUrl(url);
 
-            string videoName = Path.GetFileNameWithoutExtension(inputPath).AddSuffix();
+            string videoName = Path.GetFileNameWithoutExtension(inputPath);
             string rootFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, videoName);
             Directory.CreateDirectory(rootFolderPath);
 
@@ -364,7 +364,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             var folderRemoteUrl = await UploadFolderAsync(rootFolderPath, folderPath);
 
             _systemFileProvider.DeleteFiles(inputPath);
-            _systemFileProvider.DeleteFolders(rootFolderPath);
+            _systemFileProvider.DeleteFolders(true, rootFolderPath);
 
             if (string.IsNullOrEmpty(folderRemoteUrl))
             {
