@@ -318,15 +318,13 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return GenerateAwsFileUrl(_appSetting.StorageConfig!.BucketName, _appSetting.StorageConfig.AwsS3BaseUrl, folderName) ?? string.Empty;
         }
 
-        public async Task<MethodResult<string>> UploadResolutions(string? url)
+        private async Task<MethodResult<string>> StartResolutions(string? inputPath)
         {
             var result = new MethodResult<string>();
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(inputPath))
             {
                 return result;
             }
-
-            var inputPath = await _systemFileProvider.SaveFileFromUrl(url);
 
             string videoName = Path.GetFileNameWithoutExtension(inputPath);
             string rootFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, videoName);
@@ -373,6 +371,32 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             }
 
             result.Result = PathHelper.Combine(folderRemoteUrl, $"{videoName}.m3u8");
+            return result;
+        }
+
+        public async Task<MethodResult<string>> UploadResolutions(string? url)
+        {
+            var result = new MethodResult<string>();
+            if (string.IsNullOrEmpty(url))
+            {
+                return result;
+            }
+
+            var inputPath = await _systemFileProvider.SaveFileFromUrl(url);
+            result = await StartResolutions(inputPath);
+            return result;
+        }
+
+        public async Task<MethodResult<string>> UploadResolutions(IFormFile? file)
+        {
+            var result = new MethodResult<string>();
+            if (file == null)
+            {
+                return result;
+            }
+
+            var inputPath = await _systemFileProvider.SaveFile(file);
+            result = await StartResolutions(inputPath);
             return result;
         }
 

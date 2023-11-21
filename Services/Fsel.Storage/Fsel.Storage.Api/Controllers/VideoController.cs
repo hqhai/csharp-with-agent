@@ -11,45 +11,42 @@ namespace Fsel.Storage.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/file")]
+    [Route(Settings.APIDefaultRoute + "/video")]
     [ApiController]
-    public class FileController : ControllerBase
+    public class VideoController : ControllerBase
     {
         private readonly IAmazonS3Service _amazonS3Service;
 
-        public FileController(IAmazonS3Service amazonS3Service)
+        public VideoController(IAmazonS3Service amazonS3Service)
         {
             _amazonS3Service = amazonS3Service;
         }
 
         /// <summary>
-        /// Upload file
+        /// Get Transcription
         /// </summary>
-        [DisableFormValueModelBinding]
-        [DisableRequestSizeLimit]
-        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+        [HttpPost("url-resolutions")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [HttpPost("{type}")]
-        public async Task<IActionResult> Upload([FromRoute] EnumFolderType type, IFormFile file, [FromQuery] bool isResize = false)
+        public async Task<IActionResult> UploadResolutions(string url)
         {
-            var commandResult = await _amazonS3Service.UploadFileAsync(file, type, isResize);
-            return commandResult.GetActionResult();
+            var result = await _amazonS3Service.UploadResolutions(url);
+            return result.GetActionResult();
         }
 
         /// <summary>
-        /// Upload file
+        /// Get Transcription
         /// </summary>
+        [HttpPost("file-resolutions")]
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [HttpPost("multiple/{type}")]
-        public async Task<IActionResult> Uploads([FromRoute] EnumFolderType type, IList<IFormFile> files, [FromQuery] bool isResize = false)
+        public async Task<IActionResult> UploadResolutions(IFormFile file)
         {
-            var commandResult = await _amazonS3Service.UploadFilesAsync(files, type, isResize);
-            return commandResult.GetActionResult();
+            var result = await _amazonS3Service.UploadResolutions(file);
+            return result.GetActionResult();
         }
     }
 }
