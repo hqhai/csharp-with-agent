@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.UnitQuery;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
@@ -37,7 +36,6 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<IList<UnitResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
 
         /// <summary>
         /// Get Current Unit Indicator
