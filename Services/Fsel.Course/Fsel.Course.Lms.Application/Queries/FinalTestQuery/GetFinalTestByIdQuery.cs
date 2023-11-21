@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -15,7 +16,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class GetFinalTestByIdQuery : IRequest<MethodResult<FinalTestModel>>
     {
@@ -27,16 +27,14 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     {
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly SectionConverter _sectionConverter;
-        private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetFinalTestByIdQueryHandler(IFinalTestRepository finalTestRepository, SectionConverter sectionConverter, IFinalTestResultRepository finalTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetFinalTestByIdQueryHandler(IFinalTestRepository finalTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _finalTestRepository = finalTestRepository;
             _sectionConverter = sectionConverter;
-            _finalTestResultRepository = finalTestResultRepository;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
@@ -61,33 +59,32 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
                 return methodResult;
             }
-
-            methodResult.Result = await GetFinalTestAsync(finalTest, studentId, request);
+            var finalTestResult = finalTest.FinalTestResults.FirstOrDefault();
+            if (finalTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
+                return methodResult;
+            }
+            else if (finalTestResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(finalTestResult));
+                return methodResult;
+            }
+            methodResult.Result = GetFinalTest(finalTest, finalTestResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<FinalTestModel> GetFinalTestAsync(FinalTest finalTest, Guid studentId, GetFinalTestByIdQuery request)
+        private FinalTestModel GetFinalTest(FinalTest finalTest, FinalTestResult finalTestResult)
         {
             var finalTestDetail = _mapper.Map<FinalTestModel>(finalTest);
             var sectionGroups = finalTest.FinalTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             finalTestDetail.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
             finalTestDetail.ExecutionTime = _sectionConverter.GetExecutionTime(sectionGroups);
-            finalTestDetail.FinalTestResult = await GetAndAddMockTestResult(request, studentId);
+            finalTestDetail.FinalTestResult = _mapper.Map<FinalTestResultModel>(finalTestResult);
             finalTestDetail.CourseSkills = _sectionConverter.GetCourseSkill(sectionGroups);
             finalTestDetail.SectionGroups = _sectionConverter.GetSectionGroups(sectionGroups, finalTestDetail.FinalTestResult.Id, "FinalTestResultId");
             return finalTestDetail;
-        }
-
-        private async Task<FinalTestResultModel> GetAndAddMockTestResult(GetFinalTestByIdQuery request, Guid studentId)
-        {
-            var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.FinalTestId == request.FinalTestId && x.StudentId == studentId).FirstOrDefaultAsync();
-            if (finalTestResult == null)
-            {
-                finalTestResult = _finalTestResultRepository.Add(new FinalTestResult { StudentId = studentId, CourseId = request.CourseId, FinalTestId = request.FinalTestId });
-                await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-            }
-            return _mapper.Map<FinalTestResultModel>(finalTestResult);
         }
     }
 }

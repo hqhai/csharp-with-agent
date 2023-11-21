@@ -71,6 +71,11 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
                 return methodResult;
             }
+            else if (finalTestResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(finalTestResult));
+                return methodResult;
+            }
             if (finalTestResult.Status == EnumResultStatus.New)
             {
                 await UpdateFinalTestResult(finalTestResult);
