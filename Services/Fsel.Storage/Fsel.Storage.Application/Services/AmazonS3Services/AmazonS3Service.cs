@@ -335,9 +335,9 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             // Generate M3U8 playlists with multiple quality options for each video
             var qualities = new[]
             {
-                new { Name = "360p", Resolution = "640:360", Bitrate = "400k" },
-                new { Name = "480p", Resolution = "854:480", Bitrate = "800k" },
-                new { Name = "720p", Resolution = "1280:720", Bitrate = "1500k" }
+                new { Name = "360p", Resolution = "640x360", Bitrate = "400k" },
+                new { Name = "480p", Resolution = "854x480", Bitrate = "800k" },
+                new { Name = "720p", Resolution = "1280x720", Bitrate = "1500k" }
                 // Add more quality options as needed
             };
 
