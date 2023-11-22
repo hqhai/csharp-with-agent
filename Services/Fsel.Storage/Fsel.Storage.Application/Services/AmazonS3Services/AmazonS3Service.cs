@@ -378,7 +378,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             _systemFileProvider.DeleteFiles(inputPath);
             _systemFileProvider.DeleteFolders(true, rootFolderPath);
 
-            _logger.LogInformation($"Start resolution 6", folderRemoteUrl);
+            _logger.LogInformation($"Start resolution 6: {folderRemoteUrl}");
 
             if (string.IsNullOrEmpty(folderRemoteUrl))
             {
