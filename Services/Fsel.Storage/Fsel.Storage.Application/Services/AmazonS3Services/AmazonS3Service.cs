@@ -13,6 +13,8 @@ using Fsel.Storage.Domain.Enums.ErrorCodes;
 using Fsel.Storage.Infrastructure.ValueSettings;
 using Humanizer.Bytes;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using OneSignalApi.Model;
 using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace Fsel.Storage.Application.Services.AmazonS3Services
@@ -22,6 +24,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         private readonly AppSetting _appSetting;
         private readonly AmazonS3Client _amazonS3Client;
         private readonly TransferUtility _transferUtility;
+        private readonly ILogger<AmazonS3Service> _logger;
         private readonly ISystemFileProvider _systemFileProvider;
         private readonly float _targetWidthResize = 270F;
         private readonly float _targetHeightResize = 180F;
@@ -36,7 +39,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             { EnumFolderType.Images, ByteSize.FromMegabytes(500).Bytes } //maximum image size (500 MB)
         };
 
-        public AmazonS3Service(AppSetting appSetting, ISystemFileProvider systemFileProvider)
+        public AmazonS3Service(AppSetting appSetting, ISystemFileProvider systemFileProvider, ILogger<AmazonS3Service> logger)
         {
             _appSetting = appSetting;
 
@@ -49,6 +52,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             });
             _transferUtility = new TransferUtility(_amazonS3Client);
             _systemFileProvider = systemFileProvider;
+            _logger = logger;
         }
 
         private async Task<string> UploadFileAsync(Stream? stream, string? key)
@@ -320,6 +324,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
         private async Task<MethodResult<string>> StartResolutions(string? inputPath)
         {
+            _logger.LogInformation($"Start resolution 1");
+
             var result = new MethodResult<string>();
             if (string.IsNullOrEmpty(inputPath))
             {
@@ -339,6 +345,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 // Add more quality options as needed
             };
 
+            _logger.LogInformation($"Start resolution 2");
+
             foreach (var quality in qualities)
             {
                 string outputM3U8 = Path.Combine(rootFolderPath, $"{quality.Name}.m3u8");
@@ -346,6 +354,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
                 FfmpegStart(ffmpegArgs);
             }
+
+            _logger.LogInformation($"Start resolution 3");
 
             // Create a master M3U8 playlist for each video
             using (var masterM3U8Writer = new StreamWriter(Path.Combine(rootFolderPath, $"{videoName}.m3u8")))
@@ -358,11 +368,17 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 }
             }
 
+            _logger.LogInformation($"Start resolution 4");
+
             var folderPath = PathHelper.Combine(EnumFolderType.Videos.ToString(), videoName);
             var folderRemoteUrl = await UploadFolderAsync(rootFolderPath, folderPath);
 
+            _logger.LogInformation($"Start resolution 5");
+
             _systemFileProvider.DeleteFiles(inputPath);
             _systemFileProvider.DeleteFolders(true, rootFolderPath);
+
+            _logger.LogInformation($"Start resolution 6", folderRemoteUrl);
 
             if (string.IsNullOrEmpty(folderRemoteUrl))
             {
@@ -395,8 +411,18 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 return result;
             }
 
+            _logger.LogInformation($"Start save file to disk");
+
             var inputPath = await _systemFileProvider.SaveFile(file);
+
+            _logger.LogInformation($"End save file to disk");
+
+
+            _logger.LogInformation($"Start resolutions");
+
             result = await StartResolutions(inputPath);
+
+            _logger.LogInformation($"End resolutions");
             return result;
         }
 
