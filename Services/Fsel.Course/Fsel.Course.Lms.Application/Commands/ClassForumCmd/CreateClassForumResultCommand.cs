@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                var userAiConfig = classForum.UserAlConfig?.Replace("{0}", classForumResult?.WordContent, StringComparison.CurrentCulture);
+                var userAiConfig = classForum.UserAlConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
                 var aIResponse = await _openAIService.SubmitAICompletionsAsync(new RequestAIModel
                 {
                     Model = classForum.SettingModel,
