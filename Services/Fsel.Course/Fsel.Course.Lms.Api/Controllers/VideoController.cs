@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.VideoQuery;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
@@ -66,11 +65,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Create video time code answer
         /// </summary>
         [HttpPost("create-video-time-code-answer")]
-        [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateVideoTimeCodeAnswer([FromBody] CreateVideoTimeCodeAnswerCommand query)
         {
-            MethodResult<VideoTimeCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

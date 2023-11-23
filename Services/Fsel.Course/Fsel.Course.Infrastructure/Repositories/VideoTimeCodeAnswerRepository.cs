@@ -24,5 +24,17 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
+
+        public async Task<VideoTimeCodeAnswer?> GetAsync(Guid videoTimeCodeId, Guid videoResultId, Guid questionId, Guid? exerciseId)
+        {
+            try
+            {
+                return await Queryable.FirstOrDefaultAsync(x => x.QuestionId == questionId && x.ExerciseId == exerciseId && x.VideoResultId == videoResultId && x.VideoTimeCodeId == videoTimeCodeId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

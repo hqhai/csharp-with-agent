@@ -11,7 +11,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/cso/admin")]
+    [Route(Settings.APIDefaultRoute + "/admin/cso")]
     [ApiController]
     public class CSOController : ControllerBase
     {

@@ -50,18 +50,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Create FinalTestAnswers
-        /// </summary>
-        [HttpPost("create-answer")]
-        [ProducesResponseType(typeof(MethodResult<SectionGroupResultModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateAnswers([FromBody] CreateFinalTestAnswerBySectionGroupCommand command)
-        {
-            MethodResult<SectionGroupResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Get FinalTest
         /// </summary>
         [HttpGet]

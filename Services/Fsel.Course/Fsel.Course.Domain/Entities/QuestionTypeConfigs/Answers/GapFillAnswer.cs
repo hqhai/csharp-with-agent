@@ -15,6 +15,6 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
         public IList<string>? Answer { get; set; }
 
-        public IList<bool>? IsExacts { get; set; }
+        public IList<bool?>? IsExacts { get; set; }
     }
 }

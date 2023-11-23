@@ -6,6 +6,6 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
     {
         public string? Answers { get; set; }
 
-        public bool IsExact { get; set; }
+        public bool? IsExact { get; set; }
     }
 }

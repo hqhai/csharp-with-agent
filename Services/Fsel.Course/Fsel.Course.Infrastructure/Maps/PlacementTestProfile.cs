@@ -16,6 +16,7 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<PlacementTest, PlacementTestModel>().IgnoreAllNonExisting();
             CreateMap<CreatePlacementTestCommandModel, PlacementTest>().IgnoreAllNonExisting();
             CreateMap<UpdatePlacementTestCommandModel, PlacementTest>().IgnoreAllNonExisting();
+            CreateMap<PlacementTest, PlacementTestDtoModel>().IgnoreAllNonExisting();
             CreateMap<PlacementTestAnswer, AnswerModel>().IgnoreAllNonExisting();
             CreateMap<CreatePlacementTestAnswerCommandModel, PlacementTestAnswer>().IgnoreAllNonExisting();
         }

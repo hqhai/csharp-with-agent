@@ -88,6 +88,20 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
+        public async Task<EntityCourse?> GetAsync(Guid id, Guid? studentId)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.CourseUnitMockTests)
+                                      .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
+                                      .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<EntityCourse?> GetIncludeCourseResult(Guid id, Guid? studentId)
         {
             return await Queryable
