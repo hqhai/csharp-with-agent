@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -63,32 +64,33 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 return methodResult;
             }
 
-            methodResult.Result = await GetMockTest(mockTest, studentId, request);
+            var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.MockTestId == request.MockTestId && x.StudentId == studentId && (!request.UnitId.HasValue || x.UnitId == request.UnitId), cancellationToken);
+            if (mockTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                return methodResult;
+            }
+            else if (mockTestResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(mockTestResult));
+                return methodResult;
+            }
+
+            methodResult.Result = GetMockTest(mockTest, mockTestResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<MockTestModel> GetMockTest(MockTest mockTest, Guid studentId, GetMockTestByIdQuery request)
+        private MockTestModel GetMockTest(MockTest mockTest, MockTestResult mockTestResult)
         {
             var mockTestDetail = _mapper.Map<MockTestModel>(mockTest);
             var sectionGroups = mockTest.MockTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             mockTestDetail.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
             mockTestDetail.ExecutionTime = _sectionConverter.GetExecutionTime(sectionGroups);
-            mockTestDetail.MockTestResult = await GetAndAddMockTestResult(request, studentId);
+            mockTestDetail.MockTestResult = _mapper.Map<MockTestResultModel>(mockTestResult);
             mockTestDetail.CourseSkills = _sectionConverter.GetCourseSkill(sectionGroups);
             mockTestDetail.SectionGroups = _sectionConverter.GetSectionGroups(sectionGroups, mockTestDetail.MockTestResult.Id, "MockTestResultId");
             return mockTestDetail;
-        }
-
-        private async Task<MockTestResultModel> GetAndAddMockTestResult(GetMockTestByIdQuery request, Guid studentId)
-        {
-            var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.MockTestId == request.MockTestId && x.StudentId == studentId).FirstOrDefaultAsync(x => !request.UnitId.HasValue || x.UnitId == request.UnitId.Value);
-            if (mockTestResult == null)
-            {
-                mockTestResult = _mockTestResultRepository.Add(new MockTestResult { StudentId = studentId, CourseId = request.CourseId, UnitId = request.UnitId, MockTestId = request.MockTestId });
-                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-            }
-            return _mapper.Map<MockTestResultModel>(mockTestResult);
         }
     }
 }

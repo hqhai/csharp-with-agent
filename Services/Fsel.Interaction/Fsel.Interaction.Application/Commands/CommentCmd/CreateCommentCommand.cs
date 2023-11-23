@@ -12,6 +12,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.SystemService;
+    using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
@@ -36,16 +37,18 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly AuthContext _authContext;
         private readonly ICourseService _courseService;
         private readonly ISystemService _systemService;
+        private readonly IUserService _userService;
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService)
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, AuthContext authContext, ICourseService courseService, ISystemService systemService, IUserService userService)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
-            _authContext = authContext;
             _discussionBoardCommentPublisher = discussionBoardCommentPublisher;
             _classForumCommentPublisher = classForumCommentPublisher;
+            _authContext = authContext;
             _courseService = courseService;
             _systemService = systemService;
+            _userService = userService;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -68,6 +71,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 methodResult.AddErrorBadRequest(comment.ErrorMessages);
                 return methodResult;
             }
+            var fullname = await _commentRepository.Queryable.FirstOrDefaultAsync(cancellationToken);
+
             await _commentRepository.ExecuteTransactionAsync(async () =>
             {
                 comment = _commentRepository.Add(comment);
@@ -160,9 +165,13 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
                 }
+                var commentModel = _mapper.Map<CommentModel>(comment);
+
+                var userResult = await _userService.GetUserByIdAsync(_authContext.CurrentUserId.ToString());
+                commentModel.FullName = userResult.Content?.Result?.FullName;
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<CommentModel>(comment);
+                methodResult.Result = commentModel;
                 return methodResult;
             });
 

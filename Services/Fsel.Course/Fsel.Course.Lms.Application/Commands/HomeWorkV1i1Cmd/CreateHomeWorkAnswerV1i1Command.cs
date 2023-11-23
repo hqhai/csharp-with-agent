@@ -8,11 +8,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -158,7 +158,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
             }
             else if (homeWorkResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultDone));
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone));
+                return methodResult;
+            }
+            else if (homeWorkResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished));
                 return methodResult;
             }
             var questionIds = request.Answers.Select(x => x.QuestionId).Distinct().ToList();
@@ -180,7 +185,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
             var listQuestion = homeWork.HomeWorkQuestions.Select(x => x.Question!).ToList();
             if (request.Answers.Count != listQuestion.Count && request.IsSubmit)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.NotAnsweredEnough), nameof(request.Answers));
+                methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.NotAnsweredEnough), nameof(request.Answers));
                 return methodResult;
             }
             var questions = await _questionRepository.GetIncludeByHomeWorkAsync(questionIds);

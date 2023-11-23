@@ -14,7 +14,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -87,7 +86,12 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd
             }
             else if (finalTestResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.FinalTestResultsDone), nameof(finalTestResult.Status));
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(finalTestResult.Status));
+                return methodResult;
+            }
+            else if (finalTestResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished));
                 return methodResult;
             }
             var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
@@ -104,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd
             }
             else if (sectionGroupResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.SectionGroupResultDone), nameof(sectionGroupResult.Status));
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(sectionGroupResult.Status));
                 return methodResult;
             }
             await _finalTestAnswerRepository.ExecuteTransactionAsync(async () =>
