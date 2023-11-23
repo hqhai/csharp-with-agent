@@ -100,6 +100,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             {
                 if (classForumResult == null)
                 {
+                    classForumResult = new ClassForumResult
+                    {
+                        Content = request.Content,
+                        StudentId = studentId ?? default,
+                        LessonResultId = request.LessonResultId,
+                        Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
+                        ClassForumId = classForum.Id,
+                        WordContent = request.WordContent,
+                    };
                     if (classForum.IsAlFeedBack)
                     {
                         var aIResponse = await _mediator.Send(new SubmitAICommand
@@ -107,30 +116,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             WordContent = request.WordContent,
                             ClassForum = classForum,
                         }).ConfigureAwait(false);
-
-                        classForumResult = new ClassForumResult
+                        /*classForumResult = new ClassForumResult
                         {
-                            Content = request.Content,
-                            StudentId = studentId ?? default,
-                            LessonResultId = request.LessonResultId,
-                            Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
-                            ClassForumId = classForum.Id,
-                            WordContent = request.WordContent,
-                            GradingAlFeedback = aIResponse,
-                        };
+                            GradingAlFeedback = aIResponse
+                        };*/
+
+                        classForumResult.GradingAlFeedback = aIResponse;
                     }
                     else
                     {
-                        classForumResult = new ClassForumResult
-                        {
-                            Content = request.Content,
-                            StudentId = studentId ?? default,
-                            LessonResultId = request.LessonResultId,
-                            Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
-                            ClassForumId = classForum.Id,
-                            WordContent = request.WordContent,
-                            GradingAlFeedback = null,
-                        };
+                        classForumResult.GradingAlFeedback = null;
                     }
 
                     if (request.FilePaths != null)

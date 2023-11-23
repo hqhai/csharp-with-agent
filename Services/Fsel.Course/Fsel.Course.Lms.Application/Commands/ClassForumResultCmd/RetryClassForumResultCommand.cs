@@ -64,7 +64,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 classForumResult.RetryGradingAlFeedBack = null;
             }
+
             _mapper.Map(request, classForumResult);
+
             if (request.RetryFilePaths != null)
             {
                 classForumResult.ClassForumResultFiles = request.RetryFilePaths.Select(x => new ClassForumResultFile
