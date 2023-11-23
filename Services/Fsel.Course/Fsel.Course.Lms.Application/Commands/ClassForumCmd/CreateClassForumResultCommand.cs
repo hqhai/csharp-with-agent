@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -15,9 +14,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Course.Lms.Application.Services.AiService;
-    using Fsel.Course.Lms.Application.Services.AIService.Models;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -40,9 +38,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ISystemService _systemService;
-        private readonly IOpenAIService _openAIService;
+        private readonly IMediator _mediator;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, IOpenAIService openAIService)
+        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, IMediator mediator)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -52,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _lessonResultRepository = lessonResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
             _systemService = systemService;
-            _openAIService = openAIService;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -100,42 +98,41 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                var userAiConfig = classForum.UserAlConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
-                var aIResponse = await _openAIService.SubmitAICompletionsAsync(new RequestAIModel
-                {
-                    Model = classForum.SettingModel,
-                    Messages = new List<object>
-                    {
-                        new
-                        {
-                            Role =  "system",
-                            Content =  classForum?.SystemRoleAlConfig,
-                        },
-                        new
-                        {
-                            Role = "user",
-                            Content = userAiConfig,
-                        }
-                    },
-                    Temperature = classForum!.SettingTemperature,
-                    FrequencyPenalty = classForum.SettingFrequecy,
-                    MaxTokens = classForum.SettingWordMaxLength,
-                    PresencePenalty = classForum.SettingPresence,
-                    TopP = classForum.SettingTopP
-                });
-
                 if (classForumResult == null)
                 {
-                    classForumResult = new ClassForumResult
+                    if (classForum.IsAlFeedBack)
                     {
-                        Content = request.Content,
-                        StudentId = studentId ?? default,
-                        LessonResultId = request.LessonResultId,
-                        Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
-                        ClassForumId = classForum.Id,
-                        WordContent = request.WordContent,
-                        GradingAlFeedback = aIResponse.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault(),
-                    };
+                        var aIResponse = await _mediator.Send(new SubmitAICommand
+                        {
+                            WordContent = request.WordContent,
+                            ClassForum = classForum,
+                        }).ConfigureAwait(false);
+
+                        classForumResult = new ClassForumResult
+                        {
+                            Content = request.Content,
+                            StudentId = studentId ?? default,
+                            LessonResultId = request.LessonResultId,
+                            Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
+                            ClassForumId = classForum.Id,
+                            WordContent = request.WordContent,
+                            GradingAlFeedback = aIResponse,
+                        };
+                    }
+                    else
+                    {
+                        classForumResult = new ClassForumResult
+                        {
+                            Content = request.Content,
+                            StudentId = studentId ?? default,
+                            LessonResultId = request.LessonResultId,
+                            Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
+                            ClassForumId = classForum.Id,
+                            WordContent = request.WordContent,
+                            GradingAlFeedback = null,
+                        };
+                    }
+
                     if (request.FilePaths != null)
                     {
                         classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile

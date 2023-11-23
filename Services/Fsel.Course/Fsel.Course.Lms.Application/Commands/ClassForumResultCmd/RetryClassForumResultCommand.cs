@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -24,11 +25,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMapper _mapper;
+        private readonly IClassForumRepository _classForumRepository;
+        private readonly IMediator _mediator;
 
-        public RetryClassForumResultCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper)
+        public RetryClassForumResultCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, IClassForumRepository classForumRepository, IMediator mediator)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
+            _classForumRepository = classForumRepository;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(RetryClassForumResultCommand request, CancellationToken cancellationToken)
@@ -42,6 +47,22 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
+            }
+
+            var classForum = await _classForumRepository.Queryable.Where(x => x.Id == classForumResult.ClassForumId).FirstOrDefaultAsync(cancellationToken);
+
+            if (classForum!.IsAlFeedBack)
+            {
+                var aIResponse = await _mediator.Send(new SubmitAICommand
+                {
+                    WordContent = request.RetryWordContent,
+                    ClassForum = classForum,
+                }).ConfigureAwait(false);
+                classForumResult.RetryGradingAlFeedBack = aIResponse;
+            }
+            else
+            {
+                classForumResult.RetryGradingAlFeedBack = null;
             }
             _mapper.Map(request, classForumResult);
             if (request.RetryFilePaths != null)

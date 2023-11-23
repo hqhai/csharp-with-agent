@@ -2,8 +2,12 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.Ais
 {
-    public class SubmitAiCommandModel
+    using Fsel.Course.Domain.Entities;
+
+    public class SubmitAICommandModel
     {
-        public string? Content { get; set; }
+        public string? WordContent { get; set; }
+
+        public ClassForum? ClassForum { get; set; }
     }
 }
