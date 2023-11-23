@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public double TotalQuestion { get; set; }
         public double CountQuestion { get; set; }
+        public Guid PlacementTestId { get; set; }
 
         public double? OverallScore
         { get { return SkillScores != null && SkillScores.Count > 0 ? NumberHelper.RoundNumberDouble(SkillScores.Select(x => x.Scores).Average()) : default; } }

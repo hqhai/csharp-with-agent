@@ -42,8 +42,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<LessonResult?> GetAsync(Guid? studentId, Guid courseId)
         {
-            return await Queryable.Include(x => x.Lesson)
-                                                        .ThenInclude(x => x!.LessonInstructions)
+            return await Queryable.Include(x => x.Lesson).ThenInclude(x => x!.LessonInstructions)
                                                         .Include(x => x.VideoResult)
                                                         .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                                         .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))

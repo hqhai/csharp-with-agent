@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -70,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             if (mockTestResult.Status != EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotStatusDone), nameof(mockTestResult.Status));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultMustDone), nameof(mockTestResult));
                 return methodResult;
             }
             var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections).ThenInclude(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == mockTestResult.MockTestId, cancellationToken);

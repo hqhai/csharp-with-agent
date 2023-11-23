@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly QuestionConverter _questionConverter;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
@@ -40,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         public CreateExtraPracticeAnswerVideoCommandHandler(AuthContext authContext
             , IUserService userService
             , IMapper mapper
+            , QuestionConverter questionConverter
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
             , AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
@@ -48,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
+            _questionConverter = questionConverter;
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
@@ -95,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             if (request.Answers != null && request.Answers.Count != 0)
             {
                 var questionIds = request.Answers.Where(x => x.QuestionId != null).Select(x => x.QuestionId ?? default).ToList();
-                var questions = await _questionRepository.GetIncludeTimeCodeByIdAsync(questionIds);
+                var questions = await _questionRepository.GetListAsync(questionIds);
                 int correctCountStudent = 0;
                 int correctTotal = 0;
                 foreach (var item in request.Answers)
@@ -103,17 +106,14 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     if (item.QuestionId != null)
                     {
                         var question = questions?.FirstOrDefault(x => x.Id == item.QuestionId);
-                        if (question == null)
+                        var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, true);
+                        if (!questionResult.IsOK)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.QuestionId), item.QuestionId);
+                            methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                             return methodResult;
                         }
-                        else if (question.Config == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), question);
-                            return methodResult;
-                        }
-                        var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
+                        var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                        var exercise = questionItem.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                         var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
                         var currenVideoTimeCodeId = videoTimeCodeQuestion?.Id;
                         extraPracticeResult.CurrentVideoTimeCodeId = currenVideoTimeCodeId;
@@ -121,13 +121,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                         var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable
                                        .FirstOrDefaultAsync(x => x.QuestionId == item.QuestionId && x.ExtraPracticeResultId == extraPracticeResult.Id && x.VideoTimeCodeId == currenVideoTimeCodeId, cancellationToken);
 
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                        if (answerConfig == null && !string.IsNullOrEmpty(item.Answer?.ToString()))
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
-                            return methodResult;
-                        }
-                        correctTotal += question.CorrectTotal;
+                        correctTotal += questionItem.CorrectTotal;
                         correctCountStudent += correctCount;
                         if (extraPracticeAnswer == null && videoTimeCodeQuestion != null)
                         {
@@ -145,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                         else if (extraPracticeAnswer != null && extraPracticeAnswer.Status == EnumAnswerStatus.Process)
                         {
                             extraPracticeAnswer.Answer = answerConfig;
-                            extraPracticeAnswer.CorrectCount = question.Ungraded ? default : correctCount;
+                            extraPracticeAnswer.CorrectCount = questionItem.Ungraded ? default : correctCount;
                             extraPracticeAnswer.Status = EnumAnswerStatus.Done;
                             updateExtraPracticeAnswers.Add(extraPracticeAnswer);
                         }

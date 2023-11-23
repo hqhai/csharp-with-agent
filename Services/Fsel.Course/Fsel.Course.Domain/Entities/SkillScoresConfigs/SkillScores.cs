@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
 {
     using System.Text.Json.Serialization;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
 
     public class SkillScores
     {
@@ -25,7 +26,16 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
         [JsonRequired]
         public double CountQuestion { get; set; }
 
+        private double _percent;
+
         [JsonRequired]
-        public double Percent { get; set; }
+        public double Percent
+        {
+            get
+            {
+                return TotalCount > 0 ? NumberHelper.GetPercent(CorrectCount, TotalCount) : _percent;
+            }
+            set { _percent = TotalCount > 0 ? NumberHelper.GetPercent(CorrectCount, TotalCount) : value; }
+        }
     }
 }

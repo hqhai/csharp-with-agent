@@ -7,7 +7,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.StudentGameInfos
 
     public class SearchStudentsInPlatformQueryModel : BaseQueryModel
     {
-        public EnumPlatformCode? PlatformCode { get; set; }
         public EnumRole? Role { get; set; }
         public EnumUserPlatformStatus UserPlatformStatus { get; set; }
         public EnumGameCourseLevel? Level { get; set; }

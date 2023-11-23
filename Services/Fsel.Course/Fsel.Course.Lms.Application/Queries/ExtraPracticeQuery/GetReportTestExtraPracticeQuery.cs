@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 var skillScores = extraPracticeResult.SkillScores.GroupBy(x => x.Skill).Select(x => new SkillScores { Skill = x.Key, CorrectCount = x.Sum(x => x.CorrectCount), TotalCount = x.Sum(x => x.TotalCount) }).ToList();
                 foreach (var skillScore in skillScores)
                 {
-                    skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(skillScore.Skill);
+                    skillScore.Scores = ((int)skillScore.CorrectCount).GetIeltsScore(skillScore.Skill);
                     if (skillScore.Skill == EnumCourseSkill.Writing || skillScore.Skill == EnumCourseSkill.Speaking)
                     {
                         skillScore.TotalCount = 36;

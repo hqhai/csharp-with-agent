@@ -4,11 +4,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     public class VideoTimeCodeResultModel : BaseResultScoreModel
     {
-        public int TotalCount { get; set; }
-        public bool Ungraded { get; set; }
-        public Guid VideoId { get; set; }
-        public double DisplayTime { get; set; }
-        public double ExecutionTime { get; set; }
-        public IList<ExerciseModel>? Exercises { get; set; }
+        public Guid VideoResultId { get; set; }
+        public Guid VideoTimeCodeId { get; set; }
+        public double RemainingTime { get; set; }
+        public bool IsWorking { get; set; }
     }
 }

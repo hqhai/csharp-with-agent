@@ -128,5 +128,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                  .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
                  .AnyAsync(x => x.Id == id && x.UnitLessons.Count > 0);
         }
+
+        public async Task<Lesson?> GetAsync(Guid? lessonId)
+        {
+            return await Queryable.Include(x => x.LessonInstructions).FirstOrDefaultAsync(x => x.Id == lessonId);
+        }
     }
 }

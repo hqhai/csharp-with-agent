@@ -17,8 +17,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
-    using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
@@ -39,37 +37,28 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
-        private readonly IOrderService _orderService;
-        private readonly CreateOrderPublisher _createOrderPublisher;
         private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
-        private readonly ICourseRepository _courseRepository;
         private readonly AuthContext _authContext;
-        private readonly AnswerTypeConverter _answerTypeConverter;
+        private readonly QuestionConverter _questionConverter;
         private readonly IMediator _mediator;
 
         public CreatePlacementTestAnswerCommandHandler(IPlacementTestAnswerRepository placementTestAnswerRepository
             , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
-            , IOrderService orderService
-            , CreateOrderPublisher createOrderPublisher
             , IQuestionRepository questionRepository
             , IMapper mapper
-            , ICourseRepository courseRepository
             , AuthContext authContext
-            , AnswerTypeConverter answerTypeConverter
+            , QuestionConverter questionConverter
             , IMediator mediator)
         {
             _placementTestAnswerRepository = placementTestAnswerRepository;
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
-            _orderService = orderService;
-            _createOrderPublisher = createOrderPublisher;
             _questionRepository = questionRepository;
             _mapper = mapper;
-            _courseRepository = courseRepository;
             _authContext = authContext;
-            _answerTypeConverter = answerTypeConverter;
+            _questionConverter = questionConverter;
             _mediator = mediator;
         }
 
@@ -156,32 +145,18 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     foreach (var answer in item.Answers)
                     {
                         var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                        if (question == null)
+                        var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, true);
+                        if (!questionResult.IsOK)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                            methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                             return methodResult;
                         }
-                        else if (question.Config == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
-                            return methodResult;
-                        }
-                        else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question.SectionQuestions));
-                            return methodResult;
-                        }
-                        var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
+                        var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                        var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()!.Id;
                         var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == placementTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
 
                         if (placementTestAnswer == null)
                         {
-                            var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                            if (answerConfig == null && !string.IsNullOrEmpty(answer.Answer?.ToString()))
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
-                                return methodResult;
-                            }
                             count += correctCount;
                             countQuestion++;
                             placementTestAnswer = new PlacementTestAnswer
@@ -193,7 +168,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                             placementTestAnswers.Add(placementTestAnswer);
                         }
                     }
-                    var percent = questions.Sum(x => x.CorrectTotal) > 0 ? (double)count / questions.Sum(x => x.CorrectTotal) * 100 : default;
                     var skillScore = new SkillScores
                     {
                         Skill = item.Skill,
@@ -201,11 +175,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         TotalQuestion = questions.Count,
                         TotalCount = questions.Sum(x => x.CorrectTotal),
                         CorrectCount = count,
-                        Percent = percent
                     };
                     if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
                     {
-                        skillScore.Scores = skillScore.CorrectCount.GetIeltsScorePT(skillScore.Skill);
+                        skillScore.Scores = count.GetIeltsScorePT(skillScore.Skill);
                     }
                     skillScores.Add(skillScore);
                 }
@@ -219,53 +192,11 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             placementTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
             placementTestResult.Status = EnumResultStatus.Done;
             placementTestResult.SkillScores = skillScores;
-            placementTestResult.Percent = NumberHelper.GetPercent(placementTestResult.CorrectCount, placementTestResult.CorrectTotal);
             placementTestResult.PlacementTestAnswers = placementTestAnswers;
 
             var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());
             var (currentLevel, isLockPT) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent, age);
 
-            if (isLockPT)
-            {
-                #region Pilot
-
-                //if (currentLevel.HasValue)
-                //{
-                //    Random random = new Random();
-                //    var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value && x.Status == EnumCourseStatus.Active).ToListAsync(cancellationToken);
-                //    var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();
-                //    if (course == null)
-                //    {
-                //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
-                //        return methodResult;
-                //    }
-                //    await _orderService.CreateOrder(new CreateOrderCommandModel
-                //    {
-                //        Address = "Viet Nam",
-                //        Country = "Viet Nam",
-                //        CourseId = course.Id,
-                //        CourseLevel = currentLevel.Value,
-                //        FullName = student?.Human?.FullName,
-                //        PaymentMethod = EnumPaymentMethodStatus.Card,
-                //        CodeCourse = course.Code,
-                //        UserId = _authContext.CurrentUserId
-                //    }).ConfigureAwait(false);
-                //    //CreateOrderQueueModel createOrderQueueModel = new CreateOrderQueueModel
-                //    //{
-                //    //    Address = "Viet Nam",
-                //    //    Country = "Viet Nam",
-                //    //    CourseId = course.Id,
-                //    //    CourseLevel = currentLevel.Value,
-                //    //    FullName = student?.Human?.FullName,
-                //    //    PaymentMethod = EnumPaymentMethodStatus.Card,
-                //    //    CodeCourse = course.Code,
-                //    //    UserId = _authContext.CurrentUserId
-                //    //};
-                //    //await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
-                //}
-
-                #endregion Pilot
-            }
             if (currentLevel.HasValue)
             {
                 var updateStudent = new UpdateStudentByLevelModel

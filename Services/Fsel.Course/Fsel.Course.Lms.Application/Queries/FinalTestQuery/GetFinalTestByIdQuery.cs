@@ -16,7 +16,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class GetFinalTestByIdQuery : IRequest<MethodResult<FinalTestModel>>
     {
@@ -28,16 +27,14 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     {
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly SectionConverter _sectionConverter;
-        private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetFinalTestByIdQueryHandler(IFinalTestRepository finalTestRepository, SectionConverter sectionConverter, IFinalTestResultRepository finalTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetFinalTestByIdQueryHandler(IFinalTestRepository finalTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _finalTestRepository = finalTestRepository;
             _sectionConverter = sectionConverter;
-            _finalTestResultRepository = finalTestResultRepository;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
@@ -62,79 +59,32 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
                 return methodResult;
             }
-
-            methodResult.Result = await GetFinalTestAsync(finalTest, studentId, request);
+            var finalTestResult = finalTest.FinalTestResults.FirstOrDefault();
+            if (finalTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
+                return methodResult;
+            }
+            else if (finalTestResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(finalTestResult));
+                return methodResult;
+            }
+            methodResult.Result = GetFinalTest(finalTest, finalTestResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<FinalTestModel> GetFinalTestAsync(FinalTest finalTest, Guid studentId, GetFinalTestByIdQuery request)
+        private FinalTestModel GetFinalTest(FinalTest finalTest, FinalTestResult finalTestResult)
         {
             var finalTestDetail = _mapper.Map<FinalTestModel>(finalTest);
-            var finalTestResult = await GetMockTestResult(request, studentId);
             var sectionGroups = finalTest.FinalTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             finalTestDetail.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
             finalTestDetail.ExecutionTime = _sectionConverter.GetExecutionTime(sectionGroups);
-            finalTestDetail.FinalTestResult = finalTestResult;
+            finalTestDetail.FinalTestResult = _mapper.Map<FinalTestResultModel>(finalTestResult);
             finalTestDetail.CourseSkills = _sectionConverter.GetCourseSkill(sectionGroups);
-            finalTestDetail.SectionGroups = GetSectionGroups(sectionGroups, finalTestDetail.Id);
+            finalTestDetail.SectionGroups = _sectionConverter.GetSectionGroups(sectionGroups, finalTestDetail.FinalTestResult.Id, "FinalTestResultId");
             return finalTestDetail;
-        }
-
-        private async Task<FinalTestResultModel> GetMockTestResult(GetFinalTestByIdQuery request, Guid studentId)
-        {
-            var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.FinalTestId == request.FinalTestId && x.StudentId == studentId)
-                .FirstOrDefaultAsync();
-            if (finalTestResult == null)
-            {
-                finalTestResult = _finalTestResultRepository.Add(new FinalTestResult { StudentId = studentId, CourseId = request.CourseId, FinalTestId = request.FinalTestId });
-                await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-            }
-            return _mapper.Map<FinalTestResultModel>(finalTestResult);
-        }
-
-        private IList<SectionGroupModel> GetSectionGroups(IList<SectionGroup>? sectionGroups, Guid mockTestResultId)
-        {
-            ArgumentNullException.ThrowIfNull(sectionGroups);
-
-            var indexProcess = GetIndexProcess(sectionGroups, mockTestResultId);
-            return sectionGroups.Select(x =>
-            {
-                var index = sectionGroups.IndexOf(x);
-                var sectionGroup = _mapper.Map<SectionGroupModel>(x);
-                sectionGroup.Status = GetResultStatus(indexProcess, index);
-                sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
-                return sectionGroup;
-            }).ToList();
-        }
-
-        private static EnumResultStatus GetResultStatus(int? indexProcess, int index)
-        {
-            var resultStatus = EnumResultStatus.Unfinished;
-            if (indexProcess < index)
-            {
-                return resultStatus;
-            }
-            else if (indexProcess == index)
-            {
-                resultStatus = EnumResultStatus.Process;
-            }
-            else if (indexProcess > index || indexProcess == null)
-            {
-                resultStatus = EnumResultStatus.Done;
-            }
-            return resultStatus;
-        }
-
-        private static int? GetIndexProcess(IList<SectionGroup>? sectionGroups, Guid mockTestResultId)
-        {
-            ArgumentNullException.ThrowIfNull(sectionGroups);
-            var timeCode = sectionGroups.Where(x => !x.SectionGroupResults.Any() || x.SectionGroupResults.Any(x => x.MockTestResultId == mockTestResultId && x.Status != EnumResultStatus.Done)).FirstOrDefault();
-            if (timeCode == null)
-            {
-                return null;
-            }
-            return sectionGroups.IndexOf(timeCode);
         }
     }
 }

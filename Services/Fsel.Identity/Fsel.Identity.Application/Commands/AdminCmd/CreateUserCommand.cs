@@ -1,29 +1,24 @@
 // Copyright (c) Atlantic. All rights reserved.
 using System.Globalization;
-using System.Text;
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Constants;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.AuthCmd;
+using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Users;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
-using Fsel.Shared.Helpers;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using OtpNet;
 using EnumAuthUserErrorCode = Fsel.Identity.Domain.Enums.ErrorCodes.EnumAuthUserErrorCode;
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
@@ -39,11 +34,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly IMapper _mapper;
         private readonly IOrderService _orderService;
         private readonly IMediator _mediator;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
         private readonly ITeacherRepository _teacherRepository;
         private readonly ICSORepository _cSORepository;
-        private readonly IHostEnvironment _environment;
         private readonly IPlatformRepository _platformRepository;
         private readonly IHumanRepository _humanRepository;
 
@@ -52,11 +45,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             IMapper mapper,
             IOrderService orderService,
             IMediator mediator,
-            IUserOtpCodeRepository userOtpCodeRepository,
             AppSetting appSetting,
             ITeacherRepository teacherRepository,
             ICSORepository cSORepository,
-            IHostEnvironment environment,
             IPlatformRepository platformRepository,
             IHumanRepository humanRepository)
         {
@@ -65,11 +56,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _mapper = mapper;
             _orderService = orderService;
             _mediator = mediator;
-            _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
             _teacherRepository = teacherRepository;
             _cSORepository = cSORepository;
-            _environment = environment;
             _platformRepository = platformRepository;
             _humanRepository = humanRepository;
         }
@@ -165,27 +154,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region Send Code OTP
 
-            var userOtpCode = await _userOtpCodeRepository.Queryable
-                    .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
-
-            var otp = (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)) ? ValueSettings.OtpDefault : NumberHelper.GetRandomCode();
-            if (userOtpCode == null)
-            {
-                userOtpCode = new UserOtpCode
-                {
-                    UserId = user.Id,
-                    OTPCode = otp,
-                    Status = EnumOtpCodeStatus.New,
-                    ExpiredTime = DateTime.UtcNow.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
-                };
-                _userOtpCodeRepository.Add(userOtpCode);
-                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
-
+            var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
             var param = new SendOtpTemplateModel
             {
-                OtpCode = otp,
-                AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp),
+                OtpCode = userOtpCode.Result,
+                AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, userOtpCode.Result),
                 OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
             };
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);

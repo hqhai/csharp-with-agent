@@ -126,7 +126,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return GetValueAsync(default);
             }
             var skillScores = homeWorkResults.SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSumSkillScore(x)).ToList();
-            skillScores.ForEach(x => x.Percent = NumberHelper.GetPercent(x.CorrectCount, x.TotalCount));
             return GetValueAsync(skillScores);
         }
 
