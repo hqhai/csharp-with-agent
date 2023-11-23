@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -65,9 +66,14 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             var studentId = studentsResult.Content?.Result?.Id;
 
             var homeWorkResult = await _homeWorkResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId && x.HomeWorkId == request.HomeWorkId && x.StudentId == studentId, cancellationToken);
-            if (homeWorkResult == null || homeWorkResult.Status == EnumResultStatus.Unfinished)
+            if (homeWorkResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));
+                return methodResult;
+            }
+            else if (homeWorkResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(homeWorkResult));
                 return methodResult;
             }
             var homeWork = await _homeWorkRepository.GetAsync(request.HomeWorkId, homeWorkResult);
