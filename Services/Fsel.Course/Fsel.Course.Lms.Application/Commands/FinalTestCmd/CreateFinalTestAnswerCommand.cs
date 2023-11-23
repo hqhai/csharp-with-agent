@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -106,13 +107,19 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     FinalTestId = request.FinalTestId,
                     StudentId = studentId ?? default,
                     CourseId = request.CourseId,
+                    Status = EnumResultStatus.Process
                 };
                 finalTestResult = _finalTestResultRepository.Add(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             else if (finalTestResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.FinalTestResultsDone));
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone));
+                return methodResult;
+            }
+            else if (finalTestResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished));
                 return methodResult;
             }
             var skillScores = new List<SkillScores>();
