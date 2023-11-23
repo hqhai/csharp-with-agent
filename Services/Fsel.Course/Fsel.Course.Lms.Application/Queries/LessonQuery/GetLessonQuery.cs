@@ -39,11 +39,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly AuthContext _authContext;
-        private readonly ISectionRepository _sectionRepository;
 
         public GetLessonQueryHandler(ILessonRepository lessonRepository,
             AuthContext authContext,
-            ISectionRepository sectionRepository,
             IMapper mapper,
             IMockTestRepository mockTestRepository,
             SectionConverter sectionConverter,
@@ -59,7 +57,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             _mockTestResultRepository = mockTestResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _authContext = authContext;
-            _sectionRepository = sectionRepository;
             _userService = userService;
             _unitRepository = unitRepository;
         }

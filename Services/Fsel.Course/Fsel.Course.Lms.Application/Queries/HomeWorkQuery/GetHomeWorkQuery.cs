@@ -9,11 +9,13 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -28,22 +30,25 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     {
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly AuthContext _authContext;
+        private readonly AnswerTypeConverter _answerTypeConverter;
+        private readonly QuestionConverter _questionConverter;
         private readonly IUserService _userService;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
 
         public GetHomeWorkQueryHandler(IMapper mapper
             , IHomeWorkRepository homeWorkRepository
-            , QuestionTypeConverter questionTypeConverter
             , AuthContext authContext
+            , AnswerTypeConverter answerTypeConverter
+            , QuestionConverter questionConverter
             , IHomeWorkResultRepository homeWorkResult
             , IUserService userService)
         {
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
-            _questionTypeConverter = questionTypeConverter;
             _authContext = authContext;
+            _answerTypeConverter = answerTypeConverter;
+            _questionConverter = questionConverter;
             _userService = userService;
             _homeWorkResultRepository = homeWorkResult;
         }
@@ -60,64 +65,45 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             }
             var studentId = studentsResult.Content?.Result?.Id;
 
-            var homeWorkResult = await _homeWorkResultRepository.Queryable
-                .FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId && x.HomeWorkId == request.HomeWorkId && x.StudentId == studentId, cancellationToken);
+            var homeWorkResult = await _homeWorkResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId && x.HomeWorkId == request.HomeWorkId && x.StudentId == studentId, cancellationToken);
             if (homeWorkResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));
                 return methodResult;
             }
-            var homeWork = await _homeWorkRepository.Queryable
-                        .Include(x => x.HomeWorkQuestions)
-                        .ThenInclude(x => x.HomeWorkAnswers.Where(n => n.HomeWorkResultId == homeWorkResult.Id))
-                        .Include(x => x.HomeWorkQuestions)
-                        .ThenInclude(x => x.Question)
-                        .Include(x => x.HomeWorkResults.Where(x => x.Id == homeWorkResult.Id))
-                        .Where(x => x.Id == request.HomeWorkId)
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(cancellationToken);
+            else if (homeWorkResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(homeWorkResult));
+                return methodResult;
+            }
+            var homeWork = await _homeWorkRepository.GetAsync(request.HomeWorkId, homeWorkResult);
 
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
                 return methodResult;
             }
-
-            var checkDone = homeWorkResult.Status == EnumResultStatus.Done;
-            var homeWorkModel = new HomeWorkModel()
-            {
-                Id = homeWork.Id,
-                Name = homeWork.Name,
-                Code = homeWork.Code,
-                MediaPost = homeWork.MediaPost,
-                CourseLevel = homeWork.CourseLevel,
-                CourseSkill = homeWork.CourseSkill,
-                Questions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).Select(n => new QuestionModel
-                {
-                    Id = n.Question!.Id,
-                    CorrectTotal = n.Question!.CorrectTotal,
-                    Ungraded = n.Question!.Ungraded,
-                    Explanation = n.Question!.Explanation,
-                    QuestionType = n.Question!.QuestionType,
-                    Config = _questionTypeConverter.QuestionTypeConverterObject(n.Question.Config, n.Question.QuestionType, isDisableAnswers: !checkDone).Item1,
-                    ResultAnswer = _mapper.Map<AnswerModel>(n.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id))
-                }).ToList(),
-                HomeWorkResult = homeWork.HomeWorkResults.Where(x => x.Id == homeWorkResult.Id).Select(x => new HomeWorkResultModel
-                {
-                    Id = x.Id,
-                    HomeWorkId = x.HomeWorkId,
-                    LessonResultId = x.LessonResultId,
-                    CorrectCount = x.CorrectCount,
-                    CorrectTotal = x.CorrectTotal,
-                    Percent = x.Percent,
-                    Status = x.Status,
-                    StudentId = x.StudentId,
-                }).FirstOrDefault()
-            };
-
-            methodResult.Result = homeWorkModel;
+            methodResult.Result = GetHomeWork(homeWork, homeWorkResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private HomeWorkModel GetHomeWork(HomeWork homeWork, HomeWorkResult homeWorkResult)
+        {
+            var checkDone = homeWorkResult.Status == EnumResultStatus.Done;
+            var homeWorkModel = _mapper.Map<HomeWorkModel>(homeWork);
+            homeWorkModel.Questions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).Select(n =>
+            {
+                var answer = n.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id);
+                if (answer != null)
+                {
+                    answer.CorrectCount = checkDone ? answer.CorrectCount : default;
+                    answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, n.Question!.QuestionType, !checkDone);
+                }
+                return _questionConverter.GetQuestion(n.Question ?? new Question(), answer, checkDone);
+            }).ToList();
+            homeWorkModel.HomeWorkResult = _mapper.Map<HomeWorkResultModel>(homeWorkResult);
+            return homeWorkModel;
         }
     }
 }

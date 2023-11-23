@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Globalization;
     using System.Linq;
     using System.Threading;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -170,7 +171,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CountQuestion = 1,
                 TotalCount = TotalScoreClassForum,
                 CorrectCount = classForumResult.ClassForumScores.Sum(x => x.Score),
-                Percent = NumberHelper.GetPercent(classForumResult.ClassForumScores.Sum(x => x.Score), TotalScoreClassForum)
             };
         }
 
@@ -236,7 +236,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     CorrectCount = group.Sum(x => x.CorrectCount),
                     CountQuestion = group.Sum(x => x.CountQuestion),
                     TotalQuestion = group.Sum(x => x.TotalQuestion),
-                    Percent = NumberHelper.ConvertRound(group.Average(x => x.Percent)),
                 };
             }
             return new SkillScores();
@@ -248,12 +247,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (x != null)
             {
                 skillScores.Skill = x.Key;
-                skillScores.Scores = x.Sum(x => x.Scores) > 0 ? x.Average(x => x.Scores) : default;
                 skillScores.TotalQuestion = x.Sum(x => x.TotalQuestion);
                 skillScores.CountQuestion = x.Sum(x => x.CountQuestion);
                 skillScores.TotalCount = x.Sum(x => x.TotalCount);
                 skillScores.CorrectCount = x.Sum(x => x.CorrectCount);
-                skillScores.Percent = NumberHelper.GetPercent(x.Sum(x => x.CorrectCount), x.Sum(x => x.TotalCount));
                 return skillScores;
             };
             return skillScores;
@@ -312,14 +309,31 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var course = await _courseRepository.GetIncludeCourseUnitMockTestByIdAsync(courseId);
                 if (course != null)
                 {
-                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
-                    var index = courseUnitMockTests.FindIndex(x => x.UnitId == unitResult.UnitId) + 1;
-                    if (index < courseUnitMockTests.Count)
+                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate).ToList();
+                    var courseUnitMockTest = GetCourseUnitMockTest(courseUnitMockTests, unitResult.UnitId, "UnitId");
+                    if (courseUnitMockTest != null)
                     {
-                        await UpdateStatusProcess(courseUnitMockTests[index], unitResult.StudentId, cancellationToken);
+                        await UpdateStatusProcess(courseUnitMockTest, unitResult.StudentId, cancellationToken);
                     }
                 }
             }
+        }
+
+        private static CourseUnitMockTest? GetCourseUnitMockTest(IList<CourseUnitMockTest>? courseUnitMockTests, Guid objectId, string? type)
+        {
+            if (courseUnitMockTests != null && courseUnitMockTests.Any())
+            {
+                var courseUnitMockTest = courseUnitMockTests.Where(x => x.GetPropValue<Guid>(type) == objectId).FirstOrDefault();
+                if (courseUnitMockTest != null)
+                {
+                    var index = courseUnitMockTests.IndexOf(courseUnitMockTest) + 1;
+                    if (index < courseUnitMockTests.Count)
+                    {
+                        return courseUnitMockTests[index];
+                    }
+                }
+            }
+            return default;
         }
 
         public async Task UpdateProcessMockTest(MockTestResult? mockTestResult, CancellationToken cancellationToken)
@@ -330,10 +344,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var course = await _courseRepository.GetIncludeCourseUnitMockTestByIdAsync(courseId);
                 if (course != null)
                 {
+                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate).ToList();
+                    var courseUnitMockTest = GetCourseUnitMockTest(courseUnitMockTests, mockTestResult.MockTestId, "MockTestId");
                     var isCheckUnitResults = course.UnitResults.Where(x => x.StudentId == mockTestResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
                     var isCheckDone = isCheckUnitResults && course.MockTestResults.Where(x => x.StudentId == mockTestResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
-                    var displayOrder = course.CourseUnitMockTests.FirstOrDefault(x => x.MockTestId == mockTestResult.MockTestId)?.DisplayOrder;
-                    var courseUnitMockTest = course.CourseUnitMockTests.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1);
                     if (!isCheckDone && courseUnitMockTest != null)
                     {
                         await UpdateStatusProcess(courseUnitMockTest, mockTestResult.StudentId, cancellationToken);

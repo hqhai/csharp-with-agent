@@ -40,13 +40,13 @@ namespace Fsel.System.Application.Services.UserServices
         [Post("/student/get-by-student-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid> studentIds);
 
-        [Post("/cso/admin")]
+        [Post("/admin/cso")]
         Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetCSOByIds([Body] IList<Guid>? ids);
 
         [Get("/cso/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCsoByUserIdAsync([FromRoute] Guid id);
 
-        [Get("/cso/admin/get-all")]
+        [Get("/admin/cso/get-all")]
         Task<IApiResponse<MethodResult<IList<CSOModel>>>> GetAllCSO();
 
         [Get("/teacher/get-all")]

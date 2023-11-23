@@ -17,6 +17,16 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid VideoTimeCodeId { get; set; }
 
+        /// <summary>
+        /// Thời gian còn lại
+        /// </summary>
+        public double RemainingTime { get; set; }
+
+        /// <summary>
+        /// Đang làm việc
+        /// </summary>
+        public bool IsWorking { get; set; }
+
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }
 }

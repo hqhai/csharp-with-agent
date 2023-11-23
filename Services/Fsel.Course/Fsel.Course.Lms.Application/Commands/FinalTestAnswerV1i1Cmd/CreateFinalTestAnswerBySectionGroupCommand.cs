@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
+namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd
 {
     using System;
     using System.Collections.Generic;
@@ -14,7 +14,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -32,9 +31,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
     public class CreateFinalTestAnswerBySectionGroupCommandHandler : IRequestHandler<CreateFinalTestAnswerBySectionGroupCommand, MethodResult<SectionGroupResultModel>>
     {
-        private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly AuthContext _authContext;
+        private readonly QuestionConverter _questionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IUserService _userService;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
@@ -42,9 +42,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
 
-        public CreateFinalTestAnswerBySectionGroupCommandHandler(AnswerTypeConverter answerTypeConverter
-            , IQuestionRepository questionRepository
+        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
             , AuthContext authContext
+            , QuestionConverter questionConverter
+            , SectionGroupConverter sectionGroupConverter
             , IUserService userService
             , IFinalTestResultRepository finalTestResultRepository
             , IFinalTestAnswerRepository finalTestAnswerRepository
@@ -52,9 +53,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             , ISectionGroupRepository sectionGroupRepository
             , IMapper mapper)
         {
-            _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _authContext = authContext;
+            _questionConverter = questionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
             _finalTestAnswerRepository = finalTestAnswerRepository;
@@ -66,12 +68,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<SectionGroupResultModel> methodResult = new MethodResult<SectionGroupResultModel>();
-            if (request.Answers == null || !request.Answers.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Answers));
-                return methodResult;
-            }
+            var methodResult = new MethodResult<SectionGroupResultModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -79,9 +76,9 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            var studentId = student?.Id ?? default;
+            var studentId = student?.Id ?? request.StudentId ?? default;
 
-            var finalTestResult = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.FinalTestResultId, cancellationToken);
+            var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
             if (finalTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
@@ -89,10 +86,15 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             }
             else if (finalTestResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.FinalTestResultsDone), nameof(finalTestResult.Status));
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(finalTestResult.Status));
                 return methodResult;
             }
-            var sectionGroup = await _sectionGroupRepository.Queryable.Where(x => x.Id == request.SectionGroupId).FirstOrDefaultAsync(cancellationToken);
+            else if (finalTestResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished));
+                return methodResult;
+            }
+            var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
             if (sectionGroup == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
@@ -106,24 +108,26 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             }
             else if (sectionGroupResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.SectionGroupResultDone), nameof(sectionGroupResult.Status));
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(sectionGroupResult.Status));
                 return methodResult;
             }
-            var answerResult = await CreateAnswerAsync(request, sectionGroup);
-            if (!answerResult.IsOK)
-            {
-                methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
-                return methodResult;
-            }
-            var (skillScores, finalTestAnswers) = answerResult.Result;
             await _finalTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                if (finalTestAnswers.Any())
+                if (request.Answers != null && request.Answers.Any())
                 {
-                    await _finalTestAnswerRepository.AddList(finalTestAnswers);
-                    await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    var answerResult = await CreateAnswerAsync(request, sectionGroupResult.Id);
+                    if (!answerResult.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
+                        return methodResult;
+                    }
                 }
-                sectionGroupResult = await UpdateSectionGroupResultAsync(sectionGroupResult, skillScores, cancellationToken);
+
+                if (request.IsSubmit)
+                {
+                    await _sectionGroupConverter.UpdateFinalTestAnswers(sectionGroup, sectionGroupResult);
+                    sectionGroupResult = await UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
+                }
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
                 return methodResult;
@@ -150,113 +154,106 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             ArgumentNullException.ThrowIfNull(skillScores);
             finalTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             finalTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-            finalTestResult.Percent = NumberHelper.GetPercent(skillScores.Sum(x => x.CorrectCount), skillScores.Sum(x => x.TotalCount));
             finalTestResult.Status = EnumResultStatus.Done;
             finalTestResult.SkillScores = skillScores;
             return finalTestResult;
         }
 
-        private async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SkillScores skillScores, CancellationToken cancellationToken)
+        private async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
         {
-            sectionGroupResult.CorrectCount = (int)skillScores.CorrectCount;
-            sectionGroupResult.CorrectTotal = (int)skillScores.TotalCount;
-            sectionGroupResult.Percent = NumberHelper.GetPercent(skillScores.CorrectCount, skillScores.TotalCount);
+            var skillScore = await GetSkillScore(sectionGroupResult, sectionGroup, cancellationToken);
+            sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
+            sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
             sectionGroupResult.Status = EnumResultStatus.Done;
             if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
             {
-                sectionGroupResult.SkillScores.Add(skillScores);
+                sectionGroupResult.SkillScores.Add(skillScore);
             }
             else
             {
-                sectionGroupResult.SkillScores = new List<SkillScores> { skillScores };
+                sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
             }
             _sectionGroupResultRepository.Update(sectionGroupResult);
             await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             return sectionGroupResult;
         }
 
-        private async Task<MethodResult<(SkillScores, IList<FinalTestAnswer>)>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup)
+        private async Task<SkillScores> GetSkillScore(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
+        {
+            var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.FinalTestResultId == sectionGroupResult.FinalTestResultId).ToListAsync(cancellationToken);
+            var questionIds = finalTestAnswers.Select(x => x.SectionQuestion).Select(x => x.QuestionId).ToList();
+            var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
+            var skillScore = _sectionGroupConverter.GetSkillScore(sectionGroup, finalTestAnswers.Sum(x => x.CorrectCount), finalTestAnswers.Count, totalCorrect, questionIds.Count);
+            return skillScore;
+        }
+
+        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, Guid sectionGroupResultId)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
-            var methodResult = new MethodResult<(SkillScores, IList<FinalTestAnswer>)>();
-            var anserResult = new MethodResult<(SkillScores, IList<FinalTestAnswer>)>();
+            var methodResult = new MethodResult<IList<FinalTestAnswer>>();
             var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
-            if (questions == null)
+            if (questions == null || !questions.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
-            anserResult = await CreateAnswer(request, sectionGroup, questions);
-            if (!anserResult.IsOK)
+            var anwserResult = await CreateAnswer(request, questions, sectionGroupResultId);
+            if (!anwserResult.IsOK)
             {
-                methodResult.AddErrorBadRequest(anserResult.ErrorMessages);
+                methodResult.AddErrorBadRequest(anwserResult.ErrorMessages);
                 return methodResult;
             }
-            methodResult.Result = anserResult.Result;
+            var finalTestAnswers = anwserResult.Result;
+            if (finalTestAnswers != null && finalTestAnswers.Any())
+            {
+                await _finalTestAnswerRepository.AddList(finalTestAnswers);
+                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            }
+            methodResult.Result = anwserResult.Result;
             return methodResult;
         }
 
-        private async Task<MethodResult<(SkillScores, IList<FinalTestAnswer>)>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, IList<Question>? questions)
+        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, IList<Question>? questions, Guid sectionGroupResultId)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
-            var methodResult = new MethodResult<(SkillScores, IList<FinalTestAnswer>)>();
+            var methodResult = new MethodResult<IList<FinalTestAnswer>>();
             var finalTestAnswers = new List<FinalTestAnswer>();
             if (questions != null && questions.Any())
             {
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                    if (question == null || question.Config == null)
+                    var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit);
+                    if (!questionResult.IsOK)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                        methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    var sectionQuestionId = question.SectionQuestions.FirstOrDefault()?.Id ?? default;
+                    var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                    var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
                     var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (finalTestAnswer == null)
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                        if (!string.IsNullOrEmpty(item.Answer?.ToString()) && answerConfig == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
-                            return methodResult;
-                        }
-                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, request, sectionQuestionId));
+                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, request, sectionQuestionId, sectionGroupResultId));
                     }
                 }
             }
-            methodResult.Result = (GetSkillScore(finalTestAnswers, sectionGroup, questions), finalTestAnswers);
+            methodResult.Result = finalTestAnswers;
             return methodResult;
         }
 
-        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Guid? sectionQuestionId)
+        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Guid? sectionQuestionId, Guid sectionGroupResultId)
         {
             return new FinalTestAnswer
             {
                 Answer = answer,
                 CorrectCount = correctCount,
                 FinalTestResultId = request.FinalTestResultId,
+                SectionGroupResultId = sectionGroupResultId,
                 SectionQuestionId = sectionQuestionId ?? default,
             };
-        }
-
-        private static SkillScores GetSkillScore(IList<FinalTestAnswer>? finalTestAnswers, SectionGroup sectionGroup, IList<Question>? questions)
-        {
-            ArgumentNullException.ThrowIfNull(finalTestAnswers);
-            ArgumentNullException.ThrowIfNull(questions);
-            var skillScore = new SkillScores
-            {
-                CorrectCount = finalTestAnswers.Sum(x => x.CorrectCount),
-                CountQuestion = finalTestAnswers.Count,
-                Skill = sectionGroup.CourseSkill,
-                TotalCount = questions.Sum(x => x.CorrectTotal),
-                TotalQuestion = questions.Count
-            };
-            skillScore.Percent = NumberHelper.GetPercent(skillScore.CorrectCount, skillScore.TotalCount);
-            skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(sectionGroup.CourseSkill);
-            return skillScore;
         }
     }
 }

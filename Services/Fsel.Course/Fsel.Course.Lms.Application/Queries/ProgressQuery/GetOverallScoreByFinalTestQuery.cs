@@ -80,14 +80,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 .Select(x => new SkillScores
                 {
                     Skill = x.Key,
-                    Percent = x.Average(x => x.Percent),
                     CorrectCount = x.Sum(x => x.CorrectCount),
                     TotalCount = x.Sum(x => x.TotalCount),
                     CountQuestion = x.Sum(x => x.CountQuestion),
                     TotalQuestion = x.Sum(x => x.TotalQuestion),
                     Scores = x.Average(x => x.Scores)
                 }).ToList();
-            skillScores.ForEach(x => x.Percent = NumberHelper.GetPercent(x.CorrectCount, x.TotalCount));
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.TotalQuestion = skillScores.Sum(x => x.TotalQuestion);
             overallScoreReport.CountQuestion = skillScores.Sum(x => x.CountQuestion);

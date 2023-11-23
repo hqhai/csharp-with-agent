@@ -21,7 +21,7 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.InterationAction, new InterationActionQueueModel
+            await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.InteractionAction, new InterationActionQueueModel
             {
                 ObjectId = model.ObjectId,
                 Type = model.Type,
@@ -32,7 +32,6 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 ParamsMessage = model.ParamsMessage,
                 InterationType = model.InterationType
             }, cancellationToken);
-
         }
     }
 }

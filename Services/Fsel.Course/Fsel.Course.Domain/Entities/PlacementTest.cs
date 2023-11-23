@@ -38,5 +38,6 @@ namespace Fsel.Course.Domain.Entities
 
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
+        public ICollection<PlacementTestResult> PlacementTestResults { get; set; } = new List<PlacementTestResult>();
     }
 }
