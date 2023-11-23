@@ -124,11 +124,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     TopP = classForum.SettingTopP
                 });
 
-                var dd = aIResponse.Content?.Choices;
-                var dd1 = aIResponse.Content?.Created;
-                var dd2 = aIResponse.Content?.Usage;
-                var dd3 = aIResponse.Content?.Id;
-                var dd4 = aIResponse.Content?.Object;
                 if (classForumResult == null)
                 {
                     classForumResult = new ClassForumResult
