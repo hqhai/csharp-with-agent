@@ -10,6 +10,7 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
         public ResourceContent? ResourceContent { get; set; }
+        public OpenAiConfig? OpenAiConfig { get; set; }
         public new Services? Services { get; set; }
     }
 
@@ -22,6 +23,12 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     {
         public string? LmsWebsiteUrl { get; set; }
         public string? HotLine { get; set; }
+    }
+
+    public class OpenAiConfig
+    {
+        public string? Uri { get; set; }
+        public string? ApiKey { get; set; }
     }
 
     public class Services : BaseServices
