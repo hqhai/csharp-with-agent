@@ -29,6 +29,32 @@ namespace Fsel.Course.Lms.Application.Services.AiService.Models
 
         [AliasAs("choices")]
         [JsonPropertyName("choices")]
-        public IList<object>? Choices { get; set; }
+        public IList<Choice>? Choices { get; set; }
+
+    }
+    public class Choice
+    {
+        [AliasAs("message")]
+        [JsonPropertyName("message")]
+        public Message? Message { get; set; }
+
+        [AliasAs("finish_reason")]
+        [JsonPropertyName("finish_reason")]
+        public string? FinishReson { get; set; }
+        [AliasAs("index")]
+        [JsonPropertyName("index")]
+        public long Index { get; set; }
+    }
+
+    public class Message
+    {
+        [AliasAs("content")]
+        [JsonPropertyName("content")]
+        public string? Content { get; set; }
+        [AliasAs("role")]
+        [JsonPropertyName("role")]
+        public string? Role { get; set; }
+
+
     }
 }

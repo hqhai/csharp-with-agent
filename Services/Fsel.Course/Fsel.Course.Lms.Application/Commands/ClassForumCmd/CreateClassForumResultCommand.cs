@@ -134,7 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
                         ClassForumId = classForum.Id,
                         WordContent = request.WordContent,
-                        GradingAlFeedback = aIResponse.Content?.Choices.Serialize(),
+                        GradingAlFeedback = aIResponse.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault(),
                     };
                     if (request.FilePaths != null)
                     {
