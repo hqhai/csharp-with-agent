@@ -47,6 +47,16 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
 
             #region Validation
 
+            if (request.SectionGroups == null || !request.SectionGroups.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
+                return methodResult;
+            }
+            if (await _finalTestRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name));
+                return methodResult;
+            }
             var finalTest = await _finalTestRepository.GetIncludeByIdAsync(request.Id);
             if (finalTest == null)
             {
@@ -58,16 +68,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState), nameof(finalTest.IsActive), finalTest.IsActive);
                 return methodResult;
             }
-            if (await _finalTestRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name));
-                return methodResult;
-            }
-            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
-                return methodResult;
-            }
+
             List<SectionGroup> sectionGroups = finalTest.FinalTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
             List<SectionQuestion> sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
@@ -77,26 +78,32 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
             finalTest.FinalTestSections = new List<FinalTestSection>();
             foreach (var sectionGroup in request.SectionGroups)
             {
-                if (sectionGroup == null)
+                //if (sectionGroup == null)
+                //{
+                //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                //    return methodResult;
+                //}
+                if (sectionGroup != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
-                    return methodResult;
-                }
-                var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
-                    return methodResult;
-                }
-                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
-                if (!method.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                }
-                finalTest.FinalTestSections.Add(new FinalTestSection { SectionGroup = newSectionGroup });
-                if (!newSectionGroup.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                    var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                    //if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+                    //{
+                    //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
+                    //    return methodResult;
+                    //}
+                    if (sectionGroup.Sections != null && sectionGroup.Sections.Any())
+                    {
+                        var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
+                        if (!method.IsOK)
+                        {
+                            methodResult.AddErrorBadRequest(method.ErrorMessages);
+                        }
+                        finalTest.FinalTestSections.Add(new FinalTestSection { SectionGroup = newSectionGroup });
+                        if (!newSectionGroup.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                        }
+                    }
                 }
             }
             if (!finalTest.IsValid())

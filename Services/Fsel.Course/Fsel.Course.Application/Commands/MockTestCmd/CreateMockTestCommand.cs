@@ -45,7 +45,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             #region Validation
 
-            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
+            if (request.SectionGroups == null || !request.SectionGroups.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
                 return methodResult;
@@ -64,12 +64,12 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             foreach (var sectionGroup in request.SectionGroups)
             {
-                if (sectionGroup == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
-                    return methodResult;
-                }
-                else
+                //if (sectionGroup == null)
+                //{
+                //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                //    return methodResult;
+                //}
+                if (sectionGroup != null)
                 {
                     if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
                     {
