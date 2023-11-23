@@ -6,7 +6,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
 
     public class CreateOrderCommandModel
     {
-        public string? ClassCode { get; set; }
+        public string? CodeClass { get; set; }
         public string? Code { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public string? FullName { get; set; }

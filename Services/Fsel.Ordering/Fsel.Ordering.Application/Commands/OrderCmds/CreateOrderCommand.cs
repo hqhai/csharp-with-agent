@@ -69,7 +69,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { UserId = _authContext.CurrentUserId, Code = request.ClassCode, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = request.PackageId, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
+            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { UserId = _authContext.CurrentUserId, Code = request.CodeClass, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = request.PackageId, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
 
             if (!classnew.IsSuccessStatusCode)
             {
