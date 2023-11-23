@@ -48,7 +48,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             #region Validation
 
-            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
+            if (request.SectionGroups == null || !request.SectionGroups.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
                 return methodResult;
@@ -81,21 +81,24 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             foreach (var sectionGroup in request.SectionGroups)
             {
-                if (sectionGroup == null)
+                //if (sectionGroup == null)
+                //{
+                //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                //    return methodResult;
+                //}
+                if (sectionGroup != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
-                    return methodResult;
-                }
-                var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
-                if (!method.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                }
-                mockTest.MockTestSections.Add(new MockTestSection { SectionGroup = newSectionGroup });
-                if (!newSectionGroup.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                    var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
+                    if (!method.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    }
+                    mockTest.MockTestSections.Add(new MockTestSection { SectionGroup = newSectionGroup });
+                    if (!newSectionGroup.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                    }
                 }
             }
             if (!mockTest.IsValid())
