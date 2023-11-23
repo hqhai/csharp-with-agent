@@ -7,6 +7,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
     using Fsel.Cms.PlanetDefender.Application.Commands.ZMatterCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery;
     using Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models;
+    using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
