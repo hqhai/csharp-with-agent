@@ -21,5 +21,8 @@ namespace Fsel.Cms.PlanetDefender.Application.Services.UserServices
 
         [Put("/student/update-student-token")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
+
+        [Get("/user/get-by-student-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetInfoStudentOrGuest([FromRoute] Guid id);
     }
 }
