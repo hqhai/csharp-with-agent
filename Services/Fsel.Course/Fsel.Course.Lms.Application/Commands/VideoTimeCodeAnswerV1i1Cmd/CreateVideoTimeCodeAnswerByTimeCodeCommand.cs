@@ -132,23 +132,22 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
                 {
                     answer = new VideoTimeCodeAnswer
                     {
-                        Answer = answerConfig ?? item.Answer,
                         VideoTimeCodeId = videoTimeCode.Id,
                         ExerciseId = exercise?.Id ?? default,
                         QuestionId = questionItem.Id,
                         VideoTimeCodeResultId = videoTimeCodeResult.Id,
                         VideoResultId = videoTimeCodeResult.VideoResultId,
-                        CorrectCount = questionItem.Ungraded ? default : correctCount,
-                        Status = GetAnswerStatus(request.IsSubmit, correctCount, questionItem.CorrectTotal)
                     };
                     videoTimeCodeAnswers.Add(answer);
                 }
                 else
                 {
-                    answer.Answer = answerConfig ?? item.Answer;
-                    answer.CorrectCount = questionItem.Ungraded ? default : correctCount;
                     updateVideoTimeCodeAnswers.Add(answer);
                 }
+                answer.Answer = answerConfig ?? item.Answer;
+                answer.CorrectCount = questionItem.Ungraded ? default : correctCount;
+                answer.Status = GetAnswerStatus(request.IsSubmit, correctCount, questionItem.CorrectTotal);
+                answer.IsCorrect = GetAnswerStatus(request.IsSubmit, correctCount, questionItem.CorrectTotal) == EnumAnswerStatus.Done;
             }
             if (videoTimeCodeAnswers.Any())
             {

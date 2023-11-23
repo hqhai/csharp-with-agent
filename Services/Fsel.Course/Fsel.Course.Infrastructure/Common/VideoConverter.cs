@@ -504,6 +504,7 @@ namespace Fsel.Course.Infrastructure.Common
                     VideoTimeCodeId = videoTimeCode.Id,
                     ExerciseId = x.ExerciseQuestions.FirstOrDefault()?.ExerciseId ?? default,
                     Status = isDone ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
+                    IsCorrect = null
                 }).ToList();
 
                 await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
@@ -512,7 +513,12 @@ namespace Fsel.Course.Infrastructure.Common
             if (ValidateList(updateVideoTimeCodeAnswers) && updateVideoTimeCodeAnswers != null)
             {
                 isDone = !ValidateList(questions) && (isDone || updateVideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done));
-                updateVideoTimeCodeAnswers.ForEach(x => x.Status = isDone ? EnumAnswerStatus.Done : GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal));
+                updateVideoTimeCodeAnswers.ForEach(x =>
+                {
+                    var status = GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal);
+                    x.Status = isDone ? EnumAnswerStatus.Done : status;
+                    x.IsCorrect = status == EnumAnswerStatus.Done;
+                });
                 _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }

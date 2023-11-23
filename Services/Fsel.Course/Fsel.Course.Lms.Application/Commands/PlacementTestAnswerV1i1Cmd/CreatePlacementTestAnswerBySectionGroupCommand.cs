@@ -231,7 +231,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestAnswerV1i1Cmd
                     var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == request.PlacementTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (placementTestAnswer == null)
                     {
-                        placementTestAnswers.Add(GetPlacementTestAnswer(answerConfig, correctCount, request, sectionQuestionId, sectionGroupResultId));
+                        placementTestAnswers.Add(GetPlacementTestAnswer(answerConfig, correctCount, request, questionItem, sectionGroupResultId));
                     }
                 }
             }
@@ -239,7 +239,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestAnswerV1i1Cmd
             return methodResult;
         }
 
-        private static PlacementTestAnswer GetPlacementTestAnswer(object? answer, int correctCount, CreatePlacementTestAnswerBySectionGroupCommand request, Guid? sectionQuestionId, Guid sectionGroupResultId)
+        private static PlacementTestAnswer GetPlacementTestAnswer(object? answer, int correctCount, CreatePlacementTestAnswerBySectionGroupCommand request, Question questionItem, Guid sectionGroupResultId)
         {
             return new PlacementTestAnswer
             {
@@ -247,7 +247,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestAnswerV1i1Cmd
                 CorrectCount = correctCount,
                 PlacementTestResultId = request.PlacementTestResultId,
                 SectionGroupResultId = sectionGroupResultId,
-                SectionQuestionId = sectionQuestionId ?? default,
+                SectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default,
+                IsCorrect = request.IsSubmit ? correctCount == questionItem.CorrectTotal : null
             };
         }
     }
