@@ -116,16 +116,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             WordContent = request.WordContent,
                             ClassForum = classForum,
                         }).ConfigureAwait(false);
-                        /*classForumResult = new ClassForumResult
-                        {
-                            GradingAlFeedback = aIResponse
-                        };*/
 
                         classForumResult.GradingAlFeedback = aIResponse;
-                    }
-                    else
-                    {
-                        classForumResult.GradingAlFeedback = null;
                     }
 
                     if (request.FilePaths != null)

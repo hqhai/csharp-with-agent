@@ -51,21 +51,23 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             var classForum = await _classForumRepository.Queryable.Where(x => x.Id == classForumResult.ClassForumId).FirstOrDefaultAsync(cancellationToken);
 
-            if (classForum!.IsAlFeedBack)
+            if (classForum == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
+                return methodResult;
+            }
+
+            _mapper.Map(request, classForumResult);
+
+            if (classForum.IsAlFeedBack)
             {
                 var aIResponse = await _mediator.Send(new SubmitAICommand
                 {
                     WordContent = request.RetryWordContent,
                     ClassForum = classForum,
-                }).ConfigureAwait(false);
+                }, cancellationToken).ConfigureAwait(false);
                 classForumResult.RetryGradingAlFeedBack = aIResponse;
             }
-            else
-            {
-                classForumResult.RetryGradingAlFeedBack = null;
-            }
-
-            _mapper.Map(request, classForumResult);
 
             if (request.RetryFilePaths != null)
             {
