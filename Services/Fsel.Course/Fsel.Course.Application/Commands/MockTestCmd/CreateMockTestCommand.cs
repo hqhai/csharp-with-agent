@@ -71,19 +71,18 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 //}
                 if (sectionGroup != null)
                 {
-                    if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
-                        return methodResult;
-                    }
-
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+
+                    //if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+                    //{
+                    //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
+                    //    return methodResult;
+                    //}
                     var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
                     if (!method.IsOK)
                     {
                         methodResult.AddErrorBadRequest(method.ErrorMessages);
                     }
-
                     mockTest.MockTestSections.Add(new MockTestSection
                     {
                         SectionGroup = newSectionGroup

@@ -65,24 +65,21 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
                     //    return methodResult;
                     //}
-                    if (sectionGroup.Sections != null && sectionGroup.Sections.Any())
-                    {
-                        SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                        var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
-                        if (!method.IsOK)
-                        {
-                            methodResult.AddErrorBadRequest(method.ErrorMessages);
-                        }
 
-                        finalTest.FinalTestSections.Add(new FinalTestSection
-                        {
-                            SectionGroup = newSectionGroup
-                        });
-                        if (!newSectionGroup.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
-                            return methodResult;
-                        }
+                    SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
+                    if (!method.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    }
+                    finalTest.FinalTestSections.Add(new FinalTestSection
+                    {
+                        SectionGroup = newSectionGroup
+                    });
+                    if (!newSectionGroup.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                        return methodResult;
                     }
                 }
             }

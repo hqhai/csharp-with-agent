@@ -221,29 +221,34 @@ namespace Fsel.Course.Infrastructure.Common
                         }
                         if (type == EnumCourseType.Ielts)
                         {
-                            if (section.SectionParts == null || section.SectionParts.Count == 0)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section.SectionParts));
-                                return methodResult;
-                            }
-                            foreach (var sectionPart in section.SectionParts)
-                            {
-                                if (sectionPart == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionPart));
-                                    return methodResult;
-                                }
-                                else
-                                {
-                                    SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
+                            //if (section.SectionParts == null || section.SectionParts.Count == 0)
+                            //{
+                            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section.SectionParts));
+                            //    return methodResult;
+                            //}
 
-                                    var method = AddQuestionToSession(newSectionPart, sectionPart.Questions);
-                                    if (!method.IsOK)
+                            if (section.SectionParts != null && section.SectionParts.Any())
+                            {
+                                foreach (var sectionPart in section.SectionParts)
+                                {
+                                    if (sectionPart == null)
                                     {
-                                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionPart));
+                                        return methodResult;
+                                    }
+                                    else
+                                    {
+                                        SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
+
+                                        var method = AddQuestionToSession(newSectionPart, sectionPart.Questions);
+                                        if (!method.IsOK)
+                                        {
+                                            methodResult.AddErrorBadRequest(method.ErrorMessages);
+                                        }
                                     }
                                 }
                             }
+
                             //var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
                             //if (!SectionValidation.IsCheckSection(sectionGroup.CourseSkill, section.DisplayOrder, correctCount))
                             //{
@@ -263,21 +268,24 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
                     {
-                        if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
+                        //if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
+                        //{
+                        //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.CourseSkill));
+                        //    return methodResult;
+                        //}
+                        if (section.SectionTimeCodes != null && section.SectionTimeCodes.Any())
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.CourseSkill));
-                            return methodResult;
-                        }
-                        foreach (var sectionTimeCode in section.SectionTimeCodes)
-                        {
-                            if (sectionTimeCode == null)
+                            foreach (var sectionTimeCode in section.SectionTimeCodes)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCode));
-                                return methodResult;
-                            }
-                            else
-                            {
-                                SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
+                                if (sectionTimeCode == null)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCode));
+                                    return methodResult;
+                                }
+                                else
+                                {
+                                    SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
+                                }
                             }
                         }
                     }
