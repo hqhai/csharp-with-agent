@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
@@ -48,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             MethodResult<IList<CourseModel>> methodResult = new MethodResult<IList<CourseModel>>();
             var courses = await _courseRepository.Queryable
                               .Include(course => course.CourseTeachers.Where(y => !y.IsDeleted))
-                              .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
+                              .Where(x => request.CourseLevel != null && x.CourseLevel == request.CourseLevel)
                               .Where(x => x.Status == EnumCourseStatus.Active)
                               .AsNoTracking()
                               .Select(course => new CourseModel
