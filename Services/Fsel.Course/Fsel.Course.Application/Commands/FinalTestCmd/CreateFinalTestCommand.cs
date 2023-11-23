@@ -39,7 +39,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FinalTestModel> methodResult = new MethodResult<FinalTestModel>();
-            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
+            if (request.SectionGroups == null || !request.SectionGroups.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
                 return methodResult;
@@ -53,18 +53,18 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
 
             foreach (var sectionGroup in request.SectionGroups)
             {
-                if (sectionGroup == null)
+                //if (sectionGroup == null)
+                //{
+                //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                //    return methodResult;
+                //}
+                if (sectionGroup != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
-                    return methodResult;
-                }
-                else
-                {
-                    if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
-                        return methodResult;
-                    }
+                    //if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+                    //{
+                    //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
+                    //    return methodResult;
+                    //}
 
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
                     var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
@@ -72,7 +72,6 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     {
                         methodResult.AddErrorBadRequest(method.ErrorMessages);
                     }
-
                     finalTest.FinalTestSections.Add(new FinalTestSection
                     {
                         SectionGroup = newSectionGroup
