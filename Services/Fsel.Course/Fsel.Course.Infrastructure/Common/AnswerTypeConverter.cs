@@ -70,7 +70,7 @@ namespace Fsel.Course.Infrastructure.Common
             return (configAnswer, totalCorrect, isAnswerMissing);
         }
 
-        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false)
+        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false, bool isRemake = false)
         {
             object? result;
             switch (type)
@@ -79,29 +79,29 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
                     var multichoice = configAnswer.Deserialize<MultipleChoiceAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(multichoice) : multichoice;
+                    result = isDisableAnswers ? ClearAnswers(multichoice, isRemake) : multichoice;
                     break;
 
                 case EnumQuestionType.Listing:
                     var listingQuestion = configAnswer.Deserialize<ListingAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(listingQuestion) : listingQuestion;
+                    result = isDisableAnswers ? ClearAnswers(listingQuestion, isRemake) : listingQuestion;
                     break;
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
                 case EnumQuestionType.DragAndDropPicture:
                     var matchingTypeQuestion = configAnswer.Deserialize<MatchingTypeAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion) : matchingTypeQuestion;
+                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion, isRemake) : matchingTypeQuestion;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
                     var shortAnswerQuestionWordBaseQuestion = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion) : shortAnswerQuestionWordBaseQuestion;
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion, isRemake) : shortAnswerQuestionWordBaseQuestion;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
                     var shortAnswerWordCount = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount) : shortAnswerWordCount;
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount, isRemake) : shortAnswerWordCount;
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
@@ -109,17 +109,17 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
                     var gapFillQuestion = configAnswer.Deserialize<GapFillAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion) : gapFillQuestion;
+                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion, isRemake) : gapFillQuestion;
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion) : dragAndDropSentenceOrderQuestion;
+                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion, isRemake) : dragAndDropSentenceOrderQuestion;
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     var multipleOption = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(multipleOption) : multipleOption;
+                    result = isDisableAnswers ? ClearAnswers(multipleOption, isRemake) : multipleOption;
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
@@ -134,7 +134,7 @@ namespace Fsel.Course.Infrastructure.Common
             return result;
         }
 
-        private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data)
+        private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data, bool isRemake)
         {
             if (data != null && data.Answers != null)
             {
@@ -146,7 +146,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswers(DragAndDropSentenceOrderAnswer? data)
+        private static object? ClearAnswers(DragAndDropSentenceOrderAnswer? data, bool isRemake)
         {
             if (data != null && data.Answers != null)
             {
@@ -158,7 +158,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswers(ShortAnswerWordBaseAnswer? data)
+        private static object? ClearAnswers(ShortAnswerWordBaseAnswer? data, bool isRemake)
         {
             if (data != null && !string.IsNullOrEmpty(data.Answers))
             {
@@ -167,7 +167,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswers(ListingAnswer? data)
+        private static object? ClearAnswers(ListingAnswer? data, bool isRemake)
         {
             if (data != null && data.Answers != null)
             {
@@ -176,7 +176,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswers(MultipleChoiceAnswer? data)
+        private static object? ClearAnswers(MultipleChoiceAnswer? data, bool isRemake)
         {
             if (data != null && data.Answers != null)
             {
@@ -188,7 +188,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswers(ShortAnswerWordCountBaseAnswer? data)
+        private static object? ClearAnswers(ShortAnswerWordCountBaseAnswer? data, bool isRemake)
         {
             if (data != null)
             {
@@ -197,7 +197,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswers(MatchingTypeAnswer? data)
+        private static object? ClearAnswers(MatchingTypeAnswer? data, bool isRemake)
         {
             if (data != null && data.Answers != null)
             {
@@ -209,7 +209,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswers(GapFillAnswer? data)
+        private static object? ClearAnswers(GapFillAnswer? data, bool isRemake)
         {
             if (data != null && data.Answers != null)
             {
