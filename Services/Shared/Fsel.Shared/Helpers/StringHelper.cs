@@ -85,7 +85,7 @@ namespace Fsel.Shared.Helpers
                 if (iframeClass == "ql-audio" && indexAudioOnly)
                 {
                     // Nếu indexAudioOnly là true và iframe là 'ql-audio', thì thêm placeholder với index audio
-                    string placeholder = $"{{audio_{audioIndex}}}";
+                    string placeholder = $"<audio>{audioIndex}</audio>";
                     audioIndex++;
                     return placeholder;
                 }
