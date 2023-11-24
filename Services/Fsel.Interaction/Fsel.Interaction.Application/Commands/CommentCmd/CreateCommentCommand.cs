@@ -22,6 +22,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Newtonsoft.Json;
 
     public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<CommentModel>>
     {
@@ -73,8 +74,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 comment = _commentRepository.Add(comment);
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                NotificationQueueModel model = new NotificationQueueModel();
-
+                NotificationSendingQueueModel model = new NotificationSendingQueueModel();
+                List<object> paramLinksValue = new List<object>();
                 switch (request.Type)
                 {
                     case EnumInteractionType.DiscussionBoard:
@@ -107,16 +108,20 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         });
                         var classForumResult = classForumResultResult.Content?.Result;
 
-                        model = new NotificationQueueModel()
+                        paramLinksValue = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, request.ObjectId, comment.Id };
+
+                        // Chuyển đổi danh sách thành JSON
+                        string paramLinks = JsonConvert.SerializeObject(paramLinksValue);
+
+                        model = new NotificationSendingQueueModel()
                         {
-                            ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, },
                             ObjectId = request.ObjectId,
-                            UserId = postOwner!.CreatedUserId,
+                            UserIds = new List<Guid>() { postOwner.CreatedUserId },
+                            SenderId = _authContext.CurrentUserId,
                             Content = EnumNotificationContent.Comment,
                             Type = EnumNotificationType.LinkComment,
-                            SenderId = _authContext.CurrentUserId,
-                            ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, request.ObjectId, comment.Id },
-                            PlatformCode = EnumPlatformCode.LMS
+                            ParamsLink = paramLinksValue,
+                            ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, }
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
@@ -126,7 +131,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         var commentOwner = await _commentRepository.GetByIdAsync(request.ObjectId).ConfigureAwait(false);
 
                         //Không thông báo khi trả lời bình luận của chính mình
-                        if (commentOwner?.CreatedUserId == _authContext.CurrentUserId)
+                        if (commentOwner == null && commentOwner?.CreatedUserId == _authContext.CurrentUserId)
                         {
                             break;
                         }
@@ -146,17 +151,29 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         });
                         var classForumResultOfCommentOwner = classForumResultOfCommentOwnerResult.Content?.Result;
 
-                        model = new NotificationQueueModel()
+                        paramLinksValue = new List<object>
+                                    {
+                                        classForumResultOfCommentOwner?.UnitId ?? default,
+                                        classForumResultOfCommentOwner?.CourseId ?? default,
+                                        commentOwner?.ObjectId ?? default,
+                                        request.ObjectId,
+                                        comment.Id
+                                    };
+
+                        // Chuyển đổi danh sách thành JSON
+                        paramLinks = JsonConvert.SerializeObject(paramLinksValue);
+
+                        model = new NotificationSendingQueueModel()
                         {
                             ParamsMessage = new List<object> { _authContext.CurrentUsername ?? string.Empty },
                             ObjectId = request.ObjectId,
-                            UserId = commentOwner?.CreatedUserId,
                             Content = EnumNotificationContent.ReplyComment,
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
-                            ParamsLink = new List<object> { classForumResultOfCommentOwner?.UnitId ?? default, classForumResultOfCommentOwner?.CourseId ?? default, commentOwner?.ObjectId ?? default, request.ObjectId, comment.Id },
-                            PlatformCode = EnumPlatformCode.LMS
+                            ParamsLink = paramLinksValue,
+                            UserIds = new List<Guid> { commentOwner!.CreatedUserId },
                         };
+
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
                 }

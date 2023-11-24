@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class NotificationConsumer : IConsumer<NotificationQueueModel>
+    public class NotificationConsumer : IConsumer<NotifcationQueueModel>
     {
         private readonly IHubContext<NotificationHub> _notificationHubContext;
 
@@ -16,20 +16,12 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             _notificationHubContext = notificationHubContext;
         }
 
-        public async Task Consume(ConsumeContext<NotificationQueueModel> context)
+        public async Task Consume(ConsumeContext<NotifcationQueueModel> context)
         {
-            if (context != null)
+            if (context != null && context!.Message!.UserIds != null)
             {
-                var userId = context.Message.UserId;
-                if (userId != null && context!.Message!.UserIds!.Count == 0)
-                {
-                    await _notificationHubContext.GetGroup(userId.Value.ToString()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
-                }
-                else if (context!.Message!.UserIds!.Count > 0)
-                {
-                    var userIds = context.Message.UserIds;
-                    await _notificationHubContext.GetGroups(userIds.Select(x => x.ToString()).ToList()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
-                }
+                var userIds = context.Message.UserIds;
+                await _notificationHubContext.GetGroups(userIds.Select(x => x.ToString()).ToList()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
             }
         }
     }

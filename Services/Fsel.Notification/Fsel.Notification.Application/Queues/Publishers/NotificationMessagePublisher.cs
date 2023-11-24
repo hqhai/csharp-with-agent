@@ -21,16 +21,12 @@ namespace Fsel.Notification.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.NotificationQueue.NameQueue.Notification, new NotificationQueueModel
+            await _queueProvider.Publish(QueueSettings.NotificationQueue.NameQueue.Notification, new NotifcationQueueModel
             {
-                ObjectId = notification.ObjectId,
-                UserId = notification.UserId,
                 Message = notification.Message,
                 Link = notification.Link,
                 UserIds = notification.UserIds,
-                AvatarPath = notification.AvatarPath,
-                SenderId = notification.SenderId,
-                Status = notification.Status,
+                AvatarPath = notification.AvatarPath
             }, cancellationToken);
         }
     }

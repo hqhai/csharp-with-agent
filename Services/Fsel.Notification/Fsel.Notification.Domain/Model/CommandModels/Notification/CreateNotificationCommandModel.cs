@@ -7,16 +7,18 @@ namespace Fsel.Notification.Domain.Model.CommandModels.Notification
 
     public class CreateNotificationCommandModel
     {
-        public string? Title { get; set; }
         public string? Message { get; set; }
 
         public string? Link { get; set; }
+
         public IList<EnumRole>? Roles { get; set; }
 
-        public Guid? UserId { get; set; }
+        public IList<Guid>? UserIds { get; set; }
 
         public Guid NotificationTypeId { get; set; }
+
         public Guid ObjectId { get; set; }
+
         public Guid? SenderId { get; set; }
     }
 }

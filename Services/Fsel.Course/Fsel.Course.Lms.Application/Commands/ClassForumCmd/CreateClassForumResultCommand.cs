@@ -159,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 IList<EnumRole> roles = new List<EnumRole>();
                 roles.Add(EnumRole.CSO);
 
-                NotificationQueueModel model = new NotificationQueueModel()
+                NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                 {
                     ObjectId = classForumResult.Id,
                     Roles = roles,

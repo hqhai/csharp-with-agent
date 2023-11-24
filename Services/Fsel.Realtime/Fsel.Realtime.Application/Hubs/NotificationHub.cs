@@ -9,7 +9,7 @@ namespace Fsel.Realtime.Application.Hubs
 
     public class NotificationHub : BaseHub
     {
-        public void Send(NotificationQueueModel? model)
+        public void Send(NotifcationQueueModel? model)
         {
             Clients.All.SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, model);
         }

@@ -125,7 +125,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             {
                 order = _orderRepository.Add(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                await _notificationMessagePublisher.Publish(new NotificationQueueModel
+                await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                 {
                     Roles = new List<EnumRole> { EnumRole.Admin },
                     ObjectId = order.Id,

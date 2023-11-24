@@ -9,6 +9,8 @@ namespace Fsel.Interaction.Domain.Entities
     {
         public EnumInteractionActionType Type { get; set; }
 
+        public EnumInteractionType BusinessType { get; set; }
+
         public Guid ObjectId { get; set; }
 
         public Guid UserId { get; set; }
