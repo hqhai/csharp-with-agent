@@ -65,5 +65,69 @@ namespace Fsel.Shared.Helpers
             }
             return results;
         }
+
+        public static string ProcessHtml(string? inputHtml, bool indexAudioOnly)
+        {
+            if (string.IsNullOrEmpty(inputHtml))
+            {
+                return string.Empty;
+            }
+
+            // Regex để tìm các thẻ iframe có class là 'ql-audio' hoặc 'ql-video'
+            string pattern = @"<iframe\s+class=""(ql-audio|ql-video)""[^>]*>.*?<\/iframe>";
+
+            // Hàm thay thế các thẻ iframe bằng placeholders
+            int audioIndex = 1;
+            string result = Regex.Replace(inputHtml, pattern, match =>
+            {
+                string iframeClass = match.Groups[1].Value;
+
+                if (iframeClass == "ql-audio" && indexAudioOnly)
+                {
+                    // Nếu indexAudioOnly là true và iframe là 'ql-audio', thì thêm placeholder với index audio
+                    string placeholder = $"{{audio_{audioIndex}}}";
+                    audioIndex++;
+                    return placeholder;
+                }
+                else if (iframeClass == "ql-video" && !indexAudioOnly)
+                {
+                    // Nếu iframe là 'ql-video' và indexAudioOnly là false, thì xóa nó
+                    return "";
+                }
+                else
+                {
+                    // Nếu không phải 'ql-audio' và cũng không phải 'ql-video', thì xóa thẻ iframe
+                    return "";
+                }
+            }, RegexOptions.Singleline);
+
+            return result;
+        }
+
+        public static IEnumerable<string>? GetIframeUrls(string? inputHtml, bool isAudio)
+        {
+            if (string.IsNullOrEmpty(inputHtml))
+            {
+                return null;
+            }
+
+            List<string>? urls = new List<string>();
+
+            // Xác định class cần tìm
+            string targetClass = isAudio ? "ql-audio" : "ql-video";
+
+            // Regex để tìm các thẻ iframe có class là 'ql-audio' hoặc 'ql-video'
+            string pattern = $@"<iframe\s+class=""{targetClass}""[^>]*\ssrc=""([^""]+)""[^>]*>.*?<\/iframe>";
+
+            MatchCollection matches = Regex.Matches(inputHtml, pattern, RegexOptions.Singleline);
+
+            foreach (Match match in matches)
+            {
+                string url = match.Groups[1].Value;
+                urls.Add(url);
+            }
+
+            return urls;
+        }
     }
 }
