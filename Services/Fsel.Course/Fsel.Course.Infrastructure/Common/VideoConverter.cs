@@ -364,10 +364,10 @@ namespace Fsel.Course.Infrastructure.Common
                                                   .Count() ?? default;
         }
 
-        public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode? videoTimeCode, VideoTimeCodeResultModel? videoTimeCodeResult, bool isShowWrongQuestion = false)
+        public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode? videoTimeCode, VideoTimeCodeResultModel? videoTimeCodeResult, bool isTryAgain = false)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
-            isShowWrongQuestion = isShowWrongQuestion && videoTimeCodeResult != null && videoTimeCodeResult.Status == EnumResultStatus.Process;
+            var isTimeCodeProcess = videoTimeCodeResult != null && videoTimeCodeResult.Status == EnumResultStatus.Process;
             var timeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode);
             timeCode.TotalCount = GetTotalQuestion(videoTimeCode);
             timeCode.Ungraded = GetUngraded(videoTimeCode);
@@ -375,7 +375,7 @@ namespace Fsel.Course.Infrastructure.Common
             timeCode.CorrectTotal = GetCorrectTotal(videoTimeCode);
             timeCode.Status = GetTimeCodeStatus(videoTimeCode);
             timeCode.VideoTimeCodeResult = videoTimeCodeResult;
-            timeCode.Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n, isShowWrongQuestion)).ToList();
+            timeCode.Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n, isTryAgain, isTimeCodeProcess)).ToList();
             return timeCode;
         }
 
@@ -397,12 +397,12 @@ namespace Fsel.Course.Infrastructure.Common
             return videoTimeCodeModels;
         }
 
-        private ExerciseModel GetExercise(Exercise? n, bool isShowWrongQuestion)
+        private ExerciseModel GetExercise(Exercise? n, bool isTryAgain, bool isTimeCodeProcess)
         {
             ArgumentNullException.ThrowIfNull(n);
             var exerciseModel = _mapper.Map<ExerciseModel>(n);
-            var questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m)).ToList();
-            if (isShowWrongQuestion)
+            var questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m, isTimeCodeProcess)).ToList();
+            if (isTryAgain)
             {
                 questions = questions.Where(x => x.ResultAnswer != null && x.ResultAnswer.Status != EnumAnswerStatus.Done).ToList();
             }
@@ -410,7 +410,7 @@ namespace Fsel.Course.Infrastructure.Common
             return exerciseModel;
         }
 
-        private QuestionModel GetQuestion(Question? question)
+        private QuestionModel GetQuestion(Question? question, bool isTimeCodeProcess)
         {
             ArgumentNullException.ThrowIfNull(question);
             var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
@@ -419,7 +419,7 @@ namespace Fsel.Course.Infrastructure.Common
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
             if (videoTimeCodeAnswer != null)
             {
-                videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, !isCheck);
+                videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, !isCheck, isTimeCodeProcess);
                 videoTimeCodeAnswer.CorrectCount = isCheck ? videoTimeCodeAnswer.CorrectCount : default;
                 questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
             }

@@ -119,15 +119,15 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, videoTimeCode.ExecutionTime == 0);
+                var exercise = question?.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
+                var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCode.Id, videoTimeCodeResult.VideoResultId, question?.Id, exercise?.Id ?? default);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, answer?.Answer, videoTimeCodeResult.Status == EnumResultStatus.Process, videoTimeCode.ExecutionTime == 0);
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
                 var (questionItem, answerConfig, correctCount) = questionResult.Result;
-                var exercise = questionItem.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
-                var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCode.Id, videoTimeCodeResult.VideoResultId, questionItem.Id, exercise?.Id ?? default);
                 if (answer == null)
                 {
                     answer = new VideoTimeCodeAnswer
