@@ -89,15 +89,10 @@ namespace Fsel.Shared.Helpers
                     audioIndex++;
                     return placeholder;
                 }
-                else if (iframeClass == "ql-video" && !indexAudioOnly)
-                {
-                    // Nếu iframe là 'ql-video' và indexAudioOnly là false, thì xóa nó
-                    return "";
-                }
                 else
                 {
                     // Nếu không phải 'ql-audio' và cũng không phải 'ql-video', thì xóa thẻ iframe
-                    return "";
+                    return string.Empty;
                 }
             }, RegexOptions.Singleline);
 
