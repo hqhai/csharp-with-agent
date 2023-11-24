@@ -22,6 +22,245 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.AvatarImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<int?>("Level")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AvatarImages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("0e614a70-18b3-4fa1-9fff-632f1af667cd"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            FilePath = "https://fsel.s3-hn-2.cloud.cmctelecom.vn/videos/vetranhmeohoathinhdethuong_1699239452.jpg",
+                            IsDeleted = false,
+                            Level = 1
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.GameAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Answer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<Guid>("GameHistoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GameVocabularyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GameVocabularyTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameHistoryId");
+
+                    b.ToTable("GameAnswers");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.GameHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<int>("ComboNumber")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<int>("DestroyNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ImpactNumber")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<int>("NumberOfToken")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoundNumber")
+                        .HasColumnType("int");
+
+                    b.Property<long>("Score")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("SpaceShipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StudentGameInfoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<int>("ZPlanetNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SpaceShipId");
+
+                    b.HasIndex("StudentGameInfoId");
+
+                    b.ToTable("GameHistories");
+                });
+
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.GameplayRuleConfig", b =>
                 {
                     b.Property<Guid>("Id")
@@ -201,12 +440,17 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.ToTable("GameplayTimeConfigs");
                 });
 
-            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.QuestBank", b =>
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -235,15 +479,20 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<Guid>("GameVocabularyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("IsDefault")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<Guid?>("SpaceShipId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -260,7 +509,22 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("QuestBanks");
+                    b.HasIndex("SpaceShipId");
+
+                    b.ToTable("SpaceShips");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("46be8251-f95a-4e1b-b451-2a3fe2b4a5bc"),
+                            Code = "AG222",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDefault = true,
+                            IsDeleted = false,
+                            Name = "Atlantic"
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", b =>
@@ -269,6 +533,14 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
+
+                    b.Property<Guid>("AvatarImageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CourseLevel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -306,12 +578,21 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int>("Level")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<string>("NickName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("StudentTagNameId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TagNameId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -329,7 +610,384 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AvatarImageId");
+
+                    b.HasIndex("StudentTagNameId");
+
                     b.ToTable("StudentGameInfos");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentSpaceShip", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<int>("Level")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<Guid>("SpaceShipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StudentGameInfoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SpaceShipId");
+
+                    b.HasIndex("StudentGameInfoId");
+
+                    b.ToTable("StudentSpaceShips");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentTagName", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<int>("Level")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<Guid?>("MaxLevelSpaceShipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TagName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaxLevelSpaceShipId");
+
+                    b.ToTable("StudentTagNames");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("9f860757-1a3e-4a05-aaf5-2dc1797e23bf"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Level = 1,
+                            TagName = "Captain"
+                        },
+                        new
+                        {
+                            Id = new Guid("88bf6e6d-d9d6-4d52-bf9d-52f252f16404"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Level = 10,
+                            TagName = "Major"
+                        },
+                        new
+                        {
+                            Id = new Guid("edc52c09-c407-4371-9201-8f09351c1f58"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Level = 20,
+                            TagName = "Colonel"
+                        },
+                        new
+                        {
+                            Id = new Guid("b38637d8-129d-4d50-bdf5-a3304684740d"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Level = 30,
+                            TagName = "Brigadier"
+                        },
+                        new
+                        {
+                            Id = new Guid("402dec4e-39c9-4235-8c7d-b18eb2092305"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Level = 40,
+                            TagName = "General"
+                        },
+                        new
+                        {
+                            Id = new Guid("e2ef7a2e-bc23-4103-8e2b-23cfdca5264e"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Level = 50,
+                            TagName = "Supreme Leader"
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.WheelOfBuff", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WheelOfBuffs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("54a848c5-8d29-4698-915c-6e010048568d"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Type = "ReceiveZBuff"
+                        },
+                        new
+                        {
+                            Id = new Guid("352a53f5-1314-47f3-a953-16f3b4f508df"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Type = "TenFSELcoin"
+                        },
+                        new
+                        {
+                            Id = new Guid("9accf434-fd6a-4073-b0cd-e84e5b042020"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Type = "ReceiveZBuff"
+                        },
+                        new
+                        {
+                            Id = new Guid("376b7f0c-e8e6-4244-b2f7-149093ec7a5f"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Type = "HealBarShield"
+                        },
+                        new
+                        {
+                            Id = new Guid("70b3f720-ae44-4f06-8bc3-aa1b05404ffe"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Type = "TenFSELcoin"
+                        },
+                        new
+                        {
+                            Id = new Guid("813899b1-c223-4bfc-a054-e061c98987be"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Type = "TenFSELcoin"
+                        },
+                        new
+                        {
+                            Id = new Guid("8e4f6f33-bb51-47fc-b7ac-74a749c94fcd"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Type = "HealBarShield"
+                        },
+                        new
+                        {
+                            Id = new Guid("41f39ea2-5a2b-41c1-86cc-d9baee68c477"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Type = "TwentyFSELcoin"
+                        },
+                        new
+                        {
+                            Id = new Guid("cedea4e9-f2f2-4005-9fa0-221095f51d1d"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Type = "FiftyFSELcoin"
+                        },
+                        new
+                        {
+                            Id = new Guid("4e36a6d2-6e01-4c3f-8ac2-142e2db9bf67"),
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDeleted = false,
+                            Type = "X"
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.ZMatter", b =>
@@ -520,170 +1178,108 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.WheelOfBuff", b =>
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.GameAnswer", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.GameHistory", "GameHistory")
+                        .WithMany("GameAnswers")
+                        .HasForeignKey("GameHistoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
+                    b.Navigation("GameHistory");
+                });
 
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.GameHistory", b =>
+                {
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", "SpaceShip")
+                        .WithMany("GameHistories")
+                        .HasForeignKey("SpaceShipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", "StudentGameInfo")
+                        .WithMany("GameHistories")
+                        .HasForeignKey("StudentGameInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
+                    b.Navigation("SpaceShip");
 
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
+                    b.Navigation("StudentGameInfo");
+                });
 
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", b =>
+                {
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", null)
+                        .WithMany("SpaceShips")
+                        .HasForeignKey("SpaceShipId");
+                });
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", b =>
+                {
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.AvatarImage", "AvatarImage")
+                        .WithMany()
+                        .HasForeignKey("AvatarImageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.StudentTagName", "StudentTagName")
+                        .WithMany()
+                        .HasForeignKey("StudentTagNameId");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Navigation("AvatarImage");
 
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
+                    b.Navigation("StudentTagName");
+                });
 
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentSpaceShip", b =>
+                {
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", "SpaceShip")
+                        .WithMany()
+                        .HasForeignKey("SpaceShipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", "StudentGameInfo")
+                        .WithMany("StudentSpaceShips")
+                        .HasForeignKey("StudentGameInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasKey("Id");
+                    b.Navigation("SpaceShip");
 
-                    b.ToTable("WheelOfBuffs");
+                    b.Navigation("StudentGameInfo");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("54a848c5-8d29-4698-915c-6e010048568d"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Type = "ReceiveZBuff"
-                        },
-                        new
-                        {
-                            Id = new Guid("352a53f5-1314-47f3-a953-16f3b4f508df"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Type = "TenFSELcoin"
-                        },
-                        new
-                        {
-                            Id = new Guid("9accf434-fd6a-4073-b0cd-e84e5b042020"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Type = "ReceiveZBuff"
-                        },
-                        new
-                        {
-                            Id = new Guid("376b7f0c-e8e6-4244-b2f7-149093ec7a5f"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Type = "HealBarShield"
-                        },
-                        new
-                        {
-                            Id = new Guid("70b3f720-ae44-4f06-8bc3-aa1b05404ffe"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Type = "TenFSELcoin"
-                        },
-                        new
-                        {
-                            Id = new Guid("813899b1-c223-4bfc-a054-e061c98987be"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Type = "TenFSELcoin"
-                        },
-                        new
-                        {
-                            Id = new Guid("8e4f6f33-bb51-47fc-b7ac-74a749c94fcd"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Type = "HealBarShield"
-                        },
-                        new
-                        {
-                            Id = new Guid("41f39ea2-5a2b-41c1-86cc-d9baee68c477"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Type = "TwentyFSELcoin"
-                        },
-                        new
-                        {
-                            Id = new Guid("cedea4e9-f2f2-4005-9fa0-221095f51d1d"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Type = "FiftyFSELcoin"
-                        },
-                        new
-                        {
-                            Id = new Guid("4e36a6d2-6e01-4c3f-8ac2-142e2db9bf67"),
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsActive = true,
-                            IsDeleted = false,
-                            Type = "X"
-                        });
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentTagName", b =>
+                {
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", "SpaceShip")
+                        .WithMany("StudentTagNames")
+                        .HasForeignKey("MaxLevelSpaceShipId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("SpaceShip");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.GameHistory", b =>
+                {
+                    b.Navigation("GameAnswers");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", b =>
+                {
+                    b.Navigation("GameHistories");
+
+                    b.Navigation("SpaceShips");
+
+                    b.Navigation("StudentTagNames");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", b =>
+                {
+                    b.Navigation("GameHistories");
+
+                    b.Navigation("StudentSpaceShips");
                 });
 #pragma warning restore 612, 618
         }

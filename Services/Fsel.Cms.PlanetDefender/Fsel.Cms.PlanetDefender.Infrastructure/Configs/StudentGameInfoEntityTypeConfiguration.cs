@@ -14,7 +14,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<StudentGameInfo> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Property(e => e.Level)
+            builder.Property(e => e.CourseLevel)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
@@ -25,6 +25,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
                .HasConversion(
                    v => v.ToString(),
                    v => v.EnumParse<EnumGender>());
+
+            builder.Property(b => b.Level).HasDefaultValue(1);
         }
     }
 }

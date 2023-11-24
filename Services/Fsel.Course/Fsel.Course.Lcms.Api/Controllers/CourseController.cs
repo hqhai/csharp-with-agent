@@ -99,6 +99,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+        /// <summary>
+        /// Search Course
+        /// </summary>
+        [HttpGet("course-progress")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetList([FromQuery] GetCourseProgressQuery query)
+        {
+            MethodResult<PagingItemsModel<CourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
 
         /// <summary>
         /// Get Courses by level
