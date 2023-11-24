@@ -3,11 +3,17 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Helpers;
 
     public class SectionModel : BaseModel
     {
         public string? Name { get; set; }
         public string? MediaPost { get; set; }
+        public string? MediaPostContent => StringHelper.ProcessHtml(MediaPost, false);
+
+        public IEnumerable<string>? AudioPaths => StringHelper.GetIframeUrls(MediaPost, true);
+
+        public IEnumerable<string>? VideoPaths => StringHelper.GetIframeUrls(MediaPost, false);
         public int TargetWord { get; set; }
         public string? VideoFilePath { get; set; }
         public string? SubFilePath { get; set; }
