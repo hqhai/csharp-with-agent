@@ -163,7 +163,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                             {
                                 CorrectCount = correctCount,
                                 Answer = answerConfig,
-                                SectionQuestionId = sectionQuestionId
+                                SectionQuestionId = sectionQuestionId,
+                                IsCorrect = correctCount == questionItem.CorrectTotal
                             };
                             placementTestAnswers.Add(placementTestAnswer);
                         }

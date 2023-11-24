@@ -215,11 +215,12 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExacts = item.IsExacts?.Select(x =>
+                    item.GapFillExacts = item.GapFillExacts?.Select(x =>
                     {
                         x.IsExact = (isExactDisplay && !x.IsExactDisplay && x.IsExact == true) ? x.IsExact : default;
                         return x;
                     }).ToList();
+                    item.IsExacts = item.GapFillExacts?.Select(x => x.IsExact).ToList();
                 }
             }
             return data;
@@ -478,29 +479,29 @@ namespace Fsel.Course.Infrastructure.Common
 
                         if (question != null && question.Words?.Any() == true && item.Answer?.Any() == true)
                         {
-                            var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index));
-                            item.IsExacts = isExacts.Select(x => new GapFillAnswerExact { IsExact = x, IsExactDisplay = isTryAgain }).ToList();
-
-                            if (isExacts.Count(x => x == true) == isExacts.Count())
+                            var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
+                            item.GapFillExacts = isExacts.Select(x => new GapFillAnswerExact { IsExact = x, IsExactDisplay = isTryAgain }).ToList();
+                            item.IsExacts = isExacts;
+                            if (isExacts.Count(x => x == true) == isExacts.Count)
                             {
                                 number++;
                             }
                         }
                         else
                         {
-                            item.IsExacts = new List<GapFillAnswerExact>();
+                            item.GapFillExacts = new List<GapFillAnswerExact>();
                         }
 
                         if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                         {
                             var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
 
-                            if (answer != null && answer.IsExacts != null)
+                            if (answer != null && answer.GapFillExacts != null)
                             {
-                                foreach (var data in answer.IsExacts.Where(data => data.IsExact == true && !data.IsExactDisplay))
+                                foreach (var data in answer.GapFillExacts.Where(data => data.IsExact == true && !data.IsExactDisplay))
                                 {
-                                    var index = answer.IsExacts.IndexOf(data);
-                                    item.IsExacts[index].IsExactDisplay = false;
+                                    var index = answer.GapFillExacts.IndexOf(data);
+                                    item.GapFillExacts[index].IsExactDisplay = false;
                                 }
                             }
                         }
@@ -633,23 +634,24 @@ namespace Fsel.Course.Infrastructure.Common
                         if (question != null && question.Words != null && question.Words.Any() && item.Answer != null && item.Answer.Any())
                         {
                             var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
-                            item.IsExacts = isExacts.Select(x => new GapFillAnswerExact { IsExact = x, IsExactDisplay = isTryAgain }).ToList();
+                            item.IsExacts = isExacts;
+                            item.GapFillExacts = isExacts.Select(x => new GapFillAnswerExact { IsExact = x, IsExactDisplay = isTryAgain }).ToList();
                             number += isExacts.Count(x => x == true);
                         }
                         else
                         {
-                            item.IsExacts = new List<GapFillAnswerExact>();
+                            item.GapFillExacts = new List<GapFillAnswerExact>();
                         }
                         if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                         {
                             var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
 
-                            if (answer != null && answer.IsExacts != null)
+                            if (answer != null && answer.GapFillExacts != null)
                             {
-                                foreach (var data in answer.IsExacts.Where(data => data.IsExact == true && !data.IsExactDisplay))
+                                foreach (var data in answer.GapFillExacts.Where(data => data.IsExact == true && !data.IsExactDisplay))
                                 {
-                                    var index = answer.IsExacts.IndexOf(data);
-                                    item.IsExacts[index].IsExactDisplay = false;
+                                    var index = answer.GapFillExacts.IndexOf(data);
+                                    item.GapFillExacts[index].IsExactDisplay = false;
                                 }
                             }
                         }

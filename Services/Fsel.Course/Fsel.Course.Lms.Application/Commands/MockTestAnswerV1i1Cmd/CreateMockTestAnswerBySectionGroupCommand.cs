@@ -374,7 +374,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestAnswerV1i1Cmd
                 SectionId = sectionId ?? null,
                 SectionQuestionId = questionItem?.SectionQuestions.FirstOrDefault()?.Id ?? default,
                 SectionGroupResultId = sectionGroupResultId,
-                IsCorrect = request.IsSubmit ? questionItem?.CorrectTotal == correctCount : null,
+                IsCorrect = questionItem == null || questionItem.CorrectTotal == correctCount,
             };
         }
     }

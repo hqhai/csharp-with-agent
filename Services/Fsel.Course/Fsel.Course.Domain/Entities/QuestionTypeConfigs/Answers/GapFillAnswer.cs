@@ -13,7 +13,8 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
     {
         public long Id { get; set; }
         public IList<string>? Answer { get; set; }
-        public IList<GapFillAnswerExact>? IsExacts { get; set; }
+        public IList<bool?>? IsExacts { get; set; }
+        public IList<GapFillAnswerExact>? GapFillExacts { get; set; }
     }
 
     public class GapFillAnswerExact

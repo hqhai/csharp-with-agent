@@ -253,7 +253,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd
                 FinalTestResultId = request.FinalTestResultId,
                 SectionGroupResultId = sectionGroupResultId,
                 SectionQuestionId = question?.SectionQuestions.FirstOrDefault()?.Id ?? default,
-                IsCorrect = request.IsSubmit ? question?.CorrectTotal == correctCount : null,
+                IsCorrect = question?.CorrectTotal == correctCount,
             };
         }
     }

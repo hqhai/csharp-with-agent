@@ -248,7 +248,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestAnswerV1i1Cmd
                 PlacementTestResultId = request.PlacementTestResultId,
                 SectionGroupResultId = sectionGroupResultId,
                 SectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default,
-                IsCorrect = request.IsSubmit ? correctCount == questionItem.CorrectTotal : null
+                IsCorrect = correctCount == questionItem.CorrectTotal
             };
         }
     }

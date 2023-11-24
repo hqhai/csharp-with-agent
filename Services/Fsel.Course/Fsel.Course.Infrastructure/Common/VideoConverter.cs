@@ -517,7 +517,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var status = GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal);
                     x.Status = isDone ? EnumAnswerStatus.Done : status;
-                    x.IsCorrect = status == EnumAnswerStatus.Done;
+                    x.IsCorrect = x.IsCorrect != null ? status == EnumAnswerStatus.Done : null;
                 });
                 _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
