@@ -14,7 +14,12 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<CreateCourseUnitMockTestCommandModel, CourseUnitMockTest>().IgnoreAllNonExisting();
             CreateMap<UpdateCourseUnitMockTestCommandModel, CourseUnitMockTest>().IgnoreAllNonExisting();
-            CreateMap<CourseUnitMockTest, CourseUnitMockTestModel>().IgnoreAllNonExisting();
+            CreateMap<CourseUnitMockTest, CourseUnitMockTestModel>()
+            .ForMember(dest => dest.Type, opt =>
+                opt.MapFrom(src =>
+                    src.FinalTestId.HasValue ? nameof(src.FinalTest) :
+                    src.MockTestId.HasValue ? nameof(src.MockTest) :
+                    src.UnitId.HasValue ? nameof(src.Unit) : null));
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var extraPracticeQuery = _extraPracticeRepository.Queryable
+            var extraPracticeQuery = _extraPracticeRepository.Queryable.Where(p => !p.IsArchive)
                                                 .Select(x => new ExtraPracticeModel
                                                 {
                                                     Id = x.Id,
