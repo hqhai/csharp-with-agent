@@ -2,8 +2,6 @@
 
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
-    using Fsel.Cms.PlanetDefender.Application.Queries.GameplayRuleConfigs;
-    using Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.GameplayRuleConfigs;
     using Fsel.Common.ActionResults;
     using System.Net;
     using Fsel.Common.Constants;
@@ -11,8 +9,11 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Cms.PlanetDefender.Application.Queries.AvatarImageQuery;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/avatar-image")]
     [ApiController]
     public class AvatarImageController : ControllerBase
