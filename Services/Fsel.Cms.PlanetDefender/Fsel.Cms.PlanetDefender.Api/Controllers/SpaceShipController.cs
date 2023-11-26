@@ -2,7 +2,6 @@
 
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
-    using Fsel.Cms.PlanetDefender.Application.Queries.WheelOfBuff;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using System.Net;
@@ -10,10 +9,12 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Cms.PlanetDefender.Application.Queries.SpaceShipQuery;
-    using Fsel.Cms.PlanetDefender.Application.Queries.ZMatterQuery;
     using Fsel.Core.Base.BaseModels;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/space-ship")]
     [ApiController]
     public class SpaceShipController : ControllerBase
