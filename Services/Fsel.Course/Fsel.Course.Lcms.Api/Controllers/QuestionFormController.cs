@@ -11,10 +11,11 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/question-form")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
