@@ -10,13 +10,16 @@ using Fsel.Course.Application.Queries.CourseQuery;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
+using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
-    //[Permission(role: nameof(EnumRole.MasterAdmin))]
+    [Permission(role: nameof(EnumRole.MasterAdmin))]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;

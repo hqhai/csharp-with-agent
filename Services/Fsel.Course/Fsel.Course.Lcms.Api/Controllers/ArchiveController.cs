@@ -9,8 +9,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Course.Application.Queries.ArchiveQuery;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/archive")]
     [ApiController]
     public class ArchiveController : ControllerBase

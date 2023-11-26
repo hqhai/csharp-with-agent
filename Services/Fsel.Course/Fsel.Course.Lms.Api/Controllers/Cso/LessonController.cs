@@ -8,8 +8,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/cso/lesson")]
     [ApiController]
     public class LessonController : ControllerBase

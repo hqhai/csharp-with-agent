@@ -7,12 +7,13 @@ using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Queries.CourseQuery;
 using Fsel.Shared.Enums;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
+using Asp.Versioning;
+using Fsel.Shared.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lms.Api.Controllers.Teacher
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/teacher/course")]
     [ApiController]
     public class CourseController : ControllerBase

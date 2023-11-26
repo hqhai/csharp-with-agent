@@ -194,6 +194,11 @@
           "Name": "Auths API",
           "Version": "v1",
           "Url": "http://localhost:5201/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Auths API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5201/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -204,6 +209,11 @@
           "Name": "Users API",
           "Version": "v1",
           "Url": "http://localhost:5202/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Users API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5202/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -214,6 +224,11 @@
           "Name": "Lcms Courses API",
           "Version": "v1",
           "Url": "http://localhost:5203/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Lcms Courses API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5203/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -224,6 +239,11 @@
           "Name": "Lms Courses API",
           "Version": "v1",
           "Url": "http://localhost:5204/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Lms Courses API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5204/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -234,6 +254,11 @@
           "Name": "Storage API",
           "Version": "v1",
           "Url": "http://localhost:5205/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Storage API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5205/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -244,6 +269,11 @@
           "Name": "Senders API",
           "Version": "v1",
           "Url": "http://localhost:5206/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Senders API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5206/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -254,6 +284,11 @@
           "Name": "Training API",
           "Version": "v1",
           "Url": "http://localhost:5207/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Training API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5207/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -264,6 +299,11 @@
           "Name": "Interaction API",
           "Version": "v1",
           "Url": "http://localhost:5208/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Interaction API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5208/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -274,6 +314,11 @@
           "Name": "Ordering API",
           "Version": "v1",
           "Url": "http://localhost:5209/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Ordering API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5209/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -284,6 +329,11 @@
           "Name": "System API",
           "Version": "v1",
           "Url": "http://localhost:52010/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "System API",
+          "Version": "v1.1",
+          "Url": "http://localhost:52010/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -294,6 +344,11 @@
           "Name": "Cms Planet Defender API",
           "Version": "v1",
           "Url": "http://localhost:52011/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Cms Planet Defender API",
+          "Version": "v1.1",
+          "Url": "http://localhost:52011/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -304,6 +359,11 @@
           "Name": "Realtime API",
           "Version": "v1",
           "Url": "http://localhost:5501/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Realtime API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5501/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -314,6 +374,11 @@
           "Name": "Notification API",
           "Version": "v1",
           "Url": "http://localhost:5502/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Notification API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5502/swagger/v1.1/swagger.json"
         }
       ]
     }

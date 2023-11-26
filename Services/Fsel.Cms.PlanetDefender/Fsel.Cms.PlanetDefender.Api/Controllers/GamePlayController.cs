@@ -3,6 +3,8 @@
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
     using Fsel.Cms.PlanetDefender.Application.Commands.GameHistoryCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery;
     using Fsel.Cms.PlanetDefender.Application.Services.SystemServices.Models;
@@ -11,7 +13,8 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/game-play")]
     [ApiController]
     public class GamePlayController : ControllerBase
