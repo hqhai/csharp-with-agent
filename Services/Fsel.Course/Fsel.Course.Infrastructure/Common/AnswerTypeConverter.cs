@@ -477,7 +477,6 @@ namespace Fsel.Course.Infrastructure.Common
                         if (question != null && question.Words?.Any() == true && item.Answer?.Any() == true)
                         {
                             item.IsExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
-                            item.IsFirstSubmits = item.IsExacts.Select(x => true).ToList();
                             if (item.IsExacts.Count(x => x == true) == item.IsExacts.Count)
                             {
                                 number++;
@@ -487,14 +486,20 @@ namespace Fsel.Course.Infrastructure.Common
                                 var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
                                 if (answer != null && answer.IsFirstSubmits != null && answer.IsExacts != null)
                                 {
+                                    var isFirstSubmit = new List<bool>();
                                     foreach (var data in answer.IsExacts)
                                     {
                                         var index = answer.IsExacts.IndexOf(data);
                                         if (answer.IsFirstSubmits[index] && data.HasValue && !data.Value)
                                         {
-                                            item.IsFirstSubmits[index] = false;
+                                            isFirstSubmit.Add(false);
+                                        }
+                                        else
+                                        {
+                                            isFirstSubmit.Add(answer.IsFirstSubmits[index]);
                                         }
                                     }
+                                    item.IsFirstSubmits = isFirstSubmit;
                                 }
                             }
                         }
@@ -627,21 +632,26 @@ namespace Fsel.Course.Infrastructure.Common
                         if (question != null && question.Words != null && question.Words.Any() && item.Answer != null && item.Answer.Any())
                         {
                             item.IsExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
-                            item.IsFirstSubmits = item.IsExacts.Select(x => true).ToList();
                             number += item.IsExacts.Count(x => x == true);
                             if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                             {
                                 var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
                                 if (answer != null && answer.IsFirstSubmits != null && answer.IsExacts != null)
                                 {
+                                    var isFirstSubmit = new List<bool>();
                                     foreach (var data in answer.IsExacts)
                                     {
                                         var index = answer.IsExacts.IndexOf(data);
                                         if (answer.IsFirstSubmits[index] && data.HasValue && !data.Value)
                                         {
-                                            item.IsFirstSubmits[index] = false;
+                                            isFirstSubmit.Add(false);
+                                        }
+                                        else
+                                        {
+                                            isFirstSubmit.Add(answer.IsFirstSubmits[index]);
                                         }
                                     }
+                                    item.IsFirstSubmits = isFirstSubmit;
                                 }
                             }
                         }
