@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class NotificationConsumer : IConsumer<NotifcationQueueModel>
+    public class NotificationConsumer : IConsumer<NotificationQueueModel>
     {
         private readonly IHubContext<NotificationHub> _notificationHubContext;
 
@@ -16,7 +16,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             _notificationHubContext = notificationHubContext;
         }
 
-        public async Task Consume(ConsumeContext<NotifcationQueueModel> context)
+        public async Task Consume(ConsumeContext<NotificationQueueModel> context)
         {
             if (context != null && context!.Message!.UserIds != null)
             {
