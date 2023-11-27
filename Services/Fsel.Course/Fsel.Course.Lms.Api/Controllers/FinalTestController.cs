@@ -3,16 +3,18 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.FinalTestCmd;
     using Fsel.Course.Lms.Application.Queries.FinalTestQuery;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/final-test")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
@@ -43,6 +45,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("final-test-answers")]
         [ProducesResponseType(typeof(MethodResult<FinalTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreateFinalTestAnswerCommand command)
         {
             MethodResult<FinalTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);

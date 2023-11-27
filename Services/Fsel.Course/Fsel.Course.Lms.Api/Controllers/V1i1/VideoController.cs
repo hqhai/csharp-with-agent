@@ -9,8 +9,10 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion("1.1")]
+    [Asp.Versioning.ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/video")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
@@ -26,7 +28,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// <summary>
         /// Create video time code answer
         /// </summary>
-        [HttpPost("create-answer")]
+        [HttpPost("create-video-time-code-answer")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreateVideoTimeCodeAnswerByTimeCodeCommand query)

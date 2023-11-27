@@ -6,10 +6,12 @@ using Fsel.Common.Constants;
 using Fsel.Sender.Application.Commands.SendEmailCmd;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
+using Fsel.Shared.Constants;
 
 namespace Fsel.Sender.Api.Controllers
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/send-email")]
     [ApiController]
     public class SendEmailController : ControllerBase

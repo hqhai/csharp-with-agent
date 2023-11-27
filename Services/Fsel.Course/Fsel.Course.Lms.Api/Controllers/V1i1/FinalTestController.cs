@@ -10,8 +10,10 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion("1.1")]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/final-test")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
@@ -27,7 +29,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// <summary>
         /// Create FinalTestAnswers
         /// </summary>
-        [HttpPost("create-answer")]
+        [HttpPost("final-test-answers")]
         [ProducesResponseType(typeof(MethodResult<SectionGroupResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswers([FromBody] CreateFinalTestAnswerBySectionGroupCommand command)

@@ -9,8 +9,10 @@ namespace Fsel.Storage.Api.Controllers
     using Fsel.Storage.Application.Services.AmazonS3Services;
     using Fsel.Storage.Domain.Enums;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/video")]
     [ApiController]
     public class VideoController : ControllerBase

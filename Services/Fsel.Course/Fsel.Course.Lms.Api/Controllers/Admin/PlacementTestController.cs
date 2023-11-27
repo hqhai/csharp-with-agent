@@ -11,8 +11,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/placement-test/admin")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
