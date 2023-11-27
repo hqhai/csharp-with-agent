@@ -18,5 +18,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public object? MockTestScores { get; set; }
         public int? UnitDisplayOrder { get; set; }
         public string? CourseCode { get; set; }
+        public bool IsCurrentStudent { get; set; }
+        public double TimeSpend { get; set; }
     }
 }

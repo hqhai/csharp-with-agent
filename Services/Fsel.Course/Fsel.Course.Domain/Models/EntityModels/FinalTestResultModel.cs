@@ -6,5 +6,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public Guid FinalTestId { get; set; }
         public Guid CourseId { get; set; }
+
+        public bool IsCurrentStudent { get; set; }
+
+        public double TimeSpend { get; set; }
     }
 }
