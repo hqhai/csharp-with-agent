@@ -140,7 +140,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isTimeCodeProcess && !item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = (isTimeCodeProcess && item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
                 }
             }
             return data;
@@ -152,7 +152,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isTimeCodeProcess && !!item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = (isTimeCodeProcess && item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
                 }
             }
             return data;
@@ -162,7 +162,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (data != null && !string.IsNullOrEmpty(data.Answers))
             {
-                data.IsExact = (isTimeCodeProcess && !data.IsFirstSubmit && data.IsExact == true) ? data.IsExact : default;
+                data.IsExact = (isTimeCodeProcess && data.IsFirstSubmit && data.IsExact == true) ? data.IsExact : default;
             }
             return data;
         }
@@ -171,7 +171,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (data != null && data.Answers != null)
             {
-                data.IsExact = (isTimeCodeProcess && !data.IsFirstSubmit && data.IsExact == true) ? data.IsExact : default;
+                data.IsExact = (isTimeCodeProcess && data.IsFirstSubmit && data.IsExact == true) ? data.IsExact : default;
             }
             return data;
         }
@@ -182,7 +182,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isTimeCodeProcess && !item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = (isTimeCodeProcess && item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
                 }
             }
             return data;
