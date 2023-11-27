@@ -14,6 +14,11 @@ namespace Fsel.Shared.Constants
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
 
         public const string ZMatter = "Resources//ZMatter.json";
+        public const string SpaceShip = "Resources//SpaceShip.json";
+
         public const string GameplayRuleConfig = "Resources//GameplayRuleConfig.json";
+
+        public const string StudentTagName = "Resources//StudentTagName.json";
+        public const string AvatarImage = "Resources//AvatarImage.json";
     }
 }

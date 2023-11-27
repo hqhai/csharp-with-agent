@@ -21,6 +21,11 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumMockTestType MockTestType { get; set; }
 
+        /// <summary>
+        /// Trạng thái Archive
+        /// </summary>
+        public bool IsArchive { get; set; }
+
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<MockTestSection> MockTestSections { get; set; } = new List<MockTestSection>();
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();

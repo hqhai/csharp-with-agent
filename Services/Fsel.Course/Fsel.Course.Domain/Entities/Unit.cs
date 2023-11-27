@@ -28,6 +28,11 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
 
+        /// <summary>
+        /// Trạng thái Archive
+        /// </summary>
+        public bool IsArchive { get; set; }
+
         public ICollection<UnitSkillMockTest> UnitSkillMockTests { get; set; } = new List<UnitSkillMockTest>();
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
         public ICollection<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();

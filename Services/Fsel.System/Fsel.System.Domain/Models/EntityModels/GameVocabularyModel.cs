@@ -25,6 +25,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public EnumGameVocabType GameVocabType { get; set; }
         public string? QuestionContent { get; set; }
         public IList<string>? AlternateSpelling { get; set; }
+        public Guid GameVocabularyId { get; set; }
     }
 
     public class GameVocabularyPlatformModel : BaseModel

@@ -9,12 +9,13 @@ using Fsel.Course.Application.Queries.UnitQuery;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
+using Asp.Versioning;
+using Fsel.Shared.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/unit")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]

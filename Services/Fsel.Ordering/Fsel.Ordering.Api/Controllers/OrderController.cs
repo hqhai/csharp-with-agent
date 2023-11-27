@@ -4,17 +4,17 @@ namespace Fsel.Ordering.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Ordering.Application.Commands.OrderCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
     public class OrderController : ControllerBase
@@ -29,7 +29,7 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Generate Random Order
         /// </summary>
-        [HttpGet("")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<GenerateRamdomOrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GenerateRandomOrder([FromQuery] GenerateRamdomOrderQuery query)

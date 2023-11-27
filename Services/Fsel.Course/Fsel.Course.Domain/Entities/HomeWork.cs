@@ -39,6 +39,11 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
+        /// <summary>
+        /// Trạng thái Archive
+        /// </summary>
+        public bool IsArchive { get; set; }
+
         public ICollection<HomeWorkResult> HomeWorkResults { get; set; } = new List<HomeWorkResult>();
         public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
 

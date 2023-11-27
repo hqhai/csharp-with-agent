@@ -324,24 +324,24 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     foreach (var item in dataAnswer.Answers)
                     {
-                        item.IsExact = item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
-                        if (item.IsExact == true)
+                        if (item.IsChecked)
                         {
-                            number++;
-                        }
-                        if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
-                        {
-                            var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
-                            if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
+                            item.IsExact = dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
+                            number = item.IsExact == true ? ++number : --number;
+                            if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                             {
-                                item.IsFirstSubmit = false;
+                                var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
+                                if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
+                                {
+                                    item.IsFirstSubmit = false;
+                                }
                             }
                         }
                     }
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing);
+            return (number < 0 ? default : number, isAnswerMissing);
         }
 
         private static (int, bool) GetTotalCorrectTypeListingAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)

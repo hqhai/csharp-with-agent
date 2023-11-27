@@ -7,12 +7,15 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.StudentQuery;
     using Fsel.Course.Lms.Application.Queries.UnitQuery;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/unit-result")]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     [ApiController]
@@ -48,6 +51,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetCurrentUnitIndicator([FromQuery] GetCurrentUnitIndicatorQuery query)
         {
             MethodResult<IList<SkillScores>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get course and unit by user id
+        /// </summary>
+        [HttpGet("get-course-unit-by-user-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<StudentCourseUnitModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseAndUnit([FromRoute] Guid id)
+        {
+            MethodResult<StudentCourseUnitModel> queryResult = await _mediator.Send(new GetCourseAndUnitByUserIdQuery { UserId = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
