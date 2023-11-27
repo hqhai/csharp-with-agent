@@ -136,7 +136,8 @@ namespace Fsel.Course.Infrastructure.Common
                     Answer = null,
                     SectionQuestionId = x,
                     SectionGroupResultId = sectionGroupResult.Id,
-                    PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default
+                    PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
+                    IsCorrect = null
                 }).ToList());
                 await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }

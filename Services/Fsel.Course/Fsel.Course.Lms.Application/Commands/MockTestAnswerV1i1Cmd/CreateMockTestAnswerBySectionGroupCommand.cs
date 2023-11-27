@@ -302,7 +302,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestAnswerV1i1Cmd
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (mockTestAnswer == null)
                     {
-                        mockTestAnswers.Add(GetMockTestAnswer(answerConfig, correctCount, request, sectionGroupResultId, sectionQuestionId, default));
+                        mockTestAnswers.Add(GetMockTestAnswer(answerConfig, correctCount, request, sectionGroupResultId, questionItem, default));
                     }
                 }
             }
@@ -363,7 +363,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestAnswerV1i1Cmd
             return methodResult;
         }
 
-        private static MockTestAnswer GetMockTestAnswer(object? answer, int correctCount, CreateMockTestAnswerBySectionGroupCommand request, Guid? sectionGroupResultId, Guid? sectionQuestionId, Guid? sectionId, Guid? sectionTimeCodeId = default)
+        private static MockTestAnswer GetMockTestAnswer(object? answer, int correctCount, CreateMockTestAnswerBySectionGroupCommand request, Guid? sectionGroupResultId, Question? questionItem, Guid? sectionId, Guid? sectionTimeCodeId = default)
         {
             return new MockTestAnswer
             {
@@ -372,8 +372,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestAnswerV1i1Cmd
                 MockTestResultId = request.MockTestResultId,
                 SectionTimeCodeId = sectionTimeCodeId ?? null,
                 SectionId = sectionId ?? null,
-                SectionQuestionId = sectionQuestionId ?? null,
-                SectionGroupResultId = sectionGroupResultId
+                SectionQuestionId = questionItem?.SectionQuestions.FirstOrDefault()?.Id ?? default,
+                SectionGroupResultId = sectionGroupResultId,
+                IsCorrect = questionItem == null || questionItem.CorrectTotal == correctCount,
             };
         }
     }

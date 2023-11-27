@@ -19,6 +19,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return await Queryable.Include(x => x.ExerciseQuestions)
                                     .ThenInclude(x => x.Exercise)
+                                    .ThenInclude(x => x!.TimeCodeExercises)
                                     .Where(x => ids.Contains(x.Id)).ToListAsync();
             }
             catch (Exception)
