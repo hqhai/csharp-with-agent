@@ -59,7 +59,8 @@ queues: new Dictionary<string, Type>
 {
     { QueueSettings.UserQueue.NameQueue.SyncStudentShieldEveryDay, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
     { QueueSettings.UserQueue.NameQueue.UpdateStudentsDailyStreak, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
-    { QueueSettings.UserQueue.NameQueue.LeaderBoard, typeof(LeaderBoardConsumer) }
+    { QueueSettings.UserQueue.NameQueue.LeaderBoard, typeof(LeaderBoardConsumer) },
+    { QueueSettings.PlantDefenderQueue.NameQueue.DeleteGuestStudent, typeof(DeleteGuestStudentConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

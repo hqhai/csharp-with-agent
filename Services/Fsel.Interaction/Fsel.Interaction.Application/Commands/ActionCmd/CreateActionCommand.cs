@@ -101,8 +101,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                     var classForumResultTemp = await GetClassForumResultModel(request.ObjectId);
 
                     var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(request.ObjectId, classForumResultTemp!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId);
-
-
                     bool conditionCheckIsClassForum = await CheckObjecIsClassForum(request.ObjectId);
                     if (!conditionCheckIsClassForum)
                     {
@@ -116,12 +114,12 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
                     if (action.Type == EnumInteractionActionType.Like)
                     {
-                        NotificationQueueModel model = new NotificationQueueModel()
+                        NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                         {
-                            ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, },
                             ObjectId = request.ObjectId,
-                            UserId = objectOwnerId,
+                            UserIds = new List<Guid>() { objectOwnerId },
                             SenderId = _authContext.CurrentUserId,
+                            ParamsMessage = new List<object> { _authContext.CurrentFullName! ?? string.Empty, },
                             ParamsLink = returnedParamsLink,
                             Type = businessType,
                             Content = businessContent,
@@ -144,7 +142,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                         InterationType = action.Type,
                         Type = EnumNotificationType.LinkPage,
                         Content = EnumNotificationContent.FlagClassForum,
-                        UserId = action.CreatedUserId,
+                        UserIds = new List<Guid> { action.CreatedUserId },
                         SenderId = _authContext.CurrentUserId
                     };
 

@@ -152,7 +152,9 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                         break;
                 }
 
-                if (questBoardStudentUpdate != null)
+
+                //xử lý thêm, sửa
+                if (questBoardStudentUpdate != null) // case update
                 {
                     if (questBoardStudentUpdate.AchievedPoints >= request.AchievedPoints)
                     {
@@ -162,7 +164,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                     questBoardStudentUpdate.AchievedPoints = request.AchievedPoints;
                     questBoardStudentToUpdate.Add(questBoardStudentUpdate);
                 }
-                else
+                else // case add
                 {
                     var questBoardAdd = listQuestBoard.FirstOrDefault(x => x.Category == item);
 

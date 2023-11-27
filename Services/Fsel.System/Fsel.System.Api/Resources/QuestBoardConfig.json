@@ -250,6 +250,14 @@
     "maxPoints": 1,
     "displayType": "Number",
     "createdDate": "2023-11-07"
+  },
+  {
+    "id": "7EE5416C-118E-45DC-942C-F61E985B9827",
+    "type": "DailyQuests",
+    "category": "LearnInTwentyMinutes",
+    "operator": "Equal",
+    "maxPoints": 1,
+    "displayType": "Number",
+    "createdDate": "2023-11-07"
   }
-
 ]

@@ -11,5 +11,9 @@ namespace Fsel.Course.Domain.IRepositories
         Task<bool> IsHomeWorkUsed(Guid? id);
 
         Task<HomeWorkModel?> GetIncludeAllAsync(Guid? id);
+
+        Task<IList<HomeWork>> GetListAsync(LessonResult lessonResult);
+
+        Task<HomeWork?> GetAsync(Guid? id, HomeWorkResult homeWorkResult);
     }
 }

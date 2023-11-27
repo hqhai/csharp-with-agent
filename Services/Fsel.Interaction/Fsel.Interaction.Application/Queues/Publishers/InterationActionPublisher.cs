@@ -21,18 +21,17 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.InterationAction, new InterationActionQueueModel
+            await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.InteractionAction, new InterationActionQueueModel
             {
                 ObjectId = model.ObjectId,
                 Type = model.Type,
-                UserId = model.UserId,
+                UserIds = model.UserIds,
                 Content = model.Content,
                 SenderId = model.SenderId,
                 ParamsLink = model.ParamsLink,
                 ParamsMessage = model.ParamsMessage,
                 InterationType = model.InterationType
             }, cancellationToken);
-
         }
     }
 }

@@ -17,5 +17,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double DisplayTime { get; set; }
         public double ExecutionTime { get; set; }
         public IList<ExerciseModel>? Exercises { get; set; }
+        public VideoTimeCodeResultModel? VideoTimeCodeResult { get; set; }
     }
 }

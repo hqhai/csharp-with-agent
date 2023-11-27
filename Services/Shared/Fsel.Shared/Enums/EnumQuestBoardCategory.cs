@@ -91,5 +91,8 @@ namespace Fsel.Shared.Enums
 
         [Description("Xem X(ALL) đánh giá phản hồi của giáo viên về bài của bạn (Mock Test/Class Forum)")]
         SeeAllReviewsAndFeedback,
+
+        [Description("Tương tác tính năng \"Học\" trong 20 phút")]
+        LearnInTwentyMinutes
     }
 }

@@ -27,6 +27,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Newtonsoft.Json;
 
     public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<CommentModel>>
     {
@@ -48,9 +49,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
-            _authContext = authContext;
             _discussionBoardCommentPublisher = discussionBoardCommentPublisher;
             _classForumCommentPublisher = classForumCommentPublisher;
+            _authContext = authContext;
             _courseService = courseService;
             _systemService = systemService;
             _userService = userService;
@@ -77,9 +78,15 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 methodResult.AddErrorBadRequest(comment.ErrorMessages);
                 return methodResult;
             }
+            var fullname = await _commentRepository.Queryable.FirstOrDefaultAsync(cancellationToken);
+
             await _commentRepository.ExecuteTransactionAsync(async () =>
             {
-                NotificationQueueModel model = new NotificationQueueModel();
+                comment = _commentRepository.Add(comment);
+                await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                NotificationSendingQueueModel model = new NotificationSendingQueueModel();
+                List<object> paramLinksValue = new List<object>();
                 switch (request.Type)
                 {
                     case EnumInteractionType.DiscussionBoard:
@@ -112,16 +119,17 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         });
                         var classForumResult = classForumResultResult.Content?.Result;
 
-                        model = new NotificationQueueModel()
+                        paramLinksValue = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, request.ObjectId, comment.Id };
+
+                        model = new NotificationSendingQueueModel()
                         {
-                            ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, },
                             ObjectId = request.ObjectId,
-                            UserId = postOwner!.CreatedUserId,
+                            UserIds = new List<Guid>() { postOwner.CreatedUserId },
+                            SenderId = _authContext.CurrentUserId,
                             Content = EnumNotificationContent.Comment,
                             Type = EnumNotificationType.LinkComment,
-                            SenderId = _authContext.CurrentUserId,
-                            ParamsLink = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, request.ObjectId, comment.Id },
-                            PlatformCode = EnumPlatformCode.LMS
+                            ParamsLink = paramLinksValue,
+                            ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, }
                         };
 
                         #region DoQuestBoard
@@ -141,7 +149,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         var commentOwner = await _commentRepository.GetByIdAsync(request.ObjectId).ConfigureAwait(false);
 
                         //Không thông báo khi trả lời bình luận của chính mình
-                        if (commentOwner?.CreatedUserId == _authContext.CurrentUserId)
+                        if (commentOwner == null && commentOwner?.CreatedUserId == _authContext.CurrentUserId)
                         {
                             break;
                         }
@@ -161,24 +169,36 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         });
                         var classForumResultOfCommentOwner = classForumResultOfCommentOwnerResult.Content?.Result;
 
-                        model = new NotificationQueueModel()
+                        paramLinksValue = new List<object>
+                                    {
+                                        classForumResultOfCommentOwner?.UnitId ?? default,
+                                        classForumResultOfCommentOwner?.CourseId ?? default,
+                                        commentOwner?.ObjectId ?? default,
+                                        request.ObjectId,
+                                        comment.Id
+                                    };
+
+                        model = new NotificationSendingQueueModel()
                         {
                             ParamsMessage = new List<object> { _authContext.CurrentUsername ?? string.Empty },
                             ObjectId = request.ObjectId,
-                            UserId = commentOwner?.CreatedUserId,
                             Content = EnumNotificationContent.ReplyComment,
                             Type = EnumNotificationType.LinkComment,
                             SenderId = _authContext.CurrentUserId,
-                            ParamsLink = new List<object> { classForumResultOfCommentOwner?.UnitId ?? default, classForumResultOfCommentOwner?.CourseId ?? default, commentOwner?.ObjectId ?? default, request.ObjectId, comment.Id },
-                            PlatformCode = EnumPlatformCode.LMS
+                            ParamsLink = paramLinksValue,
+                            UserIds = new List<Guid> { commentOwner!.CreatedUserId },
                         };
+
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
                 }
-                comment = _commentRepository.Add(comment);
-                await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                var commentModel = _mapper.Map<CommentModel>(comment);
+
+                var userResult = await _userService.GetUserByIdAsync(_authContext.CurrentUserId.ToString());
+                commentModel.FullName = userResult.Content?.Result?.FullName;
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<CommentModel>(comment);
+                methodResult.Result = commentModel;
                 return methodResult;
             });
 

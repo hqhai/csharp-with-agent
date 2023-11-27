@@ -76,6 +76,8 @@ namespace Fsel.Shared.Constants
                 public const string OrderCreateNotification = $"{KeyQueue}_OrderCreateNotification";
                 public const string UpdateTeacherGradingInClassForumAndMockTest = $"{KeyQueue}_UpdateTeacherGradingInClassForumAndMockTest";
                 public const string UpdateOcCheckInClassForumResult = $"{KeyQueue}_UpdateOcCheckInClassForumResult";
+                public const string CompleteTestWhenTimeOut = $"{KeyQueue}_CompleteTestWhenTimeOut";
+                public const string SetTimeToCompleteTest = $"{KeyQueue}_SetTimeToCompleteTest";
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
             }
         }
@@ -87,7 +89,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
-                public const string InterationAction = $"{KeyQueue}_InterationAction";
+                public const string InteractionAction = $"{KeyQueue}_InterationAction";
             }
         }
 
@@ -119,6 +121,16 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string UpdateClassLiveAssignment = $"{KeyQueue}_UpdateClassLiveAssignment";
+            }
+        }
+
+        public static class PlantDefenderQueue
+        {
+            public const string KeyQueue = nameof(PlantDefenderQueue);
+
+            public static class NameQueue
+            {
+                public const string DeleteGuestStudent = $"{KeyQueue}_DeleteGuestStudent";
             }
         }
 

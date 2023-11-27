@@ -1,17 +1,20 @@
 // Copyright (c) Atlantic. All rights reserved.
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Lms.Application.Commands.MockTestAnswerV1i1Cmd;
 using Fsel.Course.Lms.Application.Commands.MockTestCmd;
 using Fsel.Course.Lms.Application.Queries.MockTestQuery;
+using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/mock-test")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
@@ -30,21 +33,10 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("create-mock-test-answer")]
         [ProducesResponseType(typeof(MethodResult<MockTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         public async Task<IActionResult> CreateMockTestAnswers([FromBody] CreateMockTestAnswerCommand command)
         {
             MethodResult<MockTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Create MockTestAnswers
-        /// </summary>
-        [HttpPost("create-answer")]
-        [ProducesResponseType(typeof(MethodResult<SectionGroupResultModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateAnswers([FromBody] CreateAnswerBySectionGroupCommand command)
-        {
-            MethodResult<SectionGroupResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

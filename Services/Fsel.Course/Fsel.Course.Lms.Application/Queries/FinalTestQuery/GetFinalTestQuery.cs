@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,11 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             if (finalTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
+                return methodResult;
+            }
+            else if (finalTestResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(finalTestResult));
                 return methodResult;
             }
             var finalTest = await _finalTestRepository.Queryable.Include(x => x.CourseUnitMockTests)

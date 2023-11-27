@@ -172,7 +172,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CountQuestion = 1,
                 TotalCount = TotalScoreClassForum,
                 CorrectCount = classForumResult.ClassForumScores.Sum(x => x.Score),
-                Percent = NumberHelper.GetPercent(classForumResult.ClassForumScores.Sum(x => x.Score), TotalScoreClassForum)
             };
         }
 
@@ -238,7 +237,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     CorrectCount = group.Sum(x => x.CorrectCount),
                     CountQuestion = group.Sum(x => x.CountQuestion),
                     TotalQuestion = group.Sum(x => x.TotalQuestion),
-                    Percent = NumberHelper.ConvertRound(group.Average(x => x.Percent)),
                 };
             }
             return new SkillScores();
@@ -250,12 +248,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (x != null)
             {
                 skillScores.Skill = x.Key;
-                skillScores.Scores = x.Sum(x => x.Scores) > 0 ? x.Average(x => x.Scores) : default;
                 skillScores.TotalQuestion = x.Sum(x => x.TotalQuestion);
                 skillScores.CountQuestion = x.Sum(x => x.CountQuestion);
                 skillScores.TotalCount = x.Sum(x => x.TotalCount);
                 skillScores.CorrectCount = x.Sum(x => x.CorrectCount);
-                skillScores.Percent = NumberHelper.GetPercent(x.Sum(x => x.CorrectCount), x.Sum(x => x.TotalCount));
                 return skillScores;
             };
             return skillScores;
@@ -328,7 +324,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             if (courseUnitMockTests != null && courseUnitMockTests.Any())
             {
-                var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => (Guid)x.GetPropValue(type) == objectId);
+                var courseUnitMockTest = courseUnitMockTests.Where(x => x.GetPropValue<Guid>(type) == objectId).FirstOrDefault();
                 if (courseUnitMockTest != null)
                 {
                     var index = courseUnitMockTests.IndexOf(courseUnitMockTest) + 1;
