@@ -126,16 +126,16 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    var isCheck = item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
-                    if (isCheck)
+                    if (item.IsChecked)
                     {
-                        number++;
+                        var isCheck = dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
+                        number = isCheck ? ++number : --number;
+                        item.IsExact = isCheck;
                     }
-                    item.IsExact = isCheck;
                 }
             }
             configAnswer = dataAnswer;
-            return number;
+            return number < 0 ? default : number;
         }
 
         private static int GetTotalCorrectTypeListingAnswer(ref object? configAnswer, object? configQuestion)
