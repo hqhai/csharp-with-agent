@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
 
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable
                 .Where(x => x.Id == request.VideoTimeCodeResultId && x.VideoTimeCodeId == request.VideoTimeCodeId && x.StudentId == student!.Id)
-                .Select(x => new VideoTimeCodeResultModel
+                .Select(x => new VideoTimeCodeResultRankingModel
                 {
                     Id = x.Id,
                     TimeCodeType = x.VideoTimeCode!.TimeCodeType,

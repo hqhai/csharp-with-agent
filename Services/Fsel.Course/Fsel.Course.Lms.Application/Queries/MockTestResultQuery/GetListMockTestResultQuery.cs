@@ -19,12 +19,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListMockTestResultQuery : IRequest<MethodResult<IList<MockTestResultModel>>>
+    public class GetListMockTestResultQuery : IRequest<MethodResult<IList<MockTestResultRankingModel>>>
     {
-        public Guid MockTestResultId { get; set; }
+        public Guid MockTestId { get; set; }
     }
 
-    public class GetListMockTestResultQueryHandler : IRequestHandler<GetListMockTestResultQuery, MethodResult<IList<MockTestResultModel>>>
+    public class GetListMockTestResultQueryHandler : IRequestHandler<GetListMockTestResultQuery, MethodResult<IList<MockTestResultRankingModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
@@ -41,27 +41,25 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             _mockTestResultRepository = mockTestResultRepository;
         }
 
-        public async Task<MethodResult<IList<MockTestResultModel>>> Handle(GetListMockTestResultQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<MockTestResultRankingModel>>> Handle(GetListMockTestResultQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<MockTestResultModel>> methodResult = new MethodResult<IList<MockTestResultModel>>();
+            MethodResult<IList<MockTestResultRankingModel>> methodResult = new MethodResult<IList<MockTestResultRankingModel>>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
 
-            IList<Guid>? classStudentIds = new List<Guid>();
-
             var currentClass = await _trainingService.GetClassByStudentId(student!.Id);
-            classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
+            var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var finalTestResults = await _mockTestResultRepository.Queryable
                             .Include(x => x.MockTest)
                             .ThenInclude(x => x!.MockTestSections)
                             .ThenInclude(x => x.SectionGroup)
-                            .Where(x => x.Id == request.MockTestResultId && classStudentIds!.Contains(x.StudentId))
+                            .Where(x => x.MockTestId == request.MockTestId && classStudentIds!.Contains(x.StudentId))
                             .ToListAsync(cancellationToken);
 
-            var finalTestResultDtos = _mapper.Map<IList<MockTestResultModel>>(finalTestResults);
+            var finalTestResultDtos = _mapper.Map<IList<MockTestResultRankingModel>>(finalTestResults);
 
             foreach (var item in finalTestResultDtos)
             {

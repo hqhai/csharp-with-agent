@@ -18,12 +18,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListVideoTimeCodeResultQuery : IRequest<MethodResult<IList<VideoTimeCodeResultModel>>>
+    public class GetListVideoTimeCodeResultQuery : IRequest<MethodResult<IList<VideoTimeCodeResultRankingModel>>>
     {
         public Guid VideoTimeCodeId { get; set; }
     }
 
-    public class GetListVideoTimeCodeResultQueryHandler : IRequestHandler<GetListVideoTimeCodeResultQuery, MethodResult<IList<VideoTimeCodeResultModel>>>
+    public class GetListVideoTimeCodeResultQueryHandler : IRequestHandler<GetListVideoTimeCodeResultQuery, MethodResult<IList<VideoTimeCodeResultRankingModel>>>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IMapper _mapper;
@@ -40,25 +40,23 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<IList<VideoTimeCodeResultModel>>> Handle(GetListVideoTimeCodeResultQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<VideoTimeCodeResultRankingModel>>> Handle(GetListVideoTimeCodeResultQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<VideoTimeCodeResultModel>> methodResult = new MethodResult<IList<VideoTimeCodeResultModel>>();
+            MethodResult<IList<VideoTimeCodeResultRankingModel>> methodResult = new MethodResult<IList<VideoTimeCodeResultRankingModel>>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
 
-            IList<Guid>? classStudentIds = new List<Guid>();
-
             var currentClass = await _trainingService.GetClassByStudentId(student!.Id);
-            classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
+            var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
                             .Include(x => x.VideoTimeCode)
                             .Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId && classStudentIds!.Contains(x.StudentId) && x.VideoTimeCode!.TimeCodeType != EnumTimeCodeType.Standalone)
                             .ToListAsync(cancellationToken);
 
-            var videoTimeCodeResultDtos = _mapper.Map<IList<VideoTimeCodeResultModel>>(videoTimeCodeResults);
+            var videoTimeCodeResultDtos = _mapper.Map<IList<VideoTimeCodeResultRankingModel>>(videoTimeCodeResults);
 
             foreach (var item in videoTimeCodeResultDtos)
             {
