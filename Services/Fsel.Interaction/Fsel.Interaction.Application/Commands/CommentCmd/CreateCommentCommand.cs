@@ -110,9 +110,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                         paramLinksValue = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, request.ObjectId, comment.Id };
 
-                        // Chuyển đổi danh sách thành JSON
-                        string paramLinks = JsonConvert.SerializeObject(paramLinksValue);
-
                         model = new NotificationSendingQueueModel()
                         {
                             ObjectId = request.ObjectId,
@@ -159,9 +156,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                                         request.ObjectId,
                                         comment.Id
                                     };
-
-                        // Chuyển đổi danh sách thành JSON
-                        paramLinks = JsonConvert.SerializeObject(paramLinksValue);
 
                         model = new NotificationSendingQueueModel()
                         {

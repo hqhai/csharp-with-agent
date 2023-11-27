@@ -116,7 +116,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                             ObjectId = request.ObjectId,
                             UserIds = new List<Guid>() { objectOwnerId },
                             SenderId = _authContext.CurrentUserId,
-                            ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, },
+                            ParamsMessage = new List<object> { _authContext.CurrentFullName! ?? string.Empty, },
                             ParamsLink = returnedParamsLink,
                             Type = businessType,
                             Content = businessContent,

@@ -18,11 +18,6 @@ namespace Fsel.Interaction.Infrastructure.Configs
                .HasConversion(
                    v => v.ToString(),
                    v => v.EnumParse<EnumInteractionActionType>());
-            builder.Property(e => e.BusinessType)
-               .HasMaxLength(100)
-               .HasConversion(
-                   v => v.ToString(),
-                   v => v.EnumParse<EnumInteractionType>());
         }
     }
 }
