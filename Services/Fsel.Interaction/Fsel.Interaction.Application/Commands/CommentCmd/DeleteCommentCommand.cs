@@ -64,9 +64,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                 var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(comment.Id, comment!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId);
 
-                NotificationQueueModel notificationQueueModel = new NotificationQueueModel()
+                NotificationSendingQueueModel notificationQueueModel = new NotificationSendingQueueModel()
                 {
-                    UserId = comment.CreatedUserId,
+                    UserIds = new List<Guid>() { comment.CreatedUserId },
                     Type = EnumNotificationType.LinkComment,
                     Content = EnumNotificationContent.DeleteComment,
                     SenderId = _authContext.CurrentUserId,

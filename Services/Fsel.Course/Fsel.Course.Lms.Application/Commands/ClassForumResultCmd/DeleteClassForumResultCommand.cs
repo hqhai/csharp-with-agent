@@ -64,7 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
                  var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(classForumResult!, classForumResult?.LessonResult?.CourseId, classForumResult?.LessonResult?.UnitId);
 
-                 NotificationQueueModel notificationQueueModel = new NotificationQueueModel()
+                 NotificationSendingQueueModel notificationQueueModel = new NotificationSendingQueueModel()
                  {
                      Type = EnumNotificationType.LinkPage,
                      Content = EnumNotificationContent.DeleteClassForumResult,
@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                      ParamsLink = returnedParamsLink,
                      ObjectId = classForumResult?.Id ?? Guid.NewGuid(),
                      PlatformCode = EnumPlatformCode.LMS,
-                     UserId = objectOwnerId,
+                     UserIds = new List<Guid>() { objectOwnerId },
                  };
 
                  await _notificationMessagePublisher.Publish(notificationQueueModel, cancellationToken).ConfigureAwait(false);
