@@ -14,6 +14,6 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
         public long Id { get; set; }
         public IList<string>? Answer { get; set; }
         public bool? IsExact { get; set; }
-        public bool IsExactDisplay { get; set; }
+        public bool IsFirstSubmit { get; set; } = true;
     }
 }

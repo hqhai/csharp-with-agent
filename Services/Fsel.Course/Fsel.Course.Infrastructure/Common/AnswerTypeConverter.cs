@@ -70,7 +70,7 @@ namespace Fsel.Course.Infrastructure.Common
             return (configAnswer, totalCorrect, isAnswerMissing);
         }
 
-        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false, bool isExactDisplay = false)
+        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false, bool isTimeCodeProcess = false)
         {
             object? result;
             switch (type)
@@ -79,29 +79,29 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
                     var multichoice = configAnswer.Deserialize<MultipleChoiceAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(multichoice, isExactDisplay) : multichoice;
+                    result = isDisableAnswers ? ClearAnswers(multichoice, isTimeCodeProcess) : multichoice;
                     break;
 
                 case EnumQuestionType.Listing:
                     var listingQuestion = configAnswer.Deserialize<ListingAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(listingQuestion, isExactDisplay) : listingQuestion;
+                    result = isDisableAnswers ? ClearAnswers(listingQuestion, isTimeCodeProcess) : listingQuestion;
                     break;
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
                 case EnumQuestionType.DragAndDropPicture:
                     var matchingTypeQuestion = configAnswer.Deserialize<MatchingTypeAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion, isExactDisplay) : matchingTypeQuestion;
+                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion, isTimeCodeProcess) : matchingTypeQuestion;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
                     var shortAnswerQuestionWordBaseQuestion = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion, isExactDisplay) : shortAnswerQuestionWordBaseQuestion;
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion, isTimeCodeProcess) : shortAnswerQuestionWordBaseQuestion;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
                     var shortAnswerWordCount = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount, isExactDisplay) : shortAnswerWordCount;
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount, isTimeCodeProcess) : shortAnswerWordCount;
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
@@ -109,17 +109,17 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
                     var gapFillQuestion = configAnswer.Deserialize<GapFillAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion, isExactDisplay) : gapFillQuestion;
+                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion, isTimeCodeProcess) : gapFillQuestion;
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion, isExactDisplay) : dragAndDropSentenceOrderQuestion;
+                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion, isTimeCodeProcess) : dragAndDropSentenceOrderQuestion;
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     var multipleOption = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(multipleOption, isExactDisplay) : multipleOption;
+                    result = isDisableAnswers ? ClearAnswers(multipleOption, isTimeCodeProcess) : multipleOption;
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
@@ -134,93 +134,91 @@ namespace Fsel.Course.Infrastructure.Common
             return result;
         }
 
-        private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data, bool isExactDisplay)
+        private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data, bool isTimeCodeProcess)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isExactDisplay && !item.IsExactDisplay && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = (isTimeCodeProcess && !item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(DragAndDropSentenceOrderAnswer? data, bool isExactDisplay)
+        private static object? ClearAnswers(DragAndDropSentenceOrderAnswer? data, bool isTimeCodeProcess)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isExactDisplay && !item.IsExactDisplay && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = (isTimeCodeProcess && !!item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(ShortAnswerWordBaseAnswer? data, bool isExactDisplay)
+        private static object? ClearAnswers(ShortAnswerWordBaseAnswer? data, bool isTimeCodeProcess)
         {
             if (data != null && !string.IsNullOrEmpty(data.Answers))
             {
-                data.IsExact = (isExactDisplay && !data.IsExactDisplay && data.IsExact == true) ? data.IsExact : default;
+                data.IsExact = (isTimeCodeProcess && !data.IsFirstSubmit && data.IsExact == true) ? data.IsExact : default;
             }
             return data;
         }
 
-        private static object? ClearAnswers(ListingAnswer? data, bool isExactDisplay)
+        private static object? ClearAnswers(ListingAnswer? data, bool isTimeCodeProcess)
         {
             if (data != null && data.Answers != null)
             {
-                data.IsExact = (isExactDisplay && !data.IsExactDisplay && data.IsExact == true) ? data.IsExact : default;
+                data.IsExact = (isTimeCodeProcess && !data.IsFirstSubmit && data.IsExact == true) ? data.IsExact : default;
             }
             return data;
         }
 
-        private static object? ClearAnswers(MultipleChoiceAnswer? data, bool isExactDisplay)
+        private static object? ClearAnswers(MultipleChoiceAnswer? data, bool isTimeCodeProcess)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isExactDisplay && !item.IsExactDisplay && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = (isTimeCodeProcess && !item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(ShortAnswerWordCountBaseAnswer? data, bool isExactDisplay)
+        private static object? ClearAnswers(ShortAnswerWordCountBaseAnswer? data, bool isTimeCodeProcess)
         {
             if (data != null)
             {
-                data.IsExact = (isExactDisplay && !data.IsExactDisplay && data.IsExact == true) ? data.IsExact : default;
+                data.IsExact = (isTimeCodeProcess && data.IsFirstSubmit && data.IsExact == true) ? data.IsExact : default;
             }
             return data;
         }
 
-        private static object? ClearAnswers(MatchingTypeAnswer? data, bool isExactDisplay)
+        private static object? ClearAnswers(MatchingTypeAnswer? data, bool isTimeCodeProcess)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isExactDisplay && !item.IsExactDisplay && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = (isTimeCodeProcess && item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(GapFillAnswer? data, bool isExactDisplay)
+        private static object? ClearAnswers(GapFillAnswer? data, bool isTimeCodeProcess)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.GapFillExacts = item.GapFillExacts?.Select(x =>
+                    item.IsExacts = item.IsExacts?.Select((x, index) =>
                     {
-                        x.IsExact = (isExactDisplay && !x.IsExactDisplay && x.IsExact == true) ? x.IsExact : default;
-                        return x;
+                        return (isTimeCodeProcess && item.IsFirstSubmits != null && item.IsFirstSubmits[index] && x == true) ? x : default;
                     }).ToList();
-                    item.IsExacts = item.GapFillExacts?.Select(x => x.IsExact).ToList();
                 }
             }
             return data;
@@ -244,7 +242,7 @@ namespace Fsel.Course.Infrastructure.Common
                     foreach (var item in dataAnswer.Answers)
                     {
                         var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                        if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => (item.AnswerId.HasValue && n.Id == item.AnswerId) && n.IsCorrect == true))
+                        if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => item.AnswerId.HasValue && n.Id == item.AnswerId && n.IsCorrect == true))
                         {
                             number++;
                             item.IsExact = true;
@@ -256,9 +254,9 @@ namespace Fsel.Course.Infrastructure.Common
                         if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                         {
                             var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
-                            if (!(answer != null && answer.IsExact == true && !answer.IsExactDisplay))
+                            if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
                             {
-                                item.IsExactDisplay = isTryAgain;
+                                item.IsFirstSubmit = false;
                             }
                         }
                     }
@@ -297,9 +295,9 @@ namespace Fsel.Course.Infrastructure.Common
                         if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                         {
                             var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.FromId == item.FromId);
-                            if (!(answer != null && answer.IsExact == true && !answer.IsExactDisplay))
+                            if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
                             {
-                                item.IsExactDisplay = isTryAgain;
+                                item.IsFirstSubmit = false;
                             }
                         }
                     }
@@ -326,18 +324,17 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     foreach (var item in dataAnswer.Answers)
                     {
-                        var isCheck = item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
-                        if (isCheck)
+                        item.IsExact = item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
+                        if (item.IsExact == true)
                         {
                             number++;
                         }
-                        item.IsExact = isCheck;
                         if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                         {
                             var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
-                            if (!(answer != null && answer.IsExact == true && !answer.IsExactDisplay))
+                            if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
                             {
-                                item.IsExactDisplay = isTryAgain;
+                                item.IsFirstSubmit = false;
                             }
                         }
                     }
@@ -369,9 +366,9 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                     {
-                        if (!(dataOldAnswer.IsExact == true && !dataOldAnswer.IsExactDisplay))
+                        if (!(dataOldAnswer.IsExact == true && dataOldAnswer.IsFirstSubmit))
                         {
-                            dataOldAnswer.IsExactDisplay = isTryAgain;
+                            dataOldAnswer.IsFirstSubmit = false;
                         }
                     }
                 }
@@ -403,9 +400,9 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                     {
-                        if (!(dataOldAnswer.IsExact == true && !dataOldAnswer.IsExactDisplay))
+                        if (!(dataOldAnswer.IsExact == true && dataOldAnswer.IsFirstSubmit))
                         {
-                            dataAnswer.IsExactDisplay = isTryAgain;
+                            dataAnswer.IsFirstSubmit = false;
                         }
                     }
                 }
@@ -447,9 +444,9 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                     {
-                        if (!(dataOldAnswer.IsExact == true && !dataOldAnswer.IsExactDisplay))
+                        if (!(dataOldAnswer.IsExact == true && dataOldAnswer.IsFirstSubmit))
                         {
-                            dataAnswer.IsExactDisplay = isTryAgain;
+                            dataAnswer.IsFirstSubmit = false;
                         }
                     }
                 }
@@ -479,29 +476,25 @@ namespace Fsel.Course.Infrastructure.Common
 
                         if (question != null && question.Words?.Any() == true && item.Answer?.Any() == true)
                         {
-                            var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
-                            item.GapFillExacts = isExacts.Select(x => new GapFillAnswerExact { IsExact = x, IsExactDisplay = isTryAgain }).ToList();
-                            item.IsExacts = isExacts;
-                            if (isExacts.Count(x => x == true) == isExacts.Count)
+                            item.IsExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
+                            item.IsFirstSubmits = item.IsExacts.Select(x => true).ToList();
+                            if (item.IsExacts.Count(x => x == true) == item.IsExacts.Count)
                             {
                                 number++;
                             }
-                        }
-                        else
-                        {
-                            item.GapFillExacts = new List<GapFillAnswerExact>();
-                        }
-
-                        if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
-                        {
-                            var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
-
-                            if (answer != null && answer.GapFillExacts != null)
+                            if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                             {
-                                foreach (var data in answer.GapFillExacts.Where(data => data.IsExact == true && !data.IsExactDisplay))
+                                var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
+                                if (answer != null && answer.IsFirstSubmits != null && answer.IsExacts != null)
                                 {
-                                    var index = answer.GapFillExacts.IndexOf(data);
-                                    item.GapFillExacts[index].IsExactDisplay = false;
+                                    foreach (var data in answer.IsExacts)
+                                    {
+                                        var index = answer.IsExacts.IndexOf(data);
+                                        if (answer.IsFirstSubmits[index] && data.HasValue && !data.Value)
+                                        {
+                                            item.IsFirstSubmits[index] = false;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -633,25 +626,22 @@ namespace Fsel.Course.Infrastructure.Common
                         var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
                         if (question != null && question.Words != null && question.Words.Any() && item.Answer != null && item.Answer.Any())
                         {
-                            var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
-                            item.IsExacts = isExacts;
-                            item.GapFillExacts = isExacts.Select(x => new GapFillAnswerExact { IsExact = x, IsExactDisplay = isTryAgain }).ToList();
-                            number += isExacts.Count(x => x == true);
-                        }
-                        else
-                        {
-                            item.GapFillExacts = new List<GapFillAnswerExact>();
-                        }
-                        if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
-                        {
-                            var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
-
-                            if (answer != null && answer.GapFillExacts != null)
+                            item.IsExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
+                            item.IsFirstSubmits = item.IsExacts.Select(x => true).ToList();
+                            number += item.IsExacts.Count(x => x == true);
+                            if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                             {
-                                foreach (var data in answer.GapFillExacts.Where(data => data.IsExact == true && !data.IsExactDisplay))
+                                var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
+                                if (answer != null && answer.IsFirstSubmits != null && answer.IsExacts != null)
                                 {
-                                    var index = answer.GapFillExacts.IndexOf(data);
-                                    item.GapFillExacts[index].IsExactDisplay = false;
+                                    foreach (var data in answer.IsExacts)
+                                    {
+                                        var index = answer.IsExacts.IndexOf(data);
+                                        if (answer.IsFirstSubmits[index] && data.HasValue && !data.Value)
+                                        {
+                                            item.IsFirstSubmits[index] = false;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -665,7 +655,7 @@ namespace Fsel.Course.Infrastructure.Common
         private static (int, bool) GetTotalCorrectTypeDragDropOrderAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
-            var dataOldAnswer = configQuestion.Deserialize<DragAndDropSentenceOrderAnswer>();
+            var dataOldAnswer = configOldAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
             var dataQuestion = configQuestion.Deserialize<DragAndDropSentenceOrderQuestion>();
             int number = 0;
             bool isAnswerMissing = default;
@@ -696,9 +686,9 @@ namespace Fsel.Course.Infrastructure.Common
                         if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                         {
                             var answer = dataOldAnswer.Answers.FirstOrDefault(c => c.Id == item.Id);
-                            if (!(answer != null && answer.IsExact == true && !answer.IsExactDisplay))
+                            if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
                             {
-                                item.IsExactDisplay = isTryAgain;
+                                item.IsFirstSubmit = false;
                             }
                         }
                     }
