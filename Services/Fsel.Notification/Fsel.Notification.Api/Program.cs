@@ -35,5 +35,5 @@ new Dictionary<string, Type>
 });
 
 var app = builder.Build();
-app.UseServices(appSetting);
+app.UseServices();
 app.Run();
