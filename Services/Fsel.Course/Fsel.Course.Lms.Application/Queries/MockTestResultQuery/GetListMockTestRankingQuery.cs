@@ -19,12 +19,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListMockTestResultQuery : IRequest<MethodResult<IList<MockTestResultRankingModel>>>
+    public class GetListMockTestRankingQuery : IRequest<MethodResult<IList<MockTestResultRankingModel>>>
     {
-        public Guid MockTestId { get; set; }
+        public Guid MockTestResultId { get; set; }
     }
 
-    public class GetListMockTestResultQueryHandler : IRequestHandler<GetListMockTestResultQuery, MethodResult<IList<MockTestResultRankingModel>>>
+    public class GetListMockTestRankingQueryHandler : IRequestHandler<GetListMockTestRankingQuery, MethodResult<IList<MockTestResultRankingModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private readonly ITrainingService _trainingService;
         private readonly IMockTestResultRepository _mockTestResultRepository;
 
-        public GetListMockTestResultQueryHandler(IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
+        public GetListMockTestRankingQueryHandler(IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
         {
             _mapper = mapper;
             _userService = userService;
@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             _mockTestResultRepository = mockTestResultRepository;
         }
 
-        public async Task<MethodResult<IList<MockTestResultRankingModel>>> Handle(GetListMockTestResultQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<MockTestResultRankingModel>>> Handle(GetListMockTestRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<MockTestResultRankingModel>> methodResult = new MethodResult<IList<MockTestResultRankingModel>>();
@@ -49,25 +49,27 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
 
+            var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
+
             var currentClass = await _trainingService.GetClassByStudentId(student!.Id);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
-            var finalTestResults = await _mockTestResultRepository.Queryable
+            var mockTestResults = await _mockTestResultRepository.Queryable
                             .Include(x => x.MockTest)
                             .ThenInclude(x => x!.MockTestSections)
                             .ThenInclude(x => x.SectionGroup)
-                            .Where(x => x.MockTestId == request.MockTestId && classStudentIds!.Contains(x.StudentId))
+                            .Where(x => x.MockTestId == mockTestResult!.MockTestId && classStudentIds!.Contains(x.StudentId))
                             .ToListAsync(cancellationToken);
 
-            var finalTestResultDtos = _mapper.Map<IList<MockTestResultRankingModel>>(finalTestResults);
+            var mockTestResultDtos = _mapper.Map<IList<MockTestResultRankingModel>>(mockTestResults);
 
-            foreach (var item in finalTestResultDtos)
+            foreach (var item in mockTestResultDtos)
             {
-                var finalTestResult = finalTestResults.FirstOrDefault(x => x.Id == item.Id);
                 item.IsCurrentStudent = item.StudentId == student!.Id;
-                item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, finalTestResult!.MockTest!.MockTestSections.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault());
+                /*item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, finalTestResult!.MockTest!.MockTestSections.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault());*/
+                item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, mockTestResults.Where(x => x.Id == item.Id).Select(x => x.MockTest!.MockTestSections.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault()).FirstOrDefault());
             }
-            methodResult.Result = finalTestResultDtos;
+            methodResult.Result = mockTestResultDtos;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

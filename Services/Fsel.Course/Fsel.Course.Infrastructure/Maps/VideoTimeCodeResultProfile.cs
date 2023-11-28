@@ -10,7 +10,7 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public VideoTimeCodeResultProfile()
         {
-            CreateMap<VideoTimeCodeResult, VideoTimeCodeResultModel>()
+            CreateMap<VideoTimeCodeResult, VideoTimeCodeResultRankingModel>()
             .ForMember(x => x.TimeCodeType, p => p.MapFrom(o => o.VideoTimeCode != null ? o.VideoTimeCode.TimeCodeType : default));
         }
     }

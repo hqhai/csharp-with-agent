@@ -18,12 +18,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListVideoTimeCodeResultQuery : IRequest<MethodResult<IList<VideoTimeCodeResultRankingModel>>>
+    public class GetListVideoTimeCodeRankingQuery : IRequest<MethodResult<IList<VideoTimeCodeResultRankingModel>>>
     {
-        public Guid VideoTimeCodeId { get; set; }
+        public Guid VideoTimeCodeResultId { get; set; }
     }
 
-    public class GetListVideoTimeCodeResultQueryHandler : IRequestHandler<GetListVideoTimeCodeResultQuery, MethodResult<IList<VideoTimeCodeResultRankingModel>>>
+    public class GetListVideoTimeCodeRankingQueryHandler : IRequestHandler<GetListVideoTimeCodeRankingQuery, MethodResult<IList<VideoTimeCodeResultRankingModel>>>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IMapper _mapper;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
         private readonly AuthContext _authContext;
         private readonly ITrainingService _trainingService;
 
-        public GetListVideoTimeCodeResultQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService)
+        public GetListVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _mapper = mapper;
@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<IList<VideoTimeCodeResultRankingModel>>> Handle(GetListVideoTimeCodeResultQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<VideoTimeCodeResultRankingModel>>> Handle(GetListVideoTimeCodeRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<VideoTimeCodeResultRankingModel>> methodResult = new MethodResult<IList<VideoTimeCodeResultRankingModel>>();
@@ -48,21 +48,22 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
 
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.GetByIdAsync(request.VideoTimeCodeResultId);
+
             var currentClass = await _trainingService.GetClassByStudentId(student!.Id);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
                             .Include(x => x.VideoTimeCode)
-                            .Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId && classStudentIds!.Contains(x.StudentId) && x.VideoTimeCode!.TimeCodeType != EnumTimeCodeType.Standalone)
+                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult!.VideoTimeCodeId && classStudentIds!.Contains(x.StudentId) && x.VideoTimeCode!.TimeCodeType != EnumTimeCodeType.Standalone)
                             .ToListAsync(cancellationToken);
 
             var videoTimeCodeResultDtos = _mapper.Map<IList<VideoTimeCodeResultRankingModel>>(videoTimeCodeResults);
 
             foreach (var item in videoTimeCodeResultDtos)
             {
-                var videoTimeCodeResult = videoTimeCodeResults.FirstOrDefault(x => x.Id == item.Id);
                 item.IsCurrentStudent = item.StudentId == student!.Id;
-                item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResult?.VideoTimeCode?.ExecutionTime ?? default);
+                item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.Id == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
             }
             methodResult.Result = videoTimeCodeResultDtos;
             methodResult.StatusCode = StatusCodes.Status200OK;

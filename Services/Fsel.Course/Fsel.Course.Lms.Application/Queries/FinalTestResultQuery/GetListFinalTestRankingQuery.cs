@@ -18,12 +18,12 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListFinalTestResultQuery : IRequest<MethodResult<IList<FinalTestResultRankingModel>>>
+    public class GetListFinalTestRankingQuery : IRequest<MethodResult<IList<FinalTestResultRankingModel>>>
     {
-        public Guid FinalTestId { get; set; }
+        public Guid FinalTestResultId { get; set; }
     }
 
-    public class GetListFinalTestResultQueryHandler : IRequestHandler<GetListFinalTestResultQuery, MethodResult<IList<FinalTestResultRankingModel>>>
+    public class GetListFinalTestResultQueryHandler : IRequestHandler<GetListFinalTestRankingQuery, MethodResult<IList<FinalTestResultRankingModel>>>
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMapper _mapper;
@@ -40,28 +40,30 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<IList<FinalTestResultRankingModel>>> Handle(GetListFinalTestResultQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<FinalTestResultRankingModel>>> Handle(GetListFinalTestRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<FinalTestResultRankingModel>> methodResult = new MethodResult<IList<FinalTestResultRankingModel>>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
+            var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
 
-            var currentClass = await _trainingService.GetClassByStudentId(student!.Id);
+            var currentClass = await _trainingService.GetClassByStudentId(finalTestResult!.StudentId);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var finalTestResults = await _finalTestResultRepository.Queryable
                             .Include(x => x.FinalTest)
-                            .Where(x => x.FinalTestId == request.FinalTestId && classStudentIds!.Contains(x.StudentId))
+                            .ThenInclude(x => x.FinalTestSections)
+                            .ThenInclude(x => x.SectionGroup)
+                            .Where(x => x.FinalTestId == finalTestResult.FinalTestId && classStudentIds!.Contains(x.StudentId))
                             .ToListAsync(cancellationToken);
 
             var finalTestResultsDtos = _mapper.Map<IList<FinalTestResultRankingModel>>(finalTestResults);
             foreach (var item in finalTestResultsDtos)
             {
-                var finalTestResult = finalTestResults.FirstOrDefault(x => x.Id == item.Id);
-                item.IsCurrentStudent = item.StudentId == student!.Id;
-                item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, finalTestResult?.FinalTest?.ExecutionTime ?? default);
+                item.IsCurrentStudent = item.StudentId == student?.Id;
+                item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, finalTestResults.Select(x => x.FinalTest!.FinalTestSections.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault()).FirstOrDefault());
             }
             methodResult.Result = finalTestResultsDtos;
             methodResult.StatusCode = StatusCodes.Status200OK;
