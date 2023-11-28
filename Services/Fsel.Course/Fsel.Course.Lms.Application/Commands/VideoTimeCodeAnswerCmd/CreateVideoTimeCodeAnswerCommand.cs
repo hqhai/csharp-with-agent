@@ -101,16 +101,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, true, videoTimeCode.ExecutionTime == 0);
+                var exercise = question?.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
+                var exerciseId = exercise?.Id ?? default;
+                var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCodeId, videoResult.Id, question?.Id, exerciseId);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, true, answer?.Answer, videoTimeCodeResult.Status == EnumResultStatus.Process, videoTimeCode.ExecutionTime == 0);
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
                 var (questionItem, answerConfig, correctCount) = questionResult.Result;
-                var exercise = questionItem.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
-                var exerciseId = exercise?.Id ?? default;
-                var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCodeId, videoResult.Id, questionItem.Id, exerciseId);
                 if (answer == null)
                 {
                     answer = new VideoTimeCodeAnswer
@@ -122,7 +122,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         VideoTimeCodeResultId = videoTimeCodeResult.Id,
                         VideoResultId = videoResult.Id,
                         CorrectCount = questionItem.Ungraded ? default : correctCount,
-                        Status = GetAnswerStatus(videoTimeCode.TimeCodeType, correctCount, questionItem.CorrectTotal)
+                        Status = GetAnswerStatus(videoTimeCode.TimeCodeType, correctCount, questionItem.CorrectTotal),
+                        IsCorrect = correctCount == questionItem.CorrectTotal,
                     };
 
                     videoTimeCodeAnswers.Add(answer);
@@ -131,6 +132,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     answer.Answer = answerConfig ?? item.Answer;
                     answer.Status = EnumAnswerStatus.Done;
+                    answer.IsCorrect = correctCount == questionItem.CorrectTotal;
                     answer.CorrectCount = questionItem.Ungraded ? default : correctCount;
                     updateVideoTimeCodeAnswers.Add(answer);
                 }
@@ -158,6 +160,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
                 if (videoTimeCodeAnswers.Any())
                 {
+                    videoTimeCodeResult.Status = EnumResultStatus.Process;
                     if (videoTimeCode?.TimeCodeType != EnumTimeCodeType.Standalone || skillScores.Sum(x => x.TotalCount) == videoTimeCodeAnswers.Sum(x => x.CorrectCount))
                     {
                         videoTimeCodeResult.Status = EnumResultStatus.Done;

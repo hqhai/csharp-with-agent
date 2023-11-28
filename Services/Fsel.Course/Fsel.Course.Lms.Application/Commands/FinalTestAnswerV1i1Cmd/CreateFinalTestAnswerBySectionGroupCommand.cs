@@ -236,7 +236,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd
                     var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (finalTestAnswer == null)
                     {
-                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, request, sectionQuestionId, sectionGroupResultId));
+                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, request, questionItem, sectionGroupResultId));
                     }
                 }
             }
@@ -244,7 +244,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd
             return methodResult;
         }
 
-        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Guid? sectionQuestionId, Guid sectionGroupResultId)
+        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Question? question, Guid sectionGroupResultId)
         {
             return new FinalTestAnswer
             {
@@ -252,7 +252,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd
                 CorrectCount = correctCount,
                 FinalTestResultId = request.FinalTestResultId,
                 SectionGroupResultId = sectionGroupResultId,
-                SectionQuestionId = sectionQuestionId ?? default,
+                SectionQuestionId = question?.SectionQuestions.FirstOrDefault()?.Id ?? default,
+                IsCorrect = question?.CorrectTotal == correctCount,
             };
         }
     }

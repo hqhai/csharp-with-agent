@@ -127,7 +127,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                     Answer = answerConfig,
                                     CorrectCount = correctCount,
                                     MockTestResultId = mockTestResult.Id,
-                                    SectionQuestionId = sectionQuestionId
+                                    SectionQuestionId = sectionQuestionId,
+                                    IsCorrect = correctCount == questionItem.CorrectTotal,
                                 };
                                 mockTestAnswers.Add(mockTestAnswer);
                             }
@@ -148,7 +149,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                 {
                                     Answer = answer.Answer,
                                     MockTestResultId = mockTestResult.Id,
-                                    SectionId = sectionId
+                                    SectionId = sectionId,
+                                    IsCorrect = true
                                 };
                                 mockTestAnswers.Add(mockTestAnswer);
                             }
@@ -169,7 +171,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                 {
                                     Answer = answer.Answer,
                                     MockTestResultId = mockTestResult.Id,
-                                    SectionTimeCodeId = sectionTimeCodeId
+                                    SectionTimeCodeId = sectionTimeCodeId,
+                                    IsCorrect = true
                                 };
                                 mockTestAnswers.Add(mockTestAnswer);
                             }

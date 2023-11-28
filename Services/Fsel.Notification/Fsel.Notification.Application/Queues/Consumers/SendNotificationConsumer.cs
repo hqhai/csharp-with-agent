@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
-    public class SendNotificationConsumer : IConsumer<NotificationQueueModel>
+    public class SendNotificationConsumer : IConsumer<NotificationSendingQueueModel>
     {
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
@@ -24,7 +24,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
             _appSetting = appSetting;
         }
 
-        public async Task Consume(ConsumeContext<NotificationQueueModel> context)
+        public async Task Consume(ConsumeContext<NotificationSendingQueueModel> context)
         {
             var dataReceipt = context?.Message;
 
@@ -36,6 +36,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
                 string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : notificationType?.TemplateLink!;
                 string? url;
+
                 if (dataReceipt.PlatformCode == EnumPlatformCode.LMS)
                 {
                     url = _appSetting.ConstantUrl?.LmsWebsiteDomain?.CombineUrl(link);
@@ -48,14 +49,14 @@ namespace Fsel.Notification.Application.Queues.Consumers
                 {
                     url = _appSetting.ConstantUrl?.LmsAdminWebsiteDomain?.CombineUrl(link);
                 }
+
                 CreateNotificationCommand model = new CreateNotificationCommand()
                 {
-                    UserId = dataReceipt.UserId ?? default,
+                    UserIds = dataReceipt.UserIds,
                     ObjectId = dataReceipt.ObjectId,
-                    Message = message,
-                    Roles = dataReceipt.Roles,
                     NotificationTypeId = notificationType?.Id ?? default,
                     SenderId = dataReceipt.SenderId,
+                    Message = message,
                     Link = url
                 };
                 await _mediator.Send(model).ConfigureAwait(false);
