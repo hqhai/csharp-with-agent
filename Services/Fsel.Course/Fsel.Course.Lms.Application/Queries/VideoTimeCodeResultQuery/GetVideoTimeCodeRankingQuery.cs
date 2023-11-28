@@ -18,12 +18,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListVideoTimeCodeRankingQuery : IRequest<MethodResult<IList<VideoTimeCodeResultRankingModel>>>
+    public class GetVideoTimeCodeRankingQuery : IRequest<MethodResult<IList<VideoTimeCodeResultRankingModel>>>
     {
         public Guid VideoTimeCodeResultId { get; set; }
     }
 
-    public class GetListVideoTimeCodeRankingQueryHandler : IRequestHandler<GetListVideoTimeCodeRankingQuery, MethodResult<IList<VideoTimeCodeResultRankingModel>>>
+    public class GetVideoTimeCodeRankingQueryHandler : IRequestHandler<GetVideoTimeCodeRankingQuery, MethodResult<IList<VideoTimeCodeResultRankingModel>>>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IMapper _mapper;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
         private readonly AuthContext _authContext;
         private readonly ITrainingService _trainingService;
 
-        public GetListVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService)
+        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _mapper = mapper;
@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<IList<VideoTimeCodeResultRankingModel>>> Handle(GetListVideoTimeCodeRankingQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<VideoTimeCodeResultRankingModel>>> Handle(GetVideoTimeCodeRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<VideoTimeCodeResultRankingModel>> methodResult = new MethodResult<IList<VideoTimeCodeResultRankingModel>>();

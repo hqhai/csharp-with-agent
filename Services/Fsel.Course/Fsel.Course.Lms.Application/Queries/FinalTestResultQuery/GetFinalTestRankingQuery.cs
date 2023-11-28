@@ -18,12 +18,12 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListFinalTestRankingQuery : IRequest<MethodResult<IList<FinalTestResultRankingModel>>>
+    public class GetFinalTestRankingQuery : IRequest<MethodResult<IList<FinalTestResultRankingModel>>>
     {
         public Guid FinalTestResultId { get; set; }
     }
 
-    public class GetListFinalTestResultQueryHandler : IRequestHandler<GetListFinalTestRankingQuery, MethodResult<IList<FinalTestResultRankingModel>>>
+    public class GetFinalTestRankingQueryHandler : IRequestHandler<GetFinalTestRankingQuery, MethodResult<IList<FinalTestResultRankingModel>>>
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMapper _mapper;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
         private readonly AuthContext _authContext;
         private readonly ITrainingService _trainingService;
 
-        public GetListFinalTestResultQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService)
+        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService)
         {
             _finalTestResultRepository = finalTestResultRepository;
             _mapper = mapper;
@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<IList<FinalTestResultRankingModel>>> Handle(GetListFinalTestRankingQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<FinalTestResultRankingModel>>> Handle(GetFinalTestRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<FinalTestResultRankingModel>> methodResult = new MethodResult<IList<FinalTestResultRankingModel>>();

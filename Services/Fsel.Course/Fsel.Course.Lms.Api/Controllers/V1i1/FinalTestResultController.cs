@@ -29,10 +29,10 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// <summary>
         /// get final test ranking
         /// </summary>
-        [HttpGet("list-final-test-ranking")]
+        [HttpGet("final-test-ranking")]
         [ProducesResponseType(typeof(MethodResult<IList<FinalTestResultRankingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetListFinalTestRankingQuery command)
+        public async Task<IActionResult> Get([FromQuery] GetFinalTestRankingQuery command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

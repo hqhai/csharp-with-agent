@@ -30,10 +30,10 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// <summary>
         /// get mock test ranking
         /// </summary>
-        [HttpGet("list-mock-test-ranking")]
+        [HttpGet("mock-test-ranking")]
         [ProducesResponseType(typeof(MethodResult<IList<MockTestResultRankingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetListMockTestRankingQuery command)
+        public async Task<IActionResult> Get([FromQuery] GetMockTestRankingQuery command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

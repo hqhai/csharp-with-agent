@@ -19,12 +19,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListMockTestRankingQuery : IRequest<MethodResult<IList<MockTestResultRankingModel>>>
+    public class GetMockTestRankingQuery : IRequest<MethodResult<IList<MockTestResultRankingModel>>>
     {
         public Guid MockTestResultId { get; set; }
     }
 
-    public class GetListMockTestRankingQueryHandler : IRequestHandler<GetListMockTestRankingQuery, MethodResult<IList<MockTestResultRankingModel>>>
+    public class GetMockTestRankingQueryHandler : IRequestHandler<GetMockTestRankingQuery, MethodResult<IList<MockTestResultRankingModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private readonly ITrainingService _trainingService;
         private readonly IMockTestResultRepository _mockTestResultRepository;
 
-        public GetListMockTestRankingQueryHandler(IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
+        public GetMockTestRankingQueryHandler(IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
         {
             _mapper = mapper;
             _userService = userService;
@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             _mockTestResultRepository = mockTestResultRepository;
         }
 
-        public async Task<MethodResult<IList<MockTestResultRankingModel>>> Handle(GetListMockTestRankingQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<MockTestResultRankingModel>>> Handle(GetMockTestRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<MockTestResultRankingModel>> methodResult = new MethodResult<IList<MockTestResultRankingModel>>();
