@@ -19,12 +19,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetMockTestRankingQuery : IRequest<MethodResult<IList<MockTestResultRankingModel>>>
+    public class GetMockTestRankingQuery : IRequest<MethodResult<IList<TestResultRankingModel>>>
     {
         public Guid MockTestResultId { get; set; }
     }
 
-    public class GetMockTestRankingQueryHandler : IRequestHandler<GetMockTestRankingQuery, MethodResult<IList<MockTestResultRankingModel>>>
+    public class GetMockTestRankingQueryHandler : IRequestHandler<GetMockTestRankingQuery, MethodResult<IList<TestResultRankingModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
@@ -41,10 +41,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             _mockTestResultRepository = mockTestResultRepository;
         }
 
-        public async Task<MethodResult<IList<MockTestResultRankingModel>>> Handle(GetMockTestRankingQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TestResultRankingModel>>> Handle(GetMockTestRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<MockTestResultRankingModel>> methodResult = new MethodResult<IList<MockTestResultRankingModel>>();
+            MethodResult<IList<TestResultRankingModel>> methodResult = new MethodResult<IList<TestResultRankingModel>>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
@@ -61,13 +61,17 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                             .Where(x => x.MockTestId == mockTestResult!.MockTestId && classStudentIds!.Contains(x.StudentId))
                             .ToListAsync(cancellationToken);
 
-            var mockTestResultDtos = _mapper.Map<IList<MockTestResultRankingModel>>(mockTestResults);
+            var mockTestResultDtos = _mapper.Map<IList<TestResultRankingModel>>(mockTestResults);
+
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(mockTestResultDtos.Select(x => x.StudentId).ToList());
+            var students = studentResults?.Content?.Result?.OrderBy(x => x.Human?.FullName);
 
             foreach (var item in mockTestResultDtos)
             {
                 item.IsCurrentStudent = item.StudentId == student!.Id;
-                /*item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, finalTestResult!.MockTest!.MockTestSections.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault());*/
                 item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, mockTestResults.Where(x => x.Id == item.Id).Select(x => x.MockTest!.MockTestSections.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault()).FirstOrDefault());
+                item.FullName = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
+                item.AvatarPath = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.AvatarPath;
             }
             methodResult.Result = mockTestResultDtos;
             methodResult.StatusCode = StatusCodes.Status200OK;

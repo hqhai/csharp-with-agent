@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure.Maps
         public MockTestResultProfile()
         {
             CreateMap<MockTestResult, MockTestResultModel>().IgnoreAllNonExisting();
-            CreateMap<MockTestResult, MockTestResultRankingModel>().IgnoreAllNonExisting();
+            CreateMap<MockTestResult, TestResultRankingModel>().IgnoreAllNonExisting();
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// get final test ranking
         /// </summary>
         [HttpGet("final-test-ranking")]
-        [ProducesResponseType(typeof(MethodResult<IList<FinalTestResultRankingModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<TestResultRankingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetFinalTestRankingQuery command)
         {

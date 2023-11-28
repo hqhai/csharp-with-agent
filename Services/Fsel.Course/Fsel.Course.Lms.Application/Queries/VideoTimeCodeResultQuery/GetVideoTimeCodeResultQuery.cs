@@ -47,26 +47,20 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
 
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable
                 .Where(x => x.Id == request.VideoTimeCodeResultId && x.VideoTimeCodeId == request.VideoTimeCodeId && x.StudentId == student!.Id)
-                .Select(x => new VideoTimeCodeResultRankingModel
+                .Select(x => new TestResultRankingModel
                 {
                     Id = x.Id,
-                    TimeCodeType = x.VideoTimeCode!.TimeCodeType,
                     StudentId = x.StudentId,
                     CorrectCount = x.CorrectCount,
                     CorrectTotal = x.CorrectTotal,
                     CreatedDate = x.CreatedDate,
                     CreatedFullName = x.CreatedFullName,
                     CreatedUserId = x.CreatedUserId,
-                    IsWorking = x.IsWorking,
                     Percent = x.Percent,
-                    RemainingTime = x.RemainingTime,
                     SkillScores = x.SkillScores,
                     Status = x.Status,
-                    VideoResultId = x.VideoResultId,
-                    VideoTimeCodeId = x.VideoTimeCodeId,
                     IsCurrentStudent = x.StudentId == student!.Id
                 }).FirstOrDefaultAsync(cancellationToken);
-
 
             methodResult.Result = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult);
             methodResult.StatusCode = StatusCodes.Status200OK;

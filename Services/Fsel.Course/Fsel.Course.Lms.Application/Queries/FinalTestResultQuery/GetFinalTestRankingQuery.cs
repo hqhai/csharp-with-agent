@@ -18,12 +18,12 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFinalTestRankingQuery : IRequest<MethodResult<IList<FinalTestResultRankingModel>>>
+    public class GetFinalTestRankingQuery : IRequest<MethodResult<IList<TestResultRankingModel>>>
     {
         public Guid FinalTestResultId { get; set; }
     }
 
-    public class GetFinalTestRankingQueryHandler : IRequestHandler<GetFinalTestRankingQuery, MethodResult<IList<FinalTestResultRankingModel>>>
+    public class GetFinalTestRankingQueryHandler : IRequestHandler<GetFinalTestRankingQuery, MethodResult<IList<TestResultRankingModel>>>
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMapper _mapper;
@@ -40,10 +40,10 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<IList<FinalTestResultRankingModel>>> Handle(GetFinalTestRankingQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TestResultRankingModel>>> Handle(GetFinalTestRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<FinalTestResultRankingModel>> methodResult = new MethodResult<IList<FinalTestResultRankingModel>>();
+            MethodResult<IList<TestResultRankingModel>> methodResult = new MethodResult<IList<TestResultRankingModel>>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
@@ -59,11 +59,17 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                             .Where(x => x.FinalTestId == finalTestResult.FinalTestId && classStudentIds!.Contains(x.StudentId))
                             .ToListAsync(cancellationToken);
 
-            var finalTestResultsDtos = _mapper.Map<IList<FinalTestResultRankingModel>>(finalTestResults);
+            var finalTestResultsDtos = _mapper.Map<IList<TestResultRankingModel>>(finalTestResults);
+
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(finalTestResultsDtos.Select(x => x.StudentId).ToList());
+            var students = studentResults?.Content?.Result?.OrderBy(x => x.Human?.FullName);
+
             foreach (var item in finalTestResultsDtos)
             {
                 item.IsCurrentStudent = item.StudentId == student?.Id;
                 item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, finalTestResults.Select(x => x.FinalTest!.FinalTestSections.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault()).FirstOrDefault());
+                item.FullName = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
+                item.AvatarPath = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.AvatarPath;
             }
             methodResult.Result = finalTestResultsDtos;
             methodResult.StatusCode = StatusCodes.Status200OK;

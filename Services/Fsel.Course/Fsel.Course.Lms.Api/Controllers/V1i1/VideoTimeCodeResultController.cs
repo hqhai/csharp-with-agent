@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// get video time code ranking
         /// </summary>
         [HttpGet("video-time-code-ranking")]
-        [ProducesResponseType(typeof(MethodResult<IList<VideoTimeCodeResultRankingModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<TestResultRankingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetVideoTimeCodeRankingQuery command)
         {

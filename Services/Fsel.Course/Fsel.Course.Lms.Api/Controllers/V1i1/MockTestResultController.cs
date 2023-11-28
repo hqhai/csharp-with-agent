@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// get mock test ranking
         /// </summary>
         [HttpGet("mock-test-ranking")]
-        [ProducesResponseType(typeof(MethodResult<IList<MockTestResultRankingModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<TestResultRankingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetMockTestRankingQuery command)
         {

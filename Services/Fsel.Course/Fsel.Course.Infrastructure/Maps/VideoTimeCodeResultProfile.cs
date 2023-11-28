@@ -3,6 +3,7 @@
 namespace Fsel.Course.Infrastructure.Maps
 {
     using AutoMapper;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.EntityModels;
 
@@ -10,8 +11,7 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public VideoTimeCodeResultProfile()
         {
-            CreateMap<VideoTimeCodeResult, VideoTimeCodeResultRankingModel>()
-            .ForMember(x => x.TimeCodeType, p => p.MapFrom(o => o.VideoTimeCode != null ? o.VideoTimeCode.TimeCodeType : default));
+            CreateMap<VideoTimeCodeResult, TestResultRankingModel>().IgnoreAllNonExisting();
         }
     }
 }
