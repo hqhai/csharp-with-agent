@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -65,29 +64,27 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
             var students = studentResults?.Content?.Result;
 
-            if (students == null)
+            if (students != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
-                return methodResult;
+                foreach (var item in students)
+                {
+                    var videoTimeCodeResultStudent = videoTimeCodeResults.FirstOrDefault(x => x.StudentId == item.Id);
+                    var videoTimeCodeResultDto = _mapper.Map<TestResultRankingModel>(videoTimeCodeResultStudent);
+                    if (videoTimeCodeResultDto != null)
+                    {
+                        videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
+                        videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.StudentId == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
+                    }
+                    else
+                    {
+                        videoTimeCodeResultDto = new TestResultRankingModel();
+                    }
+                    videoTimeCodeResultDto.FullName = item.Human?.FullName;
+                    videoTimeCodeResultDto.AvatarPath = item.Human?.AvatarPath;
+                    testResultRankings.Add(videoTimeCodeResultDto);
+                }
             }
 
-            foreach (var item in students)
-            {
-                var videoTimeCodeResultStudent = videoTimeCodeResults.FirstOrDefault(x => x.StudentId == item.Id);
-                var videoTimeCodeResultDto = _mapper.Map<TestResultRankingModel>(videoTimeCodeResultStudent);
-                if (videoTimeCodeResultDto != null)
-                {
-                    videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
-                    videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.StudentId == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
-                }
-                else
-                {
-                    videoTimeCodeResultDto = new TestResultRankingModel();
-                }
-                videoTimeCodeResultDto.FullName = item.Human?.FullName;
-                videoTimeCodeResultDto.AvatarPath = item.Human?.AvatarPath;
-                testResultRankings.Add(videoTimeCodeResultDto);
-            }
             methodResult.Result = testResultRankings.OrderByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
