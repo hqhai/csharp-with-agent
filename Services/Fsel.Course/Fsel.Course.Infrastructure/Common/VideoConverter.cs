@@ -547,7 +547,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (videoTimeCodeResult.UpdatedDate.HasValue)
                 {
-                    return videoTimeCodeResult.RemainingTime - DateTimeHelper.GetWorkingTimeVideo(videoTimeCodeResult.UpdatedDate.Value, DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
+                    return videoTimeCodeResult.RemainingTime - DateTimeHelper.GetWorkingTime(videoTimeCodeResult.UpdatedDate.Value, DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
                 }
             }
             return videoTimeCodeResult.RemainingTime - DateTimeHelper.GetWorkingTime(videoTimeCodeResult.CreatedDate, DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
