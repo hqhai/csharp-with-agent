@@ -9,8 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
@@ -45,9 +44,17 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<TestResultRankingModel>> methodResult = new MethodResult<IList<TestResultRankingModel>>();
 
+            List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
+
             var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
 
-            var currentClass = await _trainingService.GetClassByStudentId(mockTestResult!.StudentId);
+            if (mockTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                return methodResult;
+            }
+
+            var currentClass = await _trainingService.GetClassByStudentId(mockTestResult.StudentId);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var mockTestResults = await _mockTestResultRepository.Queryable
@@ -55,22 +62,29 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                             .ThenInclude(x => x!.MockTestSections)
                             .ThenInclude(x => x.SectionGroup)
                             .ThenInclude(x => x.SectionGroupResults)
-                            .Where(x => x.MockTestId == mockTestResult!.MockTestId && classStudentIds!.Contains(x.StudentId))
+                            .Where(x => x.MockTestId == mockTestResult.MockTestId && classStudentIds!.Contains(x.StudentId))
                             .ToListAsync(cancellationToken);
 
-            var mockTestResultDtos = _mapper.Map<IList<TestResultRankingModel>>(mockTestResults);
-
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(mockTestResultDtos.Select(x => x.StudentId).ToList());
-            var students = studentResults?.Content?.Result?.OrderBy(x => x.Human?.FullName);
-
-            foreach (var item in mockTestResultDtos)
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
+            var students = studentResults?.Content?.Result;
+            foreach (var item in students!)
             {
-                item.IsCurrentStudent = item.StudentId == mockTestResult?.Id;
-                item.WorkingTime = mockTestResults.FirstOrDefault(x => x.Id == item.Id)?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
-                item.FullName = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
-                item.AvatarPath = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.AvatarPath;
+                var mockTestResultStudent = mockTestResults.FirstOrDefault(x => x.StudentId == item.Id);
+                var mockTestResultDto = _mapper.Map<TestResultRankingModel>(mockTestResultStudent);
+                if (mockTestResultDto != null)
+                {
+                    mockTestResultDto.IsCurrentStudent = item.Id == mockTestResult.StudentId;
+                    mockTestResultDto.WorkingTime = mockTestResults.FirstOrDefault(x => x.Id == item.Id)?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
+                }
+                else
+                {
+                    mockTestResultDto = new TestResultRankingModel();
+                }
+                mockTestResultDto.FullName = item.Human?.FullName;
+                mockTestResultDto.AvatarPath = item.Human?.AvatarPath;
+                testResultRankings.Add(mockTestResultDto);
             }
-            methodResult.Result = mockTestResultDtos;
+            methodResult.Result = testResultRankings.OrderByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
@@ -41,33 +42,45 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<TestResultRankingModel>> methodResult = new MethodResult<IList<TestResultRankingModel>>();
+            List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
 
             var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
 
-            var currentClass = await _trainingService.GetClassByStudentId(finalTestResult!.StudentId);
+            if (finalTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
+                return methodResult;
+            }
+            var currentClass = await _trainingService.GetClassByStudentId(finalTestResult.StudentId);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var finalTestResults = await _finalTestResultRepository.Queryable
-                            .Include(x => x.FinalTest)
-                            .ThenInclude(x => x!.FinalTestSections)
-                            .ThenInclude(x => x.SectionGroup)
-                            .ThenInclude(x => x!.SectionGroupResults)
+                            .Include(x => x.SectionGroupResults)
+                            .ThenInclude(x => x!.SectionGroup)
                             .Where(x => x.FinalTestId == finalTestResult.FinalTestId && classStudentIds!.Contains(x.StudentId))
                             .ToListAsync(cancellationToken);
 
-            var finalTestResultDtos = _mapper.Map<IList<TestResultRankingModel>>(finalTestResults);
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
+            var students = studentResults?.Content?.Result;
 
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(finalTestResultDtos.Select(x => x.StudentId).ToList());
-            var students = studentResults?.Content?.Result?.OrderBy(x => x.Human?.FullName);
-
-            foreach (var item in finalTestResultDtos)
+            foreach (var item in students!)
             {
-                item.IsCurrentStudent = item.StudentId == finalTestResult?.StudentId;
-                item.WorkingTime = finalTestResults.FirstOrDefault(x => x.Id == item.Id)?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
-                item.FullName = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
-                item.AvatarPath = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.AvatarPath;
+                var finalTestResultStudent = finalTestResults.FirstOrDefault(x => x.StudentId == item.Id);
+                var finalTestResultDto = _mapper.Map<TestResultRankingModel>(finalTestResultStudent);
+                if (finalTestResultDto != null)
+                {
+                    finalTestResultDto.IsCurrentStudent = item.Id == finalTestResult.StudentId;
+                    finalTestResultDto.WorkingTime = finalTestResults.FirstOrDefault(x => x.Id == item.Id)?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
+                }
+                else
+                {
+                    finalTestResultDto = new TestResultRankingModel();
+                }
+                finalTestResultDto.FullName = item.Human?.FullName;
+                finalTestResultDto.AvatarPath = item.Human?.AvatarPath;
+                testResultRankings.Add(finalTestResultDto);
             }
-            methodResult.Result = finalTestResultDtos;
+            methodResult.Result = testResultRankings.OrderByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

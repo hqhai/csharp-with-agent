@@ -7,7 +7,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -43,9 +44,17 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<TestResultRankingModel>> methodResult = new MethodResult<IList<TestResultRankingModel>>();
 
+            List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
+
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.GetByIdAsync(request.VideoTimeCodeResultId);
 
-            var currentClass = await _trainingService.GetClassByStudentId(videoTimeCodeResult!.StudentId);
+            if (videoTimeCodeResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeResult));
+                return methodResult;
+            }
+
+            var currentClass = await _trainingService.GetClassByStudentId(videoTimeCodeResult.StudentId);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
@@ -53,19 +62,27 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                             .Where(x => x.VideoTimeCodeId == videoTimeCodeResult!.VideoTimeCodeId && classStudentIds!.Contains(x.StudentId) && x.VideoTimeCode!.TimeCodeType != EnumTimeCodeType.Standalone)
                             .ToListAsync(cancellationToken);
 
-            var videoTimeCodeResultDtos = _mapper.Map<IList<TestResultRankingModel>>(videoTimeCodeResults);
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
+            var students = studentResults?.Content?.Result;
 
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(videoTimeCodeResultDtos.Select(x => x.StudentId).ToList());
-            var students = studentResults?.Content?.Result?.OrderBy(x => x.Human?.FullName);
-
-            foreach (var item in videoTimeCodeResultDtos)
+            foreach (var item in students!)
             {
-                item.IsCurrentStudent = item.StudentId == videoTimeCodeResult?.Id;
-                item.WorkingTime = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.Id == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
-                item.FullName = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
-                item.AvatarPath = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.AvatarPath;
+                var videoTimeCodeResultStudent = videoTimeCodeResults.FirstOrDefault(x => x.StudentId == item.Id);
+                var videoTimeCodeResultDto = _mapper.Map<TestResultRankingModel>(videoTimeCodeResultStudent);
+                if (videoTimeCodeResultDto != null)
+                {
+                    videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
+                    videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.Id == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
+                }
+                else
+                {
+                    videoTimeCodeResultDto = new TestResultRankingModel();
+                }
+                videoTimeCodeResultDto.FullName = item.Human?.FullName;
+                videoTimeCodeResultDto.AvatarPath = item.Human?.AvatarPath;
+                testResultRankings.Add(videoTimeCodeResultDto);
             }
-            methodResult.Result = videoTimeCodeResultDtos;
+            methodResult.Result = testResultRankings.OrderByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

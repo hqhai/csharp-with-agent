@@ -2,8 +2,6 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Course.Domain.Enums;
-
     public class VideoTimeCodeResultModel : BaseResultScoreModel
     {
         public Guid VideoResultId { get; set; }
