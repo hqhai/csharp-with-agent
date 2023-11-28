@@ -96,11 +96,19 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             {
                 if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
-                    videoTimeCodeResult.WorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTimeVideo(GetDate(videoTimeCodeResult, videoTimeCode.TimeCodeType), videoTimeCode.ExecutionTime);
+                    videoTimeCodeResult.WorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTime(GetDate(videoTimeCodeResult), DateTime.UtcNow, videoTimeCode.ExecutionTime);
+                    if (videoTimeCodeResult.WorkingTime >= videoTimeCode.ExecutionTime)
+                    {
+                        videoTimeCodeResult.WorkingTime = videoTimeCode.ExecutionTime;
+                    }
                 }
                 else if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.Process)
                 {
-                    videoTimeCodeResult.RetryWorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTimeVideo(GetDate(videoTimeCodeResult, videoTimeCode.TimeCodeType), videoTimeCode.ExecutionTime);
+                    videoTimeCodeResult.RetryWorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTime(GetDate(videoTimeCodeResult), DateTime.UtcNow, videoTimeCode.ExecutionTime);
+                    if (videoTimeCodeResult.RetryWorkingTime >= videoTimeCode.ExecutionTime)
+                    {
+                        videoTimeCodeResult.RetryWorkingTime = videoTimeCode.ExecutionTime;
+                    }
                 }
                 else
                 {
@@ -113,9 +121,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             return videoTimeCodeResult;
         }
 
-        private static DateTime GetDate(VideoTimeCodeResult videoTimeCodeResult, EnumTimeCodeType type)
+        private static DateTime GetDate(VideoTimeCodeResult videoTimeCodeResult)
         {
-            if (videoTimeCodeResult.UpdatedDate.HasValue && type == EnumTimeCodeType.Standalone)
+            if (videoTimeCodeResult.UpdatedDate.HasValue)
             {
                 return videoTimeCodeResult.UpdatedDate.Value;
             }

@@ -31,12 +31,6 @@ namespace Fsel.Shared.Helpers
 
         public static double GetWorkingTime(DateTime? inputDate, DateTime outputDate, double executionTime)
         {
-            return inputDate.HasValue && (outputDate - inputDate.Value).TotalSeconds <= executionTime ? NumberHelper.ConvertRound((outputDate - inputDate.Value).TotalSeconds) : executionTime;
-        }
-
-        public static double GetWorkingTimeVideo(DateTime? inputDate, double executionTime)
-        {
-            var outputDate = DateTime.UtcNow;
             if (executionTime > 0)
             {
                 return inputDate.HasValue && (outputDate - inputDate.Value).TotalSeconds <= executionTime ? NumberHelper.ConvertRound((outputDate - inputDate.Value).TotalSeconds) : executionTime;

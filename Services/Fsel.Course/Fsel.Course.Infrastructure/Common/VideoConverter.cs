@@ -403,18 +403,24 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
-                    videoTimeCodeResult.RemainingTime = videoTimeCode.ExecutionTime - videoTimeCodeResult.WorkingTime;
+                    videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, videoTimeCodeResult.WorkingTime);
                 }
                 else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
                 {
-                    videoTimeCodeResult.RemainingTime = videoTimeCode.ExecutionTime - videoTimeCodeResult.RetryWorkingTime;
+                    videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, videoTimeCodeResult.RetryWorkingTime);
                 }
                 else
                 {
-                    videoTimeCodeResult.RemainingTime = videoTimeCode.ExecutionTime - (videoTimeCodeResult.RetryWorkingTime == 0 ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime);
+                    videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, (videoTimeCodeResult.RetryWorkingTime == 0 ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime));
                 }
             }
             return videoTimeCodeResult;
+        }
+
+        private static double GetRemainingTime(double executionTime, double workingTime)
+        {
+            var remainingTime = executionTime - workingTime;
+            return remainingTime > 0 ? remainingTime : default;
         }
 
         private ExerciseModel GetExercise(Exercise? n, bool isTryAgain, bool isTimeCodeProcess)
@@ -449,12 +455,9 @@ namespace Fsel.Course.Infrastructure.Common
         private static EnumResultStatus GetTimeCodeStatus(VideoTimeCode? videoTimeCode)
         {
             var status = EnumResultStatus.Process;
-            if (videoTimeCode != null)
+            if (videoTimeCode != null && videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done))
             {
-                if (videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done))
-                {
-                    status = EnumResultStatus.Done;
-                }
+                status = EnumResultStatus.Done;
             }
             return status;
         }
@@ -549,11 +552,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (timeCodeType == EnumTimeCodeType.Standalone)
             {
-                if (correctCount == correctTotal && isSubmit)
-                {
-                    return EnumAnswerStatus.Done;
-                }
-                return EnumAnswerStatus.Process;
+                return correctCount == correctTotal && isSubmit ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
             }
             return EnumAnswerStatus.Done;
         }
@@ -562,30 +561,11 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
             ArgumentNullException.ThrowIfNull(videoTimeCode);
-
-            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+            if (videoTimeCodeResult.UpdatedDate.HasValue)
             {
-                if (videoTimeCodeResult.UpdatedDate.HasValue)
-                {
-                    return DateTimeHelper.GetWorkingTimeVideo(videoTimeCodeResult.UpdatedDate.Value, videoTimeCode.ExecutionTime);
-                }
+                return DateTimeHelper.GetWorkingTime(videoTimeCodeResult.UpdatedDate.Value, DateTime.UtcNow, videoTimeCode.ExecutionTime);
             }
             return DateTimeHelper.GetWorkingTime(videoTimeCodeResult.CreatedDate, DateTime.UtcNow, videoTimeCode.ExecutionTime);
-        }
-
-        public double GetRemainingTime(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode)
-        {
-            ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
-            ArgumentNullException.ThrowIfNull(videoTimeCode);
-
-            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
-            {
-                if (videoTimeCodeResult.UpdatedDate.HasValue)
-                {
-                    return videoTimeCode.ExecutionTime - DateTimeHelper.GetWorkingTimeVideo(videoTimeCodeResult.UpdatedDate.Value, videoTimeCode.ExecutionTime);
-                }
-            }
-            return videoTimeCode.ExecutionTime - DateTimeHelper.GetWorkingTime(videoTimeCodeResult.CreatedDate, DateTime.UtcNow, videoTimeCode.ExecutionTime);
         }
 
         public bool ValidateList(object? objectList)
