@@ -181,7 +181,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                     break;
 
             };
-
             categories.Add(categoryToElement);
 
             QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
@@ -197,7 +196,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 questBoardQueueModel.Categories.Add(EnumQuestBoardCategory.FinishDailyFocusMode); // Mốc hoàn thành focusmode hàng ngày
                 await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
             }
-
         }
 
 

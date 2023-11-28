@@ -153,7 +153,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         public async Task DoQuestBoard(Guid userId, Guid courseId, CancellationToken cancellationToken)
         {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneLevelPass };
             var student = await _userService.GetStudentByUserIdAsync(userId);
             var studentId = student?.Content?.Result?.Id;
 

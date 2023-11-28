@@ -20,7 +20,7 @@
   {
     "id": "cfce3f4b-66d5-467d-8f57-50a089257bcb",
     "type": "MainQuests",
-    "category": "FinishOneUnitTest",
+    "category": "FinishOneLesson",
     "operator": "Equal",
     "maxPoints": 1,
     "displayType": "Number",
@@ -229,7 +229,7 @@
     "type": "DailyQuests",
     "category": "CommentOnNewLessonOfTwoClassMate",
     "operator": "Equal",
-    "maxPoints": 1,
+    "maxPoints": 2,
     "displayType": "Number",
     "createdDate": "2023-11-07"
   },
@@ -246,15 +246,6 @@
     "id": "F8C5416C-118E-45DC-942C-F61E985B9827",
     "type": "DailyQuests",
     "category": "ReviseYourNotes",
-    "operator": "Equal",
-    "maxPoints": 1,
-    "displayType": "Number",
-    "createdDate": "2023-11-07"
-  },
-  {
-    "id": "7EE5416C-118E-45DC-942C-F61E985B9827",
-    "type": "DailyQuests",
-    "category": "LearnInTwentyMinutes",
     "operator": "Equal",
     "maxPoints": 1,
     "displayType": "Number",

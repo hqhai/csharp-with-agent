@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -35,7 +36,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
         private readonly AuthContext _authContext;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IUserService _userService;
-        private float Default_Achieved_Point = 1;
         private const double Standard_Ratio = 1; // tỉ lệ xem đánh giá 100/100
 
         public GetListClassForumScoresQueryHandler(IClassForumScoreRepository classForumScoreRepository, IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, QuestBoardPublisher questBoardPublisher, IUserService userService)
@@ -128,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
                     Categories = categories,
                     ObjectId = classForumResultId,
                     CourseId = courseId,
-                    AchievedPoint = Default_Achieved_Point,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                 }, cancellationToken);
             }
         }

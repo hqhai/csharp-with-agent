@@ -14,6 +14,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.StudentReviews;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
@@ -34,7 +35,6 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
         private readonly ICourseService _courseService;
         private readonly IMapper _mapper;
         private readonly QuestBoardPublisher _questBoardPublisher;
-        private const float Archieve_Point = 1; // Những nhiệm vụ làm 1 lần thì achieve point sẽ là 1
 
         public SaveStudentReviewCommandHandler(IStudentReviewRepository studentReviewRepository, AuthContext authContext
             , IUserService userService
@@ -173,7 +173,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                 {
                     StudentId = (Guid)studentId,
                     Categories = categories,
-                    AchievedPoint = Archieve_Point,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                     CourseId = (Guid)courseId
                 }, cancellationToken);
             }

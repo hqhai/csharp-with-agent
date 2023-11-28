@@ -89,19 +89,24 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
 
         public async Task DoQuestBoard(Guid postId, Guid courseId, Guid userId, CancellationToken cancellationToken)
         {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.PostOneDiscussionBoard, EnumQuestBoardCategory.PostThreeDiscussionBoard, EnumQuestBoardCategory.PostFiveDiscussionBoard };
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>()
+            {
+                EnumQuestBoardCategory.PostOneDiscussionBoard,
+                EnumQuestBoardCategory.PostThreeDiscussionBoard,
+                EnumQuestBoardCategory.PostFiveDiscussionBoard
+            };
+
             var student = await _userService.GetStudentByUserIdAsync(userId);
             var studentId = student?.Content?.Result?.Id;
-
             var post = await _postRepository.Queryable.Where(c => c.CreatedUserId == userId && c.Status != EnumPostStatus.Pending && c.Status != EnumPostStatus.Draft).ToListAsync(cancellationToken);
-            var postCount = post.Count;
-            if (postCount > 0)
+
+            if (post != null && post.Count > 0)
             {
                 await _questBoardPublisher.Publish(new QuestBoardQueueModel
                 {
                     StudentId = (Guid)studentId!,
                     Categories = categories,
-                    AchievedPoint = postCount,
+                    AchievedPoint = post.Count,
                     ObjectId = postId,
                     CourseId = courseId
                 }, cancellationToken);
