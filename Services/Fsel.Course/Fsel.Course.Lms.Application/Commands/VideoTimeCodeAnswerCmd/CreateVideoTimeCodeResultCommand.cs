@@ -92,21 +92,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     }, CancellationToken.None).ConfigureAwait(false);
                 }
             }
-            else
+            else if (videoTimeCodeResult.Status != EnumResultStatus.Done && videoTimeCode.ExecutionTime != 0)
             {
-                if (videoTimeCodeResult.Status != EnumResultStatus.Done && videoTimeCode.ExecutionTime != 0)
+                if (videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
                 {
-                    if (videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
-                    {
-                        videoTimeCodeResult.RemainingTime = videoTimeCodeResult.RemainingTime - Shared.Helpers.DateTimeHelper.GetWorkingTime(GetDate(videoTimeCodeResult, videoTimeCode.TimeCodeType), DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
-                    }
-                    else
-                    {
-                        videoTimeCodeResult.IsWorking = true;
-                    }
-                    videoTimeCodeResult = _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
-                    await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                    videoTimeCodeResult.RemainingTime = videoTimeCodeResult.RemainingTime - Shared.Helpers.DateTimeHelper.GetWorkingTimeVideo(GetDate(videoTimeCodeResult, videoTimeCode.TimeCodeType), DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
                 }
+                else
+                {
+                    videoTimeCodeResult.IsWorking = true;
+                }
+                videoTimeCodeResult = _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
+                await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
 
             return videoTimeCodeResult;

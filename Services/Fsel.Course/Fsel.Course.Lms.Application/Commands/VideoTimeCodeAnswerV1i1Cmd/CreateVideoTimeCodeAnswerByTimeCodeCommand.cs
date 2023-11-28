@@ -119,36 +119,35 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, videoTimeCode.ExecutionTime == 0);
+                var exercise = question?.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
+                var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCode.Id, videoTimeCodeResult.VideoResultId, question?.Id, exercise?.Id ?? default);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, answer?.Answer, videoTimeCodeResult.Status == EnumResultStatus.Process, videoTimeCode.ExecutionTime == 0);
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
                 var (questionItem, answerConfig, correctCount) = questionResult.Result;
-                var exercise = questionItem.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
-                var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCode.Id, videoTimeCodeResult.VideoResultId, questionItem.Id, exercise?.Id ?? default);
                 if (answer == null)
                 {
                     answer = new VideoTimeCodeAnswer
                     {
-                        Answer = answerConfig ?? item.Answer,
                         VideoTimeCodeId = videoTimeCode.Id,
                         ExerciseId = exercise?.Id ?? default,
                         QuestionId = questionItem.Id,
                         VideoTimeCodeResultId = videoTimeCodeResult.Id,
                         VideoResultId = videoTimeCodeResult.VideoResultId,
-                        CorrectCount = questionItem.Ungraded ? default : correctCount,
-                        Status = GetAnswerStatus(request.IsSubmit, correctCount, questionItem.CorrectTotal)
                     };
                     videoTimeCodeAnswers.Add(answer);
                 }
                 else
                 {
-                    answer.Answer = answerConfig ?? item.Answer;
-                    answer.CorrectCount = questionItem.Ungraded ? default : correctCount;
                     updateVideoTimeCodeAnswers.Add(answer);
                 }
+                answer.Answer = answerConfig ?? item.Answer;
+                answer.CorrectCount = questionItem.Ungraded ? default : correctCount;
+                answer.Status = GetAnswerStatus(request.IsSubmit, correctCount, questionItem.CorrectTotal);
+                answer.IsCorrect = GetAnswerStatus(request.IsSubmit, correctCount, questionItem.CorrectTotal) == EnumAnswerStatus.Done;
             }
             if (videoTimeCodeAnswers.Any())
             {
@@ -230,6 +229,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
                 if (questions == null || !questions.Any())
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
+                    return methodResult;
+                }
+                var timeCodeId = questions.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).SelectMany(x => x!.TimeCodeExercises).Select(x => x.VideoTimeCodeId).FirstOrDefault();
+                if (timeCodeId != request.VideoTimeCodeId)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoTimeCodeId));
                     return methodResult;
                 }
             }

@@ -99,6 +99,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
                 }
                 homeWorkAnswer.Answer = answerConfig;
                 homeWorkAnswer.CorrectCount = correctCount;
+                homeWorkAnswer.IsCorrect = request.IsSubmit ? correctCount == questionItem.CorrectTotal : null;
             }
 
             if (request.IsSubmit)
