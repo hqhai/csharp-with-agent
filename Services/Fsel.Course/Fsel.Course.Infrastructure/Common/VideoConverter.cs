@@ -401,18 +401,20 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (videoTimeCodeResult != null)
             {
+                double remainingTime;
                 if (videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
-                    videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, videoTimeCodeResult.WorkingTime);
+                    remainingTime = videoTimeCodeResult.WorkingTime;
                 }
                 else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
                 {
-                    videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, videoTimeCodeResult.RetryWorkingTime);
+                    remainingTime = videoTimeCodeResult.RetryWorkingTime;
                 }
                 else
                 {
-                    videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, (videoTimeCodeResult.RetryWorkingTime == 0 ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime));
+                    remainingTime = videoTimeCodeResult.RetryWorkingTime == 0 ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime;
                 }
+                videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, remainingTime);
             }
             return videoTimeCodeResult;
         }
@@ -465,11 +467,7 @@ namespace Fsel.Course.Infrastructure.Common
         private static EnumResultStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
         {
             var status = EnumResultStatus.Unfinished;
-            if (indexProcess < indexTimeCode)
-            {
-                return status;
-            }
-            else if (indexProcess == indexTimeCode)
+            if (indexProcess == indexTimeCode)
             {
                 status = EnumResultStatus.Process;
             }
@@ -484,11 +482,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoTimeCodes);
             var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeAnswers.Any() || x.VideoTimeCodeAnswers.Any(x => x.VideoResultId == videoResultId && x.Status != EnumAnswerStatus.Done)).FirstOrDefault();
-            if (timeCode == null)
-            {
-                return null;
-            }
-            return videoTimeCodes.IndexOf(timeCode);
+            return timeCode != null ? videoTimeCodes.IndexOf(timeCode) : null;
         }
 
         private async Task<(List<Question>?, IList<VideoTimeCodeAnswer>?)> GetUnansweredQuestionIds(Guid videoTimeCodeId, VideoTimeCodeResult videoTimeCodeResult)
@@ -557,15 +551,9 @@ namespace Fsel.Course.Infrastructure.Common
             return EnumAnswerStatus.Done;
         }
 
-        public double GetWorkingTime(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode)
+        public double GetWorkingTime(VideoTimeCodeResult videoTimeCodeResult, double executionTime)
         {
-            ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
-            ArgumentNullException.ThrowIfNull(videoTimeCode);
-            if (videoTimeCodeResult.UpdatedDate.HasValue)
-            {
-                return DateTimeHelper.GetWorkingTime(videoTimeCodeResult.UpdatedDate.Value, DateTime.UtcNow, videoTimeCode.ExecutionTime);
-            }
-            return DateTimeHelper.GetWorkingTime(videoTimeCodeResult.CreatedDate, DateTime.UtcNow, videoTimeCode.ExecutionTime);
+            return DateTimeHelper.GetWorkingTime(videoTimeCodeResult?.UpdatedDate ?? videoTimeCodeResult?.CreatedDate, DateTime.UtcNow, executionTime);
         }
 
         public bool ValidateList(object? objectList)

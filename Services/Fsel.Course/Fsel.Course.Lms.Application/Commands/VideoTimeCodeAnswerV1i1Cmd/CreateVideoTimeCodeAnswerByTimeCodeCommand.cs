@@ -173,7 +173,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
         {
             if (videoTimeCodeResult.Status == EnumResultStatus.New)
             {
-                videoTimeCodeResult.WorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode);
+                videoTimeCodeResult.WorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode.ExecutionTime);
                 if (videoTimeCodeResult.WorkingTime >= videoTimeCode.ExecutionTime)
                 {
                     videoTimeCodeResult.WorkingTime = videoTimeCode.ExecutionTime;
@@ -181,7 +181,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
             }
             else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
             {
-                videoTimeCodeResult.RetryWorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode);
+                videoTimeCodeResult.RetryWorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode.ExecutionTime);
                 if (videoTimeCodeResult.RetryWorkingTime >= videoTimeCode.ExecutionTime)
                 {
                     videoTimeCodeResult.RetryWorkingTime = videoTimeCode.ExecutionTime;
