@@ -20,7 +20,12 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Thời gian còn lại
         /// </summary>
-        public double RemainingTime { get; set; }
+        public double WorkingTime { get; set; }
+
+        /// <summary>
+        /// Thời gian làm lại bài còn lại
+        /// </summary>
+        public double RetryWorkingTime { get; set; }
 
         /// <summary>
         /// Đang làm việc

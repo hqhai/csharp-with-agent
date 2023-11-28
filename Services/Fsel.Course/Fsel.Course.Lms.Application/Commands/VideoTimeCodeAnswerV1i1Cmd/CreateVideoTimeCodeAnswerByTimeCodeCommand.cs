@@ -164,6 +164,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
 
         private async Task UpdateVideoTimeCodeResult(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, bool isSubmit, CancellationToken cancellationToken)
         {
+            videoTimeCodeResult = await GetVideoTimeCodeResultAsync(videoTimeCodeResult, videoTimeCode, isSubmit, cancellationToken);
+            _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
+            await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<VideoTimeCodeResult> GetVideoTimeCodeResultAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, bool isSubmit, CancellationToken cancellationToken)
+        {
+            if (videoTimeCodeResult.Status == EnumResultStatus.New)
+            {
+                videoTimeCodeResult.WorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode);
+            }
+            else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+            {
+                videoTimeCodeResult.RetryWorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode);
+            }
             if (isSubmit)
             {
                 var (listSkillScore, isDone) = await GetSkillScores(videoTimeCode, videoTimeCodeResult, cancellationToken);
@@ -172,11 +187,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
                 videoTimeCodeResult.CorrectTotal = (int)listSkillScore.Sum(x => x.TotalCount);
                 videoTimeCodeResult.SkillScores = listSkillScore;
             }
-
-            videoTimeCodeResult.RemainingTime = isSubmit && videoTimeCodeResult.Status != EnumResultStatus.Done ? videoTimeCode.ExecutionTime : _videoConverter.GetRemainingTime(videoTimeCodeResult, videoTimeCode);
             videoTimeCodeResult.IsWorking = false;
-            _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
-            await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            return videoTimeCodeResult;
         }
 
         private static VideoTimeCodeResult? GetVideoTimeCodeResult(VideoResult videoResult, Guid videoTimeCodeId)
