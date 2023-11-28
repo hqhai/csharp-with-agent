@@ -140,15 +140,6 @@ namespace Fsel.Course.Infrastructure.Common
             return sectionGroupModel;
         }
 
-        public double GetExecutionTime(IList<SectionGroup>? sectionGroups)
-        {
-            if (sectionGroups != null && sectionGroups.Any())
-            {
-                return sectionGroups.Sum(x => x.ExecutionTime);
-            }
-            return default;
-        }
-
         public IList<EnumCourseSkill>? GetCourseSkill(IList<SectionGroup>? sectionGroups)
         {
             if (sectionGroups != null && sectionGroups.Any())
@@ -487,7 +478,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return null;
             }
-            var sectionGroup = sectionGroups.FirstOrDefault(x => !x.SectionGroupResults.Any() || x.SectionGroupResults.Any(x => (Guid)x.GetPropValue(objectResultType) == objectResultId && x.Status != EnumResultStatus.Done));
+            var sectionGroup = sectionGroups.FirstOrDefault(x => !x.SectionGroupResults.Any() || x.SectionGroupResults.Any(x => x.GetPropValue<Guid>(objectResultType) == objectResultId && x.Status != EnumResultStatus.Done));
             return sectionGroup != null ? sectionGroups.IndexOf(sectionGroup) : null;
         }
     }
