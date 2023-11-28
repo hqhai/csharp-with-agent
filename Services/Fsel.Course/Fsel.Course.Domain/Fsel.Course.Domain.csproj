@@ -10,6 +10,7 @@
     <Folder Include="Constants\" />
     <Folder Include="Models\CommandModels\Classes\" />
     <Folder Include="Models\CommandModels\PlacementTestResults\" />
+    <Folder Include="Models\QueryModels\VideoTimeCodeResults\" />
   </ItemGroup>
 
   <ItemGroup>
