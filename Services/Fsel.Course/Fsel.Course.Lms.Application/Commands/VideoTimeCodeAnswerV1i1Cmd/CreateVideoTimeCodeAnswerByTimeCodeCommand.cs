@@ -173,18 +173,32 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
         {
             if (videoTimeCodeResult.Status == EnumResultStatus.New)
             {
-                videoTimeCodeResult.WorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode.ExecutionTime);
-                if (videoTimeCodeResult.WorkingTime >= videoTimeCode.ExecutionTime)
+                if (videoTimeCode.ExecutionTime != 0)
                 {
-                    videoTimeCodeResult.WorkingTime = videoTimeCode.ExecutionTime;
+                    videoTimeCodeResult.WorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode.ExecutionTime);
+                    if (videoTimeCodeResult.WorkingTime >= videoTimeCode.ExecutionTime)
+                    {
+                        videoTimeCodeResult.WorkingTime = videoTimeCode.ExecutionTime;
+                    }
+                }
+                else
+                {
+                    videoTimeCodeResult.WorkingTime += DateTimeHelper.GetWorkingTimeSecond(videoTimeCodeResult.UpdatedDate ?? videoTimeCodeResult.CreatedDate, DateTime.UtcNow);
                 }
             }
             else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
             {
-                videoTimeCodeResult.RetryWorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode.ExecutionTime);
-                if (videoTimeCodeResult.RetryWorkingTime >= videoTimeCode.ExecutionTime)
+                if (videoTimeCode.ExecutionTime != 0)
                 {
-                    videoTimeCodeResult.RetryWorkingTime = videoTimeCode.ExecutionTime;
+                    videoTimeCodeResult.RetryWorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode.ExecutionTime);
+                    if (videoTimeCodeResult.RetryWorkingTime >= videoTimeCode.ExecutionTime)
+                    {
+                        videoTimeCodeResult.RetryWorkingTime = videoTimeCode.ExecutionTime;
+                    }
+                }
+                else
+                {
+                    videoTimeCodeResult.RetryWorkingTime += DateTimeHelper.GetWorkingTimeSecond(videoTimeCodeResult.UpdatedDate ?? videoTimeCodeResult.CreatedDate, DateTime.UtcNow);
                 }
             }
             if (isSubmit)

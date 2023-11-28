@@ -33,9 +33,14 @@ namespace Fsel.Shared.Helpers
         {
             if (executionTime > 0)
             {
-                return inputDate.HasValue && (outputDate - inputDate.Value).TotalSeconds <= executionTime ? NumberHelper.ConvertRound((outputDate - inputDate.Value).TotalSeconds) : executionTime;
+                return inputDate.HasValue && (outputDate - inputDate.Value).TotalSeconds <= executionTime ? GetWorkingTimeSecond(inputDate.Value, outputDate) : executionTime;
             }
             return default;
+        }
+
+        public static double GetWorkingTimeSecond(DateTime inputDate, DateTime outputDate)
+        {
+            return NumberHelper.ConvertRound((outputDate - inputDate).TotalSeconds);
         }
 
         public static async Task<(int, bool)> CountContinuousDaysAsync(IList<DateTime>? dates)

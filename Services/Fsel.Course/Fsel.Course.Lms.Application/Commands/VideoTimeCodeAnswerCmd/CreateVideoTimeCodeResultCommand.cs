@@ -92,22 +92,36 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     }, CancellationToken.None).ConfigureAwait(false);
                 }
             }
-            else if (videoTimeCodeResult.Status != EnumResultStatus.Done && videoTimeCode.ExecutionTime != 0)
+            else if (videoTimeCodeResult.Status != EnumResultStatus.Done)
             {
                 if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
-                    videoTimeCodeResult.WorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTime(GetDate(videoTimeCodeResult), DateTime.UtcNow, videoTimeCode.ExecutionTime);
-                    if (videoTimeCodeResult.WorkingTime >= videoTimeCode.ExecutionTime)
+                    if (videoTimeCode.ExecutionTime != 0)
                     {
-                        videoTimeCodeResult.WorkingTime = videoTimeCode.ExecutionTime;
+                        videoTimeCodeResult.WorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTime(GetDate(videoTimeCodeResult), DateTime.UtcNow, videoTimeCode.ExecutionTime);
+                        if (videoTimeCodeResult.WorkingTime >= videoTimeCode.ExecutionTime)
+                        {
+                            videoTimeCodeResult.WorkingTime = videoTimeCode.ExecutionTime;
+                        }
+                    }
+                    else
+                    {
+                        videoTimeCodeResult.WorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTimeSecond(GetDate(videoTimeCodeResult), DateTime.UtcNow);
                     }
                 }
                 else if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.Process)
                 {
-                    videoTimeCodeResult.RetryWorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTime(GetDate(videoTimeCodeResult), DateTime.UtcNow, videoTimeCode.ExecutionTime);
-                    if (videoTimeCodeResult.RetryWorkingTime >= videoTimeCode.ExecutionTime)
+                    if (videoTimeCode.ExecutionTime != 0)
                     {
-                        videoTimeCodeResult.RetryWorkingTime = videoTimeCode.ExecutionTime;
+                        videoTimeCodeResult.RetryWorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTime(GetDate(videoTimeCodeResult), DateTime.UtcNow, videoTimeCode.ExecutionTime);
+                        if (videoTimeCodeResult.RetryWorkingTime >= videoTimeCode.ExecutionTime)
+                        {
+                            videoTimeCodeResult.RetryWorkingTime = videoTimeCode.ExecutionTime;
+                        }
+                    }
+                    else
+                    {
+                        videoTimeCodeResult.RetryWorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTimeSecond(GetDate(videoTimeCodeResult), DateTime.UtcNow);
                     }
                 }
                 else
