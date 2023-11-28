@@ -65,14 +65,20 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
             var students = studentResults?.Content?.Result;
 
-            foreach (var item in students!)
+            if (students == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
+                return methodResult;
+            }
+
+            foreach (var item in students)
             {
                 var videoTimeCodeResultStudent = videoTimeCodeResults.FirstOrDefault(x => x.StudentId == item.Id);
                 var videoTimeCodeResultDto = _mapper.Map<TestResultRankingModel>(videoTimeCodeResultStudent);
                 if (videoTimeCodeResultDto != null)
                 {
                     videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
-                    videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.Id == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
+                    videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.StudentId == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
                 }
                 else
                 {

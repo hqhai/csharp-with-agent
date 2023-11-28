@@ -67,14 +67,21 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
             var students = studentResults?.Content?.Result;
-            foreach (var item in students!)
+
+            if (students == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
+                return methodResult;
+            }
+
+            foreach (var item in students)
             {
                 var mockTestResultStudent = mockTestResults.FirstOrDefault(x => x.StudentId == item.Id);
                 var mockTestResultDto = _mapper.Map<TestResultRankingModel>(mockTestResultStudent);
                 if (mockTestResultDto != null)
                 {
                     mockTestResultDto.IsCurrentStudent = item.Id == mockTestResult.StudentId;
-                    mockTestResultDto.WorkingTime = mockTestResults.FirstOrDefault(x => x.Id == item.Id)?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
+                    mockTestResultDto.WorkingTime = mockTestResults.FirstOrDefault(x => x.StudentId == item.Id)?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
                 }
                 else
                 {
