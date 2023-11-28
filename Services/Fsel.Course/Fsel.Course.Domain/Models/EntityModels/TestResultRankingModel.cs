@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public bool IsCurrentStudent { get; set; }
 
-        public double TimeSpend { get; set; }
+        public double? WorkingTime { get; set; }
 
         public string? AvatarPath { get; set; }
 

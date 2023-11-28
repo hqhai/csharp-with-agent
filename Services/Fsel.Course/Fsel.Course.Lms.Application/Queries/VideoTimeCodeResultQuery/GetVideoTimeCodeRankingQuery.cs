@@ -28,15 +28,13 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly AuthContext _authContext;
         private readonly ITrainingService _trainingService;
 
-        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService)
+        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _mapper = mapper;
             _userService = userService;
-            _authContext = authContext;
             _trainingService = trainingService;
         }
 
@@ -45,12 +43,9 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<TestResultRankingModel>> methodResult = new MethodResult<IList<TestResultRankingModel>>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var student = studentResult?.Content?.Result;
-
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.GetByIdAsync(request.VideoTimeCodeResultId);
 
-            var currentClass = await _trainingService.GetClassByStudentId(student!.Id);
+            var currentClass = await _trainingService.GetClassByStudentId(videoTimeCodeResult!.StudentId);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
@@ -65,8 +60,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
 
             foreach (var item in videoTimeCodeResultDtos)
             {
-                item.IsCurrentStudent = item.StudentId == student!.Id;
-                item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.Id == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
+                item.IsCurrentStudent = item.StudentId == videoTimeCodeResult?.Id;
+                item.WorkingTime = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.Id == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
                 item.FullName = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
                 item.AvatarPath = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.AvatarPath;
             }

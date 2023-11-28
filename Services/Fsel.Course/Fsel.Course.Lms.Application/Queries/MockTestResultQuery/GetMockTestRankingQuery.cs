@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
@@ -28,15 +29,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly AuthContext _authContext;
         private readonly ITrainingService _trainingService;
         private readonly IMockTestResultRepository _mockTestResultRepository;
 
-        public GetMockTestRankingQueryHandler(IMapper mapper, IUserService userService, AuthContext authContext, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
+        public GetMockTestRankingQueryHandler(IMapper mapper, IUserService userService, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
         {
             _mapper = mapper;
             _userService = userService;
-            _authContext = authContext;
             _trainingService = trainingService;
             _mockTestResultRepository = mockTestResultRepository;
         }
@@ -46,18 +45,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<TestResultRankingModel>> methodResult = new MethodResult<IList<TestResultRankingModel>>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var student = studentResult?.Content?.Result;
-
             var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
 
-            var currentClass = await _trainingService.GetClassByStudentId(student!.Id);
+            var currentClass = await _trainingService.GetClassByStudentId(mockTestResult!.StudentId);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var mockTestResults = await _mockTestResultRepository.Queryable
                             .Include(x => x.MockTest)
                             .ThenInclude(x => x!.MockTestSections)
                             .ThenInclude(x => x.SectionGroup)
+                            .ThenInclude(x => x.SectionGroupResults)
                             .Where(x => x.MockTestId == mockTestResult!.MockTestId && classStudentIds!.Contains(x.StudentId))
                             .ToListAsync(cancellationToken);
 
@@ -68,8 +65,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             foreach (var item in mockTestResultDtos)
             {
-                item.IsCurrentStudent = item.StudentId == student!.Id;
-                item.TimeSpend = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, mockTestResults.Where(x => x.Id == item.Id).Select(x => x.MockTest!.MockTestSections.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault()).FirstOrDefault());
+                item.IsCurrentStudent = item.StudentId == mockTestResult?.Id;
+                item.WorkingTime = mockTestResults.FirstOrDefault(x => x.Id == item.Id)?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
                 item.FullName = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.FullName;
                 item.AvatarPath = students?.FirstOrDefault(x => x.Id == item.StudentId)?.Human?.AvatarPath;
             }
