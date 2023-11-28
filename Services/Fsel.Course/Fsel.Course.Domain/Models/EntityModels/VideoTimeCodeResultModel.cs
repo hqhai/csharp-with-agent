@@ -10,7 +10,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid VideoTimeCodeId { get; set; }
         public double RemainingTime { get; set; }
         public bool IsWorking { get; set; }
-
-        public EnumTimeCodeType? TimeCodeType { get; set; }
     }
 }
