@@ -29,8 +29,7 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                var sectionGroups = FinalTestSections.Select(x => x.SectionGroup).ToList();
-                var executionTime = sectionGroups.Sum(x => x!.ExecutionTime);
+                var executionTime = FinalTestSections.Select(x => x.SectionGroup).Sum(x => x!.ExecutionTime);
                 return executionTime > 0 ? executionTime : _executionTime;
             }
             set
