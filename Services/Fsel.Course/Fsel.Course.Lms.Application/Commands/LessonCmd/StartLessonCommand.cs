@@ -126,10 +126,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             return lessonResult;
         }
 
-        private async Task UpdateUnitStatusNew(Domain.Entities.Unit unit, Guid? studentId, CancellationToken cancellationToken)
+        private async Task UpdateUnitStatusNew(UnitResult unitResult, CancellationToken cancellationToken)
         {
-            var unitResult = unit.UnitResults.FirstOrDefault(x => x.UnitId == unit.Id && x.StudentId == studentId);
-            if (unitResult != null && unitResult.Status == EnumResultStatus.New)
+            if (unitResult.Status == EnumResultStatus.New)
             {
                 unitResult.Status = EnumResultStatus.Process;
                 _unitResultRepository.Update(unitResult);
@@ -200,7 +199,18 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson.LessonHomeWorks));
                 return methodResult;
             }
-            await UpdateUnitStatusNew(unit, studentId, cancellationToken).ConfigureAwait(false);
+            var unitResult = unit.UnitResults.FirstOrDefault(x => x.UnitId == unit.Id && x.StudentId == studentId);
+            if (unitResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unitResult));
+                return methodResult;
+            }
+            else if (unitResult.Status == EnumResultStatus.Unfinished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(unitResult));
+                return methodResult;
+            }
+            await UpdateUnitStatusNew(unitResult, cancellationToken).ConfigureAwait(false);
             await UpdateCourseStatusNew(course, studentId, cancellationToken).ConfigureAwait(false);
             methodResult.Result = lesson;
             return methodResult;
