@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Shared.Enums;
@@ -35,6 +36,15 @@ namespace Fsel.Course.Domain.Entities
         /// Trạng thái Archive
         /// </summary>
         public bool IsArchive { get; set; }
+
+        [NotMapped]
+        public double ExecutionTime
+        {
+            get
+            {
+                return PlacementTestSections.Select(x => x.SectionGroup).Sum(x => x!.ExecutionTime);
+            }
+        }
 
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();

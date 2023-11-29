@@ -80,7 +80,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             var finalTestDetail = _mapper.Map<FinalTestModel>(finalTest);
             var sectionGroups = finalTest.FinalTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             finalTestDetail.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
-            finalTestDetail.ExecutionTime = _sectionConverter.GetExecutionTime(sectionGroups);
             finalTestDetail.FinalTestResult = _mapper.Map<FinalTestResultModel>(finalTestResult);
             finalTestDetail.CourseSkills = _sectionConverter.GetCourseSkill(sectionGroups);
             finalTestDetail.SectionGroups = _sectionConverter.GetSectionGroups(sectionGroups, finalTestDetail.FinalTestResult.Id, "FinalTestResultId");

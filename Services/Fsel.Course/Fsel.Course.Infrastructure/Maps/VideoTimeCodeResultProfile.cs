@@ -7,12 +7,11 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.EntityModels;
 
-    public class MockTestResultProfile : Profile
+    public class VideoTimeCodeResultProfile : Profile
     {
-        public MockTestResultProfile()
+        public VideoTimeCodeResultProfile()
         {
-            CreateMap<MockTestResult, MockTestResultModel>().IgnoreAllNonExisting();
-            CreateMap<MockTestResult, TestResultRankingModel>().IgnoreAllNonExisting();
+            CreateMap<VideoTimeCodeResult, TestResultRankingModel>().IgnoreAllNonExisting();
         }
     }
 }
