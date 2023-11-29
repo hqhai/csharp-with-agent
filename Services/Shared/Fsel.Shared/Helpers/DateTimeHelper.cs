@@ -40,23 +40,6 @@ namespace Fsel.Shared.Helpers
             return default;
         }
 
-        public static double GetWorkingTime(double workingTime, double executionTime, Entity entity)
-        {
-            if (executionTime != default)
-            {
-                workingTime += GetWorkingTime(GetDateTimeEntity(entity), DateTime.UtcNow, executionTime);
-                if (workingTime >= executionTime)
-                {
-                    workingTime = executionTime;
-                }
-            }
-            else
-            {
-                workingTime += GetSecondBetweenDate(GetDateTimeEntity(entity), DateTime.UtcNow);
-            }
-            return workingTime;
-        }
-
         public static double GetSecondBetweenDate(DateTime inputDate, DateTime outputDate)
         {
             return NumberHelper.ConvertRound((outputDate - inputDate).TotalSeconds);

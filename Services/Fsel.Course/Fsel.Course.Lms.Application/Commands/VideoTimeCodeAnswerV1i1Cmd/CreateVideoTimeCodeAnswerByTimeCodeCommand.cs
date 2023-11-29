@@ -173,11 +173,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
         {
             if (videoTimeCodeResult.Status == EnumResultStatus.New)
             {
-                videoTimeCodeResult.WorkingTime = DateTimeHelper.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                videoTimeCodeResult.WorkingTime = _videoConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
             }
             else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
             {
-                videoTimeCodeResult.RetryWorkingTime = DateTimeHelper.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                videoTimeCodeResult.RetryWorkingTime = _videoConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
             }
             if (isSubmit)
             {

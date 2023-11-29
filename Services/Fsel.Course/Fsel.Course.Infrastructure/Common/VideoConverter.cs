@@ -8,6 +8,7 @@ namespace Fsel.Course.Infrastructure.Common
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -559,6 +560,23 @@ namespace Fsel.Course.Infrastructure.Common
                 return objects != null && objects.Any();
             }
             return false;
+        }
+
+        public double GetWorkingTime(double workingTime, double executionTime, Entity entity)
+        {
+            if (executionTime != default)
+            {
+                workingTime += DateTimeHelper.GetWorkingTime(DateTimeHelper.GetDateTimeEntity(entity), DateTime.UtcNow, executionTime);
+                if (workingTime >= executionTime)
+                {
+                    workingTime = executionTime;
+                }
+            }
+            else
+            {
+                workingTime += DateTimeHelper.GetSecondBetweenDate(DateTimeHelper.GetDateTimeEntity(entity), DateTime.UtcNow);
+            }
+            return workingTime;
         }
     }
 }
