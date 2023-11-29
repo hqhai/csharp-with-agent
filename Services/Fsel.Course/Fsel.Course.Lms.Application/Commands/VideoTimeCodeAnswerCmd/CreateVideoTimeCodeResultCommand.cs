@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -48,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoTimeCodeResultModel> methodResult = new MethodResult<VideoTimeCodeResultModel>();
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.VideoResultId, cancellationToken);
+            var videoResult = await _videoResultRepository.GetByIdAsync(request.VideoResultId);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
@@ -96,33 +97,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             {
                 if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
-                    if (videoTimeCode.ExecutionTime != 0)
-                    {
-                        videoTimeCodeResult.WorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTime(GetDate(videoTimeCodeResult), DateTime.UtcNow, videoTimeCode.ExecutionTime);
-                        if (videoTimeCodeResult.WorkingTime >= videoTimeCode.ExecutionTime)
-                        {
-                            videoTimeCodeResult.WorkingTime = videoTimeCode.ExecutionTime;
-                        }
-                    }
-                    else
-                    {
-                        videoTimeCodeResult.WorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTimeSecond(GetDate(videoTimeCodeResult), DateTime.UtcNow);
-                    }
+                    videoTimeCodeResult.WorkingTime = DateTimeHelper.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
                 }
                 else if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.Process)
                 {
-                    if (videoTimeCode.ExecutionTime != 0)
-                    {
-                        videoTimeCodeResult.RetryWorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTime(GetDate(videoTimeCodeResult), DateTime.UtcNow, videoTimeCode.ExecutionTime);
-                        if (videoTimeCodeResult.RetryWorkingTime >= videoTimeCode.ExecutionTime)
-                        {
-                            videoTimeCodeResult.RetryWorkingTime = videoTimeCode.ExecutionTime;
-                        }
-                    }
-                    else
-                    {
-                        videoTimeCodeResult.RetryWorkingTime += Shared.Helpers.DateTimeHelper.GetWorkingTimeSecond(GetDate(videoTimeCodeResult), DateTime.UtcNow);
-                    }
+                    videoTimeCodeResult.RetryWorkingTime = DateTimeHelper.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
                 }
                 else
                 {
@@ -133,15 +112,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             }
 
             return videoTimeCodeResult;
-        }
-
-        private static DateTime GetDate(VideoTimeCodeResult videoTimeCodeResult)
-        {
-            if (videoTimeCodeResult.UpdatedDate.HasValue)
-            {
-                return videoTimeCodeResult.UpdatedDate.Value;
-            }
-            return videoTimeCodeResult.CreatedDate;
         }
 
         private async Task UpdateVideoResult(VideoResult videoResult, Guid videoTimeCodeId)

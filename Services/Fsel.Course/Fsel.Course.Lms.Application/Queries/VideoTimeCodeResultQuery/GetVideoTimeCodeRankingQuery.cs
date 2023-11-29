@@ -70,10 +70,10 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 {
                     var videoTimeCodeResultStudent = videoTimeCodeResults.FirstOrDefault(x => x.StudentId == item.Id);
                     var videoTimeCodeResultDto = _mapper.Map<TestResultRankingModel>(videoTimeCodeResultStudent);
-                    if (videoTimeCodeResultDto != null)
+                    if (videoTimeCodeResultDto != null && videoTimeCodeResultStudent != null)
                     {
                         videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
-                        videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.StudentId == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
+                        videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(videoTimeCodeResultStudent.CreatedDate, videoTimeCodeResultStudent.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.StudentId == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
                     }
                     else
                     {
