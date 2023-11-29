@@ -12,7 +12,15 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsActive { get; set; }
         public EnumMockTestType MockTestType { get; set; }
         public long TotalQuestion { get; set; }
-        public double ExecutionTime { get; set; }
+
+        public double ExecutionTime
+        {
+            get
+            {
+                return SectionGroups?.Sum(x => x!.ExecutionTime) ?? default;
+            }
+        }
+
         public IList<SectionGroupModel>? SectionGroups { get; set; }
         public MockTestResultModel? MockTestResult { get; set; }
         public EnumCourseSkill? Skill { get; set; }

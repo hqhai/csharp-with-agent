@@ -128,7 +128,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup!).ToList();
             sectionGroupModel.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroup!.Sections.ToList(), sectionGroup!.CourseSkill);
             mockTestModel.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
-            mockTestModel.ExecutionTime = sectionGroups.Sum(x => x.ExecutionTime);
             mockTestModel.MockTestResult = _mapper.Map<MockTestResultModel>(mockTest.MockTestResults.FirstOrDefault());
             mockTestModel.SectionGroups = new List<SectionGroupModel> { sectionGroupModel };
             return mockTestModel;

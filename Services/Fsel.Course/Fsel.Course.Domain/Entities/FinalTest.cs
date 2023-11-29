@@ -5,12 +5,15 @@ namespace Fsel.Course.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Linq;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
 
     public class FinalTest : Entity
     {
+        private double _executionTime;
+
         /// <summary>
         /// Tên bài test
         /// </summary>
@@ -22,7 +25,19 @@ namespace Fsel.Course.Domain.Entities
         /// Thời gian hiện làm bài
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double ExecutionTime { get; set; }
+        public double ExecutionTime
+        {
+            get
+            {
+                var sectionGroups = FinalTestSections.Select(x => x.SectionGroup).ToList();
+                var executionTime = sectionGroups.Sum(x => x!.ExecutionTime);
+                return executionTime > 0 ? executionTime : _executionTime;
+            }
+            set
+            {
+                _executionTime = value;
+            }
+        }
 
         /// <summary>
         /// Loại FinalTest

@@ -93,7 +93,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var placementTestDto = _mapper.Map<PlacementTestDtoModel>(placementTest);
             var sectionGroups = placementTest.PlacementTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             placementTestDto.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
-            placementTestDto.ExecutionTime = sectionGroups.Sum(x => x.ExecutionTime);
             placementTestDto.PlacementTestResult = _mapper.Map<PlacementTestResultModel>(placementTestResult);
             placementTestDto.CourseSkills = _sectionConverter.GetCourseSkill(sectionGroups);
             placementTestDto.SectionGroups = _sectionConverter.GetSectionGroups(sectionGroups, placementTestDto.PlacementTestResult.Id, "PlacementTestResultId");

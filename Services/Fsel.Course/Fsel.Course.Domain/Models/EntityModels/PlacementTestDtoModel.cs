@@ -10,7 +10,15 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Name { get; set; }
         public string? InstructionContent { get; set; }
         public bool IsActive { get; set; }
-        public double ExecutionTime { get; set; }
+
+        public double ExecutionTime
+        {
+            get
+            {
+                return SectionGroups?.Sum(x => x!.ExecutionTime) ?? default;
+            }
+        }
+
         public double TotalQuestion { get; set; }
         public EnumPlacementTestLevel Level { get; set; }
         public IList<EnumCourseSkill>? CourseSkills { get; set; }
