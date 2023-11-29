@@ -73,6 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                     {
                         finalTestResultDto.IsCurrentStudent = item.Id == finalTestResult.StudentId;
                         finalTestResultDto.WorkingTime = finalTestResultStudent?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
+                        finalTestResultDto.Score = finalTestResultStudent?.CorrectCount;
                     }
                     else
                     {

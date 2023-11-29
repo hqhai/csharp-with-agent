@@ -74,6 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                     {
                         videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
                         videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(item.CreatedDate, item.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.StudentId == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
+                        videoTimeCodeResultDto.Score = videoTimeCodeResultStudent?.CorrectCount;
                     }
                     else
                     {

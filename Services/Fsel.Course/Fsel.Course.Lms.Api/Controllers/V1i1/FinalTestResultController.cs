@@ -39,9 +39,9 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         }
 
         /// <summary>
-        /// get video time code ranking
+        /// get final test report
         /// </summary>
-        [HttpGet("final-test-ranking-report")]
+        [HttpGet("final-test-report")]
         [ProducesResponseType(typeof(MethodResult<TestResultReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetVideoTimeCodeResult([FromQuery] GetFinalTestResultReportQuery command)
