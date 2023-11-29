@@ -28,7 +28,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IMapper _mapper;
-        private readonly VideoConverter _videoConverter;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
 
@@ -36,14 +36,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             IVideoResultRepository videoResultRepository
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , IMapper mapper
-            , VideoConverter videoConverter
+            , DateTimeConverter dateTimeConverter
             , GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository)
         {
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _mapper = mapper;
-            _videoConverter = videoConverter;
+            _dateTimeConverter = dateTimeConverter;
             _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
         }
@@ -100,11 +100,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             {
                 if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
-                    videoTimeCodeResult.WorkingTime = _videoConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                    videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
                 }
                 else if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.Process)
                 {
-                    videoTimeCodeResult.RetryWorkingTime = _videoConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                    videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
                 }
                 else
                 {

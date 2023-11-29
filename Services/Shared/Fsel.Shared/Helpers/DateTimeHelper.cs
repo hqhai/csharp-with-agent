@@ -4,7 +4,6 @@ namespace Fsel.Shared.Helpers
 {
     using System;
     using System.Globalization;
-    using Fsel.Core.Entities;
 
     public static class DateTimeHelper
     {
@@ -30,25 +29,9 @@ namespace Fsel.Shared.Helpers
             return age;
         }
 
-        public static double GetWorkingTime(DateTime inputDate, DateTime outputDate, double executionTime)
-        {
-            if (executionTime != default)
-            {
-                var sectionBetweenDate = GetSecondBetweenDate(inputDate, outputDate);
-                return sectionBetweenDate <= executionTime ? sectionBetweenDate : executionTime;
-            }
-            return default;
-        }
-
         public static double GetSecondBetweenDate(DateTime inputDate, DateTime outputDate)
         {
             return NumberHelper.ConvertRound((outputDate - inputDate).TotalSeconds);
-        }
-
-        public static DateTime GetDateTimeEntity(Entity entity)
-        {
-            ArgumentNullException.ThrowIfNull(entity);
-            return entity.UpdatedDate ?? entity.CreatedDate;
         }
 
         public static async Task<(int, bool)> CountContinuousDaysAsync(IList<DateTime>? dates)
