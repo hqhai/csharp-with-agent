@@ -16,12 +16,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetVideoTimeCodeResultReportQuery : IRequest<MethodResult<TestResultRankingModel>>
+    public class GetVideoTimeCodeResultReportQuery : IRequest<MethodResult<TestResultReportModel>>
     {
         public Guid VideoTimeCodeResultId { get; set; }
     }
 
-    public class GetVideoTimeCodeResultReportQueryHandler : IRequestHandler<GetVideoTimeCodeResultReportQuery, MethodResult<TestResultRankingModel>>
+    public class GetVideoTimeCodeResultReportQueryHandler : IRequestHandler<GetVideoTimeCodeResultReportQuery, MethodResult<TestResultReportModel>>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IMapper _mapper;
@@ -36,10 +36,10 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<TestResultRankingModel>> Handle(GetVideoTimeCodeResultReportQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TestResultReportModel>> Handle(GetVideoTimeCodeResultReportQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<TestResultRankingModel> methodResult = new MethodResult<TestResultRankingModel>();
+            MethodResult<TestResultReportModel> methodResult = new MethodResult<TestResultReportModel>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 .Where(x => x.Id == request.VideoTimeCodeResultId && x.StudentId == student!.Id)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            var videoTimeCodeResultDto = _mapper.Map<TestResultRankingModel>(videoTimeCodeResult);
+            var videoTimeCodeResultDto = _mapper.Map<TestResultReportModel>(videoTimeCodeResult);
             if (videoTimeCodeResultDto != null)
             {
                 videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(videoTimeCodeResult?.CreatedDate, videoTimeCodeResult?.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResult!.VideoTimeCode!.ExecutionTime);

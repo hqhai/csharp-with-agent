@@ -17,12 +17,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetMockTestResultReportQuery : IRequest<MethodResult<TestResultRankingModel>>
+    public class GetMockTestResultReportQuery : IRequest<MethodResult<TestResultReportModel>>
     {
         public Guid MockTestResultId { get; set; }
     }
 
-    public class GetMockTestResultReportQueryHandler : IRequestHandler<GetMockTestResultReportQuery, MethodResult<TestResultRankingModel>>
+    public class GetMockTestResultReportQueryHandler : IRequestHandler<GetMockTestResultReportQuery, MethodResult<TestResultReportModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMapper _mapper;
@@ -37,10 +37,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<TestResultRankingModel>> Handle(GetMockTestResultReportQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TestResultReportModel>> Handle(GetMockTestResultReportQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<TestResultRankingModel>();
+            var methodResult = new MethodResult<TestResultReportModel>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                             .Where(x => x.Id == request.MockTestResultId && x.StudentId == student!.Id)
                             .FirstOrDefaultAsync(cancellationToken);
 
-            var mockTestResultDto = _mapper.Map<TestResultRankingModel>(mockTestResult);
+            var mockTestResultDto = _mapper.Map<TestResultReportModel>(mockTestResult);
 
             if (mockTestResultDto != null)
             {

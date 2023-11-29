@@ -16,12 +16,12 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFinalTestResultReportQuery : IRequest<MethodResult<TestResultRankingModel>>
+    public class GetFinalTestResultReportQuery : IRequest<MethodResult<TestResultReportModel>>
     {
         public Guid FinalTestResultId { get; set; }
     }
 
-    public class GetFinalTestResultReportQueryHandler : IRequestHandler<GetFinalTestResultReportQuery, MethodResult<TestResultRankingModel>>
+    public class GetFinalTestResultReportQueryHandler : IRequestHandler<GetFinalTestResultReportQuery, MethodResult<TestResultReportModel>>
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMapper _mapper;
@@ -36,10 +36,10 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<TestResultRankingModel>> Handle(GetFinalTestResultReportQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TestResultReportModel>> Handle(GetFinalTestResultReportQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<TestResultRankingModel>();
+            var methodResult = new MethodResult<TestResultReportModel>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                             .Where(x => x.Id == request.FinalTestResultId && x.StudentId == student!.Id)
                             .FirstOrDefaultAsync(cancellationToken);
 
-            var finalTestResultDto = _mapper.Map<TestResultRankingModel>(finalTestResult);
+            var finalTestResultDto = _mapper.Map<TestResultReportModel>(finalTestResult);
             if (finalTestResultDto != null)
             {
                 finalTestResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(finalTestResult?.CreatedDate, finalTestResult?.UpdatedDate ?? DateTime.UtcNow, finalTestResult.SectionGroupResults.Select(x => x.SectionGroup.ExecutionTime).FirstOrDefault());

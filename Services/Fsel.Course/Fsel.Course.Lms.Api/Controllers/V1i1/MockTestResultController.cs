@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// get mock-test ranking
         /// </summary>
         [HttpGet("mock-test-ranking-report")]
-        [ProducesResponseType(typeof(MethodResult<TestResultRankingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<TestResultReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetVideoTimeCodeResult([FromQuery] GetMockTestResultReportQuery command)
         {
