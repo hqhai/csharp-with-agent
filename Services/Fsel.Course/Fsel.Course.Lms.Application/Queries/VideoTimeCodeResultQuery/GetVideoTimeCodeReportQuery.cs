@@ -16,36 +16,29 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetVideoTimeCodeResultReportQuery : IRequest<MethodResult<TestResultReportModel>>
+    public class GetVideoTimeCodeReportQuery : IRequest<MethodResult<TestResultReportModel>>
     {
         public Guid VideoTimeCodeResultId { get; set; }
     }
 
-    public class GetVideoTimeCodeResultReportQueryHandler : IRequestHandler<GetVideoTimeCodeResultReportQuery, MethodResult<TestResultReportModel>>
+    public class GetVideoTimeCodeReportQueryHandler : IRequestHandler<GetVideoTimeCodeReportQuery, MethodResult<TestResultReportModel>>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IMapper _mapper;
-        private readonly IUserService _userService;
-        private readonly AuthContext _authContext;
 
-        public GetVideoTimeCodeResultReportQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, IUserService userService, AuthContext authContext)
+        public GetVideoTimeCodeReportQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _mapper = mapper;
-            _userService = userService;
-            _authContext = authContext;
         }
 
-        public async Task<MethodResult<TestResultReportModel>> Handle(GetVideoTimeCodeResultReportQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TestResultReportModel>> Handle(GetVideoTimeCodeReportQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TestResultReportModel> methodResult = new MethodResult<TestResultReportModel>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var student = studentResult?.Content?.Result;
-
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable
-                .Where(x => x.Id == request.VideoTimeCodeResultId && x.StudentId == student!.Id)
+                .Where(x => x.Id == request.VideoTimeCodeResultId)
                 .FirstOrDefaultAsync(cancellationToken);
 
             var videoTimeCodeResultDto = _mapper.Map<TestResultReportModel>(videoTimeCodeResult);
