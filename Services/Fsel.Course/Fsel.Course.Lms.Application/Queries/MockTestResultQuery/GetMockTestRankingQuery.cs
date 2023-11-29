@@ -78,6 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                     {
                         mockTestResultDto.IsCurrentStudent = item.Id == mockTestResult.StudentId;
                         mockTestResultDto.WorkingTime = mockTestResultStudent?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
+                        mockTestResultDto.Score = mockTestResultDto.SkillScores?.Average(x => x.Scores);
                     }
                     else
                     {

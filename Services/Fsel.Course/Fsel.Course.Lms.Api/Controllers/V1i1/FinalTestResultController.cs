@@ -37,5 +37,17 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get final test report
+        /// </summary>
+        [HttpGet("final-test-report")]
+        [ProducesResponseType(typeof(MethodResult<TestResultReportModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetVideoTimeCodeResult([FromQuery] GetFinalTestResultReportQuery command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
