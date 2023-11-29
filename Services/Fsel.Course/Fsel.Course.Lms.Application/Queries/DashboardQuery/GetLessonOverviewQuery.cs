@@ -196,7 +196,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
         private async Task<(Guid?, string?, Guid?, EnumLessonOverviewStatus?)> HandleLessonResult(Domain.Entities.Unit unit, LessonResult? lessonResult, Guid? studentId)
         {
-            var lessonResultCurrent = unit.LessonResults.Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished).OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.UpdatedDate).FirstOrDefault();
+            var lessonResultCurrent = unit.LessonResults.Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.New).OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.UpdatedDate).FirstOrDefault();
             var mockTestResult = unit.MockTestResults.FirstOrDefault();
             if (unit.LessonResults.All(x => x.Status == EnumResultStatus.Done) && mockTestResult != null && mockTestResult.Status != EnumResultStatus.Done)
             {
@@ -212,6 +212,14 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                     if (videoTimeCode != null && videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone && videoTimeCodeResult != null && videoTimeCodeResult.Status != EnumResultStatus.Done)
                     {
                         return videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest ? (lessonResultCurrent.LessonId, nameof(EnumTimeCodeType.UnitTest), videoTimeCode.Id, GetStatusOverview(videoTimeCodeResult.Status)) : (lessonResultCurrent.LessonId, nameof(EnumTimeCodeType.SkillTest), videoTimeCode.Id, GetStatusOverview(videoTimeCodeResult.Status));
+                    }
+                }
+                if (lessonResultCurrent.Status == EnumResultStatus.Done)
+                {
+                    var lessonResultNew = unit.LessonResults.FirstOrDefault(x => x.Status == EnumResultStatus.New);
+                    if (lessonResultNew != null)
+                    {
+                        return (lessonResultCurrent.LessonId, nameof(Lesson), lessonResultNew.LessonId, GetStatusOverview(lessonResultNew.Status));
                     }
                 }
                 return (lessonResultCurrent.LessonId, nameof(Lesson), lessonResultCurrent.LessonId, GetStatusOverview(lessonResultCurrent.Status));
