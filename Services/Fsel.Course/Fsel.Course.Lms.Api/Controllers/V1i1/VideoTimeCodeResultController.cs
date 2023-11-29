@@ -29,10 +29,10 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// <summary>
         /// get video time code ranking
         /// </summary>
-        [HttpGet("video-time-code-ranking")]
-        [ProducesResponseType(typeof(MethodResult<VideoTimeCodeResultModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("video-time-code-ranking-report")]
+        [ProducesResponseType(typeof(MethodResult<TestResultRankingModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetVideoTimeCodeResult([FromQuery] GetVideoTimeCodeResultQuery command)
+        public async Task<IActionResult> GetVideoTimeCodeResult([FromQuery] GetVideoTimeCodeResultReportQuery command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

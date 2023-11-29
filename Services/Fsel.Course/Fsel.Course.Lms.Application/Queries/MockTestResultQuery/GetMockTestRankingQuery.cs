@@ -85,6 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                     }
                     mockTestResultDto.FullName = item.Human?.FullName;
                     mockTestResultDto.AvatarPath = item.Human?.AvatarPath;
+                    mockTestResultDto.Score = mockTestResultDto.SkillScores?.Average(x => x.Scores);
                     testResultRankings.Add(mockTestResultDto);
                 }
             }
