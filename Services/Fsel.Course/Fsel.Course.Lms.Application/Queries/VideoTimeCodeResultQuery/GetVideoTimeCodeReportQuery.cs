@@ -45,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             if (videoTimeCodeResultDto != null)
             {
                 videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(videoTimeCodeResult?.CreatedDate, videoTimeCodeResult?.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResult!.VideoTimeCode!.ExecutionTime);
+                videoTimeCodeResultDto.Score = videoTimeCodeResult.CorrectCount;
             }
 
             methodResult.Result = videoTimeCodeResultDto;

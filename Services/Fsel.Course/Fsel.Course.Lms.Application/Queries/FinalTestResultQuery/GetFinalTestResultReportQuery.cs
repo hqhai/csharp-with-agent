@@ -44,7 +44,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             var finalTestResultDto = _mapper.Map<TestResultReportModel>(finalTestResult);
             if (finalTestResultDto != null)
             {
-                finalTestResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(finalTestResult?.CreatedDate, finalTestResult?.UpdatedDate ?? DateTime.UtcNow, finalTestResult.SectionGroupResults.Select(x => x.SectionGroup.ExecutionTime).FirstOrDefault());
+                finalTestResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(finalTestResult?.CreatedDate, finalTestResult?.UpdatedDate ?? DateTime.UtcNow, finalTestResult.SectionGroupResults.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault());
+                finalTestResultDto.Score = finalTestResult.CorrectCount;
             }
 
             methodResult.Result = finalTestResultDto;
