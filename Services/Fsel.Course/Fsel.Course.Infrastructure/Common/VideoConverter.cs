@@ -374,7 +374,7 @@ namespace Fsel.Course.Infrastructure.Common
             timeCode.CorrectCount = GetCorrectCount(videoTimeCode);
             timeCode.CorrectTotal = GetCorrectTotal(videoTimeCode);
             timeCode.Status = GetTimeCodeStatus(videoTimeCode);
-            timeCode.VideoTimeCodeResult = videoTimeCodeResult;
+            timeCode.VideoTimeCodeResult = GetVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
             timeCode.Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n, isTryAgain, isTimeCodeProcess)).ToList();
             return timeCode;
         }
@@ -395,6 +395,34 @@ namespace Fsel.Course.Infrastructure.Common
                 videoTimeCodeModels.Add(videoTimeCode);
             }
             return videoTimeCodeModels;
+        }
+
+        private static VideoTimeCodeResultModel? GetVideoTimeCodeResult(VideoTimeCodeResultModel? videoTimeCodeResult, VideoTimeCode videoTimeCode)
+        {
+            if (videoTimeCodeResult != null)
+            {
+                double remainingTime;
+                if (videoTimeCodeResult.Status == EnumResultStatus.New)
+                {
+                    remainingTime = videoTimeCodeResult.WorkingTime;
+                }
+                else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+                {
+                    remainingTime = videoTimeCodeResult.RetryWorkingTime;
+                }
+                else
+                {
+                    remainingTime = videoTimeCodeResult.RetryWorkingTime == 0 ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime;
+                }
+                videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, remainingTime);
+            }
+            return videoTimeCodeResult;
+        }
+
+        private static double GetRemainingTime(double executionTime, double workingTime)
+        {
+            var remainingTime = executionTime - workingTime;
+            return remainingTime > 0 ? remainingTime : default;
         }
 
         private ExerciseModel GetExercise(Exercise? n, bool isTryAgain, bool isTimeCodeProcess)
@@ -429,12 +457,9 @@ namespace Fsel.Course.Infrastructure.Common
         private static EnumResultStatus GetTimeCodeStatus(VideoTimeCode? videoTimeCode)
         {
             var status = EnumResultStatus.Process;
-            if (videoTimeCode != null)
+            if (videoTimeCode != null && videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done))
             {
-                if (videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done))
-                {
-                    status = EnumResultStatus.Done;
-                }
+                status = EnumResultStatus.Done;
             }
             return status;
         }
@@ -442,11 +467,7 @@ namespace Fsel.Course.Infrastructure.Common
         private static EnumResultStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
         {
             var status = EnumResultStatus.Unfinished;
-            if (indexProcess < indexTimeCode)
-            {
-                return status;
-            }
-            else if (indexProcess == indexTimeCode)
+            if (indexProcess == indexTimeCode)
             {
                 status = EnumResultStatus.Process;
             }
@@ -461,11 +482,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoTimeCodes);
             var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeAnswers.Any() || x.VideoTimeCodeAnswers.Any(x => x.VideoResultId == videoResultId && x.Status != EnumAnswerStatus.Done)).FirstOrDefault();
-            if (timeCode == null)
-            {
-                return null;
-            }
-            return videoTimeCodes.IndexOf(timeCode);
+            return timeCode != null ? videoTimeCodes.IndexOf(timeCode) : null;
         }
 
         private async Task<(List<Question>?, IList<VideoTimeCodeAnswer>?)> GetUnansweredQuestionIds(Guid videoTimeCodeId, VideoTimeCodeResult videoTimeCodeResult)
@@ -529,28 +546,14 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (timeCodeType == EnumTimeCodeType.Standalone)
             {
-                if (correctCount == correctTotal && isSubmit)
-                {
-                    return EnumAnswerStatus.Done;
-                }
-                return EnumAnswerStatus.Process;
+                return correctCount == correctTotal && isSubmit ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
             }
             return EnumAnswerStatus.Done;
         }
 
-        public double GetRemainingTime(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode)
+        public double GetWorkingTime(VideoTimeCodeResult videoTimeCodeResult, double executionTime)
         {
-            ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
-            ArgumentNullException.ThrowIfNull(videoTimeCode);
-
-            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
-            {
-                if (videoTimeCodeResult.UpdatedDate.HasValue)
-                {
-                    return videoTimeCodeResult.RemainingTime - DateTimeHelper.GetWorkingTime(videoTimeCodeResult.UpdatedDate.Value, DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
-                }
-            }
-            return videoTimeCodeResult.RemainingTime - DateTimeHelper.GetWorkingTime(videoTimeCodeResult.CreatedDate, DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
+            return DateTimeHelper.GetWorkingTime(videoTimeCodeResult?.UpdatedDate ?? videoTimeCodeResult?.CreatedDate, DateTime.UtcNow, executionTime);
         }
 
         public bool ValidateList(object? objectList)
