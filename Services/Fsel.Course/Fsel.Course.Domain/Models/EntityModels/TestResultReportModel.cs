@@ -7,5 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double? Score { get; set; }
 
         public double? WorkingTime { get; set; }
+
+        public int? HighestStreak { get; set; }
     }
 }
