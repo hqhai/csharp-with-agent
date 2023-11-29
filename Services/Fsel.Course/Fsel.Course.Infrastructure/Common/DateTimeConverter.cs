@@ -3,6 +3,8 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Helpers;
 
     public class DateTimeConverter
@@ -24,7 +26,7 @@ namespace Fsel.Course.Infrastructure.Common
             return workingTime;
         }
 
-        public static double GetWorkingTime(DateTime inputDate, DateTime outputDate, double executionTime)
+        public double GetWorkingTime(DateTime inputDate, DateTime outputDate, double executionTime)
         {
             if (executionTime != default)
             {
@@ -38,6 +40,16 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(entity);
             return entity.UpdatedDate ?? entity.CreatedDate;
+        }
+
+        public double GetRemainingTime(BaseResult baseResult, double executionTime)
+        {
+            ArgumentNullException.ThrowIfNull(baseResult);
+            if (baseResult.Status == EnumResultStatus.Done && baseResult.UpdatedDate.HasValue)
+            {
+                return executionTime - GetWorkingTime(baseResult.CreatedDate, baseResult.UpdatedDate.Value, executionTime);
+            }
+            return executionTime - GetWorkingTime(baseResult.CreatedDate, DateTime.UtcNow, executionTime);
         }
     }
 }

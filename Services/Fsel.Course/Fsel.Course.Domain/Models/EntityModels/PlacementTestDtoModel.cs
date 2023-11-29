@@ -13,7 +13,15 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double ExecutionTime { get; set; }
         public double TotalQuestion { get; set; }
         public EnumPlacementTestLevel Level { get; set; }
-        public IList<EnumCourseSkill>? CourseSkills { get; set; }
+
+        public IList<EnumCourseSkill>? CourseSkills
+        {
+            get
+            {
+                return SectionGroups?.Select(x => x.CourseSkill).ToList();
+            }
+        }
+
         public PlacementTestResultModel? PlacementTestResult { get; set; }
         public IList<SectionGroupModel>? SectionGroups { get; set; }
     }

@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
@@ -27,13 +28,15 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IMapper _mapper;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
 
-        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
+        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, DateTimeConverter dateTimeConverter, IUserService userService, ITrainingService trainingService)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _mapper = mapper;
+            _dateTimeConverter = dateTimeConverter;
             _userService = userService;
             _trainingService = trainingService;
         }
@@ -73,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                     if (videoTimeCodeResultDto != null && videoTimeCodeResultStudent != null)
                     {
                         videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
-                        videoTimeCodeResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(videoTimeCodeResultStudent.CreatedDate, videoTimeCodeResultStudent.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.StudentId == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
+                        videoTimeCodeResultDto.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResultStudent.CreatedDate, videoTimeCodeResultStudent.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.StudentId == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
                     }
                     else
                     {

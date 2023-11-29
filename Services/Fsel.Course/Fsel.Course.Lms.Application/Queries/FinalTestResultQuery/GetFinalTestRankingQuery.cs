@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
@@ -26,13 +27,15 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     public class GetFinalTestRankingQueryHandler : IRequestHandler<GetFinalTestRankingQuery, MethodResult<IList<TestResultRankingModel>>>
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
 
-        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
+        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, DateTimeConverter dateTimeConverter, IMapper mapper, IUserService userService, ITrainingService trainingService)
         {
             _finalTestResultRepository = finalTestResultRepository;
+            _dateTimeConverter = dateTimeConverter;
             _mapper = mapper;
             _userService = userService;
             _trainingService = trainingService;
@@ -72,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                     if (finalTestResultDto != null)
                     {
                         finalTestResultDto.IsCurrentStudent = item.Id == finalTestResult.StudentId;
-                        finalTestResultDto.WorkingTime = finalTestResultStudent?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
+                        finalTestResultDto.WorkingTime = finalTestResultStudent?.SectionGroupResults.Select(x => _dateTimeConverter.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
                     }
                     else
                     {

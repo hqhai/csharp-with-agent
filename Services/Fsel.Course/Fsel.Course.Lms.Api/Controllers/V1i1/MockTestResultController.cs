@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.MockTestResultQuery;
-    using Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;

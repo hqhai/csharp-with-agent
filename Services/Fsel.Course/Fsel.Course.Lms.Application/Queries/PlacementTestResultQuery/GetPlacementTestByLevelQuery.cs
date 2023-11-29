@@ -94,7 +94,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var sectionGroups = placementTest.PlacementTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             placementTestDto.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
             placementTestDto.PlacementTestResult = _mapper.Map<PlacementTestResultModel>(placementTestResult);
-            placementTestDto.CourseSkills = _sectionConverter.GetCourseSkill(sectionGroups);
             placementTestDto.SectionGroups = _sectionConverter.GetSectionGroups(sectionGroups, placementTestDto.PlacementTestResult.Id, "PlacementTestResultId");
             return placementTestDto;
         }
