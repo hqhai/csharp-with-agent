@@ -13,6 +13,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<FinalTestResult, FinalTestResultModel>().IgnoreAllNonExisting();
             CreateMap<FinalTestResult, TestResultRankingModel>().IgnoreAllNonExisting();
+            CreateMap<FinalTestResult, TestResultReportModel>().IgnoreAllNonExisting();
         }
     }
 }
