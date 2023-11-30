@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.MockTestResultQuery;
-    using Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -34,6 +33,18 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         [ProducesResponseType(typeof(MethodResult<IList<TestResultRankingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetMockTestRankingQuery command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get mock-test ranking
+        /// </summary>
+        [HttpGet("mock-test-report")]
+        [ProducesResponseType(typeof(MethodResult<TestResultReportModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetVideoTimeCodeResult([FromQuery] GetMockTestResultReportQuery command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

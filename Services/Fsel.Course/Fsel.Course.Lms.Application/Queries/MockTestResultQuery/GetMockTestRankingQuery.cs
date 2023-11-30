@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
@@ -28,13 +29,15 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly ITrainingService _trainingService;
         private readonly IMockTestResultRepository _mockTestResultRepository;
 
-        public GetMockTestRankingQueryHandler(IMapper mapper, IUserService userService, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
+        public GetMockTestRankingQueryHandler(IMapper mapper, IUserService userService, DateTimeConverter dateTimeConverter, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
         {
             _mapper = mapper;
             _userService = userService;
+            _dateTimeConverter = dateTimeConverter;
             _trainingService = trainingService;
             _mockTestResultRepository = mockTestResultRepository;
         }
@@ -77,7 +80,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                     if (mockTestResultDto != null)
                     {
                         mockTestResultDto.IsCurrentStudent = item.Id == mockTestResult.StudentId;
-                        mockTestResultDto.WorkingTime = mockTestResultStudent?.SectionGroupResults.Select(x => DateTimeHelper.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
+                        mockTestResultDto.WorkingTime = mockTestResultStudent?.SectionGroupResults.Select(x => _dateTimeConverter.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
+                        mockTestResultDto.Score = mockTestResultDto.SkillScores?.Average(x => x.Scores);
                     }
                     else
                     {

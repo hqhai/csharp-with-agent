@@ -114,7 +114,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var courseModel = GetCourseModel(course, studentId);
             if (courseModel == null)
             {
-                methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }

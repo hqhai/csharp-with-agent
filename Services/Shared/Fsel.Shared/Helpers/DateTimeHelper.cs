@@ -29,13 +29,9 @@ namespace Fsel.Shared.Helpers
             return age;
         }
 
-        public static double GetWorkingTime(DateTime? inputDate, DateTime outputDate, double executionTime)
+        public static double GetSecondBetweenDate(DateTime inputDate, DateTime outputDate)
         {
-            if (executionTime > 0)
-            {
-                return inputDate.HasValue && (outputDate - inputDate.Value).TotalSeconds <= executionTime ? NumberHelper.ConvertRound((outputDate - inputDate.Value).TotalSeconds) : executionTime;
-            }
-            return default;
+            return NumberHelper.ConvertRound((outputDate - inputDate).TotalSeconds);
         }
 
         public static async Task<(int, bool)> CountContinuousDaysAsync(IList<DateTime>? dates)
