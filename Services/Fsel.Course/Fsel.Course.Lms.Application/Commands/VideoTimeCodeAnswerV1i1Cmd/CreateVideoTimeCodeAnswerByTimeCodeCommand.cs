@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly VideoConverter _videoConverter;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly QuestionConverter _questionConverter;
 
@@ -42,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , VideoConverter videoConverter
+            , DateTimeConverter dateTimeConverter
             , IQuestionRepository questionRepository
             , QuestionConverter questionConverter)
         {
@@ -51,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoConverter = videoConverter;
+            _dateTimeConverter = dateTimeConverter;
             _questionRepository = questionRepository;
             _questionConverter = questionConverter;
         }
@@ -173,19 +176,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
         {
             if (videoTimeCodeResult.Status == EnumResultStatus.New)
             {
-                videoTimeCodeResult.WorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode.ExecutionTime);
-                if (videoTimeCodeResult.WorkingTime >= videoTimeCode.ExecutionTime)
-                {
-                    videoTimeCodeResult.WorkingTime = videoTimeCode.ExecutionTime;
-                }
+                videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
             }
             else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
             {
-                videoTimeCodeResult.RetryWorkingTime += _videoConverter.GetWorkingTime(videoTimeCodeResult, videoTimeCode.ExecutionTime);
-                if (videoTimeCodeResult.RetryWorkingTime >= videoTimeCode.ExecutionTime)
-                {
-                    videoTimeCodeResult.RetryWorkingTime = videoTimeCode.ExecutionTime;
-                }
+                videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
             }
             if (isSubmit)
             {
