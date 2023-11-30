@@ -38,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             MethodResult<TestResultReportModel> methodResult = new MethodResult<TestResultReportModel>();
 
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable
+                .Include(x => x.VideoTimeCode)
                 .Where(x => x.Id == request.VideoTimeCodeResultId)
                 .FirstOrDefaultAsync(cancellationToken);
 
