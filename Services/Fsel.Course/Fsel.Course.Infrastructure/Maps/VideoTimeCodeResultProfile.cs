@@ -12,6 +12,7 @@ namespace Fsel.Course.Infrastructure.Maps
         public VideoTimeCodeResultProfile()
         {
             CreateMap<VideoTimeCodeResult, TestResultRankingModel>().IgnoreAllNonExisting();
+            CreateMap<VideoTimeCodeResult, TestResultReportModel>().IgnoreAllNonExisting();
         }
     }
 }
