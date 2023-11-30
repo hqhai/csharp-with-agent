@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             methodResult.Result = new LessonsMockTestModel
             {
                 Lessons = await GetLesson(request, studentId, cancellationToken),
-                MockTest = await GetMockTestAsync(request.CourseId, request.UnitId, studentId)
+                MockTest = unit.UnitSkillMockTests.Any() ? await GetMockTestAsync(request.CourseId, request.UnitId, studentId) : default
             };
 
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -123,11 +123,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 return default;
             }
             var sectionGroup = mockTest.MockTestSections.Select(x => x.SectionGroup).FirstOrDefault();
-            var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
             var mockTestModel = _mapper.Map<MockTestModel>(mockTest);
-            var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup!).ToList();
+            var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
             sectionGroupModel.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroup!.Sections.ToList(), sectionGroup!.CourseSkill);
-            mockTestModel.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
+            mockTestModel.TotalQuestion = _sectionConverter.GetTotalQuestion(mockTest.MockTestSections.Select(x => x.SectionGroup!).ToList());
             mockTestModel.MockTestResult = _mapper.Map<MockTestResultModel>(mockTest.MockTestResults.FirstOrDefault());
             mockTestModel.SectionGroups = new List<SectionGroupModel> { sectionGroupModel };
             return mockTestModel;

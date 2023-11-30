@@ -23,6 +23,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly ISectionRepository _sectionRepository;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
 
@@ -30,6 +31,7 @@ namespace Fsel.Course.Infrastructure.Common
             , QuestionTypeConverter questionTypeConverter
             , IQuestionRepository questionRepository
             , ISectionRepository sectionRepository
+            , DateTimeConverter dateTimeConverter
             , ISectionGroupRepository sectionGroupRepository
             , ISectionQuestionRepository sectionQuestionRepository)
         {
@@ -37,6 +39,7 @@ namespace Fsel.Course.Infrastructure.Common
             _questionTypeConverter = questionTypeConverter;
             _questionRepository = questionRepository;
             _sectionRepository = sectionRepository;
+            _dateTimeConverter = dateTimeConverter;
             _sectionGroupRepository = sectionGroupRepository;
             _sectionQuestionRepository = sectionQuestionRepository;
         }
@@ -46,17 +49,8 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             ArgumentNullException.ThrowIfNull(sectionGroup);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
-            sectionGroupResultDto.RemainingTime = GetRemainingTime(sectionGroupResult, sectionGroup);
+            sectionGroupResultDto.RemainingTime = _dateTimeConverter.GetRemainingTime(sectionGroupResult, sectionGroup.ExecutionTime);
             return sectionGroupResultDto;
-        }
-
-        private static double GetRemainingTime(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
-        {
-            if (sectionGroupResult.Status == EnumResultStatus.Done && sectionGroupResult.UpdatedDate.HasValue)
-            {
-                return sectionGroup.ExecutionTime - Shared.Helpers.DateTimeHelper.GetWorkingTime(sectionGroupResult.CreatedDate, sectionGroupResult.UpdatedDate.Value, sectionGroup.ExecutionTime);
-            }
-            return sectionGroup.ExecutionTime - Shared.Helpers.DateTimeHelper.GetWorkingTime(sectionGroupResult.CreatedDate, DateTime.UtcNow, sectionGroup.ExecutionTime);
         }
 
         public async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill, bool isMockTest = false)
@@ -101,13 +95,11 @@ namespace Fsel.Course.Infrastructure.Common
 
         private IList<SectionDtoModel> GetSections(IList<Section> sections)
         {
-            var listSection = new List<SectionDtoModel>();
             return sections.Select(x => _mapper.Map<SectionDtoModel>(x)).ToList();
         }
 
         private IList<SectionDtoModel> GetSectionsByMockTest(IList<Section> sections, EnumCourseSkill skill)
         {
-            var listSection = new List<SectionDtoModel>();
             return sections.Select(x => GetSectionByMockTest(x, skill)).ToList();
         }
 
@@ -138,15 +130,6 @@ namespace Fsel.Course.Infrastructure.Common
             var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
             sectionGroupModel.TotalQuestion = GetTotalQuestion(sectionGroup);
             return sectionGroupModel;
-        }
-
-        public IList<EnumCourseSkill>? GetCourseSkill(IList<SectionGroup>? sectionGroups)
-        {
-            if (sectionGroups != null && sectionGroups.Any())
-            {
-                return sectionGroups.Select(x => x.CourseSkill).ToList();
-            }
-            return default;
         }
 
         public long GetTotalQuestion(IList<Section>? sections, EnumCourseSkill courseSkill)

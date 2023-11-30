@@ -8,9 +8,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Shared.Helpers;
+    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -24,11 +25,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMapper _mapper;
+        private readonly DateTimeConverter _dateTimeConverter;
 
-        public GetMockTestResultReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMapper mapper)
+        public GetMockTestResultReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMapper mapper, DateTimeConverter dateTimeConverter)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _mapper = mapper;
+            _dateTimeConverter = dateTimeConverter;
         }
 
         public async Task<MethodResult<TestResultReportModel>> Handle(GetMockTestResultReportQuery request, CancellationToken cancellationToken)
@@ -41,12 +44,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                             .ThenInclude(x => x!.SectionGroup)
                             .Where(x => x.Id == request.MockTestResultId)
                             .FirstOrDefaultAsync(cancellationToken);
-
+            if (mockTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                return methodResult;
+            }
             var mockTestResultDto = _mapper.Map<TestResultReportModel>(mockTestResult);
 
             if (mockTestResultDto != null)
             {
-                mockTestResultDto.WorkingTime = DateTimeHelper.GetWorkingTime(mockTestResult?.CreatedDate, mockTestResult?.UpdatedDate ?? DateTime.UtcNow, mockTestResult!.SectionGroupResults.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault());
+                mockTestResultDto.WorkingTime = _dateTimeConverter.GetWorkingTime(mockTestResult.CreatedDate, mockTestResult.UpdatedDate ?? DateTime.UtcNow, mockTestResult!.SectionGroupResults.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault());
                 mockTestResultDto.Score = mockTestResult.SkillScores?.Average(x => x.Scores);
             }
 

@@ -551,11 +551,6 @@ namespace Fsel.Course.Infrastructure.Common
             return EnumAnswerStatus.Done;
         }
 
-        public double GetWorkingTime(VideoTimeCodeResult videoTimeCodeResult, double executionTime)
-        {
-            return DateTimeHelper.GetWorkingTime(videoTimeCodeResult?.UpdatedDate ?? videoTimeCodeResult?.CreatedDate, DateTime.UtcNow, executionTime);
-        }
-
         public bool ValidateList(object? objectList)
         {
             if (objectList is IList list)
