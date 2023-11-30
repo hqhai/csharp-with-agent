@@ -74,18 +74,18 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 return methodResult;
             }
             var studentId = studentsResult.Content?.Result?.Id;
-            await UpdateLessonAndMockTest(request, studentId, cancellationToken).ConfigureAwait(false);
+            var unit = await UpdateLessonAndMockTest(request, studentId, cancellationToken).ConfigureAwait(false);
             methodResult.Result = new LessonsMockTestModel
             {
                 Lessons = await GetLesson(request, studentId, cancellationToken),
-                MockTest = await GetMockTestAsync(request.CourseId, request.UnitId, studentId)
+                MockTest = unit.UnitSkillMockTests.Any() ? await GetMockTestAsync(request.CourseId, request.UnitId, studentId) : default
             };
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task UpdateLessonAndMockTest(GetLessonQuery request, Guid? studentId, CancellationToken cancellationToken)
+        private async Task<Domain.Entities.Unit> UpdateLessonAndMockTest(GetLessonQuery request, Guid? studentId, CancellationToken cancellationToken)
         {
             var unit = await _unitRepository.Queryable
                                  .Include(x => x.UnitSkillMockTests)
@@ -96,7 +96,11 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 return;
             }
             await UpdateLessonResults(request, studentId, unit, cancellationToken).ConfigureAwait(false);
-            await UpdateMockTestResults(request, studentId, unit, cancellationToken).ConfigureAwait(false);
+            if (unit.UnitSkillMockTests.Any())
+            {
+                await UpdateMockTestResults(request, studentId, unit, cancellationToken).ConfigureAwait(false);
+            }
+            return unit;
         }
 
         private async Task<MockTestModel?> GetMockTestAsync(Guid courseId, Guid unitId, Guid? studentId)
