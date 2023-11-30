@@ -175,7 +175,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 course.CourseResults.Add(new CourseResult
                 {
                     StudentId = studentId ?? default,
-                    Status = EnumResultStatus.Process
+                    Status = EnumResultStatus.New
                 });
             }
 
