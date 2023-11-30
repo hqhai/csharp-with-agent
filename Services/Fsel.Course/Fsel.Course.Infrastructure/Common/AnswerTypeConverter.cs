@@ -4,6 +4,7 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using System;
     using System.Collections;
+    using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
@@ -70,7 +71,7 @@ namespace Fsel.Course.Infrastructure.Common
             return (configAnswer, totalCorrect, isAnswerMissing);
         }
 
-        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false, bool isTimeCodeProcess = false)
+        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false, bool isTimeCodeProcess = false, bool isShowNull = false)
         {
             object? result;
             switch (type)
@@ -79,29 +80,29 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
                     var multichoice = configAnswer.Deserialize<MultipleChoiceAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(multichoice, isTimeCodeProcess) : multichoice;
+                    result = isDisableAnswers ? ClearAnswers(multichoice, isTimeCodeProcess, isShowNull) : multichoice;
                     break;
 
                 case EnumQuestionType.Listing:
                     var listingQuestion = configAnswer.Deserialize<ListingAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(listingQuestion, isTimeCodeProcess) : listingQuestion;
+                    result = isDisableAnswers ? ClearAnswers(listingQuestion, isTimeCodeProcess, isShowNull) : listingQuestion;
                     break;
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
                 case EnumQuestionType.DragAndDropPicture:
                     var matchingTypeQuestion = configAnswer.Deserialize<MatchingTypeAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion, isTimeCodeProcess) : matchingTypeQuestion;
+                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion, isTimeCodeProcess, isShowNull) : matchingTypeQuestion;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
                     var shortAnswerQuestionWordBaseQuestion = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion, isTimeCodeProcess) : shortAnswerQuestionWordBaseQuestion;
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion, isTimeCodeProcess, isShowNull) : shortAnswerQuestionWordBaseQuestion;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
                     var shortAnswerWordCount = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount, isTimeCodeProcess) : shortAnswerWordCount;
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount, isTimeCodeProcess, isShowNull) : shortAnswerWordCount;
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
@@ -109,17 +110,17 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
                     var gapFillQuestion = configAnswer.Deserialize<GapFillAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion, isTimeCodeProcess) : gapFillQuestion;
+                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion, isTimeCodeProcess, isShowNull) : gapFillQuestion;
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion, isTimeCodeProcess) : dragAndDropSentenceOrderQuestion;
+                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion, isTimeCodeProcess, isShowNull) : dragAndDropSentenceOrderQuestion;
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     var multipleOption = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(multipleOption, isTimeCodeProcess) : multipleOption;
+                    result = isDisableAnswers ? ClearAnswers(multipleOption, isTimeCodeProcess, isShowNull) : multipleOption;
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
@@ -134,82 +135,87 @@ namespace Fsel.Course.Infrastructure.Common
             return result;
         }
 
-        private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data, bool isTimeCodeProcess)
+        private static bool? IsDisableAnswers(bool isTimeCodeProcess, bool isFirstSubmit, bool? isExact, bool isShowNull)
+        {
+            return (isTimeCodeProcess && isFirstSubmit && isExact == true) ? isExact : isShowNull ? false : (bool?)default;
+        }
+
+        private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data, bool isTimeCodeProcess, bool isShowNull)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isTimeCodeProcess && item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowNull);
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(DragAndDropSentenceOrderAnswer? data, bool isTimeCodeProcess)
+        private static object? ClearAnswers(DragAndDropSentenceOrderAnswer? data, bool isTimeCodeProcess, bool isShowNull)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isTimeCodeProcess && item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowNull);
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(ShortAnswerWordBaseAnswer? data, bool isTimeCodeProcess)
+        private static object? ClearAnswers(ShortAnswerWordBaseAnswer? data, bool isTimeCodeProcess, bool isShowNull)
         {
             if (data != null && !string.IsNullOrEmpty(data.Answers))
             {
-                data.IsExact = (isTimeCodeProcess && data.IsFirstSubmit && data.IsExact == true) ? data.IsExact : default;
+                data.IsExact = IsDisableAnswers(isTimeCodeProcess, data.IsFirstSubmit, data.IsExact, isShowNull);
             }
             return data;
         }
 
-        private static object? ClearAnswers(ListingAnswer? data, bool isTimeCodeProcess)
+        private static object? ClearAnswers(ListingAnswer? data, bool isTimeCodeProcess, bool isShowNull)
         {
             if (data != null && data.Answers != null)
             {
-                data.IsExact = (isTimeCodeProcess && data.IsFirstSubmit && data.IsExact == true) ? data.IsExact : default;
+                data.IsExact = IsDisableAnswers(isTimeCodeProcess, data.IsFirstSubmit, data.IsExact, isShowNull);
             }
             return data;
         }
 
-        private static object? ClearAnswers(MultipleChoiceAnswer? data, bool isTimeCodeProcess)
+        private static object? ClearAnswers(MultipleChoiceAnswer? data, bool isTimeCodeProcess, bool isShowNull)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isTimeCodeProcess && item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowNull);
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(ShortAnswerWordCountBaseAnswer? data, bool isTimeCodeProcess)
+        private static object? ClearAnswers(ShortAnswerWordCountBaseAnswer? data, bool isTimeCodeProcess, bool isShowNull)
         {
             if (data != null)
             {
-                data.IsExact = (isTimeCodeProcess && data.IsFirstSubmit && data.IsExact == true) ? data.IsExact : default;
+                data.IsExact = IsDisableAnswers(isTimeCodeProcess, data.IsFirstSubmit, data.IsExact, isShowNull);
             }
             return data;
         }
 
-        private static object? ClearAnswers(MatchingTypeAnswer? data, bool isTimeCodeProcess)
+        private static object? ClearAnswers(MatchingTypeAnswer? data, bool isTimeCodeProcess, bool isShowNull)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = (isTimeCodeProcess && item.IsFirstSubmit && item.IsExact == true) ? item.IsExact : default;
+                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowNull);
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(GapFillAnswer? data, bool isTimeCodeProcess)
+        private static object? ClearAnswers(GapFillAnswer? data, bool isTimeCodeProcess, bool isShowNull)
         {
             if (data != null && data.Answers != null)
             {
@@ -217,7 +223,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     item.IsExacts = item.IsExacts?.Select((x, index) =>
                     {
-                        return (isTimeCodeProcess && item.IsFirstSubmits != null && item.IsFirstSubmits[index] && x == true) ? x : default;
+                        return IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmits != null && item.IsFirstSubmits[index], x, isShowNull);
                     }).ToList();
                 }
             }
@@ -364,6 +370,10 @@ namespace Fsel.Course.Infrastructure.Common
                         dataAnswer.IsExact = true;
                         number++;
                     }
+                    else
+                    {
+                        dataAnswer.IsExact = false;
+                    }
                     if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                     {
                         if (!(dataOldAnswer.IsExact == true && dataOldAnswer.IsFirstSubmit))
@@ -398,6 +408,10 @@ namespace Fsel.Course.Infrastructure.Common
                         dataAnswer.IsExact = true;
                         number++;
                     }
+                    else
+                    {
+                        dataAnswer.IsExact = false;
+                    }
                     if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                     {
                         if (!(dataOldAnswer.IsExact == true && dataOldAnswer.IsFirstSubmit))
@@ -413,8 +427,8 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool IsShortAnswer(string question, string answer)
         {
-            string q = " " + question.Trim().ToLower().Replace('’', '\'').ToString() + " ";
-            string a = " " + answer.Trim().ToLower().Replace('’', '\'').ToString() + " ";
+            string q = " " + question.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            string a = " " + answer.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
             return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -580,7 +594,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var objects = list.Cast<object>().ToList();
                 if (objects != null && objects.Any())
                 {
-                    return objects.Any(x => (bool)x.GetPropValue(nameProperty));
+                    return objects.Any(x => x.GetPropValue<bool>(nameProperty));
                 }
             }
             else
@@ -597,13 +611,13 @@ namespace Fsel.Course.Infrastructure.Common
                 string[] questionWords = words[index].Split('|');
                 foreach (var item in questionWords)
                 {
-                    if (word.Trim().ToLower().Replace('’', '\'') == item.Trim().ToLower().Replace('’', '\''))
+                    if (word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == item.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
                     {
                         return true;
                     }
                 }
             }
-            else if (words[index].Trim().ToLower().Replace('’', '\'') == word.Trim().ToLower().Replace('’', '\''))
+            else if (words[index].Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
             {
                 return true;
             }
