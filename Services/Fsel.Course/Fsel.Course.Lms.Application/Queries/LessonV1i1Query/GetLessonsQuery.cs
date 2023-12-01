@@ -98,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonV1i1Query
                 await _lessonResultRepository.AddList(lessonResults);
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-            return _mapper.Map<IList<LessonResultModel>>(lessonResults);
+            return _mapper.Map<IList<LessonResultModel>>(lessonResults.OrderBy(x => x.CreatedDate).ToList());
         }
     }
 }
