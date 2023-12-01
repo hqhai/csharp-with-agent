@@ -71,7 +71,7 @@ namespace Fsel.Course.Infrastructure.Common
             return (configAnswer, totalCorrect, isAnswerMissing);
         }
 
-        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false, bool isTimeCodeProcess = false, bool isShowNull = false)
+        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false, bool isTimeCodeProcess = false, bool isShowSubStatus = false)
         {
             object? result;
             switch (type)
@@ -80,29 +80,29 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
                     var multichoice = configAnswer.Deserialize<MultipleChoiceAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(multichoice, isTimeCodeProcess, isShowNull) : multichoice;
+                    result = isDisableAnswers ? ClearAnswers(multichoice, isTimeCodeProcess, isShowSubStatus) : multichoice;
                     break;
 
                 case EnumQuestionType.Listing:
                     var listingQuestion = configAnswer.Deserialize<ListingAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(listingQuestion, isTimeCodeProcess, isShowNull) : listingQuestion;
+                    result = isDisableAnswers ? ClearAnswers(listingQuestion, isTimeCodeProcess, isShowSubStatus) : listingQuestion;
                     break;
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
                 case EnumQuestionType.DragAndDropPicture:
                     var matchingTypeQuestion = configAnswer.Deserialize<MatchingTypeAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion, isTimeCodeProcess, isShowNull) : matchingTypeQuestion;
+                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion, isTimeCodeProcess, isShowSubStatus) : matchingTypeQuestion;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
                     var shortAnswerQuestionWordBaseQuestion = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion, isTimeCodeProcess, isShowNull) : shortAnswerQuestionWordBaseQuestion;
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion, isTimeCodeProcess, isShowSubStatus) : shortAnswerQuestionWordBaseQuestion;
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
                     var shortAnswerWordCount = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount, isTimeCodeProcess, isShowNull) : shortAnswerWordCount;
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount, isTimeCodeProcess, isShowSubStatus) : shortAnswerWordCount;
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
@@ -110,17 +110,17 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
                     var gapFillQuestion = configAnswer.Deserialize<GapFillAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion, isTimeCodeProcess, isShowNull) : gapFillQuestion;
+                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion, isTimeCodeProcess, isShowSubStatus) : gapFillQuestion;
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion, isTimeCodeProcess, isShowNull) : dragAndDropSentenceOrderQuestion;
+                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion, isTimeCodeProcess, isShowSubStatus) : dragAndDropSentenceOrderQuestion;
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     var multipleOption = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
-                    result = isDisableAnswers ? ClearAnswers(multipleOption, isTimeCodeProcess, isShowNull) : multipleOption;
+                    result = isDisableAnswers ? ClearAnswers(multipleOption, isTimeCodeProcess, isShowSubStatus) : multipleOption;
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
@@ -135,87 +135,87 @@ namespace Fsel.Course.Infrastructure.Common
             return result;
         }
 
-        private static bool? IsDisableAnswers(bool isTimeCodeProcess, bool isFirstSubmit, bool? isExact, bool isShowNull)
+        private static bool? IsDisableAnswers(bool isTimeCodeProcess, bool isFirstSubmit, bool? isExact, bool isShowSubStatus)
         {
-            return (isTimeCodeProcess && isFirstSubmit && isExact == true) ? isExact : isShowNull ? false : (bool?)default;
+            return (isTimeCodeProcess && isFirstSubmit && isExact == true) ? isExact : isShowSubStatus ? false : (bool?)default;
         }
 
-        private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data, bool isTimeCodeProcess, bool isShowNull)
-        {
-            if (data != null && data.Answers != null)
-            {
-                foreach (var item in data.Answers)
-                {
-                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowNull);
-                }
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(DragAndDropSentenceOrderAnswer? data, bool isTimeCodeProcess, bool isShowNull)
+        private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data, bool isTimeCodeProcess, bool isShowSubStatus)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowNull);
+                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowSubStatus);
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(ShortAnswerWordBaseAnswer? data, bool isTimeCodeProcess, bool isShowNull)
+        private static object? ClearAnswers(DragAndDropSentenceOrderAnswer? data, bool isTimeCodeProcess, bool isShowSubStatus)
+        {
+            if (data != null && data.Answers != null)
+            {
+                foreach (var item in data.Answers)
+                {
+                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowSubStatus);
+                }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(ShortAnswerWordBaseAnswer? data, bool isTimeCodeProcess, bool isShowSubStatus)
         {
             if (data != null && !string.IsNullOrEmpty(data.Answers))
             {
-                data.IsExact = IsDisableAnswers(isTimeCodeProcess, data.IsFirstSubmit, data.IsExact, isShowNull);
+                data.IsExact = IsDisableAnswers(isTimeCodeProcess, data.IsFirstSubmit, data.IsExact, isShowSubStatus);
             }
             return data;
         }
 
-        private static object? ClearAnswers(ListingAnswer? data, bool isTimeCodeProcess, bool isShowNull)
+        private static object? ClearAnswers(ListingAnswer? data, bool isTimeCodeProcess, bool isShowSubStatus)
         {
             if (data != null && data.Answers != null)
             {
-                data.IsExact = IsDisableAnswers(isTimeCodeProcess, data.IsFirstSubmit, data.IsExact, isShowNull);
+                data.IsExact = IsDisableAnswers(isTimeCodeProcess, data.IsFirstSubmit, data.IsExact, isShowSubStatus);
             }
             return data;
         }
 
-        private static object? ClearAnswers(MultipleChoiceAnswer? data, bool isTimeCodeProcess, bool isShowNull)
+        private static object? ClearAnswers(MultipleChoiceAnswer? data, bool isTimeCodeProcess, bool isShowSubStatus)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowNull);
+                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowSubStatus);
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(ShortAnswerWordCountBaseAnswer? data, bool isTimeCodeProcess, bool isShowNull)
+        private static object? ClearAnswers(ShortAnswerWordCountBaseAnswer? data, bool isTimeCodeProcess, bool isShowSubStatus)
         {
             if (data != null)
             {
-                data.IsExact = IsDisableAnswers(isTimeCodeProcess, data.IsFirstSubmit, data.IsExact, isShowNull);
+                data.IsExact = IsDisableAnswers(isTimeCodeProcess, data.IsFirstSubmit, data.IsExact, isShowSubStatus);
             }
             return data;
         }
 
-        private static object? ClearAnswers(MatchingTypeAnswer? data, bool isTimeCodeProcess, bool isShowNull)
+        private static object? ClearAnswers(MatchingTypeAnswer? data, bool isTimeCodeProcess, bool isShowSubStatus)
         {
             if (data != null && data.Answers != null)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowNull);
+                    item.IsExact = IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmit, item.IsExact, isShowSubStatus);
                 }
             }
             return data;
         }
 
-        private static object? ClearAnswers(GapFillAnswer? data, bool isTimeCodeProcess, bool isShowNull)
+        private static object? ClearAnswers(GapFillAnswer? data, bool isTimeCodeProcess, bool isShowSubStatus)
         {
             if (data != null && data.Answers != null)
             {
@@ -223,7 +223,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     item.IsExacts = item.IsExacts?.Select((x, index) =>
                     {
-                        return IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmits != null && item.IsFirstSubmits[index], x, isShowNull);
+                        return IsDisableAnswers(isTimeCodeProcess, item.IsFirstSubmits != null && item.IsFirstSubmits[index], x, isShowSubStatus);
                     }).ToList();
                 }
             }

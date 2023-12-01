@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     {
         public Guid VideoId { get; set; }
         public Guid VideoTimeCodeId { get; set; }
-        public bool IsShowNull { get; set; }
+        public bool isShowSubStatus { get; set; }
         public bool IsCreateAnswer { get; set; }
         public Guid? LessonResultId { get; set; }
     }
@@ -93,7 +93,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            var videoTimeCodeModel = _videoConverter.GetVideoTimeCode(videoTimeCode, method.Result, request.IsShowNull);
+            var videoTimeCodeModel = _videoConverter.GetVideoTimeCode(videoTimeCode, method.Result, request.isShowSubStatus);
             methodResult.Result = videoTimeCodeModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

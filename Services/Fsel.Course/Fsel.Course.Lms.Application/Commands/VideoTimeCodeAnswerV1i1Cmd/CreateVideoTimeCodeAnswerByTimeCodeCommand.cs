@@ -83,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
-            var videoTimeCodeMethod = await _mediator.Send(new GetTimeCodeDetailQuery { VideoTimeCodeId = request.VideoTimeCodeId, VideoId = videoResult.VideoId, LessonResultId = videoResult.LessonResultId, IsShowNull = videoTimeCodeResult.Status == EnumResultStatus.Process && request.IsSubmit, IsCreateAnswer = true }, cancellationToken);
+            var videoTimeCodeMethod = await _mediator.Send(new GetTimeCodeDetailQuery { VideoTimeCodeId = request.VideoTimeCodeId, VideoId = videoResult.VideoId, LessonResultId = videoResult.LessonResultId, isShowSubStatus = videoTimeCodeResult.Status == EnumResultStatus.Process && request.IsSubmit, IsCreateAnswer = true }, cancellationToken);
             methodResult.Result = videoTimeCodeMethod.Result;
             return methodResult;
         }
