@@ -94,8 +94,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 return methodResult;
             }
 
-            await UpdateLessonResults(request, studentId, unit, cancellationToken).ConfigureAwait(false);
-            await UpdateMockTestResults(request, studentId, unit, cancellationToken).ConfigureAwait(false);
+            await UpdateLessonResults(request, studentId, unit, cancellationToken);
+            await UpdateMockTestResults(request, studentId, unit, cancellationToken);
             methodResult.Result = new LessonsMockTestModel
             {
                 Lessons = await GetLesson(request, studentId, cancellationToken),
@@ -134,10 +134,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
         private async Task UpdateLessonResults(GetLessonQuery request, Guid? studentId, Domain.Entities.Unit unit, CancellationToken cancellationToken)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).ToListAsync(cancellationToken);
-            if (!lessonResults.Any())
+            var isUsedLessonResult = await _lessonResultRepository.Queryable.AnyAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
+            if (isUsedLessonResult)
             {
-                lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select((x, index) => new LessonResult
+                var lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select((x, index) => new LessonResult
                 {
                     UnitId = x.UnitId,
                     LessonId = x.LessonId,
@@ -146,16 +146,16 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     StudentId = studentId ?? default
                 }).ToList();
                 await _lessonResultRepository.AddList(lessonResults);
-                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
             }
         }
 
         private async Task UpdateMockTestResults(GetLessonQuery request, Guid? studentId, Domain.Entities.Unit unit, CancellationToken cancellationToken)
         {
-            var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).ToListAsync(cancellationToken);
-            if (!mockTestResults.Any())
+            var isMockTestResult = await _mockTestResultRepository.Queryable.AnyAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
+            if (isMockTestResult)
             {
-                mockTestResults = unit.UnitSkillMockTests.Select(x => new MockTestResult
+                var mockTestResults = unit.UnitSkillMockTests.Select(x => new MockTestResult
                 {
                     UnitId = x.UnitId,
                     MockTestId = x.MockTestId,
@@ -164,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     CourseId = request.CourseId
                 }).ToList();
                 await _mockTestResultRepository.AddList(mockTestResults);
-                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
             }
         }
 
@@ -191,24 +191,22 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                             }).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken: cancellationToken);
             var lessonIds = lessons.Select(x => x.Id).ToList();
             var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.VideoResult)
-                                                                     .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
-                                                                     .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                                     .Where(x => x.StudentId == studentId && lessonIds.Contains(x.LessonId) && x.UnitId == request.UnitId && x.CourseId == request.CourseId)
-                                                                     .AsNoTracking()
-                                                                     .ToListAsync(cancellationToken);
+                                                        .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
+                                                        .Where(x => x.StudentId == studentId && lessonIds.Contains(x.LessonId) && x.UnitId == request.UnitId && x.CourseId == request.CourseId)
+                                                        .AsNoTracking()
+                                                        .ToListAsync(cancellationToken);
             return lessons.Select(x =>
             {
                 var lessonResult = lessonResults.FirstOrDefault(y => y.LessonId == x.Id);
                 if (lessonResult != null)
                 {
                     x.LessonResult = _mapper.Map<LessonResultModel>(lessonResult);
-                    var homeWorks = lessonResult.HomeWorkResults.Where(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id).ToList();
-                    var classForumResult = lessonResult.ClassForumResults.FirstOrDefault(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id);
+                    var classForumResult = lessonResult.ClassForumResults.FirstOrDefault();
                     if (lessonResult.VideoResult?.Status == EnumResultStatus.Done)
                     {
                         x.IsClassForumLock = false;
                     }
-                    if (classForumResult != null && (classForumResult.Status != EnumClassForumResultStatus.Draft && classForumResult.Status != EnumClassForumResultStatus.Denied))
+                    if (classForumResult != null && (classForumResult.Status != EnumClassForumResultStatus.Draft))
                     {
                         x.IsHomeWorkLock = false;
                     }
