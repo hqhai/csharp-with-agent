@@ -137,7 +137,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool? IsDisableAnswers(EnumResultStatus status, bool isFirstSubmit, bool? isExact, bool isShowSubStatus)
         {
-            return (status == EnumResultStatus.Process && isFirstSubmit && isExact == true) ? isExact : isShowSubStatus ? false : (bool?)default;
+            return ((status == EnumResultStatus.Process && isFirstSubmit && isExact == true) || isShowSubStatus) ? isExact : default;
         }
 
         private static object? GetAnswer(MultipleOptionSentenceCompletionAnswer? data, bool isShowSubStatus, EnumResultStatus status)
