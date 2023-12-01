@@ -71,9 +71,11 @@ namespace Fsel.Course.Infrastructure.Common
             return (configAnswer, totalCorrect, isAnswerMissing);
         }
 
-        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false, bool isTimeCodeProcess = false, bool isShowSubStatus = false)
+        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, EnumResultStatus status, bool isShowSubStatus = false)
         {
             object? result;
+            var isDisableAnswers = status != EnumResultStatus.Done;
+            var isTimeCodeProcess = status == EnumResultStatus.Process;
             switch (type)
             {
                 case EnumQuestionType.Multichoice:

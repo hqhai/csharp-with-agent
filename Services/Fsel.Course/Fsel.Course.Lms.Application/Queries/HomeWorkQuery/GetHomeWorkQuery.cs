@@ -98,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 if (answer != null)
                 {
                     answer.CorrectCount = checkDone ? answer.CorrectCount : default;
-                    answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, n.Question!.QuestionType, !checkDone);
+                    answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, n.Question!.QuestionType, homeWorkResult.Status);
                 }
                 return _questionConverter.GetQuestion(n.Question ?? new Question(), answer, checkDone);
             }).ToList();
