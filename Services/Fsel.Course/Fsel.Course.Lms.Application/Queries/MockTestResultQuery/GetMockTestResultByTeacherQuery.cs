@@ -140,7 +140,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                     .Where(x => !isCheckFull || (x!.CourseSkill != EnumCourseSkill.Reading || x.CourseSkill != EnumCourseSkill.Listening))
                     .Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing)
                     .OrderBy(x => x!.CreatedDate)
-                    .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList();
+                    .Select(x => _sectionConverter.GetSectionGroupModel(x, mockTestResult.Status)).ToList();
             mockTestDto.MockTestResult = GetMockTestResult(mockTestResult, mockTest, isCheckFull);
 
             if (mockTestDto.MockTestType == EnumMockTestType.SkillMockTest)

@@ -90,17 +90,16 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 
         private HomeWorkModel GetHomeWork(HomeWork homeWork, HomeWorkResult homeWorkResult)
         {
-            var checkDone = homeWorkResult.Status == EnumResultStatus.Done;
             var homeWorkModel = _mapper.Map<HomeWorkModel>(homeWork);
             homeWorkModel.Questions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).Select(n =>
             {
                 var answer = n.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id);
                 if (answer != null)
                 {
-                    answer.CorrectCount = checkDone ? answer.CorrectCount : default;
-                    answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, n.Question!.QuestionType, !checkDone);
+                    answer.CorrectCount = homeWorkResult.Status == EnumResultStatus.Done ? answer.CorrectCount : default;
+                    answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, n.Question!.QuestionType, homeWorkResult.Status);
                 }
-                return _questionConverter.GetQuestion(n.Question ?? new Question(), answer, checkDone);
+                return _questionConverter.GetQuestion(n.Question ?? new Question(), answer, homeWorkResult.Status);
             }).ToList();
             homeWorkModel.HomeWorkResult = _mapper.Map<HomeWorkResultModel>(homeWorkResult);
             return homeWorkModel;

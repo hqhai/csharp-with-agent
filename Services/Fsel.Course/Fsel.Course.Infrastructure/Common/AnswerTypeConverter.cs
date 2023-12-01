@@ -71,9 +71,11 @@ namespace Fsel.Course.Infrastructure.Common
             return (configAnswer, totalCorrect, isAnswerMissing);
         }
 
-        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isDisableAnswers = false, bool isTimeCodeProcess = false, bool isShowSubStatus = false)
+        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, EnumResultStatus status, bool isShowSubStatus = false)
         {
             object? result;
+            var isDisableAnswers = status != EnumResultStatus.Done;
+            var isTimeCodeProcess = status == EnumResultStatus.Process;
             switch (type)
             {
                 case EnumQuestionType.Multichoice:
@@ -137,7 +139,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool? IsDisableAnswers(bool isTimeCodeProcess, bool isFirstSubmit, bool? isExact, bool isShowSubStatus)
         {
-            return (isTimeCodeProcess && isFirstSubmit && isExact == true) ? isExact : isShowSubStatus ? false : (bool?)default;
+            return ((isTimeCodeProcess && isFirstSubmit && isExact == true) || isShowSubStatus) ? isExact : default;
         }
 
         private static object? ClearAnswers(MultipleOptionSentenceCompletionAnswer? data, bool isTimeCodeProcess, bool isShowSubStatus)

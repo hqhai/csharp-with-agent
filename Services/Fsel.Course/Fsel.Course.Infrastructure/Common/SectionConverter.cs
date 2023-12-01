@@ -117,11 +117,11 @@ namespace Fsel.Course.Infrastructure.Common
             return sectionDetail;
         }
 
-        public SectionGroupModel GetSectionGroupModel(SectionGroup? sectionGroup, bool isDisableAnswers = false)
+        public SectionGroupModel GetSectionGroupModel(SectionGroup? sectionGroup, EnumResultStatus status = EnumResultStatus.Done)
         {
             var sectionGroupModel = GetSectionGroup(sectionGroup);
             sectionGroupModel.MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(sectionGroup?.MockTestScores);
-            sectionGroupModel.Sections = GetSectionModels(sectionGroup?.Sections.ToList(), isDisableAnswers);
+            sectionGroupModel.Sections = GetSectionModels(sectionGroup?.Sections.ToList(), status);
             return sectionGroupModel;
         }
 
@@ -205,31 +205,31 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        public IList<SectionModel>? GetSectionModels(IList<Section>? sections, bool isDisableAnswers = false)
+        public IList<SectionModel>? GetSectionModels(IList<Section>? sections, EnumResultStatus status)
         {
-            return sections?.OrderBy(x => x.CreatedDate).Select(x => GetSection(x, isDisableAnswers)).ToList();
+            return sections?.OrderBy(x => x.CreatedDate).Select(x => GetSection(x, status)).ToList();
         }
 
-        private SectionModel GetSection(Section section, bool isDisableAnswers = false)
+        private SectionModel GetSection(Section section, EnumResultStatus status)
         {
             var sectionDto = _mapper.Map<SectionModel>(section);
-            sectionDto.SectionParts = GetSectionPartDtos(section.SectionParts.ToList(), isDisableAnswers);
-            sectionDto.Questions = GetQuestionDtos(section.SectionQuestions.ToList(), isDisableAnswers);
+            sectionDto.SectionParts = GetSectionPartDtos(section.SectionParts.ToList(), status);
+            sectionDto.Questions = GetQuestionDtos(section.SectionQuestions.ToList(), status);
             sectionDto.SectionTimeCodes = GetSectionTimeCodeDtos(section.SectionTimeCodes.ToList());
             sectionDto.MockTestAnswer = _mapper.Map<MockTestAnswerModel>(section.MockTestAnswers.FirstOrDefault());
             return sectionDto;
         }
 
-        public IList<SectionPartModel> GetSectionPartDtos(IList<SectionPart> sectionParts, bool isDisableAnswers = false)
+        public IList<SectionPartModel> GetSectionPartDtos(IList<SectionPart> sectionParts, EnumResultStatus status)
         {
-            return sectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPart(x, isDisableAnswers)).ToList();
+            return sectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPart(x, status)).ToList();
         }
 
-        private SectionPartModel GetSectionPart(SectionPart sectionPart, bool isDisableAnswers = false)
+        private SectionPartModel GetSectionPart(SectionPart sectionPart, EnumResultStatus status)
         {
             ArgumentNullException.ThrowIfNull(sectionPart);
             var questionDto = _mapper.Map<SectionPartModel>(sectionPart);
-            questionDto.Questions = GetQuestionDtos(sectionPart.SectionQuestions.ToList(), isDisableAnswers);
+            questionDto.Questions = GetQuestionDtos(sectionPart.SectionQuestions.ToList(), status);
             return questionDto;
         }
 
@@ -245,16 +245,16 @@ namespace Fsel.Course.Infrastructure.Common
             return sectionTimeCodeDto;
         }
 
-        public IList<QuestionModel> GetQuestionDtos(IList<SectionQuestion> sectionQuestions, bool isDisableAnswers = false)
+        public IList<QuestionModel> GetQuestionDtos(IList<SectionQuestion> sectionQuestions, EnumResultStatus status)
         {
-            return sectionQuestions.OrderBy(x => x.CreatedDate).Select(x => GetQuestion(x.Question, x.MockTestAnswers.FirstOrDefault(), isDisableAnswers)).ToList();
+            return sectionQuestions.OrderBy(x => x.CreatedDate).Select(x => GetQuestion(x.Question, x.MockTestAnswers.FirstOrDefault(), status)).ToList();
         }
 
-        private QuestionModel GetQuestion(Question? question, object? answer, bool isDisableAnswers = false)
+        private QuestionModel GetQuestion(Question? question, object? answer, EnumResultStatus status)
         {
             ArgumentNullException.ThrowIfNull(question);
             var questionDto = _mapper.Map<QuestionModel>(question);
-            questionDto.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: isDisableAnswers).Item1;
+            questionDto.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, false, status).Item1;
             questionDto.ResultAnswer = _mapper.Map<AnswerModel>(answer);
             return questionDto;
         }
@@ -270,7 +270,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             foreach (var question in questions)
             {
-                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
+                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, !question.Ungraded);
                 if (config == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);

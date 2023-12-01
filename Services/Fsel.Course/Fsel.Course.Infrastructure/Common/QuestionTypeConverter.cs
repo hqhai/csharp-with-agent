@@ -8,9 +8,10 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class QuestionTypeConverter
     {
-        public (object?, int) QuestionTypeConverterObject(object? config, EnumQuestionType type, bool isShowCorrectTotal = false, bool isDisableAnswers = false)
+        public (object?, int) QuestionTypeConverterObject(object? config, EnumQuestionType type, bool isShowCorrectTotal = false, EnumResultStatus status = EnumResultStatus.Done)
         {
             int totalCorrect = default;
+            var isDisableAnswers = status != EnumResultStatus.Done;
             object? result;
             switch (type)
             {

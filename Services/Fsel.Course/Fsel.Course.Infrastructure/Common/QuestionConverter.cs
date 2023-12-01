@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.Models.EntityModels;
 
@@ -22,11 +23,11 @@ namespace Fsel.Course.Infrastructure.Common
             _answerTypeConverter = answerTypeConverter;
         }
 
-        public QuestionModel GetQuestion(Question question, object? answer = null, bool isShowAnswer = false)
+        public QuestionModel GetQuestion(Question question, object? answer = null, EnumResultStatus status = EnumResultStatus.Done)
         {
             ArgumentNullException.ThrowIfNull(question);
             var questionModel = _mapper.Map<QuestionModel>(question);
-            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
+            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, false, status).Item1;
             questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
             questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.Section?.Id ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
             return questionModel;
