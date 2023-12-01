@@ -72,11 +72,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             if (request.FilePaths != null)
             {
-                classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
+                request.FilePaths.ForEach(x => classForumResult.ClassForumResultFiles.Add(new ClassForumResultFile
                 {
                     IsRetry = true,
                     FilePath = x,
-                }).ToList();
+                }));
             }
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
