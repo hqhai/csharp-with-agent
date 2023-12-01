@@ -135,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private async Task UpdateLessonResults(GetLessonQuery request, Guid? studentId, Domain.Entities.Unit unit, CancellationToken cancellationToken)
         {
             var isUsedLessonResult = await _lessonResultRepository.Queryable.AnyAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
-            if (isUsedLessonResult)
+            if (!isUsedLessonResult)
             {
                 var lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select((x, index) => new LessonResult
                 {
@@ -153,7 +153,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private async Task UpdateMockTestResults(GetLessonQuery request, Guid? studentId, Domain.Entities.Unit unit, CancellationToken cancellationToken)
         {
             var isMockTestResult = await _mockTestResultRepository.Queryable.AnyAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
-            if (isMockTestResult)
+            if (!isMockTestResult)
             {
                 var mockTestResults = unit.UnitSkillMockTests.Select(x => new MockTestResult
                 {
