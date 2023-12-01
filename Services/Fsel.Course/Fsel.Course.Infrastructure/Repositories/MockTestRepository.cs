@@ -8,7 +8,6 @@ namespace Fsel.Course.Infrastructure.Repositories
     using AutoMapper;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -92,7 +91,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                            MockTestType = x.MockTestType,
                                            SectionGroups = x.MockTestSections.Where(x => x.SectionGroup != null)
                                              .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
-                                             .Select(x => _sectionConverter.GetSectionGroupModel(x, EnumResultStatus.Done)).ToList(),
+                                             .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList(),
                                        }).FirstOrDefaultAsync();
             }
             catch (Exception)

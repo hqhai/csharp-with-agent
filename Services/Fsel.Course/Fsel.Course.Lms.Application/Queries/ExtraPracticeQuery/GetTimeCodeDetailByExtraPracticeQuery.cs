@@ -85,6 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoId), request.VideoId);
                 return methodResult;
             }
+            var isCheckDone = extraPracticeResult.Status == EnumResultStatus.Done;
             var videoTimeCodeModel = new VideoTimeCodeModel
             {
                 Id = videoTimeCode.Id,
@@ -110,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         CorrectTotal = m.CorrectTotal,
                         Explanation = m.Explanation,
                         Ungraded = m.Ungraded,
-                        Config = GetAnswerConfig(m, extraPracticeResult.Status),
+                        Config = GetAnswerConfig(m, isCheckDone),
                         ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                     }).ToList()
                 }).ToList(),
@@ -131,13 +132,13 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             return videoTimeCode.ExtraPracticeAnswers.Count > 0 ? videoTimeCode.ExtraPracticeAnswers.Sum(x => x.CorrectCount) : default;
         }
 
-        private object? GetAnswerConfig(Question? question, EnumResultStatus status)
+        private object? GetAnswerConfig(Question? question, bool isCheckDone)
         {
             if (question == null)
             {
                 return default;
             }
-            return _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, false, status).Item1;
+            return _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isCheckDone).Item1;
         }
     }
 }

@@ -99,6 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 return methodResult;
             }
 
+            var checkDone = finalTestResult.Status == EnumResultStatus.Done;
             var finalTestModel = new FinalTestModel
             {
                 Id = finalTest.Id,
@@ -130,7 +131,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                             Explanation = x.Question.Explanation,
                             Ungraded = x.Question.Ungraded,
                             CorrectTotal = x.Question.CorrectTotal,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(x.Question.Config, x.Question.QuestionType, false, finalTestResult.Status).Item1,
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(x.Question.Config, x.Question.QuestionType, isDisableAnswers: !checkDone).Item1,
                             ResultAnswer = _mapper.Map<AnswerModel>(x.FinalTestAnswers.FirstOrDefault(x => x.FinalTestResultId == finalTestResult.Id))
                         }).ToList()
                     }).ToList(),

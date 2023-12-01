@@ -71,7 +71,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                 else
                 {
                     Question question = _mapper.Map<Question>(q);
-                    var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, !question.Ungraded);
+                    var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
                     if (config == null)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);

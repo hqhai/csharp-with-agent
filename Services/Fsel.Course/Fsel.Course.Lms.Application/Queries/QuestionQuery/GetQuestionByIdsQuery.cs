@@ -24,8 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         public IList<string>? QuestionIds { get; set; }
 
         [JsonIgnore]
-        public IList<Guid> ListQuestionIds
-        { get { return QuestionIds.ToList<Guid>(); } }
+        public IList<Guid> ListQuestionIds { get { return QuestionIds.ToList<Guid>(); } }
     }
 
     public class GetQuestionByIdQueryHandler : IRequestHandler<GetQuestionByIdsQuery, MethodResult<IList<QuestionModel>>>
@@ -84,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, mockTestResult.Status, x.SectionQuestions.SelectMany(n => n.MockTestAnswers).FirstOrDefault())).ToList();
+            return questions.Select(x => GetQuestion(x, mockTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.MockTestAnswers).FirstOrDefault())).ToList();
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByExtraPratice(GetQuestionByIdsQuery request)
@@ -101,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, extraPracticeResult.Status, x.ExtraPracticeAnswers.FirstOrDefault())).ToList();
+            return questions.Select(x => GetQuestion(x, extraPracticeResult?.Status == EnumResultStatus.Done, x.ExtraPracticeAnswers.FirstOrDefault())).ToList();
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByFinalTest(GetQuestionByIdsQuery request)
@@ -120,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, finalTestResult.Status, x.SectionQuestions.SelectMany(n => n.FinalTestAnswers).FirstOrDefault())).ToList();
+            return questions.Select(x => GetQuestion(x, finalTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.FinalTestAnswers).FirstOrDefault())).ToList();
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByPlacementTest(GetQuestionByIdsQuery request)
@@ -139,18 +138,18 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, placementTestResult.Status, x.SectionQuestions.SelectMany(n => n.PlacementTestAnswers).FirstOrDefault())).ToList();
+            return questions.Select(x => GetQuestion(x, placementTestResult?.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.PlacementTestAnswers).FirstOrDefault())).ToList();
         }
 
-        private QuestionModel GetQuestion(Question question, EnumResultStatus status, object? answer = null)
+        private QuestionModel GetQuestion(Question question, bool isShowAnswer = false, object? answer = null)
         {
             var questionModel = _mapper.Map<QuestionModel>(question);
-            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, false, status).Item1;
+            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
             questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.SectionId ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
             if (answer != null)
             {
                 var answerDto = _mapper.Map<AnswerModel>(answer);
-                answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, status);
+                answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, !isShowAnswer);
                 questionModel.ResultAnswer = answerDto;
             }
             return questionModel;

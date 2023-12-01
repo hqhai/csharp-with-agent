@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                             CorrectTotal = m!.CorrectTotal,
                             Explanation = m!.Explanation,
                             Ungraded = m!.Ungraded,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType).Item1,
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: true).Item1,
                             ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers.FirstOrDefault(x => x.ExtraPracticeResultId == extraPracticeResult.Id))
                         }).ToList(),
                     };
@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                             CorrectTotal = m!.CorrectTotal,
                             Explanation = m!.Explanation,
                             Ungraded = m!.Ungraded,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType).Item1,
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: true).Item1,
                             ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers.FirstOrDefault(x => x.ExtraPracticeExerciseResultId == extraPracticeExerciseResult.Id))
                         }).ToList(),
                     };

@@ -142,6 +142,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestNotInActiveState));
                 return methodResult;
             }
+            var checkDone = mockTestResult.Status == EnumResultStatus.Done;
+
             var mockTestModel = new MockTestModel()
             {
                 Id = mockTest!.Id,
@@ -153,7 +155,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 IsActive = mockTest.UnitSkillMockTests.Any() || mockTest.CourseUnitMockTests.Any(),
                 SectionGroups = mockTest.MockTestSections.Where(x => x.SectionGroup != null)
                          .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
-                         .Select(x => _sectionConverter.GetSectionGroupModel(x, mockTestResult.Status)).ToList(),
+                         .Select(x => _sectionConverter.GetSectionGroupModel(x, !checkDone)).ToList(),
                 MockTestResult = mockTest.MockTestResults.Where(x => x.MockTestId == request.MockTestId && x.CourseId == request.CourseId && x.StudentId == studentId && (request.UnitId == null || x.UnitId == request.UnitId))
                 .Select(x => new MockTestResultModel
                 {
