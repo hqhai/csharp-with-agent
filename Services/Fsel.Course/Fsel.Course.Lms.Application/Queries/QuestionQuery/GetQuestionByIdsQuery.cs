@@ -150,7 +150,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             if (answer != null)
             {
                 var answerDto = _mapper.Map<AnswerModel>(answer);
-                answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, status);
+                answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, status);
                 questionModel.ResultAnswer = answerDto;
             }
             return questionModel;
