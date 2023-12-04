@@ -60,7 +60,6 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                                     StudentId = studentId,
                                     UnitId = x.UnitId,
                                     CourseId = request.CourseId,
-                                    CreatedDate = x.CreatedDate,
                                 }).ToListAsync(cancellationToken: cancellationToken);
 
             methodResult.Result = units;
