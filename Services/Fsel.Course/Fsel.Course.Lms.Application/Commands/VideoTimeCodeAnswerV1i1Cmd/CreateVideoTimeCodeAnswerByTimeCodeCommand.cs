@@ -247,7 +247,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
                 return methodResult;
             }
 
-            if (GetMandatoryAnswer(videoTimeCode, videoTimeCodeResult) && (request.Answers == null || !request.Answers.Any()))
+            if (GetMandatoryAnswer(videoTimeCode, videoTimeCodeResult) && request.IsSubmit && (request.Answers == null || !request.Answers.Any()))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Answers));
                 return methodResult;
