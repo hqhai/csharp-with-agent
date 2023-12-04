@@ -124,13 +124,24 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
             var methodResult = new MethodResult<bool>();
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var updateVideoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
-            List<SkillScores> skillScores = new List<SkillScores>();
+
+            double workingTime = 0;
+
+            if (videoTimeCodeResult.Status == EnumResultStatus.New)
+            {
+                workingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+            }
+            else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+            {
+                workingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+            }
+            var isMandatoryAnswer = videoTimeCode.ExecutionTime == 0 || (workingTime <= videoTimeCode.ExecutionTime && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone);
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
                 var exercise = question?.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                 var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCode.Id, videoTimeCodeResult.VideoResultId, question?.Id, exercise?.Id ?? default);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, answer?.Answer, videoTimeCodeResult.Status == EnumResultStatus.Process, videoTimeCode.ExecutionTime == 0);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, answer?.Answer, videoTimeCodeResult.Status == EnumResultStatus.Process, isMandatoryAnswer);
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
