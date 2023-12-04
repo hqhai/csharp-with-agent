@@ -53,7 +53,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                                             CorrectCount = x.CorrectCount,
                                             CorrectTotal = x.CorrectTotal,
                                             CourseId = x.CourseId,
-                                            CreatedDate = x.CreatedDate,
                                             FinalTestId = x.FinalTestId,
                                             Percent = x.Percent,
                                             SkillScores = x.SkillScores,
