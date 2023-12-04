@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonV1i1Query
                 {
                     lessonDto.IsClassForumLock = false;
                 }
-                if (classForumResult != null && (classForumResult.Status != EnumClassForumResultStatus.Draft && classForumResult.Status != EnumClassForumResultStatus.Denied))
+                if (classForumResult != null && (classForumResult.Status != EnumClassForumResultStatus.Draft))
                 {
                     lessonDto.IsHomeWorkLock = false;
                 }
