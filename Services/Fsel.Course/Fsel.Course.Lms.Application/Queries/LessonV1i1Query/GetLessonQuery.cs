@@ -61,7 +61,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonV1i1Query
             ArgumentNullException.ThrowIfNull(lessonResult);
             var lesson = await _lessonRepository.Queryable
                             .Include(x => x.LessonInstructions)
-                            .Include(x => x.LessonVideos).FirstOrDefaultAsync(x => x.Id == lessonResult.LessonId, cancellationToken: cancellationToken);
+                            .Include(x => x.LessonVideos)
+                            .FirstOrDefaultAsync(x => x.Id == lessonResult.LessonId, cancellationToken: cancellationToken);
             if (lesson == null)
             {
                 return default;
