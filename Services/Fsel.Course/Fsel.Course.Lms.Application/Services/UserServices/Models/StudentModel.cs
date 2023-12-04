@@ -19,5 +19,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public Guid? ClassId { get; set; }
 
         public HumanModel? Human { get; set; }
+
+        public string? BeginnerGuides { get; set; }
     }
 }

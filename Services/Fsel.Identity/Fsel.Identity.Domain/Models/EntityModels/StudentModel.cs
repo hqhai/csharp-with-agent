@@ -17,6 +17,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public Guid? ClassId { get; set; }
         public string? CodeClass { get; set; }
         public long NumberOfToken { get; set; }
+
+        public string? BeginnerGuides { get; set; }
         public ParentProfileModel? Parent { get; set; }
     }
 }
