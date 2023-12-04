@@ -248,14 +248,21 @@ namespace Fsel.Course.Infrastructure.Common
                     foreach (var item in dataAnswer.Answers)
                     {
                         var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                        if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => item.AnswerId.HasValue && n.Id == item.AnswerId && n.IsCorrect == true))
+                        if (item.AnswerId.HasValue)
                         {
-                            number++;
-                            item.IsExact = true;
+                            if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => n.Id == item.AnswerId && n.IsCorrect == true))
+                            {
+                                number++;
+                                item.IsExact = true;
+                            }
+                            else
+                            {
+                                item.IsExact = false;
+                            }
                         }
                         else
                         {
-                            item.IsExact = false;
+                            item.IsExact = default;
                         }
                         if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                         {
@@ -343,6 +350,10 @@ namespace Fsel.Course.Infrastructure.Common
                                 }
                             }
                         }
+                        else
+                        {
+                            item.IsExact = default;
+                        }
                     }
                 }
             }
@@ -365,7 +376,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 if (dataAnswer.Answers != null && (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing)))
                 {
-                    if (dataAnswer.Answers.Count >= dataQuestion.ExactWordCount)
+                    if (dataAnswer.Answers.Where(x => !string.IsNullOrEmpty(x)).Count() >= dataQuestion.ExactWordCount)
                     {
                         dataAnswer.IsExact = true;
                         number++;
