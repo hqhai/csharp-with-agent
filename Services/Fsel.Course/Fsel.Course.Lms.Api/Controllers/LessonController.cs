@@ -35,7 +35,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<LessonsMockTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLesson([FromQuery] GetLessonQuery query)
+        [ApiVersion(ApiSettings.APIVersion1)]
+        public async Task<IActionResult> GetLessons([FromQuery] GetLessonQuery query)
         {
             MethodResult<LessonsMockTestModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

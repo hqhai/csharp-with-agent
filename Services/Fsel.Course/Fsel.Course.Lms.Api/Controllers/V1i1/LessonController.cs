@@ -8,7 +8,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
-    using Fsel.Course.Lms.Application.Queries.LessonV1i1Query;
+    using Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -30,19 +30,19 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// <summary>
         /// Get List Lesson
         /// </summary>
-        [HttpGet("lessons")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<LessonMockTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromQuery] GetLessonsQuery query)
+        public async Task<IActionResult> GetLessons([FromQuery] GetLessonsQuery query)
         {
             MethodResult<IList<LessonMockTestResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Get Lesson
+        /// Get Lesson Detail
         /// </summary>
-        [HttpGet("lesson")]
+        [HttpGet("detail")]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetLessonQuery query)

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
+namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd
 {
     using System.Linq;
     using System.Linq.Dynamic.Core;
@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
         public async Task<MethodResult<bool>> Handle(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
 
             var method = await CreateAnswer(request, cancellationToken);
             if (!method.IsOK)
@@ -118,7 +118,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
             var methodResult = new MethodResult<bool>();
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var updateVideoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
-            List<SkillScores> skillScores = new List<SkillScores>();
+            var skillScores = new List<SkillScores>();
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -211,7 +211,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
         public async Task<MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult, IList<Question>)>> Validate(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult, IList<Question>)> methodResult = new MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult, IList<Question>)>();
+            var methodResult = new MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult, IList<Question>)>();
             var videoResult = await _videoResultRepository.Queryable.Include(x => x.VideoTimeCodeResults).FirstOrDefaultAsync(x => x.Id == request.VideoResultId, cancellationToken);
             if (videoResult == null)
             {
