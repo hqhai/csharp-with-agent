@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerV1i1Cmd
+namespace Fsel.Course.Lms.Application.Commands.V1i1.FinalTestAnswerCmd
 {
     using System;
     using System.Collections.Generic;

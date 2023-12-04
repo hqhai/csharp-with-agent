@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd
+namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd
 {
     using System.Linq;
     using System.Linq.Dynamic.Core;
