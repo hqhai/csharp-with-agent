@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 {
     using System.Collections.Generic;
+    using Fsel.Shared.Enums;
 
     public class GapFillAnswer
     {
@@ -15,6 +16,17 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
         public long Id { get; set; }
         public IList<string>? Answer { get; set; }
         public IList<bool?>? IsExacts { get; set; }
+
+        public IList<EnumSubAnswerStatus>? Statuses
+        {
+            get
+            {
+                return IsExacts?.Select(x =>
+                {
+                    return x.HasValue ? x.Value ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail : EnumSubAnswerStatus.Process;
+                }).ToList();
+            }
+        }
 
         public IList<bool>? IsFirstSubmits
         {

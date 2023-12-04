@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         public Guid VideoResultId { get; set; }
         public Guid StudentId { get; set; }
         public Guid VideoTimeCodeId { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 
     public class CreateVideoTimeCodeResultCommandHandler : IRequestHandler<CreateVideoTimeCodeResultCommand, MethodResult<VideoTimeCodeResultModel>>
@@ -96,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     }, CancellationToken.None).ConfigureAwait(false);
                 }
             }
-            else if (videoTimeCodeResult.Status != EnumResultStatus.Done)
+            else if (videoTimeCodeResult.Status != EnumResultStatus.Done && request.IsActive)
             {
                 if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.New)
                 {

@@ -29,7 +29,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.Listing:
                     var listingQuestion = config.Deserialize<ListingQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(listingQuestion) : listingQuestion;
+                    result = listingQuestion;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
@@ -124,15 +124,6 @@ namespace Fsel.Course.Infrastructure.Common
             if (data != null && data.Content != null && data.Content.Any())
             {
                 data.Content.Clear();
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(ListingQuestion? data)
-        {
-            if (data != null)
-            {
-                data.ExactWordCount = null;
             }
             return data;
         }
