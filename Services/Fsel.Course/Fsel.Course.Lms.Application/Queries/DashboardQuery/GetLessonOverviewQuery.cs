@@ -322,7 +322,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var status = EnumResultStatus.Unfinished;
             if (videoResult != null)
             {
-                var video = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes).ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.StudentId == videoResult.StudentId))
+                var video = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes).ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
                                                             .FirstOrDefaultAsync(x => x.Id == videoResult.VideoId);
                 if (video != null)
                 {
