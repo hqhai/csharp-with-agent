@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.CommandModels.QuestionForms
 {
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class CreateQuestionFormCommandModel
     {
