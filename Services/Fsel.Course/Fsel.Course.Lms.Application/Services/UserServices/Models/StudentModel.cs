@@ -3,7 +3,7 @@
 namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities.BeginnerGuideConfigs;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
 
     public class StudentModel : BaseModel
@@ -20,6 +20,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 
         public HumanModel? Human { get; set; }
 
-        public StudentBeginnerGuide? BeginnerGuide { get; set; }
+        public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
     }
 }
