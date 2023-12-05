@@ -78,6 +78,7 @@ builder.Services.AddScoped<CourseHelper>();
 builder.Services.AddScoped<UnitHelper>();
 builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
+builder.Services.AddScoped<NumberCourseHelper>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 
 var app = builder.Build();

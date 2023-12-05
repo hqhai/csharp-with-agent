@@ -8,5 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public double TotalQuestion { get; set; }
         public double Percent { get; set; }
         public double AnswerTime { get; set; }
+        public double HighestStreak { get; set; }
     }
 }

@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -83,6 +84,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             }
             var videoTimeCodeId = videoTimeCode.Id;
             var videoTimeCodeResult = await GetVideoTimeCodeResultAsync(videoResult, videoTimeCodeId);
+            if (videoTimeCodeResult.Status == EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(videoTimeCodeResult));
+                return methodResult;
+            }
             videoResult.CurrentVideoTimeCodeId = videoTimeCodeId;
 
             #region Chặn Time Code Chưa Done
@@ -140,19 +146,20 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         CorrectCount = questionItem.Ungraded ? default : correctCount,
                         Status = GetAnswerStatus(videoTimeCode.TimeCodeType, correctCount, questionItem.CorrectTotal),
                         IsCorrect = correctCount == questionItem.CorrectTotal,
+                        IsFirstSubmit = true,
                     };
 
                     videoTimeCodeAnswers.Add(answer);
                 }
-                else
+                else if (answer.Status != EnumAnswerStatus.Done)
                 {
                     answer.Answer = answerConfig ?? item.Answer;
                     answer.Status = EnumAnswerStatus.Done;
                     answer.IsCorrect = correctCount == questionItem.CorrectTotal;
                     answer.CorrectCount = questionItem.Ungraded ? default : correctCount;
+                    answer.IsFirstSubmit = false;
                     updateVideoTimeCodeAnswers.Add(answer);
                 }
-
                 skillScores.Add(new SkillScores
                 {
                     Skill = exercise?.CourseSkill ?? default,

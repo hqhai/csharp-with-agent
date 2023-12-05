@@ -109,6 +109,7 @@ builder.Services.AddScoped<UnitHelper>();
 builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
+builder.Services.AddScoped<NumberCourseHelper>();
 
 // Publisher
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();

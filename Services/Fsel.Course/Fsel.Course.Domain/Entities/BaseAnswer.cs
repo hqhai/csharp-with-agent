@@ -30,5 +30,7 @@ namespace Fsel.Course.Domain.Entities
         public int CorrectCount { get; set; }
 
         public bool? IsCorrect { get; set; }
+
+        public bool IsFirstSubmit { get; set; }
     }
 }

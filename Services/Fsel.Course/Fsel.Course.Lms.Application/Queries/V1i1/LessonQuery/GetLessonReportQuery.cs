@@ -5,8 +5,11 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
+    using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -22,12 +25,17 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoRepository _videoRepository;
+        private readonly NumberCourseHelper _numberCourseHelper;
 
-        public GetLessonReportQueryHandler(ILessonResultRepository lessonResultRepository, IVideoResultRepository videoResultRepository, IVideoRepository videoRepository)
+        public GetLessonReportQueryHandler(ILessonResultRepository lessonResultRepository
+            , IVideoResultRepository videoResultRepository
+            , IVideoRepository videoRepository
+            , NumberCourseHelper numberCourseHelper)
         {
             _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
             _videoRepository = videoRepository;
+            _numberCourseHelper = numberCourseHelper;
         }
 
         public async Task<MethodResult<LessonReportModel>> Handle(GetLessonReportQuery request, CancellationToken cancellationToken)
@@ -64,15 +72,17 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
             return methodResult;
         }
 
-        private static LessonReportModel GetLessonReport(Video video)
+        private LessonReportModel GetLessonReport(Video video)
         {
             var lessonReport = new LessonReportModel();
-            var questions = video.VideoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question);
-            var answers = questions.SelectMany(x => x.VideoTimeCodeAnswers);
-            lessonReport.AnswerTime = video.VideoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Sum(x => x.WorkingTime + x.RetryWorkingTime);
+            var videoTimeCodes = video.VideoTimeCodes.Where(x => x.TimeCodeType == EnumTimeCodeType.Standalone);
+            var questions = videoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).OrderBy(x => x!.CreatedDate);
+            var answers = questions.SelectMany(x => x!.VideoTimeCodeAnswers).Where(x => x.Status == EnumAnswerStatus.Done);
+            lessonReport.AnswerTime = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Sum(x => x.WorkingTime + x.RetryWorkingTime);
             lessonReport.Percent = NumberHelper.GetPercent(answers.Sum(x => x.CorrectCount), questions.Sum(x => x!.CorrectTotal));
             lessonReport.NumberOfCorrect = answers.Count(x => x!.IsCorrect == true);
             lessonReport.TotalQuestion = questions.Count();
+            lessonReport.HighestStreak = _numberCourseHelper.GetHighestStreak(answers.ToList());
             return lessonReport;
         }
     }
