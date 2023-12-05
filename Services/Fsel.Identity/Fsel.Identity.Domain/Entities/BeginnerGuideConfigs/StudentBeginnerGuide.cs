@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Models.EntityModels
+namespace Fsel.Identity.Domain.Entities.BeginnerGuideConfigs
 {
-    public class BeginnerGuidesModel
+    public class StudentBeginnerGuide
     {
         public bool? CourseOverview { get; set; }
         public bool? TeacherOverView { get; set; }

@@ -2,8 +2,10 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
+    using Fsel.Identity.Domain.Entities.BeginnerGuideConfigs;
+
     public class UpdateStudentBeginnerGuideCommandModel
     {
-        public string? BeginnerGuides { get; set; }
+        public StudentBeginnerGuide? BeginnerGuide { get; set; }
     }
 }

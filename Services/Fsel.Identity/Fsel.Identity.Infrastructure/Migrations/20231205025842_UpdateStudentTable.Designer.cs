@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20231204100232_UpdateStudentTable")]
+    [Migration("20231205025842_UpdateStudentTable")]
     partial class UpdateStudentTable
     {
         /// <inheritdoc />
@@ -624,7 +624,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("BeginnerGuides")
+                    b.Property<string>("BeginnerGuideStr")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ClassId")

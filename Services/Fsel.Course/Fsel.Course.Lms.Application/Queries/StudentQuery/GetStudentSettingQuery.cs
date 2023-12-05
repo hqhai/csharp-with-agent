@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 var placementTestResult = placementTestResults.OrderByDescending(x => x.CreatedDate).FirstOrDefault();
                 var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent, age) ?? (null, default);
 
-                settingStudentModel.BeginnerGuides = student.BeginnerGuides;
+                settingStudentModel.BeginnerGuide = student.BeginnerGuide;
                 settingStudentModel.ModuleNumber = placementTestResults.Count + 1;
                 settingStudentModel.Level = student.CourseLevel;
                 settingStudentModel.IsPlacementTest = placementTestResult != null;

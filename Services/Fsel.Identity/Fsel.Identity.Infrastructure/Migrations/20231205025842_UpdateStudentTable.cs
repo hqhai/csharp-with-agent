@@ -11,7 +11,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "BeginnerGuides",
+                name: "BeginnerGuideStr",
                 table: "Students",
                 type: "nvarchar(max)",
                 nullable: true);
@@ -21,7 +21,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "BeginnerGuides",
+                name: "BeginnerGuideStr",
                 table: "Students");
         }
     }

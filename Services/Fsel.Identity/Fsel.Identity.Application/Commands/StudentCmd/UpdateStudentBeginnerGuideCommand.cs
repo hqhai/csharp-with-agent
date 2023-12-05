@@ -3,9 +3,6 @@
 namespace Fsel.Identity.Application.Commands.StudentCmd
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -22,6 +19,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     public class UpdateStudentBeginnerGuideCommand : UpdateStudentBeginnerGuideCommandModel, IRequest<MethodResult<StudentModel>>
     {
     }
+
     public class UpdateStudentBeginnerGuideCommandHandler : IRequestHandler<UpdateStudentBeginnerGuideCommand, MethodResult<StudentModel>>
     {
         private readonly IStudentRepository _studentRepository;
@@ -48,6 +46,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+
             _mapper.Map(request, student);
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {

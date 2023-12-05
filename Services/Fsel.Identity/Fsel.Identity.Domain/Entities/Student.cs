@@ -9,7 +9,7 @@ namespace Fsel.Identity.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
-    using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Domain.Entities.BeginnerGuideConfigs;
     using Fsel.Shared.Enums;
 
     public class Student : Entity
@@ -29,13 +29,13 @@ namespace Fsel.Identity.Domain.Entities
         public int NumberOfShield { get; set; }
         public Guid? ClassId { get; set; }
 
-        public string? BeginnerGuides { get; set; }
+        public string? BeginnerGuideStr { get; set; }
 
         [NotMapped]
-        public BeginnerGuidesModel? Config
+        public StudentBeginnerGuide? BeginnerGuide
         {
-            get { return ConvertHelper.Deserialize<BeginnerGuidesModel>(BeginnerGuides); }
-            set { BeginnerGuides = ConvertHelper.Serialize(value); }
+            get { return ConvertHelper.Deserialize<StudentBeginnerGuide>(BeginnerGuideStr); }
+            set { BeginnerGuideStr = ConvertHelper.Serialize(value); }
         }
 
         public Human? Human { get; set; }

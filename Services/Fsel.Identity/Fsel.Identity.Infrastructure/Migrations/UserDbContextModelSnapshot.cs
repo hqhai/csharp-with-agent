@@ -621,7 +621,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("BeginnerGuides")
+                    b.Property<string>("BeginnerGuideStr")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ClassId")
