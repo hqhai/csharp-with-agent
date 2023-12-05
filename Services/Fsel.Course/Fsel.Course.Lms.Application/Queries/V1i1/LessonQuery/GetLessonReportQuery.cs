@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
-    using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -25,17 +24,14 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoRepository _videoRepository;
-        private readonly NumberCourseHelper _numberCourseHelper;
 
         public GetLessonReportQueryHandler(ILessonResultRepository lessonResultRepository
             , IVideoResultRepository videoResultRepository
-            , IVideoRepository videoRepository
-            , NumberCourseHelper numberCourseHelper)
+            , IVideoRepository videoRepository)
         {
             _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
             _videoRepository = videoRepository;
-            _numberCourseHelper = numberCourseHelper;
         }
 
         public async Task<MethodResult<LessonReportModel>> Handle(GetLessonReportQuery request, CancellationToken cancellationToken)
@@ -61,7 +57,9 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
                                                         .ThenInclude(x => x!.ExerciseQuestions)
                                                         .ThenInclude(x => x.Question)
                                                         .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
-                                                        .FirstOrDefaultAsync(x => x.Id == videoResult.VideoId, cancellationToken);
+                                                        .Where(x => x.Id == videoResult.VideoId)
+                                                        .AsNoTracking()
+                                                        .FirstOrDefaultAsync(cancellationToken);
             if (video == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
@@ -72,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
             return methodResult;
         }
 
-        private LessonReportModel GetLessonReport(Video video)
+        private static LessonReportModel GetLessonReport(Video video)
         {
             var lessonReport = new LessonReportModel();
             var videoTimeCodes = video.VideoTimeCodes.Where(x => x.TimeCodeType == EnumTimeCodeType.Standalone);
@@ -82,7 +80,12 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
             lessonReport.Percent = NumberHelper.GetPercent(answers.Sum(x => x.CorrectCount), questions.Sum(x => x!.CorrectTotal));
             lessonReport.NumberOfCorrect = answers.Count(x => x!.IsCorrect == true);
             lessonReport.TotalQuestion = questions.Count();
-            lessonReport.HighestStreak = _numberCourseHelper.GetHighestStreak(answers.ToList());
+            lessonReport.HighestStreak = answers.Aggregate(
+            new { Longest = 0, Current = 0 },
+            (agg, element) => element.IsCorrect == true && element.IsFirstSubmit ?
+                new { Longest = Math.Max(agg.Longest, agg.Current + 1), Current = agg.Current + 1 } :
+                new { agg.Longest, Current = 0 },
+            agg => agg.Longest);
             return lessonReport;
         }
     }
