@@ -305,7 +305,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
                                 join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
                                 join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                                where baseQ.Id == videoResult.Id && q.QuestionType != EnumQuestionType.ExercisePreparation
+                                where baseQ.Id == videoResult.Id && q.QuestionType != Domain.Enums.EnumQuestionType.ExercisePreparation
                                 group new { vt, q } by new { vt.TimeCodeType, e.CourseSkill } into g
                                 select new
                                 {

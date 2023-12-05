@@ -2,6 +2,8 @@
 
 namespace Fsel.Identity.Domain.Entities.BeginnerGuideConfigs
 {
+    using Fsel.Shared.Enums;
+
     public class StudentBeginnerGuide
     {
         public bool? CourseOverview { get; set; }
@@ -12,5 +14,7 @@ namespace Fsel.Identity.Domain.Entities.BeginnerGuideConfigs
         public bool? ClassForum { get; set; }
         public bool? HomeWork { get; set; }
         public bool? PlacementTest { get; set; }
+
+        public IList<EnumQuestionType>? QuestionTypes { get; set; }
     }
 }

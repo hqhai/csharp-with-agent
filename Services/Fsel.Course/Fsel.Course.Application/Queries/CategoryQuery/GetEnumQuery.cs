@@ -49,7 +49,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                     break;
 
                 case EnumCourseSourceData.QuestionType:
-                    methodResult.Result = ConvertHelper.EnumToListModel<EnumQuestionType>();
+                    methodResult.Result = ConvertHelper.EnumToListModel<Domain.Enums.EnumQuestionType>();
                     break;
 
                 case EnumCourseSourceData.TimeCodeType:
