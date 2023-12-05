@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20231205034348_Update_VideoTimeCodeAnswer_IsFirstSubmit")]
+    [Migration("20231205073403_Update_VideoTimeCodeAnswer_IsFirstSubmit")]
     partial class Update_VideoTimeCodeAnswer_IsFirstSubmit
     {
         /// <inheritdoc />
@@ -1162,9 +1162,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<bool>("IsFirstSubmit")
-                        .HasColumnType("bit");
-
                     b.Property<Guid?>("QuestionId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1658,9 +1655,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<bool>("IsFirstSubmit")
-                        .HasColumnType("bit");
-
                     b.Property<Guid?>("SectionGroupResultId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1978,9 +1972,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
-
-                    b.Property<bool>("IsFirstSubmit")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -2783,9 +2774,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<bool>("IsFirstSubmit")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("MockTestResultId")
                         .HasColumnType("uniqueidentifier");
 
@@ -3190,9 +3178,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
-
-                    b.Property<bool>("IsFirstSubmit")
-                        .HasColumnType("bit");
 
                     b.Property<Guid>("PlacementTestResultId")
                         .HasColumnType("uniqueidentifier");

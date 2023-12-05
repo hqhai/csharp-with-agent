@@ -8,6 +8,8 @@ namespace Fsel.Course.Domain.Entities
 
     public class VideoTimeCodeAnswer : BaseAnswer
     {
+        public bool IsFirstSubmit { get; set; }
+
         public EnumAnswerStatus Status { get; set; }
 
         public Question? Question { get; set; }
