@@ -28,9 +28,9 @@ namespace Fsel.Notification.Domain.Model.EntityModels
 
         public EnumNotificationType Type { get; set; }
 
-        public string? Icon { get; set; }
-
         public IList<Guid>? UserIds { get; set; }
+
+        public string? Icon { get; set; }
     }
 
 }

@@ -157,7 +157,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                         {
                             CorrectCount = correctCount,
                             Answer = answerConfig ?? answer.Answer,
-                            SectionQuestionId = sectionQuestionId
+                            SectionQuestionId = sectionQuestionId,
+                            IsCorrect = correctCount == questionItem.CorrectTotal
                         };
                         count += correctCount;
                         finalTestResult.FinalTestAnswers.Add(finalAnswer);

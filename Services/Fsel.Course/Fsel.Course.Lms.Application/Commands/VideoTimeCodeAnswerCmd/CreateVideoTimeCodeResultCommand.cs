@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -20,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         public Guid VideoResultId { get; set; }
         public Guid StudentId { get; set; }
         public Guid VideoTimeCodeId { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 
     public class CreateVideoTimeCodeResultCommandHandler : IRequestHandler<CreateVideoTimeCodeResultCommand, MethodResult<VideoTimeCodeResultModel>>
@@ -27,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IMapper _mapper;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
 
@@ -34,12 +37,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             IVideoResultRepository videoResultRepository
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , IMapper mapper
+            , DateTimeConverter dateTimeConverter
             , GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository)
         {
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _mapper = mapper;
+            _dateTimeConverter = dateTimeConverter;
             _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
         }
@@ -48,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoTimeCodeResultModel> methodResult = new MethodResult<VideoTimeCodeResultModel>();
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.VideoResultId, cancellationToken);
+            var videoResult = await _videoResultRepository.GetByIdAsync(request.VideoResultId);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
@@ -76,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     StudentId = request.StudentId,
                     IsWorking = true,
                     Status = EnumResultStatus.New,
-                    RemainingTime = videoTimeCode.ExecutionTime,
+                    WorkingTime = default,
                     VideoTimeCodeId = request.VideoTimeCodeId,
                 };
                 videoTimeCodeResult = _videoTimeCodeResultRepository.Add(videoTimeCodeResult);
@@ -92,33 +97,25 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     }, CancellationToken.None).ConfigureAwait(false);
                 }
             }
-            else
+            else if (videoTimeCodeResult.Status != EnumResultStatus.Done && request.IsActive)
             {
-                if (videoTimeCodeResult.Status != EnumResultStatus.Done && videoTimeCode.ExecutionTime != 0)
+                if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
-                    if (videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
-                    {
-                        videoTimeCodeResult.RemainingTime = videoTimeCodeResult.RemainingTime - Shared.Helpers.DateTimeHelper.GetWorkingTimeVideo(GetDate(videoTimeCodeResult, videoTimeCode.TimeCodeType), DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
-                    }
-                    else
-                    {
-                        videoTimeCodeResult.IsWorking = true;
-                    }
-                    videoTimeCodeResult = _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
-                    await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                    videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
                 }
+                else if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.Process)
+                {
+                    videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                }
+                else
+                {
+                    videoTimeCodeResult.IsWorking = true;
+                }
+                videoTimeCodeResult = _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
+                await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
 
             return videoTimeCodeResult;
-        }
-
-        private static DateTime GetDate(VideoTimeCodeResult videoTimeCodeResult, EnumTimeCodeType type)
-        {
-            if (videoTimeCodeResult.UpdatedDate.HasValue && type == EnumTimeCodeType.Standalone)
-            {
-                return videoTimeCodeResult.UpdatedDate.Value;
-            }
-            return videoTimeCodeResult.CreatedDate;
         }
 
         private async Task UpdateVideoResult(VideoResult videoResult, Guid videoTimeCodeId)

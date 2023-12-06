@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 {
     using System.Collections.Generic;
+    using Fsel.Shared.Enums;
 
     public class DragAndDropSentenceOrderAnswer
     {
@@ -12,9 +13,17 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
     public class DragAndDropSentenceOrderAnswers
     {
         public long Id { get; set; }
-
         public IList<string>? Answer { get; set; }
-
         public bool? IsExact { get; set; }
+
+        public EnumSubAnswerStatus Status
+        {
+            get
+            {
+                return IsExact.HasValue ? IsExact.Value ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail : EnumSubAnswerStatus.Process;
+            }
+        }
+
+        public bool IsFirstSubmit { get; set; } = true;
     }
 }

@@ -364,18 +364,18 @@ namespace Fsel.Course.Infrastructure.Common
                                                   .Count() ?? default;
         }
 
-        public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode? videoTimeCode, VideoTimeCodeResultModel? videoTimeCodeResult, bool isShowWrongQuestion = false)
+        public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode? videoTimeCode, VideoTimeCodeResultModel? videoTimeCodeResult, bool isShowSubStatus = false)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
-            isShowWrongQuestion = isShowWrongQuestion && videoTimeCodeResult != null && videoTimeCodeResult.Status == EnumResultStatus.Process;
+            var isTimeCodeProcess = videoTimeCodeResult != null && videoTimeCodeResult.Status == EnumResultStatus.Process;
             var timeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode);
             timeCode.TotalCount = GetTotalQuestion(videoTimeCode);
             timeCode.Ungraded = GetUngraded(videoTimeCode);
             timeCode.CorrectCount = GetCorrectCount(videoTimeCode);
             timeCode.CorrectTotal = GetCorrectTotal(videoTimeCode);
             timeCode.Status = GetTimeCodeStatus(videoTimeCode);
-            timeCode.VideoTimeCodeResult = videoTimeCodeResult;
-            timeCode.Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n, isShowWrongQuestion)).ToList();
+            timeCode.VideoTimeCodeResult = GetVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
+            timeCode.Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n, videoTimeCodeResult?.Status ?? EnumResultStatus.New, isShowSubStatus)).ToList();
             return timeCode;
         }
 
@@ -397,20 +397,44 @@ namespace Fsel.Course.Infrastructure.Common
             return videoTimeCodeModels;
         }
 
-        private ExerciseModel GetExercise(Exercise? n, bool isShowWrongQuestion)
+        private static VideoTimeCodeResultModel? GetVideoTimeCodeResult(VideoTimeCodeResultModel? videoTimeCodeResult, VideoTimeCode videoTimeCode)
+        {
+            if (videoTimeCodeResult != null)
+            {
+                double remainingTime;
+                if (videoTimeCodeResult.Status == EnumResultStatus.New)
+                {
+                    remainingTime = videoTimeCodeResult.WorkingTime;
+                }
+                else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+                {
+                    remainingTime = videoTimeCodeResult.RetryWorkingTime;
+                }
+                else
+                {
+                    remainingTime = videoTimeCodeResult.RetryWorkingTime == 0 ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime;
+                }
+                videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, remainingTime);
+            }
+            return videoTimeCodeResult;
+        }
+
+        private static double GetRemainingTime(double executionTime, double workingTime)
+        {
+            var remainingTime = executionTime - workingTime;
+            return remainingTime > 0 ? remainingTime : default;
+        }
+
+        private ExerciseModel GetExercise(Exercise? n, EnumResultStatus status, bool isShowSubStatus)
         {
             ArgumentNullException.ThrowIfNull(n);
             var exerciseModel = _mapper.Map<ExerciseModel>(n);
-            var questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m)).ToList();
-            if (isShowWrongQuestion)
-            {
-                questions = questions.Where(x => x.ResultAnswer != null && x.ResultAnswer.Status != EnumAnswerStatus.Done).ToList();
-            }
+            var questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m, status, isShowSubStatus)).ToList();
             exerciseModel.Questions = questions;
             return exerciseModel;
         }
 
-        private QuestionModel GetQuestion(Question? question)
+        private QuestionModel GetQuestion(Question? question, EnumResultStatus status, bool isShowSubStatus)
         {
             ArgumentNullException.ThrowIfNull(question);
             var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
@@ -419,7 +443,7 @@ namespace Fsel.Course.Infrastructure.Common
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
             if (videoTimeCodeAnswer != null)
             {
-                videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, !isCheck);
+                videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, isShowSubStatus, status);
                 videoTimeCodeAnswer.CorrectCount = isCheck ? videoTimeCodeAnswer.CorrectCount : default;
                 questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
             }
@@ -429,12 +453,9 @@ namespace Fsel.Course.Infrastructure.Common
         private static EnumResultStatus GetTimeCodeStatus(VideoTimeCode? videoTimeCode)
         {
             var status = EnumResultStatus.Process;
-            if (videoTimeCode != null)
+            if (videoTimeCode != null && videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done))
             {
-                if (videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done))
-                {
-                    status = EnumResultStatus.Done;
-                }
+                status = EnumResultStatus.Done;
             }
             return status;
         }
@@ -442,11 +463,7 @@ namespace Fsel.Course.Infrastructure.Common
         private static EnumResultStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
         {
             var status = EnumResultStatus.Unfinished;
-            if (indexProcess < indexTimeCode)
-            {
-                return status;
-            }
-            else if (indexProcess == indexTimeCode)
+            if (indexProcess == indexTimeCode)
             {
                 status = EnumResultStatus.Process;
             }
@@ -461,11 +478,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoTimeCodes);
             var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeAnswers.Any() || x.VideoTimeCodeAnswers.Any(x => x.VideoResultId == videoResultId && x.Status != EnumAnswerStatus.Done)).FirstOrDefault();
-            if (timeCode == null)
-            {
-                return null;
-            }
-            return videoTimeCodes.IndexOf(timeCode);
+            return timeCode != null ? videoTimeCodes.IndexOf(timeCode) : null;
         }
 
         private async Task<(List<Question>?, IList<VideoTimeCodeAnswer>?)> GetUnansweredQuestionIds(Guid videoTimeCodeId, VideoTimeCodeResult videoTimeCodeResult)
@@ -504,6 +517,7 @@ namespace Fsel.Course.Infrastructure.Common
                     VideoTimeCodeId = videoTimeCode.Id,
                     ExerciseId = x.ExerciseQuestions.FirstOrDefault()?.ExerciseId ?? default,
                     Status = isDone ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
+                    IsCorrect = null
                 }).ToList();
 
                 await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
@@ -512,7 +526,12 @@ namespace Fsel.Course.Infrastructure.Common
             if (ValidateList(updateVideoTimeCodeAnswers) && updateVideoTimeCodeAnswers != null)
             {
                 isDone = !ValidateList(questions) && (isDone || updateVideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done));
-                updateVideoTimeCodeAnswers.ForEach(x => x.Status = isDone ? EnumAnswerStatus.Done : GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal));
+                updateVideoTimeCodeAnswers.ForEach(x =>
+                {
+                    var status = GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal);
+                    x.Status = isDone ? EnumAnswerStatus.Done : status;
+                    x.IsCorrect = x.IsCorrect != null ? status == EnumAnswerStatus.Done : null;
+                });
                 _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
@@ -523,28 +542,9 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (timeCodeType == EnumTimeCodeType.Standalone)
             {
-                if (correctCount == correctTotal && isSubmit)
-                {
-                    return EnumAnswerStatus.Done;
-                }
-                return EnumAnswerStatus.Process;
+                return correctCount == correctTotal && isSubmit ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
             }
             return EnumAnswerStatus.Done;
-        }
-
-        public double GetRemainingTime(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode)
-        {
-            ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
-            ArgumentNullException.ThrowIfNull(videoTimeCode);
-
-            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
-            {
-                if (videoTimeCodeResult.UpdatedDate.HasValue)
-                {
-                    return videoTimeCodeResult.RemainingTime - DateTimeHelper.GetWorkingTimeVideo(videoTimeCodeResult.UpdatedDate.Value, DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
-                }
-            }
-            return videoTimeCodeResult.RemainingTime - DateTimeHelper.GetWorkingTime(videoTimeCodeResult.CreatedDate, DateTime.UtcNow, videoTimeCodeResult.RemainingTime);
         }
 
         public bool ValidateList(object? objectList)
