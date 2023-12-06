@@ -17,7 +17,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<MockTestResult, TestResultRankingModel>().IgnoreAllNonExisting();
             CreateMap<MockTestResult, TestResultReportModel>().IgnoreAllNonExisting();
             CreateMap<MockTestResult, LessonMockTestResultModel>()
-            .ForMember(x => x.Type, p => p.MapFrom(o => nameof(EnumMockTestType.SkillMockTest)));
+            .ForMember(x => x.Type, p => p.MapFrom(o => nameof(EnumMockTestType.SkillMockTest)))
+            .ForMember(x => x.ObjectId, p => p.MapFrom(o => o.MockTestId));
         }
     }
 }
