@@ -57,25 +57,26 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return methodResult;
             }
 
-            _mapper.Map(request, classForumResult);
-
             if (classForum.IsAlFeedBack)
             {
                 var aIResponse = await _mediator.Send(new SubmitAICommand
                 {
-                    WordContent = request.RetryWordContent,
+                    WordContent = request.WordContent,
                     ClassForum = classForum,
                 }, cancellationToken).ConfigureAwait(false);
                 classForumResult.RetryGradingAlFeedBack = aIResponse;
             }
 
-            if (request.RetryFilePaths != null)
+            classForumResult.RetryWordContent = request.WordContent;
+            classForumResult.RetryContent = request.Content;
+
+            if (request.FilePaths != null)
             {
-                classForumResult.ClassForumResultFiles = request.RetryFilePaths.Select(x => new ClassForumResultFile
+                request.FilePaths.ForEach(x => classForumResult.ClassForumResultFiles.Add(new ClassForumResultFile
                 {
                     IsRetry = true,
                     FilePath = x,
-                }).ToList();
+                }));
             }
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>

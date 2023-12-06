@@ -3,18 +3,19 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.PlacementTestAnswerV1i1Cmd;
+    using Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd;
     using Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/placement-test-result")]
     [ApiController]
     public class PlacementTestResultController : ControllerBase

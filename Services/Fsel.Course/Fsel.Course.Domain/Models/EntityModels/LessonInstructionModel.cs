@@ -2,13 +2,12 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class LessonInstructionModel : BaseModel
+    public class LessonInstructionModel
     {
+        public Guid Id { get; set; }
         public string? Instruction { get; set; }
-
         public EnumCourseSkill CourseSkill { get; set; }
     }
 }

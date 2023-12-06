@@ -4,7 +4,7 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
-    using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class QuestionTypeConverter
     {

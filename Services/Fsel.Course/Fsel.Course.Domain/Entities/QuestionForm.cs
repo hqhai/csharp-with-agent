@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class QuestionForm : Entity
     {

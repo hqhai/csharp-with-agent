@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
+namespace Fsel.Course.Lms.Application.Commands.V1i1.HomeWorkCmd
 {
     using System.Linq;
     using Fsel.Common.ActionResults;
@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
         public async Task<MethodResult<bool>> Handle(CreateHomeWorkAnswerV1i1Command request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
             if (request.Answers == null || !request.Answers.Any())
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;

@@ -5,8 +5,11 @@ namespace Fsel.Identity.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Identity.Domain.Entities.BeginnerGuideConfigs;
     using Fsel.Shared.Enums;
 
     public class Student : Entity
@@ -25,6 +28,15 @@ namespace Fsel.Identity.Domain.Entities
         public long NumberOfToken { get; set; }
         public int NumberOfShield { get; set; }
         public Guid? ClassId { get; set; }
+
+        public string? BeginnerGuideStr { get; set; }
+
+        [NotMapped]
+        public StudentBeginnerGuide? BeginnerGuide
+        {
+            get { return ConvertHelper.Deserialize<StudentBeginnerGuide>(BeginnerGuideStr); }
+            set { BeginnerGuideStr = ConvertHelper.Serialize(value); }
+        }
 
         public Human? Human { get; set; }
 
