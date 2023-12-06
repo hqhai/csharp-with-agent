@@ -2,12 +2,15 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 {
-    public class LessonReportModel
+    using Fsel.Course.Domain.IEntities;
+
+    public class LessonReportModel : IHighestStreak
+
     {
         public double NumberOfCorrect { get; set; }
         public double TotalQuestion { get; set; }
         public double Percent { get; set; }
         public double AnswerTime { get; set; }
-        public double HighestStreak { get; set; }
+        public int? HighestStreak { get; set; }
     }
 }

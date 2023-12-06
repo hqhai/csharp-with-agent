@@ -4,8 +4,9 @@ namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.IEntities;
 
-    public class VideoTimeCodeResult : BaseResultScore
+    public class VideoTimeCodeResult : BaseResultScore, IHighestStreak
     {
         public VideoResult? VideoResult { get; set; }
 
@@ -32,6 +33,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public bool IsWorking { get; set; }
 
+        public int? HighestStreak { get; set; }
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }
 }

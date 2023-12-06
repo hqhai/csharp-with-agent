@@ -77,6 +77,18 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd
             var (videoResult, videoTimeCode, videoTimeCodeResult) = method.Result;
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
+                if (videoTimeCodeResult.Status == EnumResultStatus.New && request.IsSubmit)
+                {
+                    if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+                    {
+                        videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
+                    }
+                    else
+                    {
+                        videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
+                    }
+                }
+
                 await UpdateVideoTimeCodeResult(videoTimeCode, videoTimeCodeResult, request.IsSubmit, cancellationToken).ConfigureAwait(false);
                 _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
