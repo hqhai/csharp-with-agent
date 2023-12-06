@@ -14,7 +14,8 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<LessonResult, LessonResultModel>().IgnoreAllNonExisting();
             CreateMap<LessonResult, LessonMockTestResultModel>()
-            .ForMember(x => x.Type, p => p.MapFrom(o => nameof(Lesson)));
+            .ForMember(x => x.Type, p => p.MapFrom(o => nameof(Lesson)))
+            .ForMember(x => x.ObjectId, p => p.MapFrom(o => o.LessonId));
         }
     }
 }
