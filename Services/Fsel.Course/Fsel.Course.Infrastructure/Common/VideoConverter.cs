@@ -17,6 +17,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Videos;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -338,6 +339,54 @@ namespace Fsel.Course.Infrastructure.Common
                                                 }).ToList()
                              };
             return (scoreQuery.ToList(), questions.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer));
+        }
+
+        public async Task<LessonReportModel?> GetLessonReport(VideoResult videoResult)
+        {
+            ArgumentNullException.ThrowIfNull(videoResult);
+            var answerQuery = from baseQ in _videoRepository.Queryable
+                              join vt in _videoTimeCodeRepository.Queryable on baseQ.Id equals vt.VideoId
+                              join vtcr in _videoTimeCodeResultRepository.Queryable on vt.Id equals vtcr.VideoTimeCodeId
+                              join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
+                              join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
+                              join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
+                              join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on q.Id equals vtca.QuestionId
+                              where baseQ.Id == videoResult.VideoId && vtcr.VideoResultId == videoResult.Id && vt.TimeCodeType == EnumTimeCodeType.Standalone && vtca.VideoResultId == videoResult.Id
+                              group new { vtcr, q } by baseQ into g
+                              select new
+                              {
+                                  CorrectCount = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Sum(x => x.CorrectCount),
+                                  CorrectTotal = g.Sum(x => x.q.CorrectTotal),
+                                  NumberOfCorrect = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Count(x => x.IsCorrect == true),
+                                  TotalQuestion = g.Select(x => x.q).Count(),
+                                  AnswerTime = g.Select(x => x.vtcr).Sum(x => x.WorkingTime + x.RetryWorkingTime),
+                                  HighestStreak = g.Select(x => x.q.VideoTimeCodeAnswers
+                                                    .Where(vtca => vtca.VideoResultId == videoResult.Id)
+                                                    .OrderBy(vtca => vtca.CreatedDate)
+                                                    .ToList()) // Materialize the query to a List
+                                                    .Select(streak => streak.Aggregate(
+                                                                        new { Longest = 0, Current = 0 },
+                                                                        (agg, element) => element.IsCorrect == true && element.IsFirstSubmit ?
+                                                                            new { Longest = agg.Current + 1 > agg.Longest ? agg.Current + 1 : agg.Longest, Current = agg.Current + 1 } :
+                                                                            new { agg.Longest, Current = 0 },
+                                                                        agg => agg.Longest))
+                                                    .Max()
+                              };
+
+            var lessonReport = await answerQuery.FirstOrDefaultAsync();
+            if (lessonReport == null)
+            {
+                return default;
+            }
+            return new LessonReportModel
+            {
+                AnswerTime = lessonReport.AnswerTime,
+                HighestStreak = lessonReport.HighestStreak,
+                NumberOfCorrect = lessonReport.NumberOfCorrect,
+                TotalQuestion = lessonReport.TotalQuestion,
+                Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal)
+            };
         }
 
         private static bool GetUngraded(VideoTimeCode? videoTimeCode)
