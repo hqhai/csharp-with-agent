@@ -1152,6 +1152,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("ExtraPracticeResultId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool?>("IsCorrect")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -1642,6 +1645,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("FinalTestResultId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool?>("IsCorrect")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -1956,6 +1962,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("HomeWorkResultId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool?>("IsCorrect")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -2755,6 +2764,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<bool?>("IsCorrect")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -3156,6 +3168,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
+
+                    b.Property<bool?>("IsCorrect")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -4696,6 +4711,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("ExerciseId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool?>("IsCorrect")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -4795,7 +4813,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
-                    b.Property<double>("RemainingTime")
+                    b.Property<double>("RetryWorkingTime")
                         .HasColumnType("float");
 
                     b.Property<string>("SkillScoresStr")
@@ -4827,6 +4845,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("VideoTimeCodeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("WorkingTime")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 

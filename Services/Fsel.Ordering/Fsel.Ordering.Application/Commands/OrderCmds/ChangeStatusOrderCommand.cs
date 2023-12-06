@@ -118,9 +118,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         return methodResult;
                     }
 
-                    await _notificationMessagePublisher.Publish(new NotificationQueueModel
+                    await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
-                        UserId = order.UserId,
+                        UserIds = new List<Guid>() { order.UserId },
                         ObjectId = order.Id,
                         ParamsMessage = new List<object> { course?.Name ?? string.Empty },
                         Type = EnumNotificationType.Text,

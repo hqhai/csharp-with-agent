@@ -25,7 +25,7 @@ namespace Fsel.Interaction.Application.Queues.Publishers
             {
                 ObjectId = model.ObjectId,
                 Type = model.Type,
-                UserId = model.UserId,
+                UserIds = model.UserIds,
                 Content = model.Content,
                 SenderId = model.SenderId,
                 ParamsLink = model.ParamsLink,

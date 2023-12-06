@@ -54,7 +54,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var student = studentResults?.Content?.Result?.FirstOrDefault();
             if (student == null)
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -79,7 +78,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var courses = await _courseRepository.GetByIdsAsync(courseIds);
                 if (courses == null || !courses.Any())
                 {
-                   
                     methodResult.StatusCode = StatusCodes.Status200OK;
                     return methodResult;
                 }

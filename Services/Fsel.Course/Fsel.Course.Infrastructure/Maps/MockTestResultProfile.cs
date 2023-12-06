@@ -12,6 +12,8 @@ namespace Fsel.Course.Infrastructure.Maps
         public MockTestResultProfile()
         {
             CreateMap<MockTestResult, MockTestResultModel>().IgnoreAllNonExisting();
+            CreateMap<MockTestResult, TestResultRankingModel>().IgnoreAllNonExisting();
+            CreateMap<MockTestResult, TestResultReportModel>().IgnoreAllNonExisting();
         }
     }
 }

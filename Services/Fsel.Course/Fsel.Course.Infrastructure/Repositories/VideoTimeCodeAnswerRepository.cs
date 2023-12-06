@@ -25,7 +25,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<VideoTimeCodeAnswer?> GetAsync(Guid videoTimeCodeId, Guid videoResultId, Guid questionId, Guid? exerciseId)
+        public async Task<VideoTimeCodeAnswer?> GetAsync(Guid videoTimeCodeId, Guid videoResultId, Guid? questionId, Guid? exerciseId)
         {
             try
             {

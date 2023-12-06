@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         Task<IApiResponse<MethodResult<bool>>> UpdateStudentByLevelAsync([Body] UpdateStudentByLevelModel command);
 
         [Post("/student/get-by-student-ids")]
-        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid> studentIds);
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid>? studentIds);
 
         [Get("/cso/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCSOByUserId([FromRoute] Guid id);
