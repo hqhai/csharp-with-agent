@@ -52,10 +52,5 @@ namespace Fsel.Shared.Enums
 
         //Review FSEL
         ReviewFSEL,
-
-        /* PersonalInfo,
-         Learn,
-         VideoLesson,
-         TestResult,*/
     }
 }

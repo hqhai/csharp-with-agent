@@ -1,6 +1,6 @@
 [
   {
-    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "id": "631bb9bb-79d4-4eaf-9395-39c8c99581b1",
     "createdDate": "2023-07-21",
     "feature": "DailyCheckin",
     "mission": "DailyCheckin",
@@ -54,7 +54,7 @@
     }
   },
   {
-    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "id": "418e095e-a79b-4b16-a212-013027ffe3f8",
     "createdDate": "2023-07-21",
     "feature": "DailyCheckin",
     "mission": "DailyCheckin",
@@ -75,7 +75,7 @@
     "SuperConfig": null
   },
   {
-    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "id": "d8c548b3-17e9-4899-90a2-6ebe8fb5ef3c",
     "createdDate": "2023-07-21",
     "feature": "TimeCode",
     "mission": "TimeCodeSubmit",
@@ -89,7 +89,7 @@
     }
   },
   {
-    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "id": "541d077d-9a7b-4074-8240-877591957d92",
     "createdDate": "2023-07-21",
     "feature": "Test",
     "mission": "HighestStreak",
@@ -103,7 +103,200 @@
     }
   },
   {
-    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "id": "570f3b94-8cb0-4e30-9483-e543b863e4c8",
+    "createdDate": "2023-07-21",
+    "feature": "TimeCode",
+    "mission": "SuperFireMode",
+    "config": {
+      "token": "0"
+    },
+    "SuperConfig": [
+      {
+        "TimeCode": "1",
+        "Test": "4",
+        "FinalTest/MockTest": "10"
+      }
+    ]
+  },
+  {
+    "id": "349335a6-6dca-436e-b0ea-40fe8c026b64",
+    "createdDate": "2023-07-21",
+    "feature": "Test",
+    "mission": "TestComplete",
+    "config": {
+      "unitTest/skillTest/skillMockTest": "10",
+      "finalTest/FullMockTest": "40"
+    },
+    "SuperConfig": {
+      "unitTest/skillTest/skillMockTest": "15",
+      "finalTest/FullMockTest": "60"
+    }
+  },
+  {
+    "id": "2ab68ffd-9969-4fd0-a3f1-e8d272122feb",
+    "createdDate": "2023-07-21",
+    "feature": "QuestBoard",
+    "mission": "DailyMission",
+    "config": {
+      "dailyQuest": "1",
+      "mainQuest": "10",
+      "sideQuest": "5",
+      "permium": "10"
+    },
+    "SuperConfig": null
+  },
+  {
+    "id": "e606579f-0bc8-4254-9fe2-44b0306e225c",
+    "createdDate": "2023-07-21",
+    "feature": "QuestBoard",
+    "mission": "MainMission",
+    "config": {
+      "dailyQuest": "1",
+      "mainQuest": "10",
+      "sideQuest": "5",
+      "permium": "10"
+    },
+    "SuperConfig": null
+  },
+  {
+    "id": "bb8cb9ba-58f1-43a7-9ac5-c07cd5da6ffb",
+    "createdDate": "2023-07-21",
+    "feature": "QuestBoard",
+    "mission": "SideMission",
+    "config": {
+      "dailyQuest": "1",
+      "mainQuest": "10",
+      "sideQuest": "5",
+      "permium": "10"
+    },
+    "SuperConfig": null
+  },
+  {
+    "id": "a569629e-f6fc-424b-b1a2-51c2a826819d",
+    "createdDate": "2023-07-21",
+    "feature": "QuestBoard",
+    "mission": "EventMission",
+    "config": {
+      "dailyQuest": "1",
+      "mainQuest": "10",
+      "sideQuest": "5",
+      "permium": "10"
+    },
+    "SuperConfig": null
+  },
+  {
+    "id": "b4732b98-4ee3-4ae6-a51b-317908973282",
+    "createdDate": "2023-07-21",
+    "feature": "Achievement",
+    "mission": "CompleteAchievement",
+    "config": {
+      "mission": "10"
+    },
+    "SuperConfig": null
+  },
+  {
+    "id": "0b750040-7d3a-41d2-827a-935599f0db2e",
+    "createdDate": "2023-07-21",
+    "feature": "Achievement",
+    "mission": "CompletePhaseAchievement",
+    "config": {
+      "phase 1": "10",
+      "phase 2": "20",
+      "phase 3": "30",
+      "phase 4": "40",
+      "phase 5": "50",
+      "phase 6": "60"
+    },
+    "SuperConfig": null
+  },
+  {
+    "id": "fca942b7-b3bb-4ad2-8035-4471f28c56af",
+    "createdDate": "2023-07-21",
+    "feature": "Price",
+    "mission": "BuyCourse",
+    "config": {
+      "standard": "50",
+      "premium": "100"
+    },
+    "SuperConfig": null
+  },
+  {
+    "id": "7b0dae34-5312-46b1-907e-a8499a532d09",
+    "createdDate": "2023-07-21",
+    "feature": "Price",
+    "mission": "UpgradeCourse",
+    "config": {
+      "Token": "50"
+    },
+    "SuperConfig": null
+  },
+  {
+    "id": "5fd4a7a7-68cf-4d44-89c9-bb6850242eda",
+    "createdDate": "2023-07-21",
+    "feature": "ReviewSystem",
+    "mission": "ReviewFSEL",
+    "config": {
+      "Token": "10"
+    },
+    "SuperConfig": null
+  },
+  {
+    "id": "2a4585ad-7155-47f8-a985-f06e32cd02b7",
+    "createdDate": "2023-07-21",
+    "feature": "Test",
+    "mission": "TestDone",
+    "config": {
+      "unitTest/skillTest/skillMockTest": "10",
+      "finalTest/FullMockTest": "40"
+    },
+    "SuperConfig": {
+      "unitTest/skillTest/skillMockTest": "15",
+      "finalTest/FullMockTest": "60"
+    }
+  },
+  {
+    "id": "1904cafe-abab-43d4-95a9-b4df18c71858",
+    "createdDate": "2023-07-21",
+    "feature": "Test",
+    "mission": "HighestStreak",
+    "config": {
+      "streak": "2",
+      "token": "1"
+    },
+    "SuperConfig": {
+      "streak": "2",
+      "token": "2"
+    }
+  },
+  {
+    "id": "9d3a3ad7-64a8-4469-beed-f81ec0903d43",
+    "createdDate": "2023-07-21",
+    "feature": "Test",
+    "mission": "SuperFireMode",
+    "config": {
+      "token": "0"
+    },
+    "SuperConfig": {
+      "unitTest/skillTest/skillMockTest": "4",
+      "finalTest/mockTest": "10"
+    }
+  },
+  {
+    "id": "d35c8680-c69e-41c2-bf42-cba51d2108a9",
+    "createdDate": "2023-07-21",
+    "feature": "TimeCode",
+    "mission": "QuestionReward",
+    "config": {
+      "QuestionUngraded": "0",
+      "subQuestion": "1"
+    },
+    "SuperConfig": {
+      "QuestionUngraded": "2",
+      "subQuestion": "1"
+    }
+  },
+  {
+    "id": "13b22301-cc43-4cea-b82d-dfa78a7083da",
     "createdDate": "2023-07-21",
     "feature": "TimeCode",
     "mission": "SuperFireMode",
@@ -111,8 +304,7 @@
       "token": "0"
     },
     "SuperConfig": {
-      "token": "2",
-      "subquestion": "1"
+      "token": "1"
     }
   }
 ]

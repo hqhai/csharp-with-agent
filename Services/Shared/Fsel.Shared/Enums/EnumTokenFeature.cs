@@ -18,6 +18,7 @@ namespace Fsel.Shared.Enums
         PesonalInfo,
         Achievement,
         ReviewSystem,
-        Test
+        Test,
+        Price
     }
 }
