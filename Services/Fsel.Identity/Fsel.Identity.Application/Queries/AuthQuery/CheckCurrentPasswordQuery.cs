@@ -10,23 +10,23 @@ namespace Fsel.Identity.Application.Queries.AuthQuery
 
     using UserManager = Core.Base.Managers.UserManager<Domain.Entities.User>;
 
-    public class CheckTheCurrentPasswordQuery : IRequest<MethodResult<bool>>
+    public class CheckCurrentPasswordQuery : IRequest<MethodResult<bool>>
     {
         public string? OldPassword { get; set; }
     }
 
-    public class CheckTheCurrentPasswordQueryHandler : IRequestHandler<CheckTheCurrentPasswordQuery, MethodResult<bool>>
+    public class CheckCurrentPasswordQueryHandler : IRequestHandler<CheckCurrentPasswordQuery, MethodResult<bool>>
     {
         private readonly UserManager _userManager;
         private readonly AuthContext _authContext;
 
-        public CheckTheCurrentPasswordQueryHandler(UserManager userManager, AuthContext authContext)
+        public CheckCurrentPasswordQueryHandler(UserManager userManager, AuthContext authContext)
         {
             _userManager = userManager;
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<bool>> Handle(CheckTheCurrentPasswordQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(CheckCurrentPasswordQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();

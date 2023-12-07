@@ -129,7 +129,7 @@ namespace Fsel.Identity.Authentication.Controllers
         [HttpGet("check-current-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CheckCurrentPassword([FromQuery] CheckTheCurrentPasswordQuery command)
+        public async Task<IActionResult> CheckCurrentPassword([FromQuery] CheckCurrentPasswordQuery command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
