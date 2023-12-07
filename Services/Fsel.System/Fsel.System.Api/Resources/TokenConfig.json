@@ -1,0 +1,112 @@
+[  
+  {
+    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "createdDate": "2023-07-21",
+    "feature": "DailyCheckin",
+    "mission": "DailyCheckin",
+    "config": {
+      "token": [
+        {
+          "token": "1",
+          "times": "30p"
+        },
+        {
+          "token": "3",
+          "times": "60p"
+        },
+        {
+          "token": "6",
+          "times": "90p"
+        },
+        {
+          "token": "12",
+          "times": "120p"
+        },
+        {
+          "token": "24",
+          "times": "180p"
+        }
+      ]
+    },
+    "SuperConfig": {
+      "token": [
+        {
+          "token": "2",
+          "times": "30p"
+        },
+        {
+          "token": "6",
+          "times": "60p"
+        },
+        {
+          "token": "12",
+          "times": "90p"
+        },
+        {
+          "token": "24",
+          "times": "120p"
+        },
+        {
+          "token": "48",
+          "times": "180p"
+        }
+      ]
+    }
+  },
+  {
+    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "createdDate": "2023-07-21",
+    "feature": "TimeCode",
+    "mission": "TimeCodeSubmit",
+    "config": {
+      "token": "1",
+      "subquestion": "1"
+    },
+    "SuperConfig": {
+      "token": "2",
+      "subquestion": "1"
+    }
+  },
+  {
+    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "createdDate": "2023-07-21",
+    "feature": "TimeCode",
+    "mission": "TimeCodeSubmit",
+    "config": {
+      "token": "1",
+      "subquestion": "1"
+    },
+    "SuperConfig": {
+      "token": "2",
+      "subquestion": "1"
+    }
+  },
+  {
+    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "createdDate": "2023-07-21",
+    "feature": "TimeCode",
+    "mission": "TimeCodeSubmit",
+    "config": {
+      "token": "1",
+      "subquestion": "1"
+    },
+    "SuperConfig": {
+      "token": "2",
+      "subquestion": "1"
+    }
+  },
+  {
+    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "createdDate": "2023-07-21",
+    "feature": "DailyCheckin",
+    "mission": "HighestStreak",
+    "config": {
+      "token": "1",
+      "subquestion": "1"
+    },
+    "SuperConfig": {
+      "token": "2",
+      "subquestion": "1"
+    }
+  }
+]
