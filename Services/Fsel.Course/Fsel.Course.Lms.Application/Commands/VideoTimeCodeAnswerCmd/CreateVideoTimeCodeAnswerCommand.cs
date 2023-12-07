@@ -208,16 +208,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                     await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                if (videoTimeCodeResult.Status == EnumResultStatus.Process && videoTimeCode != null)
+                if (videoTimeCodeResult.Status == EnumResultStatus.Process && videoTimeCode != null && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
                 {
-                    if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
-                    {
-                        videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
-                    }
-                    else
-                    {
-                        videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
-                    }
+                    videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
+                }
+                else if (videoTimeCode != null && videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+                {
+                    videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
                 }
                 _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
