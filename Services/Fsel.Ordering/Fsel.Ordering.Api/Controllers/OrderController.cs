@@ -66,12 +66,24 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Payment success
         /// </summary>
-        [HttpPut("payment-success/{oderCode}")]
+        [HttpGet("payment-success/{secretKey}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> PaymentSuccess([FromRoute] string oderCode)
+        public async Task<IActionResult> PaymentSuccess([FromRoute] string secretKey)
         {
-            var commandResult = await _mediator.Send(new PaymentSuccessCommand { OrderCode = oderCode }).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new PaymentSuccessCommand { SecretKey = secretKey }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Payment
+        /// </summary>
+        [HttpPost("payment")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Payment([FromBody] PaymentCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

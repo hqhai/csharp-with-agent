@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
-using Fsel.Ordering.Application.Queues.Consumers;
 using Fsel.Ordering.Application.Queues.Publishers;
 using Fsel.Ordering.Application.Services.CourseService;
 using Fsel.Ordering.Application.Services.SystemService;
@@ -11,7 +10,6 @@ using Fsel.Ordering.Domain.IRepositories;
 using Fsel.Ordering.Infrastructure;
 using Fsel.Ordering.Infrastructure.Repositories;
 using Fsel.Ordering.Infrastructure.ValueSettings;
-using Fsel.Shared.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +21,9 @@ builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<OrderingDbContext>();
+
+builder.Services.AddDataProtection();
+;
 
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();

@@ -6,31 +6,33 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Ordering.Application.Queues.Publishers;
-    using Fsel.Ordering.Application.Services.CourseService;
+    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
+    using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
+    using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class PaymentSuccessCommand : IRequest<MethodResult<bool>>
     {
-        public string? OrderCode { get; set; }
+        public string? SecretKey { get; set; }
     }
 
     public class PaymentSuccessCommandHandler : IRequestHandler<PaymentSuccessCommand, MethodResult<bool>>
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly NotificationMessagePublisher _notificationMessagePublisher;
-        private readonly ILmsCourseService _lmsCourseService;
+        private readonly IMediator _mediator;
+        private readonly AppSetting _appSetting;
+        private readonly IDataProtectionProvider _dataProtectionProvider;
 
-        public PaymentSuccessCommandHandler(IOrderRepository orderRepository, NotificationMessagePublisher notificationMessagePublisher, ILmsCourseService lmsCourseService)
+        public PaymentSuccessCommandHandler(IOrderRepository orderRepository, IMediator mediator, AppSetting appSetting, IDataProtectionProvider dataProtectionProvider)
         {
             _orderRepository = orderRepository;
-            _notificationMessagePublisher = notificationMessagePublisher;
-            _lmsCourseService = lmsCourseService;
+            _mediator = mediator;
+            _appSetting = appSetting;
+            _dataProtectionProvider = dataProtectionProvider;
         }
 
         public async Task<MethodResult<bool>> Handle(PaymentSuccessCommand request, CancellationToken cancellationToken)
@@ -38,41 +40,40 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.Code == request.OrderCode, cancellationToken);
+            var protector = _dataProtectionProvider.CreateProtector(_appSetting.Jwt?.SecretKey ?? string.Empty);
+            string orderCode;
+            try
+            {
+                orderCode = protector.Unprotect(request.SecretKey ?? string.Empty);
+            }
+            catch
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.TokenExpired));
+                return methodResult;
+            }
+
+            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.Code == orderCode, cancellationToken);
             if (order == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
-            //var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { order.CourseId });
-            //if (!courseResults.IsSuccessStatusCode)
-            //{
-            //    methodResult.AddError(courseResults.Error);
-            //    return methodResult;
-            //}
-            //var course = courseResults.Content?.Result?.FirstOrDefault();
-
-            await _orderRepository.ExecuteTransactionAsync(async () =>
+            if (order.Status != EnumOrderStatus.New)
             {
-                order.Status = EnumOrderStatus.Payment;
-                order = _orderRepository.Update(order);
-                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                //await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
-                //{
-                //    UserIds = new List<Guid>() { order.UserId },
-                //    ObjectId = order.Id,
-                //    ParamsMessage = new List<object> { course?.Name ?? string.Empty },
-                //    Type = EnumNotificationType.Text,
-                //    Content = EnumNotificationContent.OrderChangeStatus,
-                //    PlatformCode = EnumPlatformCode.LMS
-                //}, cancellationToken);
-
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.OrderStatusIsNotNew));
                 return methodResult;
-            });
+            }
+
+            var changeStatusOrder = await _mediator.Send(new ChangeStatusOrderCommand { OrderId = order.Id, OrderStatus = EnumOrderStatus.Payment, PackageId = order.PackageId }, cancellationToken).ConfigureAwait(false);
+            if (!changeStatusOrder.IsOK)
+            {
+                methodResult.AddError(changeStatusOrder.ErrorMessages);
+                return methodResult;
+            }
+
+            methodResult.Result = true;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }
