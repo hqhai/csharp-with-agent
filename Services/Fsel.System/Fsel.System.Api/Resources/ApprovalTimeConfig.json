@@ -1,0 +1,14 @@
+[
+  {
+    "id": "380388C3-F4CA-4062-8698-47B61F4703C9",
+    "expiredTime": 180,
+    "approvalTimeType": "DiscussionBoard",
+    "createdDate": "2023-07-21"
+  },
+  {
+    "id": "80B1EEE1-DDB1-4599-8008-959C5E3F6BB2",
+    "expiredTime": 120,
+    "approvalTimeType": "DiscussionBoardFlag",
+    "createdDate": "2023-07-21"
+  }
+]

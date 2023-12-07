@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Application.Querys.CourseTimeConfigQuery
+namespace Fsel.System.Application.Queries.CourseTimeConfigQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
