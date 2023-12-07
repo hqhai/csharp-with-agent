@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                    .ThenInclude(x => x.Unit)
                                    .ThenInclude(x => x!.CourseUnitMockTests)
                                    .Include(x => x.ClassForum)
-                                   .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId) && (studentIds != null || studentIds!.Contains(x.StudentId)))
+                                   .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId) && (studentIds != null && studentIds.Contains(x.StudentId)))
                                    .OrderByDescending(x => x.CreatedDate)
                                    .Select(x => new ClassForumResultSearchModel
                                    {
