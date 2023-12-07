@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Ordering.Infrastructure.Common;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using MediatR;
@@ -26,13 +27,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly AppSetting _appSetting;
         private readonly IDataProtectionProvider _dataProtectionProvider;
+        private readonly VnPayLibrary _vnPayLibrary;
 
-        public PaymentCommandHandler(IOrderRepository orderRepository, IHttpContextAccessor contextAccessor, AppSetting appSetting, IDataProtectionProvider dataProtectionProvider)
+        public PaymentCommandHandler(IOrderRepository orderRepository, IHttpContextAccessor contextAccessor, AppSetting appSetting, IDataProtectionProvider dataProtectionProvider, VnPayLibrary vnPayLibrary)
         {
             _orderRepository = orderRepository;
             _contextAccessor = contextAccessor;
             _appSetting = appSetting;
             _dataProtectionProvider = dataProtectionProvider;
+            _vnPayLibrary = vnPayLibrary;
         }
 
         public async Task<MethodResult<string>> Handle(PaymentCommand request, CancellationToken cancellationToken)
@@ -70,18 +73,23 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-            VnPayLibrary vnpay = new VnPayLibrary();
-
             var price = (long)order.TotalPrice * 100;
 
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpVersion, VnPayLibrary.VERSION);
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpCommand, "pay");
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpTmnCode, vnp_TmnCode);
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpAmount, price.ToString(CultureInfo.CurrentCulture));
+            var version = _appSetting.PaymentConfig?.VNPAY?.Version;
+            if (string.IsNullOrEmpty(version))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpVersion, version);
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpCommand, "pay");
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpTmnCode, vnp_TmnCode);
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpAmount, price.ToString(CultureInfo.CurrentCulture));
 
             if (request.VNPAYPaymentType.HasValue)
             {
-                vnpay.AddRequestData(PaymentSetting.VNPay.VnpBankCode, request.VNPAYPaymentType.ToString() ?? string.Empty);
+                _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpBankCode, request.VNPAYPaymentType.ToString() ?? string.Empty);
             }
 
             var ipAddress = Utils.GetIpAddress(_contextAccessor);
@@ -92,17 +100,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpCreateDate, order.CreatedDate.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture));
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpCurrCode, "VND");
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpIpAddr, ipAddress);
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpLocale, "vn");
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpOrderInfo, "Thanh toán đơn hàng :" + order.Code);
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpOrderType, "other"); //default value: other
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpCreateDate, order.CreatedDate.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture));
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpCurrCode, "VND");
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpIpAddr, ipAddress);
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpLocale, "vn");
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpOrderInfo, "Thanh toán đơn hàng :" + order.Code);
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpOrderType, "other"); //default value: other
 
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpReturnUrl, vnp_Returnurl);
-            vnpay.AddRequestData(PaymentSetting.VNPay.VnpTxnRef, order.Code ?? string.Empty);
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpReturnUrl, vnp_Returnurl);
+            _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpTxnRef, order.Code ?? string.Empty);
 
-            methodResult.Result = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+            methodResult.Result = _vnPayLibrary.CreateRequestUrl(vnp_Url, vnp_HashSecret);
             return methodResult;
         }
     }

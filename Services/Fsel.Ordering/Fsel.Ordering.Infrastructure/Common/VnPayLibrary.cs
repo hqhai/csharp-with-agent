@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Shared.Constants
+namespace Fsel.Ordering.Infrastructure.Common
 {
     using System;
     using System.Collections.Generic;
@@ -8,11 +8,11 @@ namespace Fsel.Shared.Constants
     using System.Net;
     using System.Security.Cryptography;
     using System.Text;
+    using Fsel.Shared.Constants;
     using Microsoft.AspNetCore.Http;
 
     public class VnPayLibrary
     {
-        public const string VERSION = "2.1.0";
         private SortedList<string, string> _requestData = new SortedList<string, string>(new VnPayCompare());
         private SortedList<string, string> _responseData = new SortedList<string, string>(new VnPayCompare());
 
@@ -49,8 +49,8 @@ namespace Fsel.Shared.Constants
 
         public string CreateRequestUrl(string baseUrl, string vnpHashSecret)
         {
-            StringBuilder data = new StringBuilder();
-            foreach (KeyValuePair<string, string> kv in _requestData)
+            var data = new StringBuilder();
+            foreach (var kv in _requestData)
             {
                 if (!string.IsNullOrEmpty(kv.Value))
                 {
@@ -66,7 +66,7 @@ namespace Fsel.Shared.Constants
                 signData = signData.Remove(data.Length - 1, 1);
             }
             string vnp_SecureHash = Utils.HmacSHA512(vnpHashSecret, signData);
-            baseUrl += "vnp_SecureHash=" + vnp_SecureHash;
+            baseUrl += PaymentSetting.VNPay.VnpSecureHash + "=" + vnp_SecureHash;
 
             return baseUrl;
         }
@@ -84,16 +84,16 @@ namespace Fsel.Shared.Constants
 
         private string GetResponseData()
         {
-            StringBuilder data = new StringBuilder();
-            if (_responseData.ContainsKey("vnp_SecureHashType"))
+            var data = new StringBuilder();
+            if (_responseData.ContainsKey(PaymentSetting.VNPay.VnpSecureHashType))
             {
-                _responseData.Remove("vnp_SecureHashType");
+                _responseData.Remove(PaymentSetting.VNPay.VnpSecureHashType);
             }
-            if (_responseData.ContainsKey("vnp_SecureHash"))
+            if (_responseData.ContainsKey(PaymentSetting.VNPay.VnpSecureHash))
             {
-                _responseData.Remove("vnp_SecureHash");
+                _responseData.Remove(PaymentSetting.VNPay.VnpSecureHash);
             }
-            foreach (KeyValuePair<string, string> kv in _responseData)
+            foreach (var kv in _responseData)
             {
                 if (!string.IsNullOrEmpty(kv.Value))
                 {

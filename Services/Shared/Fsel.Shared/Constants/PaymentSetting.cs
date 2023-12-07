@@ -19,6 +19,8 @@ namespace Fsel.Shared.Constants
             public const string VnpOrderType = "vnp_OrderType";
             public const string VnpReturnUrl = "vnp_ReturnUrl";
             public const string VnpTxnRef = "vnp_TxnRef";
+            public const string VnpSecureHashType = "vnp_SecureHashType";
+            public const string VnpSecureHash = "vnp_SecureHash";
         }
     }
 }

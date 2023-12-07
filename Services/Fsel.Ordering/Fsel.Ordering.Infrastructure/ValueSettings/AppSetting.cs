@@ -25,6 +25,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
 
     public class VNPAY
     {
+        public string? Version { get; set; }
         public string? VnpUrl { get; set; }
         public string? VnpTmnCode { get; set; }
         public string? VnpHashSecret { get; set; }
