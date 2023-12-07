@@ -381,24 +381,24 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<int> GetHighestStreak(VideoResult videoResult)
         {
             ArgumentNullException.ThrowIfNull(videoResult);
-            var answerQuery = from baseQ in _videoRepository.Queryable
-                              join vt in _videoTimeCodeRepository.Queryable on baseQ.Id equals vt.VideoId
-                              join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
-                              join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
-                              join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
-                              join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on q.Id equals vtca.QuestionId
-                              where baseQ.Id == videoResult.VideoId && vt.TimeCodeType == EnumTimeCodeType.Standalone
-                              group q by baseQ into g
-                              select new
-                              {
-                                  HighestStreaks = g.Select(x => x).Distinct().OrderBy(x => x.CreatedDate)
-                                                  .SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
-                                  .Select(x => new
-                                  {
-                                      IsCorrectFirstSubmit = x.IsCorrect == true && x.IsFirstSubmit
-                                  })
-                              };
+            var answerQuery = (from baseQ in _videoRepository.Queryable
+                               join vt in _videoTimeCodeRepository.Queryable on baseQ.Id equals vt.VideoId
+                               join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
+                               join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
+                               join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
+                               join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
+                               join vtca in _videoTimeCodeAnswerRepository.Queryable on q.Id equals vtca.QuestionId
+                               where baseQ.Id == videoResult.VideoId && vt.TimeCodeType == EnumTimeCodeType.Standalone
+                               group q by baseQ into g
+                               select new
+                               {
+                                   HighestStreaks = g.Select(x => x).Distinct().OrderBy(x => x.CreatedDate)
+                                                   .SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
+                                   .Select(x => new
+                                   {
+                                       IsCorrectFirstSubmit = x.IsCorrect == true && x.IsFirstSubmit
+                                   })
+                               });
             var highestStreak = await answerQuery.FirstOrDefaultAsync();
             if (highestStreak == null)
             {
@@ -414,20 +414,24 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task<int> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
         {
-            var answers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
+            return _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
                                                                 .Include(x => x.Question)
                                                                 .OrderBy(x => x.Question!.CreatedDate)
                                                                 .Select(x => new
                                                                 {
                                                                     IsCorrectFirstSubmit = x.IsCorrect == true && x.IsFirstSubmit
-                                                                })
-                                                                .ToListAsync();
-            return answers.Aggregate(
-                                new { Longest = 0, Current = 0 },
-                                (agg, element) => element.IsCorrectFirstSubmit ?
-                                    new { Longest = Math.Max(agg.Longest, agg.Current + 1), Current = agg.Current + 1 } :
-                                    new { agg.Longest, Current = 0 },
-                                agg => agg.Longest);
+                                                                }).Aggregate(
+                                                                new { Longest = 0, Current = 0 },
+                                                                (agg, element) => element.IsCorrectFirstSubmit ?
+                                                                    new { Longest = agg.Current + 1 > agg.Longest ? agg.Current + 1 : agg.Longest, Current = agg.Current + 1 } :
+                                                                    new { agg.Longest, Current = 0 },
+                                                                agg => agg.Longest);
+            //return answers.Aggregate(
+            //                    new { Longest = 0, Current = 0 },
+            //                    (agg, element) => element.IsCorrectFirstSubmit ?
+            //                        new { Longest = agg.Current + 1 > agg.Longest ? agg.Current + 1 : agg.Longest, Current = agg.Current + 1 } :
+            //                        new { agg.Longest, Current = 0 },
+            //                    agg => agg.Longest);
         }
 
         private static bool GetUngraded(VideoTimeCode? videoTimeCode)
