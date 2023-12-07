@@ -1,19 +1,21 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.UserOtpCodeQuery;
+using Fsel.Identity.Application.Queries.AuthQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
-using Fsel.Shared.Constants;
 
 namespace Fsel.Identity.Authentication.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/user")]
     [ApiController]
     public class UserController : ControllerBase
@@ -118,6 +120,18 @@ namespace Fsel.Identity.Authentication.Controllers
         public async Task<IActionResult> SignUpAsGuest([FromBody] CreateGuestAccountCommand command)
         {
             MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Current Password
+        /// </summary>
+        [HttpGet("check-current-password")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckCurrentPassword([FromQuery] GetCheckTheCurrentPasswordQuery command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
