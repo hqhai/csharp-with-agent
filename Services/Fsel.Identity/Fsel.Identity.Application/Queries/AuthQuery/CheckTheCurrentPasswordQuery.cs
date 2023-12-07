@@ -5,10 +5,8 @@ namespace Fsel.Identity.Application.Queries.AuthQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Identity.Domain.Entities;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
 
     using UserManager = Core.Base.Managers.UserManager<Domain.Entities.User>;
 
@@ -21,13 +19,11 @@ namespace Fsel.Identity.Application.Queries.AuthQuery
     {
         private readonly UserManager _userManager;
         private readonly AuthContext _authContext;
-        private readonly SignInManager<User> _signInManager;
 
-        public CheckTheCurrentPasswordQueryHandler(UserManager userManager, AuthContext authContext, SignInManager<User> signInManager)
+        public CheckTheCurrentPasswordQueryHandler(UserManager userManager, AuthContext authContext)
         {
             _userManager = userManager;
             _authContext = authContext;
-            _signInManager = signInManager;
         }
 
         public async Task<MethodResult<bool>> Handle(CheckTheCurrentPasswordQuery request, CancellationToken cancellationToken)
@@ -45,7 +41,7 @@ namespace Fsel.Identity.Application.Queries.AuthQuery
                 methodResult.Result = false;
                 return methodResult;
             }
-            var isCheckPassword = await _signInManager.UserManager.CheckPasswordAsync(user, request.OldPassword);
+            var isCheckPassword = await _userManager.CheckPasswordAsync(user, request.OldPassword);
             if (!isCheckPassword)
             {
                 methodResult.Result = false;
