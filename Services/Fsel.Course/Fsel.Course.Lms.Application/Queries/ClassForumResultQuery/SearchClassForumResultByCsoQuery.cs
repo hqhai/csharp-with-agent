@@ -52,9 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 return methodResult;
             }
 
-            #region update cso to class
-
-            /*var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+            var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
 
             var studentsResult = await _trainingService.GetClassesByCsoIdAsync(csoId ?? default);
@@ -62,43 +60,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var studentIds = students?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
 
             var classForumResultQuery = _classForumResultRepository.Queryable
-                                    .Include(x => x.LessonResult)
-                                    .ThenInclude(x => x!.Lesson)
-                                    .ThenInclude(x => x!.UnitLessons)
-                                    .ThenInclude(x => x.Unit)
-                                    .ThenInclude(x => x!.CourseUnitMockTests)
-                                    .Include(x => x.ClassForum)
-                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId) && (studentIds == null || studentIds.Contains(x.StudentId)))
-                                    .Select(x => new ClassForumResultSearchModel
-                                    {
-                                        Id = x.Id,
-                                        CreatedDate = x.CreatedDate,
-                                        CreatedUserId = x.CreatedUserId,
-                                        CreatedFullName = x.CreatedFullName,
-                                        StudentId = x.StudentId,
-                                        ClassForum = _mapper.Map<ClassForumModel>(x.ClassForum),
-                                        Status = x.Status,
-                                        CheckStartDate = x.CheckStartDate,
-                                        CourseCode = x.LessonResult!.Course!.Code,
-                                        LessonName = x.ClassForum!.Lesson!.Name,
-                                        LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
-                                        UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.DisplayOrder).FirstOrDefault(),
-                                        UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
-                                        TeacherId = x.GradingTeacherId
-                                    });*/
-
-            #endregion update cso to class
-
-            var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
-            var csoId = csoResults.Content?.Result?.Id;
-            var classForumResultQuery = _classForumResultRepository.Queryable
                                    .Include(x => x.LessonResult)
                                    .ThenInclude(x => x!.Lesson)
                                    .ThenInclude(x => x!.UnitLessons)
                                    .ThenInclude(x => x.Unit)
                                    .ThenInclude(x => x!.CourseUnitMockTests)
                                    .Include(x => x.ClassForum)
-                                   .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId))
+                                   .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId) && (studentIds == null || studentIds.Contains(x.StudentId)))
                                    .OrderByDescending(x => x.CreatedDate)
                                    .Select(x => new ClassForumResultSearchModel
                                    {
