@@ -3,13 +3,10 @@
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base;
-using Fsel.Core.Base.Managers;
-using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using UserManager = Fsel.Core.Base.Managers.UserManager<Fsel.Identity.Domain.Entities.User>;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
@@ -22,14 +19,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager _userManager;
         private readonly AuthContext _authContext;
-        private readonly SignInManager<User> _signInManager;
 
         public ChangePasswordCommandHandler(UserManager userManager,
-            AuthContext authContext,
-            SignInManager<User> signInManager)
+            AuthContext authContext)
         {
             _authContext = authContext;
-            _signInManager = signInManager;
             _userManager = userManager;
         }
 
@@ -60,8 +54,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var checkOldPassword = await _signInManager.PasswordSignInAsync(user.UserName ?? string.Empty, request.OldPassword, false, false);
-            if (!checkOldPassword.Succeeded)
+            var isCheckPassword = await _userManager.CheckPasswordAsync(user, request.OldPassword);
+            if (!isCheckPassword)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OldPasswordIncorrect), nameof(request.OldPassword));
                 return methodResult;

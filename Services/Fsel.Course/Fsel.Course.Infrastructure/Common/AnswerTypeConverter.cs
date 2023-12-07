@@ -10,6 +10,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class AnswerTypeConverter
     {
