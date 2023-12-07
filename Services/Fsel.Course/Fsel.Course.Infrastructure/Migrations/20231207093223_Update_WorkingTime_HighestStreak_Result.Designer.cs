@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20231207090600_Update_WorkingTime_HighestStreak_Result")]
+    [Migration("20231207093223_Update_WorkingTime_HighestStreak_Result")]
     partial class Update_WorkingTime_HighestStreak_Result
     {
         /// <inheritdoc />

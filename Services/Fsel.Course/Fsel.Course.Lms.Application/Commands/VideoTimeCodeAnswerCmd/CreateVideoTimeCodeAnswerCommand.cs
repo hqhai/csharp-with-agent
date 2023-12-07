@@ -208,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                     await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                if (videoTimeCodeResult.Status == EnumResultStatus.Process && videoTimeCode != null && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+                if (videoTimeCode != null && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
                 {
                     videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
                 }
