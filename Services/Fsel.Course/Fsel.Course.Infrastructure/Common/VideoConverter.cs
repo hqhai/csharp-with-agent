@@ -35,6 +35,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
+        private readonly LinQHelper _linQHelper;
         private readonly IMapper _mapper;
 
         public VideoConverter(IVideoRepository videoRepository
@@ -48,6 +49,7 @@ namespace Fsel.Course.Infrastructure.Common
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , IExerciseQuestionRepository exerciseQuestionRepository
             , ITimeCodeExerciseRepository timeCodeExerciseRepository
+            , LinQHelper linQHelper
             , IMapper mapper)
         {
             _videoRepository = videoRepository;
@@ -61,6 +63,7 @@ namespace Fsel.Course.Infrastructure.Common
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _timeCodeExerciseRepository = timeCodeExerciseRepository;
+            _linQHelper = linQHelper;
             _mapper = mapper;
         }
 
@@ -394,22 +397,14 @@ namespace Fsel.Course.Infrastructure.Common
                                {
                                    HighestStreaks = g.Select(x => x).Distinct().OrderBy(x => x.CreatedDate)
                                                    .SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
-                                   .Select(x => new
-                                   {
-                                       IsCorrectFirstSubmit = x.IsCorrect == true && x.IsFirstSubmit
-                                   })
+                                   .Select(x => x.IsCorrect == true && x.IsFirstSubmit)
                                });
             var highestStreak = await answerQuery.FirstOrDefaultAsync();
             if (highestStreak == null)
             {
                 return default;
             }
-            return highestStreak.HighestStreaks.Aggregate(
-                                new { Longest = 0, Current = 0 },
-                                (agg, element) => element.IsCorrectFirstSubmit ?
-                                    new { Longest = Math.Max(agg.Longest, agg.Current + 1), Current = agg.Current + 1 } :
-                                    new { agg.Longest, Current = 0 },
-                                agg => agg.Longest);
+            return _linQHelper.GetHighestStreak(highestStreak.HighestStreaks.ToList());
         }
 
         public async Task<int> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
@@ -417,16 +412,8 @@ namespace Fsel.Course.Infrastructure.Common
             var answers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
                                                                 .Include(x => x.Question)
                                                                 .OrderBy(x => x.Question!.CreatedDate)
-                                                                .Select(x => new
-                                                                {
-                                                                    IsCorrectFirstSubmit = x.IsCorrect == true && x.IsFirstSubmit
-                                                                }).ToListAsync();
-            return answers.Aggregate(
-                                new { Longest = 0, Current = 0 },
-                                (agg, element) => element.IsCorrectFirstSubmit ?
-                                    new { Longest = agg.Current + 1 > agg.Longest ? agg.Current + 1 : agg.Longest, Current = agg.Current + 1 } :
-                                    new { agg.Longest, Current = 0 },
-                                agg => agg.Longest);
+                                                                .Select(x => x.IsCorrect == true && x.IsFirstSubmit).ToListAsync();
+            return _linQHelper.GetHighestStreak(answers);
         }
 
         private static bool GetUngraded(VideoTimeCode? videoTimeCode)
@@ -501,7 +488,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 else
                 {
-                    remainingTime = videoTimeCodeResult.RetryWorkingTime == 0 ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime;
+                    remainingTime = videoTimeCodeResult.RetryWorkingTime == default ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime;
                 }
                 videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, remainingTime);
             }

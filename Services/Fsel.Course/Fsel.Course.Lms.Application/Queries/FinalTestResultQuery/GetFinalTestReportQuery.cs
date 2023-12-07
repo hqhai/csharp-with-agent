@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                                             Percent = x.Percent,
                                             SkillScores = x.SkillScores,
                                             Status = x.Status,
-                                            StudentId = x.StudentId,
+                                            StudentId = x.StudentId
                                         }).FirstOrDefaultAsync(cancellationToken);
             methodResult.Result = finalTestResult;
             methodResult.StatusCode = StatusCodes.Status200OK;

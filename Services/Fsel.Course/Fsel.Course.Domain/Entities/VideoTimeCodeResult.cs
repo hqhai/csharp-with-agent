@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IEntities;
 
-    public class VideoTimeCodeResult : BaseResultScore, IHighestStreak
+    public class VideoTimeCodeResult : BaseResultScore, IHighestStreak, IWorkingTime
     {
         public VideoResult? VideoResult { get; set; }
 

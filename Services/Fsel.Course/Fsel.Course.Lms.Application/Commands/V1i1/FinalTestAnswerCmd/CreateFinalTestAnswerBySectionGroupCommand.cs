@@ -126,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.FinalTestAnswerCmd
                 if (request.IsSubmit)
                 {
                     await _sectionGroupConverter.UpdateFinalTestAnswers(sectionGroup, sectionGroupResult);
-                    sectionGroupResult = await UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
+                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, false, cancellationToken);
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
@@ -144,6 +144,8 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.FinalTestAnswerCmd
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 finalTestResult = GetFinalTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), finalTestResult);
+                finalTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
+                finalTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                 _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -157,34 +159,6 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.FinalTestAnswerCmd
             finalTestResult.Status = EnumResultStatus.Done;
             finalTestResult.SkillScores = skillScores;
             return finalTestResult;
-        }
-
-        private async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
-        {
-            var skillScore = await GetSkillScore(sectionGroupResult, sectionGroup, cancellationToken);
-            sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
-            sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
-            sectionGroupResult.Status = EnumResultStatus.Done;
-            if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
-            {
-                sectionGroupResult.SkillScores.Add(skillScore);
-            }
-            else
-            {
-                sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
-            }
-            _sectionGroupResultRepository.Update(sectionGroupResult);
-            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            return sectionGroupResult;
-        }
-
-        private async Task<SkillScores> GetSkillScore(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
-        {
-            var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.FinalTestResultId == sectionGroupResult.FinalTestResultId).ToListAsync(cancellationToken);
-            var questionIds = finalTestAnswers.Select(x => x.SectionQuestion).Select(x => x.QuestionId).ToList();
-            var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
-            var skillScore = _sectionGroupConverter.GetSkillScore(sectionGroup, finalTestAnswers.Sum(x => x.CorrectCount), finalTestAnswers.Count, totalCorrect, questionIds.Count);
-            return skillScore;
         }
 
         private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, Guid sectionGroupResultId)

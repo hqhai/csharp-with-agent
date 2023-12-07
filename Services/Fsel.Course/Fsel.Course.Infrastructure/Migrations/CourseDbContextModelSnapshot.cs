@@ -1762,6 +1762,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
+                    b.Property<double>("WorkingTime")
+                        .HasColumnType("float");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
@@ -2906,6 +2909,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
+                    b.Property<double>("WorkingTime")
+                        .HasColumnType("float");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
@@ -3710,6 +3716,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("FinalTestResultId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("HighestStreak")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -3749,6 +3758,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
+
+                    b.Property<double>("WorkingTime")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 

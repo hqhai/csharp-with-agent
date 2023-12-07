@@ -12,8 +12,10 @@ namespace Fsel.Course.Infrastructure.Maps
         public FinalTestResultProfile()
         {
             CreateMap<FinalTestResult, FinalTestResultModel>().IgnoreAllNonExisting();
-            CreateMap<FinalTestResult, TestResultRankingModel>().IgnoreAllNonExisting();
-            CreateMap<FinalTestResult, TestResultReportModel>().IgnoreAllNonExisting();
+            CreateMap<FinalTestResult, TestResultRankingModel>()
+            .ForMember(x => x.Score, p => p.MapFrom(o => o.CorrectCount));
+            CreateMap<FinalTestResult, TestResultReportModel>()
+            .ForMember(x => x.Score, p => p.MapFrom(o => o.CorrectCount));
         }
     }
 }

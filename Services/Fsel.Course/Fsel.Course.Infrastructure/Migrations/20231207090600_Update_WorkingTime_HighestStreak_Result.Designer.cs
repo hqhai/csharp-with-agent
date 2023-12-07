@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20231205073403_Update_VideoTimeCodeAnswer_IsFirstSubmit")]
-    partial class Update_VideoTimeCodeAnswer_IsFirstSubmit
+    [Migration("20231207090600_Update_WorkingTime_HighestStreak_Result")]
+    partial class Update_WorkingTime_HighestStreak_Result
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1731,6 +1731,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("FinalTestId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("HighestStreak")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -1761,6 +1764,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
+
+                    b.Property<double>("WorkingTime")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -2866,6 +2872,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("GradingTeacherId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("HighestStreak")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -2902,6 +2911,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
+
+                    b.Property<double>("WorkingTime")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -3707,6 +3719,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("FinalTestResultId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("HighestStreak")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -3746,6 +3761,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
+
+                    b.Property<double>("WorkingTime")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -4549,6 +4567,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(100000000)
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("HighestStreak")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -4808,6 +4829,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
+
+                    b.Property<int?>("HighestStreak")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
