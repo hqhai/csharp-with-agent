@@ -17,6 +17,7 @@ namespace Fsel.Shared.Enums
         QuestBoard,
         PesonalInfo,
         Achievement,
-        ReviewSystem
+        ReviewSystem,
+        Test
     }
 }

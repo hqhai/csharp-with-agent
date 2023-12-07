@@ -1,4 +1,4 @@
-[  
+[
   {
     "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
     "createdDate": "2023-07-21",
@@ -56,53 +56,59 @@
   {
     "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
     "createdDate": "2023-07-21",
-    "feature": "TimeCode",
-    "mission": "TimeCodeSubmit",
-    "config": {
-      "token": "1",
-      "subquestion": "1"
-    },
-    "SuperConfig": {
-      "token": "2",
-      "subquestion": "1"
-    }
-  },
-  {
-    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
-    "createdDate": "2023-07-21",
-    "feature": "TimeCode",
-    "mission": "TimeCodeSubmit",
-    "config": {
-      "token": "1",
-      "subquestion": "1"
-    },
-    "SuperConfig": {
-      "token": "2",
-      "subquestion": "1"
-    }
-  },
-  {
-    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
-    "createdDate": "2023-07-21",
-    "feature": "TimeCode",
-    "mission": "TimeCodeSubmit",
-    "config": {
-      "token": "1",
-      "subquestion": "1"
-    },
-    "SuperConfig": {
-      "token": "2",
-      "subquestion": "1"
-    }
-  },
-  {
-    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
-    "createdDate": "2023-07-21",
     "feature": "DailyCheckin",
+    "mission": "DailyCheckin",
+    "config": [
+      {
+        "token": "5",
+        "tier": "3"
+      },
+      {
+        "token": "20",
+        "tier": "15"
+      },
+      {
+        "token": "40",
+        "tier": "30-31"
+      }
+    ],
+    "SuperConfig": null
+  },
+  {
+    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "createdDate": "2023-07-21",
+    "feature": "TimeCode",
+    "mission": "TimeCodeSubmit",
+    "config": {
+      "token": "1",
+      "subquestion": "1"
+    },
+    "SuperConfig": {
+      "token": "2",
+      "subquestion": "1"
+    }
+  },
+  {
+    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "createdDate": "2023-07-21",
+    "feature": "Test",
     "mission": "HighestStreak",
     "config": {
       "token": "1",
-      "subquestion": "1"
+      "Streak": "2"
+    },
+    "SuperConfig": {
+      "token": "2",
+      "subquestion": "2"
+    }
+  },
+  {
+    "id": "68bd35d3-c09b-45f3-9a05-0e10691f7c42",
+    "createdDate": "2023-07-21",
+    "feature": "TimeCode",
+    "mission": "SuperFireMode",
+    "config": {
+      "token": "0"
     },
     "SuperConfig": {
       "token": "2",
