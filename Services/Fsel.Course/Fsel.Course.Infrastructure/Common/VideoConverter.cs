@@ -414,24 +414,19 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task<int> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
         {
-            return _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
+            var answers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
                                                                 .Include(x => x.Question)
                                                                 .OrderBy(x => x.Question!.CreatedDate)
                                                                 .Select(x => new
                                                                 {
                                                                     IsCorrectFirstSubmit = x.IsCorrect == true && x.IsFirstSubmit
-                                                                }).Aggregate(
-                                                                new { Longest = 0, Current = 0 },
-                                                                (agg, element) => element.IsCorrectFirstSubmit ?
-                                                                    new { Longest = agg.Current + 1 > agg.Longest ? agg.Current + 1 : agg.Longest, Current = agg.Current + 1 } :
-                                                                    new { agg.Longest, Current = 0 },
-                                                                agg => agg.Longest);
-            //return answers.Aggregate(
-            //                    new { Longest = 0, Current = 0 },
-            //                    (agg, element) => element.IsCorrectFirstSubmit ?
-            //                        new { Longest = agg.Current + 1 > agg.Longest ? agg.Current + 1 : agg.Longest, Current = agg.Current + 1 } :
-            //                        new { agg.Longest, Current = 0 },
-            //                    agg => agg.Longest);
+                                                                }).ToListAsync();
+            return answers.Aggregate(
+                                new { Longest = 0, Current = 0 },
+                                (agg, element) => element.IsCorrectFirstSubmit ?
+                                    new { Longest = agg.Current + 1 > agg.Longest ? agg.Current + 1 : agg.Longest, Current = agg.Current + 1 } :
+                                    new { agg.Longest, Current = 0 },
+                                agg => agg.Longest);
         }
 
         private static bool GetUngraded(VideoTimeCode? videoTimeCode)
