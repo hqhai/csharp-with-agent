@@ -60,9 +60,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             string vnp_Returnurl = string.Format(CultureInfo.InvariantCulture, vnpReturnurl, token);
 
-            string? vnp_Url = _appSetting.VNPAY?.VnpUrl;
-            string? vnp_TmnCode = _appSetting.VNPAY?.VnpTmnCode;
-            string? vnp_HashSecret = _appSetting.VNPAY?.VnpHashSecret;
+            string? vnp_Url = _appSetting.PaymentConfig?.VNPAY?.VnpUrl;
+            string? vnp_TmnCode = _appSetting.PaymentConfig?.VNPAY?.VnpTmnCode;
+            string? vnp_HashSecret = _appSetting.PaymentConfig?.VNPAY?.VnpHashSecret;
 
             if (string.IsNullOrEmpty(vnp_Url) || string.IsNullOrEmpty(vnp_TmnCode) || string.IsNullOrEmpty(vnp_HashSecret))
             {

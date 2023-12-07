@@ -9,13 +9,18 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public Smtp? Smtp { get; set; }
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
-        public VNPAY? VNPAY { get; set; }
+        public PaymentConfig? PaymentConfig { get; set; }
         public new Services? Services { get; set; }
     }
 
     public class ConstantUrl
     {
         public string? PaymentSuccessUrl { get; set; }
+    }
+
+    public class PaymentConfig
+    {
+        public VNPAY? VNPAY { get; set; }
     }
 
     public class VNPAY

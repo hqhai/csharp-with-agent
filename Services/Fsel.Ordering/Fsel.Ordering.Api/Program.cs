@@ -23,7 +23,6 @@ builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<OrderingDbContext>();
 
 builder.Services.AddDataProtection();
-;
 
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
