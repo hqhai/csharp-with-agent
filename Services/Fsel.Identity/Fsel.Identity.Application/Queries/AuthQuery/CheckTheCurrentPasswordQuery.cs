@@ -12,25 +12,25 @@ namespace Fsel.Identity.Application.Queries.AuthQuery
 
     using UserManager = Core.Base.Managers.UserManager<Domain.Entities.User>;
 
-    public class GetCheckTheCurrentPasswordQuery : IRequest<MethodResult<bool>>
+    public class CheckTheCurrentPasswordQuery : IRequest<MethodResult<bool>>
     {
         public string? OldPassword { get; set; }
     }
 
-    public class GetCheckTheCurrentPasswordQueryHandler : IRequestHandler<GetCheckTheCurrentPasswordQuery, MethodResult<bool>>
+    public class CheckTheCurrentPasswordQueryHandler : IRequestHandler<CheckTheCurrentPasswordQuery, MethodResult<bool>>
     {
         private readonly UserManager _userManager;
         private readonly AuthContext _authContext;
         private readonly SignInManager<User> _signInManager;
 
-        public GetCheckTheCurrentPasswordQueryHandler(UserManager userManager, AuthContext authContext, SignInManager<User> signInManager)
+        public CheckTheCurrentPasswordQueryHandler(UserManager userManager, AuthContext authContext, SignInManager<User> signInManager)
         {
             _userManager = userManager;
             _authContext = authContext;
             _signInManager = signInManager;
         }
 
-        public async Task<MethodResult<bool>> Handle(GetCheckTheCurrentPasswordQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(CheckTheCurrentPasswordQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
@@ -45,8 +45,8 @@ namespace Fsel.Identity.Application.Queries.AuthQuery
                 methodResult.Result = false;
                 return methodResult;
             }
-            var checkOldPassword = await _signInManager.PasswordSignInAsync(user.UserName ?? string.Empty, request.OldPassword, false, false);
-            if (!checkOldPassword.Succeeded)
+            var isCheckPassword = await _signInManager.UserManager.CheckPasswordAsync(user, request.OldPassword);
+            if (!isCheckPassword)
             {
                 methodResult.Result = false;
                 return methodResult;
