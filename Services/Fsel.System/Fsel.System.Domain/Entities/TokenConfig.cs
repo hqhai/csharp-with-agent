@@ -2,8 +2,10 @@
 
 namespace Fsel.System.Domain.Entities
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
+    using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class TokenConfig : Entity
     {
@@ -11,8 +13,22 @@ namespace Fsel.System.Domain.Entities
 
         public EnumTokenMission Mission { get; set; }
 
-        public object? Config { get; set; }
+        public string? ConfigStr { get; set; }
 
-        public object? SuperConfig { get; set; }
+        [NotMapped]
+        public object? Config
+        {
+            get { return ConvertHelper.Deserialize<object>(ConfigStr); }
+            set { ConfigStr = ConvertHelper.Serialize(value); }
+        }
+
+        public string? SuperConfigStr { get; set; }
+
+        [NotMapped]
+        public object? SuperConfig
+        {
+            get { return ConvertHelper.Deserialize<object>(SuperConfigStr); }
+            set { SuperConfigStr = ConvertHelper.Serialize(value); }
+        }
     }
 }

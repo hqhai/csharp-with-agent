@@ -20,5 +20,6 @@ namespace Fsel.Shared.Constants
 
         public const string StudentTagName = "Resources//StudentTagName.json";
         public const string AvatarImage = "Resources//AvatarImage.json";
+        public const string TokenConfig = "Resources//TokenConfig.json";
     }
 }
