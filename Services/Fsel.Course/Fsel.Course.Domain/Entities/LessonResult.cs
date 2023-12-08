@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
 
-    public class LessonResult : BaseResultScore
+    public class LessonResult : BaseScoreResult
     {
         /// <summary>
         /// Lưu ý tóm tắt

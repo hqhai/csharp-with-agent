@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class TestResultRankingModel : BaseResultScoreModel
+    public class TestResultRankingModel : BaseScoreResultModel
     {
         public bool IsCurrentStudent { get; set; }
 

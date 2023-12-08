@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 {
-    public class LessonMockTestResultModel : BaseResultScoreModel
+    public class LessonMockTestResultModel : BaseScoreResultModel
     {
         public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }

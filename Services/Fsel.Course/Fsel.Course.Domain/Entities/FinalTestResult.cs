@@ -2,10 +2,7 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    using System.ComponentModel.DataAnnotations;
-    using Fsel.Common.Enums.ErrorCodes;
-
-    public class FinalTestResult : BaseResultScore
+    public class FinalTestResult : BaseLearnResult
     {
         public FinalTest? FinalTest { get; set; }
         public Guid FinalTestId { get; set; }
