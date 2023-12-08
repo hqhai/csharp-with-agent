@@ -27,11 +27,11 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreatePlacementTestAnswerBySectionGroupCommand : CreatePlacementTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
+    public class CreatePlacementTestAnswerBySectionGroupCommand : CreatePlacementTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<PlacementTestResultModel>>
     {
     }
 
-    public class CreatePlacementTestAnswerBySectionGroupCommandHandler : IRequestHandler<CreatePlacementTestAnswerBySectionGroupCommand, MethodResult<SectionGroupResultModel>>
+    public class CreatePlacementTestAnswerBySectionGroupCommandHandler : IRequestHandler<CreatePlacementTestAnswerBySectionGroupCommand, MethodResult<PlacementTestResultModel>>
     {
         private readonly IQuestionRepository _questionRepository;
         private readonly AuthContext _authContext;
@@ -73,10 +73,10 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<SectionGroupResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PlacementTestResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<SectionGroupResultModel>();
+            var methodResult = new MethodResult<PlacementTestResultModel>();
             StudentModel? student;
             if (request.StudentId.HasValue)
             {
@@ -160,11 +160,12 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
                     sectionGroupResult = await UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
                 return methodResult;
             });
 
             await UpdatePlacementTestResultAsync(placementTestResult, placementTest, student, cancellationToken);
+
+            methodResult.Result = _mapper.Map<PlacementTestResultModel>(placementTestResult);
             return methodResult;
         }
 
