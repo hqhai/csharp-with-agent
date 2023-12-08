@@ -4,9 +4,8 @@ namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.IEntities;
 
-    public class VideoTimeCodeResult : BaseResultScore, IHighestStreak, IWorkingTime
+    public class VideoTimeCodeResult : BaseLearnResult
     {
         public VideoResult? VideoResult { get; set; }
 
@@ -19,11 +18,6 @@ namespace Fsel.Course.Domain.Entities
         public Guid VideoTimeCodeId { get; set; }
 
         /// <summary>
-        /// Thời gian còn lại
-        /// </summary>
-        public double WorkingTime { get; set; }
-
-        /// <summary>
         /// Thời gian làm lại bài còn lại
         /// </summary>
         public double RetryWorkingTime { get; set; }
@@ -33,7 +27,6 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public bool IsWorking { get; set; }
 
-        public int? HighestStreak { get; set; }
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }
 }

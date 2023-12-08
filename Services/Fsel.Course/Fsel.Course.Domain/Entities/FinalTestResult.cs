@@ -2,16 +2,12 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    using Fsel.Course.Domain.IEntities;
-
-    public class FinalTestResult : BaseResultScore, IHighestStreak, IWorkingTime
+    public class FinalTestResult : BaseLearnResult
     {
         public FinalTest? FinalTest { get; set; }
         public Guid FinalTestId { get; set; }
         public Course? Course { get; set; }
         public Guid CourseId { get; set; }
-        public int? HighestStreak { get; set; }
-        public double WorkingTime { get; set; }
         public ICollection<FinalTestAnswer> FinalTestAnswers { get; set; } = new List<FinalTestAnswer>();
         public ICollection<SectionGroupResult> SectionGroupResults { get; set; } = new List<SectionGroupResult>();
     }
