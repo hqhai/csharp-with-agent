@@ -84,10 +84,9 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            var studentId = student?.Id;
+            var studentId = student?.Id ?? request.StudentId;
             if (student == null && request.StudentId.HasValue)
             {
-                studentId = request.StudentId;
                 var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId.Value });
                 if (!studentResults.IsSuccessStatusCode)
                 {
@@ -96,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
                 }
                 student = studentResults.Content?.Result?.FirstOrDefault();
             }
-            else
+            if (student == null)
             {
                 return methodResult;
             }
