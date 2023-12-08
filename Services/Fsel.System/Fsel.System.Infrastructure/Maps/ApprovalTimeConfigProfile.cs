@@ -7,14 +7,13 @@ namespace Fsel.System.Infrastructure.Maps
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Models.CommandModels.ApprovalTimeConfigs;
     using Fsel.System.Domain.Models.EntityModels;
-    using global::System.Collections.Generic;
-
     public class ApprovalTimeConfigProfile : Profile
     {
         public ApprovalTimeConfigProfile()
         {
             CreateMap<ApprovalTimeConfig, ApprovalTimeConfigModel>().IgnoreAllNonExisting();
-            CreateMap<IList<ApprovalTimeConfig>, ApprovalTimeConfigCommandModel>().IgnoreAllNonExisting();
+            CreateMap<ApprovalTimeConfigCommandModel, ApprovalTimeConfig>();
+
         }
     }
 }

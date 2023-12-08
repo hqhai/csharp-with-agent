@@ -32,42 +32,26 @@ namespace Fsel.System.Application.Commands.ApprovalTimeConfigCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
+            #region Validate
             if (request.ApprovalTimeConfigs == null || request.ApprovalTimeConfigs.Count == 0)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.Result = false;
                 return methodResult;
             }
+            #endregion
 
-            var requestApprovalTimeConfigTypes = request.ApprovalTimeConfigs.Select(x => x.ApprovalTimeType).ToList();
-
-            // Lấy danh sách các ApprovalTimeConfig cần cập nhật thông tin từ request
-            var updateApprovalTimeConfigs = _approveTimeConfigRepository.Queryable
-                .Where(x => requestApprovalTimeConfigTypes.Contains(x.ApprovalTimeType))
-                .ToList();
-
-            // Lấy danh sách các ApprovalTimeConfig từ request nhưng không có trong DB
-            var newApprovalTimeConfigs = request.ApprovalTimeConfigs
-                .Where(x => !updateApprovalTimeConfigs.Any(y => y.ApprovalTimeType == x.ApprovalTimeType))
-                .ToList();
-
-            IList<ApprovalTimeConfig> ac = new List<ApprovalTimeConfig>();
-            var updateList = _mapper.Map<CreateApprovalTimeCommandModel, IList<ApprovalTimeConfig>>(request, ac);
-
-            List<ApprovalTimeConfig> newListApprovalTime = new List<ApprovalTimeConfig>();
-            foreach (var item in newApprovalTimeConfigs)
-            {
-                ApprovalTimeConfig newAppovalTimeConfig = _mapper.Map<ApprovalTimeConfig>(item);
-                newListApprovalTime.Add(newAppovalTimeConfig);
-            }
+            #region Mapper
+            var (updateApprovalTimeConfigs, newListApprovalTimeConfigs) = MapApprovalTimeConfigs(request);
+            #endregion
 
             await _approveTimeConfigRepository.ExecuteTransactionAsync(async () =>
             {
                 //add new
-                await _approveTimeConfigRepository.AddList(newListApprovalTime);
+                await _approveTimeConfigRepository.AddList(newListApprovalTimeConfigs);
 
                 //update 
-                _approveTimeConfigRepository.UpdateList(updateList);
+                _approveTimeConfigRepository.UpdateList(updateApprovalTimeConfigs);
 
                 //save
                 await _approveTimeConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -79,6 +63,37 @@ namespace Fsel.System.Application.Commands.ApprovalTimeConfigCmd
             });
 
             return methodResult;
+        }
+
+
+        private (List<ApprovalTimeConfig> updateApprovalTime, List<ApprovalTimeConfig> newListApprovalTime) MapApprovalTimeConfigs(CreateApprovalTimeConfigCommand request)
+        {
+            var requestApprovalTimeConfigTypes = request.ApprovalTimeConfigs!.Select(x => x.ApprovalTimeType).ToList();
+
+            // Lấy danh sách các ApprovalTimeConfig cần cập nhật thông tin từ request
+            var updateApprovalTimeConfigs = _approveTimeConfigRepository.Queryable
+                .Where(x => requestApprovalTimeConfigTypes.Contains(x.ApprovalTimeType))
+                .ToList();
+
+            updateApprovalTimeConfigs.ForEach(updateConfig =>
+            {
+                var correspondingRequestItem = request.ApprovalTimeConfigs!
+                    .FirstOrDefault(x => x.ApprovalTimeType == updateConfig.ApprovalTimeType);
+
+                if (correspondingRequestItem != null)
+                {
+                    updateConfig.ExpiredTime = correspondingRequestItem.ExpiredTime;
+                }
+            });
+
+            // Lấy danh sách các ApprovalTimeConfig từ request nhưng không có trong DB
+            var newApprovalTimes = request.ApprovalTimeConfigs!
+                .Where(x => !updateApprovalTimeConfigs.Any(y => y.ApprovalTimeType == x.ApprovalTimeType))
+                .ToList();
+
+            List<ApprovalTimeConfig> newApprovalTimeConfigs = _mapper.Map<List<ApprovalTimeConfig>>(newApprovalTimes);
+
+            return (updateApprovalTimeConfigs, newApprovalTimeConfigs);
         }
     }
 }
