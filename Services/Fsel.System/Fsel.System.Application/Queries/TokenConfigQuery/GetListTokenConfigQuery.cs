@@ -4,15 +4,10 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
-    using Fsel.Shared.Constants;
-    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System;
     using global::System.Collections.Generic;
-    using global::System.Linq;
-    using global::System.Text;
     using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -37,10 +32,8 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<TokenConfigModel>>();
 
-            //var token = await _tokenConfigRepository.Queryable.ToListAsync(cancellationToken);
+            var tokenConfigs = await _tokenConfigRepository.Queryable.ToListAsync(cancellationToken);
 
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TokenConfig);
-            var tokenConfigs = ConvertHelper.DeserializeFromFilePath<IList<TokenConfig>>(path);
             methodResult.Result = _mapper.Map<IList<TokenConfigModel>>(tokenConfigs);
             return methodResult;
         }
