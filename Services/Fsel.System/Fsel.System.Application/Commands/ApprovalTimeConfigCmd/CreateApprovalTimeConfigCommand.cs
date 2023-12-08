@@ -68,17 +68,17 @@ namespace Fsel.System.Application.Commands.ApprovalTimeConfigCmd
 
         private (List<ApprovalTimeConfig> updateApprovalTime, List<ApprovalTimeConfig> newListApprovalTime) MapApprovalTimeConfigs(CreateApprovalTimeConfigCommand request)
         {
-            var requestApprovalTimeConfigTypes = request.ApprovalTimeConfigs!.Select(x => x.ApprovalTimeType).ToList();
+            var requestApprovalTimeConfigTypes = request.ApprovalTimeConfigs!.Select(x => x.ApprovalType).ToList();
 
             // Lấy danh sách các ApprovalTimeConfig cần cập nhật thông tin từ request
             var updateApprovalTimeConfigs = _approveTimeConfigRepository.Queryable
-                .Where(x => requestApprovalTimeConfigTypes.Contains(x.ApprovalTimeType))
+                .Where(x => requestApprovalTimeConfigTypes.Contains(x.ApprovalType))
                 .ToList();
 
             updateApprovalTimeConfigs.ForEach(updateConfig =>
             {
                 var correspondingRequestItem = request.ApprovalTimeConfigs!
-                    .FirstOrDefault(x => x.ApprovalTimeType == updateConfig.ApprovalTimeType);
+                    .FirstOrDefault(x => x.ApprovalType == updateConfig.ApprovalType);
 
                 if (correspondingRequestItem != null)
                 {
@@ -88,7 +88,7 @@ namespace Fsel.System.Application.Commands.ApprovalTimeConfigCmd
 
             // Lấy danh sách các ApprovalTimeConfig từ request nhưng không có trong DB
             var newApprovalTimes = request.ApprovalTimeConfigs!
-                .Where(x => !updateApprovalTimeConfigs.Any(y => y.ApprovalTimeType == x.ApprovalTimeType))
+                .Where(x => !updateApprovalTimeConfigs.Any(y => y.ApprovalType == x.ApprovalType))
                 .ToList();
 
             List<ApprovalTimeConfig> newApprovalTimeConfigs = _mapper.Map<List<ApprovalTimeConfig>>(newApprovalTimes);

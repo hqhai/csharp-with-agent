@@ -41,7 +41,7 @@ namespace Fsel.System.Application.Queries.ApprovalTimeConfigQuery
                                     {
                                         Id = x.Id,
                                         ExpiredTime = x.ExpiredTime,
-                                        ApprovalTimeType = x.ApprovalTimeType,
+                                        ApprovalTimeType = x.ApprovalType,
                                         CreatedDate = x.CreatedDate,
                                         CreatedFullName = x.CreatedFullName,
                                         CreatedUserId = x.CreatedUserId,

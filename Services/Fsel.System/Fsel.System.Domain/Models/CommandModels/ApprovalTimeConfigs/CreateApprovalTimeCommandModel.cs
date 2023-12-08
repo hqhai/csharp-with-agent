@@ -10,7 +10,7 @@ namespace Fsel.System.Domain.Models.CommandModels.ApprovalTimeConfigs
 
     public class ApprovalTimeConfigCommandModel
     {
-        public EnumApprovalTime ApprovalTimeType { get; set; }
+        public EnumApprovalTime ApprovalType { get; set; }
 
         public long ExpiredTime { get; set; }
     }

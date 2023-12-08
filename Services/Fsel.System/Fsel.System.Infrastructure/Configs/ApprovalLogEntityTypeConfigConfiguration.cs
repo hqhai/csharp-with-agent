@@ -9,16 +9,21 @@ namespace Fsel.System.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class ApprovalTimeEntityTypeConfigConfiguration : IEntityTypeConfiguration<ApprovalTimeConfig>
+    public class ApprovalLogEntityTypeConfigConfiguration : IEntityTypeConfiguration<ApprovalLog>
     {
-        public void Configure(EntityTypeBuilder<ApprovalTimeConfig> builder)
+        public void Configure(EntityTypeBuilder<ApprovalLog> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Property(e => e.ApprovalType)
+            builder.Property(e => e.Status)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumApprovalTime>());
+                    v => v.EnumParse<EnumApprovalLogStatus>());
+
+            builder.HasOne(a => a.ApprovalTimeConfig)
+                   .WithMany(b => b.ApprovalLogs)
+                   .HasForeignKey(b => b.ApprovalTimeConfigId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
