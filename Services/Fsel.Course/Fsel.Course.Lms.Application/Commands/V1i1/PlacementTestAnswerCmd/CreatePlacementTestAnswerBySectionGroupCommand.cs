@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
 {
+    using System.Globalization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -14,27 +15,35 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreatePlacementTestAnswerBySectionGroupCommand : CreatePlacementTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
+    public class CreatePlacementTestAnswerBySectionGroupCommand : CreatePlacementTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<PlacementTestResultModel>>
     {
     }
 
-    public class CreatePlacementTestAnswerBySectionGroupCommandHandler : IRequestHandler<CreatePlacementTestAnswerBySectionGroupCommand, MethodResult<SectionGroupResultModel>>
+    public class CreatePlacementTestAnswerBySectionGroupCommandHandler : IRequestHandler<CreatePlacementTestAnswerBySectionGroupCommand, MethodResult<PlacementTestResultModel>>
     {
         private readonly IQuestionRepository _questionRepository;
         private readonly AuthContext _authContext;
         private readonly QuestionConverter _questionConverter;
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IUserService _userService;
+        private readonly IMediator _mediator;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
 
         public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
@@ -42,10 +51,12 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
             , QuestionConverter questionConverter
             , SectionGroupConverter sectionGroupConverter
             , IUserService userService
+            , IMediator mediator
             , IPlacementTestResultRepository placementTestResultRepository
             , IPlacementTestAnswerRepository placementTestAnswerRepository
             , ISectionGroupResultRepository sectionGroupResultRepository
             , ISectionGroupRepository sectionGroupRepository
+            , IPlacementTestRepository placementTestRepository
             , IMapper mapper)
         {
             _questionRepository = questionRepository;
@@ -53,25 +64,44 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
             _questionConverter = questionConverter;
             _sectionGroupConverter = sectionGroupConverter;
             _userService = userService;
+            _mediator = mediator;
             _placementTestResultRepository = placementTestResultRepository;
             _placementTestAnswerRepository = placementTestAnswerRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _sectionGroupRepository = sectionGroupRepository;
+            _placementTestRepository = placementTestRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<SectionGroupResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PlacementTestResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<SectionGroupResultModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
+            var methodResult = new MethodResult<PlacementTestResultModel>();
+            StudentModel? student;
+            if (request.StudentId.HasValue)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId.Value });
+                if (!studentResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                    return methodResult;
+                }
+                student = studentResults.Content?.Result?.FirstOrDefault();
+            }
+            else
+            {
+                var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                if (!studentResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                    return methodResult;
+                }
+                student = studentResult.Content?.Result;
+            }
+            if (student == null)
+            {
                 return methodResult;
             }
-            var student = studentResult?.Content?.Result;
-            var studentId = student?.Id ?? request.StudentId ?? default;
 
             #region Validate
 
@@ -86,13 +116,19 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestDone), nameof(placementTestResult.Status));
                 return methodResult;
             }
+            var placementTest = await _placementTestRepository.GetByIdAsync(placementTestResult.PlacementTestId ?? default);
+            if (placementTest == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTest));
+                return methodResult;
+            }
             var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
             if (sectionGroup == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.StudentId == studentId && x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == placementTestResult.Id).FirstOrDefaultAsync(cancellationToken);
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == placementTestResult.Id).FirstOrDefaultAsync(cancellationToken);
             if (sectionGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResult));
@@ -124,23 +160,61 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
                     sectionGroupResult = await UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
                 return methodResult;
             });
 
-            await UpdatePlacementTestResultAsync(placementTestResult, cancellationToken);
+            await UpdatePlacementTestResultAsync(placementTestResult, placementTest, student, cancellationToken);
+
+            methodResult.Result = _mapper.Map<PlacementTestResultModel>(placementTestResult);
             return methodResult;
         }
 
-        private async Task UpdatePlacementTestResultAsync(PlacementTestResult placementTestResult, CancellationToken cancellationToken)
+        private async Task UpdatePlacementTestResultAsync(PlacementTestResult placementTestResult, PlacementTest placementTest, StudentModel? student, CancellationToken cancellationToken)
         {
+            if (student == null)
+            {
+                return;
+            }
             var numberOfDone = 4;
+
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.PlacementTestResultId == placementTestResult.Id).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
+                int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                var (currentLevel, isLockPT) = placementTest.Level.GetLevelInScore(placementTestResult.Percent, age);
+                if (currentLevel.HasValue)
+                {
+                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
+                    {
+                        Id = _authContext.CurrentUserId,
+                        Level = currentLevel.Value
+                    }).ConfigureAwait(false);
+                }
                 placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
                 _placementTestResultRepository.Update(placementTestResult);
-                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
+
+                if (isLockPT)
+                {
+                    await SendStudentPlacementTest(student, placementTestResult);
+                }
+            }
+        }
+
+        private async Task SendStudentPlacementTest(StudentModel student, PlacementTestResult placementTestResult)
+        {
+            var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id).ToListAsync();
+            var param = new SendStudentPTTemplateModel
+            {
+                StudentName = student.Human?.FullName,
+                CourseLevel = placementTestResult.Level,
+                Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {Math.Round(x.Percent, MidpointRounding.AwayFromZero)} %")),
+            };
+            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
+            var sendResult = new MethodResult<bool>();
+            if (!string.IsNullOrEmpty(student.Human?.Email))
+            {
+                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }).ConfigureAwait(false);
             }
         }
 
