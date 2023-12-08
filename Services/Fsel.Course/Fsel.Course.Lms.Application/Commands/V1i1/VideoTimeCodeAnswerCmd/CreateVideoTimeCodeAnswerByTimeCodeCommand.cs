@@ -77,6 +77,18 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd
             var (videoResult, videoTimeCode, videoTimeCodeResult) = method.Result;
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
+                if (videoTimeCodeResult.Status == EnumResultStatus.New && request.IsSubmit)
+                {
+                    if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+                    {
+                        videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
+                    }
+                    else
+                    {
+                        videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
+                    }
+                }
+
                 await UpdateVideoTimeCodeResult(videoTimeCode, videoTimeCodeResult, request.IsSubmit, cancellationToken).ConfigureAwait(false);
                 _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -147,11 +159,11 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd
                         VideoTimeCodeResultId = videoTimeCodeResult.Id,
                         VideoResultId = videoTimeCodeResult.VideoResultId,
                     };
-                    videoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit));
+                    videoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit, videoTimeCodeResult.Status));
                 }
                 else if (answer.Status != EnumAnswerStatus.Done)
                 {
-                    updateVideoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit));
+                    updateVideoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit, videoTimeCodeResult.Status));
                 }
             }
             if (videoTimeCodeAnswers.Any())
@@ -167,12 +179,20 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd
             return methodResult;
         }
 
-        private static VideoTimeCodeAnswer GetVideoTimeCodeAnswer(VideoTimeCodeAnswer answer, Question question, int correctCount, object? answerConfig, bool isSubmit)
+        private static VideoTimeCodeAnswer GetVideoTimeCodeAnswer(VideoTimeCodeAnswer answer, Question question, int correctCount, object? answerConfig, bool isSubmit, EnumResultStatus status)
         {
             answer.Answer = answerConfig;
             answer.CorrectCount = question.Ungraded ? default : correctCount;
             answer.Status = GetAnswerStatus(isSubmit, correctCount, question.CorrectTotal);
-            answer.IsCorrect = GetAnswerStatus(isSubmit, correctCount, question.CorrectTotal) == EnumAnswerStatus.Done;
+            answer.IsCorrect = answer.Status == EnumAnswerStatus.Done;
+            if (status == EnumResultStatus.New)
+            {
+                answer.IsFirstSubmit = true;
+            }
+            else
+            {
+                answer.IsFirstSubmit = false;
+            }
             return answer;
         }
 

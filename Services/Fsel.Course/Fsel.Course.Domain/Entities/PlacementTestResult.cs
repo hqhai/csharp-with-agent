@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Entities
 {
     using Fsel.Shared.Enums;
 
-    public class PlacementTestResult : BaseResultScore
+    public class PlacementTestResult : BaseScoreResult
     {
         public double TotalQuestion { get; set; }
         public double CountQuestion { get; set; }

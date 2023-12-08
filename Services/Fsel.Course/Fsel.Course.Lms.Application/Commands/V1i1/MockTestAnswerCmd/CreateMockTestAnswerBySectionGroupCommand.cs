@@ -35,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.MockTestAnswerCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly QuestionConverter _questionConverter;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -48,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.MockTestAnswerCmd
         public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
             , AuthContext authContext
             , IUserService userService
+            , DateTimeConverter dateTimeConverter
             , QuestionConverter questionConverter
             , IMockTestAnswerRepository mockTestAnswerRepository
             , IMockTestResultRepository mockTestResultRepository
@@ -61,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.MockTestAnswerCmd
             _questionRepository = questionRepository;
             _authContext = authContext;
             _userService = userService;
+            _dateTimeConverter = dateTimeConverter;
             _questionConverter = questionConverter;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -132,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.MockTestAnswerCmd
                 if (request.IsSubmit)
                 {
                     await _sectionGroupConverter.UpdateMockTestAnswers(sectionGroup, sectionGroupResult);
-                    sectionGroupResult = await UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
+                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, true, cancellationToken);
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
@@ -157,6 +160,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.MockTestAnswerCmd
                 if (sectionGroupResult != null && sectionGroupResult.Status == EnumResultStatus.Done)
                 {
                     mockTestResult = GetMockTestResult(sectionGroupResult.SkillScores, mockTestResult);
+                    mockTestResult.WorkingTime = sectionGroupResult.WorkingTime;
                 }
             }
             else
@@ -165,6 +169,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.MockTestAnswerCmd
                 if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
                 {
                     mockTestResult = GetMockTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), mockTestResult);
+                    mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                 }
             }
 
@@ -180,49 +185,6 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.MockTestAnswerCmd
             mockTestResult.Status = EnumResultStatus.Done;
             mockTestResult.SkillScores = skillScores;
             return mockTestResult;
-        }
-
-        private async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
-        {
-            var skillScore = await GetSkillScores(sectionGroupResult, sectionGroup, cancellationToken);
-            sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
-            sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
-            sectionGroupResult.Status = EnumResultStatus.Done;
-            if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
-            {
-                sectionGroupResult.SkillScores.Add(skillScore);
-            }
-            else
-            {
-                sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
-            }
-            _sectionGroupResultRepository.Update(sectionGroupResult);
-            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            return sectionGroupResult;
-        }
-
-        private async Task<SkillScores> GetSkillScores(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
-        {
-            var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.MockTestResultId == sectionGroupResult.MockTestResultId).ToListAsync(cancellationToken);
-            var skillScore = new SkillScores();
-            var maxTotalCorrect = 36;
-            if (sectionGroup.CourseSkill == EnumCourseSkill.Listening || sectionGroup.CourseSkill == EnumCourseSkill.Reading)
-            {
-                var questionIds = mockTestAnswers.Select(x => x.SectionQuestion).Select(x => x.QuestionId).ToList();
-                var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
-                skillScore = _sectionGroupConverter.GetSkillScore(sectionGroup, mockTestAnswers.Sum(x => x.CorrectCount), mockTestAnswers.Count, totalCorrect, questionIds.Count);
-            }
-            else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
-            {
-                var sectionIds = mockTestAnswers.Select(x => x.SectionId).ToList();
-                skillScore = _sectionGroupConverter.GetSkillScore(sectionGroup, mockTestAnswers.Sum(x => x.CorrectCount), mockTestAnswers.Count, maxTotalCorrect, sectionIds.Count);
-            }
-            else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
-            {
-                var sectionTimeCodeIds = mockTestAnswers.Select(x => x.SectionTimeCodeId).ToList();
-                skillScore = _sectionGroupConverter.GetSkillScore(sectionGroup, mockTestAnswers.Sum(x => x.CorrectCount), mockTestAnswers.Count, maxTotalCorrect, sectionTimeCodeIds.Count);
-            }
-            return skillScore;
         }
 
         private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswerAsync(CreateMockTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, Guid sectionGroupResultId)

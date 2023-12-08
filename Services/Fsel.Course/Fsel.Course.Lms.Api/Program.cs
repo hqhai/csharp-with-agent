@@ -110,6 +110,9 @@ builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
 
+// Helper
+builder.Services.AddScoped<LinQHelper>();
+
 // Publisher
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();
 builder.Services.AddScoped<FinishOneHomeWorkPublisher>();
