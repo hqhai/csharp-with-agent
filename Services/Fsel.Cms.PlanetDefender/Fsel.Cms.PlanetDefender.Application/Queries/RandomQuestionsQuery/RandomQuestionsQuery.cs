@@ -117,6 +117,11 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
 
             var questionTime = await _gameplayTimeConfigRepository.Queryable.Where(p => p.RoundNumber == request.RoundNumber).ToListAsync(cancellationToken);
 
+            if (questionTime.Count == 0)
+            {
+                questionTime = await _gameplayTimeConfigRepository.Queryable.OrderByDescending(p => p.RoundNumber).Take(5).ToListAsync(cancellationToken);
+            }
+
             var gameVocabularyTypeModel = new List<GameVocabularyTypeModel>();
             int count = 0;
             while (count < 100)
@@ -125,11 +130,11 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
 
                 gameVocabularyTypeModel = new List<GameVocabularyTypeModel>();
 
-                GetQuestion(questionTime, request.RoundNumber, questionRule, gameVocabularyTypeModel, gameVocabularyType, EnumGameVocabType.Hint, EnumGameVocabPDType.Hint);
-                GetQuestion(questionTime, request.RoundNumber, questionRule, gameVocabularyTypeModel, gameVocabularyType, EnumGameVocabType.Audio, EnumGameVocabPDType.Audio);
-                GetQuestion(questionTime, request.RoundNumber, questionRule, gameVocabularyTypeModel, gameVocabularyType, EnumGameVocabType.Image, EnumGameVocabPDType.Image);
-                GetQuestion(questionTime, request.RoundNumber, questionRule, gameVocabularyTypeModel, gameVocabularyType, EnumGameVocabType.Definition, EnumGameVocabPDType.Definition);
-                GetQuestion(questionTime, request.RoundNumber, questionRule, gameVocabularyTypeModel, gameVocabularyType, EnumGameVocabType.JumbledSpelling, EnumGameVocabPDType.JumbledSpelling);
+                GetQuestion(questionTime, questionRule, gameVocabularyTypeModel, gameVocabularyType, EnumGameVocabType.Hint, EnumGameVocabPDType.Hint);
+                GetQuestion(questionTime, questionRule, gameVocabularyTypeModel, gameVocabularyType, EnumGameVocabType.Audio, EnumGameVocabPDType.Audio);
+                GetQuestion(questionTime, questionRule, gameVocabularyTypeModel, gameVocabularyType, EnumGameVocabType.Image, EnumGameVocabPDType.Image);
+                GetQuestion(questionTime, questionRule, gameVocabularyTypeModel, gameVocabularyType, EnumGameVocabType.Definition, EnumGameVocabPDType.Definition);
+                GetQuestion(questionTime, questionRule, gameVocabularyTypeModel, gameVocabularyType, EnumGameVocabType.JumbledSpelling, EnumGameVocabPDType.JumbledSpelling);
 
                 if (gameVocabularyTypeModel.Count == (questionRule.CurrentUnitOutside + questionRule.CurrentUnit + questionRule.PreviousUnit + questionRule.PreviousUnitOutside))
                 {
@@ -149,9 +154,9 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
             return methodResult;
         }
 
-        private static void GetQuestion(List<GameplayTimeConfig> questionTime, int roundNumber, GameplayRuleConfig questionRule, List<GameVocabularyTypeModel> gameVocabularyTypeModel, List<GameVocabularyTypeModel> gameVocabularyType, EnumGameVocabType gameVocabType, EnumGameVocabPDType gameVocabPDType)
+        private static void GetQuestion(List<GameplayTimeConfig> questionTime, GameplayRuleConfig questionRule, List<GameVocabularyTypeModel> gameVocabularyTypeModel, List<GameVocabularyTypeModel> gameVocabularyType, EnumGameVocabType gameVocabType, EnumGameVocabPDType gameVocabPDType)
         {
-            var type = questionTime.First(p => p.GameVocabPDType == gameVocabPDType && p.RoundNumber == roundNumber).Percent;
+            var type = questionTime.First(p => p.GameVocabPDType == gameVocabPDType).Percent;
 
             var countQuestionType = (int)Math.Round((type * (questionRule.CurrentUnit + questionRule.CurrentUnitOutside + questionRule.PreviousUnit + questionRule.PreviousUnitOutside)) / 100, MidpointRounding.AwayFromZero);
 
