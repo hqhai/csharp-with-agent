@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
 
-    public class ExtraPracticeResultModel : BaseResultScoreModel
+    public class ExtraPracticeResultModel : BaseScoreResultModel
     {
         public Guid ExtraPracticeId { get; set; }
     }

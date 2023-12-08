@@ -4,9 +4,8 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Infrastructure.Migrations;
     using Fsel.Course.Lms.Application.Commands.SectionGroupCmd;
-    using Fsel.Course.Lms.Application.Commands.VideoTimeCodeCmd;
+    using Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeCmd;
     using Fsel.Shared.Models.ShareModels;
     using MassTransit;
     using MediatR;

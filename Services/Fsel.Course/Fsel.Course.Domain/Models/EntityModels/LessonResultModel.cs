@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System;
     using System.Collections.Generic;
 
-    public class LessonResultModel : BaseResultScoreModel
+    public class LessonResultModel : BaseScoreResultModel
     {
         public string? SummaryNote { get; set; }
         public Guid CourseId { get; set; }

@@ -5,12 +5,11 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd;
+    using Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
     [Asp.Versioning.ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/video")]

@@ -1,11 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeCmd
+namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeCmd
 {
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerV1i1Cmd;
+    using Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -29,10 +29,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeCmd
         public async Task<MethodResult<bool>> Handle(UpdateVideoTimeCodeByResultIdCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode).Where(x => x.Id == request.ObjectResultId).FirstOrDefaultAsync(cancellationToken);
             var videoTimeCode = videoTimeCodeResult?.VideoTimeCode;
-            if ((videoTimeCodeResult == null || videoTimeCode == null) || videoTimeCodeResult.Status == EnumResultStatus.Done)
+            if (videoTimeCodeResult == null || videoTimeCode == null || videoTimeCodeResult.Status == EnumResultStatus.Done)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;

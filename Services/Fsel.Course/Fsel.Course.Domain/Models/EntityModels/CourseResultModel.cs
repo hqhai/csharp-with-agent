@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System;
     using Fsel.Shared.Enums;
 
-    public class CourseResultModel : BaseResultScoreModel
+    public class CourseResultModel : BaseScoreResultModel
     {
         public DateTime? CreatedDate { get; set; }
         public EnumCourseType? CourseType { get; set; }

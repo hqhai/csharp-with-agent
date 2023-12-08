@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
 
-    public class VideoTimeCodeResult : BaseResultScore
+    public class VideoTimeCodeResult : BaseLearnResult
     {
         public VideoResult? VideoResult { get; set; }
 
@@ -16,11 +16,6 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid VideoTimeCodeId { get; set; }
-
-        /// <summary>
-        /// Thời gian còn lại
-        /// </summary>
-        public double WorkingTime { get; set; }
 
         /// <summary>
         /// Thời gian làm lại bài còn lại

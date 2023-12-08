@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Enums
+namespace Fsel.Shared.Enums
 {
     using System.ComponentModel;
 
