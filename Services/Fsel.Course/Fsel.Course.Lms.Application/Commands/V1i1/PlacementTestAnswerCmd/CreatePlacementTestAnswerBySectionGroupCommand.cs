@@ -84,7 +84,22 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            var studentId = student?.Id ?? request.StudentId ?? default;
+            var studentId = student?.Id;
+            if (student == null && request.StudentId.HasValue)
+            {
+                studentId = request.StudentId;
+                var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId.Value });
+                if (!studentResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                    return methodResult;
+                }
+                student = studentResults.Content?.Result?.FirstOrDefault();
+            }
+            else
+            {
+                return methodResult;
+            }
 
             #region Validate
 
