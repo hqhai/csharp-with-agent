@@ -90,6 +90,8 @@ namespace Fsel.System.Infrastructure
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TokenConfig);
             var tokenConfigs = ConvertHelper.DeserializeFromFilePath<IList<TokenConfig>>(path);
+            Console.WriteLine(path.Serialize());
+            Console.WriteLine(tokenConfigs.Serialize());
             ArgumentNullException.ThrowIfNull(tokenConfigs);
             builder.Entity<TokenConfig>().HasData(tokenConfigs);
         }

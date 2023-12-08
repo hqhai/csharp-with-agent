@@ -5,49 +5,49 @@
     "feature": "ForcusMode",
     "mission": "FocusTime",
     "config": {
-      "token": [
+      "FocusTimes": [
         {
-          "number": "1",
+          "number": 1,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "number": "3",
+          "number": 3,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "number": "6",
+          "number": 6,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "number": "12",
+          "number": 12,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "number": "24",
+          "number": 24,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         }
       ]
     },
-    "SuperConfig": {
+    "superConfig": {
       "token": [
         {
-          "number": "2",
+          "number": 2,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "number": "6",
+          "number": 6,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "number": "12",
+          "number": 12,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "number": "24",
+          "number": 24,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "number": "48",
+          "number": 48,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         }
       ]
@@ -60,19 +60,19 @@
     "mission": "DailyCheckin",
     "config": [
       {
-        "number": "5",
-        "level": "3"
+        "level": 1,
+        "number": 5
       },
       {
-        "number": "20",
-        "level": "15"
+        "level": 2,
+        "number": 20
       },
       {
-        "number": "40",
-        "level": "30-31"
+        "level": 3,
+        "number": 40
       }
     ],
-    "SuperConfig": null
+    "superConfig": []
   },
   {
     "id": "d8c548b3-17e9-4899-90a2-6ebe8fb5ef3c",
@@ -80,10 +80,10 @@
     "feature": "TimeCode",
     "mission": "TimeCodeSubmit",
     "config": {
-      "number": "1"
+      "number": 1
     },
-    "SuperConfig": {
-      "number": "2"
+    "superConfig": {
+      "number": 2
     }
   },
   {
@@ -92,10 +92,10 @@
     "feature": "Test",
     "mission": "HighestStreak",
     "config": {
-      "number": "1"
+      "number": 1
     },
-    "SuperConfig": {
-      "number": "2"
+    "superConfig": {
+      "number": 2
     }
   },
   {
@@ -104,13 +104,15 @@
     "feature": "TimeCode",
     "mission": "SuperFireMode",
     "config": {
-      "number": "0"
+      "TimeCode": 0,
+      "Test": 0,
+      "MockTest": 0
     },
-    "SuperConfig": [
+    "superConfig": [
       {
-        "TimeCode": "1",
-        "Test": "4",
-        "FinalTest/MockTest": "10"
+        "TimeCode": 1,
+        "Test": 4,
+        "MockTest": 10
       }
     ]
   },
@@ -120,12 +122,12 @@
     "feature": "Test",
     "mission": "TestComplete",
     "config": {
-      "unitTest/skillTest/skillMockTest": "10",
-      "finalTest/FullMockTest": "40"
+      "test": 10,
+      "mockTest": 40
     },
-    "SuperConfig": {
-      "unitTest/skillTest/skillMockTest": "15",
-      "finalTest/FullMockTest": "60"
+    "superConfig": {
+      "test": 15,
+      "mockTest": 60
     }
   },
   {
@@ -134,12 +136,12 @@
     "feature": "QuestBoard",
     "mission": "QuestBoard",
     "config": {
-      "dailyQuest": "1",
-      "mainQuest": "10",
-      "sideQuest": "5",
-      "permium": "10"
+      "dailyQuest": 1,
+      "mainQuest": 10,
+      "sideQuest": 5,
+      "permium": 10
     },
-    "SuperConfig": null
+    "superConfig": []
   },
   {
     "id": "b4732b98-4ee3-4ae6-a51b-317908973282",
@@ -147,24 +149,42 @@
     "feature": "Achievement",
     "mission": "CompleteAchievement",
     "config": {
-      "number": "10"
+      "number": 10
     },
-    "SuperConfig": null
+    "superConfig": []
   },
   {
     "id": "0b750040-7d3a-41d2-827a-935599f0db2e",
     "createdDate": "2023-07-21",
     "feature": "Achievement",
     "mission": "CompletePhaseAchievement",
-    "config": {
-      "phase 1": "10",
-      "phase 2": "20",
-      "phase 3": "30",
-      "phase 4": "40",
-      "phase 5": "50",
-      "phase 6": "60"
-    },
-    "SuperConfig": null
+    "config": [
+      {
+        "id": 1,
+        "number": 10
+      },
+      {
+        "id": 2,
+        "number": 20
+      },
+      {
+        "id": 3,
+        "number": 30
+      },
+      {
+        "id": 4,
+        "number": 40
+      },
+      {
+        "id": 5,
+        "number": 50
+      },
+      {
+        "id": 6,
+        "number": 60
+      }
+    ],
+    "superConfig": []
   },
   {
     "id": "fca942b7-b3bb-4ad2-8035-4471f28c56af",
@@ -172,19 +192,10 @@
     "feature": "Price",
     "mission": "BuyCourseStandad",
     "config": {
-      "number": "50"
+      "numberStandard": 50,
+      "numberPremium": 100
     },
-    "SuperConfig": null
-  },
-  {
-    "id": "fca942b7-b3bb-4ad2-8035-4471f28c56af",
-    "createdDate": "2023-07-21",
-    "feature": "Price",
-    "mission": "BuyCoursePremium",
-    "config": {
-      "number": "100"
-    },
-    "SuperConfig": null
+    "superConfig": []
   },
   {
     "id": "7b0dae34-5312-46b1-907e-a8499a532d09",
@@ -192,9 +203,9 @@
     "feature": "Price",
     "mission": "UpgradeCourse",
     "config": {
-      "Token": "50"
+      "number": 50
     },
-    "SuperConfig": null
+    "superConfig": []
   },
   {
     "id": "5fd4a7a7-68cf-4d44-89c9-bb6850242eda",
@@ -202,9 +213,9 @@
     "feature": "ReviewSystem",
     "mission": "ReviewFSEL",
     "config": {
-      "Token": "10"
+      "number": 10
     },
-    "SuperConfig": null
+    "superConfig": []
   },
   {
     "id": "2a4585ad-7155-47f8-a985-f06e32cd02b7",
@@ -212,12 +223,12 @@
     "feature": "Test",
     "mission": "TestDone",
     "config": {
-      "unitTest/skillTest/skillMockTest": "10",
-      "finalTest/FullMockTest": "40"
+      "test": 10,
+      "mockTest": 40
     },
-    "SuperConfig": {
-      "unitTest/skillTest/skillMockTest": "15",
-      "finalTest/FullMockTest": "60"
+    "superConfig": {
+      "test": 15,
+      "mockTest": 60
     }
   },
   {
@@ -226,12 +237,10 @@
     "feature": "Test",
     "mission": "HighestStreak",
     "config": {
-      "streak": "2",
-      "number": "1"
+      "number": 1
     },
-    "SuperConfig": {
-      "streak": "2",
-      "number": "2"
+    "superConfig": {
+      "number": 2
     }
   },
   {
@@ -240,11 +249,12 @@
     "feature": "Test",
     "mission": "SuperFireMode",
     "config": {
-      "number": "0"
+      "test": 4,
+      "mockTest": 10
     },
-    "SuperConfig": {
-      "unitTest/skillTest/skillMockTest": "4",
-      "finalTest/mockTest": "10"
+    "superConfig": {
+      "test": 4,
+      "mockTest": 10
     }
   },
   {
@@ -253,12 +263,12 @@
     "feature": "TimeCode",
     "mission": "QuestionReward",
     "config": {
-      "QuestionUngraded": "0",
-      "subQuestion": "1"
+      "QuestionUngraded": 0,
+      "subQuestion": 1
     },
-    "SuperConfig": {
-      "QuestionUngraded": "2",
-      "subQuestion": "1"
+    "superConfig": {
+      "QuestionUngraded": 0,
+      "subQuestion": 2
     }
   },
   {
@@ -267,10 +277,10 @@
     "feature": "TimeCode",
     "mission": "SuperFireMode",
     "config": {
-      "number": "0"
+      "number": 0
     },
-    "SuperConfig": {
-      "number": "1"
+    "superConfig": {
+      "number": 1
     }
   }
 ]

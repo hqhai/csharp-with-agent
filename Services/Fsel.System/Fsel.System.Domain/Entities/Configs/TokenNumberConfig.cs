@@ -21,13 +21,13 @@ namespace Fsel.System.Domain.Entities.Configs
         public int? Number { get; set; }
     }
 
-    public class QuestBoard
+    public class TokenQuestBoard
     {
         public int? Number { get; set; }
         public EnumQuestBoardType QuestBoardType { get; set; }
     }
 
-    public class Achievement
+    public class TokenAchievement
     {
         public int? Number { get; set; }
         public EnumAchievementType AchievementType { get; set; }
