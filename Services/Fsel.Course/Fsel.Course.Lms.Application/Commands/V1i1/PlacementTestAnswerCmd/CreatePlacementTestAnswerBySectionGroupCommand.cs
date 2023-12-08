@@ -77,15 +77,8 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<SectionGroupResultModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult?.Content?.Result;
-            var studentId = student?.Id ?? request.StudentId;
-            if (student == null && request.StudentId.HasValue)
+            StudentModel? student;
+            if (request.StudentId.HasValue)
             {
                 var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId.Value });
                 if (!studentResults.IsSuccessStatusCode)
@@ -94,6 +87,16 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
                     return methodResult;
                 }
                 student = studentResults.Content?.Result?.FirstOrDefault();
+            }
+            else
+            {
+                var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                if (!studentResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                    return methodResult;
+                }
+                student = studentResult.Content?.Result;
             }
             if (student == null)
             {
@@ -125,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.StudentId == studentId && x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == placementTestResult.Id).FirstOrDefaultAsync(cancellationToken);
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == placementTestResult.Id).FirstOrDefaultAsync(cancellationToken);
             if (sectionGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResult));
