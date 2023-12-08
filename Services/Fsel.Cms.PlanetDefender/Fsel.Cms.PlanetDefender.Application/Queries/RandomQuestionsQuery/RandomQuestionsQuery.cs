@@ -59,12 +59,15 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
                 var courseUnitResult = await _courseService.GetCourseUnitByUserId(_authContext.CurrentUserId);
                 if (!courseUnitResult.IsSuccessStatusCode || courseUnitResult.Content?.Result == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                    return methodResult;
+                    courseLevel = EnumGameCefrLevel.A1;
+                    unitNumber = 1;
                 }
-                var courseUnit = courseUnitResult.Content.Result;
-                courseLevel = (EnumGameCefrLevel)courseUnit.CourseLevel;
-                unitNumber = courseUnit.UnitNumber;
+                else
+                {
+                    var courseUnit = courseUnitResult.Content.Result;
+                    courseLevel = (EnumGameCefrLevel)courseUnit.CourseLevel;
+                    unitNumber = courseUnit.UnitNumber;
+                }
             }
             else if (role == EnumRole.Guest.ToString())
             {
@@ -151,9 +154,14 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
 
         private static void GetQuestion(List<GameplayTimeConfig> questionTime, int roundNumber, GameplayRuleConfig questionRule, List<GameVocabularyTypeModel> gameVocabularyTypeModel, List<GameVocabularyTypeModel> gameVocabularyType, EnumGameVocabType gameVocabType, EnumGameVocabPDType gameVocabPDType)
         {
-            var type = questionTime.First(p => p.GameVocabPDType == gameVocabPDType && p.RoundNumber == roundNumber).Percent;
+            var type = questionTime.FirstOrDefault(p => p.GameVocabPDType == gameVocabPDType && p.RoundNumber == roundNumber)?.Percent;
 
-            var countQuestionType = (int)Math.Round((type * (questionRule.CurrentUnit + questionRule.CurrentUnitOutside + questionRule.PreviousUnit + questionRule.PreviousUnitOutside)) / 100, MidpointRounding.AwayFromZero);
+            if (type == null)
+            {
+                type = questionTime.OrderByDescending(p => p.RoundNumber).First(p => p.GameVocabPDType == gameVocabPDType).Percent;
+            }
+
+            var countQuestionType = (int)Math.Round(((double)type * (questionRule.CurrentUnit + questionRule.CurrentUnitOutside + questionRule.PreviousUnit + questionRule.PreviousUnitOutside)) / 100, MidpointRounding.AwayFromZero);
 
             gameVocabularyTypeModel.AddRange(gameVocabularyType.Where(p => p.GameVocabType == gameVocabType).Take(countQuestionType));
 
@@ -203,7 +211,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
                 gameAnswerRepository.DeleteListAsync(deleteGameAnswers);
                 gameAnswerRepository.UnitOfWork.SaveChangesAsync();
 
-                GetPreviousQuestions(gameVocabularies, startLevel, unitStart, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
+                GetPreviousQuestions(gameVocabularies, startLevel, unitStart, null, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
             }
             else if (level == EnumGameCefrLevel.A1 && unitNumber == 1 && gameVocabulariesModel.Count >= (questionRule.CurrentUnit + questionRule.CurrentUnitOutside) && currentOutSideQuestions?.Count > 0)
             {
@@ -215,7 +223,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
                 gameAnswerRepository.DeleteListAsync(deleteGameAnswers);
                 gameAnswerRepository.UnitOfWork.SaveChangesAsync();
 
-                GetPreviousQuestions(gameVocabularies, startLevel, unitStart, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
+                GetPreviousQuestions(gameVocabularies, startLevel, unitStart, null, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
             }
             else
             {
