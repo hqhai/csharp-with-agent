@@ -49,24 +49,17 @@ namespace Fsel.Ordering.Infrastructure.Common
 
         public string CreateRequestUrl(string baseUrl, string vnpHashSecret)
         {
-            var data = new StringBuilder();
-            foreach (var kv in _requestData)
-            {
-                if (!string.IsNullOrEmpty(kv.Value))
-                {
-                    data.Append(WebUtility.UrlEncode(kv.Key) + "=" + WebUtility.UrlEncode(kv.Value) + "&");
-                }
-            }
-            string queryString = data.ToString();
+            var encodedPairs = _requestData
+    .Where(kv => !string.IsNullOrEmpty(kv.Value))
+    .Select(kv => $"{WebUtility.UrlEncode(kv.Key)}={WebUtility.UrlEncode(kv.Value)}");
 
-            baseUrl += "?" + queryString;
-            string signData = queryString;
-            if (signData.Length > 0)
+            if (encodedPairs.Any())
             {
-                signData = signData.Remove(data.Length - 1, 1);
+                string queryString = string.Join("&", encodedPairs);
+                string vnp_SecureHash = Utils.HmacSHA512(vnpHashSecret, queryString);
+
+                return $"{baseUrl}?{queryString}&{PaymentSetting.VNPay.VnpSecureHash}={vnp_SecureHash}";
             }
-            string vnp_SecureHash = Utils.HmacSHA512(vnpHashSecret, signData);
-            baseUrl += PaymentSetting.VNPay.VnpSecureHash + "=" + vnp_SecureHash;
 
             return baseUrl;
         }
@@ -84,28 +77,17 @@ namespace Fsel.Ordering.Infrastructure.Common
 
         private string GetResponseData()
         {
-            var data = new StringBuilder();
-            if (_responseData.ContainsKey(PaymentSetting.VNPay.VnpSecureHashType))
+            var filteredData = _responseData
+    .Where(kv => !string.IsNullOrEmpty(kv.Value) &&
+                 kv.Key != PaymentSetting.VNPay.VnpSecureHashType &&
+                 kv.Key != PaymentSetting.VNPay.VnpSecureHash)
+    .Select(kv => $"{WebUtility.UrlEncode(kv.Key)}={WebUtility.UrlEncode(kv.Value)}");
+
+            if (filteredData.Any())
             {
-                _responseData.Remove(PaymentSetting.VNPay.VnpSecureHashType);
+                return string.Join("&", filteredData);
             }
-            if (_responseData.ContainsKey(PaymentSetting.VNPay.VnpSecureHash))
-            {
-                _responseData.Remove(PaymentSetting.VNPay.VnpSecureHash);
-            }
-            foreach (var kv in _responseData)
-            {
-                if (!string.IsNullOrEmpty(kv.Value))
-                {
-                    data.Append(WebUtility.UrlEncode(kv.Key) + "=" + WebUtility.UrlEncode(kv.Value) + "&");
-                }
-            }
-            //remove last '&'
-            if (data.Length > 0)
-            {
-                data.Remove(data.Length - 1, 1);
-            }
-            return data.ToString();
+            return string.Empty;
         }
 
         #endregion Response process
