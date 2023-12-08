@@ -25,18 +25,8 @@ namespace Fsel.Shared.Enums
 
         //time code submit successfully
         TimeCodeSubmit,
-
-        //Quest board nhiệm vụ hằng ngày
-        DailyMission,
-
-        //Quest board nhiệm vụ chính
-        MainMission,
-
-        //Quest board nhiệm vụ phụ
-        SideMission,
-
-        //Quest board nhiệm vụ sự kiện
-        EventMission,
+        //Quest Board
+        QuestBoard,
 
         //B uy course
         BuyCourse,
@@ -52,5 +42,10 @@ namespace Fsel.Shared.Enums
 
         //Review FSEL
         ReviewFSEL,
+        //buy course standad
+        BuyCourseStandad,
+        //buy course Premium
+        BuyCoursePremium
+
     }
 }

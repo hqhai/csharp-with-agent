@@ -2,53 +2,53 @@
   {
     "id": "631bb9bb-79d4-4eaf-9395-39c8c99581b1",
     "createdDate": "2023-07-21",
-    "feature": "DailyCheckin",
-    "mission": "DailyCheckin",
+    "feature": "ForcusMode",
+    "mission": "FocusTime",
     "config": {
       "token": [
         {
-          "token": "1",
-          "times": "30p"
+          "number": "1",
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "token": "3",
-          "times": "60p"
+          "number": "3",
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "token": "6",
-          "times": "90p"
+          "number": "6",
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "token": "12",
-          "times": "120p"
+          "number": "12",
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "token": "24",
-          "times": "180p"
+          "number": "24",
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         }
       ]
     },
     "SuperConfig": {
       "token": [
         {
-          "token": "2",
-          "times": "30p"
+          "number": "2",
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "token": "6",
-          "times": "60p"
+          "number": "6",
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "token": "12",
-          "times": "90p"
+          "number": "12",
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "token": "24",
-          "times": "120p"
+          "number": "24",
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         },
         {
-          "token": "48",
-          "times": "180p"
+          "number": "48",
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
         }
       ]
     }
@@ -60,16 +60,16 @@
     "mission": "DailyCheckin",
     "config": [
       {
-        "token": "5",
-        "tier": "3"
+        "number": "5",
+        "level": "3"
       },
       {
-        "token": "20",
-        "tier": "15"
+        "number": "20",
+        "level": "15"
       },
       {
-        "token": "40",
-        "tier": "30-31"
+        "number": "40",
+        "level": "30-31"
       }
     ],
     "SuperConfig": null
@@ -80,12 +80,10 @@
     "feature": "TimeCode",
     "mission": "TimeCodeSubmit",
     "config": {
-      "token": "1",
-      "subquestion": "1"
+      "number": "1"
     },
     "SuperConfig": {
-      "token": "2",
-      "subquestion": "1"
+      "number": "2"
     }
   },
   {
@@ -94,12 +92,10 @@
     "feature": "Test",
     "mission": "HighestStreak",
     "config": {
-      "token": "1",
-      "Streak": "2"
+      "number": "1"
     },
     "SuperConfig": {
-      "token": "2",
-      "subquestion": "2"
+      "number": "2"
     }
   },
   {
@@ -108,7 +104,7 @@
     "feature": "TimeCode",
     "mission": "SuperFireMode",
     "config": {
-      "token": "0"
+      "number": "0"
     },
     "SuperConfig": [
       {
@@ -136,46 +132,7 @@
     "id": "2ab68ffd-9969-4fd0-a3f1-e8d272122feb",
     "createdDate": "2023-07-21",
     "feature": "QuestBoard",
-    "mission": "DailyMission",
-    "config": {
-      "dailyQuest": "1",
-      "mainQuest": "10",
-      "sideQuest": "5",
-      "permium": "10"
-    },
-    "SuperConfig": null
-  },
-  {
-    "id": "e606579f-0bc8-4254-9fe2-44b0306e225c",
-    "createdDate": "2023-07-21",
-    "feature": "QuestBoard",
-    "mission": "MainMission",
-    "config": {
-      "dailyQuest": "1",
-      "mainQuest": "10",
-      "sideQuest": "5",
-      "permium": "10"
-    },
-    "SuperConfig": null
-  },
-  {
-    "id": "bb8cb9ba-58f1-43a7-9ac5-c07cd5da6ffb",
-    "createdDate": "2023-07-21",
-    "feature": "QuestBoard",
-    "mission": "SideMission",
-    "config": {
-      "dailyQuest": "1",
-      "mainQuest": "10",
-      "sideQuest": "5",
-      "permium": "10"
-    },
-    "SuperConfig": null
-  },
-  {
-    "id": "a569629e-f6fc-424b-b1a2-51c2a826819d",
-    "createdDate": "2023-07-21",
-    "feature": "QuestBoard",
-    "mission": "EventMission",
+    "mission": "QuestBoard",
     "config": {
       "dailyQuest": "1",
       "mainQuest": "10",
@@ -190,7 +147,7 @@
     "feature": "Achievement",
     "mission": "CompleteAchievement",
     "config": {
-      "mission": "10"
+      "number": "10"
     },
     "SuperConfig": null
   },
@@ -213,10 +170,19 @@
     "id": "fca942b7-b3bb-4ad2-8035-4471f28c56af",
     "createdDate": "2023-07-21",
     "feature": "Price",
-    "mission": "BuyCourse",
+    "mission": "BuyCourseStandad",
     "config": {
-      "standard": "50",
-      "premium": "100"
+      "number": "50"
+    },
+    "SuperConfig": null
+  },
+  {
+    "id": "fca942b7-b3bb-4ad2-8035-4471f28c56af",
+    "createdDate": "2023-07-21",
+    "feature": "Price",
+    "mission": "BuyCoursePremium",
+    "config": {
+      "number": "100"
     },
     "SuperConfig": null
   },
@@ -261,11 +227,11 @@
     "mission": "HighestStreak",
     "config": {
       "streak": "2",
-      "token": "1"
+      "number": "1"
     },
     "SuperConfig": {
       "streak": "2",
-      "token": "2"
+      "number": "2"
     }
   },
   {
@@ -274,7 +240,7 @@
     "feature": "Test",
     "mission": "SuperFireMode",
     "config": {
-      "token": "0"
+      "number": "0"
     },
     "SuperConfig": {
       "unitTest/skillTest/skillMockTest": "4",
@@ -301,10 +267,10 @@
     "feature": "TimeCode",
     "mission": "SuperFireMode",
     "config": {
-      "token": "0"
+      "number": "0"
     },
     "SuperConfig": {
-      "token": "1"
+      "number": "1"
     }
   }
 ]
