@@ -59,12 +59,15 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
                 var courseUnitResult = await _courseService.GetCourseUnitByUserId(_authContext.CurrentUserId);
                 if (!courseUnitResult.IsSuccessStatusCode || courseUnitResult.Content?.Result == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                    return methodResult;
+                    courseLevel = EnumGameCefrLevel.A1;
+                    unitNumber = 1;
                 }
-                var courseUnit = courseUnitResult.Content.Result;
-                courseLevel = (EnumGameCefrLevel)courseUnit.CourseLevel;
-                unitNumber = courseUnit.UnitNumber;
+                else
+                {
+                    var courseUnit = courseUnitResult.Content.Result;
+                    courseLevel = (EnumGameCefrLevel)courseUnit.CourseLevel;
+                    unitNumber = courseUnit.UnitNumber;
+                }
             }
             else if (role == EnumRole.Guest.ToString())
             {
@@ -208,7 +211,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
                 gameAnswerRepository.DeleteListAsync(deleteGameAnswers);
                 gameAnswerRepository.UnitOfWork.SaveChangesAsync();
 
-                GetPreviousQuestions(gameVocabularies, startLevel, unitStart, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
+                GetPreviousQuestions(gameVocabularies, startLevel, unitStart, null, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
             }
             else if (level == EnumGameCefrLevel.A1 && unitNumber == 1 && gameVocabulariesModel.Count >= (questionRule.CurrentUnit + questionRule.CurrentUnitOutside) && currentOutSideQuestions?.Count > 0)
             {
@@ -220,7 +223,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
                 gameAnswerRepository.DeleteListAsync(deleteGameAnswers);
                 gameAnswerRepository.UnitOfWork.SaveChangesAsync();
 
-                GetPreviousQuestions(gameVocabularies, startLevel, unitStart, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
+                GetPreviousQuestions(gameVocabularies, startLevel, unitStart, null, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
             }
             else
             {
