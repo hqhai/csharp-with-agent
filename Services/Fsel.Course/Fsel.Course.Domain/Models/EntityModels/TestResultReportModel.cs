@@ -2,14 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Course.Domain.IEntities;
-
-    public class TestResultReportModel : BaseResultScoreModel, IHighestStreak
+    public class TestResultReportModel : BaseLearnResultModel
     {
         public double? Score { get; set; }
-
-        public double? WorkingTime { get; set; }
-
-        public int? HighestStreak { get; set; }
     }
 }

@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
-    public class PlacementTestResultModel : BaseResultScoreModel
+    public class PlacementTestResultModel : BaseScoreResultModel
     {
         public double TotalQuestion { get; set; }
         public double CountQuestion { get; set; }
