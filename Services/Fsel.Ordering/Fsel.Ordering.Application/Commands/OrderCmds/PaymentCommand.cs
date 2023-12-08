@@ -87,10 +87,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpTmnCode, vnp_TmnCode);
             _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpAmount, price.ToString(CultureInfo.CurrentCulture));
 
-            if (request.VNPAYPaymentType.HasValue)
-            {
-                _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpBankCode, request.VNPAYPaymentType.ToString() ?? string.Empty);
-            }
+            //if (request.VNPAYPaymentType.HasValue)
+            //{
+            //    _vnPayLibrary.AddRequestData(PaymentSetting.VNPay.VnpBankCode, request.VNPAYPaymentType.ToString() ?? string.Empty);
+            //}
 
             var ipAddress = Utils.GetIpAddress(_contextAccessor);
 
