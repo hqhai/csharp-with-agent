@@ -8,7 +8,7 @@ namespace Fsel.Shared.Enums
         UnitTest,
         SkillTest,
         TimeCode,
-        ForcusMode,
+        FocusMode,
         SkillMockTest,
         FullMockTest,
         SignIn,

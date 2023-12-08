@@ -25,6 +25,7 @@ namespace Fsel.Shared.Enums
 
         //time code submit successfully
         TimeCodeSubmit,
+
         //Quest Board
         QuestBoard,
 
@@ -42,10 +43,14 @@ namespace Fsel.Shared.Enums
 
         //Review FSEL
         ReviewFSEL,
+
         //buy course standad
         BuyCourseStandad,
-        //buy course Premium
-        BuyCoursePremium
 
+        //buy course Premium
+        BuyCoursePremium,
+
+        // forcus time
+        FocusTime
     }
 }

@@ -2,10 +2,10 @@
   {
     "id": "631bb9bb-79d4-4eaf-9395-39c8c99581b1",
     "createdDate": "2023-07-21",
-    "feature": "ForcusMode",
+    "feature": "FocusMode",
     "mission": "FocusTime",
     "config": {
-      "FocusTimes": [
+      "focusTimes": [
         {
           "number": 1,
           "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
@@ -72,7 +72,7 @@
         "number": 40
       }
     ],
-    "superConfig": []
+    "superConfig": null
   },
   {
     "id": "d8c548b3-17e9-4899-90a2-6ebe8fb5ef3c",
@@ -104,15 +104,15 @@
     "feature": "TimeCode",
     "mission": "SuperFireMode",
     "config": {
-      "TimeCode": 0,
-      "Test": 0,
-      "MockTest": 0
+      "timeCode": 0,
+      "test": 0,
+      "mockTest": 0
     },
     "superConfig": [
       {
-        "TimeCode": 1,
-        "Test": 4,
-        "MockTest": 10
+        "timeCode": 1,
+        "test": 4,
+        "mockTest": 10
       }
     ]
   },
@@ -141,7 +141,7 @@
       "sideQuest": 5,
       "permium": 10
     },
-    "superConfig": []
+    "superConfig": null
   },
   {
     "id": "b4732b98-4ee3-4ae6-a51b-317908973282",
@@ -151,7 +151,7 @@
     "config": {
       "number": 10
     },
-    "superConfig": []
+    "superConfig": null
   },
   {
     "id": "0b750040-7d3a-41d2-827a-935599f0db2e",
@@ -184,7 +184,7 @@
         "number": 60
       }
     ],
-    "superConfig": []
+    "superConfig": null
   },
   {
     "id": "fca942b7-b3bb-4ad2-8035-4471f28c56af",
@@ -195,7 +195,7 @@
       "numberStandard": 50,
       "numberPremium": 100
     },
-    "superConfig": []
+    "superConfig": null
   },
   {
     "id": "7b0dae34-5312-46b1-907e-a8499a532d09",
@@ -205,7 +205,7 @@
     "config": {
       "number": 50
     },
-    "superConfig": []
+    "superConfig": null
   },
   {
     "id": "5fd4a7a7-68cf-4d44-89c9-bb6850242eda",
@@ -215,7 +215,7 @@
     "config": {
       "number": 10
     },
-    "superConfig": []
+    "superConfig": null
   },
   {
     "id": "2a4585ad-7155-47f8-a985-f06e32cd02b7",
@@ -263,11 +263,11 @@
     "feature": "TimeCode",
     "mission": "QuestionReward",
     "config": {
-      "QuestionUngraded": 0,
+      "questionUngraded": 0,
       "subQuestion": 1
     },
     "superConfig": {
-      "QuestionUngraded": 0,
+      "questionUngraded": 0,
       "subQuestion": 2
     }
   },
@@ -283,4 +283,4 @@
       "number": 1
     }
   }
-] 
+]
