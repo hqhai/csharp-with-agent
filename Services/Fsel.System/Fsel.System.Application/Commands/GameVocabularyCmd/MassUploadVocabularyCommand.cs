@@ -49,7 +49,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 
             #region Validate
 
-            var gameTopicIds = request.GameVocabularies.Where(x => x.WordCategoryId.HasValue).Select(n => n.WordCategoryId).ToList();
+            var gameTopicIds = request.GameVocabularies.Where(x => x.WordCategoryId.HasValue).Select(n => n.WordCategoryId).Distinct().ToList();
             var gameTopics = await _gameTopicRepository.Queryable.Where(p => gameTopicIds.Contains(p.Id)).ToListAsync(cancellationToken);
             if (gameTopics.Count != gameTopicIds.Count)
             {
