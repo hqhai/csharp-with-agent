@@ -163,42 +163,50 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 return methodResult;
             });
 
-            await UpdatePlacementTestResultAsync(placementTestResult, placementTest, student, cancellationToken);
-
-            methodResult.Result = _mapper.Map<PlacementTestResultModel>(placementTestResult);
+            var isLockPT = await UpdatePlacementTestResultAsync(placementTestResult, placementTest, student, cancellationToken);
+            methodResult.Result = await GetPlacementTestResult(placementTestResult, isLockPT);
             return methodResult;
         }
 
-        private async Task UpdatePlacementTestResultAsync(PlacementTestResult placementTestResult, PlacementTest placementTest, StudentModel? student, CancellationToken cancellationToken)
+        private async Task<PlacementTestResultModel> GetPlacementTestResult(PlacementTestResult placementTestResult, bool isLockPT)
         {
-            if (student == null)
-            {
-                return;
-            }
-            var numberOfDone = 4;
+            var moduleNumber = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == placementTestResult.StudentId).CountAsync();
+            var placementTestResultDto = _mapper.Map<PlacementTestResultModel>(placementTestResult);
+            placementTestResultDto.IsLock = isLockPT;
+            placementTestResultDto.ModuleNumber = ++moduleNumber;
+            return placementTestResultDto;
+        }
 
-            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.PlacementTestResultId == placementTestResult.Id).ToListAsync(cancellationToken);
-            if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
+        private async Task<bool> UpdatePlacementTestResultAsync(PlacementTestResult placementTestResult, PlacementTest placementTest, StudentModel? student, CancellationToken cancellationToken)
+        {
+            if (student != null)
             {
-                int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
-                var (currentLevel, isLockPT) = placementTest.Level.GetLevelInScore(placementTestResult.Percent, age);
-                if (currentLevel.HasValue)
+                var numberOfDone = 4;
+                var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.PlacementTestResultId == placementTestResult.Id).ToListAsync(cancellationToken);
+                if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
                 {
-                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
+                    int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                    var (currentLevel, isLockPT) = placementTest.Level.GetLevelInScore(placementTestResult.Percent, age);
+                    if (currentLevel.HasValue)
                     {
-                        Id = _authContext.CurrentUserId,
-                        Level = currentLevel.Value
-                    }).ConfigureAwait(false);
-                }
-                placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
-                _placementTestResultRepository.Update(placementTestResult);
-                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
+                        await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
+                        {
+                            Id = _authContext.CurrentUserId,
+                            Level = currentLevel.Value
+                        }).ConfigureAwait(false);
+                    }
+                    placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
+                    _placementTestResultRepository.Update(placementTestResult);
+                    await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
 
-                if (isLockPT)
-                {
-                    await SendStudentPlacementTest(student, placementTestResult);
+                    if (isLockPT)
+                    {
+                        await SendStudentPlacementTest(student, placementTestResult);
+                    }
+                    return isLockPT;
                 }
             }
+            return default;
         }
 
         private async Task SendStudentPlacementTest(StudentModel student, PlacementTestResult placementTestResult)
