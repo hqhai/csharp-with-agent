@@ -14,34 +14,12 @@ namespace Fsel.Ordering.Infrastructure.Common
     public class VnPayLibrary
     {
         private SortedList<string, string> _requestData = new SortedList<string, string>(new VnPayCompare());
-        private SortedList<string, string> _responseData = new SortedList<string, string>(new VnPayCompare());
 
         public void AddRequestData(string key, string value)
         {
             if (!string.IsNullOrEmpty(value))
             {
                 _requestData.Add(key, value);
-            }
-        }
-
-        public void AddResponseData(string key, string value)
-        {
-            if (!string.IsNullOrEmpty(value))
-            {
-                _responseData.Add(key, value);
-            }
-        }
-
-        public string GetResponseData(string key)
-        {
-            string? retValue;
-            if (_responseData.TryGetValue(key, out retValue))
-            {
-                return retValue;
-            }
-            else
-            {
-                return string.Empty;
             }
         }
 
@@ -65,32 +43,6 @@ namespace Fsel.Ordering.Infrastructure.Common
         }
 
         #endregion Request
-
-        #region Response process
-
-        public bool ValidateSignature(string inputHash, string secretKey)
-        {
-            string rspRaw = GetResponseData();
-            string myChecksum = Utils.HmacSHA512(secretKey, rspRaw);
-            return myChecksum.Equals(inputHash, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private string GetResponseData()
-        {
-            var filteredData = _responseData
-    .Where(kv => !string.IsNullOrEmpty(kv.Value) &&
-                 kv.Key != PaymentSetting.VNPay.VnpSecureHashType &&
-                 kv.Key != PaymentSetting.VNPay.VnpSecureHash)
-    .Select(kv => $"{WebUtility.UrlEncode(kv.Key)}={WebUtility.UrlEncode(kv.Value)}");
-
-            if (filteredData.Any())
-            {
-                return string.Join("&", filteredData);
-            }
-            return string.Empty;
-        }
-
-        #endregion Response process
     }
 
     public static class Utils
