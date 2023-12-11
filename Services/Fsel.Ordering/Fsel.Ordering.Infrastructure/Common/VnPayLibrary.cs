@@ -13,7 +13,7 @@ namespace Fsel.Ordering.Infrastructure.Common
 
     public class VnPayLibrary
     {
-        private SortedList<string, string> _requestData = new SortedList<string, string>(new VnPayCompare());
+        private SortedList<string, string> _requestData = new SortedList<string, string>();
 
         public void AddRequestData(string key, string value)
         {
@@ -93,30 +93,6 @@ namespace Fsel.Ordering.Infrastructure.Common
             }
 
             return ipAddress;
-        }
-    }
-
-    public class VnPayCompare : IComparer<string>
-    {
-        public int Compare(string? x, string? y)
-        {
-            if (x == y)
-            {
-                return 0;
-            }
-
-            if (x == null)
-            {
-                return -1;
-            }
-
-            if (y == null)
-            {
-                return 1;
-            }
-
-            var vnpCompare = CompareInfo.GetCompareInfo("en-US");
-            return vnpCompare.Compare(x, y, CompareOptions.Ordinal);
         }
     }
 }
