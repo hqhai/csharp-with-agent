@@ -5,7 +5,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd;
+    using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;

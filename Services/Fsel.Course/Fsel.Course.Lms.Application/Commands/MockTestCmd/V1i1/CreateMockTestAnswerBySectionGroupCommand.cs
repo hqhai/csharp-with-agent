@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.V1i1.MockTestAnswerCmd
+namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 {
     using System;
     using System.Collections.Generic;
