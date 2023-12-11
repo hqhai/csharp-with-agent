@@ -5,6 +5,7 @@ namespace Fsel.Shared.Enums
     public enum EnumApprovalLogStatus
     {
         OnTime,
-        Expired
+        Pending,
+        Expired,
     }
 }

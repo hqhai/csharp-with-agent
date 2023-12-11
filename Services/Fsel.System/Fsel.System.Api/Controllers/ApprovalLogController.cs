@@ -36,7 +36,7 @@ namespace Fsel.System.Api.Controllers
         /// Execute-list-query
         /// </summary>
         [HttpPost("execute-list-query")]
-        [ProducesResponseType(typeof(MethodResult<IList<ApprovalTimeConfig>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<ApprovalTimeConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission]
         public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
@@ -53,8 +53,6 @@ namespace Fsel.System.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-
 
     }
 }

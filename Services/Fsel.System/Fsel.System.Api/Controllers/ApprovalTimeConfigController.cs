@@ -26,28 +26,27 @@ namespace Fsel.System.Api.Controllers
     public class ApprovalTimeConfigController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ICourseTimeConfigRepository _courseTimeConfigRepository;
+        private readonly IApprovalTimeConfigRepository _approvalTimeConfigRepository;
 
-        public ApprovalTimeConfigController(IMediator mediator, ICourseTimeConfigRepository courseTimeConfigRepository)
+        public ApprovalTimeConfigController(IMediator mediator, IApprovalTimeConfigRepository approvalTimeConfigRepository)
         {
             _mediator = mediator;
-            _courseTimeConfigRepository = courseTimeConfigRepository;
+            _approvalTimeConfigRepository = approvalTimeConfigRepository;
         }
 
 
         /// <summary>
         /// Execute-list-query
         /// </summary>
-        [HttpPost("execute-list-query")]
-        [ProducesResponseType(typeof(MethodResult<IList<ApprovalTimeConfig>>), (int)HttpStatusCode.OK)]
+        [HttpGet("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<ApprovalTimeConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission]
-        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
+        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
         {
-            var result = await _courseTimeConfigRepository.GetListResultAsync<ApprovalTimeConfigModel>(query);
+            var result = await _approvalTimeConfigRepository.GetListResultAsync<ApprovalTimeConfigModel>(query);
             return result.GetActionResult();
         }
-
 
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ApprovalTimeConfigModel>>), (int)HttpStatusCode.OK)]
@@ -65,7 +64,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SaveList([FromBody] CreateApprovalLogCommand command)
+        public async Task<IActionResult> SaveList([FromBody] CreateApprovalTimeConfigCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

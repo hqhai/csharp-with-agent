@@ -12,8 +12,7 @@ namespace Fsel.System.Infrastructure.Maps
         public ApprovalTimeConfigProfile()
         {
             CreateMap<ApprovalTimeConfig, ApprovalTimeConfigModel>().IgnoreAllNonExisting();
-            CreateMap<ApprovalTimeConfigCommandModel, ApprovalTimeConfig>();
-
+            CreateMap<ApprovalTimeConfigCommandModel, ApprovalTimeConfig>().IgnoreAllNonExisting();
         }
     }
 }

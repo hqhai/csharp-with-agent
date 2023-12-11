@@ -7,7 +7,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
     public class ApprovalTimeConfigModel : BaseModel
     {
-        public EnumApprovalTime ApprovalTimeType { get; set; }
+        public EnumApprovalTime ApprovalType { get; set; }
 
         public long ExpiredTime { get; set; }
     }
