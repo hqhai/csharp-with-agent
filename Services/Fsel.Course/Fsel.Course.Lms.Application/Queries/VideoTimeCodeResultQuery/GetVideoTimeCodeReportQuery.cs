@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -24,13 +23,11 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IMapper _mapper;
-        private readonly DateTimeConverter _dateTimeConverter;
 
-        public GetVideoTimeCodeReportQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, DateTimeConverter dateTimeConverter)
+        public GetVideoTimeCodeReportQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _mapper = mapper;
-            _dateTimeConverter = dateTimeConverter;
         }
 
         public async Task<MethodResult<TestResultReportModel>> Handle(GetVideoTimeCodeReportQuery request, CancellationToken cancellationToken)
@@ -50,8 +47,9 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             var videoTimeCodeResultDto = _mapper.Map<TestResultReportModel>(videoTimeCodeResult);
             if (videoTimeCodeResultDto != null)
             {
-                videoTimeCodeResultDto.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.CreatedDate, videoTimeCodeResult.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResult.VideoTimeCode!.ExecutionTime);
+                videoTimeCodeResultDto.WorkingTime = videoTimeCodeResult.WorkingTime;
                 videoTimeCodeResultDto.Score = videoTimeCodeResult.CorrectCount;
+                videoTimeCodeResultDto.HighestStreak = videoTimeCodeResult.HighestStreak;
             }
 
             methodResult.Result = videoTimeCodeResultDto;

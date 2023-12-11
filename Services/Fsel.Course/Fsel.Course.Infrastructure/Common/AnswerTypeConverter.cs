@@ -10,6 +10,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class AnswerTypeConverter
     {
@@ -71,7 +72,7 @@ namespace Fsel.Course.Infrastructure.Common
             return (configAnswer, totalCorrect, isAnswerMissing);
         }
 
-        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isShowSubStatus, EnumResultStatus status)
+        public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer = true)
         {
             object? result;
             switch (type)
@@ -80,29 +81,29 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
                     var multichoice = configAnswer.Deserialize<MultipleChoiceAnswer>();
-                    result = GetAnswer(multichoice, isShowSubStatus, status);
+                    result = GetAnswer(multichoice, isShowSubStatus, status, isDisableAnswer);
                     break;
 
                 case EnumQuestionType.Listing:
                     var listingQuestion = configAnswer.Deserialize<ListingAnswer>();
-                    result = GetAnswer(listingQuestion, isShowSubStatus, status);
+                    result = GetAnswer(listingQuestion, isShowSubStatus, status, isDisableAnswer);
                     break;
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
                 case EnumQuestionType.DragAndDropPicture:
                     var matchingTypeQuestion = configAnswer.Deserialize<MatchingTypeAnswer>();
-                    result = GetAnswer(matchingTypeQuestion, isShowSubStatus, status);
+                    result = GetAnswer(matchingTypeQuestion, isShowSubStatus, status, isDisableAnswer);
                     break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
                     var shortAnswerQuestionWordBaseQuestion = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
-                    result = GetAnswer(shortAnswerQuestionWordBaseQuestion, isShowSubStatus, status);
+                    result = GetAnswer(shortAnswerQuestionWordBaseQuestion, isShowSubStatus, status, isDisableAnswer);
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
                     var shortAnswerWordCount = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
-                    result = GetAnswer(shortAnswerWordCount, isShowSubStatus, status);
+                    result = GetAnswer(shortAnswerWordCount, isShowSubStatus, status, isDisableAnswer);
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
@@ -110,17 +111,17 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
                     var gapFillQuestion = configAnswer.Deserialize<GapFillAnswer>();
-                    result = GetAnswer(gapFillQuestion, isShowSubStatus, status);
+                    result = GetAnswer(gapFillQuestion, isShowSubStatus, status, isDisableAnswer);
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
-                    result = GetAnswer(dragAndDropSentenceOrderQuestion, isShowSubStatus, status);
+                    result = GetAnswer(dragAndDropSentenceOrderQuestion, isShowSubStatus, status, isDisableAnswer);
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     var multipleOption = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
-                    result = GetAnswer(multipleOption, isShowSubStatus, status);
+                    result = GetAnswer(multipleOption, isShowSubStatus, status, isDisableAnswer);
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
@@ -135,87 +136,87 @@ namespace Fsel.Course.Infrastructure.Common
             return result;
         }
 
-        private static bool? IsDisableAnswers(EnumResultStatus status, bool isFirstSubmit, bool? isExact, bool isShowSubStatus)
+        private static bool? IsDisableAnswers(EnumResultStatus status, bool isFirstSubmit, bool? isExact, bool isShowSubStatus, bool isDisableAnswer)
         {
-            return ((status == EnumResultStatus.Process && isFirstSubmit && isExact == true) || isShowSubStatus) ? isExact : default;
+            return isDisableAnswer && ((status == EnumResultStatus.Process && isFirstSubmit && isExact == true) || isShowSubStatus) ? isExact : default;
         }
 
-        private static object? GetAnswer(MultipleOptionSentenceCompletionAnswer? data, bool isShowSubStatus, EnumResultStatus status)
-        {
-            if (data != null && data.Answers != null && status != EnumResultStatus.Done)
-            {
-                foreach (var item in data.Answers)
-                {
-                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus);
-                }
-            }
-            return data;
-        }
-
-        private static object? GetAnswer(DragAndDropSentenceOrderAnswer? data, bool isShowSubStatus, EnumResultStatus status)
+        private static object? GetAnswer(MultipleOptionSentenceCompletionAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
         {
             if (data != null && data.Answers != null && status != EnumResultStatus.Done)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus);
+                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus, isDisableAnswer);
                 }
             }
             return data;
         }
 
-        private static object? GetAnswer(ShortAnswerWordBaseAnswer? data, bool isShowSubStatus, EnumResultStatus status)
+        private static object? GetAnswer(DragAndDropSentenceOrderAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
+        {
+            if (data != null && data.Answers != null && status != EnumResultStatus.Done)
+            {
+                foreach (var item in data.Answers)
+                {
+                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus, isDisableAnswer);
+                }
+            }
+            return data;
+        }
+
+        private static object? GetAnswer(ShortAnswerWordBaseAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
         {
             if (data != null && status != EnumResultStatus.Done)
             {
-                data.IsExact = IsDisableAnswers(status, data.IsFirstSubmit, data.IsExact, isShowSubStatus);
+                data.IsExact = IsDisableAnswers(status, data.IsFirstSubmit, data.IsExact, isShowSubStatus, isDisableAnswer);
             }
             return data;
         }
 
-        private static object? GetAnswer(ListingAnswer? data, bool isShowSubStatus, EnumResultStatus status)
+        private static object? GetAnswer(ListingAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
         {
             if (data != null && status != EnumResultStatus.Done)
             {
-                data.IsExact = IsDisableAnswers(status, data.IsFirstSubmit, data.IsExact, isShowSubStatus);
+                data.IsExact = IsDisableAnswers(status, data.IsFirstSubmit, data.IsExact, isShowSubStatus, isDisableAnswer);
             }
             return data;
         }
 
-        private static object? GetAnswer(MultipleChoiceAnswer? data, bool isShowSubStatus, EnumResultStatus status)
+        private static object? GetAnswer(MultipleChoiceAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
         {
             if (data != null && data.Answers != null && status != EnumResultStatus.Done)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus);
+                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus, isDisableAnswer);
                 }
             }
             return data;
         }
 
-        private static object? GetAnswer(ShortAnswerWordCountBaseAnswer? data, bool isShowSubStatus, EnumResultStatus status)
+        private static object? GetAnswer(ShortAnswerWordCountBaseAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
         {
             if (data != null && status != EnumResultStatus.Done)
             {
-                data.IsExact = IsDisableAnswers(status, data.IsFirstSubmit, data.IsExact, isShowSubStatus);
+                data.IsExact = IsDisableAnswers(status, data.IsFirstSubmit, data.IsExact, isShowSubStatus, isDisableAnswer);
             }
             return data;
         }
 
-        private static object? GetAnswer(MatchingTypeAnswer? data, bool isShowSubStatus, EnumResultStatus status)
+        private static object? GetAnswer(MatchingTypeAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
         {
             if (data != null && data.Answers != null && status != EnumResultStatus.Done)
             {
                 foreach (var item in data.Answers)
                 {
-                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus);
+                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus, isDisableAnswer);
                 }
             }
             return data;
         }
 
-        private static object? GetAnswer(GapFillAnswer? data, bool isShowSubStatus, EnumResultStatus status)
+        private static object? GetAnswer(GapFillAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
         {
             if (data != null && data.Answers != null && status != EnumResultStatus.Done)
             {
@@ -223,7 +224,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     item.IsExacts = item.IsExacts?.Select((x, index) =>
                     {
-                        return IsDisableAnswers(status, item.IsFirstSubmits != null && item.IsFirstSubmits[index], x, isShowSubStatus);
+                        return IsDisableAnswers(status, item.IsFirstSubmits != null && item.IsFirstSubmits[index], x, isShowSubStatus, isDisableAnswer);
                     }).ToList();
                 }
             }
@@ -248,14 +249,21 @@ namespace Fsel.Course.Infrastructure.Common
                     foreach (var item in dataAnswer.Answers)
                     {
                         var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                        if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => item.AnswerId.HasValue && n.Id == item.AnswerId && n.IsCorrect == true))
+                        if (item.AnswerId.HasValue)
                         {
-                            number++;
-                            item.IsExact = true;
+                            if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => n.Id == item.AnswerId && n.IsCorrect == true))
+                            {
+                                number++;
+                                item.IsExact = true;
+                            }
+                            else
+                            {
+                                item.IsExact = false;
+                            }
                         }
                         else
                         {
-                            item.IsExact = false;
+                            item.IsExact = default;
                         }
                         if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                         {
@@ -343,6 +351,10 @@ namespace Fsel.Course.Infrastructure.Common
                                 }
                             }
                         }
+                        else
+                        {
+                            item.IsExact = default;
+                        }
                     }
                 }
             }
@@ -365,7 +377,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 if (dataAnswer.Answers != null && (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing)))
                 {
-                    if (dataAnswer.Answers.Count >= dataQuestion.ExactWordCount)
+                    if (dataAnswer.Answers.Where(x => !string.IsNullOrEmpty(x)).Count() >= dataQuestion.ExactWordCount)
                     {
                         dataAnswer.IsExact = true;
                         number++;
@@ -532,15 +544,15 @@ namespace Fsel.Course.Infrastructure.Common
                 if (objects != null && objects.Any())
                 {
                     return objects.Any(x =>
-                     {
-                         var datas = x.GetPropValue(nameProperty) as IList;
-                         if (datas != null)
-                         {
-                             var listObject = datas?.Cast<object>().ToList();
-                             return ((listObject == null || !listObject.Any()) || listObject.Any(x => string.IsNullOrEmpty(x.ToString())));
-                         }
-                         return string.IsNullOrEmpty(x.ToString());
-                     });
+                    {
+                        var datas = x.GetPropValue(nameProperty) as IList;
+                        if (datas != null)
+                        {
+                            var listObject = datas?.Cast<object>().ToList();
+                            return ((listObject == null || !listObject.Any()) || listObject.Any(x => string.IsNullOrEmpty(x.ToString())));
+                        }
+                        return string.IsNullOrEmpty(x.ToString());
+                    });
                 }
             }
             else

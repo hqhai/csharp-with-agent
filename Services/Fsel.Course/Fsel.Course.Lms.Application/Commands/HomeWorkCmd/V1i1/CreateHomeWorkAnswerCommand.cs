@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
+namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 {
     using System.Linq;
     using Fsel.Common.ActionResults;
@@ -18,11 +18,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateHomeWorkAnswerV1i1Command : CreateHomeWorkAnswerV1i1CommandModel, IRequest<MethodResult<bool>>
+    public class CreateHomeWorkAnswerCommand : CreateHomeWorkAnswerV1i1CommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class CreateHomeWorkAnswerV1i1CommandHandler : IRequestHandler<CreateHomeWorkAnswerV1i1Command, MethodResult<bool>>
+    public class CreateHomeWorkAnswerCommandHandler : IRequestHandler<CreateHomeWorkAnswerCommand, MethodResult<bool>>
     {
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly QuestionConverter _questionConverter;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly IQuestionRepository _questionRepository;
 
-        public CreateHomeWorkAnswerV1i1CommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
+        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             QuestionConverter questionConverter,
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
             IHomeWorkRepository homeWorkRepository,
@@ -47,10 +47,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
             _questionRepository = questionRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(CreateHomeWorkAnswerV1i1Command request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
             if (request.Answers == null || !request.Answers.Any())
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkV1i1Cmd
             return methodResult;
         }
 
-        public async Task<MethodResult<(IList<Question>, IList<Question>, HomeWorkResult, HomeWork)>> Validate(CreateHomeWorkAnswerV1i1Command request, CancellationToken cancellationToken)
+        public async Task<MethodResult<(IList<Question>, IList<Question>, HomeWorkResult, HomeWork)>> Validate(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<(IList<Question>, IList<Question>, HomeWorkResult, HomeWork)>();

@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
     using System;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -11,10 +10,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class GetMockTestResultReportQuery : IRequest<MethodResult<TestResultReportModel>>
     {
@@ -25,13 +22,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMapper _mapper;
-        private readonly DateTimeConverter _dateTimeConverter;
 
-        public GetMockTestResultReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMapper mapper, DateTimeConverter dateTimeConverter)
+        public GetMockTestResultReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _mapper = mapper;
-            _dateTimeConverter = dateTimeConverter;
         }
 
         public async Task<MethodResult<TestResultReportModel>> Handle(GetMockTestResultReportQuery request, CancellationToken cancellationToken)
@@ -39,25 +34,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<TestResultReportModel>();
 
-            var mockTestResult = await _mockTestResultRepository.Queryable
-                            .Include(x => x.SectionGroupResults)
-                            .ThenInclude(x => x!.SectionGroup)
-                            .Where(x => x.Id == request.MockTestResultId)
-                            .FirstOrDefaultAsync(cancellationToken);
+            var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
-            var mockTestResultDto = _mapper.Map<TestResultReportModel>(mockTestResult);
-
-            if (mockTestResultDto != null)
-            {
-                mockTestResultDto.WorkingTime = _dateTimeConverter.GetWorkingTime(mockTestResult.CreatedDate, mockTestResult.UpdatedDate ?? DateTime.UtcNow, mockTestResult!.SectionGroupResults.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault());
-                mockTestResultDto.Score = mockTestResult.SkillScores?.Average(x => x.Scores);
-            }
-
-            methodResult.Result = mockTestResultDto;
+            methodResult.Result = _mapper.Map<TestResultReportModel>(mockTestResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

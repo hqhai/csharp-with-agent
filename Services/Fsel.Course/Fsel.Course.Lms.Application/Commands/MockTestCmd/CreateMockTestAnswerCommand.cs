@@ -197,7 +197,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 }
             }
 
-            if (mockTestAnswers.Count > 0)
+            if (mockTestAnswers.Any())
             {
                 mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
@@ -206,19 +206,19 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             }
 
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>
-                    {
-                        if (mockTestAnswers.Count > 0)
-                        {
-                            await _mockTestAnswerRepository.AddList(mockTestAnswers);
-                            await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                        }
+            {
+                if (mockTestAnswers.Count > 0)
+                {
+                    await _mockTestAnswerRepository.AddList(mockTestAnswers);
+                    await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
 
-                        _mockTestResultRepository.Update(mockTestResult);
-                        await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                        methodResult.StatusCode = StatusCodes.Status201Created;
-                        methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
-                        return methodResult;
-                    });
+                _mockTestResultRepository.Update(mockTestResult);
+                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
+                return methodResult;
+            });
 
             return methodResult;
         }

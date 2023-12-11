@@ -5,7 +5,7 @@ using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
-using Fsel.Course.Application.Commands.CourseCmd;
+using Fsel.Course.Application.Commands.CourseCmd.V1i1;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -33,7 +33,7 @@ namespace Fsel.Course.Lcms.Api.Controllers.V1i1
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateCourseV1i1Command command)
+        public async Task<IActionResult> Create([FromBody] CreateCourseCommand command)
         {
             MethodResult<CourseModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -45,7 +45,7 @@ namespace Fsel.Course.Lcms.Api.Controllers.V1i1
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCourseV1i1Command command)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCourseCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
