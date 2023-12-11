@@ -84,9 +84,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-            var ipAddress = Utils.GetIpAddress(_contextAccessor);
+            var ipAddress = _contextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 
-            if (string.IsNullOrEmpty(ipAddress) || ipAddress.Contains("Invalid IP", StringComparison.CurrentCulture))
+            if (string.IsNullOrEmpty(ipAddress))
             {
                 methodResult.AddErrorBadRequest(ipAddress);
                 return methodResult;

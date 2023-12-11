@@ -2,14 +2,10 @@
 
 namespace Fsel.Ordering.Infrastructure.Common
 {
-    using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Net;
-    using System.Security.Cryptography;
-    using System.Text;
     using Fsel.Shared.Constants;
-    using Microsoft.AspNetCore.Http;
+    using Fsel.Shared.Helpers;
 
     public class VnPayLibrary
     {
@@ -34,7 +30,7 @@ namespace Fsel.Ordering.Infrastructure.Common
             if (encodedPairs.Any())
             {
                 string queryString = string.Join("&", encodedPairs);
-                string vnp_SecureHash = Utils.HmacSHA512(vnpHashSecret, queryString);
+                string vnp_SecureHash = EncodeHelper.HmacSHA512(vnpHashSecret, queryString);
 
                 return $"{baseUrl}?{queryString}&{PaymentSetting.VNPay.VnpSecureHash}={vnp_SecureHash}";
             }
@@ -43,56 +39,5 @@ namespace Fsel.Ordering.Infrastructure.Common
         }
 
         #endregion Request
-    }
-
-    public static class Utils
-    {
-        public static string HmacSHA512(string key, string inputData)
-        {
-            var hash = new StringBuilder();
-            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
-            byte[] inputBytes = Encoding.UTF8.GetBytes(inputData);
-            using (var hmac = new HMACSHA512(keyBytes))
-            {
-                byte[] hashValue = hmac.ComputeHash(inputBytes);
-                foreach (var theByte in hashValue)
-                {
-                    hash.Append(theByte.ToString("x2", CultureInfo.InvariantCulture));
-                }
-            }
-
-            return hash.ToString();
-        }
-
-        public static string? GetIpAddress(IHttpContextAccessor httpContextAccessor)
-        {
-            string? ipAddress;
-            try
-            {
-                var xForwardedForHeader = httpContextAccessor?.HttpContext?.Request.Headers["X-Forwarded-For"];
-                if (!string.IsNullOrEmpty(xForwardedForHeader))
-                {
-                    ipAddress = xForwardedForHeader;
-
-                    // Kiểm tra và lấy IP đầu tiên nếu có nhiều địa chỉ IP được chuyển tiếp bởi proxy
-                    if (!string.IsNullOrEmpty(ipAddress) && ipAddress.Contains(',', StringComparison.CurrentCulture))
-                    {
-                        ipAddress = ipAddress.Split(',')[0].Trim();
-                    }
-                }
-                else
-                {
-                    // Lấy địa chỉ IP thực sự nếu không có proxy hoặc giá trị từ proxy không hợp lệ
-                    ipAddress = httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
-                }
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ và gán giá trị mặc định nếu có lỗi
-                ipAddress = "Invalid IP: " + ex.Message;
-            }
-
-            return ipAddress;
-        }
     }
 }
