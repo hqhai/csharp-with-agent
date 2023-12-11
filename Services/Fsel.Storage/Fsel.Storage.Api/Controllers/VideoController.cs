@@ -7,10 +7,10 @@ namespace Fsel.Storage.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Shared.Attributes;
     using Fsel.Storage.Application.Services.AmazonS3Services;
-    using Fsel.Storage.Domain.Enums;
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Storage.Domain.Models.CommandModels;
 
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/video")]
@@ -30,9 +30,9 @@ namespace Fsel.Storage.Api.Controllers
         [HttpPost("url-resolutions")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UploadResolutions(string url)
+        public async Task<IActionResult> UploadResolutions([FromBody] UrlRequestModel request)
         {
-            var result = await _amazonS3Service.UploadResolutions(url);
+            var result = await _amazonS3Service.UploadResolutions(request?.Url ?? string.Empty);
             return result.GetActionResult();
         }
 

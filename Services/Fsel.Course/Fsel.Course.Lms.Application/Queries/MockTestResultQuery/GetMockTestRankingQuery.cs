@@ -12,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
@@ -29,15 +28,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly DateTimeConverter _dateTimeConverter;
         private readonly ITrainingService _trainingService;
         private readonly IMockTestResultRepository _mockTestResultRepository;
 
-        public GetMockTestRankingQueryHandler(IMapper mapper, IUserService userService, DateTimeConverter dateTimeConverter, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
+        public GetMockTestRankingQueryHandler(IMapper mapper, IUserService userService, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
         {
             _mapper = mapper;
             _userService = userService;
-            _dateTimeConverter = dateTimeConverter;
             _trainingService = trainingService;
             _mockTestResultRepository = mockTestResultRepository;
         }
@@ -50,23 +47,20 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
 
             var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
-
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
-
             var currentClass = await _trainingService.GetClassByStudentId(mockTestResult.StudentId);
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
-
+            if (classStudentIds == null || !classStudentIds.Any())
+            {
+                return methodResult;
+            }
             var mockTestResults = await _mockTestResultRepository.Queryable
-                            .Include(x => x.MockTest)
-                            .ThenInclude(x => x!.MockTestSections)
-                            .ThenInclude(x => x.SectionGroup)
-                            .ThenInclude(x => x.SectionGroupResults)
-                            .Where(x => x.MockTestId == mockTestResult.MockTestId && classStudentIds!.Contains(x.StudentId))
-                            .ToListAsync(cancellationToken);
+                                .Where(x => x.MockTestId == mockTestResult.MockTestId && classStudentIds.Contains(x.StudentId))
+                                .ToListAsync(cancellationToken);
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
             var students = studentResults?.Content?.Result;
@@ -77,16 +71,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 {
                     var mockTestResultStudent = mockTestResults.FirstOrDefault(x => x.StudentId == item.Id);
                     var mockTestResultDto = _mapper.Map<TestResultRankingModel>(mockTestResultStudent);
-                    if (mockTestResultDto != null)
-                    {
-                        mockTestResultDto.IsCurrentStudent = item.Id == mockTestResult.StudentId;
-                        mockTestResultDto.WorkingTime = mockTestResultStudent?.SectionGroupResults.Select(x => _dateTimeConverter.GetWorkingTime(x.CreatedDate, x.UpdatedDate ?? DateTime.UtcNow, x.SectionGroup!.ExecutionTime)).Sum();
-                        mockTestResultDto.Score = mockTestResultDto.SkillScores?.Average(x => x.Scores);
-                    }
-                    else
+                    if (mockTestResultDto == null)
                     {
                         mockTestResultDto = new TestResultRankingModel();
                     }
+                    mockTestResultDto.IsCurrentStudent = item.Id == mockTestResult.StudentId;
                     mockTestResultDto.FullName = item.Human?.FullName;
                     mockTestResultDto.AvatarPath = item.Human?.AvatarPath;
                     testResultRankings.Add(mockTestResultDto);

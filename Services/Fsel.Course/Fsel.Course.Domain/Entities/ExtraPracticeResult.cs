@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class ExtraPracticeResult : BaseResultScore
+    public class ExtraPracticeResult : BaseScoreResult
     {
         public ExtraPractice? ExtraPractice { get; set; }
         public Guid ExtraPracticeId { get; set; }

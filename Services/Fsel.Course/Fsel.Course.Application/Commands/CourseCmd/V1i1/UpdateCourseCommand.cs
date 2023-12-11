@@ -11,52 +11,64 @@ using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using EntityCourse = Fsel.Course.Domain.Entities.Course;
+using Microsoft.EntityFrameworkCore;
 
-namespace Fsel.Course.Application.Commands.CourseCmd
+namespace Fsel.Course.Application.Commands.CourseCmd.V1i1
 {
-    public class CreateCourseV1i1Command : UpdateCourseCommandModel, IRequest<MethodResult<CourseModel>>
+    public class UpdateCourseCommand : UpdateCourseCommandModel, IRequest<MethodResult<CourseModel>>
     {
     }
 
-    public class CreateCourseV1i1CommandHandler : IRequestHandler<CreateCourseV1i1Command, MethodResult<CourseModel>>
+    public class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseCommand, MethodResult<CourseModel>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly CourseHelper _courseHelper;
         private readonly IMapper _mapper;
+        private readonly CourseHelper _courseHelper;
         private readonly IUserService _userService;
 
-        public CreateCourseV1i1CommandHandler(ICourseRepository courseRepository
-            , CourseHelper courseHelper
+        public UpdateCourseCommandHandler(ICourseRepository courseRepository
             , IMapper mapper
-            , IUserService userService
-            )
+            , CourseHelper courseHelper
+            , IUserService userService)
         {
             _courseRepository = courseRepository;
-            _courseHelper = courseHelper;
             _mapper = mapper;
+            _courseHelper = courseHelper;
             _userService = userService;
         }
 
-        public async Task<MethodResult<CourseModel>> Handle(CreateCourseV1i1Command request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CourseModel>> Handle(UpdateCourseCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
+            var methodResult = new MethodResult<CourseModel>();
 
             #region Validation
 
-            EntityCourse course = _mapper.Map<EntityCourse>(request);
-
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
-            if (!teachers.IsSuccessStatusCode)
+            var course = await _courseRepository.Queryable.Include(e => e.CourseUnitMockTests)
+                                                        .Include(e => e.CourseTeachers)
+                                                        .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
+            if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
             var method = await _courseHelper.ValidateV1i1(course, request);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+
+            _mapper.Map(request, course);
+            if (!course.IsValid())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course.Id), course.Id);
+                return methodResult;
+            }
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
+            if (!teachers.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
                 return methodResult;
             }
 
@@ -77,10 +89,9 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                course = _courseRepository.Add(course);
+                course = _courseRepository.Update(course);
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<CourseModel>(course);
                 return methodResult;
             });

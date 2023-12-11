@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
 
-    public class HomeWorkResult : BaseResultScore
+    public class HomeWorkResult : BaseScoreResult
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid HomeWorkId { get; set; }

@@ -3,18 +3,19 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.PlacementTestAnswerV1i1Cmd;
+    using Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1;
     using Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/placement-test-result")]
     [ApiController]
     public class PlacementTestResultController : ControllerBase
@@ -57,11 +58,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpPost("create-answers")]
         [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
-        [ProducesResponseType(typeof(MethodResult<SectionGroupResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PlacementTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreatePlacementTestAnswerBySectionGroupCommand command)
         {
-            MethodResult<SectionGroupResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<PlacementTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
