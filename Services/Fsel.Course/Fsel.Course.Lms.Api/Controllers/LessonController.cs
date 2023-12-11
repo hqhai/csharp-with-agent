@@ -60,6 +60,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("start-lesson")]
         [ProducesResponseType(typeof(MethodResult<LessonResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ApiVersion(ApiSettings.APIVersion1)]
         public async Task<IActionResult> StartLesson([FromBody] StartLessonCommand query)
         {
             MethodResult<LessonResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
