@@ -8,9 +8,9 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,14 +23,14 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     public class GetFinalTestResultReportQueryHandler : IRequestHandler<GetFinalTestResultReportQuery, MethodResult<TestResultReportModel>>
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
+        private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly IMapper _mapper;
-        private readonly DateTimeConverter _dateTimeConverter;
 
-        public GetFinalTestResultReportQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, DateTimeConverter dateTimeConverter)
+        public GetFinalTestResultReportQueryHandler(IFinalTestResultRepository finalTestResultRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IMapper mapper)
         {
             _finalTestResultRepository = finalTestResultRepository;
+            _finalTestAnswerRepository = finalTestAnswerRepository;
             _mapper = mapper;
-            _dateTimeConverter = dateTimeConverter;
         }
 
         public async Task<MethodResult<TestResultReportModel>> Handle(GetFinalTestResultReportQuery request, CancellationToken cancellationToken)
@@ -38,26 +38,24 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<TestResultReportModel>();
 
-            var finalTestResult = await _finalTestResultRepository.Queryable
-                            .Include(x => x.SectionGroupResults)
-                            .ThenInclude(x => x!.SectionGroup)
-                            .Where(x => x.Id == request.FinalTestResultId)
-                            .FirstOrDefaultAsync(cancellationToken);
+            var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
             if (finalTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResult));
                 return methodResult;
             }
-            var finalTestResultDto = _mapper.Map<TestResultReportModel>(finalTestResult);
-            if (finalTestResultDto != null)
-            {
-                finalTestResultDto.WorkingTime = _dateTimeConverter.GetWorkingTime(finalTestResult.CreatedDate, finalTestResult.UpdatedDate ?? DateTime.UtcNow, finalTestResult.SectionGroupResults.Select(x => x.SectionGroup!.ExecutionTime).FirstOrDefault());
-                finalTestResultDto.Score = finalTestResult.CorrectCount;
-            }
-
-            methodResult.Result = finalTestResultDto;
+            methodResult.Result = await GetFinalTestReport(finalTestResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<TestResultReportModel> GetFinalTestReport(FinalTestResult finalTestResult)
+        {
+            var query = _finalTestAnswerRepository.Queryable.Where(x => x.FinalTestResultId == finalTestResult.Id);
+            var finalTestResultDto = _mapper.Map<TestResultReportModel>(finalTestResult);
+            finalTestResultDto.TotalQuestion = await query.CountAsync();
+            finalTestResultDto.CorrectQuestion = await query.Where(x => x.IsCorrect == true).CountAsync();
+            return finalTestResultDto;
         }
     }
 }

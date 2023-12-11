@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
 
     public class BaseResultModel

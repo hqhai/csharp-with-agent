@@ -361,7 +361,7 @@ namespace Fsel.Course.Infrastructure.Common
                               {
                                   CorrectCount = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Sum(x => x.CorrectCount),
                                   CorrectTotal = g.Sum(x => x.q.CorrectTotal),
-                                  NumberOfCorrect = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Count(x => x.IsCorrect == true),
+                                  CorrectQuestion = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Count(x => x.IsCorrect == true),
                                   TotalQuestion = g.Select(x => x.q).Count(),
                                   AnswerTime = g.Select(x => x.vtcr).Where(x => x.VideoResultId == videoResult.Id).Sum(x => x.WorkingTime + x.RetryWorkingTime),
                               };
@@ -374,7 +374,7 @@ namespace Fsel.Course.Infrastructure.Common
             return new LessonReportModel
             {
                 AnswerTime = lessonReport.AnswerTime,
-                NumberOfCorrect = lessonReport.NumberOfCorrect,
+                CorrectQuestion = lessonReport.CorrectQuestion,
                 TotalQuestion = lessonReport.TotalQuestion,
                 Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal),
                 HighestStreak = videoResult.HighestStreak
