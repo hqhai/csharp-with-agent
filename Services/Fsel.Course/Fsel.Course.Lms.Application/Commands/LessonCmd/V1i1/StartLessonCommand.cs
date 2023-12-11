@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.V1i1.LessonCmd
+namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
 {
     using System;
     using System.Linq;
@@ -22,12 +22,12 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.LessonCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class StartLessonOverviewCommand : IRequest<MethodResult<LessonResultModel>>
+    public class StartLessonCommand : IRequest<MethodResult<LessonResultModel>>
     {
         public Guid LessonResultId { get; set; }
     }
 
-    public class StartLessonOverviewCommandHandler : IRequestHandler<StartLessonOverviewCommand, MethodResult<LessonResultModel>>
+    public class StartLessonCommandHandler : IRequestHandler<StartLessonCommand, MethodResult<LessonResultModel>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IUnitRepository _unitRepository;
@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.LessonCmd
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
 
-        public StartLessonOverviewCommandHandler(ICourseRepository courseRepository
+        public StartLessonCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
             , IUserService userService
             , IMapper mapper
@@ -63,10 +63,10 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.LessonCmd
             _homeWorkRepository = homeWorkRepository;
         }
 
-        public async Task<MethodResult<LessonResultModel>> Handle(StartLessonOverviewCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<LessonResultModel>> Handle(StartLessonCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<LessonResultModel> methodResult = new MethodResult<LessonResultModel>();
+            var methodResult = new MethodResult<LessonResultModel>();
 
             #region Validation
 
@@ -147,9 +147,9 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.LessonCmd
             }
         }
 
-        private async Task<MethodResult<Lesson>> Validate(StartLessonOverviewCommand request, Guid? studentId, CancellationToken cancellationToken)
+        private async Task<MethodResult<Lesson>> Validate(StartLessonCommand request, Guid? studentId, CancellationToken cancellationToken)
         {
-            MethodResult<Lesson> methodResult = new MethodResult<Lesson>();
+            var methodResult = new MethodResult<Lesson>();
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
             if (lessonResult == null)
             {

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.V1i1.PlacementTestAnswerCmd
+namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 {
     using System.Globalization;
     using AutoMapper;

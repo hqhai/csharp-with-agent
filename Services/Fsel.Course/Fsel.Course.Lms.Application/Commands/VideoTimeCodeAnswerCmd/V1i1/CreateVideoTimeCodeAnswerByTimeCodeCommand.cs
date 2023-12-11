@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd
+namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 {
     using System.Linq;
     using System.Linq.Dynamic.Core;
@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd
         public async Task<MethodResult<VideoTimeCodeModel>> Handle(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<VideoTimeCodeModel> methodResult = new MethodResult<VideoTimeCodeModel>();
+            var methodResult = new MethodResult<VideoTimeCodeModel>();
 
             var method = await CreateAnswer(request, cancellationToken);
             if (!method.IsOK)
@@ -242,7 +242,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd
         public async Task<MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult, IList<Question>)>> Validate(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult, IList<Question>)> methodResult = new MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult, IList<Question>)>();
+            var methodResult = new MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult, IList<Question>)>();
             var videoResult = await _videoResultRepository.Queryable.Include(x => x.VideoTimeCodeResults).FirstOrDefaultAsync(x => x.Id == request.VideoResultId, cancellationToken);
             if (videoResult == null)
             {
@@ -318,7 +318,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.VideoTimeCodeAnswerCmd
             {
                 workingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
             }
-            return videoTimeCode.ExecutionTime == 0 || (workingTime < videoTimeCode.ExecutionTime && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone);
+            return videoTimeCode.ExecutionTime == 0 || workingTime < videoTimeCode.ExecutionTime && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone;
         }
 
         private static SkillScores GetSkillScore(IGrouping<EnumCourseSkill, Exercise> exercise)

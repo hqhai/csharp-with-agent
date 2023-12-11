@@ -8,7 +8,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
-    using Fsel.Course.Lms.Application.Commands.V1i1.LessonCmd;
+    using Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1;
     using Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         [HttpPost("start-lesson")]
         [ProducesResponseType(typeof(MethodResult<LessonResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> StartLesson([FromBody] StartLessonOverviewCommand query)
+        public async Task<IActionResult> StartLesson([FromBody] StartLessonCommand query)
         {
             MethodResult<LessonResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
