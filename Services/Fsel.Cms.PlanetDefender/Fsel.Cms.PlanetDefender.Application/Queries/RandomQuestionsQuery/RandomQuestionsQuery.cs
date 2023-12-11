@@ -103,12 +103,12 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
                 return methodResult;
             }
 
-            var gameVocabularyCorrectIds = await _gameAnswerRepository.Queryable.Where(p => p.StudentId == student.Id && p.IsCorrect).Select(p => p.GameVocabularyId).ToListAsync(cancellationToken);
+            var gameVocabularyCorrectIds = await _gameAnswerRepository.Queryable.Where(p => p.StudentId == student.Id && p.IsCorrect && !p.IsDisable).Select(p => p.GameVocabularyId).ToListAsync(cancellationToken);
             var gameVocabularyTypeInCorrectIds = await _gameAnswerRepository.Queryable.Where(p => p.StudentId == student.Id && !p.IsCorrect).Select(p => p.GameVocabularyTypeId).ToListAsync(cancellationToken);
 
             var gameVocabulariesModel = new List<GameVocabularyModel>();
 
-            GetCurrentQuestions(gameVocabularies.ToList(), courseLevel, unitNumber, null, questionRule, 0, gameVocabulariesModel, false, courseLevel, _gameAnswerRepository, student.Id, unitNumber);
+            GetCurrentQuestions(gameVocabularies.ToList(), (EnumGameCourseLevel)courseLevel, unitNumber, gameVocabularyCorrectIds, questionRule, 0, gameVocabulariesModel, false, (EnumGameCourseLevel)courseLevel, _gameAnswerRepository, student.Id, unitNumber);
 
             foreach (var item in gameVocabulariesModel.SelectMany(p => p.GameVocabularyTypes!))
             {
@@ -168,9 +168,9 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
             gameVocabularyType.RemoveAll(p => gameVocabularyTypeModel.Select(x => x.GameVocabularyId).Contains(p.GameVocabularyId));
         }
 
-        private static void GetCurrentQuestions(List<GameVocabularyModel> gameVocabularies, EnumGameCefrLevel level, int unitNumber, IList<Guid>? gameVocabularyCorrectIds, GameplayRuleConfig questionRule, int surplus, List<GameVocabularyModel> gameVocabulariesModel, bool isSecond, EnumGameCefrLevel startLevel, IGameAnswerRepository gameAnswerRepository, Guid studentId, int unitStart)
+        private static void GetCurrentQuestions(List<GameVocabularyModel> gameVocabularies, EnumGameCourseLevel level, int unitNumber, IList<Guid>? gameVocabularyCorrectIds, GameplayRuleConfig questionRule, int surplus, List<GameVocabularyModel> gameVocabulariesModel, bool isSecond, EnumGameCourseLevel startLevel, IGameAnswerRepository gameAnswerRepository, Guid studentId, int unitStart)
         {
-            var currentQuestions = gameVocabularies.Where(p => p.CefrLevel == level && p.UnitOrder == (EnumUnitNumber)unitNumber && (gameVocabularyCorrectIds == null || !gameVocabularyCorrectIds.Contains(p.Id)) && p.CourseLevel != EnumGameCourseLevel.OutsideCurriculum).ToList();
+            var currentQuestions = gameVocabularies.Where(p => p.CourseLevel == level && p.UnitOrder == (EnumUnitNumber)unitNumber && (gameVocabularyCorrectIds == null || !gameVocabularyCorrectIds.Contains(p.Id))).ToList();
 
             currentQuestions = currentQuestions.Take(!isSecond ? questionRule.CurrentUnit : surplus).ToList();
 
@@ -188,9 +188,9 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
             GetCurrentOutSideQuestions(gameVocabularies, level, unitNumber, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitStart);
         }
 
-        private static void GetCurrentOutSideQuestions(List<GameVocabularyModel> gameVocabularies, EnumGameCefrLevel level, int unitNumber, IList<Guid>? gameVocabularyCorrectIds, GameplayRuleConfig questionRule, int surplus, List<GameVocabularyModel> gameVocabulariesModel, bool isSecond, EnumGameCefrLevel startLevel, IGameAnswerRepository gameAnswerRepository, Guid studentId, int unitStart)
+        private static void GetCurrentOutSideQuestions(List<GameVocabularyModel> gameVocabularies, EnumGameCourseLevel level, int unitNumber, IList<Guid>? gameVocabularyCorrectIds, GameplayRuleConfig questionRule, int surplus, List<GameVocabularyModel> gameVocabulariesModel, bool isSecond, EnumGameCourseLevel startLevel, IGameAnswerRepository gameAnswerRepository, Guid studentId, int unitStart)
         {
-            var currentOutSideQuestions = gameVocabularies.Where(p => p.CefrLevel == level && p.UnitOrder == (EnumUnitNumber)unitNumber && (gameVocabularyCorrectIds == null || !gameVocabularyCorrectIds.Contains(p.Id)) && p.CourseLevel == EnumGameCourseLevel.OutsideCurriculum).ToList();
+            var currentOutSideQuestions = gameVocabularies.Where(p => p.CefrLevel == (EnumGameCefrLevel)level && p.UnitOrder == (EnumUnitNumber)unitNumber && (gameVocabularyCorrectIds == null || !gameVocabularyCorrectIds.Contains(p.Id)) && p.CourseLevel == EnumGameCourseLevel.OutsideCurriculum).ToList();
 
             currentOutSideQuestions = currentOutSideQuestions.Take(!isSecond ? (questionRule.CurrentUnitOutside + surplus) : surplus).ToList();
 
@@ -205,35 +205,37 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
 
             surplus = !isSecond ? (currentOutSideQuestions == null ? surplus + questionRule.CurrentUnitOutside : (questionRule.CurrentUnitOutside + surplus - currentOutSideQuestions.Count)) : surplus - currentOutSideQuestions.Count;
 
-            if (level == EnumGameCefrLevel.A1 && unitNumber == 1 && gameVocabulariesModel.Count < (questionRule.CurrentUnit + questionRule.CurrentUnitOutside))
+            if (level == EnumGameCourseLevel.A1 && unitNumber == 1 && gameVocabulariesModel.Count < (questionRule.CurrentUnit + questionRule.CurrentUnitOutside) && isSecond)
             {
                 var deleteGameAnswers = gameAnswerRepository.Queryable.Where(p => p.StudentId == studentId).ToList();
-                gameAnswerRepository.DeleteListAsync(deleteGameAnswers);
+                deleteGameAnswers.ForEach(p => { p.IsDisable = true; });
+                gameAnswerRepository.UpdateList(deleteGameAnswers);
                 gameAnswerRepository.UnitOfWork.SaveChangesAsync();
 
                 GetPreviousQuestions(gameVocabularies, startLevel, unitStart, null, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
             }
-            else if (level == EnumGameCefrLevel.A1 && unitNumber == 1 && gameVocabulariesModel.Count >= (questionRule.CurrentUnit + questionRule.CurrentUnitOutside) && currentOutSideQuestions?.Count > 0)
+            else if (level == EnumGameCourseLevel.A1 && unitNumber == 1 && gameVocabulariesModel.Count >= (questionRule.CurrentUnit + questionRule.CurrentUnitOutside) && currentOutSideQuestions?.Count > 0)
             {
                 GetPreviousQuestions(gameVocabularies, level, unitNumber, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitStart);
             }
-            else if (level == EnumGameCefrLevel.A1 && unitNumber == 1 && gameVocabulariesModel.Count >= (questionRule.CurrentUnit + questionRule.CurrentUnitOutside) && currentOutSideQuestions?.Count == 0)
+            else if (level == EnumGameCourseLevel.A1 && unitNumber == 1 && gameVocabulariesModel.Count >= (questionRule.CurrentUnit + questionRule.CurrentUnitOutside) && currentOutSideQuestions?.Count == 0)
             {
                 var deleteGameAnswers = gameAnswerRepository.Queryable.Where(p => p.StudentId == studentId).ToList();
-                gameAnswerRepository.DeleteListAsync(deleteGameAnswers);
+                deleteGameAnswers.ForEach(p => { p.IsDisable = true; });
+                gameAnswerRepository.UpdateList(deleteGameAnswers);
                 gameAnswerRepository.UnitOfWork.SaveChangesAsync();
 
                 GetPreviousQuestions(gameVocabularies, startLevel, unitStart, null, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
             }
             else
             {
-                GetPreviousQuestions(gameVocabularies, unitNumber == 1 ? (level - 1 >= 0 ? level - 1 : startLevel) : level, unitNumber == 1 ? (level - 1 >= 0 ? (level - 1 <= (EnumGameCefrLevel)6 ? 12 : 8) : unitStart) : unitNumber - 1, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
+                GetPreviousQuestions(gameVocabularies, unitNumber == 1 ? (level - 1 >= 0 ? level - 1 : startLevel) : level, unitNumber == 1 ? (level - 1 >= 0 ? (level - 1 <= (EnumGameCourseLevel)6 ? 12 : 8) : unitStart) : unitNumber - 1, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitNumber);
             }
         }
 
-        private static void GetPreviousQuestions(List<GameVocabularyModel> gameVocabularies, EnumGameCefrLevel level, int unitNumber, IList<Guid>? gameVocabularyCorrectIds, GameplayRuleConfig questionRule, int surplus, List<GameVocabularyModel> gameVocabulariesModel, bool isSecond, EnumGameCefrLevel startLevel, IGameAnswerRepository gameAnswerRepository, Guid studentId, int unitStart)
+        private static void GetPreviousQuestions(List<GameVocabularyModel> gameVocabularies, EnumGameCourseLevel level, int unitNumber, IList<Guid>? gameVocabularyCorrectIds, GameplayRuleConfig questionRule, int surplus, List<GameVocabularyModel> gameVocabulariesModel, bool isSecond, EnumGameCourseLevel startLevel, IGameAnswerRepository gameAnswerRepository, Guid studentId, int unitStart)
         {
-            var previousQuestions = gameVocabularies.Where(p => p.CefrLevel == level && p.UnitOrder == (EnumUnitNumber)unitNumber && (gameVocabularyCorrectIds == null || !gameVocabularyCorrectIds.Contains(p.Id)) && p.CourseLevel != EnumGameCourseLevel.OutsideCurriculum).ToList();
+            var previousQuestions = gameVocabularies.Where(p => p.CourseLevel == level && p.UnitOrder == (EnumUnitNumber)unitNumber && (gameVocabularyCorrectIds == null || !gameVocabularyCorrectIds.Contains(p.Id))).ToList();
 
             previousQuestions = previousQuestions.Take(!isSecond ? questionRule.PreviousUnit + surplus : surplus).ToList();
 
@@ -251,9 +253,9 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
             GetPreviousOutSideQuestions(gameVocabularies, level, unitNumber, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, isSecond, startLevel, gameAnswerRepository, studentId, unitStart);
         }
 
-        private static void GetPreviousOutSideQuestions(List<GameVocabularyModel> gameVocabularies, EnumGameCefrLevel level, int unitNumber, IList<Guid>? gameVocabularyCorrectIds, GameplayRuleConfig questionRule, int surplus, List<GameVocabularyModel> gameVocabulariesModel, bool isSecond, EnumGameCefrLevel startLevel, IGameAnswerRepository gameAnswerRepository, Guid studentId, int startUnit)
+        private static void GetPreviousOutSideQuestions(List<GameVocabularyModel> gameVocabularies, EnumGameCourseLevel level, int unitNumber, IList<Guid>? gameVocabularyCorrectIds, GameplayRuleConfig questionRule, int surplus, List<GameVocabularyModel> gameVocabulariesModel, bool isSecond, EnumGameCourseLevel startLevel, IGameAnswerRepository gameAnswerRepository, Guid studentId, int startUnit)
         {
-            var previousOutSideQuestions = gameVocabularies.Where(p => p.CefrLevel == level && p.UnitOrder == (EnumUnitNumber)unitNumber && (gameVocabularyCorrectIds == null || !gameVocabularyCorrectIds.Contains(p.Id)) && p.CourseLevel == EnumGameCourseLevel.OutsideCurriculum).ToList();
+            var previousOutSideQuestions = gameVocabularies.Where(p => p.CefrLevel == (EnumGameCefrLevel)level && p.UnitOrder == (EnumUnitNumber)unitNumber && (gameVocabularyCorrectIds == null || !gameVocabularyCorrectIds.Contains(p.Id)) && p.CourseLevel == EnumGameCourseLevel.OutsideCurriculum).ToList();
 
             previousOutSideQuestions = previousOutSideQuestions.Take(!isSecond ? questionRule.PreviousUnitOutside + surplus : surplus).ToList();
             gameVocabulariesModel.AddRange(previousOutSideQuestions);
@@ -267,7 +269,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.RandomQuestionsQuery
 
             surplus = !isSecond ? previousOutSideQuestions == null ? surplus + questionRule.PreviousUnitOutside : (questionRule.PreviousUnit + surplus - previousOutSideQuestions.Count) : surplus - previousOutSideQuestions.Count;
 
-            GetCurrentQuestions(gameVocabularies, unitNumber == 1 ? (level - 1 >= 0 ? level - 1 : startLevel) : level, unitNumber == 1 ? (level - 1 >= 0 ? (level - 1 <= (EnumGameCefrLevel)6 ? 12 : 8) : startUnit) : unitNumber - 1, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, true, startLevel, gameAnswerRepository, studentId, unitNumber);
+            GetCurrentQuestions(gameVocabularies, unitNumber == 1 ? (level - 1 >= 0 ? level - 1 : startLevel) : level, unitNumber == 1 ? (level - 1 >= 0 ? (level - 1 <= (EnumGameCourseLevel)6 ? 12 : 8) : startUnit) : unitNumber - 1, gameVocabularyCorrectIds, questionRule, surplus, gameVocabulariesModel, true, startLevel, gameAnswerRepository, studentId, unitNumber);
         }
     }
 }
