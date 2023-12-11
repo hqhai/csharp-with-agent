@@ -135,12 +135,24 @@
     "createdDate": "2023-07-21",
     "feature": "QuestBoard",
     "mission": "QuestBoard",
-    "config": {
-      "dailyQuest": 1,
-      "mainQuest": 10,
-      "sideQuest": 5,
-      "permium": 10
-    },
+    "config": [
+      {
+        "number": 1,
+        "QuestBoardType": "dailyQuest"
+      },
+      {
+        "number": 10,
+        "QuestBoardType": "mainQuest"
+      },
+      {
+        "number": 5,
+        "QuestBoardType": "sideQuest"
+      },
+      {
+        "number": 10,
+        "QuestBoardType": "permium"
+      }
+    ],
     "superConfig": null
   },
   {
