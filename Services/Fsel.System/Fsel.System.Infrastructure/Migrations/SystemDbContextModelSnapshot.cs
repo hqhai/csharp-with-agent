@@ -1322,7 +1322,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             Feature = "FocusMode",
                             IsDeleted = false,
                             Mission = "FocusTime",
-                            SuperConfigStr = "{\"token\":[{\"number\":2,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\"},{\"number\":6,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\"},{\"number\":12,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\"},{\"number\":24,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\"},{\"number\":48,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\"}]}"
+                            SuperConfigStr = "{\"focusTimes\":[{\"number\":2,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\"},{\"number\":6,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\"},{\"number\":12,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\"},{\"number\":24,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\"},{\"number\":48,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\"}]}"
                         },
                         new
                         {

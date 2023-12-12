@@ -29,7 +29,7 @@
       ]
     },
     "superConfig": {
-      "token": [
+      "focusTimes": [
         {
           "number": 2,
           "focustimeid": "0A7B57F3-C964-4F1B-8986-DF1579C5D08B"
