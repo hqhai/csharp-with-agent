@@ -10,7 +10,7 @@ namespace Fsel.Shared.Enums
         HighestStreak,
 
         //Super fire mode
-        SuperFireMode,
+        SuperFire,
 
         QuestionReward,
 
@@ -45,12 +45,26 @@ namespace Fsel.Shared.Enums
         ReviewFSEL,
 
         //buy course standad
-        BuyCourseStandad,
+        Standard,
 
         //buy course Premium
-        BuyCoursePremium,
+        Permium,
 
         // forcus time
-        FocusTime
+        FocusTime,
+
+        //Permium Quest
+        PermiumQuest,
+
+        //SideQuest
+        SideQuest,
+
+        //MainQuest
+        MainQuest,
+
+        //DailyQuest
+        DailyQuest,
+        //Review course
+        ReviewCourse
     }
 }

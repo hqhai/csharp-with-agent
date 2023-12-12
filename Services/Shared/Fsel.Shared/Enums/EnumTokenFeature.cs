@@ -19,6 +19,7 @@ namespace Fsel.Shared.Enums
         Achievement,
         ReviewSystem,
         Test,
-        Price
+        UpGradeCourse,
+        BuyNextCourse
     }
 }

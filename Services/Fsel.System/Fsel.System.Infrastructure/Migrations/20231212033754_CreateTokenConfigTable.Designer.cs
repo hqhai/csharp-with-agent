@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20231208093748_CreateTokenConfigTable")]
+    [Migration("20231212033754_CreateTokenConfigTable")]
     partial class CreateTokenConfigTable
     {
         /// <inheritdoc />
@@ -1317,7 +1317,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("631bb9bb-79d4-4eaf-9395-39c8c99581b1"),
+                            Id = new Guid("928b4f17-be50-4798-8657-54e93d3cf450"),
                             ConfigStr = "{\"focusTimes\":[{\"number\":1,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\"},{\"number\":3,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\"},{\"number\":6,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\"},{\"number\":12,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\"},{\"number\":24,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\"}]}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -1329,7 +1329,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("418e095e-a79b-4b16-a212-013027ffe3f8"),
+                            Id = new Guid("95c9f9b7-cc16-43af-b32e-4ee3689d4e27"),
                             ConfigStr = "[{\"level\":1,\"number\":5},{\"level\":2,\"number\":20},{\"level\":3,\"number\":40}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -1341,115 +1341,295 @@ namespace Fsel.System.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("d8c548b3-17e9-4899-90a2-6ebe8fb5ef3c"),
+                            Id = new Guid("394fe972-3e4b-4daf-9fcf-e6720204be24"),
                             ConfigStr = "{\"number\":1}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Feature = "TimeCode",
                             IsDeleted = false,
-                            Mission = "TimeCodeSubmit",
+                            Mission = "QuestionReward",
                             SuperConfigStr = "{\"number\":2}"
                         },
                         new
                         {
-                            Id = new Guid("541d077d-9a7b-4074-8240-877591957d92"),
+                            Id = new Guid("5e19b75e-f16c-4e44-8299-3c626804159c"),
+                            ConfigStr = "{\"number\":10}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "SkillTest",
+                            IsDeleted = false,
+                            Mission = "TestDone",
+                            SuperConfigStr = "{\"number\":15}"
+                        },
+                        new
+                        {
+                            Id = new Guid("6915a722-1268-45b8-adee-9d038799b020"),
                             ConfigStr = "{\"number\":1}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "Test",
+                            Feature = "SkillTest",
                             IsDeleted = false,
                             Mission = "HighestStreak",
                             SuperConfigStr = "{\"number\":2}"
                         },
                         new
                         {
-                            Id = new Guid("570f3b94-8cb0-4e30-9483-e543b863e4c8"),
-                            ConfigStr = "{\"timeCode\":0,\"test\":0,\"mockTest\":0}",
+                            Id = new Guid("89f2e48c-308a-411f-9950-441af87d861e"),
+                            ConfigStr = "{\"number\":0}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "TimeCode",
+                            Feature = "SkillTest",
                             IsDeleted = false,
-                            Mission = "SuperFireMode",
-                            SuperConfigStr = "[{\"timeCode\":1,\"test\":4,\"mockTest\":10}]"
+                            Mission = "SuperFire",
+                            SuperConfigStr = "{\"number\":4}"
                         },
                         new
                         {
-                            Id = new Guid("349335a6-6dca-436e-b0ea-40fe8c026b64"),
-                            ConfigStr = "{\"test\":10,\"mockTest\":40}",
+                            Id = new Guid("e7bc1ee5-9151-453b-a369-aafffa8dac53"),
+                            ConfigStr = "{\"number\":10}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "Test",
+                            Feature = "UnitTest",
                             IsDeleted = false,
-                            Mission = "TestComplete",
-                            SuperConfigStr = "{\"test\":15,\"mockTest\":60}"
+                            Mission = "TestDone",
+                            SuperConfigStr = "{\"number\":15}"
                         },
                         new
                         {
-                            Id = new Guid("2ab68ffd-9969-4fd0-a3f1-e8d272122feb"),
-                            ConfigStr = "{\"dailyQuest\":1,\"mainQuest\":10,\"sideQuest\":5,\"permium\":10}",
+                            Id = new Guid("f1657e49-02df-44d8-aba1-46a42654cf40"),
+                            ConfigStr = "{\"number\":1}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "UnitTest",
+                            IsDeleted = false,
+                            Mission = "HighestStreak",
+                            SuperConfigStr = "{\"number\":2}"
+                        },
+                        new
+                        {
+                            Id = new Guid("ef5dce88-eb01-4d9f-98b5-ef709bc736f7"),
+                            ConfigStr = "{\"number\":0}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "UnitTest",
+                            IsDeleted = false,
+                            Mission = "SuperFire",
+                            SuperConfigStr = "{\"number\":4}"
+                        },
+                        new
+                        {
+                            Id = new Guid("e00c5780-7d72-4cfe-872e-5b8954cff205"),
+                            ConfigStr = "{\"number\":10}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "TestDone",
+                            SuperConfigStr = "{\"number\":15}"
+                        },
+                        new
+                        {
+                            Id = new Guid("cfeefec6-e53e-4cb6-a341-5f945e94a470"),
+                            ConfigStr = "{\"number\":1}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "HighestStreak",
+                            SuperConfigStr = "{\"number\":2}"
+                        },
+                        new
+                        {
+                            Id = new Guid("09fc6407-064e-4260-92de-12fc36c5eeda"),
+                            ConfigStr = "{\"number\":0}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SuperFire",
+                            SuperConfigStr = "{\"number\":4}"
+                        },
+                        new
+                        {
+                            Id = new Guid("a2457d1c-2331-4624-8f94-2530bb5b21e5"),
+                            ConfigStr = "{\"number\":40}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "TestDone",
+                            SuperConfigStr = "{\"number\":60}"
+                        },
+                        new
+                        {
+                            Id = new Guid("272f4fdc-91d8-475b-8394-843c43c89e56"),
+                            ConfigStr = "{\"number\":1}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "HighestStreak",
+                            SuperConfigStr = "{\"number\":2}"
+                        },
+                        new
+                        {
+                            Id = new Guid("6dd62758-60c3-42cc-88eb-9acb246ebda5"),
+                            ConfigStr = "{\"number\":0}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "SuperFire",
+                            SuperConfigStr = "{\"number\":10}"
+                        },
+                        new
+                        {
+                            Id = new Guid("f0f20824-1354-4267-bf44-812455aa85d0"),
+                            ConfigStr = "{\"number\":40}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "FinalTest",
+                            IsDeleted = false,
+                            Mission = "TestDone",
+                            SuperConfigStr = "{\"number\":60}"
+                        },
+                        new
+                        {
+                            Id = new Guid("061242a9-7e64-4fb1-ab8d-99b5e250c389"),
+                            ConfigStr = "{\"number\":1}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "FinalTest",
+                            IsDeleted = false,
+                            Mission = "HighestStreak",
+                            SuperConfigStr = "{\"number\":2}"
+                        },
+                        new
+                        {
+                            Id = new Guid("1e3c6f57-25d6-40bd-a9be-d5571be1a7ae"),
+                            ConfigStr = "{\"number\":0}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "FinalTest",
+                            IsDeleted = false,
+                            Mission = "SuperFire",
+                            SuperConfigStr = "{\"number\":10}"
+                        },
+                        new
+                        {
+                            Id = new Guid("5d1628c6-6c44-4afa-a911-687ae7ba753c"),
+                            ConfigStr = "{\"number\":1}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Feature = "QuestBoard",
                             IsDeleted = false,
-                            Mission = "QuestBoard",
+                            Mission = "DailyQuest",
                             SuperConfigStr = "null"
                         },
                         new
                         {
-                            Id = new Guid("b4732b98-4ee3-4ae6-a51b-317908973282"),
+                            Id = new Guid("d3340516-ab0b-471e-8117-2b6fd6ec1680"),
                             ConfigStr = "{\"number\":10}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "Achievement",
+                            Feature = "QuestBoard",
                             IsDeleted = false,
-                            Mission = "CompleteAchievement",
+                            Mission = "MainQuest",
                             SuperConfigStr = "null"
                         },
                         new
                         {
-                            Id = new Guid("0b750040-7d3a-41d2-827a-935599f0db2e"),
-                            ConfigStr = "[{\"id\":1,\"number\":10},{\"id\":2,\"number\":20},{\"id\":3,\"number\":30},{\"id\":4,\"number\":40},{\"id\":5,\"number\":50},{\"id\":6,\"number\":60}]",
+                            Id = new Guid("ce5000ba-788c-4872-b5e1-46d582c6f596"),
+                            ConfigStr = "{\"number\":5}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "Achievement",
+                            Feature = "QuestBoard",
                             IsDeleted = false,
-                            Mission = "CompletePhaseAchievement",
+                            Mission = "SideQuest",
                             SuperConfigStr = "null"
                         },
                         new
                         {
-                            Id = new Guid("fca942b7-b3bb-4ad2-8035-4471f28c56af"),
-                            ConfigStr = "{\"numberStandard\":50,\"numberPremium\":100}",
+                            Id = new Guid("65a9971f-22d0-4730-a99f-33e7ac7b3698"),
+                            ConfigStr = "{\"number\":10}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "Price",
+                            Feature = "QuestBoard",
                             IsDeleted = false,
-                            Mission = "BuyCourseStandad",
+                            Mission = "PermiumQuest",
                             SuperConfigStr = "null"
                         },
                         new
                         {
-                            Id = new Guid("7b0dae34-5312-46b1-907e-a8499a532d09"),
+                            Id = new Guid("8042aeda-9f73-4981-8262-eb70f993a92c"),
                             ConfigStr = "{\"number\":50}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "Price",
+                            Feature = "BuyNextCourse",
+                            IsDeleted = false,
+                            Mission = "Standard",
+                            SuperConfigStr = "null"
+                        },
+                        new
+                        {
+                            Id = new Guid("cb48fa8e-b45f-4599-a87f-971668bf8907"),
+                            ConfigStr = "{\"number\":100}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "BuyNextCourse",
+                            IsDeleted = false,
+                            Mission = "Permium",
+                            SuperConfigStr = "null"
+                        },
+                        new
+                        {
+                            Id = new Guid("b2dd2846-a565-438f-aa5f-e3af66f191aa"),
+                            ConfigStr = "{\"number\":50}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "UpGradeCourse",
                             IsDeleted = false,
                             Mission = "UpgradeCourse",
                             SuperConfigStr = "null"
                         },
                         new
                         {
-                            Id = new Guid("5fd4a7a7-68cf-4d44-89c9-bb6850242eda"),
+                            Id = new Guid("d33de316-efe4-46d7-89e8-d27d49e8186a"),
+                            ConfigStr = "{\"number\":10}",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Feature = "ReviewSystem",
+                            IsDeleted = false,
+                            Mission = "ReviewCourse",
+                            SuperConfigStr = "null"
+                        },
+                        new
+                        {
+                            Id = new Guid("e5361e72-412e-4022-bc66-c813c56f1b10"),
                             ConfigStr = "{\"number\":10}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -1458,66 +1638,6 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsDeleted = false,
                             Mission = "ReviewFSEL",
                             SuperConfigStr = "null"
-                        },
-                        new
-                        {
-                            Id = new Guid("2a4585ad-7155-47f8-a985-f06e32cd02b7"),
-                            ConfigStr = "{\"test\":10,\"mockTest\":40}",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "Test",
-                            IsDeleted = false,
-                            Mission = "TestDone",
-                            SuperConfigStr = "{\"test\":15,\"mockTest\":60}"
-                        },
-                        new
-                        {
-                            Id = new Guid("1904cafe-abab-43d4-95a9-b4df18c71858"),
-                            ConfigStr = "{\"number\":1}",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "Test",
-                            IsDeleted = false,
-                            Mission = "HighestStreak",
-                            SuperConfigStr = "{\"number\":2}"
-                        },
-                        new
-                        {
-                            Id = new Guid("9d3a3ad7-64a8-4469-beed-f81ec0903d43"),
-                            ConfigStr = "{\"test\":4,\"mockTest\":10}",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "Test",
-                            IsDeleted = false,
-                            Mission = "SuperFireMode",
-                            SuperConfigStr = "{\"test\":4,\"mockTest\":10}"
-                        },
-                        new
-                        {
-                            Id = new Guid("d35c8680-c69e-41c2-bf42-cba51d2108a9"),
-                            ConfigStr = "{\"questionUngraded\":0,\"subQuestion\":1}",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "TimeCode",
-                            IsDeleted = false,
-                            Mission = "QuestionReward",
-                            SuperConfigStr = "{\"questionUngraded\":0,\"subQuestion\":2}"
-                        },
-                        new
-                        {
-                            Id = new Guid("13b22301-cc43-4cea-b82d-dfa78a7083da"),
-                            ConfigStr = "{\"number\":0}",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "TimeCode",
-                            IsDeleted = false,
-                            Mission = "SuperFireMode",
-                            SuperConfigStr = "{\"number\":1}"
                         });
                 });
 
