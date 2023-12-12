@@ -2,44 +2,45 @@
 
 namespace Fsel.System.Application.Queries.TokenConfigQuery
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.IRepositories;
+    using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetTokenQuery : IRequest<MethodResult<int>>
+    public class GetTokenQuery : IRequest<MethodResult<TokenConfigModel>>
     {
         public EnumTokenFeature Feature { get; set; }
         public EnumTokenMission Mission { get; set; }
-        public bool IsSuperFireMode { get; set; }
-        public Guid? ObjectId { get; set; }
-        public int? Level { get; set; }
     }
 
-    public class GetTokenQueryHandler : IRequestHandler<GetTokenQuery, MethodResult<int>>
+    public class GetTokenQueryHandler : IRequestHandler<GetTokenQuery, MethodResult<TokenConfigModel>>
     {
         private readonly ITokenConfigRepository _tokenConfigRepository;
         private readonly TokenConfigConverter _tokenConfigConverter;
+        private readonly IMapper _mapper;
 
-        public GetTokenQueryHandler(ITokenConfigRepository tokenConfigRepository, TokenConfigConverter tokenConfigConverter)
+        public GetTokenQueryHandler(ITokenConfigRepository tokenConfigRepository, TokenConfigConverter tokenConfigConverter, IMapper mapper)
         {
             _tokenConfigRepository = tokenConfigRepository;
             _tokenConfigConverter = tokenConfigConverter;
+            _mapper = mapper;
         }
 
-        public async Task<MethodResult<int>> Handle(GetTokenQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TokenConfigModel>> Handle(GetTokenQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<int>();
+            var methodResult = new MethodResult<TokenConfigModel>();
             var tokenConfig = await _tokenConfigRepository.Queryable.FirstOrDefaultAsync(x => x.Feature == request.Feature && x.Mission == request.Mission, cancellationToken);
             if (tokenConfig == null)
             {
                 return methodResult;
             }
-            methodResult.Result = _tokenConfigConverter.GetTotalCorrectByAnswerType(request.IsSuperFireMode ? tokenConfig.SuperConfig : tokenConfig.Config, request.ObjectId, request.Level);
+            methodResult.Result = _mapper.Map<TokenConfigModel>(tokenConfig);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

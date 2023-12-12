@@ -29,7 +29,7 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// get list blog
         /// </summary>
-        [HttpGet("get-list-token")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<TokenConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetList()
