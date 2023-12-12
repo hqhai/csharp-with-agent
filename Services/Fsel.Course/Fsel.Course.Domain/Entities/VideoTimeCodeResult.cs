@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
 
-    public class VideoTimeCodeResult : BaseLearnResult
+    public class VideoTimeCodeResult : BaseTokenResult
     {
         public VideoResult? VideoResult { get; set; }
 
@@ -26,6 +26,11 @@ namespace Fsel.Course.Domain.Entities
         /// Đang làm việc
         /// </summary>
         public bool IsWorking { get; set; }
+
+        /// <summary>
+        /// Token Question Reward
+        /// </summary>
+        public int TokenQuestionReward { get; set; }
 
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }

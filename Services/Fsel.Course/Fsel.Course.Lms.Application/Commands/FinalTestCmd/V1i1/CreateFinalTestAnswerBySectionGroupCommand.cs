@@ -151,6 +151,10 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.FinalTestAnswerCmd
             }
         }
 
+        private async Task UpdateTokenFinalTest()
+        {
+        }
+
         private static FinalTestResult GetFinalTestResult(IList<SkillScores>? skillScores, FinalTestResult finalTestResult)
         {
             ArgumentNullException.ThrowIfNull(skillScores);
