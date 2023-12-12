@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
@@ -27,16 +26,16 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     public class GetVideoTimeCodeRankingQueryHandler : IRequestHandler<GetVideoTimeCodeRankingQuery, MethodResult<IList<TestResultRankingModel>>>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
+        private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IMapper _mapper;
-        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
 
-        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, DateTimeConverter dateTimeConverter, IUserService userService, ITrainingService trainingService)
+        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
+            _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _mapper = mapper;
-            _dateTimeConverter = dateTimeConverter;
             _userService = userService;
             _trainingService = trainingService;
         }
@@ -48,11 +47,14 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
 
             List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
 
-            var videoTimeCodeResult = await _videoTimeCodeResultRepository.GetByIdAsync(request.VideoTimeCodeResultId);
-
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode).FirstOrDefaultAsync(x => x.Id == request.VideoTimeCodeResultId, cancellationToken);
             if (videoTimeCodeResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeResult));
+                return methodResult;
+            }
+            if (videoTimeCodeResult.VideoTimeCode?.TimeCodeType != EnumTimeCodeType.Standalone)
+            {
                 return methodResult;
             }
 
@@ -60,8 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
-                            .Include(x => x.VideoTimeCode)
-                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult!.VideoTimeCodeId && classStudentIds!.Contains(x.StudentId) && x.VideoTimeCode!.TimeCodeType != EnumTimeCodeType.Standalone)
+                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && classStudentIds!.Contains(x.StudentId))
                             .ToListAsync(cancellationToken);
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
@@ -73,16 +74,16 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 {
                     var videoTimeCodeResultStudent = videoTimeCodeResults.FirstOrDefault(x => x.StudentId == item.Id);
                     var videoTimeCodeResultDto = _mapper.Map<TestResultRankingModel>(videoTimeCodeResultStudent);
-                    if (videoTimeCodeResultDto != null && videoTimeCodeResultStudent != null)
+                    if (videoTimeCodeResultStudent != null)
                     {
-                        videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
-                        videoTimeCodeResultDto.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResultStudent.CreatedDate, videoTimeCodeResultStudent.UpdatedDate ?? DateTime.UtcNow, videoTimeCodeResults.Where(x => x.StudentId == item.Id).Select(x => x.VideoTimeCode!.ExecutionTime).FirstOrDefault());
-                        videoTimeCodeResultDto.Score = videoTimeCodeResultStudent.CorrectCount;
+                        var correctQuestion = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResultStudent.Id && x.IsCorrect == true).CountAsync(cancellationToken);
+                        videoTimeCodeResultDto.CorrectQuestion = correctQuestion;
                     }
                     else
                     {
                         videoTimeCodeResultDto = new TestResultRankingModel();
                     }
+                    videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
                     videoTimeCodeResultDto.FullName = item.Human?.FullName;
                     videoTimeCodeResultDto.AvatarPath = item.Human?.AvatarPath;
                     testResultRankings.Add(videoTimeCodeResultDto);

@@ -28,13 +28,15 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+        private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly ITrainingService _trainingService;
         private readonly IMockTestResultRepository _mockTestResultRepository;
 
-        public GetMockTestRankingQueryHandler(IMapper mapper, IUserService userService, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
+        public GetMockTestRankingQueryHandler(IMapper mapper, IUserService userService, IMockTestAnswerRepository mockTestAnswerRepository, ITrainingService trainingService, IMockTestResultRepository mockTestResultRepository)
         {
             _mapper = mapper;
             _userService = userService;
+            _mockTestAnswerRepository = mockTestAnswerRepository;
             _trainingService = trainingService;
             _mockTestResultRepository = mockTestResultRepository;
         }
@@ -71,7 +73,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 {
                     var mockTestResultStudent = mockTestResults.FirstOrDefault(x => x.StudentId == item.Id);
                     var mockTestResultDto = _mapper.Map<TestResultRankingModel>(mockTestResultStudent);
-                    if (mockTestResultDto == null)
+                    if (mockTestResultStudent != null)
+                    {
+                        var correctQuestion = await _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResultStudent.Id && x.IsCorrect == true).CountAsync(cancellationToken);
+                        mockTestResultDto.CorrectQuestion = correctQuestion;
+                    }
+                    else
                     {
                         mockTestResultDto = new TestResultRankingModel();
                     }

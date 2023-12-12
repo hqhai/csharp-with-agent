@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
             var answers = questions.Where(x => !x!.Ungraded).SelectMany(x => x!.VideoTimeCodeAnswers);
             lessonReport.AnswerTime = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Sum(x => x.WorkingTime + x.RetryWorkingTime);
             lessonReport.Percent = NumberHelper.GetPercent(answers.Sum(x => x.CorrectCount), questions.Where(x => !x!.Ungraded).Sum(x => x!.CorrectTotal));
-            lessonReport.NumberOfCorrect = answers.Count(x => x!.IsCorrect == true);
+            lessonReport.CorrectQuestion = answers.Count(x => x!.IsCorrect == true);
             lessonReport.TotalQuestion = questions.Count();
             lessonReport.HighestStreak = videoResult.HighestStreak;
             return lessonReport;

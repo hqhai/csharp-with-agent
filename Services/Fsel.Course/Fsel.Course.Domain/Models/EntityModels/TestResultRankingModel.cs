@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class TestResultRankingModel : BaseScoreResultModel
     {
         public bool IsCurrentStudent { get; set; }
-
+        public int CorrectQuestion { get; set; }
         public double? WorkingTime { get; set; }
 
         public string? AvatarPath { get; set; }
