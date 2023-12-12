@@ -28,8 +28,7 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.Listing:
-                    var listingQuestion = config.Deserialize<ListingQuestion>();
-                    result = listingQuestion;
+                    result = config.Deserialize<ListingQuestion>();
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
@@ -48,8 +47,7 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
-                    var shortAnswerWordCount = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
-                    result = shortAnswerWordCount;
+                    result = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
@@ -90,8 +88,7 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
-                    var exercisePreparation = config.Deserialize<ExercisePreparationQuestion>();
-                    result = exercisePreparation;
+                    result = config.Deserialize<ExercisePreparationQuestion>();
                     break;
 
                 default:
