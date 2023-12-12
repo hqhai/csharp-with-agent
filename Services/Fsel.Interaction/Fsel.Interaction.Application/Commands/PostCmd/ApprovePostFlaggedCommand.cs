@@ -5,6 +5,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
@@ -26,13 +27,15 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
         private readonly IInteractionActionRepository _interactionActionRepository;
         private readonly IMapper _mapper;
         private readonly CompleteApprovalPostPublisher _completeApprovalPostPublisher;
+        private readonly AuthContext _authContext;
 
-        public ApprovePostFlaggedCommandHandler(IPostRepository postRepository, IMapper mapper, IInteractionActionRepository interactionActionRepository, CompleteApprovalPostPublisher completeApprovalPostPublisher)
+        public ApprovePostFlaggedCommandHandler(IPostRepository postRepository, IMapper mapper, IInteractionActionRepository interactionActionRepository, CompleteApprovalPostPublisher completeApprovalPostPublisher, AuthContext authContext)
         {
             _postRepository = postRepository;
             _mapper = mapper;
             _interactionActionRepository = interactionActionRepository;
             _completeApprovalPostPublisher = completeApprovalPostPublisher;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PostModel>> Handle(ApprovePostFlaggedCommand request, CancellationToken cancellationToken)
@@ -69,11 +72,13 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
                     await _interactionActionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
+                List<Guid> userIds = new List<Guid>() { _authContext.CurrentUserId };
                 await _completeApprovalPostPublisher.Publish(new SetTimeCompleteApprovalModel()
                 {
-                    ExpiredDate = post.CreatedDate,
+                    StartDate = post.CreatedDate,
                     ObjectId = post.Id,
-                    ApprovalType = EnumApprovalTime.DiscussionBoardFlag
+                    ApprovalType = EnumApprovalTime.DiscussionBoardFlag,
+                    UserIds = userIds
                 },
                cancellationToken);
 

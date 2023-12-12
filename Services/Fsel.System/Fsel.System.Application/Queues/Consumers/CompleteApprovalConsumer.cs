@@ -22,7 +22,7 @@ namespace Fsel.System.Application.Queues.Consumers
                     await _mediator.Send(new CreateApprovalLogCommand
                     {
                         ObjectId = context.Message.ObjectId,
-                        ExpiredDate = context.Message.ExpiredDate,
+                        StartDate = context.Message.StartDate,
                         ApprovalType = context.Message.ApprovalType,
                     }).ConfigureAwait(false);
                 }

@@ -8,9 +8,11 @@ namespace Fsel.System.Domain.Models.CommandModels.ApprovalLog
     {
         public Guid? ObjectId { get; set; }
 
-        public DateTime ExpiredDate { get; set; }
+        public DateTime StartDate { get; set; }
 
         public EnumApprovalTime ApprovalType { get; set; }
+
+        public IList<Guid>? UserIds { get; set; }
     }
 
 }

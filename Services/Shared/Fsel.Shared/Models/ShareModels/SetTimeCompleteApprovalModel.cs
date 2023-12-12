@@ -6,10 +6,12 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class SetTimeCompleteApprovalModel
     {
-        public DateTime ExpiredDate { get; set; }
+        public DateTime StartDate { get; set; }
 
         public Guid ObjectId { get; set; }
 
         public EnumApprovalTime ApprovalType { get; set; }
+
+        public IList<Guid>? UserIds { get; set; }
     }
 }

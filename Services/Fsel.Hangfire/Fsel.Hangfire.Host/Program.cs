@@ -5,6 +5,7 @@ using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Hangfire.Application.Queues.Consumers;
 using Fsel.Hangfire.Application.Queues.Publishers;
+using Fsel.Hangfire.Application.Workers;
 using Fsel.Hangfire.Host.Jobs;
 using Fsel.Shared.Constants;
 using Hangfire;
@@ -26,6 +27,7 @@ builder.Services.AddScoped<UpdateTeacherGradingInClassForumAndMockTestPublisher>
 builder.Services.AddScoped<SyncStudentShieldEveryDayPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<CompleteTestWhenTimeOutPublisher>();
+builder.Services.AddScoped<CompleteApprovalWhenTimeOutWorker>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {

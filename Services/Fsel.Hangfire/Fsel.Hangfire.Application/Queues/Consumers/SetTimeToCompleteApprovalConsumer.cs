@@ -9,18 +9,18 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
 
     public class SetTimeToCompleteApprovalConsumer : IConsumer<SetTimeCompleteApprovalModel>
     {
+
+        private const int Delay_Approve_Minutes = 1; // cộng thêm 1 phút trước khi chạy job để đảm bảo không có ai phê duyệt bài viết trước khi job chạy
         public SetTimeToCompleteApprovalConsumer()
         {
         }
 
         public Task Consume(ConsumeContext<SetTimeCompleteApprovalModel> context)
         {
+
             if (context != null)
             {
-                double delayHour = (context.Message.ExpiredDate.Hour - DateTime.UtcNow.Hour);
-
-                JobExtensions.SetScheduleJob<CompleteApprovalWhenTimeOutWorker, SetTimeCompleteApprovalModel>(TimeSpan.FromHours(delayHour), context.Message);
-
+                JobExtensions.SetScheduleJob<CompleteApprovalWhenTimeOutWorker, SetTimeCompleteApprovalModel>(context.Message.StartDate.AddMinutes(Delay_Approve_Minutes), context.Message);
             }
             return Task.CompletedTask;
         }

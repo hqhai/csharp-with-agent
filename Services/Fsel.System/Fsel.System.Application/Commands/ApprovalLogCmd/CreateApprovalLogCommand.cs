@@ -2,11 +2,13 @@
 
 namespace Fsel.System.Application.Commands.ApprovalLogCmd
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Queues.Publisher;
+    using Fsel.System.Application.Services.UserServices;
+    using Fsel.System.Application.Services.UserServices.Models.QueryModels;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.ApprovalLog;
@@ -24,12 +26,14 @@ namespace Fsel.System.Application.Commands.ApprovalLogCmd
         private readonly IApprovalLogRepository _approvalLogRepository;
         private readonly IApprovalTimeConfigRepository _approvalTimeConfigRepository;
         private readonly SetCompleteApprovalPublisher _setCompleteApprovalPublisher;
+        private readonly IUserService _userService;
 
-        public CreateApprovalLogCommandHandler(IApprovalLogRepository approvalLogRepository, IApprovalTimeConfigRepository approvalTimeConfigRepository, SetCompleteApprovalPublisher setCompleteApprovalPublisher)
+        public CreateApprovalLogCommandHandler(IApprovalLogRepository approvalLogRepository, IApprovalTimeConfigRepository approvalTimeConfigRepository, SetCompleteApprovalPublisher setCompleteApprovalPublisher, IUserService userService)
         {
             _approvalLogRepository = approvalLogRepository;
             _approvalTimeConfigRepository = approvalTimeConfigRepository;
             _setCompleteApprovalPublisher = setCompleteApprovalPublisher;
+            _userService = userService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateApprovalLogCommand request, CancellationToken cancellationToken)
@@ -51,10 +55,11 @@ namespace Fsel.System.Application.Commands.ApprovalLogCmd
 
             ApprovalLog newApprovalLog = new ApprovalLog()
             {
-                ExpiredDate = request.ExpiredDate.AddMinutes(approvalTimeConfigs!.ExpiredTime),
+                ExpiredDate = request.StartDate.AddMinutes(approvalTimeConfigs!.ExpiredTime),
                 Status = EnumApprovalLogStatus.Pending,
                 ApprovalTimeConfigId = approvalTimeConfigs.Id,
                 ObjectId = (Guid)request.ObjectId!,
+                UserIdsStr = ConvertHelper.Serialize(request.UserIds)
             };
 
 
@@ -70,12 +75,27 @@ namespace Fsel.System.Application.Commands.ApprovalLogCmd
                }
                else
                {
+                   // Lấy list userId của nhóm moderator
+                   GetUsersByRoleQueryModel roleQuery = new GetUsersByRoleQueryModel();
+                   List<Guid> userIds = new List<Guid>();
+                   roleQuery.Role = EnumRole.Moderator;
+                   var user = await _userService.GetUserByRoleAsync(roleQuery);
+                   if (user.Content?.Result != null)
+                   {
+                       var users = user.Content.Result;
+                       userIds.AddRange(users.Select(u => u.Id));
+                   }
+
+
+                   // Tạo queue push sang hangfire để gọi job thực thi
                    await _setCompleteApprovalPublisher.Publish(
                     new SetTimeCompleteApprovalModel()
                     {
-                        ExpiredDate = newApprovalLog.ExpiredDate,
+                        // khi gửi sang job để khở chạy thì thời điểm startdate bên job chính là thời điểm hết hạn (expiredate) của đối tượng được phê duyệt
+                        StartDate = newApprovalLog.ExpiredDate,
                         ObjectId = newApprovalLog.ObjectId,
-                        ApprovalType = approvalTimeConfigs.ApprovalType
+                        ApprovalType = approvalTimeConfigs.ApprovalType,
+                        UserIds = userIds
                     },
                     cancellationToken);
                }

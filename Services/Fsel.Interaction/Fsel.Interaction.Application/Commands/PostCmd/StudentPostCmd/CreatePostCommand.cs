@@ -77,7 +77,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
 
                 await _completeApprovalPostPublisher.Publish(new SetTimeCompleteApprovalModel()
                 {
-                    ExpiredDate = studentPosts.CreatedDate,
+                    StartDate = studentPosts.CreatedDate,
                     ObjectId = studentPosts.Id,
                     ApprovalType = EnumApprovalTime.DiscussionBoard
                 },
