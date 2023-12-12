@@ -12,7 +12,6 @@ namespace Fsel.Shared.Enums
         SkillMockTest,
         FullMockTest,
         SignIn,
-        FocusTime,
         DailyCheckin,
         QuestBoard,
         PesonalInfo,

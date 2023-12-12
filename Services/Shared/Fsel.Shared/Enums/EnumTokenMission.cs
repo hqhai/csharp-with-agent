@@ -14,9 +14,6 @@ namespace Fsel.Shared.Enums
 
         QuestionReward,
 
-        //mốc thời gian tập trung
-        FocusMode,
-
         //Check in mỗi ngày
         DailyCheckin,
 
