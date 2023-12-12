@@ -49,7 +49,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.ShortAnswerWordCount:
                     var shortAnswerWordCount = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount) : shortAnswerWordCount;
+                    result = shortAnswerWordCount;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
@@ -136,15 +136,6 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     data.Contents[i].IsCorrect = default;
                 }
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(ShortAnswerQuestionWordCountBaseQuestion? data)
-        {
-            if (data != null)
-            {
-                data.ExactWordCount = null;
             }
             return data;
         }
