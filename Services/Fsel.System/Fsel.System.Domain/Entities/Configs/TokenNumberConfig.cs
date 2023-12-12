@@ -19,7 +19,7 @@ namespace Fsel.System.Domain.Entities.Configs
 
     public class TokenDailyCheckin
     {
-        public IList<DailyCheckinNumber>? DailyCheckins { get; set; }
+        public IList<DailyCheckinNumber>? DailyCheckIns { get; set; }
     }
 
 

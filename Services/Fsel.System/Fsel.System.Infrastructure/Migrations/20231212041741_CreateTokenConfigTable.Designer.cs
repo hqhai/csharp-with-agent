@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20231212035747_CreateTokenConfigTable")]
+    [Migration("20231212041741_CreateTokenConfigTable")]
     partial class CreateTokenConfigTable
     {
         /// <inheritdoc />
@@ -1330,7 +1330,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("95c9f9b7-cc16-43af-b32e-4ee3689d4e27"),
-                            ConfigStr = "[{\"level\":1,\"number\":5},{\"level\":2,\"number\":20},{\"level\":3,\"number\":40}]",
+                            ConfigStr = "{\"dailyCheckIns\":[{\"level\":1,\"number\":5},{\"level\":2,\"number\":20},{\"level\":3,\"number\":40}]}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
