@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Course.Domain.IEntities;
 
-    public class TestResultReportModel : BaseLearnResultModel, IQuestionAnswer
+    public class TestResultReportModel : BaseLearnResultModel, ICorrectQuestion
     {
         public double? Score { get; set; }
         public int CorrectQuestion { get; set; }

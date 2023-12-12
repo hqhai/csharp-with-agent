@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 {
     using Fsel.Course.Domain.IEntities;
 
-    public class LessonReportModel : IHighestStreak, IQuestionAnswer
+    public class LessonReportModel : IHighestStreak, ICorrectQuestion
     {
         public int CorrectQuestion { get; set; }
         public int TotalQuestion { get; set; }

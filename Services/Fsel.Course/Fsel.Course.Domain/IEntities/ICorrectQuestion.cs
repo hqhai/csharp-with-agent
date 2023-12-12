@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.IEntities
 {
-    public interface IQuestionAnswer
+    public interface ICorrectQuestion
     {
         public int CorrectQuestion { get; set; }
         public int TotalQuestion { get; set; }
