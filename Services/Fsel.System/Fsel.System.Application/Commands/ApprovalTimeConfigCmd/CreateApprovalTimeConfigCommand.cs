@@ -42,13 +42,11 @@ namespace Fsel.System.Application.Commands.ApprovalTimeConfigCmd
             #endregion
 
             #region Mapper
-            var (updateApprovalTimeConfigs, newListApprovalTimeConfigs) = MapApprovalTimeConfigs(request);
+            var updateApprovalTimeConfigs = MapApprovalTimeConfigs(request);
             #endregion
 
             await _approveTimeConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                //add new
-                await _approveTimeConfigRepository.AddList(newListApprovalTimeConfigs);
 
                 //update 
                 _approveTimeConfigRepository.UpdateList(updateApprovalTimeConfigs);
@@ -66,7 +64,7 @@ namespace Fsel.System.Application.Commands.ApprovalTimeConfigCmd
         }
 
 
-        private (List<ApprovalTimeConfig> updateApprovalTime, List<ApprovalTimeConfig> newListApprovalTime) MapApprovalTimeConfigs(CreateApprovalTimeConfigCommand request)
+        private List<ApprovalTimeConfig> MapApprovalTimeConfigs(CreateApprovalTimeConfigCommand request)
         {
             var requestApprovalTimeConfigTypes = request.ApprovalTimeConfigs!.Select(x => x.ApprovalType).ToList();
 
@@ -91,9 +89,7 @@ namespace Fsel.System.Application.Commands.ApprovalTimeConfigCmd
                 .Where(x => !updateApprovalTimeConfigs.Any(y => y.ApprovalType == x.ApprovalType))
                 .ToList();
 
-            List<ApprovalTimeConfig> newApprovalTimeConfigs = _mapper.Map<List<ApprovalTimeConfig>>(newApprovalTimes);
-
-            return (updateApprovalTimeConfigs, newApprovalTimeConfigs);
+            return updateApprovalTimeConfigs;
         }
     }
 }

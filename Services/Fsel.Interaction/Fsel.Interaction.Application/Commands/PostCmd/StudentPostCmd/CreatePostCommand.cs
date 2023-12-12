@@ -90,10 +90,5 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
 
             return methodResult;
         }
-
-
-
-
-
     }
 }
