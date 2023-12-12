@@ -17,7 +17,9 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
         {
             if (context != null)
             {
-                JobExtensions.SetScheduleJob<CompleteApprovalWhenTimeOutWorker, SetTimeCompleteApprovalModel>(TimeSpan.FromSeconds((DateTime.UtcNow.Hour - context.Message.ExpiredDate.Hour) * 60), context.Message!);
+                double delayHour = (context.Message.ExpiredDate.Hour - DateTime.UtcNow.Hour);
+
+                JobExtensions.SetScheduleJob<CompleteApprovalWhenTimeOutWorker, SetTimeCompleteApprovalModel>(TimeSpan.FromHours(delayHour), context.Message);
 
             }
             return Task.CompletedTask;

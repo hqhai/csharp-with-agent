@@ -30,7 +30,7 @@ builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.LmsQueue.NameQueue.SetTimeToCompleteTest, typeof(SetTimeToCompleteTestConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPost, typeof(SetTimeToCompleteApprovalConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPostTimeOut, typeof(SetTimeToCompleteApprovalConsumer) },
 });
 var app = builder.Build();
 

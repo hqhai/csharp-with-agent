@@ -7,10 +7,12 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -22,11 +24,13 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
     {
         private readonly IMapper _mapper;
         private readonly IPostRepository _postRepository;
+        private readonly CompleteApprovalPostPublisher _completeApprovalPostPublisher;
 
-        public ApprovePostPendingCommandHandler(IMapper mapper, IPostRepository postRepository)
+        public ApprovePostPendingCommandHandler(IMapper mapper, IPostRepository postRepository, CompleteApprovalPostPublisher completeApprovalPostPublisher)
         {
             _mapper = mapper;
             _postRepository = postRepository;
+            _completeApprovalPostPublisher = completeApprovalPostPublisher;
         }
 
         public async Task<MethodResult<PostModel>> Handle(ApprovePostPendingCommand request, CancellationToken cancellationToken)
@@ -50,10 +54,17 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
                 post.Status = request.IsApprove ? EnumPostStatus.Active : EnumPostStatus.Reject;
                 _postRepository.Update(post);
 
+                await _completeApprovalPostPublisher.Publish(new SetTimeCompleteApprovalModel()
+                {
+                    ExpiredDate = post.CreatedDate,
+                    ObjectId = post.Id,
+                    ApprovalType = EnumApprovalTime.DiscussionBoard
+                },
+                cancellationToken);
+
                 await _postRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<PostModel>(post);
-
                 return methodResult;
             });
 

@@ -24,7 +24,7 @@ namespace Fsel.System.Application.Queues.Publisher
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPost, request, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPostTimeOut, request, cancellationToken);
         }
     }
 }

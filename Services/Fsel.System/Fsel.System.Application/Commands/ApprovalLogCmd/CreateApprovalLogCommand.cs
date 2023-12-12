@@ -23,12 +23,10 @@ namespace Fsel.System.Application.Commands.ApprovalLogCmd
     {
         private readonly IApprovalLogRepository _approvalLogRepository;
         private readonly IApprovalTimeConfigRepository _approvalTimeConfigRepository;
-        private readonly IMapper _mapper;
         private readonly SetCompleteApprovalPublisher _setCompleteApprovalPublisher;
 
-        public CreateApprovalLogCommandHandler(IMapper mapper, IApprovalLogRepository approvalLogRepository, IApprovalTimeConfigRepository approvalTimeConfigRepository, SetCompleteApprovalPublisher setCompleteApprovalPublisher)
+        public CreateApprovalLogCommandHandler(IApprovalLogRepository approvalLogRepository, IApprovalTimeConfigRepository approvalTimeConfigRepository, SetCompleteApprovalPublisher setCompleteApprovalPublisher)
         {
-            _mapper = mapper;
             _approvalLogRepository = approvalLogRepository;
             _approvalTimeConfigRepository = approvalTimeConfigRepository;
             _setCompleteApprovalPublisher = setCompleteApprovalPublisher;
@@ -39,65 +37,50 @@ namespace Fsel.System.Application.Commands.ApprovalLogCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            #region Validate
-            if (request.ApprovalLogCommandModels == null || request.ApprovalLogCommandModels.Count == 0)
+
+            var approvalTimeConfigs = await _approvalTimeConfigRepository.Queryable.Where(x => request.ApprovalType == x.ApprovalType).FirstOrDefaultAsync(cancellationToken);
+
+            if (approvalTimeConfigs == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.Result = false;
                 return methodResult;
             }
-            #endregion
 
-            var approvalTimeConfigIds = request.ApprovalLogCommandModels.Select(x => x.ApprovalTimeConfigId).ToList();
-            var approvalLogIds = request.ApprovalLogCommandModels.Select(x => x.Id).ToList();
+            var existsApproveLog = _approvalLogRepository.Queryable.FirstOrDefault(x => x.Status == EnumApprovalLogStatus.Pending && approvalTimeConfigs.Id == x.ApprovalTimeConfigId && request.ObjectId == x.ObjectId);
 
-            var existsApproveLog = _approvalLogRepository.Queryable.Where(x => x.Status == EnumApprovalLogStatus.Pending && approvalTimeConfigIds.Contains(x.ApprovalTimeConfigId) && approvalLogIds.Contains(x.Id)).ToList();
-            var existsApproveLogIds = existsApproveLog.Select(x => x.Id).ToList();
-
-            var approvalTimeConfigs = await _approvalTimeConfigRepository.Queryable.Where(x => approvalTimeConfigIds.Contains(x.Id)).ToListAsync(cancellationToken);
-
-            var newApprovalLog =
-                (from req in request.ApprovalLogCommandModels
-                 join config in approvalTimeConfigs on req.ApprovalTimeConfigId equals config.Id
-                 where approvalTimeConfigIds.Contains(req.ApprovalTimeConfigId) && (req.Id == null || !existsApproveLog.Select(x => x.Id).ToList().Contains((Guid)req.Id!))
-                 select new ApprovalLog()
-                 {
-                     ExpiredDate = req.ExpiredDate.AddMinutes(config.ExpiredTime),
-                     Status = EnumApprovalLogStatus.Pending,
-                     ApprovalTimeConfigId = req.ApprovalTimeConfigId,
-                     ObjectId = (Guid)req.ObjectId!,
-                 }).ToList();
-
-
-
-            existsApproveLog.ForEach(item =>
+            ApprovalLog newApprovalLog = new ApprovalLog()
             {
-                if (item.ExpiredDate < DateTime.UtcNow)
-                {
-                    item.Status = EnumApprovalLogStatus.Expired;
-                }
-                else
-                {
-                    item.Status = EnumApprovalLogStatus.OnTime;
-                }
-            });
+                ExpiredDate = request.ExpiredDate.AddMinutes(approvalTimeConfigs!.ExpiredTime),
+                Status = EnumApprovalLogStatus.Pending,
+                ApprovalTimeConfigId = approvalTimeConfigs.Id,
+                ObjectId = (Guid)request.ObjectId!,
+            };
+
 
             await _approvalLogRepository.ExecuteTransactionAsync(async () =>
            {
-               await _approvalLogRepository.AddList(newApprovalLog);
+               _approvalLogRepository.Add(newApprovalLog);
 
-               _approvalLogRepository.UpdateList(existsApproveLog);
+               if (existsApproveLog != null)
+               {
+                   existsApproveLog.Status = existsApproveLog.ExpiredDate < DateTime.UtcNow ? EnumApprovalLogStatus.Expired : EnumApprovalLogStatus.OnTime;
+                   _approvalLogRepository.Update(existsApproveLog);
+
+               }
+               else
+               {
+                   await _setCompleteApprovalPublisher.Publish(
+                    new SetTimeCompleteApprovalModel()
+                    {
+                        ExpiredDate = newApprovalLog.ExpiredDate,
+                        ObjectId = newApprovalLog.ObjectId,
+                        ApprovalType = approvalTimeConfigs.ApprovalType
+                    },
+                    cancellationToken);
+               }
                //save
                await _approvalLogRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-               await _setCompleteApprovalPublisher.Publish(
-                   new SetTimeCompleteApprovalModel()
-                   {
-                       ExpiredDate = newApprovalLog.FirstOrDefault().ExpiredDate,
-                       ObjectId = newApprovalLog.FirstOrDefault().ObjectId,
-                       ApprovalType = EnumApprovalTime.DiscussionBoard
-                   },
-                   cancellationToken);
 
                //return
                methodResult.StatusCode = StatusCodes.Status201Created;

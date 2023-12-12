@@ -16,7 +16,7 @@ namespace Fsel.Hangfire.Application.Workers
             _completeApprovalPosWhenTimeOutPublisher = completeApprovalPosWhenTimeOutPublisher;
         }
 
-        public async Task RunAsync(SetTimeCompleteApprovalModel? data = null)
+        public async Task RunAsync(SetTimeCompleteApprovalModel? data)
         {
             if (data != null)
             {
