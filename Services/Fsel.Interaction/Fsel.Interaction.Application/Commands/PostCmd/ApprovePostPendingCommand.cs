@@ -53,6 +53,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
                 await _postRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<PostModel>(post);
+
                 return methodResult;
             });
 
