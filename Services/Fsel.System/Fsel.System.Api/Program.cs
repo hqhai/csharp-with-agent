@@ -8,7 +8,6 @@ using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.UserServices;
 using Fsel.System.Domain.IRepositories;
 using Fsel.System.Infrastructure;
-using Fsel.System.Infrastructure.Common;
 using Fsel.System.Infrastructure.Repositories;
 using Fsel.System.Infrastructure.ValueSettings;
 
@@ -37,9 +36,6 @@ builder.Services.AddScoped<IGameVocabularyTypeRepository, GameVocabularyTypeRepo
 builder.Services.AddScoped<IFocusTimeConfigRepository, FocusTimeRepository>();
 builder.Services.AddScoped<IGameVocabularyPlatformRepository, GameVocabularyPlatformRepository>();
 builder.Services.AddScoped<ITokenConfigRepository, TokenConfigRepository>();
-
-// Converter
-builder.Services.AddScoped<TokenConfigConverter>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);

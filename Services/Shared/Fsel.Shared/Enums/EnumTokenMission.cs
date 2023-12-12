@@ -4,6 +4,7 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumTokenMission
     {
+        //Test done
         TestDone,
 
         //Highest Streak
@@ -12,40 +13,14 @@ namespace Fsel.Shared.Enums
         //Super fire mode
         SuperFire,
 
+        //Question Reward
         QuestionReward,
 
         //Check in mỗi ngày
         DailyCheckin,
 
-        //test complete
-        TestComplete,
-
-        //time code submit successfully
-        TimeCodeSubmit,
-
         //Quest Board
         QuestBoard,
-
-        //B uy course
-        BuyCourse,
-
-        //Upgrade course
-        UpgradeCourse,
-
-        //Complete achievement
-        CompleteAchievement,
-
-        //Complete phases
-        CompletePhaseAchievement,
-
-        //Review FSEL
-        ReviewFSEL,
-
-        //buy course standad
-        Standard,
-
-        //buy course Premium
-        Permium,
 
         // forcus time
         FocusTime,
@@ -61,7 +36,26 @@ namespace Fsel.Shared.Enums
 
         //DailyQuest
         DailyQuest,
+
+        //Complete achievement
+        CompleteAchievement,
+
+        //Complete phases
+        CompletePhaseAchievement,
+
+        //buy course standad
+        Standard,
+
+        //buy course Premium
+        Permium,
+
+        //Upgrade course
+        UpgradeCourse,
+
         //Review course
-        ReviewCourse
+        ReviewCourse,
+
+        //Review FSEL
+        ReviewFSEL,
     }
 }

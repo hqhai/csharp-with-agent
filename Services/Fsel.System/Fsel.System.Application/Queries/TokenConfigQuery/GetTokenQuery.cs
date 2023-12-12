@@ -7,7 +7,6 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
-    using Fsel.System.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -21,13 +20,11 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     public class GetTokenQueryHandler : IRequestHandler<GetTokenQuery, MethodResult<TokenConfigModel>>
     {
         private readonly ITokenConfigRepository _tokenConfigRepository;
-        private readonly TokenConfigConverter _tokenConfigConverter;
         private readonly IMapper _mapper;
 
-        public GetTokenQueryHandler(ITokenConfigRepository tokenConfigRepository, TokenConfigConverter tokenConfigConverter, IMapper mapper)
+        public GetTokenQueryHandler(ITokenConfigRepository tokenConfigRepository, IMapper mapper)
         {
             _tokenConfigRepository = tokenConfigRepository;
-            _tokenConfigConverter = tokenConfigConverter;
             _mapper = mapper;
         }
 

@@ -11,13 +11,10 @@ namespace Fsel.Shared.Enums
         FocusMode,
         SkillMockTest,
         FullMockTest,
-        SignIn,
         DailyCheckin,
         QuestBoard,
-        PesonalInfo,
         Achievement,
         ReviewSystem,
-        Test,
         UpGradeCourse,
         BuyNextCourse
     }
