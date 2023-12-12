@@ -35,10 +35,8 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<TokenConfigModel>>();
 
-            //var tokenConfigs = await _tokenConfigRepository.Queryable.ToListAsync(cancellationToken);
+            var tokenConfigs = await _tokenConfigRepository.Queryable.ToListAsync(cancellationToken);
 
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TokenConfig);
-            var tokenConfigs = ConvertHelper.DeserializeFromFilePath<IList<TokenConfig>>(path);
             methodResult.Result = _mapper.Map<IList<TokenConfigModel>>(tokenConfigs);
             return methodResult;
         }

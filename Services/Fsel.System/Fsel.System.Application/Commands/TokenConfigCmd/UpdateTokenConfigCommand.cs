@@ -40,9 +40,9 @@ namespace Fsel.System.Application.Commands.TokenConfigCmd
                 return methodResult;
             }
 
-            _mapper.Map(request, tokenConfig);
-
             #endregion Validation
+
+            _mapper.Map(request, tokenConfig);
 
             await _tokenConfigRepository.ExecuteTransactionAsync(async () =>
             {
