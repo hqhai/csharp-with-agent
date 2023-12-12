@@ -39,6 +39,18 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
+        /// get token
+        /// </summary>
+        [HttpGet("get-token")]
+        [ProducesResponseType(typeof(MethodResult<IList<TokenConfigModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromQuery] GetTokenQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Update a token
         /// </summary>
         [HttpPut("{id}")]
