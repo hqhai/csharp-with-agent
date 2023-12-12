@@ -25,7 +25,6 @@ namespace Fsel.System.Domain.Entities.Configs
         public IList<DailyCheckinNumber>? DailyCheckins { get; set; }
     }
 
-
     public class DailyCheckinNumber
     {
         public int Level { get; set; }
@@ -79,6 +78,7 @@ namespace Fsel.System.Domain.Entities.Configs
         public int? NumberStandard { get; set; }
         public int? NumberPremium { get; set; }
     }
+
     public class TestDone
     {
         public int? Test { get; set; }
