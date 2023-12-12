@@ -23,25 +23,25 @@ namespace Fsel.System.Api.Controllers
     public class ApprovalLogController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ICourseTimeConfigRepository _courseTimeConfigRepository;
+        private readonly IApprovalLogRepository _approvalLogRepository;
 
-        public ApprovalLogController(IMediator mediator, ICourseTimeConfigRepository courseTimeConfigRepository)
+        public ApprovalLogController(IMediator mediator,IApprovalLogRepository approvalLogRepository)
         {
             _mediator = mediator;
-            _courseTimeConfigRepository = courseTimeConfigRepository;
+            _approvalLogRepository = approvalLogRepository;
         }
 
 
         /// <summary>
         /// Execute-list-query
         /// </summary>
-        [HttpPost("execute-list-query")]
+        [HttpGet("execute-list-query")]
         [ProducesResponseType(typeof(MethodResult<IList<ApprovalTimeConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission]
-        public async Task<IActionResult> ExecuteList([FromBody] BaseQueryModel query)
+        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
         {
-            var result = await _courseTimeConfigRepository.GetListResultAsync<ApprovalTimeConfigModel>(query);
+            var result = await _approvalLogRepository.GetListResultAsync<ApprovalTimeConfigModel>(query);
             return result.GetActionResult();
         }
 

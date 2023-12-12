@@ -6,8 +6,6 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.System.Application.Commands.CourseTimeConfigCmd;
-    using Fsel.System.Application.Querys.CourseTimeConfigQuery;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
@@ -15,7 +13,6 @@ namespace Fsel.System.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
-    using Fsel.System.Domain.Entities;
     using Fsel.System.Application.Queries.ApprovalTimeConfigQuery;
     using Fsel.System.Application.Commands.ApprovalTimeConfigCmd;
 
