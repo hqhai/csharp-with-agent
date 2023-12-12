@@ -7,7 +7,7 @@ namespace Fsel.System.Domain.Entities.Configs
         public int? Number { get; set; }
     }
 
-    public class TokenForcusTime
+    public class TokenFocusTime
     {
         public IList<FocusTimeNumber>? FocusTimes { get; set; }
     }
@@ -17,12 +17,12 @@ namespace Fsel.System.Domain.Entities.Configs
         public Guid FocusTimeId { get; set; }
     }
 
-    public class TokenDailyCheckin
+    public class TokenDailyCheckIn
     {
-        public IList<DailyCheckinNumber>? DailyCheckins { get; set; }
+        public IList<DailyCheckInNumber>? DailyCheckIns { get; set; }
     }
 
-    public class DailyCheckinNumber : TokenNumber
+    public class DailyCheckInNumber : TokenNumber
     {
         public int Level { get; set; }
     }

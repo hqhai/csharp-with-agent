@@ -25,14 +25,14 @@ namespace Fsel.System.Infrastructure.Common
 
         private static int GetToken(object? config, Guid objectId)
         {
-            var data = config.Deserialize<TokenForcusTime>();
+            var data = config.Deserialize<TokenFocusTime>();
             return data?.FocusTimes?.FirstOrDefault(x => x.FocusTimeId == objectId)?.Number ?? default;
         }
 
         private static int GetToken(object? config, int level)
         {
-            var data = config.Deserialize<TokenDailyCheckin>();
-            return data?.DailyCheckins?.FirstOrDefault(x => x.Level == level)?.Number ?? default;
+            var data = config.Deserialize<TokenDailyCheckIn>();
+            return data?.DailyCheckIns?.FirstOrDefault(x => x.Level == level)?.Number ?? default;
         }
 
         private static int GetToken(object? config)
