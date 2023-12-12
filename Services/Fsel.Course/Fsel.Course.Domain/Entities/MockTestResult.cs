@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
 
-    public class MockTestResult : BaseResultScore
+    public class MockTestResult : BaseLearnResult
     {
         public Guid? GradingTeacherId { get; set; }
 
@@ -24,7 +24,6 @@ namespace Fsel.Course.Domain.Entities
         public Guid MockTestId { get; set; }
 
         public DateTime? GradingStartDate { get; set; }
-
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
         public ICollection<MockTestScore> MockTestScores { get; set; } = new List<MockTestScore>();
         public ICollection<SectionGroupResult> SectionGroupResults { get; set; } = new List<SectionGroupResult>();

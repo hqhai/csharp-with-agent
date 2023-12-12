@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
 
-    public class BaseResultScoreModel : BaseResultModel
+    public class BaseScoreResultModel : BaseResultModel
     {
         public IList<SkillScores>? SkillScores { get; set; }
     }

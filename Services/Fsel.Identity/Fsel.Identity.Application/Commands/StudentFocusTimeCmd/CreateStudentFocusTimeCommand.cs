@@ -93,7 +93,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                     studentFocusTime.ExecuteTime = request.ExecuteTime;
 
 
-                    if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime)
+                    if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime && studentFocusTime.IsEstablished)
                     {
                         student.NumberOfToken += CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token
                         _studentRepository.Update(student);

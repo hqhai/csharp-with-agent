@@ -6,10 +6,10 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
 
     public class RetryClassForumResultCommandModel : BaseCommandModel
     {
-        public string? RetryContent { get; set; }
+        public string? Content { get; set; }
 
-        public string? RetryWordContent { get; set; }
+        public string? WordContent { get; set; }
 
-        public IList<string>? RetryFilePaths { get; set; }
+        public IList<string>? FilePaths { get; set; }
     }
 }

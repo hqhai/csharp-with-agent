@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
 
-    public class MockTestResultModel : BaseResultScoreModel
+    public class MockTestResultModel : BaseLearnResultModel
     {
         public string? FeedbackNote { get; set; }
         public int FeedbackStars { get; set; }

@@ -17,6 +17,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Videos;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
+        private readonly LinQHelper _linQHelper;
         private readonly IMapper _mapper;
 
         public VideoConverter(IVideoRepository videoRepository
@@ -47,6 +49,7 @@ namespace Fsel.Course.Infrastructure.Common
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , IExerciseQuestionRepository exerciseQuestionRepository
             , ITimeCodeExerciseRepository timeCodeExerciseRepository
+            , LinQHelper linQHelper
             , IMapper mapper)
         {
             _videoRepository = videoRepository;
@@ -60,6 +63,7 @@ namespace Fsel.Course.Infrastructure.Common
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _timeCodeExerciseRepository = timeCodeExerciseRepository;
+            _linQHelper = linQHelper;
             _mapper = mapper;
         }
 
@@ -340,6 +344,78 @@ namespace Fsel.Course.Infrastructure.Common
             return (scoreQuery.ToList(), questions.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer));
         }
 
+        public async Task<LessonReportModel?> GetLessonReport(VideoResult videoResult)
+        {
+            ArgumentNullException.ThrowIfNull(videoResult);
+            var answerQuery = from baseQ in _videoRepository.Queryable
+                              join vt in _videoTimeCodeRepository.Queryable on baseQ.Id equals vt.VideoId
+                              join vtcr in _videoTimeCodeResultRepository.Queryable on vt.Id equals vtcr.VideoTimeCodeId
+                              join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
+                              join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
+                              join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
+                              join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on q.Id equals vtca.QuestionId
+                              where baseQ.Id == videoResult.VideoId && vt.TimeCodeType == EnumTimeCodeType.Standalone && vtcr.VideoResultId == videoResult.Id
+                              group new { vtcr, q } by baseQ into g
+                              select new
+                              {
+                                  CorrectCount = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Sum(x => x.CorrectCount),
+                                  CorrectTotal = g.Sum(x => x.q.CorrectTotal),
+                                  NumberOfCorrect = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Count(x => x.IsCorrect == true),
+                                  TotalQuestion = g.Select(x => x.q).Count(),
+                                  AnswerTime = g.Select(x => x.vtcr).Where(x => x.VideoResultId == videoResult.Id).Sum(x => x.WorkingTime + x.RetryWorkingTime),
+                              };
+
+            var lessonReport = await answerQuery.FirstOrDefaultAsync();
+            if (lessonReport == null)
+            {
+                return default;
+            }
+            return new LessonReportModel
+            {
+                AnswerTime = lessonReport.AnswerTime,
+                NumberOfCorrect = lessonReport.NumberOfCorrect,
+                TotalQuestion = lessonReport.TotalQuestion,
+                Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal),
+                HighestStreak = videoResult.HighestStreak
+            };
+        }
+
+        public async Task<int> GetHighestStreak(VideoResult videoResult)
+        {
+            ArgumentNullException.ThrowIfNull(videoResult);
+            var answerQuery = (from baseQ in _videoRepository.Queryable
+                               join vt in _videoTimeCodeRepository.Queryable on baseQ.Id equals vt.VideoId
+                               join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
+                               join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
+                               join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
+                               join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
+                               join vtca in _videoTimeCodeAnswerRepository.Queryable on q.Id equals vtca.QuestionId
+                               where baseQ.Id == videoResult.VideoId && vt.TimeCodeType == EnumTimeCodeType.Standalone
+                               group q by baseQ into g
+                               select new
+                               {
+                                   HighestStreaks = g.Select(x => x).Distinct().OrderBy(x => x.CreatedDate)
+                                                   .SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
+                                   .Select(x => x.IsCorrect == true && x.IsFirstSubmit)
+                               });
+            var highestStreak = await answerQuery.FirstOrDefaultAsync();
+            if (highestStreak == null)
+            {
+                return default;
+            }
+            return _linQHelper.GetHighestStreak(highestStreak.HighestStreaks.ToList());
+        }
+
+        public async Task<int> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
+        {
+            var answers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
+                                                                .Include(x => x.Question)
+                                                                .OrderBy(x => x.Question!.CreatedDate)
+                                                                .Select(x => x.IsCorrect == true && x.IsFirstSubmit).ToListAsync();
+            return _linQHelper.GetHighestStreak(answers);
+        }
+
         private static bool GetUngraded(VideoTimeCode? videoTimeCode)
         {
             return videoTimeCode?.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default;
@@ -412,7 +488,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 else
                 {
-                    remainingTime = videoTimeCodeResult.RetryWorkingTime == 0 ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime;
+                    remainingTime = videoTimeCodeResult.RetryWorkingTime == default ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime;
                 }
                 videoTimeCodeResult.RemainingTime = GetRemainingTime(videoTimeCode.ExecutionTime, remainingTime);
             }

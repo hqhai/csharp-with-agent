@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
 
-    public class BaseResultScore : BaseResult
+    public class BaseScoreResult : BaseResult
     {
         public string? SkillScoresStr { get; set; }
 
