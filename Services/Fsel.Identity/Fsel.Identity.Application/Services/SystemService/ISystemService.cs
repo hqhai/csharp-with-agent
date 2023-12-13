@@ -15,4 +15,3 @@ namespace Fsel.Identity.Application.Services.SystemService
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
     }
 }
-

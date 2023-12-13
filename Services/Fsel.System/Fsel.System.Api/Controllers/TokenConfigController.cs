@@ -42,7 +42,7 @@ namespace Fsel.System.Api.Controllers
         /// get token
         /// </summary>
         [HttpGet("get-token")]
-        [ProducesResponseType(typeof(MethodResult<IList<TokenConfigModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<TokenConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetTokenQuery query)
         {

@@ -21,13 +21,15 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
     {
         private readonly IMapper _mapper;
         private readonly IStudentFocusTimeRepository _studentFocusTimeRepository;
+        private readonly IMediator _mediator;
         private readonly AuthContext _authContext;
         private readonly IStudentRepository _studentRepository;
-        private const int NUMBER_OF_WEEKDAY = 7;
-        public GetStudentFocusTimeQueryHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, AuthContext authContext, IStudentRepository studentRepository)
+
+        public GetStudentFocusTimeQueryHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IMediator mediator, AuthContext authContext, IStudentRepository studentRepository)
         {
             _mapper = mapper;
             _studentFocusTimeRepository = studentFocusTimeRepository;
+            _mediator = mediator;
             _authContext = authContext;
             _studentRepository = studentRepository;
         }
@@ -44,45 +46,22 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
                 return methodResult;
             }
 
-
-
             StudentFocusTimeModel studentFocusTime = new StudentFocusTimeModel();
             var studentFocusTimesQuery = _studentFocusTimeRepository.Queryable.Where(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
-
             if (studentFocusTimesQuery == null)
             {
-                studentFocusTime = new StudentFocusTimeModel();
-                methodResult.Result = studentFocusTime;
+                methodResult.Result = new StudentFocusTimeModel();
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
-            //Check xem học sinh có học liên tiếp trong 7 ngày hay không 
-            var currentDate = DateTime.UtcNow.Date;
-            var startDate = currentDate.AddDays(-NUMBER_OF_WEEKDAY).Date; // Ngày bắt đầu từ 7 ngày trước
-            var endDate = currentDate.Date;
-            var studentFocusTimesCheckQuery = _studentFocusTimeRepository.Queryable
-                                        .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && x.ExecuteTime >= x.TargetTime)
-                                        .OrderBy(x => x.CreatedDate.Date)
-                                        .ToList();
-            bool hasContinuousData = true;
-
-            for (int i = 1; i <= NUMBER_OF_WEEKDAY; i++)
-            {
-                var expectedDate = currentDate.AddDays(-i);
-                var checkDate = studentFocusTimesCheckQuery.FirstOrDefault(x => x.CreatedDate.Date == expectedDate.Date);
-
-                if (checkDate == null)
-                {
-                    hasContinuousData = false;
-                    break;
-                }
-            }
+            //Check xem học sinh có học liên tiếp trong 7 ngày hay không
+            var hasContinuousData = await _mediator.Send(new CheckSuperFireModeQuery(), cancellationToken);
             studentFocusTime = _mapper.Map<StudentFocusTimeModel>(studentFocusTimesQuery.FirstOrDefault());
             if (studentFocusTime != null)
             {
                 studentFocusTime.StudentId = student.Id;
-                studentFocusTime.IsWeekStreak = hasContinuousData;
+                studentFocusTime.IsWeekStreak = hasContinuousData.Result;
             }
 
             methodResult.Result = studentFocusTime;
