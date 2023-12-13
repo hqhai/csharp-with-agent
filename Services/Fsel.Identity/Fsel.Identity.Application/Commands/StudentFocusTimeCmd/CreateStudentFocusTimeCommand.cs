@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Domain.Entities;
@@ -28,6 +29,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
     public class CreateStudentFocusTimeCommandHandler : IRequestHandler<CreateStudentFocusTimeCommand, MethodResult<StudentFocusTimeModel>>
     {
+        private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly IStudentFocusTimeRepository _studentFocusTimeRepository;
         private readonly IStudentRepository _studentRepository;
@@ -36,8 +38,9 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private const int NUMBER_OF_WEEKDAY = 7;
         private const double DEFAULT_TARGET_TIME = 1800; // 1800s tương ứng với 30p
 
-        public CreateStudentFocusTimeCommandHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService)
+        public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService)
         {
+            _mediator = mediator;
             _mapper = mapper;
             _studentFocusTimeRepository = studentFocusTimeRepository;
             _studentRepository = studentRepository;
@@ -104,12 +107,28 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                         });
 
                         var tokenConfigResult = tokenConfig.Content?.Result;
-                        var config = tokenConfigResult?.Config.Deserialize<TokenNumber>();
-                        if (config != null && config.Number.HasValue)
-                        {
-                            student.NumberOfToken += config.Number.Value;
-                        }
 
+                        var config = tokenConfigResult?.Config.Deserialize<TokenFocusTime>();
+                        var configNumber = config?.FocusTimes?.Where(x => x.FocusTimeId == systemConfigMap.Id).Select(x => x.Number!.Value).FirstOrDefault();
+
+                        var superConfig = tokenConfigResult?.SuperConfig.Deserialize<TokenFocusTime>();
+                        var superConfigNumber = superConfig?.FocusTimes?.Where(x => x.FocusTimeId == systemConfigMap.Id).Select(x => x.Number!.Value).FirstOrDefault();
+
+                        var checkSuperFireMode = await _mediator.Send(new CheckSuperFireModeQuery());
+                        if (checkSuperFireMode.Result)
+                        {
+                            if (superConfig != null && superConfigNumber.HasValue)
+                            {
+                                student.NumberOfToken += superConfigNumber.Value;
+                            }
+                        }
+                        else
+                        {
+                            if (config != null && configNumber.HasValue)
+                            {
+                                student.NumberOfToken += configNumber.Value;
+                            }
+                        }
                         student.NumberOfToken += CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token
                         _studentRepository.Update(student);
                         await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
