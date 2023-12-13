@@ -108,15 +108,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
                         var tokenConfigResult = tokenConfig.Content?.Result;
 
-                        var config = tokenConfigResult?.Config.Deserialize<TokenFocusTime>();
-                        var configNumber = config?.FocusTimes?.Where(x => x.FocusTimeId == systemConfigMap.Id).Select(x => x.Number!.Value).FirstOrDefault();
-
-                        var superConfig = tokenConfigResult?.SuperConfig.Deserialize<TokenFocusTime>();
-                        var superConfigNumber = superConfig?.FocusTimes?.Where(x => x.FocusTimeId == systemConfigMap.Id).Select(x => x.Number!.Value).FirstOrDefault();
-
                         var checkSuperFireMode = await _mediator.Send(new CheckSuperFireModeQuery());
                         if (checkSuperFireMode.Result)
                         {
+                            var superConfig = tokenConfigResult?.SuperConfig.Deserialize<TokenFocusTime>();
+                            var superConfigNumber = superConfig?.FocusTimes?.Where(x => x.FocusTimeId == systemConfigMap.Id).Select(x => x.Number!.Value).FirstOrDefault();
+
                             if (superConfig != null && superConfigNumber.HasValue)
                             {
                                 student.NumberOfToken += superConfigNumber.Value;
@@ -124,6 +121,9 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                         }
                         else
                         {
+                            var config = tokenConfigResult?.Config.Deserialize<TokenFocusTime>();
+                            var configNumber = config?.FocusTimes?.Where(x => x.FocusTimeId == systemConfigMap.Id).Select(x => x.Number!.Value).FirstOrDefault();
+
                             if (config != null && configNumber.HasValue)
                             {
                                 student.NumberOfToken += configNumber.Value;
