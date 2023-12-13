@@ -105,7 +105,10 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
                         var tokenConfigResult = tokenConfig.Content?.Result;
                         var config = tokenConfigResult?.Config.Deserialize<TokenNumber>();
-                        var number = config?.Number;
+                        if (config != null && config.Number.HasValue)
+                        {
+                            student.NumberOfToken += config.Number.Value;
+                        }
 
                         student.NumberOfToken += CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token
                         _studentRepository.Update(student);
