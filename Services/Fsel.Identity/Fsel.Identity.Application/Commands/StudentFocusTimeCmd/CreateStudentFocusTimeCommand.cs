@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
@@ -16,6 +17,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Identity.Domain.Models.CommandModels.StudentFocusTime;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -95,15 +97,15 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
                     if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime && studentFocusTime.IsEstablished)
                     {
-                        var forcusTimeId = systemConfigResult.Where(x => x.TargetTime == request.TargetTime).Select(x => x.Id).FirstOrDefault();
-                        var tokenConfig = await _systemService.GetTokenAsync(new GetTokenCommandModel
+                        var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
                         {
                             Feature = EnumTokenFeature.FocusMode,
-                            Mission = EnumTokenMission.FocusTime,
+                            Mission = EnumTokenMission.FocusTime
                         });
-                        var tokenConfigResult = tokenConfig.Content?.Result;
 
-                        tokenConfigResult.Config = new 
+                        var tokenConfigResult = tokenConfig.Content?.Result;
+                        var config = tokenConfigResult?.Config.Deserialize<TokenNumber>();
+                        var number = config?.Number;
 
                         student.NumberOfToken += CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token
                         _studentRepository.Update(student);

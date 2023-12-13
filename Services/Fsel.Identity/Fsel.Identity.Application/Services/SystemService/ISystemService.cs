@@ -12,7 +12,6 @@ namespace Fsel.Identity.Application.Services.SystemService
         Task<IApiResponse<MethodResult<IList<FocusTimeConfigModel>>>> GetFocusTimeConfig();
 
         [Get("/get-token")]
-        Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenAsync([Query] GetTokenCommandModel getTokenCommand);
+        Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
     }
 }
-
