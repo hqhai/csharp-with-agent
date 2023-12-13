@@ -31,10 +31,10 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         [Get("/forbidden-word/get-list-forbidden-word")]
         Task<IApiResponse<MethodResult<IList<string>>>> CheckContainForbiddenWord([FromQuery] string word);
 
-        [Get("/get-token")]
+        [Get("/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
 
-        [Get("/get-tokens")]
+        [Get("/token-config/get-tokens")]
         Task<IApiResponse<MethodResult<IList<TokenConfigModel>>>> GetTokenConfigsAsync([Query] GetTokenConfigsQueryModel query);
     }
 }
