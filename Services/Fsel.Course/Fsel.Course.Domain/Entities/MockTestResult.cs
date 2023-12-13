@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
 
-    public class MockTestResult : BaseTokenResult
+    public class MockTestResult : BaseLearnResult
     {
         public Guid? GradingTeacherId { get; set; }
 
