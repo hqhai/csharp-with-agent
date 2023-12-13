@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -68,27 +68,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             migrationBuilder.AddColumn<int>(
                 name: "TokenDone",
-                table: "SectionGroupResults",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
-                name: "TokenHighestStreak",
-                table: "SectionGroupResults",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
-                name: "TokenSuperFire",
-                table: "SectionGroupResults",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
-                name: "TokenDone",
                 table: "MockTestResults",
                 type: "int",
                 nullable: false,
@@ -96,6 +75,13 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             migrationBuilder.AddColumn<int>(
                 name: "TokenHighestStreak",
+                table: "MockTestResults",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<int>(
+                name: "TokenQuestionReward",
                 table: "MockTestResults",
                 type: "int",
                 nullable: false,
@@ -117,6 +103,13 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             migrationBuilder.AddColumn<int>(
                 name: "TokenHighestStreak",
+                table: "FinalTestResults",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<int>(
+                name: "TokenQuestionReward",
                 table: "FinalTestResults",
                 type: "int",
                 nullable: false,
@@ -167,22 +160,14 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             migrationBuilder.DropColumn(
                 name: "TokenDone",
-                table: "SectionGroupResults");
-
-            migrationBuilder.DropColumn(
-                name: "TokenHighestStreak",
-                table: "SectionGroupResults");
-
-            migrationBuilder.DropColumn(
-                name: "TokenSuperFire",
-                table: "SectionGroupResults");
-
-            migrationBuilder.DropColumn(
-                name: "TokenDone",
                 table: "MockTestResults");
 
             migrationBuilder.DropColumn(
                 name: "TokenHighestStreak",
+                table: "MockTestResults");
+
+            migrationBuilder.DropColumn(
+                name: "TokenQuestionReward",
                 table: "MockTestResults");
 
             migrationBuilder.DropColumn(
@@ -195,6 +180,10 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             migrationBuilder.DropColumn(
                 name: "TokenHighestStreak",
+                table: "FinalTestResults");
+
+            migrationBuilder.DropColumn(
+                name: "TokenQuestionReward",
                 table: "FinalTestResults");
 
             migrationBuilder.DropColumn(

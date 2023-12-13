@@ -1755,6 +1755,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int>("TokenHighestStreak")
                         .HasColumnType("int");
 
+                    b.Property<int>("TokenQuestionReward")
+                        .HasColumnType("int");
+
                     b.Property<int>("TokenSuperFire")
                         .HasColumnType("int");
 
@@ -2908,6 +2911,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int>("TokenHighestStreak")
                         .HasColumnType("int");
 
+                    b.Property<int>("TokenQuestionReward")
+                        .HasColumnType("int");
+
                     b.Property<int>("TokenSuperFire")
                         .HasColumnType("int");
 
@@ -3763,15 +3769,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("TokenDone")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TokenHighestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TokenSuperFire")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")

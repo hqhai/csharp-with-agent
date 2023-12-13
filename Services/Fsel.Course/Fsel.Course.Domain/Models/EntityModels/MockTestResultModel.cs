@@ -3,9 +3,8 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Course.Domain.IEntities;
 
-    public class MockTestResultModel : BaseLearnResultModel, ITokenResult
+    public class MockTestResultModel : BaseTokenResultModel
     {
         public string? FeedbackNote { get; set; }
         public int FeedbackStars { get; set; }
@@ -13,9 +12,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? UnitId { get; set; }
         public Guid CourseId { get; set; }
         public DateTime? GradingStartDate { get; set; }
-        public int TokenDone { get; set; }
-        public int TokenHighestStreak { get; set; }
-        public int TokenSuperFire { get; set; }
         public Guid? GradingTeacherId { get; set; }
         public bool? IsTeacherGraded { get; set; }
         public double Scores { get; set; }

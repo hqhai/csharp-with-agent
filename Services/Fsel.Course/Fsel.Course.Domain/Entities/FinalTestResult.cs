@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class FinalTestResult : BaseLearnResult
+    public class FinalTestResult : BaseTokenResult
     {
         public FinalTest? FinalTest { get; set; }
         public Guid FinalTestId { get; set; }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20231213064537_Update_Token_Result")]
+    [Migration("20231213074233_Update_Token_Result")]
     partial class Update_Token_Result
     {
         /// <inheritdoc />
@@ -1758,6 +1758,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int>("TokenHighestStreak")
                         .HasColumnType("int");
 
+                    b.Property<int>("TokenQuestionReward")
+                        .HasColumnType("int");
+
                     b.Property<int>("TokenSuperFire")
                         .HasColumnType("int");
 
@@ -2911,6 +2914,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int>("TokenHighestStreak")
                         .HasColumnType("int");
 
+                    b.Property<int>("TokenQuestionReward")
+                        .HasColumnType("int");
+
                     b.Property<int>("TokenSuperFire")
                         .HasColumnType("int");
 
@@ -3766,15 +3772,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("TokenDone")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TokenHighestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TokenSuperFire")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")

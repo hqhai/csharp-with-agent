@@ -1,8 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.IEntities
+namespace Fsel.Course.Domain.Entities
 {
-    public interface ITokenResult
+    using Fsel.Course.Domain.IEntities;
+
+    public class BaseTokenResult : BaseLearnResult, ITokenResult
     {
         public int TokenDone { get; set; }
         public int TokenHighestStreak { get; set; }

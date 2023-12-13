@@ -2,10 +2,13 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class BaseTokenResultModel : BaseLearnResultModel
+    using Fsel.Course.Domain.IEntities;
+
+    public class BaseTokenResultModel : BaseLearnResultModel, ITokenResult
     {
         public int TokenDone { get; set; }
         public int TokenHighestStreak { get; set; }
         public int TokenSuperFire { get; set; }
+        public int TokenQuestionReward { get; set; }
     }
 }
