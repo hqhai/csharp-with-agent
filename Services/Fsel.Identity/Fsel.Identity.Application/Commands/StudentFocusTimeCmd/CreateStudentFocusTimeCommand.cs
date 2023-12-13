@@ -10,10 +10,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.StudentFocusTime;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -87,14 +89,22 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                     }
                     studentFocusTime.IsEstablished = confitionChangeTarget;
 
-
                     // Set AccessTime And NumberOfToken
                     var systemConfigMap = systemConfigResult!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
                     studentFocusTime.ExecuteTime = request.ExecuteTime;
 
-
                     if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime && studentFocusTime.IsEstablished)
                     {
+                        var forcusTimeId = systemConfigResult.Where(x => x.TargetTime == request.TargetTime).Select(x => x.Id).FirstOrDefault();
+                        var tokenConfig = await _systemService.GetTokenAsync(new GetTokenCommandModel
+                        {
+                            Feature = EnumTokenFeature.FocusMode,
+                            Mission = EnumTokenMission.FocusTime,
+                        });
+                        var tokenConfigResult = tokenConfig.Content?.Result;
+
+                        tokenConfigResult.Config = new 
+
                         student.NumberOfToken += CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token
                         _studentRepository.Update(student);
                         await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -110,7 +120,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
             return methodResult;
         }
-
 
         /// <summary>
         /// Check xem học sinh có chuỗi đăng nhập không
@@ -144,7 +153,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             return hasStreak;
         }
 
-
         /// <summary>
         /// Lấy cấu hình của ngày gần nhất
         /// </summary>
@@ -152,11 +160,9 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         /// <returns></returns>
         private static double GetNearestConfigTime(IStudentFocusTimeRepository studentFocusTimeRepository, Guid? studentId)
         {
-
             var nearestConfigTargetTime = studentFocusTimeRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date)?.TargetTime ?? DEFAULT_TARGET_TIME;
 
             return nearestConfigTargetTime;
         }
-
     }
 }
