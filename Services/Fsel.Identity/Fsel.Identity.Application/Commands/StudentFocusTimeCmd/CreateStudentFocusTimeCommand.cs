@@ -129,7 +129,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                                 student.NumberOfToken += configNumber.Value;
                             }
                         }
-                       /* student.NumberOfToken += CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token*/
                         _studentRepository.Update(student);
                         await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -143,38 +142,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             });
 
             return methodResult;
-        }
-
-        /// <summary>
-        /// Check xem học sinh có chuỗi đăng nhập không
-        /// </summary>
-        /// <param name="student"></param>
-        /// <returns></returns>
-        private bool CheckStudentHasStreak(Student student)
-        {
-            bool hasStreak = true;
-
-            var currentDate = DateTime.UtcNow.Date;
-            var startDate = currentDate.AddDays(-NUMBER_OF_WEEKDAY).Date; // Ngày bắt đầu từ 7 ngày trước
-            var endDate = currentDate.Date;
-            var studentFocusTimesCheckQuery = _studentFocusTimeRepository.Queryable
-                                        .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && x.ExecuteTime >= x.TargetTime)
-                                        .OrderBy(x => x.CreatedDate.Date)
-                                        .ToList();
-
-            for (int i = 1; i <= NUMBER_OF_WEEKDAY; i++)
-            {
-                var expectedDate = currentDate.AddDays(-i);
-                var checkDate = studentFocusTimesCheckQuery.FirstOrDefault(x => x.CreatedDate.Date == expectedDate.Date);
-
-                if (checkDate == null)
-                {
-                    hasStreak = false;
-                    break;
-                }
-            }
-
-            return hasStreak;
         }
 
         /// <summary>
