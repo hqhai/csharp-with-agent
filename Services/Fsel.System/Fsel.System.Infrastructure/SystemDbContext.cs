@@ -22,6 +22,7 @@ namespace Fsel.System.Infrastructure
             ArgumentNullException.ThrowIfNull(modelBuilder);
             SeedQuestBoards(modelBuilder);
             SeedFocusTimeConfig(modelBuilder);
+            SeedApprovalTimeConfig(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfigConfiguration());
@@ -33,6 +34,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new GameVocabularyTypeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FocusTimeConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameVocabularyPlatformEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ApprovalTimeEntityTypeConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -51,6 +53,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<GameVocabularyType> GameVocabularyTypes { get; set; }
         public DbSet<FocusTimeConfig> FocusTimeConfigs { get; set; }
         public DbSet<GameVocabularyPlatform> GameVocabularyPlatforms { get; set; }
+        public DbSet<ApprovalTimeConfig> ApprovalTimeConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -81,6 +84,14 @@ namespace Fsel.System.Infrastructure
             var focusTimeConfigs = ConvertHelper.DeserializeFromFilePath<IList<FocusTimeConfig>>(path);
             ArgumentNullException.ThrowIfNull(focusTimeConfigs);
             builder.Entity<FocusTimeConfig>().HasData(focusTimeConfigs);
+        }
+
+        private static void SeedApprovalTimeConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ApprovalTimeFileName);
+            var approvalTimeConfigs = ConvertHelper.DeserializeFromFilePath<IList<ApprovalTimeConfig>>(path);
+            ArgumentNullException.ThrowIfNull(approvalTimeConfigs);
+            builder.Entity<ApprovalTimeConfig>().HasData(approvalTimeConfigs);
         }
     }
 }

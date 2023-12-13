@@ -5,11 +5,14 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,12 +26,16 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
         private readonly IPostRepository _postRepository;
         private readonly IInteractionActionRepository _interactionActionRepository;
         private readonly IMapper _mapper;
+        private readonly CompleteApprovalPostPublisher _completeApprovalPostPublisher;
+        private readonly AuthContext _authContext;
 
-        public ApprovePostFlaggedCommandHandler(IPostRepository postRepository, IMapper mapper, IInteractionActionRepository interactionActionRepository)
+        public ApprovePostFlaggedCommandHandler(IPostRepository postRepository, IMapper mapper, IInteractionActionRepository interactionActionRepository, CompleteApprovalPostPublisher completeApprovalPostPublisher, AuthContext authContext)
         {
             _postRepository = postRepository;
             _mapper = mapper;
             _interactionActionRepository = interactionActionRepository;
+            _completeApprovalPostPublisher = completeApprovalPostPublisher;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PostModel>> Handle(ApprovePostFlaggedCommand request, CancellationToken cancellationToken)
@@ -64,6 +71,16 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
                     }
                     await _interactionActionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
+
+                List<Guid> userIds = new List<Guid>() { _authContext.CurrentUserId };
+                await _completeApprovalPostPublisher.Publish(new SetTimeCompleteApprovalModel()
+                {
+                    StartDate = post.CreatedDate,
+                    ObjectId = post.Id,
+                    ApprovalType = EnumApprovalTime.DiscussionBoardFlag,
+                    UserIds = userIds
+                },
+               cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<PostModel>(post);
