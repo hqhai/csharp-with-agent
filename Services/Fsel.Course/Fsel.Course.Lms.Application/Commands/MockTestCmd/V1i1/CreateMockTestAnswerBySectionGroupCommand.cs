@@ -379,7 +379,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 MockTestResultId = request.MockTestResultId,
                 SectionTimeCodeId = sectionTimeCodeId ?? null,
                 SectionId = sectionId ?? null,
-                SectionQuestionId = questionItem?.SectionQuestions.FirstOrDefault()?.Id ?? default,
+                SectionQuestionId = questionItem?.SectionQuestions.FirstOrDefault()?.Id ?? null,
                 SectionGroupResultId = sectionGroupResultId,
                 IsCorrect = questionItem == null || questionItem.CorrectTotal == correctCount,
             };
