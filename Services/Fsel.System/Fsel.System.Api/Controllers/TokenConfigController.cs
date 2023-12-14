@@ -6,6 +6,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Commands.TokenConfigCmd;
     using Fsel.System.Application.Queries.TokenConfigQuery;
     using Fsel.System.Domain.Models.EntityModels;

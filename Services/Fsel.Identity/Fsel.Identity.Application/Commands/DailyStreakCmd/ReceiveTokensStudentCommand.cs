@@ -3,7 +3,7 @@
 namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
+    using Fsel.Shared.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
@@ -64,11 +64,11 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             });
             var tokenConfigResult = tokenConfig.Content?.Result;
 
-            var config = tokenConfigResult?.Config.Deserialize<TokenDailyCheckIn>();
-            var configNumber = config?.DailyCheckIns?.Where(x => x.Level == studentDailyStreak.LevelOfGift).Select(x => x.Number!.Value).FirstOrDefault();
-            if (config != null && configNumber.HasValue)
+            var targetConfig = tokenConfigResult.GetTokenNumber<TokenDailyCheckIn>();
+            var targetNumber = targetConfig?.DailyCheckIns?.FirstOrDefault(x => x.Level == studentDailyStreak.LevelOfGift)?.Number;
+            if (targetNumber.HasValue)
             {
-                student.NumberOfToken += configNumber.Value;
+                student.NumberOfToken += targetNumber.Value;
             }
 
             await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>

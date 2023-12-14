@@ -4,11 +4,8 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
-    using Fsel.Shared.Constants;
-    using Fsel.System.Domain.Entities;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models.EntityModels;
     using global::System;
     using global::System.Collections.Generic;
     using global::System.Threading.Tasks;

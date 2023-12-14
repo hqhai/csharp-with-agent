@@ -352,7 +352,7 @@
     "id": "e5361e72-412e-4022-bc66-c813c56f1b10",
     "createdDate": "2023-07-21",
     "feature": "ReviewSystem",
-    "mission": "ReviewFSEL",
+    "mission": "ReviewPlatform",
     "config": {
       "number": 10
     },

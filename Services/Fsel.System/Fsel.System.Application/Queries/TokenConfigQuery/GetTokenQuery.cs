@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;

@@ -18,6 +18,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Identity.Domain.Models.CommandModels.StudentFocusTime;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -105,36 +106,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                             Feature = EnumTokenFeature.FocusMode,
                             Mission = EnumTokenMission.FocusTime
                         });
-
                         var tokenConfigResult = tokenConfig.Content?.Result;
 
                         var checkSuperFireMode = await _mediator.Send(new CheckSuperFireModeQuery());
-                        /* if (checkSuperFireMode.Result)
-                         {
-                             var superConfig = tokenConfigResult?.SuperConfig.Deserialize<TokenFocusTime>();
-                             var superConfigNumber = superConfig?.FocusTimes?.Where(x => x.FocusTimeId == systemConfigMap.Id).Select(x => x.Number!.Value).FirstOrDefault();
-
-                             if (superConfig != null && superConfigNumber.HasValue)
-                             {
-                                 student.NumberOfToken += superConfigNumber.Value;
-                             }
-                         }
-                         else
-                         {
-                             var config = tokenConfigResult?.Config.Deserialize<TokenFocusTime>();
-                             var configNumber = config?.FocusTimes?.Where(x => x.FocusTimeId == systemConfigMap.Id).Select(x => x.Number!.Value).FirstOrDefault();
-
-                             if (config != null && configNumber.HasValue)
-                             {
-                                 student.NumberOfToken += configNumber.Value;
-                             }
-                         }*/
-
-                        var focusTimeConfig = tokenConfigResult?.Config?.Deserialize<TokenFocusTime>();
-                        var superConfig = tokenConfigResult?.SuperConfig.Deserialize<TokenFocusTime>();
                         var isSuperMode = checkSuperFireMode.Result;
 
-                        var targetConfig = isSuperMode ? superConfig : focusTimeConfig;
+                        var targetConfig = tokenConfigResult.GetTokenNumber<TokenFocusTime>(isSuperMode);
                         var targetNumber = targetConfig?.FocusTimes?.FirstOrDefault(x => x.FocusTimeId == systemConfigMap.Id)?.Number;
 
                         if (targetNumber.HasValue)
