@@ -12,6 +12,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Video Time Code Result Done
         /// </summary>
-        VideoTimeCodeResultDone
+        VideoTimeCodeResultDone,
     }
 }

@@ -49,7 +49,7 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             ArgumentNullException.ThrowIfNull(sectionGroup);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
-            sectionGroupResultDto.RemainingTime = _dateTimeConverter.GetRemainingTime(sectionGroupResult, sectionGroup.ExecutionTime);
+            sectionGroupResultDto.RemainingTime = sectionGroup.ExecutionTime - sectionGroupResult.WorkingTime;
             return sectionGroupResultDto;
         }
 

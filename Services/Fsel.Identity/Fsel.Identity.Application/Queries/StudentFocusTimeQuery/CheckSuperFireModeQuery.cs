@@ -48,18 +48,10 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
                                         .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && x.ExecuteTime >= x.TargetTime)
                                         .OrderBy(x => x.CreatedDate.Date)
                                         .ToList();
-            bool hasContinuousData = true;
-            for (int i = 1; i <= NUMBER_OF_WEEKDAY; i++)
-            {
-                var expectedDate = currentDate.AddDays(-i);
-                var checkDate = studentFocusTimesCheckQuery.FirstOrDefault(x => x.CreatedDate.Date == expectedDate.Date);
 
-                if (checkDate == null)
-                {
-                    hasContinuousData = false;
-                    break;
-                }
-            }
+            bool hasContinuousData = Enumerable.Range(1, NUMBER_OF_WEEKDAY)
+             .All(i => studentFocusTimesCheckQuery.Any(x => x.CreatedDate.Date == currentDate.AddDays(-i).Date && x.ExecuteTime >= x.TargetTime));
+
             methodResult.Result = hasContinuousData;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

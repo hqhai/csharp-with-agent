@@ -4,9 +4,9 @@ namespace Fsel.System.Infrastructure.Maps
 {
     using AutoMapper;
     using Fsel.Core.Extensions;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Models.CommandModels.TokenConfigs;
-    using Fsel.System.Domain.Models.EntityModels;
 
     public class TokenConfigProfile : Profile
     {

@@ -1,11 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models.EntityModels
+namespace Fsel.Shared.Models.ShareModels
 {
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class TokenConfigModel : BaseModel
+    public class TokenConfigModel
     {
         public EnumTokenFeature Feature { get; set; }
 

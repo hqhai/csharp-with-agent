@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoResults;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -20,15 +21,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     public class ReviewLessonVideoCommandHandler : IRequestHandler<ReviewLessonVideoCommand, MethodResult<VideoResultModel>>
     {
         private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly VideoConverter _videoConverter;
         private readonly IMapper _mapper;
 
         public ReviewLessonVideoCommandHandler(IVideoResultRepository videoResultRepository,
+            IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
             IMapper mapper,
             VideoConverter videoConverter)
         {
             _videoConverter = videoConverter;
             _videoResultRepository = videoResultRepository;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _mapper = mapper;
         }
 
@@ -43,7 +47,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-
+            var isVideoTimeCodeDone = await _videoTimeCodeResultRepository.Queryable.AnyAsync(x => x.VideoResultId == videoResult.Id && x.Status != EnumResultStatus.Done, cancellationToken);
+            if (isVideoTimeCodeDone)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isVideoTimeCodeDone));
+                return methodResult;
+            }
             _mapper.Map(request, videoResult);
             if (!videoResult.IsValid())
             {
