@@ -275,11 +275,16 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.NotEnoughQuestions));
                 return methodResult;
             }
+            var query = _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id);
             var skillScores = listSkillScore.Where(x => x.Type == EnumTimeCodeType.Standalone && x.SkillScores?.Count > 0).SelectMany(x => x.SkillScores!).ToList();
             videoResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
             videoResult.VideoSkillScores = listSkillScore;
+            videoResult.TokenDone = await query.SumAsync(x => x.TokenDone, cancellationToken);
+            videoResult.TokenHighestStreak = await query.SumAsync(x => x.TokenHighestStreak, cancellationToken);
+            videoResult.TokenQuestionReward = await query.SumAsync(x => x.TokenQuestionReward, cancellationToken);
+            videoResult.TokenSuperFire = await query.SumAsync(x => x.TokenSuperFire, cancellationToken);
             return methodResult;
         }
 

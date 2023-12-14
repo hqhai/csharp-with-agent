@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -16,8 +17,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queries.VideoQuery;
+    using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -34,6 +40,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly VideoConverter _videoConverter;
+        private readonly IUserService _userService;
+        private readonly ISystemService _systemService;
         private readonly IMediator _mediator;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IQuestionRepository _questionRepository;
@@ -46,6 +54,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , VideoConverter videoConverter
+            , IUserService userService
+            , ISystemService systemService
             , IMediator mediator
             , DateTimeConverter dateTimeConverter
             , IQuestionRepository questionRepository
@@ -57,6 +67,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoConverter = videoConverter;
+            _userService = userService;
+            _systemService = systemService;
             _mediator = mediator;
             _dateTimeConverter = dateTimeConverter;
             _questionRepository = questionRepository;
@@ -95,7 +107,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
-            var videoTimeCodeMethod = await _mediator.Send(new GetTimeCodeDetailQuery { VideoTimeCodeId = request.VideoTimeCodeId, VideoId = videoResult.VideoId, LessonResultId = videoResult.LessonResultId, isShowSubStatus = videoTimeCodeResult.Status == EnumResultStatus.Process && request.IsSubmit, IsCreateAnswer = true }, cancellationToken);
+            var videoTimeCodeMethod = await _mediator.Send(new GetTimeCodeDetailQuery
+            {
+                VideoTimeCodeId = request.VideoTimeCodeId,
+                VideoId = videoResult.VideoId,
+                LessonResultId = videoResult.LessonResultId,
+                IsShowSubStatus = videoTimeCodeResult.Status == EnumResultStatus.Process && request.IsSubmit,
+                IsCreateAnswer = true
+            }, cancellationToken);
             methodResult.Result = videoTimeCodeMethod.Result;
             return methodResult;
         }
@@ -185,20 +204,22 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             answer.CorrectCount = question.Ungraded ? default : correctCount;
             answer.Status = GetAnswerStatus(isSubmit, correctCount, question.CorrectTotal);
             answer.IsCorrect = answer.Status == EnumAnswerStatus.Done;
-            if (status == EnumResultStatus.New)
-            {
-                answer.IsFirstSubmit = true;
-            }
-            else
-            {
-                answer.IsFirstSubmit = false;
-            }
+            answer.IsFirstSubmit = status == EnumResultStatus.New;
             return answer;
         }
 
         private async Task UpdateVideoTimeCodeResult(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, bool isSubmit, CancellationToken cancellationToken)
         {
             videoTimeCodeResult = await GetVideoTimeCodeResultAsync(videoTimeCodeResult, videoTimeCode, isSubmit, cancellationToken);
+            if (videoTimeCodeResult.Status == EnumResultStatus.Done)
+            {
+                var tokens = new List<int> { videoTimeCodeResult.TokenDone, videoTimeCodeResult.TokenHighestStreak, videoTimeCodeResult.TokenQuestionReward, videoTimeCodeResult.TokenQuestionReward };
+                await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+                {
+                    NumberOfToken = tokens.Sum(),
+                    StudentId = videoTimeCodeResult.StudentId,
+                }).ConfigureAwait(false);
+            }
             _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
             await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -216,13 +237,73 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             if (isSubmit)
             {
                 var (listSkillScore, isDone) = await GetSkillScores(videoTimeCode, videoTimeCodeResult, cancellationToken);
-                videoTimeCodeResult.Status = isDone ? EnumResultStatus.Process : EnumResultStatus.Done;
+                videoTimeCodeResult.Status = (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || isDone) ? EnumResultStatus.Done : EnumResultStatus.Process;
                 videoTimeCodeResult.CorrectCount = (int)listSkillScore.Sum(x => x.CorrectCount);
                 videoTimeCodeResult.CorrectTotal = (int)listSkillScore.Sum(x => x.TotalCount);
                 videoTimeCodeResult.SkillScores = listSkillScore;
+                if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || isDone)
+                {
+                    videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
+                }
             }
             videoTimeCodeResult.IsWorking = false;
             return videoTimeCodeResult;
+        }
+
+        private async Task<VideoTimeCodeResult> GetTokenVideoTimeCodeResult(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode)
+        {
+            var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
+            if (!isSuperFireModeResult.IsSuccessStatusCode)
+            {
+                return videoTimeCodeResult;
+            }
+            var tokenConfigs = await GetTokenConfig(videoTimeCode);
+            var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
+            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+            {
+                var configQuestionReward = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.QuestionReward);
+                videoTimeCodeResult.TokenQuestionReward = GetToken(isSuperFireMode ? configQuestionReward?.SuperConfig : configQuestionReward?.Config);
+            }
+            else
+            {
+                var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone);
+                var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak);
+                videoTimeCodeResult.TokenDone = GetToken(isSuperFireMode ? configDone?.SuperConfig : configDone?.Config);
+                videoTimeCodeResult.TokenHighestStreak = GetToken(isSuperFireMode ? configHighestStreak?.SuperConfig : configHighestStreak?.Config) * videoTimeCodeResult.HighestStreak ?? default;
+            }
+            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire);
+            videoTimeCodeResult.TokenSuperFire = GetToken(isSuperFireMode ? configSuperFire?.SuperConfig : configSuperFire?.Config);
+            return videoTimeCodeResult;
+        }
+
+        private async Task<IList<TokenConfigModel>?> GetTokenConfig(VideoTimeCode videoTimeCode)
+        {
+            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+            {
+                var misstions = new List<string> { nameof(EnumTokenMission.QuestionReward), nameof(EnumTokenMission.SuperFire) };
+                var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+                {
+                    Feature = EnumTokenFeature.TimeCode,
+                    Missions = string.Join(",", misstions)
+                });
+                return tokenConfigResults?.Content?.Result;
+            }
+            else
+            {
+                var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
+                var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+                {
+                    Feature = videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest ? EnumTokenFeature.UnitTest : EnumTokenFeature.SkillTest,
+                    Missions = string.Join(",", misstions)
+                });
+                return tokenConfigResults?.Content?.Result;
+            }
+        }
+
+        private static int GetToken(object? config)
+        {
+            var tokenConfig = config.Deserialize<TokenNumber>();
+            return tokenConfig?.Number ?? default;
         }
 
         private static VideoTimeCodeResult? GetVideoTimeCodeResult(VideoResult videoResult, Guid videoTimeCodeId)

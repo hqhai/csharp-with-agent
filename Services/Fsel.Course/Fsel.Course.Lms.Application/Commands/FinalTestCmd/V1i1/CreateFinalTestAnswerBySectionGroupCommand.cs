@@ -167,10 +167,11 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
 
         private async Task<FinalTestResult> GetTokenFinalTestResult(FinalTestResult finalTestResult)
         {
+            var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
             var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
             {
                 Feature = EnumTokenFeature.FinalTest,
-                Missions = new List<EnumTokenMission> { EnumTokenMission.HighestStreak, EnumTokenMission.TestDone, EnumTokenMission.SuperFire }
+                Missions = string.Join(",", misstions)
             });
             var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
             if (!tokenConfigResults.IsSuccessStatusCode || !isSuperFireModeResult.IsSuccessStatusCode)
