@@ -6,6 +6,7 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System;
