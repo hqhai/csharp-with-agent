@@ -262,7 +262,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
             {
                 var configQuestionReward = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.QuestionReward);
-                videoTimeCodeResult.TokenQuestionReward = GetToken(isSuperFireMode ? configQuestionReward?.SuperConfig : configQuestionReward?.Config);
+                videoTimeCodeResult.TokenQuestionReward = GetToken(isSuperFireMode ? configQuestionReward?.SuperConfig : configQuestionReward?.Config) * videoTimeCodeResult.CorrectCount;
             }
             else
             {
@@ -427,7 +427,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                                     .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id))
                                     .Where(x => exerciseIds.Contains(x.Id))
                                     .ToListAsync(cancellationToken);
-            var isDone = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question).SelectMany(x => x!.VideoTimeCodeAnswers).Any(x => x.Status != EnumAnswerStatus.Done);
+            var isDone = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question).SelectMany(x => x!.VideoTimeCodeAnswers).All(x => x.Status == EnumAnswerStatus.Done);
             var skillScores = exercises.GroupBy(x => x.CourseSkill).Select(x => GetSkillScore(x)).ToList();
             return (skillScores, isDone);
         }
