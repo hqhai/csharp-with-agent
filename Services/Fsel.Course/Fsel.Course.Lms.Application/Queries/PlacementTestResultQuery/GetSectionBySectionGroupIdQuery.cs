@@ -28,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
         private readonly ISectionRepository _sectionRepository;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
         private readonly SectionConverter _sectionConverter;
@@ -37,9 +38,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
 
-        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, IPlacementTestResultRepository placementTestResultRepository, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionConverter sectionConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
+        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, DateTimeConverter dateTimeConverter, IPlacementTestResultRepository placementTestResultRepository, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionConverter sectionConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
         {
             _sectionRepository = sectionRepository;
+            _dateTimeConverter = dateTimeConverter;
             _placementTestResultRepository = placementTestResultRepository;
             _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
             _sectionConverter = sectionConverter;
@@ -107,6 +109,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     ObjectResultId = sectionGroupResult.Id,
                     ObjectResultType = nameof(PlacementTest)
                 }, CancellationToken.None).ConfigureAwait(false);
+            }
+            else if (sectionGroupResult.Status != EnumResultStatus.Done)
+            {
+                sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.WorkingTime, sectionGroup.ExecutionTime, sectionGroupResult);
+                sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
+                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
             return sectionGroupResult;
         }

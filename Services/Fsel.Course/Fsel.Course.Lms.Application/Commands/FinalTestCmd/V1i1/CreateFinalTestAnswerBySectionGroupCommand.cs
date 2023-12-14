@@ -126,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.FinalTestAnswerCmd
                 if (request.IsSubmit)
                 {
                     await _sectionGroupConverter.UpdateFinalTestAnswers(sectionGroup, sectionGroupResult);
-                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, false, cancellationToken);
+                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, nameof(FinalTest), cancellationToken);
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);

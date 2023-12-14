@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
+    using System.Threading;
     using AutoMapper;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -67,6 +68,15 @@ namespace Fsel.Course.Infrastructure.Common
             return skillScore;
         }
 
+        private async Task<SkillScores> GetSkillScorePlacementTest(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
+        {
+            var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.PlacementTestResultId == sectionGroupResult.FinalTestResultId).ToListAsync(cancellationToken);
+            var questionIds = placementTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList();
+            var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
+            var skillScore = GetSkillScore(sectionGroup, placementTestAnswers.Sum(x => x.CorrectCount), placementTestAnswers.Count, totalCorrect, questionIds.Count);
+            return skillScore;
+        }
+
         public async Task<SkillScores> GetSkillScoreMockTest(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
@@ -92,11 +102,11 @@ namespace Fsel.Course.Infrastructure.Common
             return skillScore;
         }
 
-        public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, bool isMockTest, CancellationToken cancellationToken)
+        public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, string? type, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             ArgumentNullException.ThrowIfNull(sectionGroup);
-            var skillScore = isMockTest ? await GetSkillScoreMockTest(sectionGroupResult, sectionGroup, cancellationToken) : await GetSkillScoreFinalTest(sectionGroupResult, sectionGroup, cancellationToken);
+            var skillScore = await GetSkillScore(sectionGroupResult, sectionGroup, type, cancellationToken);
             sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
             sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
             sectionGroupResult.Status = EnumResultStatus.Done;
@@ -113,6 +123,26 @@ namespace Fsel.Course.Infrastructure.Common
             _sectionGroupResultRepository.Update(sectionGroupResult);
             await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             return sectionGroupResult;
+        }
+
+        private async Task<SkillScores> GetSkillScore(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, string? type, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(type))
+            {
+                return new SkillScores();
+            }
+            if (type == nameof(MockTest))
+            {
+                return await GetSkillScoreMockTest(sectionGroupResult, sectionGroup, cancellationToken);
+            }
+            else if (type == nameof(FinalTest))
+            {
+                return await GetSkillScoreFinalTest(sectionGroupResult, sectionGroup, cancellationToken);
+            }
+            else
+            {
+                return await GetSkillScorePlacementTest(sectionGroupResult, sectionGroup, cancellationToken);
+            }
         }
 
         private async Task<(IList<Guid>?, IList<Guid>?, IList<Guid>?)> GetUnansweredQuestionIds(SectionGroup? sectionGroup, string? type, SectionGroupResult sectionGroupResult)
