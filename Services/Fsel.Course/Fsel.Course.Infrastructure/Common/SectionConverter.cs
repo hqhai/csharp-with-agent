@@ -53,68 +53,139 @@ namespace Fsel.Course.Infrastructure.Common
             return sectionGroupResultDto;
         }
 
-        public async Task<(IList<Section>, long)> GetSectionsAsync(Guid sectionGroupId, EnumCourseSkill skill, bool isMockTest = false)
+        public async Task<(IList<Section>, long)> GetSectionsAsync(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, string? type)
         {
+            ArgumentNullException.ThrowIfNull(sectionGroup);
             var sections = new List<Section>();
-            if (isMockTest)
+            if (type == nameof(MockTest))
             {
-                if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
+                if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
                 {
                     sections = await _sectionRepository.Queryable.Include(x => x.SectionParts).ThenInclude(x => x.SectionQuestions)
-                                                                        .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
-                                                                        .ToListAsync();
+                                                                 .ThenInclude(x => x.MockTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id))
+                                                                 .Where(x => x.SectionGroupId == sectionGroup.Id)
+                                                                 .OrderBy(x => x.DisplayOrder)
+                                                                 .ToListAsync();
                 }
-                else if (skill == EnumCourseSkill.Writing)
+                else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
                 {
-                    sections = await _sectionRepository.Queryable.Include(x => x.MockTestAnswers).Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
-                                                                        .ToListAsync();
+                    sections = await _sectionRepository.Queryable.Include(x => x.MockTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id))
+                                                                 .Where(x => x.SectionGroupId == sectionGroup.Id)
+                                                                 .OrderBy(x => x.DisplayOrder)
+                                                                 .ToListAsync();
                 }
                 else
                 {
-                    sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).ThenInclude(x => x.MockTestAnswers)
-                                                                .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
+                    sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).ThenInclude(x => x.MockTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id))
+                                                                .Where(x => x.SectionGroupId == sectionGroup.Id).OrderBy(x => x.DisplayOrder)
                                                                 .ToListAsync();
                 }
-                return (sections, GetTotalQuestion(sections, skill));
+                return (sections, GetTotalQuestion(sections, sectionGroup.CourseSkill));
             }
-            sections = await _sectionRepository.Queryable.Include(x => x.SectionQuestions)
-                                                               .Where(x => x.SectionGroupId == sectionGroupId).OrderBy(x => x.DisplayOrder)
-                                                               .ToListAsync();
-            return (sections, GetTotalQuestion(sections, skill));
+            else if (type == nameof(FinalTest))
+            {
+                sections = await _sectionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.FinalTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id))
+                                               .Where(x => x.SectionGroupId == sectionGroup.Id).OrderBy(x => x.DisplayOrder)
+                                               .ToListAsync();
+            }
+            else
+            {
+                sections = await _sectionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.PlacementTestAnswers.Where(x => x.SectionGroupResultId == sectionGroupResult.Id))
+                                               .Where(x => x.SectionGroupId == sectionGroup.Id).OrderBy(x => x.DisplayOrder)
+                                               .ToListAsync();
+            }
+
+            return (sections, GetTotalQuestion(sections, sectionGroup.CourseSkill));
         }
 
-        public SectionGroupDtoModel GetSectionGroupDto(long totalCount, IList<Section> sections, SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, bool isMockTest = false)
+        public SectionGroupDtoModel GetSectionGroupDto(long totalCount, IList<Section> sections, SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, string? type)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
             var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
+            var isDone = sectionGroupResult.Status == EnumResultStatus.Done;
             sectonGroupDetail.SectionGroupResult = GetSectionGroupResult(sectionGroupResult, sectionGroup);
-            sectonGroupDetail.Sections = isMockTest ? GetSectionsByMockTest(sections, sectionGroup.CourseSkill) : GetSections(sections);
+            if (type == nameof(MockTest))
+            {
+                sectonGroupDetail.Sections = GetSectionsByMockTest(sections, sectionGroup.CourseSkill, isDone);
+            }
+            else
+            {
+                sectonGroupDetail.Sections = GetSections(sections, isDone, type);
+            }
             sectonGroupDetail.TotalQuestion = totalCount;
             return sectonGroupDetail;
         }
 
-        private IList<SectionDtoModel> GetSections(IList<Section> sections)
+        private IList<SectionDtoModel> GetSections(IList<Section> sections, bool isDone, string? type)
         {
-            return sections.Select(x => _mapper.Map<SectionDtoModel>(x)).ToList();
+            return sections.Select(x => GetSectionDto(x, type, isDone)).ToList();
         }
 
-        private IList<SectionDtoModel> GetSectionsByMockTest(IList<Section> sections, EnumCourseSkill skill)
+        private SectionDtoModel GetSectionDto(Section section, string? type, bool isDone)
         {
-            return sections.Select(x => GetSectionByMockTest(x, skill)).ToList();
+            var sectionDto = _mapper.Map<SectionDtoModel>(section);
+            sectionDto.QuestionTests = section.SectionQuestions.OrderBy(x => x.CreatedDate)
+                                            .Select(x => new QuestionTestModel
+                                            {
+                                                QuestionId = x.QuestionId ?? default,
+                                                Status = GetStatus(x, type, isDone)
+                                            }).ToList();
+            return sectionDto;
         }
 
-        private SectionDtoModel GetSectionByMockTest(Section section, EnumCourseSkill skill)
+        private IList<SectionDtoModel> GetSectionsByMockTest(IList<Section> sections, EnumCourseSkill skill, bool isDone)
+        {
+            return sections.Select(x => GetSectionByMockTest(x, skill, isDone)).ToList();
+        }
+
+        private SectionDtoModel GetSectionByMockTest(Section section, EnumCourseSkill skill, bool isDone)
         {
             var sectionDetail = _mapper.Map<SectionDtoModel>(section);
             if (skill == EnumCourseSkill.Reading || skill == EnumCourseSkill.Listening)
             {
-                sectionDetail.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => _mapper.Map<SectionPartDtoModel>(x)).ToList();
+                sectionDetail.SectionParts = section.SectionParts.OrderBy(x => x.CreatedDate).Select(x => GetSectionPartMockTest(x, isDone)).ToList();
             }
             else if (skill == EnumCourseSkill.Speaking)
             {
                 sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => _mapper.Map<SectionTimeCodeDtoModel>(x)).ToList();
             }
             return sectionDetail;
+        }
+
+        private SectionPartDtoModel GetSectionPartMockTest(SectionPart sectionPart, bool isDone)
+        {
+            var sectionPartDto = _mapper.Map<SectionPartDtoModel>(sectionPart);
+            sectionPartDto.QuestionTests = sectionPart.SectionQuestions.OrderBy(x => x.CreatedDate)
+                                            .Select(x => new QuestionTestModel
+                                            {
+                                                QuestionId = x.QuestionId ?? default,
+                                                Status = GetStatus(x, nameof(MockTest), isDone)
+                                            }).ToList();
+            return sectionPartDto;
+        }
+
+        private static EnumSubAnswerStatus? GetStatus(SectionQuestion sectionQuestion, string? type, bool isDone)
+        {
+            var answer = new BaseAnswerModel();
+            if (type == nameof(MockTest))
+            {
+                return GetStatus(sectionQuestion.MockTestAnswers.FirstOrDefault(), isDone);
+            }
+            else if (type == nameof(FinalTest))
+            {
+                return GetStatus(sectionQuestion.FinalTestAnswers.FirstOrDefault(), isDone);
+            }
+            else if (type == nameof(PlacementTest))
+            {
+                return GetStatus(sectionQuestion.PlacementTestAnswers.FirstOrDefault(), isDone);
+            }
+            return null;
+        }
+
+        private static EnumSubAnswerStatus? GetStatus(BaseAnswer? baseAnswer, bool isDone)
+        {
+            return baseAnswer != null ? isDone ? baseAnswer.IsCorrect == true ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail : EnumSubAnswerStatus.Process : null;
         }
 
         public SectionGroupModel GetSectionGroupModel(SectionGroup? sectionGroup, bool isDisableAnswers = false)
@@ -157,11 +228,11 @@ namespace Fsel.Course.Infrastructure.Common
             if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && isMockTest)
             {
                 var sectionTimeCode = sectionGroup.Sections.SelectMany(x => x.SectionTimeCodes);
-                return sectionTimeCode.Any() ? sectionTimeCode.Count() : 0;
+                return sectionTimeCode.Any() ? sectionTimeCode.Count() : default;
             }
             else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && isMockTest)
             {
-                return sectionGroup.Sections.Any() ? sectionGroup.Sections.Count : 0;
+                return sectionGroup.Sections.Any() ? sectionGroup.Sections.Count : default;
             }
             else
             {

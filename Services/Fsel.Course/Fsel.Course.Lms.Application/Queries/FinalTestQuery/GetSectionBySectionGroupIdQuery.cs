@@ -89,10 +89,10 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 return methodResult;
             }
 
-            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
             var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId, sectionGroup);
+            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(sectionGroup, sectionGroupResult, nameof(FinalTest));
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult);
+            methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult, nameof(FinalTest));
             return methodResult;
         }
 
@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId && x.FinalTestResultId == request.FinalTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
-                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, FinalTestResultId = request.FinalTestResultId });
+                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, FinalTestResultId = request.FinalTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
                 {
@@ -120,6 +120,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             }
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
+                sectionGroupResult.Status = EnumResultStatus.Process;
                 sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.WorkingTime, sectionGroup.ExecutionTime, sectionGroupResult);
                 sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);

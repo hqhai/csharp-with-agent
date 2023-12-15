@@ -513,15 +513,24 @@ namespace Fsel.Course.Infrastructure.Common
         private QuestionModel GetQuestion(Question? question, EnumResultStatus status, bool isShowSubStatus)
         {
             ArgumentNullException.ThrowIfNull(question);
-            var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
-            var isCheck = videoTimeCodeAnswer?.Status == EnumAnswerStatus.Done;
+            var answer = _mapper.Map<AnswerVideoModel>(question.VideoTimeCodeAnswers.FirstOrDefault());
+            var isCheck = answer?.Status == EnumAnswerStatus.Done;
             var questionModel = _mapper.Map<QuestionModel>(question);
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
-            if (videoTimeCodeAnswer != null)
+            if (answer != null)
             {
-                videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, isShowSubStatus, status);
-                videoTimeCodeAnswer.CorrectCount = isCheck ? videoTimeCodeAnswer.CorrectCount : default;
-                questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
+                answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, question.QuestionType, isShowSubStatus, status);
+                if (!isCheck)
+                {
+                    answer.CorrectCount = default;
+                    answer.IsCorrect = default;
+                    answer.SubAnswerStatus = EnumSubAnswerStatus.Process;
+                }
+                else
+                {
+                    answer.SubAnswerStatus = answer.IsCorrect == true ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail;
+                }
+                questionModel.ResultAnswer = answer;
             }
             return questionModel;
         }

@@ -81,11 +81,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-
-            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
             var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId, sectionGroup);
+            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(sectionGroup, sectionGroupResult, nameof(PlacementTest));
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult);
+            methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult, nameof(PlacementTest));
             return methodResult;
         }
 
@@ -101,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == request.PlacementTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
-                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, PlacementTestResultId = request.PlacementTestResultId });
+                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, PlacementTestResultId = request.PlacementTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
                 {
@@ -112,6 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             }
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
+                sectionGroupResult.Status = EnumResultStatus.Process;
                 sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.WorkingTime, sectionGroup.ExecutionTime, sectionGroupResult);
                 sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);

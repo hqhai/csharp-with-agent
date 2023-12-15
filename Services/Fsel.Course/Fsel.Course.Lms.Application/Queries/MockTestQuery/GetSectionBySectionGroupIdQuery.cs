@@ -88,11 +88,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-
-            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill, true);
             var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId, sectionGroup);
+            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(sectionGroup, sectionGroupResult, nameof(MockTest));
+            methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult, nameof(MockTest));
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult, true);
             return methodResult;
         }
 
@@ -108,7 +107,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
-                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId });
+                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
                 {
@@ -119,6 +118,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             }
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
+                sectionGroupResult.Status = EnumResultStatus.Process;
                 sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.WorkingTime, sectionGroup.ExecutionTime, sectionGroupResult);
                 sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
