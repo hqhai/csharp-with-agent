@@ -214,7 +214,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             videoTimeCodeResult = await GetVideoTimeCodeResultAsync(videoTimeCodeResult, videoTimeCode, isSubmit, cancellationToken);
             if (videoTimeCodeResult.Status == EnumResultStatus.Done)
             {
-                var tokens = new List<int> { videoTimeCodeResult.TokenDone, videoTimeCodeResult.TokenHighestStreak, videoTimeCodeResult.TokenQuestionReward, videoTimeCodeResult.TokenQuestionReward };
+                var tokens = new List<int> { videoTimeCodeResult.TokenDone, videoTimeCodeResult.TokenHighestStreak, videoTimeCodeResult.TokenQuestionReward, videoTimeCodeResult.TokenSuperFire };
                 await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
                 {
                     NumberOfToken = tokens.Sum(),
