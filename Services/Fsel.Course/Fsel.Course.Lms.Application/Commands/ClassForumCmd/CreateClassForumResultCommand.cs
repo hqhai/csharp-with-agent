@@ -109,16 +109,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         ClassForumId = classForum.Id,
                         WordContent = request.WordContent,
                     };
-                    if (classForum.IsAlFeedBack)
-                    {
-                        var aIResponse = await _mediator.Send(new SubmitAICommand
-                        {
-                            WordContent = request.WordContent,
-                            ClassForum = classForum,
-                        }).ConfigureAwait(false);
-
-                        classForumResult.GradingAlFeedback = aIResponse;
-                    }
 
                     if (request.FilePaths != null)
                     {
@@ -127,15 +117,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             FilePath = x,
                         }).ToList();
                     }
-                    classForumResult = _classForumResultRepository.Add(classForumResult);
 
-                    if (classForumResult.Status == EnumClassForumResultStatus.Draft)
+
+                    if (classForum.IsAlFeedBack)
                     {
-                        await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                        var aIResponse = await _mediator.Send(new SubmitAICommand
+                        {
+                            WordContent = request.WordContent,
+                            ClassForum = classForum,
+                            ClassForumResult = classForumResult,
+                        }).ConfigureAwait(false);
                     }
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)

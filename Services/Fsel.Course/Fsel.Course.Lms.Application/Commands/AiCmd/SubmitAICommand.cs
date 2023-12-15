@@ -17,10 +17,13 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     public class SubmitAICommandHandler : IRequestHandler<SubmitAICommand, string?>
     {
         private readonly IOpenAIService _openAIService;
+        private readonly IMediator _mediator;
 
-        public SubmitAICommandHandler(IOpenAIService openAIService)
+
+        public SubmitAICommandHandler(IOpenAIService openAIService, IMediator mediator)
         {
             _openAIService = openAIService;
+            _mediator = mediator;
         }
 
         public async Task<string?> Handle(SubmitAICommand request, CancellationToken cancellationToken)
@@ -50,7 +53,17 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 PresencePenalty = request.ClassForum.SettingPresence,
                 TopP = request.ClassForum.SettingTopP
             });
-            return response.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault();
+
+            var result = response.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault();
+
+            await _mediator.Send(new SubmitAIResponseCommand
+            {
+                GradingAlFeedback = result,
+                ClassForumResult = request.ClassForumResult
+            }, cancellationToken).ConfigureAwait(false);
+
+
+            return result;
         }
     }
 }

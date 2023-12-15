@@ -9,5 +9,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Ais
         public string? WordContent { get; set; }
 
         public ClassForum? ClassForum { get; set; }
+
+        public ClassForumResult? ClassForumResult { get; set; }
     }
 }
