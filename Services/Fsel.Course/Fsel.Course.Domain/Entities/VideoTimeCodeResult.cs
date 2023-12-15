@@ -4,8 +4,9 @@ namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.IEntities;
 
-    public class VideoTimeCodeResult : BaseTokenResult
+    public class VideoTimeCodeResult : BaseLearnResult, ITokenResult
     {
         public VideoResult? VideoResult { get; set; }
 
@@ -27,6 +28,10 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public bool IsWorking { get; set; }
 
+        public int? TokenDone { get; set; }
+        public int? TokenHighestStreak { get; set; }
+        public int? TokenSuperFire { get; set; }
+        public int? TokenQuestionReward { get; set; }
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }
 }

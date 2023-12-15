@@ -177,7 +177,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 return finalTestResult;
             }
             var tokenConfigs = tokenConfigResults.Content?.Result;
-            var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
+            var isSuperFireMode = true; /*isSuperFireModeResult.Content?.Result ?? default;*/
 
             var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
             var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
@@ -189,13 +189,13 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             return finalTestResult;
         }
 
-        private async Task UpdateUserToken(BaseTokenResult baseTokenResult)
+        private async Task UpdateUserToken(FinalTestResult finalTestResult)
         {
-            var tokens = new List<int?> { baseTokenResult.TokenDone, baseTokenResult.TokenHighestStreak, baseTokenResult.TokenQuestionReward, baseTokenResult.TokenQuestionReward };
+            var tokens = new List<int?> { finalTestResult.TokenDone, finalTestResult.TokenHighestStreak, finalTestResult.TokenQuestionReward, finalTestResult.TokenSuperFire };
             await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
             {
                 NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
-                StudentId = baseTokenResult.StudentId,
+                StudentId = finalTestResult.StudentId,
             }).ConfigureAwait(false);
         }
 

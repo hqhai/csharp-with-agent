@@ -192,13 +192,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task UpdateUserToken(BaseTokenResult baseTokenResult)
+        private async Task UpdateUserToken(MockTestResult mockTestResult)
         {
-            var tokens = new List<int?> { baseTokenResult.TokenDone, baseTokenResult.TokenHighestStreak, baseTokenResult.TokenQuestionReward, baseTokenResult.TokenQuestionReward };
+            var tokens = new List<int?> { mockTestResult.TokenDone, mockTestResult.TokenHighestStreak, mockTestResult.TokenQuestionReward, mockTestResult.TokenSuperFire };
             await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
             {
                 NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
-                StudentId = baseTokenResult.StudentId,
+                StudentId = mockTestResult.StudentId,
             }).ConfigureAwait(false);
         }
 
