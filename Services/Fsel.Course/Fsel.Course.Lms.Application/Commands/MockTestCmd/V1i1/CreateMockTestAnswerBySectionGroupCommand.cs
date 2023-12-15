@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -173,6 +174,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     mockTestResult.WorkingTime = sectionGroupResult.WorkingTime;
                     mockTestResult.HighestStreak = sectionGroupResult.HighestStreak;
                     mockTestResult = await GetMockTestResult(sectionGroupResult.SkillScores, mockTestResult, isSkillTest);
+                    await UpdateUserToken(mockTestResult).ConfigureAwait(false);
                 }
             }
             else
@@ -183,11 +185,22 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                     mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
                     mockTestResult = await GetMockTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), mockTestResult, isSkillTest);
+                    await UpdateUserToken(mockTestResult).ConfigureAwait(false);
                 }
             }
 
             _mockTestResultRepository.Update(mockTestResult);
             await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task UpdateUserToken(BaseTokenResult baseTokenResult)
+        {
+            var tokens = new List<int> { baseTokenResult.TokenDone, baseTokenResult.TokenHighestStreak, baseTokenResult.TokenQuestionReward, baseTokenResult.TokenQuestionReward };
+            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+            {
+                NumberOfToken = tokens.Sum(),
+                StudentId = baseTokenResult.StudentId,
+            }).ConfigureAwait(false);
         }
 
         private async Task<MockTestResult> GetMockTestResult(IList<SkillScores>? skillScores, MockTestResult mockTestResult, bool isSkillTest)

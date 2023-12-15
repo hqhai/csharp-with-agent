@@ -158,8 +158,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 finalTestResult = await GetFinalTestResult(sectionGroupResults, finalTestResult);
-                var tokens = new List<int> { finalTestResult.TokenDone, finalTestResult.TokenHighestStreak, finalTestResult.TokenSuperFire };
-                await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel { NumberOfToken = tokens.Sum(), StudentId = finalTestResult.StudentId }).ConfigureAwait(false);
+                await UpdateUserToken(finalTestResult).ConfigureAwait(false);
                 _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -188,6 +187,16 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             finalTestResult.TokenHighestStreak = GetToken(isSuperFireMode ? configHighestStreak?.SuperConfig : configHighestStreak?.Config) * finalTestResult.HighestStreak ?? default;
             finalTestResult.TokenSuperFire = GetToken(isSuperFireMode ? configSuperFire?.SuperConfig : configSuperFire?.Config);
             return finalTestResult;
+        }
+
+        private async Task UpdateUserToken(BaseTokenResult baseTokenResult)
+        {
+            var tokens = new List<int> { baseTokenResult.TokenDone, baseTokenResult.TokenHighestStreak, baseTokenResult.TokenQuestionReward, baseTokenResult.TokenQuestionReward };
+            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+            {
+                NumberOfToken = tokens.Sum(),
+                StudentId = baseTokenResult.StudentId,
+            }).ConfigureAwait(false);
         }
 
         private static int GetToken(object? config)
