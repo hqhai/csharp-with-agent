@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -195,10 +194,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private async Task UpdateUserToken(BaseTokenResult baseTokenResult)
         {
-            var tokens = new List<int> { baseTokenResult.TokenDone, baseTokenResult.TokenHighestStreak, baseTokenResult.TokenQuestionReward, baseTokenResult.TokenQuestionReward };
+            var tokens = new List<int?> { baseTokenResult.TokenDone, baseTokenResult.TokenHighestStreak, baseTokenResult.TokenQuestionReward, baseTokenResult.TokenQuestionReward };
             await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
             {
-                NumberOfToken = tokens.Sum(),
+                NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
                 StudentId = baseTokenResult.StudentId,
             }).ConfigureAwait(false);
         }
@@ -212,12 +211,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             mockTestResult.SkillScores = skillScores;
             mockTestResult = await GetTokenMockTestResult(mockTestResult, isSkillTest);
             return mockTestResult;
-        }
-
-        private static int GetToken(object? config)
-        {
-            var tokenConfig = config.Deserialize<TokenNumber>();
-            return tokenConfig?.Number ?? default;
         }
 
         private async Task<MockTestResult> GetTokenMockTestResult(MockTestResult mockTestResult, bool isSkillTest)
@@ -235,13 +228,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             }
             var tokenConfigs = tokenConfigResults.Content?.Result;
             var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
-            var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone);
-            var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak);
-            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire);
 
-            mockTestResult.TokenDone = GetToken(isSuperFireMode ? configDone?.SuperConfig : configDone?.Config);
-            mockTestResult.TokenHighestStreak = GetToken(isSuperFireMode ? configHighestStreak?.SuperConfig : configHighestStreak?.Config) * mockTestResult.HighestStreak ?? default;
-            mockTestResult.TokenSuperFire = GetToken(isSuperFireMode ? configSuperFire?.SuperConfig : configSuperFire?.Config);
+            var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
+            var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
+            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
+
+            mockTestResult.TokenDone = configDone?.Number;
+            mockTestResult.TokenHighestStreak = configHighestStreak?.Number;
+            mockTestResult.TokenSuperFire = configSuperFire?.Number;
             return mockTestResult;
         }
 

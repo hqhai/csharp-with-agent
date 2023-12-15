@@ -6,9 +6,9 @@ namespace Fsel.Course.Domain.Entities
 
     public class BaseTokenResult : BaseLearnResult, ITokenResult
     {
-        public int TokenDone { get; set; }
-        public int TokenHighestStreak { get; set; }
-        public int TokenSuperFire { get; set; }
-        public int TokenQuestionReward { get; set; }
+        public int? TokenDone { get; set; }
+        public int? TokenHighestStreak { get; set; }
+        public int? TokenSuperFire { get; set; }
+        public int? TokenQuestionReward { get; set; }
     }
 }

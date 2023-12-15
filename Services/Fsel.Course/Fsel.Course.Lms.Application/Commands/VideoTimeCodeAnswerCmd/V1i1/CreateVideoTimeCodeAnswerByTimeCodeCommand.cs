@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -214,10 +213,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             videoTimeCodeResult = await GetVideoTimeCodeResultAsync(videoTimeCodeResult, videoTimeCode, isSubmit, cancellationToken);
             if (videoTimeCodeResult.Status == EnumResultStatus.Done)
             {
-                var tokens = new List<int> { videoTimeCodeResult.TokenDone, videoTimeCodeResult.TokenHighestStreak, videoTimeCodeResult.TokenQuestionReward, videoTimeCodeResult.TokenSuperFire };
+                var tokens = new List<int?> { videoTimeCodeResult.TokenDone, videoTimeCodeResult.TokenHighestStreak, videoTimeCodeResult.TokenQuestionReward, videoTimeCodeResult.TokenSuperFire };
                 await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
                 {
-                    NumberOfToken = tokens.Sum(),
+                    NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
                     StudentId = videoTimeCodeResult.StudentId,
                 }).ConfigureAwait(false);
             }
@@ -262,18 +261,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
             if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
             {
-                var configQuestionReward = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.QuestionReward);
-                videoTimeCodeResult.TokenQuestionReward = GetToken(isSuperFireMode ? configQuestionReward?.SuperConfig : configQuestionReward?.Config) * videoTimeCodeResult.CorrectCount;
+                var configQuestionReward = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.QuestionReward).GetTokenNumber<TokenNumber>(isSuperFireMode);
+                videoTimeCodeResult.TokenQuestionReward = configQuestionReward?.Number * videoTimeCodeResult.CorrectCount;
             }
             else
             {
-                var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone);
-                var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak);
-                videoTimeCodeResult.TokenDone = GetToken(isSuperFireMode ? configDone?.SuperConfig : configDone?.Config);
-                videoTimeCodeResult.TokenHighestStreak = GetToken(isSuperFireMode ? configHighestStreak?.SuperConfig : configHighestStreak?.Config) * videoTimeCodeResult.HighestStreak ?? default;
+                var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
+                var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
+                videoTimeCodeResult.TokenDone = configDone?.Number;
+                videoTimeCodeResult.TokenHighestStreak = configHighestStreak?.Number * videoTimeCodeResult.HighestStreak ?? default;
             }
-            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire);
-            videoTimeCodeResult.TokenSuperFire = GetToken(isSuperFireMode ? configSuperFire?.SuperConfig : configSuperFire?.Config);
+            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
+            videoTimeCodeResult.TokenSuperFire = configSuperFire?.Number;
             return videoTimeCodeResult;
         }
 
@@ -299,12 +298,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 });
                 return tokenConfigResults?.Content?.Result;
             }
-        }
-
-        private static int GetToken(object? config)
-        {
-            var tokenConfig = config.Deserialize<TokenNumber>();
-            return tokenConfig?.Number ?? default;
         }
 
         private static VideoTimeCodeResult? GetVideoTimeCodeResult(VideoResult videoResult, Guid videoTimeCodeId)
@@ -391,7 +384,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private bool GetMandatoryAnswer(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult)
         {
-            double workingTime = 0;
+            double workingTime = default;
             if (videoTimeCodeResult.Status == EnumResultStatus.New)
             {
                 workingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
@@ -400,7 +393,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 workingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
             }
-            return videoTimeCode.ExecutionTime == 0 || workingTime < videoTimeCode.ExecutionTime && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone;
+            return videoTimeCode.ExecutionTime == default || (workingTime < videoTimeCode.ExecutionTime && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone);
         }
 
         private static SkillScores GetSkillScore(IGrouping<EnumCourseSkill, Exercise> exercise)

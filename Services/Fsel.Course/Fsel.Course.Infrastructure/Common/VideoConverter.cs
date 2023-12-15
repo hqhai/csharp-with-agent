@@ -281,10 +281,10 @@ namespace Fsel.Course.Infrastructure.Common
             videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
             videoResult.VideoSkillScores = listSkillScore;
-            videoResult.TokenDone = await query.SumAsync(x => x.TokenDone, cancellationToken);
-            videoResult.TokenHighestStreak = await query.SumAsync(x => x.TokenHighestStreak, cancellationToken);
-            videoResult.TokenQuestionReward = await query.SumAsync(x => x.TokenQuestionReward, cancellationToken);
-            videoResult.TokenSuperFire = await query.SumAsync(x => x.TokenSuperFire, cancellationToken);
+            videoResult.TokenDone = await query.Where(x => x.TokenDone.HasValue).SumAsync(x => x.TokenDone!.Value, cancellationToken);
+            videoResult.TokenHighestStreak = await query.Where(x => x.TokenHighestStreak.HasValue).SumAsync(x => x.TokenHighestStreak!.Value, cancellationToken);
+            videoResult.TokenQuestionReward = await query.Where(x => x.TokenQuestionReward.HasValue).SumAsync(x => x.TokenQuestionReward!.Value, cancellationToken);
+            videoResult.TokenSuperFire = await query.Where(x => x.TokenSuperFire.HasValue).SumAsync(x => x.TokenSuperFire!.Value, cancellationToken);
             return methodResult;
         }
 

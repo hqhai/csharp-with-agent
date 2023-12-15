@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20231213074233_Update_Token_Result")]
+    [Migration("20231215140157_Update_Token_Result")]
     partial class Update_Token_Result
     {
         /// <inheritdoc />
@@ -1752,16 +1752,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("TokenDone")
+                    b.Property<int?>("TokenDone")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenHighestStreak")
+                    b.Property<int?>("TokenHighestStreak")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenQuestionReward")
+                    b.Property<int?>("TokenQuestionReward")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenSuperFire")
+                    b.Property<int?>("TokenSuperFire")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -2908,16 +2908,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("TokenDone")
+                    b.Property<int?>("TokenDone")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenHighestStreak")
+                    b.Property<int?>("TokenHighestStreak")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenQuestionReward")
+                    b.Property<int?>("TokenQuestionReward")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenSuperFire")
+                    b.Property<int?>("TokenSuperFire")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("UnitId")
@@ -4615,16 +4615,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("TokenDone")
+                    b.Property<int?>("TokenDone")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenHighestStreak")
+                    b.Property<int?>("TokenHighestStreak")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenQuestionReward")
+                    b.Property<int?>("TokenQuestionReward")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenSuperFire")
+                    b.Property<int?>("TokenSuperFire")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -4893,16 +4893,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("TokenDone")
+                    b.Property<int?>("TokenDone")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenHighestStreak")
+                    b.Property<int?>("TokenHighestStreak")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenQuestionReward")
+                    b.Property<int?>("TokenQuestionReward")
                         .HasColumnType("int");
 
-                    b.Property<int>("TokenSuperFire")
+                    b.Property<int?>("TokenSuperFire")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
