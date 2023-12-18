@@ -184,7 +184,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
 
             finalTestResult.TokenDone = configDone?.Number;
-            finalTestResult.TokenHighestStreak = configHighestStreak?.Number;
+            finalTestResult.TokenHighestStreak = configHighestStreak?.Number * finalTestResult.HighestStreak;
             finalTestResult.TokenSuperFire = configSuperFire?.Number;
             return finalTestResult;
         }
