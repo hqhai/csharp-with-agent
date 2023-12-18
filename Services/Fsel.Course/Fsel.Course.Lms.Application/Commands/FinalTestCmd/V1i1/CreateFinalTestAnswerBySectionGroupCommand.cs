@@ -128,12 +128,14 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.FinalTestAnswerCmd
                     await _sectionGroupConverter.UpdateFinalTestAnswers(sectionGroup, sectionGroupResult);
                     sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, nameof(FinalTest), cancellationToken);
                 }
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
                 return methodResult;
             });
 
             await UpdateFinalTestResultAsync(finalTestResult, cancellationToken);
+            var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
+            sectionGroupResultDto.IsDoneTest = finalTestResult.Status == EnumResultStatus.Done;
+            methodResult.Result = sectionGroupResultDto;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
