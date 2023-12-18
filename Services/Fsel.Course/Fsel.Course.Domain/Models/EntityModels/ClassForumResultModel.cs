@@ -5,9 +5,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System;
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
 
     public class ClassForumResultModel : BaseModel
     {
@@ -42,6 +44,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsTurnedOffNotification { get; set; }
 
         public string? WordContent { get; set; }
+        public int WordCount => Shared.Helpers.StringHelper.CountWords(WordContent);
 
         public string? GradingAlFeedback { get; set; }
 
@@ -57,7 +60,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? RetryContent { get; set; }
         public string? RetryWordContent { get; set; }
         public string? RetryGradingAlFeedBack { get; set; }
-
+        public bool IsFeedBack { get; set; }
         public ClassForumModel? ClassForum { get; set; }
         public LessonResultModel? LessonResult { get; set; }
         public string? CourseCode { get; set; }
@@ -65,8 +68,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int UnitDisplayOrder { get; set; }
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
-        public IList<string>? FilePaths { get { return ClassForumResultFiles?.Where(x => !x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
-        public IList<string>? RetryFilePaths { get { return ClassForumResultFiles?.Where(x => x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
+        public IList<string>? FilePaths
+        { get { return ClassForumResultFiles?.Where(x => !x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
+        public IList<string>? RetryFilePaths
+        { get { return ClassForumResultFiles?.Where(x => x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
+
         [JsonIgnore]
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
 

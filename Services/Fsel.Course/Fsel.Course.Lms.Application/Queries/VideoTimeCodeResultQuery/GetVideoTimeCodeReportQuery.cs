@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
@@ -22,11 +23,13 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     public class GetVideoTimeCodeReportQueryHandler : IRequestHandler<GetVideoTimeCodeReportQuery, MethodResult<TestResultReportModel>>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
+        private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IMapper _mapper;
 
-        public GetVideoTimeCodeReportQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper)
+        public GetVideoTimeCodeReportQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository, IMapper mapper)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
+            _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _mapper = mapper;
         }
 
@@ -35,26 +38,24 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TestResultReportModel> methodResult = new MethodResult<TestResultReportModel>();
 
-            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable
-                .Include(x => x.VideoTimeCode)
-                .Where(x => x.Id == request.VideoTimeCodeResultId)
-                .FirstOrDefaultAsync(cancellationToken);
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.GetByIdAsync(request.VideoTimeCodeResultId);
             if (videoTimeCodeResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeResult));
                 return methodResult;
             }
-            var videoTimeCodeResultDto = _mapper.Map<TestResultReportModel>(videoTimeCodeResult);
-            if (videoTimeCodeResultDto != null)
-            {
-                videoTimeCodeResultDto.WorkingTime = videoTimeCodeResult.WorkingTime;
-                videoTimeCodeResultDto.Score = videoTimeCodeResult.CorrectCount;
-                videoTimeCodeResultDto.HighestStreak = videoTimeCodeResult.HighestStreak;
-            }
-
-            methodResult.Result = videoTimeCodeResultDto;
+            methodResult.Result = await GetVideoTimeCodeReport(videoTimeCodeResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<TestResultReportModel> GetVideoTimeCodeReport(VideoTimeCodeResult videoTimeCodeResult)
+        {
+            var query = _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id);
+            var videoTimeCodeResultDto = _mapper.Map<TestResultReportModel>(videoTimeCodeResult);
+            videoTimeCodeResultDto.CorrectQuestion = await query.Where(x => x.IsCorrect == true).CountAsync();
+            videoTimeCodeResultDto.TotalQuestion = await query.CountAsync();
+            return videoTimeCodeResultDto;
         }
     }
 }

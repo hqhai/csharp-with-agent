@@ -3,7 +3,6 @@
 namespace Fsel.Course.Infrastructure.Maps
 {
     using AutoMapper;
-    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.EntityModels;
 
@@ -11,8 +10,10 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public VideoTimeCodeResultProfile()
         {
-            CreateMap<VideoTimeCodeResult, TestResultRankingModel>().IgnoreAllNonExisting();
-            CreateMap<VideoTimeCodeResult, TestResultReportModel>().IgnoreAllNonExisting();
+            CreateMap<VideoTimeCodeResult, TestResultRankingModel>()
+            .ForMember(x => x.Score, p => p.MapFrom(o => o.CorrectCount));
+            CreateMap<VideoTimeCodeResult, TestResultReportModel>()
+            .ForMember(x => x.Score, p => p.MapFrom(o => o.CorrectCount));
         }
     }
 }

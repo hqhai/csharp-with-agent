@@ -157,7 +157,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 if (request.IsSubmit)
                 {
                     await _sectionGroupConverter.UpdatePlacementTestAnswers(sectionGroup, sectionGroupResult);
-                    sectionGroupResult = await UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
+                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, nameof(PlacementTest), cancellationToken);
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
@@ -186,6 +186,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
                 {
                     int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                    placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
                     var (currentLevel, isLockPT) = placementTest.Level.GetLevelInScore(placementTestResult.Percent, age);
                     if (currentLevel.HasValue)
                     {
@@ -195,10 +196,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                             Level = currentLevel.Value
                         }).ConfigureAwait(false);
                     }
-                    placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
                     _placementTestResultRepository.Update(placementTestResult);
                     await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
-
                     if (isLockPT)
                     {
                         await SendStudentPlacementTest(student, placementTestResult);
@@ -234,34 +233,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             placementTestResult.Status = EnumResultStatus.Done;
             placementTestResult.SkillScores = skillScores;
             return placementTestResult;
-        }
-
-        private async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
-        {
-            var skillScore = await GetSkillScore(sectionGroupResult, sectionGroup, cancellationToken);
-            sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
-            sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
-            sectionGroupResult.Status = EnumResultStatus.Done;
-            if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
-            {
-                sectionGroupResult.SkillScores.Add(skillScore);
-            }
-            else
-            {
-                sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
-            }
-            _sectionGroupResultRepository.Update(sectionGroupResult);
-            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            return sectionGroupResult;
-        }
-
-        private async Task<SkillScores> GetSkillScore(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
-        {
-            var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.PlacementTestResultId == sectionGroupResult.PlacementTestResultId).ToListAsync(cancellationToken);
-            var questionIds = placementTestAnswers.Select(x => x.SectionQuestion).Select(x => x.QuestionId).ToList();
-            var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
-            var skillScore = _sectionGroupConverter.GetSkillScore(sectionGroup, placementTestAnswers.Sum(x => x.CorrectCount), placementTestAnswers.Count, totalCorrect, questionIds.Count);
-            return skillScore;
         }
 
         private async Task<MethodResult<IList<PlacementTestAnswer>>> CreateAnswerAsync(CreatePlacementTestAnswerBySectionGroupCommand request, Guid sectionGroupResultId)

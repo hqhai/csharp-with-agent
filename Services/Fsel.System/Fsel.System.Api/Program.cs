@@ -36,6 +36,7 @@ builder.Services.AddScoped<IGameVocabularyRepository, GameVocabularyRepository>(
 builder.Services.AddScoped<IGameVocabularyTypeRepository, GameVocabularyTypeRepository>();
 builder.Services.AddScoped<IFocusTimeConfigRepository, FocusTimeRepository>();
 builder.Services.AddScoped<IGameVocabularyPlatformRepository, GameVocabularyPlatformRepository>();
+builder.Services.AddScoped<ITokenConfigRepository, TokenConfigRepository>();
 builder.Services.AddScoped<IApprovalTimeConfigRepository, ApprovalTimeConfigRepository>();
 builder.Services.AddScoped<IApprovalLogRepository, ApprovalLogRepository>();
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
