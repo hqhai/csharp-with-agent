@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.V1i1.FinalTestAnswerCmd
+namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1
 {
     using System;
     using System.Collections.Generic;
@@ -128,12 +128,14 @@ namespace Fsel.Course.Lms.Application.Commands.V1i1.FinalTestAnswerCmd
                     await _sectionGroupConverter.UpdateFinalTestAnswers(sectionGroup, sectionGroupResult);
                     sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, nameof(FinalTest), cancellationToken);
                 }
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
                 return methodResult;
             });
 
             await UpdateFinalTestResultAsync(finalTestResult, cancellationToken);
+            var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
+            sectionGroupResultDto.IsTestDone = finalTestResult.Status == EnumResultStatus.Done;
+            methodResult.Result = sectionGroupResultDto;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 

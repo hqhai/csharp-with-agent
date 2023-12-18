@@ -125,7 +125,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 if (request.Answers != null && request.Answers.Any())
                 {
-                    var answerResult = await CreateAnswerAsync(request, sectionGroup, sectionGroupResult.Id);
+                    var answerResult = await CreateAnswerAsync(request, sectionGroup, sectionGroupResult);
                     if (!answerResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
@@ -137,12 +137,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     await _sectionGroupConverter.UpdateMockTestAnswers(sectionGroup, sectionGroupResult);
                     sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, nameof(MockTest), cancellationToken);
                 }
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
                 return methodResult;
             });
 
             await UpdateMockTestResultAsync(mockTestResult, cancellationToken);
+            var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
+            sectionGroupResultDto.IsTestDone = mockTestResult.Status == EnumResultStatus.Done;
+            methodResult.Result = sectionGroupResultDto;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
@@ -187,7 +189,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return mockTestResult;
         }
 
-        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswerAsync(CreateMockTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, Guid sectionGroupResultId)
+        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswerAsync(CreateMockTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<IList<MockTestAnswer>>();
@@ -201,7 +203,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
-                anserResult = await CreateAnswer(request, questions, sectionGroupResultId);
+                anserResult = await CreateAnswer(request, questions, sectionGroupResult);
             }
             else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
             {
@@ -212,7 +214,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
-                anserResult = await CreateAnswer(request, sections, sectionGroupResultId);
+                anserResult = await CreateAnswer(request, sections, sectionGroupResult);
             }
             else
             {
@@ -223,7 +225,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
-                anserResult = await CreateAnswer(request, sectionTimeCodes, sectionGroupResultId);
+                anserResult = await CreateAnswer(request, sectionTimeCodes, sectionGroupResult);
             }
 
             if (!anserResult.IsOK)
@@ -241,7 +243,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswer(CreateMockTestAnswerBySectionGroupCommand request, IList<Question>? questions, Guid sectionGroupResultId)
+        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswer(CreateMockTestAnswerBySectionGroupCommand request, IList<Question>? questions, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
@@ -264,7 +266,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (mockTestAnswer == null)
                     {
-                        mockTestAnswers.Add(GetMockTestAnswer(answerConfig, correctCount, request, sectionGroupResultId, questionItem, default));
+                        mockTestAnswers.Add(GetMockTestAnswer(answerConfig, correctCount, sectionGroupResult, questionItem, default));
                     }
                 }
             }
@@ -272,7 +274,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswer(CreateMockTestAnswerBySectionGroupCommand request, IList<Section>? sections, Guid sectionGroupResultId)
+        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswer(CreateMockTestAnswerBySectionGroupCommand request, IList<Section>? sections, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<IList<MockTestAnswer>>();
@@ -290,7 +292,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (mockTestAnswer == null)
                     {
-                        mockTestAnswers.Add(GetMockTestAnswer(item.Answer, default, request, sectionGroupResultId, default, section.Id));
+                        mockTestAnswers.Add(GetMockTestAnswer(item.Answer, default, sectionGroupResult, default, section.Id));
                     }
                 }
             }
@@ -298,7 +300,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswer(CreateMockTestAnswerBySectionGroupCommand request, IList<SectionTimeCode>? sectionTimeCodes, Guid sectionGroupResultId)
+        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswer(CreateMockTestAnswerBySectionGroupCommand request, IList<SectionTimeCode>? sectionTimeCodes, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<IList<MockTestAnswer>>();
@@ -316,7 +318,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (mockTestAnswer == null)
                     {
-                        mockTestAnswers.Add(GetMockTestAnswer(item.Answer, default, request, sectionGroupResultId, default, default, sectionTimeCode.Id));
+                        mockTestAnswers.Add(GetMockTestAnswer(item.Answer, default, sectionGroupResult, default, default, sectionTimeCode.Id));
                     }
                 }
             }
@@ -325,17 +327,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private static MockTestAnswer GetMockTestAnswer(object? answer, int correctCount, CreateMockTestAnswerBySectionGroupCommand request, Guid? sectionGroupResultId, Question? questionItem, Guid? sectionId, Guid? sectionTimeCodeId = default)
+        private static MockTestAnswer GetMockTestAnswer(object? answer, int correctCount, SectionGroupResult sectionGroupResult, Question? questionItem = null, Guid? sectionId = null, Guid? sectionTimeCodeId = null)
         {
             return new MockTestAnswer
             {
                 Answer = answer,
                 CorrectCount = correctCount,
-                MockTestResultId = request.MockTestResultId,
+                MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionTimeCodeId = sectionTimeCodeId ?? null,
                 SectionId = sectionId ?? null,
-                SectionQuestionId = questionItem?.SectionQuestions.FirstOrDefault()?.Id ?? default,
-                SectionGroupResultId = sectionGroupResultId,
+                SectionQuestionId = questionItem?.SectionQuestions.FirstOrDefault()?.Id,
+                SectionGroupResultId = sectionGroupResult.Id,
                 IsCorrect = questionItem == null || questionItem.CorrectTotal == correctCount,
             };
         }

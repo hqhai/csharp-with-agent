@@ -186,6 +186,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
                 {
                     int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                    placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
                     var (currentLevel, isLockPT) = placementTest.Level.GetLevelInScore(placementTestResult.Percent, age);
                     if (currentLevel.HasValue)
                     {
@@ -195,10 +196,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                             Level = currentLevel.Value
                         }).ConfigureAwait(false);
                     }
-                    placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
                     _placementTestResultRepository.Update(placementTestResult);
                     await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
-
                     if (isLockPT)
                     {
                         await SendStudentPlacementTest(student, placementTestResult);
