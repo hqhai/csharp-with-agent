@@ -12,7 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
 
-    public class SubmitAIResponseCommand : IRequest<bool>
+    public class SubmitClassforumAICommand : IRequest<bool>
     {
         public ClassForumResult? ClassForumResult { get; set; }
 
@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         public string? WordContent { get; set; }
     }
 
-    public class SubmitAIResponseCommandHandler : IRequestHandler<SubmitAIResponseCommand, bool>
+    public class SubmitAIResponseCommandHandler : IRequestHandler<SubmitClassforumAICommand, bool>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             _mediator = mediator;
         }
 
-        public async Task<bool> Handle(SubmitAIResponseCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(SubmitClassforumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var classForumResult = request.ClassForumResult;

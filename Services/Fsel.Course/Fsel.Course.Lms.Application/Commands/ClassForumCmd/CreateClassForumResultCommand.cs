@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
                     if (classForum.IsAlFeedBack)
                     {
-                        await _mediator.Send(new SubmitAIResponseCommand
+                        await _mediator.Send(new SubmitClassforumAICommand
                         {
                             ClassForum = classForum,
                             ClassForumResult = classForumResult,
