@@ -28,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IClassForumRepository _classForumRepository;
         private readonly IMediator _mediator;
 
+
         public RetryClassForumResultCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, IClassForumRepository classForumRepository, IMediator mediator)
         {
             _classForumResultRepository = classForumResultRepository;
@@ -59,12 +60,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             if (classForum.IsAlFeedBack)
             {
-                var aIResponse = await _mediator.Send(new SubmitAICommand
+                if (classForum.IsAlFeedBack)
                 {
-                    WordContent = request.WordContent,
-                    ClassForum = classForum,
-                }, cancellationToken).ConfigureAwait(false);
-                classForumResult.RetryGradingAlFeedBack = aIResponse;
+                    var aIResponse = await _mediator.Send(new SubmitAIResponseCommand
+                    {
+                        ClassForum = classForum,
+                        ClassForumResult = classForumResult,
+                        WordContent = request.WordContent,
+                    }, cancellationToken);
+                }
             }
 
             classForumResult.RetryWordContent = request.WordContent;

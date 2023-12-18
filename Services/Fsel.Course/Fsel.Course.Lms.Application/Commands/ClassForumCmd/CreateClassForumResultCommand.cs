@@ -39,8 +39,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ISystemService _systemService;
         private readonly IMediator _mediator;
+        private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, IMediator mediator)
+        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, IMediator mediator, SubmitAIResponsePublisher submitAIResponsePublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -51,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _notificationMessagePublisher = notificationMessagePublisher;
             _systemService = systemService;
             _mediator = mediator;
+            _submitAIResponsePublisher = submitAIResponsePublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -110,6 +112,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         WordContent = request.WordContent,
                     };
 
+                    if (classForum.IsAlFeedBack)
+                    {
+                        var aIResponse = await _mediator.Send(new SubmitAIResponseCommand
+                        {
+                            ClassForum = classForum,
+                            ClassForumResult = classForumResult,
+                            WordContent = request.WordContent
+                        }, cancellationToken);
+                    }
+
                     if (request.FilePaths != null)
                     {
                         classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
@@ -117,16 +129,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             FilePath = x,
                         }).ToList();
                     }
+                    classForumResult = _classForumResultRepository.Add(classForumResult);
 
-
-                    if (classForum.IsAlFeedBack)
+                    if (classForumResult.Status == EnumClassForumResultStatus.Draft)
                     {
-                        var aIResponse = await _mediator.Send(new SubmitAICommand
-                        {
-                            WordContent = request.WordContent,
-                            ClassForum = classForum,
-                            ClassForumResult = classForumResult,
-                        }).ConfigureAwait(false);
+                        await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
