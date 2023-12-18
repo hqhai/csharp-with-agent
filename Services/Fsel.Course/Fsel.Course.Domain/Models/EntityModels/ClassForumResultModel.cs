@@ -44,6 +44,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? WordContent { get; set; }
         public int WordCount { get; set; }
+        public int? TimeCount { get; set; }
 
         public string? GradingAlFeedback { get; set; }
 

@@ -22,6 +22,10 @@ namespace Fsel.Course.Domain.Entities
         public int WordCount
         { get { return StringHelper.CountWords(WordContent); } }
 
+        [NotMapped]
+        public int? TimeCount
+        { get { return ClassForumResultFiles.Select(p => p.TimeCount).Sum(); } }
+
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
 
