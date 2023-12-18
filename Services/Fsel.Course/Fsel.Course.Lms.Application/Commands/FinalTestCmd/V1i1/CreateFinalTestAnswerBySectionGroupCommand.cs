@@ -177,8 +177,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 return finalTestResult;
             }
             var tokenConfigs = tokenConfigResults.Content?.Result;
-            var isSuperFireMode = true; /*isSuperFireModeResult.Content?.Result ?? default;*/
-
+            var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
             var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
             var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
             var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);

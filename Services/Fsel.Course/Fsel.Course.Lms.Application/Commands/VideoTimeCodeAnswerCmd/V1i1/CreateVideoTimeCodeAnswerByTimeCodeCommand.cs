@@ -241,10 +241,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 videoTimeCodeResult.CorrectCount = (int)listSkillScore.Sum(x => x.CorrectCount);
                 videoTimeCodeResult.CorrectTotal = (int)listSkillScore.Sum(x => x.TotalCount);
                 videoTimeCodeResult.SkillScores = listSkillScore;
-                if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || isDone)
-                {
-                    videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
-                }
+                videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
             }
             videoTimeCodeResult.IsWorking = false;
             return videoTimeCodeResult;
