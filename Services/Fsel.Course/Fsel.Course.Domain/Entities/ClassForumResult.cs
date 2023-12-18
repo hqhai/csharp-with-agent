@@ -5,9 +5,11 @@ namespace Fsel.Course.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Helpers;
 
     public class ClassForumResult : Entity
     {
@@ -15,6 +17,10 @@ namespace Fsel.Course.Domain.Entities
         public string? Content { get; set; }
 
         public string? WordContent { get; set; }
+
+        [NotMapped]
+        public int WordCount
+        { get { return StringHelper.CountWords(WordContent); } }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
