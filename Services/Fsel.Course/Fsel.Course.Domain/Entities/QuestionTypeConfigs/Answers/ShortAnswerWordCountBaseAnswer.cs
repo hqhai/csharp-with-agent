@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 {
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
 
     public class ShortAnswerWordCountBaseAnswer
     {
@@ -17,6 +18,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
             }
         }
 
+        public int WordCount => StringHelper.CountWords(Answers);
         public bool IsFirstSubmit { get; set; } = true;
     }
 }
