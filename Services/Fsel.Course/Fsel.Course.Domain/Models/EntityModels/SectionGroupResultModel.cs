@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? FinalTestResultId { get; set; }
         public Guid? ExtraPracticeResultId { get; set; }
         public Guid? PlacementTestResultId { get; set; }
+        public bool? IsTestDone { get; set; }
         public double RemainingTime { get; set; }
     }
 }

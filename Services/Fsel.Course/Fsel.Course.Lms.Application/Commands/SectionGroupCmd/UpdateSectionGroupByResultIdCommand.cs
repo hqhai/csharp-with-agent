@@ -7,9 +7,9 @@ namespace Fsel.Course.Lms.Application.Commands.SectionGroupCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1;
     using Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1;
     using Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1;
-    using Fsel.Course.Lms.Application.Commands.V1i1.FinalTestAnswerCmd;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
