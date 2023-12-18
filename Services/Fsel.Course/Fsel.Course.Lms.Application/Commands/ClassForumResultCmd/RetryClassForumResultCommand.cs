@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 if (classForum.IsAlFeedBack)
                 {
-                    var aIResponse = await _mediator.Send(new SubmitAIResponseCommand
+                     await _mediator.Send(new SubmitAIResponseCommand
                     {
                         ClassForum = classForum,
                         ClassForumResult = classForumResult,
