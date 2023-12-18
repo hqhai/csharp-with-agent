@@ -34,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
 
     public class GetClassForumQueryHandler : IRequestHandler<GetClassForumQuery, MethodResult<ClassForumByStudentModel>>
     {
+        private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly IClassForumRepository _classForumRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IUserService _userService;
@@ -46,17 +47,19 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
         private readonly IClassForumResultRandomRepository _classForumResultRandomRepository;
         private const int STUDENT_RANDOM_TAKE = 2; // lấy random 2 bài post của học sinh bất kì từ lớp khác, cùng unit, cùng level
 
-        public GetClassForumQueryHandler(IClassForumRepository classForumRepository
+        public GetClassForumQueryHandler(IStudentFeedbackRepository studentFeedbackRepository
+            , IClassForumRepository classForumRepository
             , IClassForumResultRepository classForumResultRepository
             , IUserService userService
             , AuthContext authContext
             , IMapper mapper
             , ILessonRepository lessonRepository
-            , IInteractionService interactionService,
-              ITrainingService trainingService,
-              INotificationService notificationService,
-              IClassForumResultRandomRepository classForumResultRandomRepository)
+            , IInteractionService interactionService
+            , ITrainingService trainingService
+            , INotificationService notificationService
+            , IClassForumResultRandomRepository classForumResultRandomRepository)
         {
+            _studentFeedbackRepository = studentFeedbackRepository;
             _classForumRepository = classForumRepository;
             _classForumResultRepository = classForumResultRepository;
             _userService = userService;
@@ -132,7 +135,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 //Lấy ClassForumCurrent - học sinh submit tài khoản hiện tại
                 var classForumResultCurrentStudent = classForumResults.FirstOrDefault(x => x.ClassForumId == classForum.Id && x.LessonResultId == request.LessonResultId);
                 classForumByStudentModel.ClassForumResultCurrentStudent = classForumResultCurrentStudent;
-
                 var classForumResultRandom = _classForumResultRandomRepository.Queryable.Where(x => classForumResultCurrentStudent != null && x.ClassForumId == classForumResultCurrentStudent.ClassForumId && x.ClassId == student.ClassId).ToList();
 
                 // Lấy list Random, nếu chưa có thì tạo list random và lưu xuống DB, lần sau call API sẽ lấy list Random được khởi tạo ban đầu
@@ -150,6 +152,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 ///Xử lý kết quả trả về
                 if (classForumResultCurrentStudent != null && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Draft)
                 {
+                    //feed back
+                    classForumResultCurrentStudent.IsFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultCurrentStudent.Id, cancellationToken);
+
                     // Lấy bài post học sinh trong lớp
                     var classForumResultAllStudents = classForumResults.Where(x => x.ClassForumId == classForum.Id &&
                                     x.Id != classForumResultCurrentStudent.Id && x.Status != EnumClassForumResultStatus.Draft && x.Status != EnumClassForumResultStatus.Pending
