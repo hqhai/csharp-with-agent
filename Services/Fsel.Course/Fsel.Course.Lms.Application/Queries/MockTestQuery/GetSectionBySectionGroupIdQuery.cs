@@ -89,8 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 return methodResult;
             }
             var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId, sectionGroup);
-            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(sectionGroup, sectionGroupResult, nameof(MockTest));
-            methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult, nameof(MockTest));
+            methodResult.Result = await _sectionConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

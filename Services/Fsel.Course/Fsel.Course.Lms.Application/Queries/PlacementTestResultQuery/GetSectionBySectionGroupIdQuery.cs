@@ -82,9 +82,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 return methodResult;
             }
             var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId, sectionGroup);
-            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(sectionGroup, sectionGroupResult, nameof(PlacementTest));
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult, nameof(PlacementTest));
+            methodResult.Result = await _sectionConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult);
             return methodResult;
         }
 
