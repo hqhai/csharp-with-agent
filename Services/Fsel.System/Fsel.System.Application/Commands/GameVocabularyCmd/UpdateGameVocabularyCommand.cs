@@ -58,11 +58,12 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 
             if (request.GameVocabularyTypeModels?.Count > 0)
             {
-                foreach (var item in request.GameVocabularyTypeModels)
+                for (int i = request.GameVocabularyTypeModels.Count - 1; i >= 0; i--)
                 {
+                    var item = request.GameVocabularyTypeModels[i];
                     if (string.IsNullOrEmpty(item.QuestionContent))
                     {
-                        request.GameVocabularyTypeModels.Remove(item);
+                        request.GameVocabularyTypeModels.RemoveAt(i);
                     }
                 }
             }
