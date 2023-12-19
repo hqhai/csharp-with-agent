@@ -66,16 +66,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }, cancellationToken);
 
             classForumResult.GradingAlFeedback = aIResponse;
-            _classForumResultRepository.Update(classForumResult);
 
-            if (classForumResult.Status == EnumClassForumResultStatus.Draft)
-            {
-                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            }
+            _classForumResultRepository.Update(classForumResult);
+            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             return true;
         }
