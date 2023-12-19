@@ -7,7 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1;
+    using Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
