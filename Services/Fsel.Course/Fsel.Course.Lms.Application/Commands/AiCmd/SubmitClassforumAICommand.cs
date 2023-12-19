@@ -59,16 +59,17 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
 
             classForumResult.GradingAlFeedback = aIResponse;
+            classForumResult.GradingAlFeedback = aIResponse;
+
+            _classForumResultRepository.Update(classForumResult);
+            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
             {
                 GradingAlFeedback = aIResponse,
                 ClassForumResultId = classForumResult.Id,
             }, cancellationToken);
-
-            classForumResult.GradingAlFeedback = aIResponse;
-
-            _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             return true;
         }
