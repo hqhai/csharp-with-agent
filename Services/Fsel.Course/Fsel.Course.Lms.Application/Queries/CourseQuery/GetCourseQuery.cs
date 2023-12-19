@@ -114,7 +114,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var courseModel = GetCourseModel(course, studentId);
             if (courseModel == null)
             {
-                methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -171,13 +170,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return;
             }
 
-
             if (!course.CourseResults.Any())
             {
                 course.CourseResults.Add(new CourseResult
                 {
                     StudentId = studentId ?? default,
-                    Status = EnumResultStatus.Process
+                    Status = EnumResultStatus.New
                 });
             }
 
@@ -222,9 +220,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
         public static void AddUnit(int index, List<UnitResult> checkUnitResultAll, List<MockTestResult> checkMockTestResultAll, List<CourseUnitMockTest> courseUnitMockTests, Course? course, CourseUnitMockTest courseUnitMockTest, Guid? studentId)
         {
-
             var courseUnitMockTestFirst = index != 0 ? courseUnitMockTests[index - 1] : new CourseUnitMockTest();
-            // index !=0 ktra unit trc nó có trong result với status = done thì add result mới với Status new 
+            // index !=0 ktra unit trc nó có trong result với status = done thì add result mới với Status new
             bool checkFirstDone = false;
             if (courseUnitMockTestFirst.UnitId.HasValue && index != 0)
             {
@@ -240,21 +237,18 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 StudentId = studentId ?? default,
                 Status = (index == 0 || checkFirstDone) ? EnumResultStatus.New : EnumResultStatus.Unfinished
             });
-
         }
 
         public static void AddMockTest(int index, List<UnitResult> checkUnitResultAll, List<CourseUnitMockTest> courseUnitMockTests, Course? course, CourseUnitMockTest courseUnitMockTest, Guid? studentId)
         {
-            var courseUnitMockTestFirt =( index != 0) ? courseUnitMockTests[index - 1] : new CourseUnitMockTest();
+            var courseUnitMockTestFirt = (index != 0) ? courseUnitMockTests[index - 1] : new CourseUnitMockTest();
             var checkFirstDone = checkUnitResultAll.Any(x => x.UnitId == courseUnitMockTestFirt.UnitId && x.CourseId == courseUnitMockTestFirt.CourseId && x.Status == EnumResultStatus.Done);
-                course.MockTestResults.Add(new MockTestResult
-                {
-                    MockTestId = courseUnitMockTest != null ? courseUnitMockTest.MockTestId!.Value : default,
-                    StudentId = studentId ?? default,
-                    Status = checkFirstDone ? EnumResultStatus.New : EnumResultStatus.Unfinished
-                });
-            
-          
+            course.MockTestResults.Add(new MockTestResult
+            {
+                MockTestId = courseUnitMockTest != null ? courseUnitMockTest.MockTestId!.Value : default,
+                StudentId = studentId ?? default,
+                Status = checkFirstDone ? EnumResultStatus.New : EnumResultStatus.Unfinished
+            });
         }
 
         public static void AddFinal(int index, List<UnitResult> checkUnitResultAll, List<CourseUnitMockTest> courseUnitMockTests, Course? course, CourseUnitMockTest courseUnitMockTest, Guid? studentId)

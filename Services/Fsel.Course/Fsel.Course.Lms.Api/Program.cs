@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.Constants;
-using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
@@ -111,6 +110,10 @@ builder.Services.AddScoped<CourseHelper>();
 builder.Services.AddScoped<UnitHelper>();
 builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<SectionGroupConverter>();
+builder.Services.AddScoped<DateTimeConverter>();
+
+// Helper
+builder.Services.AddScoped<LinQHelper>();
 
 // Publisher
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();

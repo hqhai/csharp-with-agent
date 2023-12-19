@@ -30,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
         private readonly ISectionRepository _sectionRepository;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
         private readonly SectionConverter _sectionConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
@@ -39,9 +40,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
 
-        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionConverter sectionConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
+        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, DateTimeConverter dateTimeConverter, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionConverter sectionConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
         {
             _sectionRepository = sectionRepository;
+            _dateTimeConverter = dateTimeConverter;
             _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
             _sectionConverter = sectionConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
@@ -114,6 +116,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                     ObjectResultId = sectionGroupResult.Id,
                     ObjectResultType = nameof(MockTest)
                 }, CancellationToken.None).ConfigureAwait(false);
+            }
+            else if (sectionGroupResult.Status != EnumResultStatus.Done)
+            {
+                sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.WorkingTime, sectionGroup.ExecutionTime, sectionGroupResult);
+                sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
+                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
             return sectionGroupResult;
         }

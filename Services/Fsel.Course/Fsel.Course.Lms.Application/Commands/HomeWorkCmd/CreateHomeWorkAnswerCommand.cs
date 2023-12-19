@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
@@ -120,7 +121,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                         Answer = answerConfig,
                         CorrectCount = correctCount,
                         HomeWorkQuestionId = homeWorkQuestion.Id,
-                        HomeWorkResultId = homeWorkResult.Id
+                        HomeWorkResultId = homeWorkResult.Id,
+                        IsCorrect = correctCount == questionItem.CorrectTotal
                     });
                 }
                 else
@@ -128,6 +130,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     correctTotal += correctCount;
                     homeWorkAnswer.Answer = answerConfig;
                     homeWorkAnswer.CorrectCount = correctCount;
+                    homeWorkAnswer.IsCorrect = correctCount == questionItem.CorrectTotal;
                     homeWorkAnswers.Add(homeWorkAnswer);
                 }
             }

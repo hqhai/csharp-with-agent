@@ -7,6 +7,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.GameHistoryCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Cms.PlanetDefender.Application.Services.UserServices;
+    using Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models;
     using Fsel.Cms.PlanetDefender.Domain.Entities;
     using Fsel.Cms.PlanetDefender.Domain.IRepositories;
     using Fsel.Cms.PlanetDefender.Domain.Models.CommandModel.GameHistorys;
@@ -86,6 +87,16 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.GameHistoryCmd
 
             await _gameHistoryRepository.ExecuteTransactionAsync(async () =>
             {
+                if (request.Id.HasValue)
+                {
+                    var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel { StudentId = studentId ?? default, NumberOfToken = request.NumberOfToken });
+                    if (!updateTokenResult.IsSuccessStatusCode)
+                    {
+                        methodResult.AddError(updateTokenResult.Error);
+                        return methodResult;
+                    }
+                }
+
                 gameHistory.StudentGameInfoId = studentGameInfo.Id;
                 gameHistory.SpaceShipId = spaceShipId ?? default;
                 if (gameHistory.Id == default)

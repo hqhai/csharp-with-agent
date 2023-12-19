@@ -5,9 +5,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
     using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
@@ -26,6 +29,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
     public class CreateStudentFocusTimeCommandHandler : IRequestHandler<CreateStudentFocusTimeCommand, MethodResult<StudentFocusTimeModel>>
     {
+        private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly IStudentFocusTimeRepository _studentFocusTimeRepository;
         private readonly IStudentRepository _studentRepository;
@@ -36,9 +40,10 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
 
-        public CreateStudentFocusTimeCommandHandler(IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher,
+        public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher,
             ITrainingService trainingService)
         {
+            _mediator = mediator;
             _mapper = mapper;
             _studentFocusTimeRepository = studentFocusTimeRepository;
             _studentRepository = studentRepository;
@@ -94,18 +99,31 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                     }
                     studentFocusTime.IsEstablished = confitionChangeTarget;
 
-
                     // Set AccessTime And NumberOfToken
                     var systemConfigMap = systemConfigResult!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
                     studentFocusTime.ExecuteTime = request.ExecuteTime;
 
+                    if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime && studentFocusTime.IsEstablished)
+                    {
+                        var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+                        {
+                            Feature = EnumTokenFeature.FocusMode,
+                            Mission = EnumTokenMission.FocusTime
+                        });
+                        var tokenConfigResult = tokenConfig.Content?.Result;
                     // làm nhiệm vụ
                     await DoQuestBoard(student, request.ExecuteTime, studentFocusTime.TargetTime, cancellationToken);
 
+                        var checkSuperFireMode = await _mediator.Send(new CheckSuperFireModeQuery());
+                        var isSuperMode = checkSuperFireMode.Result;
 
-                    if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime)
-                    {
-                        student.NumberOfToken += CheckStudentHasStreak(student) ? systemConfigMap.Token * 2 : systemConfigMap.Token;  // Nếu học sinh có streak thì nhân đôi số token
+                        var targetConfig = tokenConfigResult.GetTokenNumber<TokenFocusTime>(isSuperMode);
+                        var targetNumber = targetConfig?.FocusTimes?.FirstOrDefault(x => x.FocusTimeId == systemConfigMap.Id)?.Number;
+
+                        if (targetNumber.HasValue)
+                        {
+                            student.NumberOfToken += targetNumber.Value;
+                        }
                         _studentRepository.Update(student);
                         await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -119,39 +137,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             });
 
             return methodResult;
-        }
-
-
-        /// <summary>
-        /// Check xem học sinh có chuỗi đăng nhập không
-        /// </summary>
-        /// <param name="student"></param>
-        /// <returns></returns>
-        private bool CheckStudentHasStreak(Student student)
-        {
-            bool hasStreak = true;
-
-            var currentDate = DateTime.UtcNow.Date;
-            var startDate = currentDate.AddDays(-NUMBER_OF_WEEKDAY).Date; // Ngày bắt đầu từ 7 ngày trước
-            var endDate = currentDate.Date;
-            var studentFocusTimesCheckQuery = _studentFocusTimeRepository.Queryable
-                                        .Where(x => x.StudentId == student.Id && x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate && x.ExecuteTime >= x.TargetTime)
-                                        .OrderBy(x => x.CreatedDate.Date)
-                                        .ToList();
-
-            for (int i = 1; i <= NUMBER_OF_WEEKDAY; i++)
-            {
-                var expectedDate = currentDate.AddDays(-i);
-                var checkDate = studentFocusTimesCheckQuery.FirstOrDefault(x => x.CreatedDate.Date == expectedDate.Date);
-
-                if (checkDate == null)
-                {
-                    hasStreak = false;
-                    break;
-                }
-            }
-
-            return hasStreak;
         }
 
         public async Task DoQuestBoard(Student student, double executeTime, double targetTime, CancellationToken cancellationToken)
@@ -207,13 +192,9 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         /// <returns></returns>
         private static double GetNearestConfigTime(IStudentFocusTimeRepository studentFocusTimeRepository, Guid? studentId)
         {
-
-            var nearestConfigTargetTime = studentFocusTimeRepository.Queryable
-                                                                    .OrderByDescending(x => x.CreatedDate)
-                                                                    .FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date)?.TargetTime ?? DEFAULT_TARGET_TIME;
+            var nearestConfigTargetTime = studentFocusTimeRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date)?.TargetTime ?? DEFAULT_TARGET_TIME;
 
             return nearestConfigTargetTime;
         }
-
     }
 }

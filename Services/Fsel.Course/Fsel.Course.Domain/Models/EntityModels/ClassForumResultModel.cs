@@ -57,7 +57,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? RetryContent { get; set; }
         public string? RetryWordContent { get; set; }
         public string? RetryGradingAlFeedBack { get; set; }
-
+        public bool IsFeedBack { get; set; }
         public ClassForumModel? ClassForum { get; set; }
         public LessonResultModel? LessonResult { get; set; }
         public string? CourseCode { get; set; }

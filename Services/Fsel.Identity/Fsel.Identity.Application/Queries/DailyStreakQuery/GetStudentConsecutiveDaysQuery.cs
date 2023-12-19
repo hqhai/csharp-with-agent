@@ -44,6 +44,7 @@ namespace Fsel.Identity.Application.Queries.DailyStreakQuery
             var studentDailyQuery = student.StudentDailyStreaks.Where(x => x.DailyDate.Month == date.Month && x.DailyDate.Year == date.Year);
             var studentDailyStreak = new StudentDailyStreakModel();
             studentDailyStreak.NumberOfShield = student.NumberOfShield;
+            studentDailyStreak.IsCheckIn = studentDailyQuery.Any(x => x.DailyDate.Date == DateTime.UtcNow.Date);
             studentDailyStreak.NumberOfGift = studentDailyQuery.Where(x => x.IsGiftReceive).Count();
             studentDailyStreak.DailyDayOfGifts = studentDailyQuery.Where(x => x.LevelOfGift.HasValue && x.LevelOfGift != 0).OrderBy(x => x.DailyDate).Select(x => new StudentConsecutiveDayModel
             {

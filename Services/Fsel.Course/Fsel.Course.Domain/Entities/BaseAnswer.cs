@@ -28,5 +28,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectCount { get; set; }
+
+        public bool? IsCorrect { get; set; }
     }
 }

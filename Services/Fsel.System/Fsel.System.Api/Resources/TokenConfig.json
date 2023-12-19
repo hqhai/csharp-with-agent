@@ -1,0 +1,361 @@
+[
+  {
+    "id": "928b4f17-be50-4798-8657-54e93d3cf450",
+    "createdDate": "2023-07-21",
+    "feature": "FocusMode",
+    "mission": "FocusTime",
+    "config": {
+      "focusTimes": [
+        {
+          "number": 1,
+          "focustimeid": "0A7B57F3-C964-4F1B-8986-DF1579C5D08B"
+        },
+        {
+          "number": 3,
+          "focustimeid": "9B4FA7B6-1AF4-458B-82D9-621C1A88654A"
+        },
+        {
+          "number": 6,
+          "focustimeid": "124F4341-4C87-4E5F-BA4D-2481D8D36737"
+        },
+        {
+          "number": 12,
+          "focustimeid": "82061293-C9D0-4598-99F1-8DFD8162B999"
+        },
+        {
+          "number": 24,
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
+        }
+      ]
+    },
+    "superConfig": {
+      "focusTimes": [
+        {
+          "number": 2,
+          "focustimeid": "0A7B57F3-C964-4F1B-8986-DF1579C5D08B"
+        },
+        {
+          "number": 6,
+          "focustimeid": "9B4FA7B6-1AF4-458B-82D9-621C1A88654A"
+        },
+        {
+          "number": 12,
+          "focustimeid": "124F4341-4C87-4E5F-BA4D-2481D8D36737"
+        },
+        {
+          "number": 24,
+          "focustimeid": "82061293-C9D0-4598-99F1-8DFD8162B999"
+        },
+        {
+          "number": 48,
+          "focustimeid": "FD7E66D3-A29B-4DA7-BB29-2283536D836A"
+        }
+      ]
+    }
+  },
+  {
+    "id": "95c9f9b7-cc16-43af-b32e-4ee3689d4e27",
+    "createdDate": "2023-07-21",
+    "feature": "DailyCheckin",
+    "mission": "DailyCheckin",
+    "config": {
+      "dailyCheckIns": [
+        {
+          "level": 1,
+          "number": 5
+        },
+        {
+          "level": 2,
+          "number": 20
+        },
+        {
+          "level": 3,
+          "number": 40
+        }
+      ]
+    },
+    "superConfig": null
+  },
+  {
+    "id": "394fe972-3e4b-4daf-9fcf-e6720204be24",
+    "createdDate": "2023-07-21",
+    "feature": "TimeCode",
+    "mission": "QuestionReward",
+    "config": {
+      "number": 1
+    },
+    "superConfig": {
+      "number": 2
+    }
+  },
+  {
+    "id": "5e19b75e-f16c-4e44-8299-3c626804159c",
+    "createdDate": "2023-07-21",
+    "feature": "SkillTest",
+    "mission": "TestDone",
+    "config": {
+      "number": 10
+    },
+    "superConfig": {
+      "number": 15
+    }
+  },
+  {
+    "id": "6915a722-1268-45b8-adee-9d038799b020",
+    "createdDate": "2023-07-21",
+    "feature": "SkillTest",
+    "mission": "HighestStreak",
+    "config": {
+      "number": 1
+    },
+    "superConfig": {
+      "number": 2
+    }
+  },
+  {
+    "id": "89f2e48c-308a-411f-9950-441af87d861e",
+    "createdDate": "2023-07-21",
+    "feature": "SkillTest",
+    "mission": "SuperFire",
+    "config": {
+      "number": 0
+    },
+    "superConfig": {
+      "number": 4
+    }
+  },
+  {
+    "id": "e7bc1ee5-9151-453b-a369-aafffa8dac53",
+    "createdDate": "2023-07-21",
+    "feature": "UnitTest",
+    "mission": "TestDone",
+    "config": {
+      "number": 10
+    },
+    "superConfig": {
+      "number": 15
+    }
+  },
+  {
+    "id": "f1657e49-02df-44d8-aba1-46a42654cf40",
+    "createdDate": "2023-07-21",
+    "feature": "UnitTest",
+    "mission": "HighestStreak",
+    "config": {
+      "number": 1
+    },
+    "superConfig": {
+      "number": 2
+    }
+  },
+  {
+    "id": "ef5dce88-eb01-4d9f-98b5-ef709bc736f7",
+    "createdDate": "2023-07-21",
+    "feature": "UnitTest",
+    "mission": "SuperFire",
+    "config": {
+      "number": 0
+    },
+    "superConfig": {
+      "number": 4
+    }
+  },
+  {
+    "id": "e00c5780-7d72-4cfe-872e-5b8954cff205",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "mission": "TestDone",
+    "config": {
+      "number": 10
+    },
+    "superConfig": {
+      "number": 15
+    }
+  },
+  {
+    "id": "cfeefec6-e53e-4cb6-a341-5f945e94a470",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "mission": "HighestStreak",
+    "config": {
+      "number": 1
+    },
+    "superConfig": {
+      "number": 2
+    }
+  },
+  {
+    "id": "09fc6407-064e-4260-92de-12fc36c5eeda",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "mission": "SuperFire",
+    "config": {
+      "number": 0
+    },
+    "superConfig": {
+      "number": 4
+    }
+  },
+  {
+    "id": "a2457d1c-2331-4624-8f94-2530bb5b21e5",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "mission": "TestDone",
+    "config": {
+      "number": 40
+    },
+    "superConfig": {
+      "number": 60
+    }
+  },
+  {
+    "id": "272f4fdc-91d8-475b-8394-843c43c89e56",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "mission": "HighestStreak",
+    "config": {
+      "number": 1
+    },
+    "superConfig": {
+      "number": 2
+    }
+  },
+  {
+    "id": "6dd62758-60c3-42cc-88eb-9acb246ebda5",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "mission": "SuperFire",
+    "config": {
+      "number": 0
+    },
+    "superConfig": {
+      "number": 10
+    }
+  },
+  {
+    "id": "f0f20824-1354-4267-bf44-812455aa85d0",
+    "createdDate": "2023-07-21",
+    "feature": "FinalTest",
+    "mission": "TestDone",
+    "config": {
+      "number": 40
+    },
+    "superConfig": {
+      "number": 60
+    }
+  },
+  {
+    "id": "061242a9-7e64-4fb1-ab8d-99b5e250c389",
+    "createdDate": "2023-07-21",
+    "feature": "FinalTest",
+    "mission": "HighestStreak",
+    "config": {
+      "number": 1
+    },
+    "superConfig": {
+      "number": 2
+    }
+  },
+  {
+    "id": "1e3c6f57-25d6-40bd-a9be-d5571be1a7ae",
+    "createdDate": "2023-07-21",
+    "feature": "FinalTest",
+    "mission": "SuperFire",
+    "config": {
+      "number": 0
+    },
+    "superConfig": {
+      "number": 10
+    }
+  },
+  {
+    "id": "5d1628c6-6c44-4afa-a911-687ae7ba753c",
+    "createdDate": "2023-07-21",
+    "feature": "QuestBoard",
+    "mission": "DailyQuest",
+    "config": {
+      "number": 1
+    },
+    "superConfig": null
+  },
+  {
+    "id": "d3340516-ab0b-471e-8117-2b6fd6ec1680",
+    "createdDate": "2023-07-21",
+    "feature": "QuestBoard",
+    "mission": "MainQuest",
+    "config": {
+      "number": 10
+    },
+    "superConfig": null
+  },
+  {
+    "id": "ce5000ba-788c-4872-b5e1-46d582c6f596",
+    "createdDate": "2023-07-21",
+    "feature": "QuestBoard",
+    "mission": "SideQuest",
+    "config": {
+      "number": 5
+    },
+    "superConfig": null
+  },
+  {
+    "id": "65a9971f-22d0-4730-a99f-33e7ac7b3698",
+    "createdDate": "2023-07-21",
+    "feature": "QuestBoard",
+    "mission": "PermiumQuest",
+    "config": {
+      "number": 10
+    },
+    "superConfig": null
+  },
+  {
+    "id": "8042aeda-9f73-4981-8262-eb70f993a92c",
+    "createdDate": "2023-07-21",
+    "feature": "BuyNextCourse",
+    "mission": "Standard",
+    "config": {
+      "number": 50
+    },
+    "superConfig": null
+  },
+  {
+    "id": "cb48fa8e-b45f-4599-a87f-971668bf8907",
+    "createdDate": "2023-07-21",
+    "feature": "BuyNextCourse",
+    "mission": "Permium",
+    "config": {
+      "number": 100
+    },
+    "superConfig": null
+  },
+  {
+    "id": "b2dd2846-a565-438f-aa5f-e3af66f191aa",
+    "createdDate": "2023-07-21",
+    "feature": "UpgradeCourse",
+    "mission": "UpgradeCourse",
+    "config": {
+      "number": 50
+    },
+    "superConfig": null
+  },
+  {
+    "id": "d33de316-efe4-46d7-89e8-d27d49e8186a",
+    "createdDate": "2023-07-21",
+    "feature": "ReviewSystem",
+    "mission": "ReviewCourse",
+    "config": {
+      "number": 10
+    },
+    "superConfig": null
+  },
+  {
+    "id": "e5361e72-412e-4022-bc66-c813c56f1b10",
+    "createdDate": "2023-07-21",
+    "feature": "ReviewSystem",
+    "mission": "ReviewPlatform",
+    "config": {
+      "number": 10
+    },
+    "superConfig": null
+  }
+]

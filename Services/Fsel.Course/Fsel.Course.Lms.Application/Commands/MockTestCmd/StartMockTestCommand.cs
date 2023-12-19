@@ -166,7 +166,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     Scores = x.SkillScores?.Average(x => x.Scores) ?? 0,
                     Percent = x.Percent,
                     Status = x.Status,
-                    CreatedDate = x.CreatedDate,
                     MockTestId = x.MockTestId,
                     StudentId = x.StudentId,
                     CourseId = course.Id,

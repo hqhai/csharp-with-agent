@@ -2,11 +2,11 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
 
-    public class BaseResultModel : BaseModel
+    public class BaseResultModel
     {
+        public Guid Id { get; set; }
         public double Percent { get; set; }
         public int CorrectCount { get; set; }
         public int CorrectTotal { get; set; }

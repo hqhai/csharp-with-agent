@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
 
-    public class CourseResult : BaseResultScore
+    public class CourseResult : BaseScoreResult
     {
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public override double Percent { get; set; }

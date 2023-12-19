@@ -36,14 +36,14 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
-            var course = await _courseRepository.GetByIdAsync(request.Id);
+            var course = await _courseRepository.Queryable.Include(x => x.CourseTeachers).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
             var courseModel = _mapper.Map<CourseModel>(course);
-            courseModel.CourseUnitMockTests = await GetCourseUnitMockTestsAsync(course,cancellationToken);
+            courseModel.CourseUnitMockTests = await GetCourseUnitMockTestsAsync(course, cancellationToken);
             methodResult.Result = courseModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -58,8 +58,8 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                                                         .Include(x => x.MockTest)
                                                                         .ThenInclude(x => x.MockTestResults)
                                                                         .Where(x => x.CourseId == course.Id)
-                                                                         .ToListAsync(cancellationToken);
-            return courseUnitMockTests.Select(x =>
+                                                                        .ToListAsync(cancellationToken);
+            return courseUnitMockTests.OrderBy(x => x.DisplayOrder).Select(x =>
             {
                 var courseUnitMockTest = _mapper.Map<CourseUnitMockTestModel>(x);
                 if (courseUnitMockTest.UnitId.HasValue)

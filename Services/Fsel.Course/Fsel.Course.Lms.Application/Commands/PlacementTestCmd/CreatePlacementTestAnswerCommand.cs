@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestResultMaxThree), nameof(placementTestResults));
                 return methodResult;
             }
-            var placementTestResult = await _placementTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.Level == request.Level && x.Status == EnumResultStatus.Process, cancellationToken);
+            var placementTestResult = await _placementTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.Level == request.Level && x.Status == EnumResultStatus.Process && x.StudentId == studentId, cancellationToken);
             if (placementTestResult == null)
             {
                 placementTestResult = new PlacementTestResult
@@ -163,7 +163,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                             {
                                 CorrectCount = correctCount,
                                 Answer = answerConfig,
-                                SectionQuestionId = sectionQuestionId
+                                SectionQuestionId = sectionQuestionId,
+                                IsCorrect = correctCount == questionItem.CorrectTotal
                             };
                             placementTestAnswers.Add(placementTestAnswer);
                         }

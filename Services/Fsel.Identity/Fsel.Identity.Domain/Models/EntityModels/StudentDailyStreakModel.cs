@@ -7,6 +7,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public int CountStudentDaily { get; set; }
         public int NumberOfShield { get; set; }
         public int NumberOfGift { get; set; }
+        public bool IsCheckIn { get; set; }
         public IList<StudentConsecutiveDayModel>? DailyDayOfGifts { get; set; }
     }
 }

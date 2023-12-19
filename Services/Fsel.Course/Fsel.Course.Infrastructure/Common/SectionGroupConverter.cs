@@ -2,9 +2,11 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
+    using System.Threading;
     using AutoMapper;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -13,20 +15,134 @@ namespace Fsel.Course.Infrastructure.Common
     public class SectionGroupConverter
     {
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly DateTimeConverter _dateTimeConverter;
+        private readonly IQuestionRepository _questionRepository;
+        private readonly LinQHelper _linQHelper;
         private readonly IMapper _mapper;
         private readonly ISectionRepository _sectionRepository;
         private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
 
-        public SectionGroupConverter(ISectionGroupRepository sectionGroupRepository, IMapper mapper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
+        public SectionGroupConverter(ISectionGroupRepository sectionGroupRepository, ISectionGroupResultRepository sectionGroupResultRepository, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, LinQHelper linQHelper, IMapper mapper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
         {
             _sectionGroupRepository = sectionGroupRepository;
+            _sectionGroupResultRepository = sectionGroupResultRepository;
+            _dateTimeConverter = dateTimeConverter;
+            _questionRepository = questionRepository;
+            _linQHelper = linQHelper;
             _mapper = mapper;
             _sectionRepository = sectionRepository;
             _finalTestAnswerRepository = finalTestAnswerRepository;
             _placementTestAnswerRepository = placementTestAnswerRepository;
             _mockTestAnswerRepository = mockTestAnswerRepository;
+        }
+
+        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult, bool isMockTest = false)
+        {
+            if (isMockTest)
+            {
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                    .Include(x => x.SectionQuestion)
+                    .OrderBy(x => x.CreatedDate)
+                    .Select(x => x.IsCorrect == true).ToListAsync();
+                return _linQHelper.GetHighestStreak(mockTestAnswers);
+            }
+            else
+            {
+                var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                    .Include(x => x.SectionQuestion)
+                    .OrderBy(x => x.CreatedDate)
+                    .Select(x => x.IsCorrect == true).ToListAsync();
+                return _linQHelper.GetHighestStreak(finalTestAnswers);
+            }
+        }
+
+        private async Task<SkillScores> GetSkillScoreFinalTest(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
+        {
+            var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.FinalTestResultId == sectionGroupResult.FinalTestResultId).ToListAsync(cancellationToken);
+            var questionIds = finalTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList();
+            var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
+            var skillScore = GetSkillScore(sectionGroup, finalTestAnswers.Sum(x => x.CorrectCount), finalTestAnswers.Count, totalCorrect, questionIds.Count);
+            return skillScore;
+        }
+
+        private async Task<SkillScores> GetSkillScorePlacementTest(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
+        {
+            var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.PlacementTestResultId == sectionGroupResult.FinalTestResultId).ToListAsync(cancellationToken);
+            var questionIds = placementTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList();
+            var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
+            var skillScore = GetSkillScore(sectionGroup, placementTestAnswers.Sum(x => x.CorrectCount), placementTestAnswers.Count, totalCorrect, questionIds.Count);
+            return skillScore;
+        }
+
+        public async Task<SkillScores> GetSkillScoreMockTest(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(sectionGroup);
+            var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.MockTestResultId == sectionGroupResult.MockTestResultId).ToListAsync(cancellationToken);
+            var skillScore = new SkillScores();
+            var maxTotalCorrect = 36;
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Listening || sectionGroup.CourseSkill == EnumCourseSkill.Reading)
+            {
+                var questionIds = mockTestAnswers.Select(x => x.SectionQuestion).Select(x => x.QuestionId).ToList();
+                var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
+                skillScore = GetSkillScore(sectionGroup, mockTestAnswers.Sum(x => x.CorrectCount), mockTestAnswers.Count, totalCorrect, questionIds.Count);
+            }
+            else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
+            {
+                var sectionIds = mockTestAnswers.Select(x => x.SectionId).ToList();
+                skillScore = GetSkillScore(sectionGroup, mockTestAnswers.Sum(x => x.CorrectCount), mockTestAnswers.Count, maxTotalCorrect, sectionIds.Count);
+            }
+            else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
+            {
+                var sectionTimeCodeIds = mockTestAnswers.Select(x => x.SectionTimeCodeId).ToList();
+                skillScore = GetSkillScore(sectionGroup, mockTestAnswers.Sum(x => x.CorrectCount), mockTestAnswers.Count, maxTotalCorrect, sectionTimeCodeIds.Count);
+            }
+            return skillScore;
+        }
+
+        public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, string? type, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
+            ArgumentNullException.ThrowIfNull(sectionGroup);
+            var skillScore = await GetSkillScore(sectionGroupResult, sectionGroup, type, cancellationToken);
+            sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
+            sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
+            sectionGroupResult.Status = EnumResultStatus.Done;
+            sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult);
+            sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.CreatedDate, DateTime.UtcNow, sectionGroup.ExecutionTime);
+            if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
+            {
+                sectionGroupResult.SkillScores.Add(skillScore);
+            }
+            else
+            {
+                sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
+            }
+            _sectionGroupResultRepository.Update(sectionGroupResult);
+            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            return sectionGroupResult;
+        }
+
+        private async Task<SkillScores> GetSkillScore(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, string? type, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(type))
+            {
+                return new SkillScores();
+            }
+            if (type == nameof(MockTest))
+            {
+                return await GetSkillScoreMockTest(sectionGroupResult, sectionGroup, cancellationToken);
+            }
+            else if (type == nameof(FinalTest))
+            {
+                return await GetSkillScoreFinalTest(sectionGroupResult, sectionGroup, cancellationToken);
+            }
+            else
+            {
+                return await GetSkillScorePlacementTest(sectionGroupResult, sectionGroup, cancellationToken);
+            }
         }
 
         private async Task<(IList<Guid>?, IList<Guid>?, IList<Guid>?)> GetUnansweredQuestionIds(SectionGroup? sectionGroup, string? type, SectionGroupResult sectionGroupResult)
@@ -136,7 +252,8 @@ namespace Fsel.Course.Infrastructure.Common
                     Answer = null,
                     SectionQuestionId = x,
                     SectionGroupResultId = sectionGroupResult.Id,
-                    PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default
+                    PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
+                    IsCorrect = null
                 }).ToList());
                 await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }

@@ -182,5 +182,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Update Student By Class Id
+        /// </summary>
+        [HttpPut("update-beginner-guide")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateBeginnerGuide([FromBody] UpdateStudentBeginnerGuideCommand query)
+        {
+            MethodResult<StudentModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

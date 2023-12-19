@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Queries.DailyStreakQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            methodResult.Result = await _studentDailyStreakRepository.Queryable.Where(x => x.IsArmorialReceive && x.DailyDate.Year == request.Year && x.StudentId == student.Id).Select(x => x.DailyDate).ToListAsync(cancellationToken);
+            methodResult.Result = await _studentDailyStreakRepository.Queryable.Where(x => x.IsArmorialReceive && x.DailyDate.Year == request.Year && x.StudentId == student.Id).Select(x => x.DailyDate).OrderBy(x => x).ToListAsync(cancellationToken);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

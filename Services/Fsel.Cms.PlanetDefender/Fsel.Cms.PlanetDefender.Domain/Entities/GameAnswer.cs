@@ -9,6 +9,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
     {
         public string? Answer { get; set; }
         public bool IsCorrect { get; set; }
+        public bool IsDisable { get; set; }
         public Guid GameVocabularyId { get; set; }
         public Guid GameVocabularyTypeId { get; set; }
         public Guid StudentId { get; set; }

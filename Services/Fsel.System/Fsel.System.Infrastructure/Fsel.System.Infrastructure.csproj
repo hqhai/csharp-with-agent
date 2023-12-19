@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Fsel.System.Domain\Fsel.System.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Common\" />
+  </ItemGroup>
+
 </Project>
