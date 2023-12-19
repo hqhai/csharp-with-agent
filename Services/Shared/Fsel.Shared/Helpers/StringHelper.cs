@@ -166,5 +166,20 @@ namespace Fsel.Shared.Helpers
 
             return urls;
         }
+
+        public static int CountWords(string? input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return 0;
+            }
+
+            input = input.Trim();
+
+            string[] words = input.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            int wordCount = words.Length;
+
+            return wordCount;
+        }
     }
 }
