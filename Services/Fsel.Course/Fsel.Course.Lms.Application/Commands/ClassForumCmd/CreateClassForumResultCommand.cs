@@ -136,7 +136,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             ClassForum = classForum,
                             ClassForumResult = classForumResult,
                             WordContent = request.WordContent
-                        }, cancellationToken);
+                        }, cancellationToken).ConfigureAwait(false);
                     }
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
