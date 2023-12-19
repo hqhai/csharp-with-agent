@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20231219021900_Update_VideoTimeCodeResult_Ungraded")]
+    [Migration("20231219040747_Update_VideoTimeCodeResult_Ungraded")]
     partial class Update_VideoTimeCodeResult_Ungraded
     {
         /// <inheritdoc />
@@ -4800,13 +4800,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
-                    b.Property<int>("CorrectCountUngraded")
+                    b.Property<int?>("CorrectCountUngraded")
                         .HasColumnType("int");
 
                     b.Property<int>("CorrectTotal")
                         .HasColumnType("int");
 
-                    b.Property<int>("CorrectTotalUngraded")
+                    b.Property<int?>("CorrectTotalUngraded")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")

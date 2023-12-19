@@ -14,6 +14,9 @@ namespace Fsel.Course.Infrastructure.Maps
             .ForMember(x => x.Score, p => p.MapFrom(o => o.CorrectCount));
             CreateMap<VideoTimeCodeResult, TestResultReportModel>()
             .ForMember(x => x.Score, p => p.MapFrom(o => o.CorrectCount));
+            CreateMap<VideoTimeCodeResult, VideoTimeCodeResultModel>()
+            .ForMember(x => x.CorrectCount, p => p.MapFrom(o => o.CorrectCount + o.CorrectCountUngraded))
+            .ForMember(x => x.CorrectTotal, p => p.MapFrom(o => o.CorrectTotal + o.CorrectTotalUngraded));
         }
     }
 }

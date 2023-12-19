@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Shared.Helpers;
 
     public class VideoTimeCodeResult : BaseLearnResult
     {
@@ -33,14 +34,12 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Số câu trả lời đúng của Student
         /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCountUngraded { get; set; }
+        public int? CorrectCountUngraded { get; set; }
 
         /// <summary>
         /// Tổng số câu trả lời đúng
         /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectTotalUngraded { get; set; }
+        public int? CorrectTotalUngraded { get; set; }
 
         public string? SkillScoreUngradedStr { get; set; }
 
@@ -53,7 +52,17 @@ namespace Fsel.Course.Domain.Entities
             }
             set { SkillScoreUngradedStr = ConvertHelper.Serialize(value); }
         }
+        private double _percentUngraded;
 
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public override double Percent
+        {
+            get
+            {
+                return CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : _percentUngraded;
+            }
+            set { _percentUngraded = CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : value; }
+        }
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }
 }

@@ -4797,13 +4797,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
-                    b.Property<int>("CorrectCountUngraded")
+                    b.Property<int?>("CorrectCountUngraded")
                         .HasColumnType("int");
 
                     b.Property<int>("CorrectTotal")
                         .HasColumnType("int");
 
-                    b.Property<int>("CorrectTotalUngraded")
+                    b.Property<int?>("CorrectTotalUngraded")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")

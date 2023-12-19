@@ -95,7 +95,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
-            var videoTimeCodeMethod = await _mediator.Send(new GetTimeCodeDetailQuery { VideoTimeCodeId = request.VideoTimeCodeId, VideoId = videoResult.VideoId, LessonResultId = videoResult.LessonResultId, isShowSubStatus = videoTimeCodeResult.Status == EnumResultStatus.Process && request.IsSubmit, IsCreateAnswer = true }, cancellationToken);
+            var videoTimeCodeMethod = await _mediator.Send(new GetTimeCodeDetailQuery
+            {
+                VideoTimeCodeId = request.VideoTimeCodeId,
+                VideoId = videoResult.VideoId,
+                LessonResultId = videoResult.LessonResultId,
+                IsShowSubStatus = videoTimeCodeResult.Status == EnumResultStatus.Process && request.IsSubmit,
+                IsCreateAnswer = true
+            }, cancellationToken);
             methodResult.Result = videoTimeCodeMethod.Result;
             return methodResult;
         }
@@ -208,9 +215,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             if (isSubmit)
             {
                 var (listSkillScore, skillScores, isDone) = await GetSkillScoresAsync(videoTimeCodeResult, cancellationToken);
+                if (listSkillScore != null && listSkillScore.Any())
+                {
+                    videoTimeCodeResult.CorrectCountUngraded = (int)listSkillScore.Sum(x => x.CorrectCount);
+                    videoTimeCodeResult.CorrectTotalUngraded = (int)listSkillScore.Sum(x => x.TotalCount);
+                }
                 videoTimeCodeResult.Status = isDone ? EnumResultStatus.Process : EnumResultStatus.Done;
-                videoTimeCodeResult.CorrectCountUngraded = (int)listSkillScore.Sum(x => x.CorrectCount);
-                videoTimeCodeResult.CorrectTotalUngraded = (int)listSkillScore.Sum(x => x.TotalCount);
                 videoTimeCodeResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
                 videoTimeCodeResult.SkillScores = skillScores;
@@ -311,7 +321,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             return videoTimeCode.ExecutionTime == default || (workingTime < videoTimeCode.ExecutionTime && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone);
         }
 
-        private async Task<(IList<SkillScores>, IList<SkillScores>, bool)> GetSkillScoresAsync(VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
+        private async Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
         {
             var exerciseIds = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id).Select(x => x.ExerciseId).Distinct().ToListAsync(cancellationToken);
             var exercises = await _exerciseRepository.Queryable.Include(x => x.ExerciseQuestions)
@@ -323,29 +333,33 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                                     .SelectMany(x => x!.VideoTimeCodeAnswers)
                                     .Any(x => x.Status != EnumAnswerStatus.Done);
             var skillScores = exercises.GroupBy(x => x.CourseSkill).Select(x => GetSkillScores(x));
-            return (skillScores.Select(x => x.Item1).ToList(), skillScores.Select(x => x.Item2).ToList(), isDone);
+            return (skillScores.Where(x => x.Item1 != null).Select(x => x.Item1!).ToList(), skillScores.Where(x => x.Item2 != null).Select(x => x.Item2!).ToList(), isDone);
         }
 
-        private static (SkillScores, SkillScores) GetSkillScores(IGrouping<EnumCourseSkill, Exercise> exercise)
+        private static (SkillScores?, SkillScores?) GetSkillScores(IGrouping<EnumCourseSkill, Exercise> exercise)
         {
             ArgumentNullException.ThrowIfNull(exercise);
             var questions = exercise.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question);
-            return (GetSkillScore(questions.Where(x => x != null && x.Ungraded).ToList(), exercise.Key), GetSkillScore(questions.ToList(), exercise.Key));
+            return (GetSkillScore(questions.Where(x => x != null && x.Ungraded).ToList(), exercise.Key), GetSkillScore(questions.Where(x => x != null && !x.Ungraded).ToList(), exercise.Key));
         }
 
-        private static SkillScores GetSkillScore(IList<Question?>? questions, EnumCourseSkill courseSkill)
+        private static SkillScores? GetSkillScore(IList<Question?>? questions, EnumCourseSkill courseSkill)
         {
-            var answers = questions?.SelectMany(x => x!.VideoTimeCodeAnswers);
-            var correctCount = answers?.Sum(x => x.CorrectCount) ?? default;
-            return new SkillScores
+            if (questions != null && questions.Any())
             {
-                CorrectCount = correctCount,
-                CountQuestion = answers?.Count() ?? default,
-                Skill = courseSkill,
-                TotalCount = questions?.Sum(x => x!.CorrectTotal) ?? default,
-                TotalQuestion = questions?.Count ?? default,
-                Scores = correctCount.GetIeltsScore(courseSkill)
-            };
+                var answers = questions.SelectMany(x => x!.VideoTimeCodeAnswers);
+                var correctCount = answers?.Sum(x => x.CorrectCount) ?? default;
+                return new SkillScores
+                {
+                    CorrectCount = correctCount,
+                    CountQuestion = answers?.Count() ?? default,
+                    Skill = courseSkill,
+                    TotalCount = questions.Sum(x => x!.CorrectTotal),
+                    TotalQuestion = questions.Count,
+                    Scores = correctCount.GetIeltsScore(courseSkill)
+                };
+            }
+            return null;
         }
     }
 }

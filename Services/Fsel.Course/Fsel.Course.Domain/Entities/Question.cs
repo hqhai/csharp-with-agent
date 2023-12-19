@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities

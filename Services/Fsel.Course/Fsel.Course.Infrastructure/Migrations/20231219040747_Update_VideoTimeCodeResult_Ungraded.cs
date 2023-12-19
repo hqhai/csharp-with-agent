@@ -14,15 +14,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "CorrectCountUngraded",
                 table: "VideoTimeCodeResults",
                 type: "int",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "CorrectTotalUngraded",
                 table: "VideoTimeCodeResults",
                 type: "int",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "SkillScoreUngradedStr",
