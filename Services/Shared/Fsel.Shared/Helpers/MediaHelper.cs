@@ -9,6 +9,11 @@ namespace Fsel.Shared.Helpers
     {
         public static int? GetMediaDurationAsync(string? mediaUrl)
         {
+            if (string.IsNullOrEmpty(mediaUrl))
+            {
+                return null;
+            }
+
             try
             {
                 string command = $"-i \"{mediaUrl}\"";
