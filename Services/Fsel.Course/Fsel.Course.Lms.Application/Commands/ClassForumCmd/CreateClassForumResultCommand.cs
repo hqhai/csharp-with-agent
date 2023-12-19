@@ -39,9 +39,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ISystemService _systemService;
         private readonly IMediator _mediator;
-        private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, IMediator mediator, SubmitAIResponsePublisher submitAIResponsePublisher)
+        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, IMediator mediator)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -52,7 +51,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _notificationMessagePublisher = notificationMessagePublisher;
             _systemService = systemService;
             _mediator = mediator;
-            _submitAIResponsePublisher = submitAIResponsePublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
