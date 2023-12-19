@@ -12,6 +12,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Video Time Code Previous Not Done
         /// </summary>
-        VideoTimeCodePreviousNotDone
+        VideoTimeCodePreviousNotDone,
+
+        /// <summary>
+        /// You have not completed the time code yet
+        /// </summary>
+        VideoTimeCodesNotCompleted
     }
 }

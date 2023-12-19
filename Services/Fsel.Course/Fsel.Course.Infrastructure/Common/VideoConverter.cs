@@ -275,6 +275,7 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.NotEnoughQuestions));
                 return methodResult;
             }
+
             var skillScores = listSkillScore.Where(x => x.Type == EnumTimeCodeType.Standalone && x.SkillScores?.Count > 0).SelectMany(x => x.SkillScores!).ToList();
             videoResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
