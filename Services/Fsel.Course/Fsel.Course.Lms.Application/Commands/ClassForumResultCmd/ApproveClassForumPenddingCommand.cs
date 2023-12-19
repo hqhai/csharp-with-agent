@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -82,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot)
                     {
                         long score = 0;
-                        if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= request.WordLimit) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= request.TimeLimit))
+                        if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= classForumResult.WordCount) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= classForumResult.TimeCount))
                         {
                             score = 9;
                         }

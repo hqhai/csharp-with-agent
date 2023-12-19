@@ -70,7 +70,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         private async Task<SkillScores> GetSkillScorePlacementTest(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
         {
-            var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.PlacementTestResultId == sectionGroupResult.FinalTestResultId).ToListAsync(cancellationToken);
+            var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.PlacementTestResultId == sectionGroupResult.PlacementTestResultId).ToListAsync(cancellationToken);
             var questionIds = placementTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList();
             var totalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal, cancellationToken);
             var skillScore = GetSkillScore(sectionGroup, placementTestAnswers.Sum(x => x.CorrectCount), placementTestAnswers.Count, totalCorrect, questionIds.Count);

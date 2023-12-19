@@ -123,7 +123,7 @@ namespace Fsel.Notification.Application.Commands
             var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId).ToListAsync(cancellationToken);
 
             GetUsersByRoleQueryModel roleQuery = new GetUsersByRoleQueryModel();
-            List<Guid> listUserIds = request.UserIds!.ToList();
+            List<Guid> listUserIds = request.UserIds?.ToList() ?? new List<Guid>();
 
             if (request.Roles != null)
             {
