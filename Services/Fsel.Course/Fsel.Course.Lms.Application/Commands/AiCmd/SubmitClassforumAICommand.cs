@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }, cancellationToken);
 
             classForumResult.GradingAlFeedback = aIResponse;
-            _classForumResultRepository.Add(classForumResult);
+            _classForumResultRepository.Update(classForumResult);
 
             if (classForumResult.Status == EnumClassForumResultStatus.Draft)
             {

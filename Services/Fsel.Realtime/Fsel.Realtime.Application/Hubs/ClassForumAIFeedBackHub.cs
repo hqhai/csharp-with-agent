@@ -10,10 +10,10 @@ namespace Fsel.Realtime.Application.Hubs
     {
         public override async Task OnConnectedAsync()
         {
-            string courseLevel = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
-            if (!string.IsNullOrEmpty(courseLevel))
+            string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
+            if (!string.IsNullOrEmpty(classForumResultId))
             {
-                await Groups.AddGroupAsync(Context.ConnectionId, courseLevel);
+                await Groups.AddGroupAsync(Context.ConnectionId, classForumResultId);
             }
 
             await base.OnConnectedAsync();
@@ -21,10 +21,10 @@ namespace Fsel.Realtime.Application.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            string courseLevel = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
-            if (!string.IsNullOrEmpty(courseLevel))
+            string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
+            if (!string.IsNullOrEmpty(classForumResultId))
             {
-                await Groups.RemoveGroupAsync(Context.ConnectionId, courseLevel);
+                await Groups.RemoveGroupAsync(Context.ConnectionId, classForumResultId);
             }
 
             await base.OnDisconnectedAsync(exception);

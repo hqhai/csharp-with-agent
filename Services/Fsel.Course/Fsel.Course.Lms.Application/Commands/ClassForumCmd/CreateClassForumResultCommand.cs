@@ -112,16 +112,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         WordContent = request.WordContent,
                     };
 
-                    if (classForum.IsAlFeedBack)
-                    {
-                        await _mediator.Send(new SubmitClassforumAICommand
-                        {
-                            ClassForum = classForum,
-                            ClassForumResult = classForumResult,
-                            WordContent = request.WordContent
-                        }, cancellationToken);
-                    }
-
                     if (request.FilePaths != null)
                     {
                         classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
@@ -138,6 +128,17 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     else
                     {
                         await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+
+                    //check AI feedback
+                    if (classForum.IsAlFeedBack)
+                    {
+                        await _mediator.Send(new SubmitClassforumAICommand
+                        {
+                            ClassForum = classForum,
+                            ClassForumResult = classForumResult,
+                            WordContent = request.WordContent
+                        }, cancellationToken);
                     }
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
