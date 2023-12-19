@@ -56,6 +56,17 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 
             #region validate
 
+            if (request.GameVocabularyTypeModels?.Count > 0)
+            {
+                foreach (var item in request.GameVocabularyTypeModels)
+                {
+                    if (string.IsNullOrEmpty(item.QuestionContent))
+                    {
+                        request.GameVocabularyTypeModels.Remove(item);
+                    }
+                }
+            }
+
             if (!string.IsNullOrEmpty(request.Key) && _gameVocabularyRepository.Queryable.Any(p => p.Key == request.Key && p.Id != gameVocabulary.Id))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.KeyAlreadyExist));
