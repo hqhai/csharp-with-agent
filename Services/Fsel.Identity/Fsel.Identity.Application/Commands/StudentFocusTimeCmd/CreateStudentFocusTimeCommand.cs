@@ -5,7 +5,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
     using Fsel.Identity.Application.Queues.Publishers;
@@ -22,6 +21,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Shared.Helpers;
 
     public class CreateStudentFocusTimeCommand : CreateStudentFocusTimeCommandModel, IRequest<MethodResult<StudentFocusTimeModel>>
     {

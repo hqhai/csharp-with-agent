@@ -48,7 +48,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
             , ICourseService courseService
             , IMapper mapper
             , QuestBoardPublisher questBoardPublisher
-            , ISystemService _systemService)
+            , ISystemService systemService)
 
         {
             _studentReviewRepository = studentReviewRepository;
