@@ -56,6 +56,6 @@ namespace Fsel.Shared.Enums
         ReviewCourse,
 
         //Review FSEL
-        ReviewFSEL,
+        ReviewPlatform,
     }
 }

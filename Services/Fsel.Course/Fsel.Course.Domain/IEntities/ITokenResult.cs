@@ -1,13 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels
+namespace Fsel.Course.Domain.IEntities
 {
-    using Fsel.Course.Domain.IEntities;
-
-    public class FinalTestResultModel : BaseLearnResultModel, ITokenResult
+    public interface ITokenResult
     {
-        public Guid FinalTestId { get; set; }
-        public Guid CourseId { get; set; }
         public int? TokenDone { get; set; }
         public int? TokenHighestStreak { get; set; }
         public int? TokenSuperFire { get; set; }

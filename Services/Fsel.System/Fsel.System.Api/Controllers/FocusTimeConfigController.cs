@@ -12,6 +12,7 @@ namespace Fsel.System.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.System.Domain.Models.EntityModels;
 
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/focus-time-config")]
@@ -33,7 +34,7 @@ namespace Fsel.System.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetList()
         {
-            MethodResult <IList<FocusTimeConfig>> queryResult = await _mediator.Send(new GetListFocusTimeConfigQuery()).ConfigureAwait(false);
+            MethodResult <IList<FocusTimeConfigModel>> queryResult = await _mediator.Send(new GetListFocusTimeConfigQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
