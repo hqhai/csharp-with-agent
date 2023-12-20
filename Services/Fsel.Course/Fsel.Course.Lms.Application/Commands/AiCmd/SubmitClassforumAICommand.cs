@@ -5,20 +5,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
 
-    public class SubmitClassforumAICommand : IRequest<bool>
+    public class SubmitClassforumAICommand : ClassForumAIResponseModel, IRequest<bool>
     {
-        public ClassForumResult? ClassForumResult { get; set; }
-
-        public ClassForum? ClassForum { get; set; }
-
-        public string? WordContent { get; set; }
     }
 
     public class SubmitAIResponseCommandHandler : IRequestHandler<SubmitClassforumAICommand, bool>
@@ -36,39 +30,43 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         public async Task<bool> Handle(SubmitClassforumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var classForumResult = request.ClassForumResult;
-            var classForum = request.ClassForum;
-
-            if (classForumResult == null || classForum == null)
-            {
-                return false;
-            }
-
-            var userAiConfig = request.ClassForum!.UserAlConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
+            var classForumResult = await _classForumResultRepository.GetByIdAsync(request.ClassForumResultId);
+            var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
             var aIResponse = await _mediator.Send(new SubmitAICommand
             {
-                SettingModel = classForum.SettingModel,
-                SettingTemperature = classForum.SettingTemperature,
-                SettingFrequecy = classForum.SettingFrequecy,
-                SettingWordMaxLength = classForum.SettingWordMaxLength,
-                SettingPresence = classForum.SettingPresence,
-                SettingTopP = classForum.SettingTopP,
-                SystemRoleAlConfig = classForum.SystemRoleAlConfig,
-                UserAIConfig = userAiConfig
+                SettingModel = request.SettingModel,
+                SettingTemperature = request.SettingTemperature,
+                SettingFrequecy = request.SettingFrequecy,
+                SettingWordMaxLength = request.SettingWordMaxLength,
+                SettingPresence = request.SettingPresence,
+                SettingTopP = request.SettingTopP,
+                SystemRoleAlConfig = request.SystemRoleAlConfig,
+                UserAIConfig = userAiConfig,
             }, cancellationToken).ConfigureAwait(false);
 
 
-            classForumResult.GradingAlFeedback = aIResponse;
-            classForumResult.GradingAlFeedback = aIResponse;
+            if (classForumResult != null)
+            {
+                if (request.IsRetry != null && (bool)request.IsRetry)
+                {
+                    classForumResult.RetryGradingAlFeedBack = aIResponse;
+                }
+                else
+                {
+                    classForumResult.GradingAlFeedback = aIResponse;
 
-            _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
 
+
+                _classForumResultRepository.Update(classForumResult);
+                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            }
 
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
             {
                 GradingAlFeedback = aIResponse,
-                ClassForumResultId = classForumResult.Id,
+                ClassForumResultId = request.ClassForumResultId,
             }, cancellationToken);
 
             return true;
