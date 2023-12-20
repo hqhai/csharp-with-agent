@@ -32,15 +32,15 @@ namespace Fsel.Course.Infrastructure.Common
             return questionModel;
         }
 
-        public MethodResult<(Question, object?, int)> HandleQuestionAnswer(Question? question, object? answer, bool isSubmit, object? oldAnswer = default, bool isTryAgain = false, bool isMandatoryAnswer = false)
+        public MethodResult<(Question, object?, int, bool)> HandleQuestionAnswer(Question? question, object? answer, bool isSubmit, object? oldAnswer = default, bool isTryAgain = false, bool isMandatoryAnswer = false)
         {
-            var methodResult = new MethodResult<(Question, object?, int)>();
+            var methodResult = new MethodResult<(Question, object?, int, bool)>();
             if (question == null || question.Config == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                 return methodResult;
             }
-            var (answerConfig, correctCount, isAnswerMissing) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, oldAnswer, question.Config, question.QuestionType, isTryAgain, isSubmit, isMandatoryAnswer);
+            var (answerConfig, correctCount, isAnswerMissing, isAnswered) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, oldAnswer, question.Config, question.QuestionType, isTryAgain, isSubmit, isMandatoryAnswer);
             if (answerConfig == null && !string.IsNullOrEmpty(answer?.ToString()))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
@@ -51,7 +51,7 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.QuestionNotCompleted), nameof(question), new object[] { question.Id });
                 return methodResult;
             }
-            methodResult.Result = (question, answerConfig, correctCount);
+            methodResult.Result = (question, answerConfig, correctCount, isAnswered);
             return methodResult;
         }
     }

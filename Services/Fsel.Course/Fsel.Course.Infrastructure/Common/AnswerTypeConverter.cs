@@ -14,10 +14,11 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class AnswerTypeConverter
     {
-        public (object?, int, bool) GetTotalCorrectByAnswerType(object? configAnswer, object? configOldAnswer, object? configQuestion, EnumQuestionType type, bool isTryAgain = false, bool isSubmit = false, bool isMandatoryAnswer = false)
+        public (object?, int, bool, bool) GetTotalCorrectByAnswerType(object? configAnswer, object? configOldAnswer, object? configQuestion, EnumQuestionType type, bool isTryAgain = false, bool isSubmit = false, bool isMandatoryAnswer = false)
         {
             int totalCorrect = default;
             bool isAnswerMissing = default;
+            bool isAnswered = true;
             switch (type)
             {
                 case EnumQuestionType.Multichoice:
@@ -46,12 +47,12 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
-                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeGapFillBySubAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = GetTotalCorrectTypeGapFillBySubAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
-                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeGapFillGapAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = GetTotalCorrectTypeGapFillGapAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
@@ -69,7 +70,7 @@ namespace Fsel.Course.Infrastructure.Common
                     throw new ArgumentException("Invalid answer type");
             }
 
-            return (configAnswer, totalCorrect, isAnswerMissing);
+            return (configAnswer, totalCorrect, isAnswerMissing, isAnswered);
         }
 
         public object? AnswerTypeConverterObject(object? configAnswer, EnumQuestionType type, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer = true)
@@ -481,7 +482,7 @@ namespace Fsel.Course.Infrastructure.Common
             return (number, isAnswerMissing);
         }
 
-        private static (int, bool) GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private static (int, bool, bool) GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataOldAnswer = configOldAnswer.Deserialize<GapFillAnswer>();
@@ -533,7 +534,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing);
+            return (number, isAnswerMissing, CheckAnswerGapFill(dataAnswer));
         }
 
         private static bool IsNullOrEmptyData(object? data, string? nameProperty)
@@ -569,6 +570,22 @@ namespace Fsel.Course.Infrastructure.Common
                 return listAnswer.Count == listQuestion.Count;
             }
             return true;
+        }
+
+        public static bool CheckAnswerGapFill(GapFillAnswer? answer)
+        {
+            if (answer != null && answer.Answers != null && answer.Answers.Any())
+            {
+                return answer.Answers.All(x =>
+                {
+                    if (x.Answer != null && x.Answer.Any())
+                    {
+                        return x.Answer.All(x => !string.IsNullOrEmpty(x));
+                    }
+                    return false;
+                });
+            }
+            return false;
         }
 
         private static bool IsNullOrEmptyDataHasValue(object? data, string? nameProperty)
@@ -637,7 +654,7 @@ namespace Fsel.Course.Infrastructure.Common
             return false;
         }
 
-        private static (int, bool) GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private static (int, bool, bool) GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataOldAnswer = configOldAnswer.Deserialize<GapFillAnswer>();
@@ -685,7 +702,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing);
+            return (number, isAnswerMissing, CheckAnswerGapFill(dataAnswer));
         }
 
         private static (int, bool) GetTotalCorrectTypeDragDropOrderAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)

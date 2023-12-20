@@ -135,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
-                var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                 if (answer == null)
                 {
                     answer = new VideoTimeCodeAnswer
@@ -148,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         VideoResultId = videoResult.Id,
                         CorrectCount = questionItem.Ungraded ? default : correctCount,
                         Status = GetAnswerStatus(videoTimeCode.TimeCodeType, correctCount, questionItem.CorrectTotal),
-                        IsCorrect = correctCount == questionItem.CorrectTotal,
+                        IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null,
                         IsFirstSubmit = true,
                     };
 
