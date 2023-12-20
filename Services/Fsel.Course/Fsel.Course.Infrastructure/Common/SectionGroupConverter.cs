@@ -421,9 +421,15 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (skill == EnumCourseSkill.Speaking)
             {
-                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => _mapper.Map<SectionTimeCodeDtoModel>(x)).ToList();
+                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => GetSectionTimeCodeDto(x)).ToList();
             }
             return sectionDetail;
+        }
+
+        private SectionTimeCodeDtoModel GetSectionTimeCodeDto(SectionTimeCode sectionTimeCode)
+        {
+            var sectionTimeCodeDto = _mapper.Map<SectionTimeCodeDtoModel>(sectionTimeCode);
+            return sectionTimeCodeDto;
         }
 
         private SectionPartDtoModel GetSectionPartMockTest(SectionPart sectionPart, bool isDone)

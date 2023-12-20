@@ -2,23 +2,17 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Models.EntityModels;
 
     public class QuestionConverter
     {
-        private readonly IMapper _mapper;
-        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly AnswerTypeConverter _answerTypeConverter;
 
-        public QuestionConverter(IMapper mapper, QuestionTypeConverter questionTypeConverter, AnswerTypeConverter answerTypeConverter)
+        public QuestionConverter(AnswerTypeConverter answerTypeConverter)
         {
-            _mapper = mapper;
-            _questionTypeConverter = questionTypeConverter;
             _answerTypeConverter = answerTypeConverter;
         }
 

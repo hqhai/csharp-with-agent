@@ -374,7 +374,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                 }
             }
-
             methodResult.Result = mockTestAnswers;
             return methodResult;
         }
