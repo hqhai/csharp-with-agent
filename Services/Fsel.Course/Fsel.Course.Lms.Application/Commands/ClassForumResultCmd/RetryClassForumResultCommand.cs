@@ -60,15 +60,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             if (classForum.IsAlFeedBack)
             {
-                if (classForum.IsAlFeedBack)
-                {
-                     await _mediator.Send(new SubmitClassforumAICommand
-                    {
-                        ClassForum = classForum,
-                        ClassForumResult = classForumResult,
-                        WordContent = request.WordContent,
-                    }, cancellationToken);
-                }
+                //if (classForum.IsAlFeedBack)
+                //{
+                //     await _mediator.Send(new SubmitClassforumAICommand
+                //    {
+                //        ClassForum = classForum,
+                //        ClassForumResult = classForumResult,
+                //        WordContent = request.WordContent,
+                //    }, cancellationToken);
+                //}
             }
 
             classForumResult.RetryWordContent = request.WordContent;
