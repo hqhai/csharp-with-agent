@@ -12,7 +12,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.AiCmd;
+    using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -27,14 +28,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IMapper _mapper;
         private readonly IClassForumRepository _classForumRepository;
         private readonly IMediator _mediator;
+        private SubmitClassForumGradingPublisher _submitClassForumGradingPublisher;
 
-
-        public RetryClassForumResultCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, IClassForumRepository classForumRepository, IMediator mediator)
+        public RetryClassForumResultCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, IClassForumRepository classForumRepository, IMediator mediator, SubmitClassForumGradingPublisher submitClassForumGradingPublisher)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
             _classForumRepository = classForumRepository;
             _mediator = mediator;
+            _submitClassForumGradingPublisher = submitClassForumGradingPublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(RetryClassForumResultCommand request, CancellationToken cancellationToken)
@@ -60,15 +62,22 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             if (classForum.IsAlFeedBack)
             {
-                //if (classForum.IsAlFeedBack)
-                //{
-                //     await _mediator.Send(new SubmitClassforumAICommand
-                //    {
-                //        ClassForum = classForum,
-                //        ClassForumResult = classForumResult,
-                //        WordContent = request.WordContent,
-                //    }, cancellationToken);
-                //}
+                if (classForum.IsAlFeedBack)
+                {
+                    await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
+                    {
+                        ClassForumResultId = classForumResult.Id,
+                        WordContent = request.WordContent,
+                        UserAIConfig = classForum.UserAlConfig,
+                        SettingModel = classForum.SettingModel,
+                        SettingFrequecy = classForum.SettingFrequecy,
+                        SettingPresence = classForum.SettingPresence,
+                        SettingTemperature = classForum.SettingTemperature,
+                        SettingTopP = classForum.SettingTopP,
+                        SettingWordMaxLength = classForum.SettingWordMaxLength,
+                        SystemRoleAlConfig = classForum.SystemRoleAlConfig,
+                    }, cancellationToken);
+                }
             }
 
             classForumResult.RetryWordContent = request.WordContent;
