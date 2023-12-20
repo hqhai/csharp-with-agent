@@ -25,15 +25,15 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     {
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
 
         public CreatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
             IMapper mapper,
-            SectionConverter sectionConverter)
+            SectionGroupConverter sectionGroupConverter)
         {
             _placementTestRepository = placementTestRepository;
             _mapper = mapper;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
         }
 
         public async Task<MethodResult<PlacementTestModel>> Handle(CreatePlacementTestCommand request, CancellationToken cancellationToken)
@@ -76,7 +76,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     }
 
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
+                    var method = _sectionGroupConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
                     if (!method.IsOK)
                     {
                         methodResult.AddErrorBadRequest(method.ErrorMessages);

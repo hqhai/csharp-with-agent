@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly AuthContext _authContext;
@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             AuthContext authContext,
             IMapper mapper,
             IMockTestRepository mockTestRepository,
-            SectionConverter sectionConverter,
+            SectionGroupConverter sectionGroupConverter,
             IMockTestResultRepository mockTestResultRepository,
             ILessonResultRepository lessonResultRepository,
             IUserService userService,
@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             _lessonRepository = lessonRepository;
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _mockTestResultRepository = mockTestResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _authContext = authContext;
@@ -125,8 +125,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var sectionGroup = mockTest.MockTestSections.Select(x => x.SectionGroup).FirstOrDefault();
             var mockTestModel = _mapper.Map<MockTestModel>(mockTest);
             var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
-            sectionGroupModel.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroup!.Sections.ToList(), sectionGroup!.CourseSkill);
-            mockTestModel.TotalQuestion = _sectionConverter.GetTotalQuestion(mockTest.MockTestSections.Select(x => x.SectionGroup!).ToList(), true);
+            sectionGroupModel.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(sectionGroup!.Sections.ToList(), sectionGroup!.CourseSkill);
+            mockTestModel.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(mockTest.MockTestSections.Select(x => x.SectionGroup!).ToList());
             mockTestModel.MockTestResult = _mapper.Map<MockTestResultModel>(mockTest.MockTestResults.FirstOrDefault());
             mockTestModel.SectionGroups = new List<SectionGroupModel> { sectionGroupModel };
             return mockTestModel;

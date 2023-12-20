@@ -29,13 +29,13 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IFinalTestRepository _finalTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionConverter;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public UpdateFinalTestCommandHandler(IMapper mapper
             , IFinalTestRepository finalTestRepository
-            , SectionConverter sectionConverter,
-ICourseUnitMockTestRepository courseUnitMockTestRepository)
+            , SectionGroupConverter sectionConverter
+            , ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _mapper = mapper;
             _finalTestRepository = finalTestRepository;

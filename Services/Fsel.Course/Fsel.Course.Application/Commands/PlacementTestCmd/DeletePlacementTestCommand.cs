@@ -19,14 +19,14 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     public class DeletePlacementTestCommandHandler : IRequestHandler<DeletePlacementTestCommand, MethodResult<bool>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
 
         public DeletePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository
-            , SectionConverter sectionConverter
+            , SectionGroupConverter sectionGroupConverter
             )
         {
             _placementTestRepository = placementTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
         }
 
         public async Task<MethodResult<bool>> Handle(DeletePlacementTestCommand request, CancellationToken cancellationToken)
@@ -67,7 +67,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
-                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
+                await _sectionGroupConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
                 var result = await _placementTestRepository.DeleteAsync(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

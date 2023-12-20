@@ -36,7 +36,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        public static DateTime GetDateTimeEntity(Entity entity)
+        private static DateTime GetDateTimeEntity(Entity entity)
         {
             ArgumentNullException.ThrowIfNull(entity);
             return entity.UpdatedDate ?? entity.CreatedDate;
@@ -50,6 +50,12 @@ namespace Fsel.Course.Infrastructure.Common
                 return executionTime - GetWorkingTime(baseResult.CreatedDate, baseResult.UpdatedDate.Value, executionTime);
             }
             return executionTime - GetWorkingTime(baseResult.CreatedDate, DateTime.UtcNow, executionTime);
+        }
+
+        public double GetRemainingTime(double executionTime, double workingTime)
+        {
+            var remainingTime = executionTime - workingTime;
+            return remainingTime > 0 ? remainingTime : default;
         }
     }
 }

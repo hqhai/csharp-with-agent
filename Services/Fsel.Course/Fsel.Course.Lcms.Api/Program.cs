@@ -47,6 +47,7 @@ builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<IMockTestResultRepository, MockTestResultRepository>();
+builder.Services.AddScoped<IMockTestAnswerRepository, MockTestAnswerRepository>();
 builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
 builder.Services.AddScoped<IQuestionFormRepository, QuestionFormRepository>();
 builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionRepository>();
@@ -63,6 +64,7 @@ builder.Services.AddScoped<ISectionPartRepository, SectionPartRepository>();
 builder.Services.AddScoped<ISectionRepository, SectionRepository>();
 builder.Services.AddScoped<ISectionTimeCodeRepository, SectionTimeCodeRepository>();
 builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository>();
+builder.Services.AddScoped<ISectionGroupResultRepository, SectionGroupResultRepository>();
 builder.Services.AddScoped<IFinalTestRepository, FinalTestRepository>();
 builder.Services.AddScoped<IFinalTestAnswerRepository, FinalTestAnswerRepository>();
 builder.Services.AddScoped<IFinalTestResultRepository, FinalTestResultRepository>();
@@ -72,13 +74,12 @@ builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRe
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
-builder.Services.AddScoped<SectionConverter>();
 builder.Services.AddScoped<VideoConverter>();
 builder.Services.AddScoped<CourseHelper>();
 builder.Services.AddScoped<UnitHelper>();
 builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
-
+builder.Services.AddScoped<SectionGroupConverter>();
 // Helper
 builder.Services.AddScoped<LinQHelper>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

@@ -28,16 +28,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     public class GetMockTestByIdQueryHandler : IRequestHandler<GetMockTestByIdQuery, MethodResult<MockTestModel>>
     {
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetMockTestByIdQueryHandler(IMockTestRepository mockTestRepository, SectionConverter sectionConverter, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetMockTestByIdQueryHandler(IMockTestRepository mockTestRepository, SectionGroupConverter sectionGroupConverter, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _mockTestRepository = mockTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _mockTestResultRepository = mockTestResultRepository;
             _authContext = authContext;
             _userService = userService;
@@ -85,9 +85,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         {
             var mockTestDetail = _mapper.Map<MockTestModel>(mockTest);
             var sectionGroups = mockTest.MockTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
-            mockTestDetail.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups, true);
+            mockTestDetail.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(sectionGroups);
             mockTestDetail.MockTestResult = _mapper.Map<MockTestResultModel>(mockTestResult);
-            mockTestDetail.SectionGroups = _sectionConverter.GetSectionGroups(sectionGroups, mockTestDetail.MockTestResult.Id, "MockTestResultId");
+            mockTestDetail.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, mockTestDetail.MockTestResult.Id, "MockTestResultId");
             return mockTestDetail;
         }
     }

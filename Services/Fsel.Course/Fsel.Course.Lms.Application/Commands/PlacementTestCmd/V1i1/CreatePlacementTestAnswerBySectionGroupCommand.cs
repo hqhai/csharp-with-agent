@@ -142,22 +142,21 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             #endregion Validate
 
+            if (request.Answers != null && request.Answers.Any())
+            {
+                var answerResult = await CreateAnswerAsync(request, sectionGroupResult.Id);
+                if (!answerResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
+                    return methodResult;
+                }
+            }
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                if (request.Answers != null && request.Answers.Any())
-                {
-                    var answerResult = await CreateAnswerAsync(request, sectionGroupResult.Id);
-                    if (!answerResult.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-
                 if (request.IsSubmit)
                 {
                     await _sectionGroupConverter.UpdatePlacementTestAnswers(sectionGroup, sectionGroupResult);
-                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
+                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup);
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
