@@ -76,6 +76,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                         SettingTopP = classForum.SettingTopP,
                         SettingWordMaxLength = classForum.SettingWordMaxLength,
                         SystemRoleAlConfig = classForum.SystemRoleAlConfig,
+                        IsRetry = true
                     }, cancellationToken);
                 }
             }

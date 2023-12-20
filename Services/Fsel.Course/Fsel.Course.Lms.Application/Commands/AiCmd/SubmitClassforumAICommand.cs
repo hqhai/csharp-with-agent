@@ -47,7 +47,17 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             if (classForumResult != null)
             {
-                classForumResult.GradingAlFeedback = aIResponse;
+                if (request.IsRetry != null && (bool)request.IsRetry)
+                {
+                    classForumResult.RetryGradingAlFeedBack = aIResponse;
+                }
+                else
+                {
+                    classForumResult.GradingAlFeedback = aIResponse;
+
+                }
+
+
                 _classForumResultRepository.Update(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
