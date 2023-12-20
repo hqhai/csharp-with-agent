@@ -5,9 +5,9 @@ namespace Fsel.System.Application.Commands.TokenConfigCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.TokenConfigs;
-    using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 

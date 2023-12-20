@@ -6,9 +6,5 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
     {
         public Guid ClassForumResultId { get; set; }
         public bool IsApprove { get; set; }
-
-        public long WordLimit { get; set; }
-
-        public double TimeLimit { get; set; }
     }
 }

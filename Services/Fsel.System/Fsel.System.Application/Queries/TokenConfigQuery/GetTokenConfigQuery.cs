@@ -5,30 +5,31 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetTokenQuery : IRequest<MethodResult<TokenConfigModel>>
+    public class GetTokenConfigQuery : IRequest<MethodResult<TokenConfigModel>>
     {
         public EnumTokenFeature Feature { get; set; }
         public EnumTokenMission Mission { get; set; }
     }
 
-    public class GetTokenQueryHandler : IRequestHandler<GetTokenQuery, MethodResult<TokenConfigModel>>
+    public class GetTokenConfigQueryHandler : IRequestHandler<GetTokenConfigQuery, MethodResult<TokenConfigModel>>
     {
         private readonly ITokenConfigRepository _tokenConfigRepository;
         private readonly IMapper _mapper;
 
-        public GetTokenQueryHandler(ITokenConfigRepository tokenConfigRepository, IMapper mapper)
+        public GetTokenConfigQueryHandler(ITokenConfigRepository tokenConfigRepository, IMapper mapper)
         {
             _tokenConfigRepository = tokenConfigRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<TokenConfigModel>> Handle(GetTokenQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TokenConfigModel>> Handle(GetTokenConfigQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<TokenConfigModel>();

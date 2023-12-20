@@ -8,12 +8,13 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (data != null && data.Any())
             {
-                return data.Aggregate(
-                                  new { Longest = 0, Current = 0 },
-                                  (agg, element) => element ?
-                                      new { Longest = agg.Current + 1 > agg.Longest ? agg.Current + 1 : agg.Longest, Current = agg.Current + 1 } :
-                                      new { agg.Longest, Current = 0 },
-                                  agg => agg.Longest);
+                return data.Aggregate(new { CurrentStreak = 0, MaxStreak = 0 },
+                                (acc, value) => new
+                                {
+                                    CurrentStreak = value ? acc.CurrentStreak + 1 : 0,
+                                    MaxStreak = value ? Math.Max(acc.MaxStreak, acc.CurrentStreak + 1) : acc.MaxStreak
+                                })
+                            .MaxStreak - 1;
             }
             return default;
         }

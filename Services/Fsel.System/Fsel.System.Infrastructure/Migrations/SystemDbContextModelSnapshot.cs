@@ -213,9 +213,6 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<double>("TargetTime")
                         .HasColumnType("float");
 
-                    b.Property<int>("Token")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -242,8 +239,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Bắt đầu nhẹ nhàng",
                             IsDeleted = false,
-                            TargetTime = 1800.0,
-                            Token = 1
+                            TargetTime = 1800.0
                         },
                         new
                         {
@@ -253,8 +249,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Hình thành thói quen chưa?",
                             IsDeleted = false,
-                            TargetTime = 3600.0,
-                            Token = 3
+                            TargetTime = 3600.0
                         },
                         new
                         {
@@ -264,8 +259,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Tập trung hơn nữa nào",
                             IsDeleted = false,
-                            TargetTime = 5400.0,
-                            Token = 6
+                            TargetTime = 5400.0
                         },
                         new
                         {
@@ -275,8 +269,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Chăm chỉ phết",
                             IsDeleted = false,
-                            TargetTime = 7200.0,
-                            Token = 12
+                            TargetTime = 7200.0
                         },
                         new
                         {
@@ -286,8 +279,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Thách đấu FSEL",
                             IsDeleted = false,
-                            TargetTime = 10800.0,
-                            Token = 24
+                            TargetTime = 10800.0
                         });
                 });
 
@@ -1633,7 +1625,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Feature = "ReviewSystem",
                             IsDeleted = false,
-                            Mission = "ReviewFSEL",
+                            Mission = "ReviewPlatform",
                             SuperConfigStr = "null"
                         });
                 });

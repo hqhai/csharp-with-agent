@@ -1,7 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Entities.Configs
+namespace Fsel.Shared.Models.ShareModels
 {
+    using System;
+    using System.Collections.Generic;
+
     public class TokenNumber
     {
         public int? Number { get; set; }
