@@ -66,7 +66,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return methodResult;
             }
             var (listQuestion, questions, homeWorkResult, homeWork) = method.Result;
-            var homeWorkAnswers = new List<HomeWorkAnswer>();
+            var createHomeWorkAnswers = new List<HomeWorkAnswer>();
+            var updateHomeWorkAnswers = new List<HomeWorkAnswer>();
             int correctTotal = default;
             foreach (var item in request.Answers)
             {
@@ -91,11 +92,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     homeWorkAnswer = new HomeWorkAnswer();
                     homeWorkAnswer.HomeWorkQuestionId = homeWorkQuestion.Id;
                     homeWorkAnswer.HomeWorkResultId = homeWorkResult.Id;
-                    homeWorkResult.HomeWorkAnswers.Add(homeWorkAnswer);
+                    createHomeWorkAnswers.Add(homeWorkAnswer);
                 }
                 else
                 {
-                    homeWorkAnswers.Add(homeWorkAnswer);
+                    updateHomeWorkAnswers.Add(homeWorkAnswer);
                 }
                 homeWorkAnswer.Answer = answerConfig;
                 homeWorkAnswer.CorrectCount = correctCount;
@@ -115,7 +116,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     TotalQuestion = listQuestion.Count,
                 };
                 homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
-
                 await _finishOneHomeWorkPublisher.Publish(homeWorkResult, cancellationToken);
             }
             else
@@ -129,9 +129,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 _homeWorkResultRepository.Update(homeWorkResult);
                 await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                if (homeWorkAnswers.Any())
+                if (createHomeWorkAnswers.Any())
                 {
-                    _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
+                    await _homeWorkAnswerRepository.AddList(createHomeWorkAnswers);
+                    await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                if (updateHomeWorkAnswers.Any())
+                {
+                    _homeWorkAnswerRepository.UpdateList(updateHomeWorkAnswers);
                     await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 methodResult.StatusCode = StatusCodes.Status201Created;
