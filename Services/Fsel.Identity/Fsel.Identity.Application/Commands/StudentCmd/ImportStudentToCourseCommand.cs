@@ -65,7 +65,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             var packagesResult = await _orderService.GetPackages();
 
-            var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentToCourseModel x, int rowIndex, IList<ValidateExcelModel> errors) =>
+            var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentToCourseModel x, IList<ImportStudentToCourseModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.Email))
                 {

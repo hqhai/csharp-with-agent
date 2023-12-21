@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
@@ -37,19 +38,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly SubmitClassForumGradingPublisher _submitClassForumGradingPublisher;
         private readonly ISystemService _systemService;
         private readonly IMediator _mediator;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper
-            , AuthContext authContext
-            , IUserService userService
-            , IClassForumResultRepository classForumResultRepository
-            , IClassForumRepository classForumRepository
-            , ILessonResultRepository lessonResultRepository
-            , NotificationMessagePublisher notificationMessagePublisher
-            , ISystemService systemService
-            , IMediator mediator
-            )
+        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, IMediator mediator, SubmitClassForumGradingPublisher submitClassForumGradingPublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -60,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _notificationMessagePublisher = notificationMessagePublisher;
             _systemService = systemService;
             _mediator = mediator;
+            _submitClassForumGradingPublisher = submitClassForumGradingPublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -144,11 +138,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     //check AI feedback
                     if (classForum.IsAlFeedBack)
                     {
-                        await _mediator.Send(new SubmitClassforumAICommand
+                        await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
                         {
-                            ClassForum = classForum,
-                            ClassForumResult = classForumResult,
-                            WordContent = request.WordContent
+                            ClassForumResultId = classForumResult.Id,
+                            WordContent = request.WordContent,
+                            UserAIConfig = classForum.UserAlConfig,
+                            SettingModel = classForum.SettingModel,
+                            SettingFrequecy = classForum.SettingFrequecy,
+                            SettingPresence = classForum.SettingPresence,
+                            SettingTemperature = classForum.SettingTemperature,
+                            SettingTopP = classForum.SettingTopP,
+                            SettingWordMaxLength = classForum.SettingWordMaxLength,
+                            SystemRoleAlConfig = classForum.SystemRoleAlConfig,
                         }, cancellationToken);
                     }
                 }
