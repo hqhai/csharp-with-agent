@@ -138,5 +138,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// PhoneNumber is not valid
         /// </summary>
         PhoneNumberIsNotValid,
+
+        /// <summary>
+        /// Password is not valid
+        /// </summary>
+        PasswordIsNotValid,
     }
 }

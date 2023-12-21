@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Services.UserServices
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Services.UserServices.Models;
+    using Fsel.System.Application.Services.UserServices.Models.QueryModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -40,13 +41,13 @@ namespace Fsel.System.Application.Services.UserServices
         [Post("/student/get-by-student-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid> studentIds);
 
-        [Post("/cso/admin")]
+        [Post("/admin/cso")]
         Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetCSOByIds([Body] IList<Guid>? ids);
 
         [Get("/cso/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCsoByUserIdAsync([FromRoute] Guid id);
 
-        [Get("/cso/admin/get-all")]
+        [Get("/admin/cso/get-all")]
         Task<IApiResponse<MethodResult<IList<CSOModel>>>> GetAllCSO();
 
         [Get("/teacher/get-all")]
@@ -57,5 +58,9 @@ namespace Fsel.System.Application.Services.UserServices
 
         [Post("/platform/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<PlatformModel>>>> GetPlatformsQueryAsync([Body] BaseQueryModel query);
+
+
+        [Get("/user/get-users-by-role")]
+        Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRoleAsync([Query] GetUsersByRoleQueryModel query);
     }
 }

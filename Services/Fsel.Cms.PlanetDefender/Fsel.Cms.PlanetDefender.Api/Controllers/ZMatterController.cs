@@ -3,6 +3,8 @@
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
     using Fsel.Cms.PlanetDefender.Application.Commands.ZMatterCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.ZMatterQuery;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
@@ -12,7 +14,8 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/z-matter")]
     [ApiController]
     public class ZMatterController : ControllerBase

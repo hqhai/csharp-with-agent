@@ -41,7 +41,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                 return methodResult;
             }
 
-            var lessonQuery = _lessonRepository.Queryable
+            var lessonQuery = _lessonRepository.Queryable.Where(p => !p.IsArchive)
                      .Include(x => x.UnitLessons.Where(y => !y.IsDeleted))
                      .Include(x => x.LessonVideos.Where(y => !y.IsDeleted && y.Video != null))
                      .ThenInclude(x => x.Video)

@@ -76,7 +76,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id, UserId = request.UserId }, cancellationToken).ConfigureAwait(false);
+            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
             var code = codeSend.Result?.Code;
 
             if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code || (x.Status == EnumOrderStatus.New && x.UserId == request.UserId), cancellationToken))
@@ -125,13 +125,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             {
                 order = _orderRepository.Add(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                await _notificationMessagePublisher.Publish(new NotificationQueueModel
+                await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                 {
                     Roles = new List<EnumRole> { EnumRole.Admin },
                     ObjectId = order.Id,
                     Type = EnumNotificationType.Text,
                     Content = EnumNotificationContent.OrderCreate,
                     SenderId = order.CreatedUserId,
+                    PlatformCode = EnumPlatformCode.LMSAdmin
                 }, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(order);

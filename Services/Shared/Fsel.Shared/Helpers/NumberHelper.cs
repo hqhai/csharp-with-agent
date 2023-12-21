@@ -2,6 +2,10 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using Fsel.Common.Helpers;
+    using OtpNet;
+    using System.Text;
+
     public static class NumberHelper
     {
         public static double RoundNumberDouble(double number, bool roundUp = false)
@@ -14,6 +18,13 @@ namespace Fsel.Shared.Helpers
             {
                 return Math.Floor(number * 2) / 2;
             }
+        }
+
+        public static string GetRandomCode()
+        {
+            var randomSecure = new RandomSecureHelper();
+            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
+            return totp.ComputeTotp();
         }
 
         public static string GenerateCode(int length)
@@ -42,7 +53,7 @@ namespace Fsel.Shared.Helpers
 
         public static double ConvertDoublePercent(double value)
         {
-            double convertedValue = Math.Round(value / 100, 2, MidpointRounding.AwayFromZero);
+            double convertedValue = Math.Round(value / 100, 0, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 

@@ -53,6 +53,11 @@ namespace Fsel.Course.Domain.Entities
             }
         }
 
+        /// <summary>
+        /// Trạng thái Archive
+        /// </summary>
+        public bool IsArchive { get; set; }
+
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
         public ICollection<CourseTeacher> CourseTeachers { get; set; } = new List<CourseTeacher>();
         public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();

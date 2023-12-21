@@ -5,6 +5,7 @@ namespace Fsel.Course.Infrastructure.Configs
     using System;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -14,12 +15,6 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<ExtraPracticeAnswer> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-
-            builder.Property(e => e.Status)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumAnswerStatus>());
 
             builder.HasOne(a => a.Question)
                 .WithMany(b => b.ExtraPracticeAnswers)
@@ -50,6 +45,17 @@ namespace Fsel.Course.Infrastructure.Configs
               .WithMany(b => b.ExtraPracticeAnswers)
               .HasForeignKey(b => b.SectionId)
               .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.SectionGroupResult)
+             .WithMany(b => b.ExtraPracticeAnswers)
+             .HasForeignKey(b => b.SectionGroupResultId)
+             .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Property(e => e.Status)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                       v => v.ToString(),
+                       v => v.EnumParse<EnumAnswerStatus>());
         }
     }
 }

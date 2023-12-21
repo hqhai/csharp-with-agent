@@ -15,23 +15,13 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(NotificationQueueModel? request, CancellationToken cancellationToken)
+        public async Task Publish(NotificationSendingQueueModel? request, CancellationToken cancellationToken)
         {
             if (request == null)
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.SendNotification, new NotificationQueueModel
-            {
-                ObjectId = request.ObjectId,
-                Message = request.Message,
-                Link = request.Link,
-                Type = request.Type,
-                Content = request.Content,
-                ParamsMessage = request.ParamsMessage,
-                Roles = request.Roles,
-                SenderId = request.SenderId,
-            }, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.SendNotification, request, cancellationToken);
         }
     }
 }

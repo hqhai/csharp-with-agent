@@ -6,6 +6,6 @@ namespace Fsel.Shared.Enums
     {
         ClassForum,
         DiscussionBoard,
-        ReplyComment
+        ReplyComment,
     }
 }

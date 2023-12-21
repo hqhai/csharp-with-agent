@@ -68,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (unit != null)
             {
                 var lessonIds = unit.UnitLessons.Select(x => x.LessonId).ToList();
-                var mockTestId = unit.UnitSkillMockTests.Any() ? unit.UnitSkillMockTests.FirstOrDefault()?.Id : null;
+                var mockTestId = unit.UnitSkillMockTests.Any() ? unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId : null;
                 var (currentProgress, progress) = await GetContentComplete(lessonIds, request, mockTestId);
                 var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, UserId = userId ?? default });
                 var featureAccessTime = featureAccessTimeResult?.Content?.Result;
@@ -103,9 +103,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var lessonResults = await _lessonResultRepository.GetListAsync(lessonIds, request.StudentId, request.UnitId);
                 if (lessonResults != null && lessonResults.Any())
                 {
-                    counts.Add(lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId).Count());
-                    counts.Add(lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && x.Status == EnumClassForumResultStatus.Graded && x.StudentId == request.StudentId).Count());
-                    counts.Add(lessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId).GroupBy(x => x.LessonResultId).Count());
+                    var countVideo = lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId).Count();
+                    var countClassForum = lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == request.StudentId).Count();
+                    var countHomeWork = lessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId).GroupBy(x => x.LessonResultId).Count();
+                    counts.AddRange(new List<int> { countHomeWork, countClassForum, countVideo });
                 }
             }
             if (mockTestId != null)

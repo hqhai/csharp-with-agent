@@ -118,14 +118,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         return methodResult;
                     }
 
-                    await _notificationMessagePublisher.Publish(new NotificationQueueModel
+                    await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
-                        UserId = order.CreatedUserId,
+                        UserIds = new List<Guid>() { order.UserId },
                         ObjectId = order.Id,
                         ParamsMessage = new List<object> { course?.Name ?? string.Empty },
                         Type = EnumNotificationType.Text,
                         Content = EnumNotificationContent.OrderChangeStatus,
-                        SenderId = _authContext.CurrentUserId
+                        SenderId = _authContext.CurrentUserId,
+                        PlatformCode = EnumPlatformCode.LMS
                     }, cancellationToken);
                 }
                 order.Status = request.OrderStatus;

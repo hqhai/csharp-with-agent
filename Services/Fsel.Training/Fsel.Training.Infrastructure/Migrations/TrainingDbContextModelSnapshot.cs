@@ -560,6 +560,73 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.ToTable("TeacherFreeTimes");
                 });
 
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.TeacherFreeTimeLive", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LiveDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TeacherFreeTimeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeacherFreeTimeId");
+
+                    b.ToTable("TeacherFreeTimeLives");
+                });
+
             modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassLiveCalendar", b =>
                 {
                     b.HasOne("Fsel.Training.Domain.Entities.Class", "Class")
@@ -615,6 +682,17 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.Navigation("TeacherFreeDate");
                 });
 
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.TeacherFreeTimeLive", b =>
+                {
+                    b.HasOne("Fsel.Training.Domain.Entities.TeacherFreeTime", "TeacherFreeTime")
+                        .WithMany("TeacherFreeTimeLives")
+                        .HasForeignKey("TeacherFreeTimeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TeacherFreeTime");
+                });
+
             modelBuilder.Entity("Fsel.Training.Domain.Entities.Class", b =>
                 {
                     b.Navigation("ClassLiveCalendars");
@@ -635,6 +713,11 @@ namespace Fsel.Training.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Training.Domain.Entities.TeacherFreeDate", b =>
                 {
                     b.Navigation("TeacherFreeTimes");
+                });
+
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.TeacherFreeTime", b =>
+                {
+                    b.Navigation("TeacherFreeTimeLives");
                 });
 #pragma warning restore 612, 618
         }

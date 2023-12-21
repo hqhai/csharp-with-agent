@@ -17,7 +17,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models
         public EnumCourseLevel CourseLevel { get; set; }
 
         public Guid? ClassId { get; set; }
-
-        public HumanModel? Human { get; set; }
+        public long NumberOfToken { get; set; }
+        public HumanProfileModel? Human { get; set; }
     }
 }

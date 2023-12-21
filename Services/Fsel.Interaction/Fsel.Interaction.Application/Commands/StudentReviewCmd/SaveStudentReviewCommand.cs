@@ -7,14 +7,19 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.CourseServices;
+    using Fsel.Interaction.Application.Services.SystemService;
+    using Fsel.Interaction.Application.Services.SystemService.Models;
     using Fsel.Interaction.Application.Services.TrainingServices;
     using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.StudentReviews;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,12 +36,9 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
         private readonly ITrainingService _trainingService;
         private readonly ICourseService _courseService;
         private readonly IMapper _mapper;
+        private readonly ISystemService _systemService;
 
-        public SaveStudentReviewCommandHandler(IStudentReviewRepository studentReviewRepository, AuthContext authContext
-            , IUserService userService
-            , ITrainingService trainingService
-            , ICourseService courseService
-            , IMapper mapper)
+        public SaveStudentReviewCommandHandler(IStudentReviewRepository studentReviewRepository, AuthContext authContext, IUserService userService, ITrainingService trainingService, ICourseService courseService, IMapper mapper, ISystemService systemService)
         {
             _studentReviewRepository = studentReviewRepository;
             _authContext = authContext;
@@ -44,6 +46,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
             _trainingService = trainingService;
             _courseService = courseService;
             _mapper = mapper;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<StudentReviewModel>> Handle(SaveStudentReviewCommand request, CancellationToken cancellationToken)
@@ -87,6 +90,25 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                 var studentReview = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).FirstOrDefaultAsync(x => x.StudentId == studentId && x.ReviewType == request.ReviewType, cancellationToken);
 
                 var studentReviewDetails = _mapper.Map<List<StudentReviewDetail>>(request.StudentReviewDetails);
+
+                var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+                {
+                    Feature = EnumTokenFeature.ReviewSystem,
+                    Mission = request.ReviewType == EnumReviewType.Platform ? EnumTokenMission.ReviewPlatform : EnumTokenMission.ReviewCourse
+                });
+                var tokenConfigResult = tokenConfig.Content?.Result;
+
+                var targetConfig = tokenConfigResult.GetTokenNumber<TokenNumber>();
+                var targetNumber = targetConfig?.Number;
+                if (targetNumber.HasValue)
+                {
+                    var userToken = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+                    {
+                        StudentId = studentId ?? default,
+                        NumberOfToken = targetNumber.Value,
+                    });
+                }
+
                 foreach (var studentReviewDetail in studentReviewDetails)
                 {
                     if (!studentReviewDetail.IsValid())

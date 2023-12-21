@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
@@ -20,6 +21,20 @@ namespace Fsel.Course.Domain.Entities
         /// Loại MockTest
         /// </summary>
         public EnumMockTestType MockTestType { get; set; }
+
+        /// <summary>
+        /// Trạng thái Archive
+        /// </summary>
+        public bool IsArchive { get; set; }
+
+        [NotMapped]
+        public double ExecutionTime
+        {
+            get
+            {
+                return MockTestSections.Select(x => x.SectionGroup).Sum(x => x!.ExecutionTime);
+            }
+        }
 
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<MockTestSection> MockTestSections { get; set; } = new List<MockTestSection>();

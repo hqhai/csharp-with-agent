@@ -106,16 +106,17 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
-            var lesson = classForumResult!.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId)?.DisplayOrder;
-            var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.Number;
-            var course = classForumResult.LessonResult?.Course?.Code;
-
+            var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId);
+            var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId);
+            var course = classForumResult.LessonResult?.Course;
 
             var classForumResultModel = new ClassForumResultModel
             {
                 Id = classForumResult.Id,
                 Content = classForumResult.Content,
                 WordContent = classForumResult.WordContent,
+                WordCount = classForumResult.WordCount,
+                TimeCount = classForumResult.TimeCount,
                 Status = classForumResult.Status,
                 ClassForumId = classForumResult.ClassForumId,
                 ClassForum = _mapper.Map<ClassForumModel>(classForumResult.ClassForum),
@@ -123,6 +124,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 CheckStartDate = classForumResult.CheckStartDate,
                 GradingStartDate = classForumResult.GradingStartDate,
                 CheckCsoId = classForumResult.CheckCsoId,
+                UnitId = unit?.Id ?? default,
+                CreatedUserId = classForumResult.CreatedUserId,
+                CourseId = course?.Id ?? default,
                 GradingTeacherId = classForumResult.GradingTeacherId ?? default,
                 ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(classForumResult.ClassForumResultFiles),
                 ClassForumScores = classForumResult.ClassForumScores == null ? null : classForumResult.ClassForumScores.Select(x => new ClassForumScoreModel
@@ -132,7 +136,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     Criteria = x.Criteria,
                     Score = x.Score
                 }).ToList(),
-                PostArea = "L" + lesson + "_" + "U" + unit + "_" + course
+                PostArea = "L" + lesson?.DisplayOrder + "_" + "U" + unit?.Number + "_" + course?.Code
             };
 
             methodResult.Result = classForumResultModel;

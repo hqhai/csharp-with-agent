@@ -12,8 +12,10 @@ namespace Fsel.Training.Api.Controllers.Teacher
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/teacher/cancel-schedule")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]

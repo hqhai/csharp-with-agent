@@ -40,7 +40,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var homeWorkQuery = _homeWorkRepository.Queryable
+            var homeWorkQuery = _homeWorkRepository.Queryable.Where(p => !p.IsArchive)
                                     .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
                                     .Select(x => new HomeWorkSearchModel
                                     {

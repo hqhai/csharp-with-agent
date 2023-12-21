@@ -9,5 +9,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int CorrectCount { get; set; }
         public object? Answer { get; set; }
         public EnumAnswerStatus? Status { get; set; }
+        public bool? IsCorrect { get; set; }
     }
 }

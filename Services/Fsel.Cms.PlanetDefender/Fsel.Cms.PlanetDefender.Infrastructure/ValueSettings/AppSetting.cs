@@ -8,8 +8,10 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.ValueSettings
     {
         public new Services? Services { get; set; }
     }
+
     public class Services : BaseServices
     {
         public string? SystemApiUrl { get; set; }
+        public string? CourseApiUrl { get; set; }
     }
 }

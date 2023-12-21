@@ -8,6 +8,13 @@ namespace Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers
         public IList<HomeWorkAnswerQuestionModel>? Answers { get; set; }
     }
 
+    public class CreateHomeWorkAnswerV1i1CommandModel
+    {
+        public Guid HomeWorkResultId { get; set; }
+        public bool IsSubmit { get; set; }
+        public IList<HomeWorkAnswerQuestionModel>? Answers { get; set; }
+    }
+
     public class HomeWorkAnswerQuestionModel
     {
         public Guid QuestionId { get; set; }

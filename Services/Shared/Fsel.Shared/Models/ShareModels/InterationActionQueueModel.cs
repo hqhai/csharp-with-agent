@@ -4,7 +4,7 @@ namespace Fsel.Shared.Models.ShareModels
 {
     using Fsel.Shared.Enums;
 
-    public class InterationActionQueueModel : NotificationQueueModel
+    public class InterationActionQueueModel : NotificationSendingQueueModel
     {
         public EnumInteractionActionType InterationType { get; set; }
 

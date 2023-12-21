@@ -86,12 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             videoStudentProgress.Name = videoResult.Video?.Name;
             videoStudentProgress.Status = videoResult.Status;
             var method = await _videoConverter.GetVideoSkillScores(videoResult, cancellationToken).ConfigureAwait(false);
-            if (!method.IsOK)
-            {
-                methodResult.AddErrorBadRequest(method.ErrorMessages);
-                return methodResult;
-            }
-            videoStudentProgress.VideoSkillScores = videoResult.VideoSkillScores;
+            videoStudentProgress.VideoSkillScores = method.Item1;
             if (featureAccessTime != null)
             {
                 videoStudentProgress.Visit = featureAccessTime.Visit;

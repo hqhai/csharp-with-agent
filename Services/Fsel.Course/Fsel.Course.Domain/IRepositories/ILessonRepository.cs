@@ -18,5 +18,7 @@ namespace Fsel.Course.Domain.IRepositories
         Task<double> GetPercentHomeWork(Guid unitId, Guid? studentId);
 
         Task<Lesson?> GetIncludeByIdNoTrackingAsync(Guid id, int? siteId = null);
+
+        Task<Lesson?> GetAsync(Guid? lessonId);
     }
 }

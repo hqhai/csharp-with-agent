@@ -60,12 +60,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            if (course.Status != EnumCourseStatus.New)
+
+            _mapper.Map(request, course);
+            if (!course.IsValid())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course.Id), course.Id);
                 return methodResult;
             }
-            _mapper.Map(request, course);
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
             if (!teachers.IsSuccessStatusCode)
             {

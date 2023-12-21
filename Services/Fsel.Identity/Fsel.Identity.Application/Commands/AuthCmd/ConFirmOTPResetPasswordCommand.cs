@@ -4,8 +4,8 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base.Managers;
+using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Shared.Enums;
@@ -22,15 +22,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class ConfirmOtpResetPasswordCommandHandler : IRequestHandler<ConfirmOtpResetPasswordCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly IHumanRepository _humanRepository;
         private readonly IParentRepository _parentRepository;
 
-        public ConfirmOtpResetPasswordCommandHandler(UserManager<User> userManager, IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, IHumanRepository humanRepository, IParentRepository parentRepository)
+        public ConfirmOtpResetPasswordCommandHandler(UserManager<User> userManager, IMediator mediator, IMapper mapper, IHumanRepository humanRepository, IParentRepository parentRepository)
         {
             _userManager = userManager;
-            _userOtpCodeRepository = userOtpCodeRepository;
+            _mediator = mediator;
             _mapper = mapper;
             _humanRepository = humanRepository;
             _parentRepository = parentRepository;
@@ -52,32 +52,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var user = await _userManager.Users.Include(x => x.UserOtpCodes)
-                                .FirstOrDefaultAsync(x => x.UserOtpCodes.Where(x => x.Status == EnumOtpCodeStatus.New).Select(x => x.OTPCode).Contains(request.Otp), cancellationToken);
-
+            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.Otp, Email = request.Email }, cancellationToken);
+            if (!method.IsOK || method.Result == null)
+            {
+                methodResult.AddError(method.ErrorMessages);
+                return methodResult;
+            }
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-
-            var userOtpCode = await _userOtpCodeRepository.Queryable
-                       .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
-            if (userOtpCode == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
-                return methodResult;
-            }
-
-            if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
-                return methodResult;
-            }
-
-            userOtpCode.Status = EnumOtpCodeStatus.Verified;
-            _userOtpCodeRepository.Update(userOtpCode);
-            await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             if (!user.EmailConfirmed)
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);

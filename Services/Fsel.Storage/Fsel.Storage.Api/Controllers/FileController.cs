@@ -9,8 +9,10 @@ namespace Fsel.Storage.Api.Controllers
     using Fsel.Storage.Application.Services.AmazonS3Services;
     using Fsel.Storage.Domain.Enums;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/file")]
     [ApiController]
     public class FileController : ControllerBase
@@ -31,9 +33,24 @@ namespace Fsel.Storage.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [HttpPost("{type}")]
-        public async Task<IActionResult> Upload([FromRoute] EnumFolderType type, IFormFile file)
+        public async Task<IActionResult> Upload([FromRoute] EnumFolderType type, IFormFile file, [FromQuery] bool isResize = false)
         {
-            var commandResult = await _amazonS3Service.UploadFileAsync(file, type);
+            var commandResult = await _amazonS3Service.UploadFileAsync(file, type, isResize);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Upload file
+        /// </summary>
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [HttpPost("multiple/{type}")]
+        public async Task<IActionResult> Uploads([FromRoute] EnumFolderType type, IList<IFormFile> files, [FromQuery] bool isResize = false)
+        {
+            var commandResult = await _amazonS3Service.UploadFilesAsync(files, type, isResize);
             return commandResult.GetActionResult();
         }
     }

@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -21,7 +22,6 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     {
         public Guid PackageId { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
-        public Guid UserId { get; set; }
     }
 
     public class GetOrderQueryHandler : IRequestHandler<GenerateRamdomOrderQuery, MethodResult<GenerateRamdomOrderModel>>
@@ -29,14 +29,16 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
         private readonly IPackageRepository _packageRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-
+        private readonly AuthContext _authContext;
         public GetOrderQueryHandler(IPackageRepository packageRepository,
             IMapper mapper,
-            IUserService userService)
+            IUserService userService,
+            AuthContext authContext)
         {
             _packageRepository = packageRepository;
             _mapper = mapper;
             _userService = userService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<GenerateRamdomOrderModel>> Handle(GenerateRamdomOrderQuery request, CancellationToken cancellationToken)
@@ -51,7 +53,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
-            var student = await _userService.GetStudentByUserIdAsync(request.UserId);
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));

@@ -7,5 +7,6 @@ namespace Fsel.Course.Domain.IRepositories
 {
     public interface IUnitResultRepository : IRepository<UnitResult>
     {
+        Task<bool> IsDoneAsync(LessonResult lessonResult);
     }
 }

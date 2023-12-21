@@ -48,7 +48,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                                       {
                                           Id = x.Id,
                                           Name = x.Name,
-                                          IsActive = x.IsActive,
                                           FinalTestLevel = x.FinalTestLevel,
                                           CreatedDate = x.CreatedDate,
                                           CreatedFullName = x.CreatedFullName,
@@ -78,6 +77,27 @@ namespace Fsel.Course.Infrastructure.Repositories
                                               }).ToList(),
                                           }).ToList(),
                                       }).FirstOrDefaultAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<FinalTest?> GetAsync(Guid id, Guid? studentId)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.FinalTestSections.Where(n => !n.IsDeleted))
+                                    .ThenInclude(x => x.SectionGroup)
+                                    .ThenInclude(x => x!.Sections.Where(n => !n.IsDeleted))
+                                    .ThenInclude(x => x!.SectionQuestions.Where(n => !n.IsDeleted))
+                                    .ThenInclude(x => x.Question)
+                                    .Include(x => x.FinalTestSections.Where(n => !n.IsDeleted))
+                                    .ThenInclude(x => x.SectionGroup)
+                                    .ThenInclude(x => x!.SectionGroupResults.Where(x => x.StudentId == studentId))
+                                    .Include(x => x.FinalTestResults.Where(x => x.StudentId == studentId))
+                                    .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {

@@ -10,8 +10,10 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/comment")]
     [ApiController]
     public class CommentController : ControllerBase
@@ -27,7 +29,6 @@ namespace Fsel.Interaction.Api.Controllers
         /// Create action
         /// </summary>
         [HttpPost]
-
         [ProducesResponseType(typeof(MethodResult<CommentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateCommentCommand command)

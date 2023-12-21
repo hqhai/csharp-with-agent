@@ -7,5 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsRetry { get; set; }
 
         public string? FilePath { get; set; }
+
+        public int? TimeCount { get; set; }
     }
 }

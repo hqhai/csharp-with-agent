@@ -5,8 +5,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
-    using Azure.Core;
-    using Deepgram.Models;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -16,9 +14,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
+    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
-    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -39,17 +38,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly SubmitClassForumGradingPublisher _submitClassForumGradingPublisher;
         private readonly ISystemService _systemService;
+        private readonly IMediator _mediator;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper
-            , AuthContext authContext
-            , IUserService userService
-            , IClassForumResultRepository classForumResultRepository
-            , IClassForumRepository classForumRepository
-            , ILessonResultRepository lessonResultRepository
-            , NotificationMessagePublisher notificationMessagePublisher
-            , ISystemService systemService
-            )
+        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, IMediator mediator, SubmitClassForumGradingPublisher submitClassForumGradingPublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -59,6 +52,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _lessonResultRepository = lessonResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
             _systemService = systemService;
+            _mediator = mediator;
+            _submitClassForumGradingPublisher = submitClassForumGradingPublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -116,8 +111,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
                         ClassForumId = classForum.Id,
                         WordContent = request.WordContent,
-                        GradingAlFeedback = request.GradingAlFeedback,
                     };
+
                     if (request.FilePaths != null)
                     {
                         classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
@@ -134,6 +129,24 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     else
                     {
                         await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+
+                    //check AI feedback
+                    if (classForum.IsAlFeedBack)
+                    {
+                        await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
+                        {
+                            ClassForumResultId = classForumResult.Id,
+                            WordContent = request.WordContent,
+                            UserAIConfig = classForum.UserAlConfig,
+                            SettingModel = classForum.SettingModel,
+                            SettingFrequecy = classForum.SettingFrequecy,
+                            SettingPresence = classForum.SettingPresence,
+                            SettingTemperature = classForum.SettingTemperature,
+                            SettingTopP = classForum.SettingTopP,
+                            SettingWordMaxLength = classForum.SettingWordMaxLength,
+                            SystemRoleAlConfig = classForum.SystemRoleAlConfig,
+                        }, cancellationToken);
                     }
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
@@ -162,13 +175,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 IList<EnumRole> roles = new List<EnumRole>();
                 roles.Add(EnumRole.CSO);
 
-                NotificationQueueModel model = new NotificationQueueModel()
+                NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                 {
                     ObjectId = classForumResult.Id,
                     Roles = roles,
                     Content = EnumNotificationContent.CreateClassForumResult,
                     Type = EnumNotificationType.Text,
-                    SenderId = _authContext.CurrentUserId
+                    SenderId = _authContext.CurrentUserId,
+                    PlatformCode = EnumPlatformCode.LMSAdmin
                 };
 
                 await _notificationMessagePublisher.Publish(model, cancellationToken);

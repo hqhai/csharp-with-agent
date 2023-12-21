@@ -4,23 +4,45 @@ namespace Fsel.Identity.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student")]
     [ApiController]
-    public class StudentController : ControllerBase
+    public class StudentController : BaseController
     {
         private readonly IMediator _mediator;
+        private readonly IStudentRepository _studentRepository;
 
-        public StudentController(IMediator mediator)
+        public StudentController(IMediator mediator, IStudentRepository studentRepository)
         {
             _mediator = mediator;
+            _studentRepository = studentRepository;
+        }
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpGet("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
+        {
+            SetQuery(query);
+            var result = await _studentRepository.GetListResultAsync<StudentModel>(query);
+            return result.GetActionResult();
         }
 
         /// <summary>
@@ -158,6 +180,18 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> UpdateReferralCode([FromBody] UpdateReferralCodeStudentCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update Student By Class Id
+        /// </summary>
+        [HttpPut("update-beginner-guide")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateBeginnerGuide([FromBody] UpdateStudentBeginnerGuideCommand query)
+        {
+            MethodResult<StudentModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

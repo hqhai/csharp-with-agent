@@ -27,5 +27,6 @@ namespace Fsel.Cms.PlanetDefender.Application.Services.SystemServices.Models
         public EnumGameVocabType GameVocabType { get; set; }
         public string? QuestionContent { get; set; }
         public IList<string>? AlternateSpelling { get; set; }
+        public Guid GameVocabularyId { get; set; }
     }
 }

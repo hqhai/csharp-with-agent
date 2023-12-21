@@ -6,24 +6,57 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.ClassForumCmd;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
     [Permission]
-    public class ClassForumResultController : ControllerBase
+    public class ClassForumResultController : BaseController
     {
         private readonly IMediator _mediator;
-
-        public ClassForumResultController(IMediator mediator)
+        private readonly IClassForumResultRepository _classForumResultRepository;
+        public ClassForumResultController(IMediator mediator, IClassForumResultRepository classForumResultRepository)
         {
             _mediator = mediator;
+            _classForumResultRepository = classForumResultRepository;
+        }
+
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpGet("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
+        {
+            SetQuery(query);
+            var result = await _classForumResultRepository.GetListResultAsync<ClassForumResultModel>(query);
+            return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpGet("execute-query")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Execute([FromQuery] BaseQueryModel query)
+        {
+            var result = await _classForumResultRepository.GetResultAsync<ClassForumResultInfoModel>(BaseQuery ?? query);
+            return result.GetActionResult();
         }
 
         /// <summary>

@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -30,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IUserService _userService;
         private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly IMapper _mapper;
+        private readonly QuestionConverter _questionConverter;
         private readonly ISectionRepository _sectionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , IUserService userService
             , ISectionTimeCodeRepository sectionTimeCodeRepository
             , IMapper mapper
+            , QuestionConverter questionConverter
             , ISectionRepository sectionRepository
             , ISectionGroupRepository sectionGroupRepository
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
@@ -52,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _userService = userService;
             _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _mapper = mapper;
+            _questionConverter = questionConverter;
             _sectionRepository = sectionRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
@@ -120,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     extraPracticeResult.Percent = 0;
                 }
                 extraPracticeResult.CorrectCount = extraPracticeResult.ExtraPracticeAnswers.Sum(x => x.CorrectCount);
-                if (request.IsActive)
+                if (request.IsSubmit)
                 {
                     extraPracticeResult.Status = EnumResultStatus.Done;
                     extraPracticeResult.Percent = 100;
@@ -209,31 +211,23 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     }
                     var questionIds = item.Answers.Where(x => x.QuestionId != null).Select(x => x.QuestionId ?? default).ToList();
                     var questions = await _questionRepository.GetByIdsAsync(questionIds);
-                    double correctCountTotal = 0;
+                    var correctCountTotal = 0;
                     foreach (var answer in item.Answers)
                     {
                         if (answer.QuestionId != null)
                         {
                             var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                            if (question == null)
+                            var questionResult = _questionConverter.HandleQuestionAnswer(question, answer.Answer, request.IsSubmit);
+                            if (!questionResult.IsOK)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(answer.QuestionId), answer.QuestionId);
+                                methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                                 return methodResult;
                             }
-                            else if (question.Config == null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), question);
-                                return methodResult;
-                            }
+
+                            var (questionItem, answerConfig, correctCount) = questionResult.Result;
                             var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.QuestionId == answer.QuestionId && x.ExtraPracticeResultId == request.ExtraPracticeResultId, cancellationToken);
                             if (extraPracticeAnswer == null)
                             {
-                                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                                if (answerConfig == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
-                                    return methodResult;
-                                }
                                 extraPracticeResult.ExtraPracticeAnswers.Add(new ExtraPracticeAnswer
                                 {
                                     Answer = answerConfig,

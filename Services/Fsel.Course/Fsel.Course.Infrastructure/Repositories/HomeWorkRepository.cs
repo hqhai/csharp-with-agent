@@ -53,5 +53,40 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
+
+        public async Task<IList<HomeWork>> GetListAsync(LessonResult lessonResult)
+        {
+            try
+            {
+                return await Queryable.Include(x => x!.LessonHomeWorks.Where(x => x.LessonId == lessonResult.LessonId))
+                                        .Include(x => x!.HomeWorkQuestions)
+                                        .Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == lessonResult.Id))
+                                        .Where(x => x.LessonHomeWorks.Any(x => x.LessonId == lessonResult.LessonId))
+                                        .ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<HomeWork?> GetAsync(Guid? id, HomeWorkResult homeWorkResult)
+        {
+            try
+            {
+                return await Queryable
+                        .Include(x => x.HomeWorkQuestions)
+                        .ThenInclude(x => x.Question)
+                        .Include(x => x.HomeWorkQuestions)
+                        .ThenInclude(x => x.HomeWorkAnswers.Where(n => n.HomeWorkResultId == homeWorkResult.Id))
+                        .Where(x => x.Id == id)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

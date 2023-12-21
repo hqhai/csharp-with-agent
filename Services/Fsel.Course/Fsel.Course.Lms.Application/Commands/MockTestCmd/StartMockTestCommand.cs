@@ -117,11 +117,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                                 .ThenInclude(x => x.SectionGroup)
                                                 .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
                                                 .ThenInclude(x => x.SectionTimeCodes.Where(x => !x.IsDeleted))
-                                                .ThenInclude(x => x.MockTestAnswers)
+                                                .ThenInclude(x => x.MockTestAnswers.Where(x => !x.IsDeleted && x.MockTestResultId == mockTestResult.Id))
                                                 .Include(x => x.MockTestSections.Where(x => !x.IsDeleted))
                                                 .ThenInclude(x => x.SectionGroup)
                                                 .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
-                                                .ThenInclude(x => x.MockTestAnswers)
+                                                .ThenInclude(x => x.MockTestAnswers.Where(x => !x.IsDeleted && x.MockTestResultId == mockTestResult.Id))
                                                 .Include(x => x.MockTestResults.Where(x => !x.IsDeleted))
                                                 .Include(x => x.MockTestSections.Where(x => !x.IsDeleted))
                                                 .ThenInclude(x => x.SectionGroup)
@@ -166,7 +166,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     Scores = x.SkillScores?.Average(x => x.Scores) ?? 0,
                     Percent = x.Percent,
                     Status = x.Status,
-                    CreatedDate = x.CreatedDate,
                     MockTestId = x.MockTestId,
                     StudentId = x.StudentId,
                     CourseId = course.Id,

@@ -3,6 +3,8 @@
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
     using Fsel.Cms.PlanetDefender.Application.Commands.GameplayTimeConfigCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.GameplayTimeConfigs;
     using Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.GameplayTimeConfigs;
@@ -11,7 +13,8 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/game-play-time-config")]
     [ApiController]
     public class GameplayTimeConfigController : ControllerBase

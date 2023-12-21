@@ -10,6 +10,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<MockTestAnswer> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.HasOne(a => a.SectionQuestion)
                 .WithMany(b => b.MockTestAnswers)
                 .HasForeignKey(b => b.SectionQuestionId)
@@ -29,6 +30,11 @@ namespace Fsel.Course.Infrastructure.Configs
                 .WithMany(b => b.MockTestAnswers)
                 .HasForeignKey(b => b.MockTestResultId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.SectionGroupResult)
+                  .WithMany(b => b.MockTestAnswers)
+                  .HasForeignKey(b => b.SectionGroupResultId)
+                  .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

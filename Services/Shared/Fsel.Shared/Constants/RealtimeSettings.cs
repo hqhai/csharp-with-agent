@@ -30,5 +30,14 @@ namespace Fsel.Shared.Constants
                 public const string LeaderBoardMessage = $"LeaderBoardMessage";
             }
         }
+
+        public static class ClassForumAIFeedBackHub
+        {
+            public const string Pattern = $"/class-forum-result";
+            public static class Methods
+            {
+                public const string ClassForumResultFeedBack = $"ClassForumResultFeedBack";
+            }
+        }
     }
 }

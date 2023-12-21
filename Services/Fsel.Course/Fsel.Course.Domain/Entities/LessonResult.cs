@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
 
-    public class LessonResult : BaseResultScore
+    public class LessonResult : BaseScoreResult
     {
         /// <summary>
         /// Lưu ý tóm tắt
@@ -23,6 +23,9 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid UnitId { get; set; }
+
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public override double Percent { get; set; }
 
         public Lesson? Lesson { get; set; }
 

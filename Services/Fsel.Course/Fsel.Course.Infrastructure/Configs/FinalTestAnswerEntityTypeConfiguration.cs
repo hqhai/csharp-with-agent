@@ -22,6 +22,11 @@ namespace Fsel.Course.Infrastructure.Configs
                 .WithMany(b => b.FinalTestAnswers)
                 .HasForeignKey(b => b.SectionQuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.SectionGroupResult)
+                  .WithMany(b => b.FinalTestAnswers)
+                  .HasForeignKey(b => b.SectionGroupResultId)
+                  .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

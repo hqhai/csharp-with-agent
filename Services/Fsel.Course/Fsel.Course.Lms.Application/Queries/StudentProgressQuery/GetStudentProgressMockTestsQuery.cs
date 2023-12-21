@@ -68,21 +68,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var courseUnitMockTests = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
             if (courseUnitMockTests == null || !courseUnitMockTests.Any())
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
             if (course.CourseType == EnumCourseType.Academic)
             {
-               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -132,8 +129,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         CountQuestion = skillScore?.CountQuestion ?? default,
                         TotalQuestion = skillScore?.TotalQuestion ?? default,
                         Scores = skillScore?.Scores ?? default,
-                        Percent = skillScore?.Percent ?? default,
                     };
+
                     if (x.Skill == EnumCourseSkill.Speaking || x.Skill == EnumCourseSkill.Writing)
                     {
                         if (x.MockTestScores.Any() && x.MockTestScores.All(x => x != null))

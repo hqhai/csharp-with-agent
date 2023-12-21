@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class HomeWorkResultModel : BaseResultScoreModel
+    public class HomeWorkResultModel : BaseScoreResultModel
     {
         public Guid HomeWorkId { get; set; }
         public Guid LessonResultId { get; set; }
