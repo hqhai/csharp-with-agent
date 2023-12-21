@@ -90,6 +90,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string QuestBoard = $"{KeyQueue}_QuestBoard";
                 public const string SetCompleteApprovalPost = $"{KeyQueue}_SetCompleteApprovalPost";
                 public const string CompleteApprovalPostTimeOut = $"{KeyQueue}_CompleteApprovalPostTimeOut";
                 public const string SetCompleteApprovalPostTimeOut = $"{KeyQueue}_SetCompleteApprovalPostTimeOut";
@@ -146,16 +147,6 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string DeleteGuestStudent = $"{KeyQueue}_DeleteGuestStudent";
-            }
-        }
-
-        public static class SystemQueue
-        {
-            public const string KeyQueue = nameof(SystemQueue);
-
-            public static class NameQueue
-            {
-                public const string QuestBoard = $"{KeyQueue}_QuestBoard";
             }
         }
     }
