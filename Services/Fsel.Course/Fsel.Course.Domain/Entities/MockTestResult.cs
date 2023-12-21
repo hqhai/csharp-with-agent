@@ -29,6 +29,9 @@ namespace Fsel.Course.Domain.Entities
         public int? TokenSuperFire { get; set; }
         public int? TokenQuestionReward { get; set; }
         public DateTime? GradingStartDate { get; set; }
+
+        public bool IsViewed { get; set; }
+
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
         public ICollection<MockTestScore> MockTestScores { get; set; } = new List<MockTestScore>();
         public ICollection<SectionGroupResult> SectionGroupResults { get; set; } = new List<SectionGroupResult>();

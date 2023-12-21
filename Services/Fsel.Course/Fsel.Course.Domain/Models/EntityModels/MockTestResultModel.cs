@@ -23,5 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? TokenHighestStreak { get; set; }
         public int? TokenSuperFire { get; set; }
         public int? TokenQuestionReward { get; set; }
+
+        public bool IsViewed { get; set; }
     }
 }
