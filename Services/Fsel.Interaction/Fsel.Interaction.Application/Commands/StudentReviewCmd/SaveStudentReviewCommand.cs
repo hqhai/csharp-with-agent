@@ -6,6 +6,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.SystemService;
     using Fsel.Interaction.Application.Services.SystemService.Models;
@@ -16,8 +17,10 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.StudentReviews;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -37,8 +40,16 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
         private readonly ICourseService _courseService;
         private readonly IMapper _mapper;
         private readonly ISystemService _systemService;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public SaveStudentReviewCommandHandler(IStudentReviewRepository studentReviewRepository, AuthContext authContext, IUserService userService, ITrainingService trainingService, ICourseService courseService, IMapper mapper, ISystemService systemService)
+        public SaveStudentReviewCommandHandler(IStudentReviewRepository studentReviewRepository, AuthContext authContext
+            , IUserService userService
+            , ITrainingService trainingService
+            , ICourseService courseService
+            , IMapper mapper
+            , QuestBoardPublisher questBoardPublisher
+            , ISystemService systemService)
+
         {
             _studentReviewRepository = studentReviewRepository;
             _authContext = authContext;
@@ -47,6 +58,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
             _courseService = courseService;
             _mapper = mapper;
             _systemService = systemService;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<StudentReviewModel>> Handle(SaveStudentReviewCommand request, CancellationToken cancellationToken)
@@ -128,6 +140,8 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                         return methodResult;
                     }
                     _studentReviewRepository.Add(studentReview);
+
+                    await DoQuestBoard(studentId, cancellationToken);
                     methodResult.StatusCode = StatusCodes.Status201Created;
                 }
                 else
@@ -159,6 +173,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                             methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentReview));
                             return methodResult;
                         }
+
                     }
                     _mapper.Map(request, studentReview);
                     if (!studentReview!.IsValid())
@@ -174,6 +189,23 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                 return methodResult;
             });
             return methodResult;
+        }
+        public async Task DoQuestBoard(Guid? studentId, CancellationToken cancellationToken)
+        {
+            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+            var courseId = classResult.Content?.Result?.CourseId;
+            if (studentId != null && courseId != null)
+            {
+                IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.RateAndComment };
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId,
+                    Categories = categories,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
+                    CourseId = (Guid)courseId
+                }, cancellationToken);
+            }
+
         }
     }
 }

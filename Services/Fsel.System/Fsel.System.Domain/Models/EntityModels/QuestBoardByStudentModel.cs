@@ -17,5 +17,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public EnumRepeatType? RepeatType { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+
+        public float AchievedPoints { get; set; }
     }
 }
