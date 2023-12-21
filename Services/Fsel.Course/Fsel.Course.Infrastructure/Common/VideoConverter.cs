@@ -275,11 +275,16 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.NotEnoughQuestions));
                 return methodResult;
             }
+            var query = _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id);
             var skillScores = listSkillScore.Where(x => x.Type == EnumTimeCodeType.Standalone && x.SkillScores?.Count > 0).SelectMany(x => x.SkillScores!).ToList();
             videoResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
             videoResult.VideoSkillScores = listSkillScore;
+            videoResult.TokenDone = await query.Where(x => x.TokenDone.HasValue).SumAsync(x => x.TokenDone!.Value, cancellationToken);
+            videoResult.TokenHighestStreak = await query.Where(x => x.TokenHighestStreak.HasValue).SumAsync(x => x.TokenHighestStreak!.Value, cancellationToken);
+            videoResult.TokenQuestionReward = await query.Where(x => x.TokenQuestionReward.HasValue).SumAsync(x => x.TokenQuestionReward!.Value, cancellationToken);
+            videoResult.TokenSuperFire = await query.Where(x => x.TokenSuperFire.HasValue).SumAsync(x => x.TokenSuperFire!.Value, cancellationToken);
             return methodResult;
         }
 
@@ -309,7 +314,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
                                 join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
                                 join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                                where baseQ.Id == videoResult.Id && q.QuestionType != EnumQuestionType.ExercisePreparation
+                                where baseQ.Id == videoResult.Id
                                 group new { vt, q } by new { vt.TimeCodeType, e.CourseSkill } into g
                                 select new
                                 {
@@ -361,7 +366,7 @@ namespace Fsel.Course.Infrastructure.Common
                               {
                                   CorrectCount = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Sum(x => x.CorrectCount),
                                   CorrectTotal = g.Sum(x => x.q.CorrectTotal),
-                                  NumberOfCorrect = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Count(x => x.IsCorrect == true),
+                                  CorrectQuestion = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Count(x => x.IsCorrect == true),
                                   TotalQuestion = g.Select(x => x.q).Count(),
                                   AnswerTime = g.Select(x => x.vtcr).Where(x => x.VideoResultId == videoResult.Id).Sum(x => x.WorkingTime + x.RetryWorkingTime),
                               };
@@ -374,7 +379,7 @@ namespace Fsel.Course.Infrastructure.Common
             return new LessonReportModel
             {
                 AnswerTime = lessonReport.AnswerTime,
-                NumberOfCorrect = lessonReport.NumberOfCorrect,
+                CorrectQuestion = lessonReport.CorrectQuestion,
                 TotalQuestion = lessonReport.TotalQuestion,
                 Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal),
                 HighestStreak = videoResult.HighestStreak

@@ -26,7 +26,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly AuthContext _authContext;
         private const int ROUND_DIGIT = 2; // Làm tròn đến số thập phân thú 2
 
-
         public GetCurrentPositionQueryHandler(IUserService userService
             , IUnitResultRepository unitResultRepository
             , ICourseResultRepository courseResultRepository
@@ -54,12 +53,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             }
             var student = studentResults?.Content?.Result?.Where(x => x.Human!.UserId == _authContext.CurrentUserId);
 
-
-
             LeaderBoardSearchModel leaderBoardSearch = new LeaderBoardSearchModel();
             IList<LeaderBoardModel> leaderBoards = new List<LeaderBoardModel>();
-
-
 
             //Case này cho tài khoản mới tạo, chưa tham gia bất cứ lớp học nào, chỉ trả về avatar và fullname
             if (student != null && !student.Any())
@@ -78,9 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 methodResult.Result = leaderBoardSearch;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
-
             }
-
 
             var leaderBoardsToAdd = student!.Select(student =>
             {
@@ -113,7 +106,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                                     )
                                     .OrderBy(x => x.CourseLevel)
                                     .ToList();
-
 
             leaderBoardSearch.LeaderBoards = finalLeaderBoards;
 

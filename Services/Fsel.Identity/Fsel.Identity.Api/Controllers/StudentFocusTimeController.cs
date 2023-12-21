@@ -1,19 +1,20 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.StudentFocusTimeCmd;
 using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
-using Fsel.Shared.Constants;
 
 namespace Fsel.Identity.Api.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student-focus-time")]
     [ApiController]
     public class StudentFocusTimeController : ControllerBase
@@ -37,9 +38,8 @@ namespace Fsel.Identity.Api.Controllers
             return commandResult.GetActionResult();
         }
 
-
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<List<StudentFocusTimeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<StudentFocusTimeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentFocusTime()
         {
@@ -47,5 +47,13 @@ namespace Fsel.Identity.Api.Controllers
             return commandResult.GetActionResult();
         }
 
+        [HttpGet("check-super-fire")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckSuperFireMode()
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new CheckSuperFireModeQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

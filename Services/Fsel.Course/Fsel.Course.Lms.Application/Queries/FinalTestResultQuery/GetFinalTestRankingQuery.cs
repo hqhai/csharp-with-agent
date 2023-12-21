@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
@@ -27,16 +26,16 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     public class GetFinalTestRankingQueryHandler : IRequestHandler<GetFinalTestRankingQuery, MethodResult<IList<TestResultRankingModel>>>
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
-        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IMapper _mapper;
+        private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
 
-        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, DateTimeConverter dateTimeConverter, IMapper mapper, IUserService userService, ITrainingService trainingService)
+        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IFinalTestAnswerRepository finalTestAnswerRepository, IUserService userService, ITrainingService trainingService)
         {
             _finalTestResultRepository = finalTestResultRepository;
-            _dateTimeConverter = dateTimeConverter;
             _mapper = mapper;
+            _finalTestAnswerRepository = finalTestAnswerRepository;
             _userService = userService;
             _trainingService = trainingService;
         }
@@ -58,8 +57,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var finalTestResults = await _finalTestResultRepository.Queryable
-                            .Include(x => x.SectionGroupResults)
-                            .ThenInclude(x => x!.SectionGroup)
                             .Where(x => x.FinalTestId == finalTestResult.FinalTestId && classStudentIds!.Contains(x.StudentId))
                             .ToListAsync(cancellationToken);
 
@@ -72,14 +69,16 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 {
                     var finalTestResultStudent = finalTestResults.FirstOrDefault(x => x.StudentId == item.Id);
                     var finalTestResultDto = _mapper.Map<TestResultRankingModel>(finalTestResultStudent);
-                    if (finalTestResultDto != null)
+                    if (finalTestResultStudent != null)
                     {
-                        finalTestResultDto.IsCurrentStudent = item.Id == finalTestResult.StudentId;
+                        var correctQuestion = await _finalTestAnswerRepository.Queryable.Where(x => x.FinalTestResultId == finalTestResultStudent.Id && x.IsCorrect == true).CountAsync(cancellationToken);
+                        finalTestResultDto.CorrectQuestion = correctQuestion;
                     }
                     else
                     {
                         finalTestResultDto = new TestResultRankingModel();
                     }
+                    finalTestResultDto.IsCurrentStudent = item.Id == finalTestResult.StudentId;
                     finalTestResultDto.FullName = item.Human?.FullName;
                     finalTestResultDto.AvatarPath = item.Human?.AvatarPath;
                     testResultRankings.Add(finalTestResultDto);

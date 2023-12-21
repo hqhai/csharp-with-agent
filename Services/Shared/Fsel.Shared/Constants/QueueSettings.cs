@@ -34,6 +34,7 @@ namespace Fsel.Shared.Constants
                 public const string DiscussionBoard = $"{KeyQueue}_DiscussionBoard";
                 public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
+                public const string AIFeedBack = $"{KeyQueue}_AIFeedBack";
             }
         }
 
@@ -78,6 +79,20 @@ namespace Fsel.Shared.Constants
                 public const string CompleteTestWhenTimeOut = $"{KeyQueue}_CompleteTestWhenTimeOut";
                 public const string SetTimeToCompleteTest = $"{KeyQueue}_SetTimeToCompleteTest";
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
+                public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
+            }
+        }
+
+        public static class SystemQueue
+        {
+            public const string KeyQueue = nameof(SystemQueue);
+
+            public static class NameQueue
+            {
+                public const string SetCompleteApprovalPost = $"{KeyQueue}_SetCompleteApprovalPost";
+                public const string CompleteApprovalPostTimeOut = $"{KeyQueue}_CompleteApprovalPostTimeOut";
+                public const string SetCompleteApprovalPostTimeOut = $"{KeyQueue}_SetCompleteApprovalPostTimeOut";
+
             }
         }
 

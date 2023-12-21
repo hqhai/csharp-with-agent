@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Services.UserServices
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Services.UserServices.Models;
+    using Fsel.System.Application.Services.UserServices.Models.QueryModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -57,5 +58,9 @@ namespace Fsel.System.Application.Services.UserServices
 
         [Post("/platform/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<PlatformModel>>>> GetPlatformsQueryAsync([Body] BaseQueryModel query);
+
+
+        [Get("/user/get-users-by-role")]
+        Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRoleAsync([Query] GetUsersByRoleQueryModel query);
     }
 }
