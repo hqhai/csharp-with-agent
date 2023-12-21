@@ -18,31 +18,31 @@ namespace Fsel.Course.Infrastructure.Common
         {
             int totalCorrect = default;
             bool isAnswerMissing = default;
-            bool isAnswered = true;
+            bool isAnswered = default;
             switch (type)
             {
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
-                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeCheckListAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = GetTotalCorrectTypeCheckListAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.Listing:
-                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeListingAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = GetTotalCorrectTypeListingAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.DragAndDropPicture:
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
-                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeMaschingAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = GetTotalCorrectTypeMaschingAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
-                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeShortAnswerWordBase(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = GetTotalCorrectTypeShortAnswerWordBase(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
-                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeShortAnswerWordCount(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = GetTotalCorrectTypeShortAnswerWordCount(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
@@ -56,11 +56,11 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
-                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeDragDropOrderAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = GetTotalCorrectTypeDragDropOrderAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
-                    (totalCorrect, isAnswerMissing) = GetTotalCorrectTypeMultipleOptionAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = GetTotalCorrectTypeMultipleOptionAnswer(ref configAnswer, configOldAnswer, configQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
@@ -232,7 +232,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static (int, bool) GetTotalCorrectTypeMultipleOptionAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private static (int, bool, bool) GetTotalCorrectTypeMultipleOptionAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
             var dataOldAnswer = configOldAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
@@ -278,10 +278,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing);
+            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, "AnswerId"));
         }
 
-        private static (int, bool) GetTotalCorrectTypeMaschingAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private static (int, bool, bool) GetTotalCorrectTypeMaschingAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<MatchingTypeAnswer>();
             var dataOldAnswer = configOldAnswer.Deserialize<MatchingTypeAnswer>();
@@ -319,10 +319,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing);
+            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, "ToId"));
         }
 
-        private static (int, bool) GetTotalCorrectTypeCheckListAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private static (int, bool, bool) GetTotalCorrectTypeCheckListAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<MultipleChoiceAnswer>();
             var dataOldAnswer = configOldAnswer.Deserialize<MultipleChoiceAnswer>();
@@ -360,10 +360,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number < 0 ? default : number, isAnswerMissing);
+            return (number < 0 ? default : number, isAnswerMissing, IsNullOrEmptyDataValueBool(dataAnswer?.Answers, "IsChecked"));
         }
 
-        private static (int, bool) GetTotalCorrectTypeListingAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private static (int, bool, bool) GetTotalCorrectTypeListingAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
             var dataOldAnswer = configOldAnswer.Deserialize<ListingAnswer>();
@@ -372,7 +372,7 @@ namespace Fsel.Course.Infrastructure.Common
             bool isAnswerMissing = default;
             if (dataQuestion != null && dataAnswer != null)
             {
-                if (isMandatoryAnswer && IsNullOrEmptyData(dataAnswer.Answers, "Answers") && isSubmit)
+                if (isMandatoryAnswer && IsNullOrEmptyData(dataAnswer.Answers) && isSubmit)
                 {
                     isAnswerMissing = true;
                 }
@@ -397,10 +397,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing);
+            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers));
         }
 
-        private static (int, bool) GetTotalCorrectTypeShortAnswerWordCount(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private static (int, bool, bool) GetTotalCorrectTypeShortAnswerWordCount(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
             var dataOldAnswer = configOldAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
@@ -435,7 +435,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing);
+            return (number, isAnswerMissing, !string.IsNullOrEmpty(dataAnswer?.Answers));
         }
 
         private static bool IsShortAnswer(string question, string answer)
@@ -445,7 +445,7 @@ namespace Fsel.Course.Infrastructure.Common
             return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
 
-        private static (int, bool) GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private static (int, bool, bool) GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
             var dataOldAnswer = configOldAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
@@ -479,7 +479,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing);
+            return (number, isAnswerMissing, !string.IsNullOrEmpty(dataAnswer?.Answers?.ToString()));
         }
 
         private static (int, bool, bool) GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
@@ -534,33 +534,45 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing, CheckAnswerGapFill(dataAnswer));
+            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, "Answer"));
         }
 
-        private static bool IsNullOrEmptyData(object? data, string? nameProperty)
+        private static bool IsAnswerHaveData(object? data, string? nameProperty = default)
         {
-            if (data is IList list && !string.IsNullOrEmpty(nameProperty))
+            if (data is IList list)
             {
                 var objects = list.Cast<object>().ToList();
                 if (objects != null && objects.Any())
                 {
-                    return objects.Any(x =>
-                    {
-                        var datas = x.GetPropValue(nameProperty) as IList;
-                        if (datas != null)
-                        {
-                            var listObject = datas?.Cast<object>().ToList();
-                            return ((listObject == null || !listObject.Any()) || listObject.Any(x => string.IsNullOrEmpty(x.ToString())));
-                        }
-                        return string.IsNullOrEmpty(x.ToString());
-                    });
+                    return objects.Any(x => !string.IsNullOrEmpty(nameProperty) ? IsAnswerHaveData(x.GetPropValue(nameProperty)) : IsAnswerHaveData(x));
                 }
+                return false;
             }
-            else
+            return !string.IsNullOrEmpty(data?.ToString());
+        }
+
+        private static bool IsNullOrEmptyData(object? data, string? nameProperty = default)
+        {
+            if (data is IList list)
             {
-                return string.IsNullOrEmpty(data?.ToString());
+                var objects = list.Cast<object>().ToList();
+                if (objects != null && objects.Any())
+                {
+                    return objects.Any(x => string.IsNullOrEmpty(nameProperty) ? IsNullOrEmptyData(x) : IsNullOrEmptyData(x.GetPropValue(nameProperty)));
+                }
+                return false;
             }
-            return false;
+            return string.IsNullOrEmpty(data?.ToString());
+        }
+
+        private static bool IsNullOrEmptyDataHasValue(object? data, string? nameProperty)
+        {
+            if (data is IList list && !string.IsNullOrEmpty(nameProperty))
+            {
+                var objects = list.Cast<object>().ToList();
+                return objects.Any(x => IsNullOrEmptyDataHasValue(x.GetPropValue(nameProperty), nameProperty));
+            }
+            return string.IsNullOrEmpty(data?.ToString());
         }
 
         public static bool CheckAnswerCount(object? answer, object? question)
@@ -570,50 +582,6 @@ namespace Fsel.Course.Infrastructure.Common
                 return listAnswer.Count == listQuestion.Count;
             }
             return true;
-        }
-
-        public static bool CheckAnswerGapFill(GapFillAnswer? answer)
-        {
-            if (answer != null && answer.Answers != null && answer.Answers.Any())
-            {
-                return answer.Answers.All(x =>
-                {
-                    if (x.Answer != null && x.Answer.Any())
-                    {
-                        return x.Answer.All(x => !string.IsNullOrEmpty(x));
-                    }
-                    return false;
-                });
-            }
-            return false;
-        }
-
-        private static bool IsNullOrEmptyDataHasValue(object? data, string? nameProperty)
-        {
-            if (data is IList list && !string.IsNullOrEmpty(nameProperty))
-            {
-                var objects = list.Cast<object>().ToList();
-                if (objects != null && objects.Any())
-                {
-                    return objects.Any(x =>
-                    {
-                        if (x.GetPropValue(nameProperty) is long number)
-                        {
-                            return number == 0;
-                        }
-                        var propertyValue = x.GetPropValue(nameProperty)?.ToString();
-                        return string.IsNullOrEmpty(propertyValue);
-                    });
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                return string.IsNullOrEmpty(data?.ToString());
-            }
         }
 
         private static bool IsNullOrEmptyDataValueBool(object? data, string? nameProperty)
@@ -626,11 +594,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return objects.Any(x => x.GetPropValue<bool>(nameProperty));
                 }
             }
-            else
-            {
-                return string.IsNullOrEmpty(data?.ToString());
-            }
-            return false;
+            return string.IsNullOrEmpty(data?.ToString());
         }
 
         private static bool? CheckAnswer(IList<string> words, string word, int index)
@@ -702,10 +666,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing, CheckAnswerGapFill(dataAnswer));
+            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, "Answer"));
         }
 
-        private static (int, bool) GetTotalCorrectTypeDragDropOrderAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private static (int, bool, bool) GetTotalCorrectTypeDragDropOrderAnswer(ref object? configAnswer, object? configOldAnswer, object? configQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
             var dataOldAnswer = configOldAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
@@ -748,7 +712,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing);
+            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, "Answer"));
         }
     }
 }
