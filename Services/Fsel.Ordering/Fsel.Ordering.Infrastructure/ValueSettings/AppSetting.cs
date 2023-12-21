@@ -11,11 +11,18 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public ConstantUrl? ConstantUrl { get; set; }
         public PaymentConfig? PaymentConfig { get; set; }
         public new Services? Services { get; set; }
+        public UrBoxConfig? UrBoxConfig { get; set; }
     }
 
     public class ConstantUrl
     {
         public string? PaymentSuccessUrl { get; set; }
+    }
+
+    public class UrBoxConfig
+    {
+        public string? AppSecret { get; set; }
+        public int AppId { get; set; }
     }
 
     public class PaymentConfig
@@ -35,6 +42,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     {
         public string? LmsCourseApiUrl { get; set; }
         public string? SystemApiUrl { get; set; }
+        public string? UrBoxApiUrl { get; set; }
     }
 
     public class Otp
