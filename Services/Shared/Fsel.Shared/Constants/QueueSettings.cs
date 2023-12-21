@@ -72,6 +72,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string QuestBoardMainFinish = $"{KeyQueue}_QuestBoardMainFinish";
+                public const string QuestBoard = $"{KeyQueue}_QuestBoard";
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
                 public const string OrderCreateNotification = $"{KeyQueue}_OrderCreateNotification";
                 public const string UpdateTeacherGradingInClassForumAndMockTest = $"{KeyQueue}_UpdateTeacherGradingInClassForumAndMockTest";
@@ -79,6 +80,21 @@ namespace Fsel.Shared.Constants
                 public const string CompleteTestWhenTimeOut = $"{KeyQueue}_CompleteTestWhenTimeOut";
                 public const string SetTimeToCompleteTest = $"{KeyQueue}_SetTimeToCompleteTest";
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
+                public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
+            }
+        }
+
+        public static class SystemQueue
+        {
+            public const string KeyQueue = nameof(SystemQueue);
+
+            public static class NameQueue
+            {
+                public const string QuestBoard = $"{KeyQueue}_QuestBoard";
+                public const string SetCompleteApprovalPost = $"{KeyQueue}_SetCompleteApprovalPost";
+                public const string CompleteApprovalPostTimeOut = $"{KeyQueue}_CompleteApprovalPostTimeOut";
+                public const string SetCompleteApprovalPostTimeOut = $"{KeyQueue}_SetCompleteApprovalPostTimeOut";
+
             }
         }
 

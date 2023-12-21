@@ -8,5 +8,6 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.Actions
     {
         public Guid ObjectId { get; set; }
         public EnumInteractionActionType Type { get; set; }
+        public EnumInteractionType BusinessType { get; set; }
     }
 }

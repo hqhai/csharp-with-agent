@@ -7,12 +7,15 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.SystemService;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts.StudentPost;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -26,13 +29,16 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
         private readonly AuthContext _authContext;
         private readonly IPostRepository _iPostRepository;
         private readonly ISystemService _systemService;
+        private readonly CompleteApprovalPostPublisher _completeApprovalPostPublisher;
 
-        public CreatePostCommandHandler(IMapper mapper, AuthContext authContext, IPostRepository iPostRepository, ISystemService systemService)
+
+        public CreatePostCommandHandler(IMapper mapper, AuthContext authContext, IPostRepository iPostRepository, ISystemService systemService, CompleteApprovalPostPublisher completeApprovalPostPublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
             _iPostRepository = iPostRepository;
             _systemService = systemService;
+            _completeApprovalPostPublisher = completeApprovalPostPublisher;
         }
 
         public async Task<MethodResult<PostModel>> Handle(CreatePostCommand request, CancellationToken cancellationToken)
@@ -67,6 +73,15 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
 
                 studentPosts = _iPostRepository.Add(studentPosts);
                 await _iPostRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+
+                await _completeApprovalPostPublisher.Publish(new SetTimeCompleteApprovalModel()
+                {
+                    StartDate = studentPosts.CreatedDate,
+                    ObjectId = studentPosts.Id,
+                    ApprovalType = EnumApprovalTime.DiscussionBoard
+                },
+                cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<PostModel>(studentPosts);
