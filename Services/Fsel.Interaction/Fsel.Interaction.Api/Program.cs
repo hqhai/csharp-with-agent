@@ -39,6 +39,7 @@ builder.Services.AddScoped<DiscussionBoardLikePublisher>();
 builder.Services.AddScoped<InterationActionPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<DeleteClassForumByFlagPublisher>();
+builder.Services.AddScoped<CompleteApprovalPostPublisher>();
 builder.Services.AddScoped<QuestBoardPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
