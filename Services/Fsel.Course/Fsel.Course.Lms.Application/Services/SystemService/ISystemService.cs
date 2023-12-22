@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -30,7 +31,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         Task<IApiResponse<MethodResult<FeatureAccessTimeModel>>> GetFeatureAccessTimeAsync([FromQuery] FeatureAccessTimeQueryModel query);
 
         [Get("/forbidden-word/get-list-forbidden-word")]
-        Task<IApiResponse<MethodResult<IList<string>>>> CheckContainForbiddenWord([FromQuery] string word);
+        Task<IApiResponse<MethodResult<IList<string>>>> CheckContainForbiddenWord([FromQuery] string Word);
+
 
         [Get("/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);

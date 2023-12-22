@@ -15,8 +15,11 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -33,10 +36,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IMapper _mapper;
         private readonly QuestionConverter _questionConverter;
-        private readonly FinishOneFinalTestPublisher _finishOneFinalTestPublisher;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICourseRepository _courseRepository;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
         public CreateFinalTestAnswerCommandHandler(
             IQuestionRepository questionRepository
@@ -44,22 +47,22 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             , IFinalTestResultRepository finalTestResultRepository
             , IFinalTestRepository finalTestRepository
             , IMapper mapper
-            , QuestionConverter questionConverter
-            , FinishOneFinalTestPublisher finishOneFinalTestPublisher
             , AuthContext authContext
             , IUserService userService
-            , ICourseRepository courseRepository)
+            , ICourseRepository courseRepository,
+              QuestBoardPublisher questBoardPublisher,
+              QuestionConverter questionConverter)
         {
             _questionRepository = questionRepository;
             _finalTestAnswerRepository = finalTestAnswerRepository;
             _finalTestResultRepository = finalTestResultRepository;
             _finalTestRepository = finalTestRepository;
             _mapper = mapper;
-            _questionConverter = questionConverter;
-            _finishOneFinalTestPublisher = finishOneFinalTestPublisher;
             _authContext = authContext;
             _userService = userService;
             _courseRepository = courseRepository;
+            _questBoardPublisher = questBoardPublisher;
+            _questionConverter = questionConverter;
         }
 
         public async Task<MethodResult<FinalTestResultModel>> Handle(CreateFinalTestAnswerCommand request, CancellationToken cancellationToken)
@@ -183,7 +186,13 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 finalTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
                 finalTestResult.Status = EnumResultStatus.Done;
                 finalTestResult.SkillScores = skillScores;
-                await _finishOneFinalTestPublisher.Publish(finalTestResult, cancellationToken);
+                finalTestResult.Percent = NumberHelper.GetPercent(finalTestResult.CorrectCount, finalTestResult.CorrectTotal);
+                var courseId = finalTestResult.CourseId;
+
+
+                // làm nhiệm vụ
+                await DoQuestBoard(courseId, cancellationToken);
+
                 finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -193,6 +202,28 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             });
 
             return methodResult;
+        }
+
+
+        private async Task DoQuestBoard(Guid courseId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneFinalTest };
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentId = student?.Content?.Result?.Id;
+
+            //Chỉ bài finaltest đầu tiên hoàn thành của khóa mới được tính là hoàn thành nhiệm vụ
+            bool checkFirstFinalTestDone = _finalTestResultRepository.Queryable.Any(f => f.CourseId == courseId && f.Status == EnumResultStatus.Done);
+
+            if (!checkFirstFinalTestDone)
+            {
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId!,
+                    Categories = categories,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
+                    CourseId = courseId
+                }, cancellationToken);
+            }
         }
     }
 }

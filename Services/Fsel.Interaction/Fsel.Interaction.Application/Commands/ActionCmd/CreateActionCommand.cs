@@ -20,6 +20,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using Fsel.Interaction.Application.Services.TrainingServices;
     using Fsel.Interaction.Application.Services.CourseServices.Models;
     using Fsel.Interaction.Application.Services.CourseServices;
+    using Fsel.Shared.Constants;
 
     public class CreateActionCommand : CreateActionCommandModel, IRequest<MethodResult<bool>>
     {
@@ -37,8 +38,9 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         private readonly ITrainingService _trainingService;
         private readonly ICourseService _courseService;
         private readonly ICommentRepository _commentRepository;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreateActionCommandHandler(IMapper mapper, IInteractionActionRepository interactionActionRepository, AuthContext authContext, DiscussionBoardLikePublisher discussionBoardLikePublisher, InterationActionPublisher interationActionPublisher, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, ITrainingService trainingService, ICourseService courseService, ICommentRepository commentRepository)
+        public CreateActionCommandHandler(IMapper mapper, IInteractionActionRepository interactionActionRepository, AuthContext authContext, DiscussionBoardLikePublisher discussionBoardLikePublisher, InterationActionPublisher interationActionPublisher, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, ITrainingService trainingService, ICourseService courseService, ICommentRepository commentRepository, QuestBoardPublisher questBoardPublisher)
         {
             _mapper = mapper;
             _interactionActionRepository = interactionActionRepository;
@@ -50,6 +52,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             _trainingService = trainingService;
             _courseService = courseService;
             _commentRepository = commentRepository;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateActionCommand request, CancellationToken cancellationToken)
@@ -148,6 +151,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
                 await _interactionActionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+                await DoDailyQuest(action.Id, cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
@@ -155,6 +159,36 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             });
 
             return methodResult;
+        }
+
+        public async Task DoDailyQuest(Guid interationId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnNewLessonOfTwoClassMate };
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = student?.Content?.Result;
+            var isInteractDiscussionBoard = _interactionActionRepository.Queryable.Any(c => c.CreatedUserId == _authContext.CurrentUserId &&
+                                                                          c.Type == EnumInteractionActionType.Like &&
+                                                                          c.BusinessType == EnumInteractionType.DiscussionBoard &&
+                                                                          c.CreatedDate.Date == DateTime.UtcNow.Date &&
+                                                                          c.CreatedDate.Month == DateTime.UtcNow.Month &&
+                                                                          c.CreatedDate.Year == DateTime.UtcNow.Year);
+
+            var studentClassInfo = await _trainingService.GetClassByStudentId(studentResult!.Id);
+            var courseId = studentClassInfo?.Content?.Result?.CourseId;
+
+            if (isInteractDiscussionBoard && studentResult != null && courseId != null)
+            {
+                QuestBoardQueueModel questBoardModel = new QuestBoardQueueModel()
+                {
+                    StudentId = studentResult.Id,
+                    Categories = categories,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
+                    ObjectId = interationId,
+                    CourseId = (Guid)courseId!,
+                };
+
+                await _questBoardPublisher.Publish(questBoardModel, cancellationToken);
+            }
         }
 
         /// <summary>

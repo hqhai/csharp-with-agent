@@ -11,7 +11,6 @@ namespace Fsel.System.Api.Controllers.Student
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
@@ -42,6 +41,19 @@ namespace Fsel.System.Api.Controllers.Student
         }
 
         /// <summary>
+        /// Search Quest Board by Student
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddQuestBoardStudent([FromBody] QuestBoardStudentCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+
+        /// <summary>
         /// QuestBoard Reward Student
         /// </summary>
         [HttpPost("reward-student/{id}")]
@@ -53,16 +65,5 @@ namespace Fsel.System.Api.Controllers.Student
             return queryResult.GetActionResult();
         }
 
-        /// <summary>
-        /// Taking Mission Student
-        /// </summary>
-        [HttpPost("taking-mission")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<bool>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TakingMissionStudent([FromBody] TakingMissionCommand command)
-        {
-            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
     }
 }

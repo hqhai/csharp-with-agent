@@ -2,6 +2,7 @@
 
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
 

@@ -14,6 +14,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool? ClassForum { get; set; }
         public bool? HomeWork { get; set; }
         public bool? PlacementTest { get; set; }
+        public string? Other { get; set; }
         public IList<EnumQuestionType>? QuestionTypes { get; set; }
     }
 }
