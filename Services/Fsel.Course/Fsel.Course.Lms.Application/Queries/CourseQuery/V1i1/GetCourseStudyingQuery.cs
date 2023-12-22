@@ -17,7 +17,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     {
     }
 
-    public class GetCourseStudyingQueryHandler : IRequestHandler<GetCourseByCodeQuery, MethodResult<CourseModel>>
+    public class GetCourseStudyingQueryHandler : IRequestHandler<GetCourseStudyingQuery, MethodResult<CourseModel>>
     {
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly AuthContext _authContext;
@@ -30,13 +30,14 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<CourseModel>> Handle(GetCourseByCodeQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CourseModel>> Handle(GetCourseStudyingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<CourseModel>();
-
-            var course = await _courseResultRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-            methodResult.Result = _mapper.Map<CourseModel>(course);
+            var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course).Where(p => p.CreatedUserId == _authContext.CurrentUserId)
+                                                            .OrderByDescending(x => x.CreatedDate)
+                                                            .FirstOrDefaultAsync(cancellationToken);
+            methodResult.Result = _mapper.Map<CourseModel>(courseResult?.Course);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

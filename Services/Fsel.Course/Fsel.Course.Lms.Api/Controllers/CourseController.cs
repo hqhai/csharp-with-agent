@@ -10,6 +10,7 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
 using Fsel.Course.Lms.Application.Queries.CourseQuery;
+using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -81,7 +82,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> GetCourseStudying()
         {
-            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery()).ConfigureAwait(false);
+            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseStudyingQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
