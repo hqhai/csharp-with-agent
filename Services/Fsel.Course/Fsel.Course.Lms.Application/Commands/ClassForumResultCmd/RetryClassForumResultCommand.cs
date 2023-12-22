@@ -60,26 +60,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return methodResult;
             }
 
-            if (classForum.IsAlFeedBack)
-            {
-                if (classForum.IsAlFeedBack)
-                {
-                    await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
-                    {
-                        ClassForumResultId = classForumResult.Id,
-                        WordContent = request.WordContent,
-                        UserAIConfig = classForum.UserAlConfig,
-                        SettingModel = classForum.SettingModel,
-                        SettingFrequecy = classForum.SettingFrequecy,
-                        SettingPresence = classForum.SettingPresence,
-                        SettingTemperature = classForum.SettingTemperature,
-                        SettingTopP = classForum.SettingTopP,
-                        SettingWordMaxLength = classForum.SettingWordMaxLength,
-                        SystemRoleAlConfig = classForum.SystemRoleAlConfig,
-                        IsRetry = true
-                    }, cancellationToken);
-                }
-            }
+
 
             classForumResult.RetryWordContent = request.WordContent;
             classForumResult.RetryContent = request.Content;
@@ -98,6 +79,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 classForumResult = _classForumResultRepository.Update(classForumResult);
 
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                await SendToAIGrading(classForum, classForumResult, request.WordContent!, cancellationToken);
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
@@ -105,5 +89,28 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             return methodResult;
         }
+
+        public async Task SendToAIGrading(ClassForum classForum, ClassForumResult classForumResult, string wordContent, CancellationToken cancellationToken)
+        {
+            if (classForum != null && classForumResult != null && classForum.IsAlFeedBack)
+            {
+                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
+                {
+                    ClassForumResultId = classForumResult.Id,
+                    WordContent = wordContent,
+                    UserAIConfig = classForum.UserAlConfig,
+                    SettingModel = classForum.SettingModel,
+                    SettingFrequecy = classForum.SettingFrequecy,
+                    SettingPresence = classForum.SettingPresence,
+                    SettingTemperature = classForum.SettingTemperature,
+                    SettingTopP = classForum.SettingTopP,
+                    SettingWordMaxLength = classForum.SettingWordMaxLength,
+                    SystemRoleAlConfig = classForum.SystemRoleAlConfig,
+                    IsRetry = true
+                }, cancellationToken);
+            }
+        }
+
+
     }
 }
