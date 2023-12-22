@@ -1,0 +1,44 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
+{
+    using System;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class GetCourseStudyingQuery : IRequest<MethodResult<CourseModel>>
+    {
+    }
+
+    public class GetCourseStudyingQueryHandler : IRequestHandler<GetCourseByCodeQuery, MethodResult<CourseModel>>
+    {
+        private readonly ICourseResultRepository _courseResultRepository;
+        private readonly AuthContext _authContext;
+        private readonly IMapper _mapper;
+
+        public GetCourseStudyingQueryHandler(ICourseResultRepository courseResultRepository, AuthContext authContext, IMapper mapper)
+        {
+            _courseResultRepository = courseResultRepository;
+            _authContext = authContext;
+            _mapper = mapper;
+        }
+
+        public async Task<MethodResult<CourseModel>> Handle(GetCourseByCodeQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<CourseModel>();
+
+            var course = await _courseResultRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+            methodResult.Result = _mapper.Map<CourseModel>(course);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

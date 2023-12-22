@@ -2,11 +2,11 @@
 
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class StudentReviewModel : BaseModel
+    public class StudentReviewModel
     {
+        public Guid Id { get; set; }
         public EnumReviewType ReviewType { get; set; }
         public Guid StudentId { get; set; }
         public string? FullName { get; set; }
