@@ -3,6 +3,7 @@
 namespace Fsel.Shared.Helpers
 {
     using System.Diagnostics;
+    using System.Globalization;
 
     public static class MediaHelper
     {
@@ -27,31 +28,30 @@ namespace Fsel.Shared.Helpers
                     CreateNoWindow = true
                 };
 
-                //using (var process = new Process { StartInfo = processStartInfo })
-                //{
-                //    process.Start();
-                //    string output = process.StandardError.ReadToEnd();
-                //    process.WaitForExit();
+                using (var process = new Process { StartInfo = processStartInfo })
+                {
+                    process.Start();
+                    string output = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
 
-                //    string? durationLine = output.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
-                //                                 .FirstOrDefault(line => line.Contains("Duration", StringComparison.CurrentCulture))
-                //                           ?? null;
+                    string? durationLine = output.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                                                 .FirstOrDefault(line => line.Contains("Duration", StringComparison.CurrentCulture))
+                                           ?? null;
 
-                //    if (!string.IsNullOrEmpty(durationLine))
-                //    {
-                //        int start = durationLine.IndexOf("Duration: ", StringComparison.CurrentCulture) + "Duration: ".Length;
-                //        int end = durationLine.IndexOf(",", StringComparison.CurrentCulture);
-                //        string duration = durationLine.Substring(start, end - start).Trim();
+                    if (!string.IsNullOrEmpty(durationLine))
+                    {
+                        int start = durationLine.IndexOf("Duration: ", StringComparison.CurrentCulture) + "Duration: ".Length;
+                        int end = durationLine.IndexOf(",", StringComparison.CurrentCulture);
+                        string duration = durationLine.Substring(start, end - start).Trim();
 
-                //        TimeSpan timeSpan = TimeSpan.Parse(duration, CultureInfo.CurrentCulture);
-                //        return (int)timeSpan.TotalSeconds;
-                //    }
-                //    else
-                //    {
-                //        return null;
-                //    }
-                //}
-                return null;
+                        TimeSpan timeSpan = TimeSpan.Parse(duration, CultureInfo.CurrentCulture);
+                        return (int)timeSpan.TotalSeconds;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
             }
             catch
             {
