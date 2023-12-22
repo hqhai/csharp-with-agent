@@ -155,8 +155,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 if (!isShowAnswer)
                 {
                     answerDto.CorrectCount = default;
+                    answerDto.SubAnswerStatus = answerDto.IsCorrect.HasValue ? EnumSubAnswerStatus.Process : null;
                     answerDto.IsCorrect = default;
-                    answerDto.SubAnswerStatus = EnumSubAnswerStatus.Process;
                 }
                 else
                 {

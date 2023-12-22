@@ -283,6 +283,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var mocktestAnswer = new MockTestAnswer
                     {
+                        Answer = null,
                         SectionGroupResultId = sectionGroupResult.Id,
                         MockTestResultId = sectionGroupResult.MockTestResultId ?? default
                     };
