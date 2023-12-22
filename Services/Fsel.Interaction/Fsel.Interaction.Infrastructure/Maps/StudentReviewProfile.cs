@@ -15,7 +15,6 @@ namespace Fsel.Interaction.Infrastructure.Maps
         {
             CreateMap<StudentReview, StudentReviewModel>().IgnoreAllNonExisting();
             CreateMap<SaveStudentReviewCommandModel, StudentReview>().IgnoreAllNonExisting();
-
             CreateMap<StudentReviewDetail, StudentReviewDetailModel>().IgnoreAllNonExisting();
             CreateMap<SaveStudentReviewDetailCommandModel, StudentReviewDetail>().IgnoreAllNonExisting();
         }

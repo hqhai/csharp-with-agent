@@ -44,11 +44,11 @@ namespace Fsel.Interaction.Api.Controllers.Student
         /// Get Student Review
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<StudentReviewInfoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentReviewModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get()
         {
-            MethodResult<IList<StudentReviewInfoModel>> queryResult = await _mediator.Send(new GetReviewStudentsByStudentQuery()).ConfigureAwait(false);
+            MethodResult<IList<StudentReviewModel>> queryResult = await _mediator.Send(new GetReviewStudentsByStudentQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
