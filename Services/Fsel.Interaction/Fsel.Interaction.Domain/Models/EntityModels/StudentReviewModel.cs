@@ -11,6 +11,8 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public Guid StudentId { get; set; }
         public string? FullName { get; set; }
         public Guid? CourseId { get; set; }
+        public string? CourseName { get; set; }
+        public double VoteStars { get; set; }
         public IList<StudentReviewDetailModel>? StudentReviewDetails { get; set; }
     }
 }

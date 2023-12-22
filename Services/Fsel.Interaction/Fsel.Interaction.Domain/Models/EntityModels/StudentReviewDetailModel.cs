@@ -7,7 +7,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
     public class StudentReviewDetailModel
     {
         public Guid Id { get; set; }
-        public EnumReviewQuestionType ReviewQuestionType { get; set; }
+        public EnumReviewQuestionType ReviewType { get; set; }
         public double VoteStars { get; set; }
         public string? Content { get; set; }
     }

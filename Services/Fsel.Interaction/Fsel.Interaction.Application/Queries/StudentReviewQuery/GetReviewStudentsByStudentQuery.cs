@@ -21,11 +21,11 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetReviewStudentsByStudentQuery : IRequest<MethodResult<IList<StudentReviewInfoModel>>>
+    public class GetReviewStudentsByStudentQuery : IRequest<MethodResult<IList<StudentReviewModel>>>
     {
     }
 
-    public class GetReviewStudentsByStudentQueryHandler : IRequestHandler<GetReviewStudentsByStudentQuery, MethodResult<IList<StudentReviewInfoModel>>>
+    public class GetReviewStudentsByStudentQueryHandler : IRequestHandler<GetReviewStudentsByStudentQuery, MethodResult<IList<StudentReviewModel>>>
     {
         private readonly IStudentReviewRepository _studentReviewRepository;
         private readonly AuthContext _authContext;
@@ -43,10 +43,10 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
             _courseService = courseService;
         }
 
-        public async Task<MethodResult<IList<StudentReviewInfoModel>>> Handle(GetReviewStudentsByStudentQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<StudentReviewModel>>> Handle(GetReviewStudentsByStudentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<StudentReviewInfoModel>>();
+            var methodResult = new MethodResult<IList<StudentReviewModel>>();
             var courseResult = await _courseService.GetCourseStudying();
             if (!courseResult.IsSuccessStatusCode)
             {
@@ -64,7 +64,7 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
             return methodResult;
         }
 
-        private async Task<IList<StudentReviewInfoModel>> GetStudentReview(Guid userId, CourseModel course)
+        private async Task<IList<StudentReviewModel>> GetStudentReview(Guid userId, CourseModel course)
         {
             var reviewTypes = ConvertHelper.EnumToList<EnumReviewType>();
             var studentReviews = await _studentReviewRepository.Queryable
@@ -75,9 +75,9 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
             return studentReviews.Select(x => GetStudentReviewInfo(x, course)).ToList();
         }
 
-        private StudentReviewInfoModel GetStudentReviewInfo(StudentReview studentReview, CourseModel course)
+        private StudentReviewModel GetStudentReviewInfo(StudentReview studentReview, CourseModel course)
         {
-            var studentReviewInfo = _mapper.Map<StudentReviewInfoModel>(studentReview);
+            var studentReviewInfo = _mapper.Map<StudentReviewModel>(studentReview);
             studentReviewInfo.CourseName = studentReview.CourseId.HasValue ? course.Name : null;
             studentReviewInfo.VoteStars = NumberHelper.ConvertRound(studentReview.StudentReviewDetails.Average(x => x.VoteStars));
             return studentReviewInfo;
