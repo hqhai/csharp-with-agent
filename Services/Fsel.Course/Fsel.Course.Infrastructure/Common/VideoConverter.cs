@@ -524,8 +524,8 @@ namespace Fsel.Course.Infrastructure.Common
                 if (!isCheck)
                 {
                     answer.CorrectCount = default;
+                    answer.SubAnswerStatus = answer.IsCorrect.HasValue ? EnumSubAnswerStatus.Process : null;
                     answer.IsCorrect = default;
-                    answer.SubAnswerStatus = EnumSubAnswerStatus.Process;
                 }
                 else
                 {

@@ -128,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             {
                 if (request.Answers != null && request.Answers.Any())
                 {
-                    var answerResult = await CreateAnswerAsync(request, sectionGroupResult.Id);
+                    var answerResult = await CreateAnswerAsync(request, sectionGroupResult);
                     if (!answerResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
@@ -213,7 +213,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             return finalTestResult;
         }
 
-        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, Guid sectionGroupResultId)
+        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<IList<FinalTestAnswer>>();
@@ -224,7 +224,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
-            var anwserResult = await CreateAnswer(request, questions, sectionGroupResultId);
+            var anwserResult = await CreateAnswer(request, questions, sectionGroupResult);
             if (!anwserResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(anwserResult.ErrorMessages);
@@ -240,7 +240,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, IList<Question>? questions, Guid sectionGroupResultId)
+        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, IList<Question>? questions, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
@@ -262,7 +262,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (finalTestAnswer == null)
                     {
-                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, request, questionItem, sectionGroupResultId));
+                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, questionItem, sectionGroupResult));
                     }
                 }
             }
@@ -270,14 +270,14 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             return methodResult;
         }
 
-        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Question? question, Guid sectionGroupResultId)
+        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, Question? question, SectionGroupResult sectionGroupResult)
         {
             return new FinalTestAnswer
             {
                 Answer = answer,
                 CorrectCount = correctCount,
-                FinalTestResultId = request.FinalTestResultId,
-                SectionGroupResultId = sectionGroupResultId,
+                FinalTestResultId = sectionGroupResult.FinalTestResultId ?? default,
+                SectionGroupResultId = sectionGroupResult.Id,
                 SectionQuestionId = question?.SectionQuestions.FirstOrDefault()?.Id ?? default,
                 IsCorrect = question?.CorrectTotal == correctCount,
             };
