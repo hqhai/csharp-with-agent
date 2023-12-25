@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
 
-    public class MutipleChoiceQuestion
+    public class MultipleChoiceQuestion
     {
         [JsonRequired]
         public string? Name { get; set; }

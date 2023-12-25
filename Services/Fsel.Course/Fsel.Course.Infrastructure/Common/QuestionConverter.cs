@@ -40,7 +40,7 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                 return methodResult;
             }
-            var (answerConfig, correctCount, isAnswerMissing, isAnswered) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, oldAnswer, question.Config, question.QuestionType, isTryAgain, isSubmit, isMandatoryAnswer);
+            var (answerConfig, correctCount, isAnswerMissing, isAnswered) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, oldAnswer, question, isTryAgain, isSubmit, isMandatoryAnswer);
             if (answerConfig == null && !string.IsNullOrEmpty(answer?.ToString()))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
