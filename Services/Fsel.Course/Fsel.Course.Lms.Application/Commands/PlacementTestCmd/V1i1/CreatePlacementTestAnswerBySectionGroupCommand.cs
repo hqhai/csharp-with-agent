@@ -278,30 +278,25 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                    var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
                     var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == request.PlacementTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (placementTestAnswer == null)
                     {
-                        placementTestAnswers.Add(GetPlacementTestAnswer(answerConfig, correctCount, request, questionItem, sectionGroupResultId));
+                        placementTestAnswers.Add(new PlacementTestAnswer
+                        {
+                            Answer = answerConfig,
+                            CorrectCount = correctCount,
+                            PlacementTestResultId = request.PlacementTestResultId,
+                            SectionGroupResultId = sectionGroupResultId,
+                            SectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default,
+                            IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null
+                        });
                     }
                 }
             }
             methodResult.Result = placementTestAnswers;
             return methodResult;
-        }
-
-        private static PlacementTestAnswer GetPlacementTestAnswer(object? answer, int correctCount, CreatePlacementTestAnswerBySectionGroupCommand request, Question questionItem, Guid sectionGroupResultId)
-        {
-            return new PlacementTestAnswer
-            {
-                Answer = answer,
-                CorrectCount = correctCount,
-                PlacementTestResultId = request.PlacementTestResultId,
-                SectionGroupResultId = sectionGroupResultId,
-                SectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default,
-                IsCorrect = correctCount == questionItem.CorrectTotal
-            };
         }
     }
 }

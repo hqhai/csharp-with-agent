@@ -257,12 +257,20 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                    var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
                     var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (finalTestAnswer == null)
                     {
-                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, questionItem, sectionGroupResult));
+                        finalTestAnswers.Add(new FinalTestAnswer
+                        {
+                            Answer = answerConfig,
+                            CorrectCount = correctCount,
+                            FinalTestResultId = request.FinalTestResultId,
+                            SectionGroupResultId = sectionGroupResultId,
+                            SectionQuestionId = question?.SectionQuestions.FirstOrDefault()?.Id ?? default,
+                            IsCorrect = isAnswered ? question?.CorrectTotal == correctCount : null,
+                        });
                     }
                 }
             }
@@ -270,14 +278,14 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             return methodResult;
         }
 
-        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, Question? question, SectionGroupResult sectionGroupResult)
+        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Question? question, Guid sectionGroupResultId)
         {
             return new FinalTestAnswer
             {
                 Answer = answer,
                 CorrectCount = correctCount,
-                FinalTestResultId = sectionGroupResult.FinalTestResultId ?? default,
-                SectionGroupResultId = sectionGroupResult.Id,
+                FinalTestResultId = request.FinalTestResultId,
+                SectionGroupResultId = sectionGroupResultId,
                 SectionQuestionId = question?.SectionQuestions.FirstOrDefault()?.Id ?? default,
                 IsCorrect = question?.CorrectTotal == correctCount,
             };

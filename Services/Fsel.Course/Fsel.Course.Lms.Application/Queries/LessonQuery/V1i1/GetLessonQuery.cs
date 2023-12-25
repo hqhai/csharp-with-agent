@@ -93,6 +93,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
                                                         .Include(x => x.HomeWorkResults.Where(x => x.StudentId == lessonResult.StudentId))
                                                         .Include(x => x.ClassForumResults.Where(x => x.StudentId == lessonResult.StudentId))
                                                         .Where(x => x.Id == lessonResult.Id)
+                                                        .AsNoTracking()
                                                         .FirstOrDefaultAsync(cancellationToken);
         }
     }

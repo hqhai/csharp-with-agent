@@ -15,7 +15,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         QuestionNotCompleted,
 
         /// <summary>
-        /// Question not completed
+        /// List QuestionId Duplicate
         /// </summary>
         ListQuestionIdDuplicate
     }

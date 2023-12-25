@@ -16,15 +16,25 @@ namespace Fsel.Course.Infrastructure.Common
             _answerTypeConverter = answerTypeConverter;
         }
 
-        public MethodResult<(Question, object?, int)> HandleQuestionAnswer(Question? question, object? answer, bool isSubmit, object? oldAnswer = default, bool isTryAgain = false, bool isMandatoryAnswer = false)
+        public QuestionModel GetQuestion(Question question, object? answer = null, bool isShowAnswer = false)
         {
-            var methodResult = new MethodResult<(Question, object?, int)>();
+            ArgumentNullException.ThrowIfNull(question);
+            var questionModel = _mapper.Map<QuestionModel>(question);
+            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
+            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
+            questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.Section?.Id ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
+            return questionModel;
+        }
+
+        public MethodResult<(Question, object?, int, bool)> HandleQuestionAnswer(Question? question, object? answer, bool isSubmit, object? oldAnswer = default, bool isTryAgain = false, bool isMandatoryAnswer = false)
+        {
+            var methodResult = new MethodResult<(Question, object?, int, bool)>();
             if (question == null || question.Config == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                 return methodResult;
             }
-            var (answerConfig, correctCount, isAnswerMissing) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, oldAnswer, question.Config, question.QuestionType, isTryAgain, isSubmit, isMandatoryAnswer);
+            var (answerConfig, correctCount, isAnswerMissing, isAnswered) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, oldAnswer, question, isTryAgain, isSubmit, isMandatoryAnswer);
             if (answerConfig == null && !string.IsNullOrEmpty(answer?.ToString()))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
@@ -35,7 +45,7 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.QuestionNotCompleted), nameof(question), new object[] { question.Id });
                 return methodResult;
             }
-            methodResult.Result = (question, answerConfig, correctCount);
+            methodResult.Result = (question, answerConfig, correctCount, isAnswered);
             return methodResult;
         }
     }
