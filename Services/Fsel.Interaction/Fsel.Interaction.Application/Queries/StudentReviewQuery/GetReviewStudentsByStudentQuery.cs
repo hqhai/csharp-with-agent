@@ -2,107 +2,85 @@
 
 namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
 {
-    using System.Linq;
+    using System.Collections.Generic;
+    using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.CourseServices.Models;
-    using Fsel.Interaction.Application.Services.TrainingServices;
-    using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetReviewStudentsByStudentQuery : IRequest<MethodResult<IList<StudentReviewInfoModel>>>
+    public class GetReviewStudentsByStudentQuery : IRequest<MethodResult<IList<StudentReviewModel>>>
     {
     }
 
-    public class GetReviewStudentsByStudentQueryHandler : IRequestHandler<GetReviewStudentsByStudentQuery, MethodResult<IList<StudentReviewInfoModel>>>
+    public class GetReviewStudentsByStudentQueryHandler : IRequestHandler<GetReviewStudentsByStudentQuery, MethodResult<IList<StudentReviewModel>>>
     {
         private readonly IStudentReviewRepository _studentReviewRepository;
         private readonly AuthContext _authContext;
-        private readonly IUserService _userService;
         private readonly IMapper _mapper;
-        private readonly ITrainingService _trainingService;
         private readonly ICourseService _courseService;
 
         public GetReviewStudentsByStudentQueryHandler(IStudentReviewRepository studentReviewRepository
             , AuthContext authContext
-            , IUserService userService
             , IMapper mapper
-            , ITrainingService trainingService
             , ICourseService courseService)
         {
             _studentReviewRepository = studentReviewRepository;
             _authContext = authContext;
-            _userService = userService;
             _mapper = mapper;
-            _trainingService = trainingService;
             _courseService = courseService;
         }
 
-        public async Task<MethodResult<IList<StudentReviewInfoModel>>> Handle(GetReviewStudentsByStudentQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<StudentReviewModel>>> Handle(GetReviewStudentsByStudentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<StudentReviewInfoModel>>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
+            var methodResult = new MethodResult<IList<StudentReviewModel>>();
+            var courseResult = await _courseService.GetCourseStudying();
+            if (!courseResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError));
                 return methodResult;
             }
-            var studentId = studentResult.Content?.Result?.Id;
-
-            var classStudents = await _trainingService.GetClassCourseStudentAsync(studentId ?? default);
-            if (!classStudents.IsSuccessStatusCode)
+            var course = courseResult.Content?.Result;
+            if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-            var courseIds = classStudents.Content?.Result?.Select(x => x.CourseId).Distinct().ToList();
-            List<CourseModel>? courses = new List<CourseModel>();
-            if (courseIds != null && courseIds.Count > 0)
-            {
-                var courseResults = await _courseService.GetListCourseByIds(courseIds);
-                if (!courseResults.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
-                    return methodResult;
-                }
-                courses = courseResults.Content?.Result?.ToList();
-            }
-
-            var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
-                .Where(x => x.StudentId == studentId)
-                .Select(x => new StudentReviewInfoModel
-                {
-                    Id = x.Id,
-                    ReviewType = x.ReviewType,
-                    CourseId = x.CourseId,
-                    StudentId = x.StudentId,
-                    StudentReviewDetails = _mapper.Map<IList<StudentReviewDetailModel>>(x.StudentReviewDetails.OrderBy(x => x.CreatedDate))
-                }).ToListAsync(cancellationToken: cancellationToken);
-
-            foreach (var studentReview in studentReviews)
-            {
-                if (courses != null && courses.Count > 0 && studentReview.CourseId.HasValue)
-                {
-                    var course = courses.FirstOrDefault(x => x.Id == studentReview.CourseId);
-                    if (course != null)
-                    {
-                        studentReview.CourseName = course.Name;
-                    }
-                }
-            }
-
-            methodResult.Result = studentReviews;
+            methodResult.Result = await GetStudentReview(_authContext.CurrentUserId, course);
             methodResult.StatusCode = StatusCodes.Status200OK;
-
             return methodResult;
+        }
+
+        private async Task<IList<StudentReviewModel>> GetStudentReview(Guid userId, CourseModel course)
+        {
+            var reviewTypes = ConvertHelper.EnumToList<EnumReviewType>();
+            var studentReviews = await _studentReviewRepository.Queryable
+                .Include(x => x.StudentReviewDetails.OrderBy(x => x.CreatedDate))
+                .Where(x => x.CreatedUserId == userId && reviewTypes.Contains(x.ReviewType) && (x.ReviewType != EnumReviewType.Course || x.CourseId == course.Id))
+                .AsNoTracking()
+                .ToListAsync();
+            return studentReviews.Select(x => GetStudentReviewInfo(x, course)).ToList();
+        }
+
+        private StudentReviewModel GetStudentReviewInfo(StudentReview studentReview, CourseModel course)
+        {
+            var studentReviewInfo = _mapper.Map<StudentReviewModel>(studentReview);
+            studentReviewInfo.CourseName = studentReview.CourseId.HasValue ? course.Name : null;
+            studentReviewInfo.VoteStars = NumberHelper.ConvertRound(studentReview.StudentReviewDetails.Average(x => x.VoteStars));
+            return studentReviewInfo;
         }
     }
 }
