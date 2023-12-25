@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Diagnostics;
-using System.Reflection.Metadata;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
@@ -14,7 +13,6 @@ using Fsel.Storage.Infrastructure.ValueSettings;
 using Humanizer.Bytes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using OneSignalApi.Model;
 using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace Fsel.Storage.Application.Services.AmazonS3Services
@@ -32,7 +30,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
         private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
         {
-            { EnumFolderType.Fsis, ByteSize.FromGigabytes(1).Bytes }, //maximum question size (1 GB)
+            { EnumFolderType.Fsis, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (1 GB)
+            { EnumFolderType.AG, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
             { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
             { EnumFolderType.Files, ByteSize.FromMegabytes(6).Bytes }, //maximum file size (6 MB)
             { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes }, //maximum question size (6 MB)
