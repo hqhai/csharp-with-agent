@@ -78,7 +78,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VideoTimeCodeModel>();
-
             var method = await CreateAnswer(request, cancellationToken);
             if (!method.IsOK)
             {

@@ -25,43 +25,43 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleCheckListAnswer(ref configAnswer, configOldAnswer as MultipleChoiceAnswer, question.Config as MultipleChoiceQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleCheckListAnswer(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswer>(), question.Config.Deserialize<MultipleChoiceQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.Listing:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleListingAnswer(ref configAnswer, configOldAnswer as ListingAnswer, question.Config as ListingQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleListingAnswer(ref configAnswer, configOldAnswer.Deserialize<ListingAnswer>(), question.Config.Deserialize<ListingQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.DragAndDropPicture:
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleMaschingTypeAnswer(ref configAnswer, configOldAnswer as MatchingTypeAnswer, question.Config as MatchingTypeQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleMaschingTypeAnswer(ref configAnswer, configOldAnswer.Deserialize<MatchingTypeAnswer>(), question.Config.Deserialize<MatchingTypeQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleShortAnswerWordBase(ref configAnswer, configOldAnswer as ShortAnswerWordBaseAnswer, question.Config as ShortAnswerQuestionWordBaseQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleShortAnswerWordBase(ref configAnswer, configOldAnswer.Deserialize<ShortAnswerWordBaseAnswer>(), question.Config.Deserialize<ShortAnswerQuestionWordBaseQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleShortAnswerWordCount(ref configAnswer, configOldAnswer as ShortAnswerWordCountBaseAnswer, question.Config as ShortAnswerQuestionWordCountBaseQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleShortAnswerWordCount(ref configAnswer, configOldAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>(), question.Config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleGapFillBySubAnswer(ref configAnswer, configOldAnswer as GapFillAnswer, question.Config as GapFillQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleGapFillBySubAnswer(ref configAnswer, configOldAnswer.Deserialize<GapFillAnswer>(), question.Config.Deserialize<GapFillQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleGapFillGapAnswer(ref configAnswer, configOldAnswer as GapFillAnswer, question.Config as GapFillQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleGapFillGapAnswer(ref configAnswer, configOldAnswer.Deserialize<GapFillAnswer>(), question.Config.Deserialize<GapFillQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleDragDropOrderAnswer(ref configAnswer, configOldAnswer as DragAndDropSentenceOrderAnswer, question.Config as DragAndDropSentenceOrderQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleDragDropOrderAnswer(ref configAnswer, configOldAnswer.Deserialize<DragAndDropSentenceOrderAnswer>(), question.Config.Deserialize<DragAndDropSentenceOrderQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
-                    (totalCorrect, isAnswerMissing, isAnswered) = HandleMultipleOptionAnswer(ref configAnswer, configOldAnswer as MultipleOptionSentenceCompletionAnswer, question.Config as MultipleOptionSentenceCompletionQuestion, isTryAgain, isSubmit, isMandatoryAnswer);
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleMultipleOptionAnswer(ref configAnswer, configOldAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>(), question.Config.Deserialize<MultipleOptionSentenceCompletionQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
@@ -553,7 +553,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             var dataAnswer = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
             int number = 0;
-            bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Contents, EnumQuestionType.GapFillScoreByQuestion, isSubmit, isMandatoryAnswer);
+            bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Contents, EnumQuestionType.MultipleOptionSentenceCompletion, isSubmit, isMandatoryAnswer);
             if (dataAnswer?.Answers == null || dataQuestion?.Contents == null || (isMandatoryAnswer && isAnswerMissing))
             {
                 return (default, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));

@@ -11,10 +11,10 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
         public string? Name { get; set; }
 
         [JsonRequired]
-        public IList<MutipleChoiceQuestionContent>? Contents { get; set; }
+        public IList<MultipleChoiceQuestionContent>? Contents { get; set; }
     }
 
-    public class MutipleChoiceQuestionContent
+    public class MultipleChoiceQuestionContent
     {
         public long Id { get; set; }
         public string? FilePath { get; set; }
