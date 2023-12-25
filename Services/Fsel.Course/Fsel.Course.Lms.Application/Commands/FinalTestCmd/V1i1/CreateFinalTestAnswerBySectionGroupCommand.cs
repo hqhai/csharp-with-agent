@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1
+namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
 {
     using System;
     using System.Collections.Generic;
@@ -12,15 +12,19 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -36,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1
         private readonly QuestionConverter _questionConverter;
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IUserService _userService;
+        private readonly ISystemService _systemService;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
@@ -47,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1
             , QuestionConverter questionConverter
             , SectionGroupConverter sectionGroupConverter
             , IUserService userService
+            , ISystemService systemService
             , IFinalTestResultRepository finalTestResultRepository
             , IFinalTestAnswerRepository finalTestAnswerRepository
             , ISectionGroupResultRepository sectionGroupResultRepository
@@ -58,6 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1
             _questionConverter = questionConverter;
             _sectionGroupConverter = sectionGroupConverter;
             _userService = userService;
+            _systemService = systemService;
             _finalTestResultRepository = finalTestResultRepository;
             _finalTestAnswerRepository = finalTestAnswerRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
@@ -68,6 +75,9 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+
+            #region Validate
+
             var methodResult = new MethodResult<SectionGroupResultModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
@@ -111,6 +121,9 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(sectionGroupResult.Status));
                 return methodResult;
             }
+
+            #endregion Validate
+
             await _finalTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 if (request.Answers != null && request.Answers.Any())
@@ -145,21 +158,58 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestAnswerCmd.V1i1
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.FinalTestResultId == finalTestResult.Id).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                finalTestResult = GetFinalTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), finalTestResult);
-                finalTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
-                finalTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
+                finalTestResult = await GetFinalTestResult(sectionGroupResults, finalTestResult);
+                await UpdateUserToken(finalTestResult).ConfigureAwait(false);
                 _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private static FinalTestResult GetFinalTestResult(IList<SkillScores>? skillScores, FinalTestResult finalTestResult)
+        private async Task<FinalTestResult> GetTokenFinalTestResult(FinalTestResult finalTestResult)
         {
-            ArgumentNullException.ThrowIfNull(skillScores);
+            var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
+            var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+            {
+                Feature = EnumTokenFeature.FinalTest,
+                Missions = string.Join(",", misstions)
+            });
+            var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
+            if (!tokenConfigResults.IsSuccessStatusCode || !isSuperFireModeResult.IsSuccessStatusCode)
+            {
+                return finalTestResult;
+            }
+            var tokenConfigs = tokenConfigResults.Content?.Result;
+            var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
+            var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
+            var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
+            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
+
+            finalTestResult.TokenDone = configDone?.Number;
+            finalTestResult.TokenHighestStreak = configHighestStreak?.Number * finalTestResult.HighestStreak;
+            finalTestResult.TokenSuperFire = configSuperFire?.Number;
+            return finalTestResult;
+        }
+
+        private async Task UpdateUserToken(FinalTestResult finalTestResult)
+        {
+            var tokens = new List<int?> { finalTestResult.TokenDone, finalTestResult.TokenHighestStreak, finalTestResult.TokenQuestionReward, finalTestResult.TokenSuperFire };
+            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+            {
+                NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
+                StudentId = finalTestResult.StudentId,
+            }).ConfigureAwait(false);
+        }
+
+        private async Task<FinalTestResult> GetFinalTestResult(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult)
+        {
+            var skillScores = sectionGroupResults.SelectMany(x => x.SkillScores!).ToList();
+            finalTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
+            finalTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
             finalTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             finalTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             finalTestResult.Status = EnumResultStatus.Done;
             finalTestResult.SkillScores = skillScores;
+            finalTestResult = await GetTokenFinalTestResult(finalTestResult);
             return finalTestResult;
         }
 

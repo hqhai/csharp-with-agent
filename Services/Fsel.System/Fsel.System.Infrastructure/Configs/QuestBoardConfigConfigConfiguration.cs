@@ -7,6 +7,7 @@ namespace Fsel.System.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
+    using Fsel.Common.Enums;
 
     public class QuestBoardConfigConfigConfiguration : IEntityTypeConfiguration<QuestBoardConfig>
     {
@@ -24,6 +25,18 @@ namespace Fsel.System.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumQuestBoardCategory>());
+
+            builder.Property(e => e.DisplayType)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumDisplayType>());
+
+            builder.Property(e => e.Operator)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumFilterOperator>());
         }
     }
 }

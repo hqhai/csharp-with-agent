@@ -22,12 +22,16 @@ namespace Fsel.Interaction.Application.Services.UserServices
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid> studentIds);
 
         [Post("/user/get-users-by-ids")]
-        Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetUsersByIdsAsync([Body] GetUsersByIdsQueryModel model);
+        Task<IApiResponse<MethodResult<IList<HumanProfileModel>>>> GetUsersByIdsAsync([Body] GetUsersByIdsQueryModel model);
 
         [Get("/user/get-user-by-id")]
-        Task<IApiResponse<MethodResult<HumanModel>>> GetUserByIdAsync([Query] string? id);
+        Task<IApiResponse<MethodResult<HumanProfileModel>>> GetUserByIdAsync([Query] string? id);
 
         [Get("/student/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> ExecuteListStudentQueryAsync([Query] BaseQueryModel query);
+
+        [Put("/student/update-student-token")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
+
     }
 }

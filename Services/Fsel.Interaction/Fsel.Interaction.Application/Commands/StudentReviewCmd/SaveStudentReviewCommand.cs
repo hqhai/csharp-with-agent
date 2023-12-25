@@ -6,15 +6,23 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
+    using Fsel.Interaction.Application.Services.SystemService;
+    using Fsel.Interaction.Application.Services.SystemService.Models;
     using Fsel.Interaction.Application.Services.TrainingServices;
     using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.StudentReviews;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,12 +39,17 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
         private readonly ITrainingService _trainingService;
         private readonly ICourseService _courseService;
         private readonly IMapper _mapper;
+        private readonly ISystemService _systemService;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
         public SaveStudentReviewCommandHandler(IStudentReviewRepository studentReviewRepository, AuthContext authContext
             , IUserService userService
             , ITrainingService trainingService
             , ICourseService courseService
-            , IMapper mapper)
+            , IMapper mapper
+            , QuestBoardPublisher questBoardPublisher
+            , ISystemService systemService)
+
         {
             _studentReviewRepository = studentReviewRepository;
             _authContext = authContext;
@@ -44,6 +57,8 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
             _trainingService = trainingService;
             _courseService = courseService;
             _mapper = mapper;
+            _systemService = systemService;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<StudentReviewModel>> Handle(SaveStudentReviewCommand request, CancellationToken cancellationToken)
@@ -87,6 +102,25 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                 var studentReview = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).FirstOrDefaultAsync(x => x.StudentId == studentId && x.ReviewType == request.ReviewType, cancellationToken);
 
                 var studentReviewDetails = _mapper.Map<List<StudentReviewDetail>>(request.StudentReviewDetails);
+
+                var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+                {
+                    Feature = EnumTokenFeature.ReviewSystem,
+                    Mission = request.ReviewType == EnumReviewType.Platform ? EnumTokenMission.ReviewPlatform : EnumTokenMission.ReviewCourse
+                });
+                var tokenConfigResult = tokenConfig.Content?.Result;
+
+                var targetConfig = tokenConfigResult.GetTokenNumber<TokenNumber>();
+                var targetNumber = targetConfig?.Number;
+                if (targetNumber.HasValue)
+                {
+                    var userToken = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+                    {
+                        StudentId = studentId ?? default,
+                        NumberOfToken = targetNumber.Value,
+                    });
+                }
+
                 foreach (var studentReviewDetail in studentReviewDetails)
                 {
                     if (!studentReviewDetail.IsValid())
@@ -106,6 +140,8 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                         return methodResult;
                     }
                     _studentReviewRepository.Add(studentReview);
+
+                    await DoQuestBoard(studentId, cancellationToken);
                     methodResult.StatusCode = StatusCodes.Status201Created;
                 }
                 else
@@ -137,6 +173,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                             methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentReview));
                             return methodResult;
                         }
+
                     }
                     _mapper.Map(request, studentReview);
                     if (!studentReview!.IsValid())
@@ -152,6 +189,23 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                 return methodResult;
             });
             return methodResult;
+        }
+        public async Task DoQuestBoard(Guid? studentId, CancellationToken cancellationToken)
+        {
+            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+            var courseId = classResult.Content?.Result?.CourseId;
+            if (studentId != null && courseId != null)
+            {
+                IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.RateAndComment };
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId,
+                    Categories = categories,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
+                    CourseId = (Guid)courseId
+                }, cancellationToken);
+            }
+
         }
     }
 }

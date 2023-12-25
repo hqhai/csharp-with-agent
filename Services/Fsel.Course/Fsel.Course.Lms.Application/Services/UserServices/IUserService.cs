@@ -16,6 +16,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Post("/student/execute-list-query")]
         Task<IApiResponse<MethodResult<StudentModel>>> ExecuteListQueryAsync([Body] BaseQueryModel query);
 
+        [Put("/student/update-student-token")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
+
         [Post("/student/execute-query")]
         Task<IApiResponse<MethodResult<StudentModel>>> ExecuteQueryAsync([Body] BaseQueryModel query);
 
@@ -51,5 +54,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/student-daily-streak/get-daily-streak/{id}")]
         Task<IApiResponse<MethodResult<DailyStreakModel>>> GetDailyStreak([FromRoute] Guid id);
+
+        [Get("/student-focus-time/check-super-fire")]
+        Task<IApiResponse<MethodResult<bool>>> CheckSuperFireModeAsync();
     }
 }
