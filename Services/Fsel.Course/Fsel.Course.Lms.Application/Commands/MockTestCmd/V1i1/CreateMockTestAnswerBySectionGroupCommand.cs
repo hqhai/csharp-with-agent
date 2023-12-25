@@ -144,7 +144,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 }
                 if (request.IsSubmit)
                 {
-                    await _sectionGroupConverter.UpdateMockTestAnswers(sectionGroup, sectionGroupResult);
+                    await _sectionGroupConverter.UpdateUnansweredQuestions(sectionGroup, sectionGroupResult);
                     sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup);
                 }
                 return methodResult;

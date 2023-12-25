@@ -26,16 +26,16 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly SectionGroupConverter _sectionGroupConverter;
+        private readonly SectionGroupLCMSConverter _sectionGroupLCMSConverter;
 
         public CreateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
-            , SectionGroupConverter sectionGroupConverter
+            , SectionGroupLCMSConverter sectionGroupLCMSConverter
             )
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
-            _sectionGroupConverter = sectionGroupConverter;
+            _sectionGroupLCMSConverter = sectionGroupLCMSConverter;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(CreateMockTestCommand request, CancellationToken cancellationToken)
@@ -78,7 +78,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
                     //    return methodResult;
                     //}
-                    var method = _sectionGroupConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
+                    var method = _sectionGroupLCMSConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
                     if (!method.IsOK)
                     {
                         methodResult.AddErrorBadRequest(method.ErrorMessages);

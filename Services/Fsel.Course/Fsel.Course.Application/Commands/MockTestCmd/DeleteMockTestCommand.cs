@@ -22,13 +22,13 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     public class DeleteMockTestCommandHandler : IRequestHandler<DeleteMockTestCommand, MethodResult<bool>>
     {
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly SectionGroupConverter _sectionGroupConverter;
+        private readonly SectionGroupLCMSConverter _sectionGroupLCMSConverter;
 
         public DeleteMockTestCommandHandler(IMockTestRepository mockTestRepository
-            , SectionGroupConverter sectionGroupConverter)
+            , SectionGroupLCMSConverter sectionGroupLCMSConverter)
         {
             _mockTestRepository = mockTestRepository;
-            _sectionGroupConverter = sectionGroupConverter;
+            _sectionGroupLCMSConverter = sectionGroupLCMSConverter;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteMockTestCommand request, CancellationToken cancellationToken)
@@ -54,7 +54,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             await _mockTestRepository.ExecuteTransactionAsync(async () =>
             {
-                await _sectionGroupConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
+                await _sectionGroupLCMSConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
 
                 var result = await _mockTestRepository.DeleteAsync(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

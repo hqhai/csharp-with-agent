@@ -26,13 +26,13 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IFinalTestRepository _finalTestRepository;
-        private readonly SectionGroupConverter _sectionGroupConverter;
+        private readonly SectionGroupLCMSConverter _sectionGroupLCMSConverter;
 
-        public CreateFinalTestCommandHandler(IMapper mapper, IFinalTestRepository finalTestRepository, SectionGroupConverter sectionGroupConverter)
+        public CreateFinalTestCommandHandler(IMapper mapper, IFinalTestRepository finalTestRepository, SectionGroupLCMSConverter sectionGroupLCMSConverter)
         {
             _mapper = mapper;
             _finalTestRepository = finalTestRepository;
-            _sectionGroupConverter = sectionGroupConverter;
+            _sectionGroupLCMSConverter = sectionGroupLCMSConverter;
         }
 
         public async Task<MethodResult<FinalTestModel>> Handle(CreateFinalTestCommand request, CancellationToken cancellationToken)
@@ -67,7 +67,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     //}
 
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    var method = _sectionGroupConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
+                    var method = _sectionGroupLCMSConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
                     if (!method.IsOK)
                     {
                         methodResult.AddErrorBadRequest(method.ErrorMessages);

@@ -18,7 +18,6 @@ using Fsel.Course.Lms.Application.Services.SystemService;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Shared.Constants;
-using Fsel.Shared.Models.ShareModels;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -100,7 +99,6 @@ builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRa
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
 builder.Services.AddScoped<QuestBoardPublisher>();
 
-
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();
@@ -111,6 +109,7 @@ builder.Services.AddScoped<UnitHelper>();
 builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
+builder.Services.AddScoped<SectionGroupLCMSConverter>();
 
 // Helper
 builder.Services.AddScoped<LinQHelper>();

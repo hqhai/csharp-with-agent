@@ -3,16 +3,11 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using AutoMapper;
-    using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.Questions;
-    using Fsel.Course.Domain.Models.CommandModels.Sections;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -23,8 +18,6 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
-        private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly LinQHelper _linQHelper;
@@ -35,13 +28,11 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Clean Code
 
-        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, ISectionGroupRepository sectionGroupRepository, ISectionQuestionRepository sectionQuestionRepository, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
+        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
         {
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
-            _sectionGroupRepository = sectionGroupRepository;
-            _sectionQuestionRepository = sectionQuestionRepository;
             _dateTimeConverter = dateTimeConverter;
             _questionRepository = questionRepository;
             _linQHelper = linQHelper;
@@ -273,59 +264,54 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        public async Task UpdateMockTestAnswers(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        public async Task UpdateUnansweredQuestions(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
         {
             var questionIds = await GetUnansweredQuestionIds(sectionGroup, sectionGroupResult);
-            var mockTestAnswers = new List<MockTestAnswer>();
             if (questionIds != null && questionIds.Any())
             {
-                mockTestAnswers = questionIds.Select(x =>
+                if (sectionGroupResult.FinalTestResultId.HasValue)
                 {
-                    var mocktestAnswer = new MockTestAnswer
+                    await _finalTestAnswerRepository.AddList(questionIds.Select(x => new FinalTestAnswer
                     {
                         Answer = null,
+                        SectionQuestionId = x,
                         SectionGroupResultId = sectionGroupResult.Id,
-                        MockTestResultId = sectionGroupResult.MockTestResultId ?? default
-                    };
-                    mocktestAnswer.SectionId = sectionGroup.CourseSkill == EnumCourseSkill.Writing ? x : null;
-                    mocktestAnswer.SectionTimeCodeId = sectionGroup.CourseSkill == EnumCourseSkill.Speaking ? x : null;
-                    mocktestAnswer.SectionQuestionId = sectionGroup.CourseSkill != EnumCourseSkill.Writing && sectionGroup.CourseSkill != EnumCourseSkill.Speaking ? x : null;
-                    return mocktestAnswer;
-                }).ToList();
-                await _mockTestAnswerRepository.AddList(mockTestAnswers);
-                await _mockTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-            }
-        }
-
-        public async Task UpdateFinalTestAnswers(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
-        {
-            var questionIds = await GetUnansweredQuestionIds(sectionGroup, sectionGroupResult);
-            if (questionIds != null && questionIds.Any())
-            {
-                await _finalTestAnswerRepository.AddList(questionIds.Select(x => new FinalTestAnswer
+                        FinalTestResultId = sectionGroupResult.FinalTestResultId ?? default,
+                        IsCorrect = null
+                    }).ToList());
+                    await _finalTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                }
+                else if (sectionGroupResult.PlacementTestResultId.HasValue)
                 {
-                    SectionQuestionId = x,
-                    SectionGroupResultId = sectionGroupResult.Id,
-                    FinalTestResultId = sectionGroupResult.FinalTestResultId ?? default
-                }).ToList());
-                await _finalTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-            }
-        }
-
-        public async Task UpdatePlacementTestAnswers(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
-        {
-            var questionIds = await GetUnansweredQuestionIds(sectionGroup, sectionGroupResult);
-            if (questionIds != null && questionIds.Any())
-            {
-                await _placementTestAnswerRepository.AddList(questionIds.Select(x => new PlacementTestAnswer
+                    await _placementTestAnswerRepository.AddList(questionIds.Select(x => new PlacementTestAnswer
+                    {
+                        Answer = null,
+                        SectionQuestionId = x,
+                        SectionGroupResultId = sectionGroupResult.Id,
+                        PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
+                        IsCorrect = null
+                    }).ToList());
+                    await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                }
+                else
                 {
-                    Answer = null,
-                    SectionQuestionId = x,
-                    SectionGroupResultId = sectionGroupResult.Id,
-                    PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
-                    IsCorrect = null
-                }).ToList());
-                await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                    var mockTestAnswers = questionIds.Select(x =>
+                     {
+                         var mocktestAnswer = new MockTestAnswer
+                         {
+                             Answer = null,
+                             SectionGroupResultId = sectionGroupResult.Id,
+                             MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
+                             IsCorrect = null
+                         };
+                         mocktestAnswer.SectionId = sectionGroup.CourseSkill == EnumCourseSkill.Writing ? x : null;
+                         mocktestAnswer.SectionTimeCodeId = sectionGroup.CourseSkill == EnumCourseSkill.Speaking ? x : null;
+                         mocktestAnswer.SectionQuestionId = sectionGroup.CourseSkill != EnumCourseSkill.Writing && sectionGroup.CourseSkill != EnumCourseSkill.Speaking ? x : null;
+                         return mocktestAnswer;
+                     }).ToList();
+                    await _mockTestAnswerRepository.AddList(mockTestAnswers);
+                    await _mockTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                }
             }
         }
 
@@ -374,8 +360,6 @@ namespace Fsel.Course.Infrastructure.Common
 
         private SectionGroupResultModel GetSectionGroupResult(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
         {
-            ArgumentNullException.ThrowIfNull(sectionGroup);
-            ArgumentNullException.ThrowIfNull(sectionGroupResult);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.RemainingTime = sectionGroup.ExecutionTime - sectionGroupResult.WorkingTime;
             return sectionGroupResultDto;
@@ -568,171 +552,5 @@ namespace Fsel.Course.Infrastructure.Common
         }
 
         #endregion Code Chưa Clearn
-
-        #region LCMS
-
-        public VoidMethodResult AddQuestionToSession(dynamic section, IList<CreateQuestionCommandModel>? questionModels)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var questions = _mapper.Map<IList<Question>>(questionModels);
-            if (questions == null || !questions.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
-                return methodResult;
-            }
-            foreach (var question in questions)
-            {
-                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                if (config == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                }
-                question.CorrectTotal = correctTotal;
-                if (!question.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(question.ErrorMessages);
-                    return methodResult;
-                }
-                if (section != null)
-                {
-                    section.SectionQuestions.Add(new SectionQuestion
-                    {
-                        Question = question,
-                    });
-                }
-            }
-
-            if (!section.IsValid())
-            {
-                methodResult.AddErrorBadRequest(section.ErrorMessages);
-                return methodResult;
-            }
-
-            return methodResult;
-        }
-
-        public VoidMethodResult AddSessionToSessionGroup(dynamic sectionGroup, IList<CreateSectionCommandModel>? sectionModels, EnumCourseType? type)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            //if (sectionModels == null || sectionModels.Count == 0)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
-            //    return methodResult;
-            //}
-            if (sectionModels != null && sectionModels.Any())
-            {
-                IList<Section> sections = sectionGroup.Sections;
-                foreach (var section in sectionModels)
-                {
-                    if (section == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
-                        return methodResult;
-                    }
-                    Section newSection = sections.ElementAt(sectionModels.IndexOf(section));
-                    if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking && sectionGroup.CourseSkill != EnumCourseSkill.Writing)
-                    {
-                        if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
-                            return methodResult;
-                        }
-                        if (type == EnumCourseType.Ielts)
-                        {
-                            //if (section.SectionParts == null || section.SectionParts.Count == 0)
-                            //{
-                            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section.SectionParts));
-                            //    return methodResult;
-                            //}
-
-                            if (section.SectionParts != null && section.SectionParts.Any())
-                            {
-                                foreach (var sectionPart in section.SectionParts)
-                                {
-                                    if (sectionPart == null)
-                                    {
-                                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionPart));
-                                        return methodResult;
-                                    }
-                                    else
-                                    {
-                                        SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-
-                                        var method = AddQuestionToSession(newSectionPart, sectionPart.Questions);
-                                        if (!method.IsOK)
-                                        {
-                                            methodResult.AddErrorBadRequest(method.ErrorMessages);
-                                        }
-                                    }
-                                }
-                            }
-
-                            //var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                            //if (!SectionValidation.IsCheckSection(sectionGroup.CourseSkill, section.DisplayOrder, correctCount))
-                            //{
-                            //    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.MustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
-                            //    return methodResult;
-                            //}
-                        }
-                        else
-                        {
-                            var method = AddQuestionToSession(newSection, section.Questions);
-                            if (!method.IsOK)
-                            {
-                                methodResult.AddErrorBadRequest(method.ErrorMessages);
-                                return methodResult;
-                            }
-                        }
-                    }
-                    else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
-                    {
-                        //if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
-                        //{
-                        //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.CourseSkill));
-                        //    return methodResult;
-                        //}
-                        if (section.SectionTimeCodes != null && section.SectionTimeCodes.Any())
-                        {
-                            foreach (var sectionTimeCode in section.SectionTimeCodes)
-                            {
-                                if (sectionTimeCode == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCode));
-                                    return methodResult;
-                                }
-                                else
-                                {
-                                    SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
-                                }
-                            }
-                        }
-                    }
-
-                    if (!newSection.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(newSection.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-            }
-
-            return methodResult;
-        }
-
-        public async Task<bool> DeleteSectionGroup(IList<SectionGroup> sectionGroups, IList<SectionQuestion> sectionQuestions, IList<Question> questions)
-        {
-            sectionGroups.ForEach(async x => await _sectionGroupRepository.DeleteAsync(x));
-            await _sectionGroupRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-
-            sectionQuestions.ForEach(async x => await _sectionQuestionRepository.DeleteAsync(x));
-            await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-
-            questions.ForEach(async x => await _questionRepository.DeleteAsync(x));
-            await _questionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-
-            return true;
-        }
-
-        #endregion LCMS
     }
 }
