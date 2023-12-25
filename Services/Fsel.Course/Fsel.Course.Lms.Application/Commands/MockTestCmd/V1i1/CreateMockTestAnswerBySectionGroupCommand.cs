@@ -408,7 +408,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionId = sectionId ?? null,
                 SectionGroupResultId = sectionGroupResult.Id,
-                IsCorrect = null
+                IsCorrect = null,
+                Status = EnumAnswerStatus.Done
             };
         }
 
@@ -419,17 +420,19 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionTimeCodeId = sectionTimeCodeId ?? null,
                 SectionGroupResultId = sectionGroupResult.Id,
-                IsCorrect = null
+                IsCorrect = null,
+                Status = EnumAnswerStatus.Done
             };
         }
 
-        private static MockTestAnswer GetMockTestAnswer(SectionGroupResult sectionGroupResult, int correctCount, bool isAnswered, Question? questionItem = null)
+        private static MockTestAnswer GetMockTestAnswer(SectionGroupResult sectionGroupResult, int correctCount, bool isAnswered, Question questionItem)
         {
             return new MockTestAnswer
             {
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionQuestionId = questionItem?.SectionQuestions.FirstOrDefault()?.Id,
                 SectionGroupResultId = sectionGroupResult.Id,
+                Status = questionItem?.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
                 IsCorrect = isAnswered ? (questionItem == null || questionItem.CorrectTotal == correctCount) : null,
             };
         }

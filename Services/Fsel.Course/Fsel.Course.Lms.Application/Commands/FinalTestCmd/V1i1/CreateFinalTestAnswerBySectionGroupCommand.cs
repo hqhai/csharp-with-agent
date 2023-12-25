@@ -266,6 +266,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                         {
                             Answer = answerConfig,
                             CorrectCount = correctCount,
+                            Status = correctCount == questionItem.CorrectTotal ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
                             FinalTestResultId = request.FinalTestResultId,
                             SectionGroupResultId = sectionGroupResult.Id,
                             SectionQuestionId = question?.SectionQuestions.Select(x => x.Id).FirstOrDefault() ?? default,

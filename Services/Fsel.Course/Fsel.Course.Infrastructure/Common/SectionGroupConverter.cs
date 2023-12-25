@@ -277,7 +277,8 @@ namespace Fsel.Course.Infrastructure.Common
                         SectionQuestionId = x,
                         SectionGroupResultId = sectionGroupResult.Id,
                         FinalTestResultId = sectionGroupResult.FinalTestResultId ?? default,
-                        IsCorrect = null
+                        IsCorrect = null,
+                        Status = EnumAnswerStatus.Done
                     }).ToList());
                     await _finalTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 }
@@ -289,7 +290,8 @@ namespace Fsel.Course.Infrastructure.Common
                         SectionQuestionId = x,
                         SectionGroupResultId = sectionGroupResult.Id,
                         PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
-                        IsCorrect = null
+                        IsCorrect = null,
+                        Status = EnumAnswerStatus.Done
                     }).ToList());
                     await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 }
@@ -302,7 +304,8 @@ namespace Fsel.Course.Infrastructure.Common
                              Answer = null,
                              SectionGroupResultId = sectionGroupResult.Id,
                              MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
-                             IsCorrect = null
+                             IsCorrect = null,
+                             Status = EnumAnswerStatus.Done
                          };
                          mocktestAnswer.SectionId = sectionGroup.CourseSkill == EnumCourseSkill.Writing ? x : null;
                          mocktestAnswer.SectionTimeCodeId = sectionGroup.CourseSkill == EnumCourseSkill.Speaking ? x : null;

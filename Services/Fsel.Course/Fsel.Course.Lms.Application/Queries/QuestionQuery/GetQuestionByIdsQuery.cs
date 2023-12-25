@@ -12,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -155,12 +154,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 if (!isShowAnswer)
                 {
                     answerDto.CorrectCount = default;
-                    answerDto.SubAnswerStatus = answerDto.IsCorrect.HasValue ? EnumSubAnswerStatus.Process : null;
                     answerDto.IsCorrect = default;
-                }
-                else
-                {
-                    answerDto.SubAnswerStatus = answerDto.IsCorrect == true ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail;
                 }
                 questionModel.ResultAnswer = answerDto;
             }

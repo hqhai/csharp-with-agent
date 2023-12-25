@@ -288,6 +288,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                             Answer = answerConfig,
                             CorrectCount = correctCount,
                             PlacementTestResultId = request.PlacementTestResultId,
+                            Status = questionItem.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
                             SectionGroupResultId = sectionGroupResultId,
                             SectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default,
                             IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null

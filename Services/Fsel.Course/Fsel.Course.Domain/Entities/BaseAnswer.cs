@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
 
     public class BaseAnswer : Entity
     {
@@ -30,5 +31,6 @@ namespace Fsel.Course.Domain.Entities
         public int CorrectCount { get; set; }
 
         public bool? IsCorrect { get; set; }
+        public EnumAnswerStatus Status { get; set; }
     }
 }
