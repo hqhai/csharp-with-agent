@@ -179,6 +179,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.ListQuestionIdDuplicate), nameof(listQuestionId));
                 return methodResult;
             }
+
             var questionIds = request.Answers.Select(x => x.QuestionId).Distinct().ToList();
             if (questionIds == null || !questionIds.Any())
             {
@@ -193,12 +194,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
-                return methodResult;
-            }
-            var listQuestionId = request.Answers.Select(x => x.QuestionId).GroupBy(x => x).Select(x => x.Count()).ToList();
-            if (listQuestionId.Any(x => x > 1))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.ListQuestionIdDuplicate), nameof(listQuestionId));
                 return methodResult;
             }
             var listQuestion = homeWork.HomeWorkQuestions.Select(x => x.Question!).ToList();

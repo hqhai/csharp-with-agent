@@ -267,8 +267,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                             Answer = answerConfig,
                             CorrectCount = correctCount,
                             FinalTestResultId = request.FinalTestResultId,
-                            SectionGroupResultId = sectionGroupResultId,
-                            SectionQuestionId = question?.SectionQuestions.FirstOrDefault()?.Id ?? default,
+                            SectionGroupResultId = sectionGroupResult.Id,
+                            SectionQuestionId = question?.SectionQuestions.Select(x => x.Id).FirstOrDefault() ?? default,
                             IsCorrect = isAnswered ? question?.CorrectTotal == correctCount : null,
                         });
                     }
@@ -276,19 +276,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             }
             methodResult.Result = finalTestAnswers;
             return methodResult;
-        }
-
-        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Question? question, Guid sectionGroupResultId)
-        {
-            return new FinalTestAnswer
-            {
-                Answer = answer,
-                CorrectCount = correctCount,
-                FinalTestResultId = request.FinalTestResultId,
-                SectionGroupResultId = sectionGroupResultId,
-                SectionQuestionId = question?.SectionQuestions.FirstOrDefault()?.Id ?? default,
-                IsCorrect = question?.CorrectTotal == correctCount,
-            };
         }
     }
 }

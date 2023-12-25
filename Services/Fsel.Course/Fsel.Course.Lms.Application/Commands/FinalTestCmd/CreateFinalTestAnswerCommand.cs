@@ -189,7 +189,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 finalTestResult.Percent = NumberHelper.GetPercent(finalTestResult.CorrectCount, finalTestResult.CorrectTotal);
                 var courseId = finalTestResult.CourseId;
 
-
                 // làm nhiệm vụ
                 await DoQuestBoard(courseId, cancellationToken);
 
@@ -203,7 +202,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
             return methodResult;
         }
-
 
         private async Task DoQuestBoard(Guid courseId, CancellationToken cancellationToken)
         {
