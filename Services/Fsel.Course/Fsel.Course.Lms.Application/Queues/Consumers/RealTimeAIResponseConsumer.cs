@@ -36,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 SettingFrequecy = data.SettingFrequecy,
                 SettingModel = data.SettingModel,
                 WordContent = data.WordContent,
+                IsRetry = data.IsRetry,
             }).ConfigureAwait(false);
         }
     }
