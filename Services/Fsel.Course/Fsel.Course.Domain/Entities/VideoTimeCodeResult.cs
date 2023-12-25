@@ -33,12 +33,12 @@ namespace Fsel.Course.Domain.Entities
         public bool IsWorking { get; set; }
 
         /// <summary>
-        /// Số câu trả lời đúng của Student
+        /// Tổng điểm đạt được của câu hỏi không tính điểm
         /// </summary>
         public int? CorrectCountUngraded { get; set; }
 
         /// <summary>
-        /// Tổng số câu trả lời đúng
+        /// Tổng điểm của câu hỏi không tính điểm đúng
         /// </summary>
         public int? CorrectTotalUngraded { get; set; }
 
@@ -53,6 +53,7 @@ namespace Fsel.Course.Domain.Entities
             }
             set { SkillScoreUngradedStr = ConvertHelper.Serialize(value); }
         }
+
         private double _percentUngraded;
 
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
@@ -64,6 +65,7 @@ namespace Fsel.Course.Domain.Entities
             }
             set { _percentUngraded = CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : value; }
         }
+
         public int? TokenDone { get; set; }
         public int? TokenHighestStreak { get; set; }
         public int? TokenSuperFire { get; set; }

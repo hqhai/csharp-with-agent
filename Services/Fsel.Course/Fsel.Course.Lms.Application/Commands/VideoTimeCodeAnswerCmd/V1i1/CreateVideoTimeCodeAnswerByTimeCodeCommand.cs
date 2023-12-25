@@ -234,17 +234,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             }
             if (isSubmit)
             {
-                var (listSkillScore, skillScores, isDone) = await GetSkillScoresAsync(videoTimeCodeResult, cancellationToken);
-                if (listSkillScore != null && listSkillScore.Any())
+                var (skillScoreUngradeds, skillScores, isDone) = await GetSkillScoresAsync(videoTimeCodeResult, cancellationToken);
+                if (skillScoreUngradeds != null && skillScoreUngradeds.Any())
                 {
-                    videoTimeCodeResult.CorrectCountUngraded = (int)listSkillScore.Sum(x => x.CorrectCount);
-                    videoTimeCodeResult.CorrectTotalUngraded = (int)listSkillScore.Sum(x => x.TotalCount);
+                    videoTimeCodeResult.CorrectCountUngraded = (int)skillScoreUngradeds.Sum(x => x.CorrectCount);
+                    videoTimeCodeResult.CorrectTotalUngraded = (int)skillScoreUngradeds.Sum(x => x.TotalCount);
                 }
                 videoTimeCodeResult.Status = isDone ? EnumResultStatus.Process : EnumResultStatus.Done;
                 videoTimeCodeResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
                 videoTimeCodeResult.SkillScores = skillScores;
-                videoTimeCodeResult.SkillScoreUngraded = listSkillScore;
+                videoTimeCodeResult.SkillScoreUngraded = skillScoreUngradeds;
                 videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
             }
             videoTimeCodeResult.IsWorking = false;
