@@ -34,5 +34,8 @@ namespace Fsel.Interaction.Application.Services.CourseServices
 
         [Get("/class-forum-result/execute-query")]
         Task<IApiResponse<MethodResult<ClassForumResultInfoModel>>> GetClassForumResultInfoByIdAsync([FromQuery] BaseQueryModel query);
+
+        [Get("/course/get-course-studying")]
+        Task<IApiResponse<MethodResult<CourseModel>>> GetCourseStudying();
     }
 }
