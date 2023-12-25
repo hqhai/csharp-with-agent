@@ -6,6 +6,7 @@ namespace Fsel.Storage.Domain.Enums
         Videos,
         Images,
         Questions,
-        Fsis
+        Fsis,
+        AG,
     }
 }

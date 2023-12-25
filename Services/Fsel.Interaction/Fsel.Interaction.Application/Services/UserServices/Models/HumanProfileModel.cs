@@ -2,7 +2,7 @@
 
 namespace Fsel.Interaction.Application.Services.UserServices.Models
 {
-    public class HumanModel
+    public class HumanProfileModel
     {
         public string? FullName { get; set; }
         public string? Birthday { get; set; }
