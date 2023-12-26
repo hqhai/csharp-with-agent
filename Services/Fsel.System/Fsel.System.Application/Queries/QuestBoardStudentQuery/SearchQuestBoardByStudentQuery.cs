@@ -111,34 +111,15 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
             }
 
             int totalItem = questBoards.Count;
-            var lists = questBoards.ApplySortAndPaging(request).ToList();
-
-
+            var lists = questBoards.Where(x => x.QuestBoardType == request.Type).ApplySortAndPaging(request).ToList();
 
             switch (request.Type)
             {
-                case EnumQuestBoardType.MainQuests:
-                    lists = questBoards.Where(x => x.QuestBoardType == EnumQuestBoardType.MainQuests).ToList();
-                    break;
                 case EnumQuestBoardType.EventQuests:
                     break;
-
-                case EnumQuestBoardType.SideQuests:
-                    lists = questBoards.Where(x => x.QuestBoardType == EnumQuestBoardType.SideQuests).ToList();
-                    break;
-                case EnumQuestBoardType.PremiumQuests:
-                    lists = questBoards.Where(x => x.QuestBoardType == EnumQuestBoardType.PremiumQuests).ToList();
-                    break;
-
                 case EnumQuestBoardType.DailyQuests:
                     Random random = new Random();
-                    lists = questBoards.Where(x => x.QuestBoardType == EnumQuestBoardType.DailyQuests).OrderBy(x => random.Next()).Take(ValueSettings.QuestBoardPoint.Random_Daily_QuestBoard).ToList();
-                    break;
-
-                case EnumQuestBoardType.FunChallenges:
-                    break;
-
-                case EnumQuestBoardType.TreasureHunters:
+                    lists = questBoards.OrderBy(x => random.Next()).Take(ValueSettings.QuestBoardPoint.Random_Daily_QuestBoard).ToList();
                     break;
             }
 
