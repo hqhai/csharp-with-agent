@@ -241,7 +241,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
                 await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
-            methodResult.Result = anwserResult.Result;
             return methodResult;
         }
 

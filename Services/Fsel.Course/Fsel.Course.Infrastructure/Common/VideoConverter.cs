@@ -458,7 +458,7 @@ namespace Fsel.Course.Infrastructure.Common
             timeCode.CorrectTotal = GetCorrectTotal(videoTimeCode);
             timeCode.Status = GetTimeCodeStatus(videoTimeCode);
             timeCode.VideoTimeCodeResult = GetVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
-            timeCode.Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n, videoTimeCodeResult?.Status ?? EnumResultStatus.New, isShowSubStatus)).ToList();
+            timeCode.Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n, videoTimeCodeResult?.Status ?? EnumResultStatus.New, isShowSubStatus, videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)).ToList();
             return timeCode;
         }
 
@@ -502,16 +502,22 @@ namespace Fsel.Course.Infrastructure.Common
             return videoTimeCodeResult;
         }
 
-        private ExerciseModel GetExercise(Exercise? n, EnumResultStatus status, bool isShowSubStatus)
+        private static double GetRemainingTime(double executionTime, double workingTime)
+        {
+            var remainingTime = executionTime - workingTime;
+            return remainingTime > 0 ? remainingTime : default;
+        }
+
+        private ExerciseModel GetExercise(Exercise? n, EnumResultStatus status, bool isShowSubStatus, bool isDisableAnswer)
         {
             ArgumentNullException.ThrowIfNull(n);
             var exerciseModel = _mapper.Map<ExerciseModel>(n);
-            var questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m, status, isShowSubStatus)).ToList();
+            var questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m, status, isShowSubStatus, isDisableAnswer)).ToList();
             exerciseModel.Questions = questions;
             return exerciseModel;
         }
 
-        private QuestionModel GetQuestion(Question? question, EnumResultStatus status, bool isShowSubStatus)
+        private QuestionModel GetQuestion(Question? question, EnumResultStatus status, bool isShowSubStatus, bool isDisableAnswer)
         {
             ArgumentNullException.ThrowIfNull(question);
             var answer = _mapper.Map<AnswerModel>(question.VideoTimeCodeAnswers.FirstOrDefault());
@@ -520,13 +526,8 @@ namespace Fsel.Course.Infrastructure.Common
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
             if (answer != null)
             {
-                answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, question.QuestionType, isShowSubStatus, status);
-                if (!isCheck)
-                {
-                    answer.CorrectCount = default;
-                    answer.IsCorrect = default;
-                }
-                questionModel.ResultAnswer = answer;
+                answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, question.QuestionType, isShowSubStatus, status, isDisableAnswer);
+                questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
             }
             return questionModel;
         }
@@ -611,7 +612,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var status = GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal);
                     x.Status = isDone ? EnumAnswerStatus.Done : status;
-                    x.IsCorrect = x.IsCorrect != null ? status == EnumAnswerStatus.Done : null;
+                    x.IsCorrect = x.CorrectCount == x.Question!.CorrectTotal;
                 });
                 _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);

@@ -24,13 +24,37 @@ namespace Fsel.Course.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
+        public EnumAnswerStatus Status { get; set; }
+
+        private bool? _isCorrect;
+        private int _correctCount;
+
+        public bool? IsCorrect
+        {
+            get
+            {
+                return Status == EnumAnswerStatus.Done ? _isCorrect : null;
+            }
+            set
+            {
+                _isCorrect = value;
+            }
+        }
+
         /// <summary>
         /// Số lượng câu trả lời đúng
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount { get; set; }
-
-        public bool? IsCorrect { get; set; }
-        public EnumAnswerStatus Status { get; set; }
+        public int CorrectCount
+        {
+            get
+            {
+                return Status == EnumAnswerStatus.Done ? _correctCount : default;
+            }
+            set
+            {
+                _correctCount = value;
+            }
+        }
     }
 }
