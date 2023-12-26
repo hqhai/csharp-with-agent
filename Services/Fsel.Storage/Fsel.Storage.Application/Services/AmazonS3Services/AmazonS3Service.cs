@@ -427,19 +427,26 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
         private static async Task FfmpegStart(string ffmpegArgs)
         {
-            var ffmpegProcess = new ProcessStartInfo
+            using (var process = new Process())
             {
-                FileName = "ffmpeg",
-                Arguments = ffmpegArgs,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
+                var ffmpegProcess = new ProcessStartInfo
+                {
+                    FileName = "ffmpeg",
+                    Arguments = ffmpegArgs,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                };
 
-            var process = Process.Start(ffmpegProcess);
-            if (process != null)
-            {
+                process.StartInfo = ffmpegProcess;
+                process.Start();
                 await process.WaitForExitAsync();
+
+                if (!process.HasExited)
+                {
+                    process.WaitForExit(5000);
+                    process.Kill();
+                }
             }
         }
     }
