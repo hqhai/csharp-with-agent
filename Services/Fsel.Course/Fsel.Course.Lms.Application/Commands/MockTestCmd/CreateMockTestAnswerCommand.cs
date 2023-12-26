@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                 methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                                 return methodResult;
                             }
-                            var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                            var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                             var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()!.Id;
                             var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
                             if (mockTestAnswer == null)
@@ -128,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                     CorrectCount = correctCount,
                                     MockTestResultId = mockTestResult.Id,
                                     SectionQuestionId = sectionQuestionId,
-                                    IsCorrect = correctCount == questionItem.CorrectTotal,
+                                    IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null,
                                 };
                                 mockTestAnswers.Add(mockTestAnswer);
                             }

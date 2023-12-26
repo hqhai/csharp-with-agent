@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
-                var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                 var homeWorkQuestion = questionItem.HomeWorkQuestions.FirstOrDefault();
                 if (homeWorkQuestion == null)
                 {
@@ -122,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                         CorrectCount = correctCount,
                         HomeWorkQuestionId = homeWorkQuestion.Id,
                         HomeWorkResultId = homeWorkResult.Id,
-                        IsCorrect = correctCount == questionItem.CorrectTotal
+                        IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null
                     });
                 }
                 else
@@ -130,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     correctTotal += correctCount;
                     homeWorkAnswer.Answer = answerConfig;
                     homeWorkAnswer.CorrectCount = correctCount;
-                    homeWorkAnswer.IsCorrect = correctCount == questionItem.CorrectTotal;
+                    homeWorkAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
                     homeWorkAnswers.Add(homeWorkAnswer);
                 }
             }

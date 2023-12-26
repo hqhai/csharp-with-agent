@@ -8,6 +8,33 @@ namespace Fsel.Course.Domain.Entities
 
     public class VideoTimeCodeAnswer : BaseAnswer
     {
+        private bool? _isCorrect;
+        private int _correctCount;
+
+        public override bool? IsCorrect
+        {
+            get
+            {
+                return Status == EnumAnswerStatus.Done ? _isCorrect : null;
+            }
+            set
+            {
+                _isCorrect = value;
+            }
+        }
+
+        public override int CorrectCount
+        {
+            get
+            {
+                return Status == EnumAnswerStatus.Done ? _correctCount : default;
+            }
+            set
+            {
+                _correctCount = value;
+            }
+        }
+
         public bool IsFirstSubmit { get; set; }
 
         public EnumAnswerStatus Status { get; set; }
