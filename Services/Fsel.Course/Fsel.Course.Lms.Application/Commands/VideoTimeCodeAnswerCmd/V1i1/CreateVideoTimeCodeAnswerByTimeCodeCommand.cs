@@ -226,14 +226,23 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private async Task<VideoTimeCodeResult> GetVideoTimeCodeResultAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, bool isSubmit, CancellationToken cancellationToken)
         {
-            if (videoTimeCodeResult.Status == EnumResultStatus.New || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+            if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                videoTimeCodeResult.Status = EnumResultStatus.Process;
             }
-            else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+            else
             {
-                videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                if (videoTimeCodeResult.Status == EnumResultStatus.New)
+                {
+                    videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                }
+                else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+                {
+                    videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                }
             }
+
             if (isSubmit)
             {
                 var (listSkillScore, isDone) = await GetSkillScores(videoTimeCode, videoTimeCodeResult, cancellationToken);
@@ -242,10 +251,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 videoTimeCodeResult.CorrectTotal = (int)listSkillScore.Sum(x => x.TotalCount);
                 videoTimeCodeResult.SkillScores = listSkillScore;
                 videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
-            }
-            else if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
-            {
-                videoTimeCodeResult.Status = EnumResultStatus.Process;
             }
             videoTimeCodeResult.IsWorking = false;
             return videoTimeCodeResult;
