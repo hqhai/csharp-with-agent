@@ -226,7 +226,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private async Task<VideoTimeCodeResult> GetVideoTimeCodeResultAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, bool isSubmit, CancellationToken cancellationToken)
         {
-            if (videoTimeCodeResult.Status == EnumResultStatus.New)
+            if (videoTimeCodeResult.Status == EnumResultStatus.New || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
             }
@@ -242,6 +242,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 videoTimeCodeResult.CorrectTotal = (int)listSkillScore.Sum(x => x.TotalCount);
                 videoTimeCodeResult.SkillScores = listSkillScore;
                 videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
+            }
+            else if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+            {
+                videoTimeCodeResult.Status = EnumResultStatus.Process;
             }
             videoTimeCodeResult.IsWorking = false;
             return videoTimeCodeResult;
