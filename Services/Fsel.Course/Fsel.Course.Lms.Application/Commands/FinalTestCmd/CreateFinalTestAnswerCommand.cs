@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -150,7 +149,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                    var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()!.Id;
                     var finalAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == finalTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
 
@@ -161,7 +160,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                             CorrectCount = correctCount,
                             Answer = answerConfig ?? answer.Answer,
                             SectionQuestionId = sectionQuestionId,
-                            IsCorrect = correctCount == questionItem.CorrectTotal
+                            IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null
                         };
                         count += correctCount;
                         finalTestResult.FinalTestAnswers.Add(finalAnswer);
