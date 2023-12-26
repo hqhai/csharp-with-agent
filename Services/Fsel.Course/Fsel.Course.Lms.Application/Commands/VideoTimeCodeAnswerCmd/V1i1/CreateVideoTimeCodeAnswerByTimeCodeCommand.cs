@@ -78,7 +78,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VideoTimeCodeModel>();
-
             var method = await CreateAnswer(request, cancellationToken);
             if (!method.IsOK)
             {
@@ -166,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
-                var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
 
                 if (answer == null)
                 {
@@ -178,11 +177,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                         VideoTimeCodeResultId = videoTimeCodeResult.Id,
                         VideoResultId = videoTimeCodeResult.VideoResultId,
                     };
-                    videoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit, videoTimeCodeResult.Status));
+                    videoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit, videoTimeCodeResult.Status, isAnswered));
                 }
                 else if (answer.Status != EnumAnswerStatus.Done)
                 {
-                    updateVideoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit, videoTimeCodeResult.Status));
+                    updateVideoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit, videoTimeCodeResult.Status, isAnswered));
                 }
             }
             if (videoTimeCodeAnswers.Any())
@@ -198,12 +197,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             return methodResult;
         }
 
-        private static VideoTimeCodeAnswer GetVideoTimeCodeAnswer(VideoTimeCodeAnswer answer, Question question, int correctCount, object? answerConfig, bool isSubmit, EnumResultStatus status)
+        private static VideoTimeCodeAnswer GetVideoTimeCodeAnswer(VideoTimeCodeAnswer answer, Question question, int correctCount, object? answerConfig, bool isSubmit, EnumResultStatus status, bool isAnswered)
         {
             answer.Answer = answerConfig;
             answer.CorrectCount = question.Ungraded ? default : correctCount;
             answer.Status = GetAnswerStatus(isSubmit, correctCount, question.CorrectTotal);
-            answer.IsCorrect = answer.Status == EnumAnswerStatus.Done;
+            answer.IsCorrect = isAnswered ? correctCount == question.CorrectTotal : null;
             answer.IsFirstSubmit = status == EnumResultStatus.New;
             return answer;
         }
@@ -226,14 +225,23 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private async Task<VideoTimeCodeResult> GetVideoTimeCodeResultAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, bool isSubmit, CancellationToken cancellationToken)
         {
-            if (videoTimeCodeResult.Status == EnumResultStatus.New)
+            if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                videoTimeCodeResult.Status = EnumResultStatus.Process;
             }
-            else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+            else
             {
-                videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                if (videoTimeCodeResult.Status == EnumResultStatus.New)
+                {
+                    videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                }
+                else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+                {
+                    videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                }
             }
+
             if (isSubmit)
             {
                 var (listSkillScore, isDone) = await GetSkillScores(videoTimeCode, videoTimeCodeResult, cancellationToken);
