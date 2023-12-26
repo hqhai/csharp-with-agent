@@ -237,9 +237,9 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
                 await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
-            if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
+            if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
             {
-                await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
+                _finalTestAnswerRepository.UpdateList(updateFinalTestAnswers);
                 await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             return methodResult;
