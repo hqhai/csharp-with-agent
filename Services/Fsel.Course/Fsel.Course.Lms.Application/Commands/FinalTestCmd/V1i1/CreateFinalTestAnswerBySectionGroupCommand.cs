@@ -230,22 +230,28 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 methodResult.AddErrorBadRequest(anwserResult.ErrorMessages);
                 return methodResult;
             }
-            var finalTestAnswers = anwserResult.Result;
-            if (finalTestAnswers != null && finalTestAnswers.Any())
+            var (createFinalTestAnswers, updateFinalTestAnswers) = anwserResult.Result;
+            if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
             {
-                await _finalTestAnswerRepository.AddList(finalTestAnswers);
+                await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
+                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            }
+            if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
+            {
+                await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
                 await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
             methodResult.Result = anwserResult.Result;
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, IList<Question>? questions, SectionGroupResult sectionGroupResult)
+        private async Task<MethodResult<(IList<FinalTestAnswer>, IList<FinalTestAnswer>)>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, IList<Question>? questions, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
-            var methodResult = new MethodResult<IList<FinalTestAnswer>>();
-            var finalTestAnswers = new List<FinalTestAnswer>();
+            var methodResult = new MethodResult<(IList<FinalTestAnswer>, IList<FinalTestAnswer>)>();
+            var updateFinalTestAnswers = new List<FinalTestAnswer>();
+            var createFinalTestAnswers = new List<FinalTestAnswer>();
             if (questions != null && questions.Any())
             {
                 foreach (var item in request.Answers)
@@ -259,23 +265,29 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     }
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
-                    var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == request.SectionGroupId);
+                    var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionQuestionId == sectionQuestionId);
                     if (finalTestAnswer == null)
                     {
-                        finalTestAnswers.Add(new FinalTestAnswer
+                        finalTestAnswer = new FinalTestAnswer
                         {
-                            Answer = answerConfig,
-                            CorrectCount = correctCount,
-                            Status = correctCount == questionItem.CorrectTotal ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
                             FinalTestResultId = request.FinalTestResultId,
                             SectionGroupResultId = sectionGroupResult.Id,
-                            SectionQuestionId = question?.SectionQuestions.Select(x => x.Id).FirstOrDefault() ?? default,
-                            IsCorrect = isAnswered ? question?.CorrectTotal == correctCount : null,
-                        });
+                            SectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default,
+                        };
+                        createFinalTestAnswers.Add(finalTestAnswer);
                     }
+                    else
+                    {
+                        updateFinalTestAnswers.Add(finalTestAnswer);
+                    }
+
+                    finalTestAnswer.Answer = answerConfig;
+                    finalTestAnswer.CorrectCount = correctCount;
+                    finalTestAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
+                    finalTestAnswer.Status = questionItem.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
                 }
             }
-            methodResult.Result = finalTestAnswers;
+            methodResult.Result = (createFinalTestAnswers, updateFinalTestAnswers);
             return methodResult;
         }
     }

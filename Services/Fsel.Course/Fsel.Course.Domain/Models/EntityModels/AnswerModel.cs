@@ -18,6 +18,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
             }
         }
 
-        public EnumAnswerStatus EnumAnswerStatus { get; set; }
+        public EnumAnswerStatus Status { get; set; }
     }
 }

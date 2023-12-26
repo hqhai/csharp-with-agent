@@ -514,7 +514,7 @@ namespace Fsel.Course.Infrastructure.Common
         private QuestionModel GetQuestion(Question? question, EnumResultStatus status, bool isShowSubStatus)
         {
             ArgumentNullException.ThrowIfNull(question);
-            var answer = _mapper.Map<AnswerVideoModel>(question.VideoTimeCodeAnswers.FirstOrDefault());
+            var answer = _mapper.Map<AnswerModel>(question.VideoTimeCodeAnswers.FirstOrDefault());
             var isCheck = answer?.Status == EnumAnswerStatus.Done;
             var questionModel = _mapper.Map<QuestionModel>(question);
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
@@ -524,12 +524,7 @@ namespace Fsel.Course.Infrastructure.Common
                 if (!isCheck)
                 {
                     answer.CorrectCount = default;
-                    answer.SubAnswerStatus = answer.IsCorrect.HasValue ? EnumSubAnswerStatus.Process : null;
                     answer.IsCorrect = default;
-                }
-                else
-                {
-                    answer.SubAnswerStatus = answer.IsCorrect == true ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail;
                 }
                 questionModel.ResultAnswer = answer;
             }
