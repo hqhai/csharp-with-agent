@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeResult));
                 return methodResult;
             }
-            if (videoTimeCodeResult.VideoTimeCode?.TimeCodeType != EnumTimeCodeType.Standalone)
+            if (videoTimeCodeResult.VideoTimeCode?.TimeCodeType == EnumTimeCodeType.Standalone)
             {
                 return methodResult;
             }
