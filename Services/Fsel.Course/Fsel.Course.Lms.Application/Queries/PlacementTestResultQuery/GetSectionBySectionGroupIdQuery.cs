@@ -81,9 +81,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-
-            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(request.SectionGroupId, sectionGroup.CourseSkill);
             var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId, sectionGroup);
+            var (sections, totalCount) = await _sectionConverter.GetSectionsAsync(sectionGroupResult, sectionGroup.CourseSkill);
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _sectionConverter.GetSectionGroupDto(totalCount, sections, sectionGroup, sectionGroupResult);
             return methodResult;

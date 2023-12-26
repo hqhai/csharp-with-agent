@@ -10,6 +10,8 @@ namespace Fsel.Shared.Constants
 
             public const int Random_Daily_QuestBoard = 3; // Lấy ngẫu nhiên 3 nhiệm vụ trong daily questboard
         }
+
+        public const int DelayOneMinute = 1;
     }
 }
 
