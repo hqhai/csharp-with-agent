@@ -145,6 +145,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 if (request.IsSubmit)
                 {
                     await _sectionGroupConverter.UpdateUnansweredQuestions(sectionGroup, sectionGroupResult);
+                    await _sectionGroupConverter.UpdateAnswerProcessByTest(sectionGroupResult).ConfigureAwait(false);
                     sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup);
                 }
                 return methodResult;
@@ -320,7 +321,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
 
-                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
+                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionQuestionId == sectionQuestionId);
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, correctCount, isAnswered, questionItem);

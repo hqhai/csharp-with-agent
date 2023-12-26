@@ -1661,8 +1661,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("SectionQuestionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -1994,8 +1996,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -2813,8 +2817,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("SectionTimeCodeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -3236,8 +3242,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("SectionQuestionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")

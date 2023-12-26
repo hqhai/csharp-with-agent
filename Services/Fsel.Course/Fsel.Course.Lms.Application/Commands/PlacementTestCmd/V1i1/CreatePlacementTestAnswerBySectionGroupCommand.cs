@@ -156,6 +156,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 if (request.IsSubmit)
                 {
                     await _sectionGroupConverter.UpdateUnansweredQuestions(sectionGroup, sectionGroupResult);
+                    await _sectionGroupConverter.UpdateAnswerProcessByTest(sectionGroupResult).ConfigureAwait(false);
                     sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup);
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;

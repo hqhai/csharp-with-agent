@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 {
                     updateHomeWorkAnswers.Add(homeWorkAnswer);
                 }
-                homeWorkAnswer.Status = request.IsSubmit && correctCount == questionItem.CorrectTotal ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
+                homeWorkAnswer.Status = request.IsSubmit ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
                 homeWorkAnswer.Answer = answerConfig;
                 homeWorkAnswer.CorrectCount = correctCount;
                 homeWorkAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;

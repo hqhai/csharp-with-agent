@@ -24,6 +24,12 @@ namespace Fsel.Course.Infrastructure.Configs
               .WithMany(b => b.HomeWorkAnswers)
               .HasForeignKey(b => b.HomeWorkQuestionId)
               .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(e => e.Status)
+                  .HasMaxLength(100)
+                  .HasConversion(
+                      v => v.ToString(),
+                      v => v.EnumParse<EnumAnswerStatus>());
         }
     }
 }

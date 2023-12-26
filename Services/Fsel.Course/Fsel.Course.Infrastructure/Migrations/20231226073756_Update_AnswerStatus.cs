@@ -10,33 +10,37 @@ namespace Fsel.Course.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<string>(
                 name: "Status",
                 table: "PlacementTestAnswers",
-                type: "int",
+                type: "nvarchar(100)",
+                maxLength: 100,
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
 
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<string>(
                 name: "Status",
                 table: "MockTestAnswers",
-                type: "int",
+                type: "nvarchar(100)",
+                maxLength: 100,
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
 
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<string>(
                 name: "Status",
                 table: "HomeWorkAnswers",
-                type: "int",
+                type: "nvarchar(100)",
+                maxLength: 100,
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
 
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<string>(
                 name: "Status",
                 table: "FinalTestAnswers",
-                type: "int",
+                type: "nvarchar(100)",
+                maxLength: 100,
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
         }
 
         /// <inheritdoc />

@@ -318,6 +318,41 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
+        public async Task UpdateAnswerProcessByTest(SectionGroupResult sectionGroupResult)
+        {
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
+            if (sectionGroupResult.FinalTestResultId.HasValue)
+            {
+                var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
+                _finalTestAnswerRepository.UpdateList(finalTestAnswers.Select(x =>
+               {
+                   x.Status = EnumAnswerStatus.Done;
+                   return x;
+               }).ToList());
+                await _finalTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            }
+            else if (sectionGroupResult.PlacementTestResultId.HasValue)
+            {
+                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
+                _placementTestAnswerRepository.UpdateList(placementTestAnswers.Select(x =>
+               {
+                   x.Status = EnumAnswerStatus.Done;
+                   return x;
+               }).ToList());
+                await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            }
+            else
+            {
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
+                _mockTestAnswerRepository.UpdateList(mockTestAnswers.Select(x =>
+               {
+                   x.Status = EnumAnswerStatus.Done;
+                   return x;
+               }).ToList());
+                await _mockTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            }
+        }
+
         #endregion Clean Code
 
         public IList<SectionGroupModel> GetSectionGroups(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
