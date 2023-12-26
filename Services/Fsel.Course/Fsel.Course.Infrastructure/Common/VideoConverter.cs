@@ -525,8 +525,6 @@ namespace Fsel.Course.Infrastructure.Common
             if (videoTimeCodeAnswer != null)
             {
                 videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, isShowSubStatus, status);
-                videoTimeCodeAnswer.CorrectCount = isCheck ? videoTimeCodeAnswer.CorrectCount : default;
-                videoTimeCodeAnswer.IsCorrect = isCheck ? videoTimeCodeAnswer.IsCorrect : default;
                 questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
             }
             return questionModel;
@@ -599,7 +597,7 @@ namespace Fsel.Course.Infrastructure.Common
                     VideoTimeCodeId = videoTimeCode.Id,
                     ExerciseId = x.ExerciseQuestions.FirstOrDefault()?.ExerciseId ?? default,
                     Status = isDone ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
-                    IsCorrect = null
+                    IsCorrect = false
                 }).ToList();
 
                 await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
@@ -612,7 +610,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var status = GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal);
                     x.Status = isDone ? EnumAnswerStatus.Done : status;
-                    x.IsCorrect = x.IsCorrect != null ? x.CorrectCount == x.Question!.CorrectTotal : null;
+                    x.IsCorrect = x.CorrectCount == x.Question!.CorrectTotal;
                 });
                 _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
