@@ -203,7 +203,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             answer.Answer = answerConfig;
             answer.CorrectCount = question.Ungraded ? default : correctCount;
             answer.Status = GetAnswerStatus(isSubmit, correctCount, question.CorrectTotal);
-            answer.IsCorrect = answer.Status == EnumAnswerStatus.Done;
+            answer.IsCorrect = correctCount == question.CorrectTotal;
             answer.IsFirstSubmit = status == EnumResultStatus.New;
             return answer;
         }

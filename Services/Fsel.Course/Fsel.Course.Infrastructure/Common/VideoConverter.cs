@@ -526,6 +526,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, isShowSubStatus, status);
                 videoTimeCodeAnswer.CorrectCount = isCheck ? videoTimeCodeAnswer.CorrectCount : default;
+                videoTimeCodeAnswer.IsCorrect = isCheck ? videoTimeCodeAnswer.IsCorrect : default;
                 questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
             }
             return questionModel;
@@ -611,7 +612,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var status = GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal);
                     x.Status = isDone ? EnumAnswerStatus.Done : status;
-                    x.IsCorrect = x.IsCorrect != null ? status == EnumAnswerStatus.Done : null;
+                    x.IsCorrect = x.IsCorrect != null ? x.CorrectCount == x.Question!.CorrectTotal : null;
                 });
                 _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
