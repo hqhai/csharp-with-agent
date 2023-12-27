@@ -2,6 +2,14 @@
   "GlobalConfiguration": {
     "BaseUrl": "http://gateway-testing.fsel-testing.svc"
   },
+  "RateLimitOptions": {
+    "DisableRateLimitHeaders": true,
+    "EnableRateLimiting": true,
+    "ClientWhitelist": [],
+    "Period": "1s",
+    "PeriodTimespan": 1,
+    "Limit": 100
+  },
   "Routes": [
     // Auth Service
     {
@@ -71,7 +79,12 @@
           "Host": "storage-testing.fsel-testing.svc",
           "Port": 80
         }
-      ]
+      ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 99999,
+        "DurationOfBreak": 1000,
+        "TimeoutValue": 900000
+      }
     },
     // Sender Service
     {
