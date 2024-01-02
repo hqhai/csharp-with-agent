@@ -14,8 +14,6 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<VideoTimeCode, VideoTimeCodeModel>().IgnoreAllNonExisting();
             CreateMap<CreateVideoTimeCodeCommandModel, VideoTimeCode>().IgnoreAllNonExisting();
-            CreateMap<VideoTimeCodeResult, VideoTimeCodeResultModel>()
-            .ForMember(x => x.CurrentVideoTimeCodeId, p => p.MapFrom(o => o.VideoResult != null ? o.VideoResult.CurrentVideoTimeCodeId : null));
         }
     }
 }
