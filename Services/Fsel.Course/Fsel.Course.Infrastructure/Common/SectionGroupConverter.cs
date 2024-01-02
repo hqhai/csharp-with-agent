@@ -42,22 +42,22 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
-            var bools = new List<bool>();
+            var isHighestStreaks = new List<bool>();
             if (sectionGroupResult.MockTestResultId.HasValue)
             {
-                bools = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                isHighestStreaks = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                     .Include(x => x.SectionQuestion)
                     .OrderBy(x => x.CreatedDate)
                     .Select(x => x.IsCorrect == true).ToListAsync();
             }
             else if (sectionGroupResult.FinalTestResultId.HasValue)
             {
-                bools = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                isHighestStreaks = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                     .Include(x => x.SectionQuestion)
                     .OrderBy(x => x.CreatedDate)
                     .Select(x => x.IsCorrect == true).ToListAsync();
             }
-            return bools.Any() ? _linQHelper.GetHighestStreak(bools) : default;
+            return _linQHelper.GetHighestStreak(isHighestStreaks);
         }
 
         private async Task<SkillScores> GetSkillScoreFinalTest(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
