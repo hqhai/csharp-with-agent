@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Sections;
     using Fsel.Shared.Enums;
 
-    public class SectionGroupLCMSConverter
+    public class SectionGroupManagerConverter
     {
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
@@ -20,7 +20,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly IQuestionRepository _questionRepository;
 
-        public SectionGroupLCMSConverter(QuestionTypeConverter questionTypeConverter, IMapper mapper, ISectionGroupRepository sectionGroupRepository, ISectionQuestionRepository sectionQuestionRepository, IQuestionRepository questionRepository)
+        public SectionGroupManagerConverter(QuestionTypeConverter questionTypeConverter, IMapper mapper, ISectionGroupRepository sectionGroupRepository, ISectionQuestionRepository sectionQuestionRepository, IQuestionRepository questionRepository)
         {
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;

@@ -29,17 +29,17 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IFinalTestRepository _finalTestRepository;
-        private readonly SectionGroupLCMSConverter _sectionGroupLCMSConverter;
+        private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public UpdateFinalTestCommandHandler(IMapper mapper
             , IFinalTestRepository finalTestRepository
-            , SectionGroupLCMSConverter sectionGroupLCMSConverter
+            , SectionGroupManagerConverter sectionGroupManagerConverter
             , ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _mapper = mapper;
             _finalTestRepository = finalTestRepository;
-            _sectionGroupLCMSConverter = sectionGroupLCMSConverter;
+            _sectionGroupManagerConverter = sectionGroupManagerConverter;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
@@ -94,7 +94,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
                     //    return methodResult;
                     //}
-                    var method = _sectionGroupLCMSConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
+                    var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
                     if (!method.IsOK)
                     {
                         methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -120,7 +120,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
 
             await _finalTestRepository.ExecuteTransactionAsync(async () =>
             {
-                await _sectionGroupLCMSConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
+                await _sectionGroupManagerConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
                 finalTest = _finalTestRepository.Update(finalTest);
                 await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
