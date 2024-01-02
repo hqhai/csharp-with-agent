@@ -39,24 +39,25 @@ namespace Fsel.Course.Infrastructure.Common
             _mockTestAnswerRepository = mockTestAnswerRepository;
         }
 
-        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult, bool isMockTest = false)
+        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult)
         {
-            if (isMockTest)
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
+            var isHighestStreaks = new List<bool>();
+            if (sectionGroupResult.MockTestResultId.HasValue)
             {
-                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                isHighestStreaks = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                     .Include(x => x.SectionQuestion)
                     .OrderBy(x => x.CreatedDate)
                     .Select(x => x.IsCorrect == true).ToListAsync();
-                return _linQHelper.GetHighestStreak(mockTestAnswers);
             }
-            else
+            else if (sectionGroupResult.FinalTestResultId.HasValue)
             {
-                var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                isHighestStreaks = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                     .Include(x => x.SectionQuestion)
                     .OrderBy(x => x.CreatedDate)
                     .Select(x => x.IsCorrect == true).ToListAsync();
-                return _linQHelper.GetHighestStreak(finalTestAnswers);
             }
+            return _linQHelper.GetHighestStreak(isHighestStreaks);
         }
 
         private async Task<SkillScores> GetSkillScoreFinalTest(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
