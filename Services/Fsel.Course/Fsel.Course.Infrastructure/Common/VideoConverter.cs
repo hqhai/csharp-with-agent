@@ -462,7 +462,7 @@ namespace Fsel.Course.Infrastructure.Common
             return timeCode;
         }
 
-        public IList<VideoTimeCodeModel> GetTimeCodes(Video? video, Guid videoResultId, bool isShowTotalCount = false)
+        public IList<VideoTimeCodeModel> GetTimeCodes(Video? video, Guid videoResultId)
         {
             ArgumentNullException.ThrowIfNull(video);
             var videoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).ToList();
@@ -473,7 +473,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var indexTimeCode = videoTimeCodes.IndexOf(item);
                 var videoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(item.VideoTimeCodeResults.FirstOrDefault());
                 var videoTimeCode = GetVideoTimeCode(item, videoTimeCodeResult);
-                videoTimeCode.TotalCount = isShowTotalCount ? GetTotalQuestion(item) : default;
+                videoTimeCode.TotalCount = GetTotalQuestion(item);
                 videoTimeCode.Status = GetTimeCodeStatus(indexProcess, indexTimeCode);
                 videoTimeCodeModels.Add(videoTimeCode);
             }
