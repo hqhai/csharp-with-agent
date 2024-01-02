@@ -52,7 +52,7 @@ namespace Fsel.Shared.Helpers
 
                 foreach (var date in sortedDates)
                 {
-                    var numberOfDays = DateTime.UtcNow.Date - date;
+                    var numberOfDays = DateTime.UtcNow.Date - date.Date;
                     if (numberOfDays.Days == consecutiveDays + 1)
                     {
                         consecutiveDays++;
