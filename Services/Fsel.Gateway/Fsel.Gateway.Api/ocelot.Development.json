@@ -2,6 +2,14 @@
   "GlobalConfiguration": {
     "BaseUrl": "http://localhost:5200"
   },
+  "RateLimitOptions": {
+    "DisableRateLimitHeaders": true,
+    "EnableRateLimiting": true,
+    "ClientWhitelist": [],
+    "Period": "1s",
+    "PeriodTimespan": 1,
+    "Limit": 100
+  },
   "Routes": [
     // Auth Service
     {
@@ -71,7 +79,12 @@
           "Host": "localhost",
           "Port": 5205
         }
-      ]
+      ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 99999,
+        "DurationOfBreak": 1000,
+        "TimeoutValue": 900000
+      }
     },
     // Sender Service
     {
