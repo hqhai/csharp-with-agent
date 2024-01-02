@@ -351,7 +351,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 string outputM3U8 = Path.Combine(rootFolderPath, $"{quality.Name}.m3u8");
                 string ffmpegArgs = $"-i {inputPath} -c:v libx264 -b:v {quality.Bitrate} -vf \"scale={quality.Resolution}\" -c:a aac -b:a 128k -hls_time 60 -hls_list_size 0 -f hls {outputM3U8}";
 
-                FfmpegStart(ffmpegArgs);
+                await FfmpegStart(ffmpegArgs);
             }
 
             _logger.LogInformation($"Start resolution 3");
@@ -425,7 +425,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return result;
         }
 
-        private static void FfmpegStart(string ffmpegArgs)
+        private static async Task FfmpegStart(string ffmpegArgs)
         {
             var ffmpegProcess = new ProcessStartInfo
             {
@@ -436,9 +436,10 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 CreateNoWindow = true,
             };
 
-            var process = Process.Start(ffmpegProcess);
-            if (process != null)
+            using (var process = new Process { StartInfo = ffmpegProcess })
             {
+                process.Start();
+                await process.WaitForExitAsync();
                 process.WaitForExit();
             }
         }
