@@ -153,12 +153,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             }
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                if (request.IsSubmit)
-                {
-                    await _sectionGroupConverter.UpdateUnansweredQuestions(sectionGroup, sectionGroupResult);
-                    await _sectionGroupConverter.UpdateAnswerProcessByTest(sectionGroupResult).ConfigureAwait(false);
-                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup);
-                }
+                sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });

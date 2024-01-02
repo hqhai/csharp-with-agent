@@ -45,22 +45,22 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
+            var bools = new List<bool>();
             if (sectionGroupResult.MockTestResultId.HasValue)
             {
-                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                bools = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                     .Include(x => x.SectionQuestion)
                     .OrderBy(x => x.CreatedDate)
                     .Select(x => x.IsCorrect == true).ToListAsync();
-                return _linQHelper.GetHighestStreak(mockTestAnswers);
             }
             else
             {
-                var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                bools = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                     .Include(x => x.SectionQuestion)
                     .OrderBy(x => x.CreatedDate)
                     .Select(x => x.IsCorrect == true).ToListAsync();
-                return _linQHelper.GetHighestStreak(finalTestAnswers);
             }
+            return _linQHelper.GetHighestStreak(bools);
         }
 
         public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
@@ -94,33 +94,20 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (sectionGroupResult.FinalTestResultId.HasValue)
             {
-                return await GetSkillScoreFinalTest(sectionGroup, sectionGroupResult);
+                var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync();
+                return await GetSkillScore(GetSkillScore(sectionGroup, new List<BaseAnswer>(finalTestAnswers)), finalTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList());
             }
             else
             {
-                return await GetSkillScorePlacementTest(sectionGroup, sectionGroupResult);
+                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync();
+                return await GetSkillScore(GetSkillScore(sectionGroup, new List<BaseAnswer>(placementTestAnswers)), placementTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList());
             }
         }
 
-        private async Task<SkillScores> GetSkillScoreFinalTest(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        private async Task<SkillScores> GetSkillScore(SkillScores skillScore, IList<Guid?>? ids)
         {
-            var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.FinalTestResultId == sectionGroupResult.FinalTestResultId).ToListAsync();
-            var skillScore = GetSkillScore(sectionGroup, new List<BaseAnswer>(finalTestAnswers));
-
-            var questionIds = finalTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList();
-            skillScore.TotalCount = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal);
-            skillScore.TotalQuestion = questionIds.Count;
-            return skillScore;
-        }
-
-        private async Task<SkillScores> GetSkillScorePlacementTest(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
-        {
-            var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.PlacementTestResultId == sectionGroupResult.PlacementTestResultId).ToListAsync();
-            var skillScore = GetSkillScore(sectionGroup, new List<BaseAnswer>(placementTestAnswers));
-
-            var questionIds = placementTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList();
-            skillScore.TotalCount = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal);
-            skillScore.TotalQuestion = questionIds.Count;
+            skillScore.TotalCount = await _questionRepository.Queryable.Where(x => ids != null && ids.Contains(x.Id)).SumAsync(x => x.CorrectTotal);
+            skillScore.TotalQuestion = ids?.Count ?? default;
             return skillScore;
         }
 
@@ -135,7 +122,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (sectionGroup.CourseSkill == EnumCourseSkill.Listening || sectionGroup.CourseSkill == EnumCourseSkill.Reading)
             {
-                var questionIds = mockTestAnswers.Select(x => x.SectionQuestion).Select(x => x.QuestionId).ToList();
+                var questionIds = mockTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList();
                 maxTotalCorrect = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).SumAsync(x => x.CorrectTotal);
                 totalQuestion = questionIds.Count;
             }
@@ -156,13 +143,12 @@ namespace Fsel.Course.Infrastructure.Common
         public SkillScores GetSkillScore(SectionGroup sectionGroup, IList<BaseAnswer>? baseAnswers)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
-            ArgumentNullException.ThrowIfNull(baseAnswers);
             return new SkillScores
             {
-                CorrectCount = baseAnswers.Sum(x => x.CorrectCount),
-                CountQuestion = baseAnswers.Count,
+                CorrectCount = baseAnswers?.Sum(x => x.CorrectCount) ?? default,
+                CountQuestion = baseAnswers?.Count ?? default,
                 Skill = sectionGroup.CourseSkill,
-                Scores = baseAnswers.Sum(x => x.CorrectCount).GetIeltsScore(sectionGroup.CourseSkill)
+                Scores = baseAnswers?.Sum(x => x.CorrectCount).GetIeltsScore(sectionGroup.CourseSkill) ?? default
             };
         }
 
@@ -353,6 +339,17 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
+        public async Task<SectionGroupResult> UpdateSectionGroupToIsSubmit(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, bool isSubmit)
+        {
+            if (isSubmit)
+            {
+                await UpdateUnansweredQuestions(sectionGroup, sectionGroupResult);
+                await UpdateAnswerProcessByTest(sectionGroupResult).ConfigureAwait(false);
+                return await UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup);
+            }
+            return sectionGroupResult;
+        }
+
         #endregion Clean Code
 
         public IList<SectionGroupModel> GetSectionGroups(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
@@ -486,15 +483,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static EnumSubAnswerStatus? GetStatus(BaseAnswer? baseAnswer, bool isDone)
         {
-            if (baseAnswer != null)
-            {
-                if (isDone)
-                {
-                    return baseAnswer.IsCorrect == true ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail;
-                }
-                return EnumSubAnswerStatus.Process;
-            }
-            return null;
+            return baseAnswer != null ? (isDone ? (baseAnswer.IsCorrect == true ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail) : EnumSubAnswerStatus.Process) : null;
         }
 
         public SectionGroupModel GetSectionGroupModel(SectionGroup? sectionGroup, bool isDisableAnswers = false)
@@ -575,7 +564,7 @@ namespace Fsel.Course.Infrastructure.Common
             }).ToList();
         }
 
-        public IList<QuestionModel> GetQuestionDtos(IList<SectionQuestion> sectionQuestions, bool isDisableAnswers = false)
+        private IList<QuestionModel> GetQuestionDtos(IList<SectionQuestion> sectionQuestions, bool isDisableAnswers = false)
         {
             return sectionQuestions.OrderBy(x => x.CreatedDate).Select(x => GetQuestion(x.Question, x.MockTestAnswers.FirstOrDefault(), isDisableAnswers)).ToList();
         }

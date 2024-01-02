@@ -142,12 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         return methodResult;
                     }
                 }
-                if (request.IsSubmit)
-                {
-                    await _sectionGroupConverter.UpdateUnansweredQuestions(sectionGroup, sectionGroupResult);
-                    await _sectionGroupConverter.UpdateAnswerProcessByTest(sectionGroupResult).ConfigureAwait(false);
-                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup);
-                }
+                sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
                 return methodResult;
             });
 
