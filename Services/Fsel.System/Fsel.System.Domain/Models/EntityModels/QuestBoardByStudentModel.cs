@@ -13,10 +13,14 @@ namespace Fsel.System.Domain.Models.EntityModels
         public Guid? ObjectId { get; set; }
         public IList<Guid>? PackageIds { get; set; }
         public EnumQuestBoardCategory Category { get; set; }
+
+        public EnumQuestBoardType QuestBoardType { get; set; }
         public EnumQuestBoardStudentStatus? Status { get; set; }
         public EnumRepeatType? RepeatType { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+
+        public int MaxPoints { get; set; }
 
         public float AchievedPoints { get; set; }
     }
