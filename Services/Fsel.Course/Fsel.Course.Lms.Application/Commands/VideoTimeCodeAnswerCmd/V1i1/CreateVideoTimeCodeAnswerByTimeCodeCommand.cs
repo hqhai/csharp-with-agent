@@ -201,7 +201,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             answer.Answer = answerConfig;
             answer.CorrectCount = correctCount;
             answer.Status = GetAnswerStatus(isSubmit, correctCount, question.CorrectTotal);
-            answer.IsCorrect = isAnswered ? answer.Status == EnumAnswerStatus.Done : null;
+            answer.IsCorrect = isAnswered ? correctCount == question.CorrectTotal : null;
             answer.IsFirstSubmit = status == EnumResultStatus.New;
             return answer;
         }
@@ -224,14 +224,23 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private async Task<VideoTimeCodeResult> GetVideoTimeCodeResultAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, bool isSubmit, CancellationToken cancellationToken)
         {
-            if (videoTimeCodeResult.Status == EnumResultStatus.New)
+            if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                videoTimeCodeResult.Status = EnumResultStatus.Process;
             }
-            else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+            else
             {
-                videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                if (videoTimeCodeResult.Status == EnumResultStatus.New)
+                {
+                    videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                }
+                else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+                {
+                    videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                }
             }
+
             if (isSubmit)
             {
                 var (skillScoreUngradeds, skillScores, isDone) = await GetSkillScoresAsync(videoTimeCodeResult, cancellationToken);
