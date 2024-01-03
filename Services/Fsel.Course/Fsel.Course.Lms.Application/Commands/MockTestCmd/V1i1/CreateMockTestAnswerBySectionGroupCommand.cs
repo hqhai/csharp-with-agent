@@ -141,6 +141,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
                         return methodResult;
                     }
+                    sectionGroupResult = answerResult.Result;
                 }
                 if (request.IsSubmit)
                 {
@@ -241,10 +242,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return mockTestResult;
         }
 
-        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswerAsync(CreateMockTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        private async Task<MethodResult<SectionGroupResult>> CreateAnswerAsync(CreateMockTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
-            var methodResult = new MethodResult<IList<MockTestAnswer>>();
+            var methodResult = new MethodResult<SectionGroupResult>();
             var anserResult = new MethodResult<IList<MockTestAnswer>>();
             if (sectionGroup.CourseSkill == EnumCourseSkill.Listening || sectionGroup.CourseSkill == EnumCourseSkill.Reading)
             {
@@ -278,6 +279,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     return methodResult;
                 }
                 anserResult = await CreateAnswer(request, sectionTimeCodes, sectionGroupResult);
+                sectionGroupResult.CurrentSectionTimeCodeId = sectionTimeCodeIds.Select(x => x).FirstOrDefault();
             }
 
             if (!anserResult.IsOK)
@@ -291,7 +293,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 await _mockTestAnswerRepository.AddList(mockTestAnswers);
                 await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
-            methodResult.Result = anserResult.Result;
+            methodResult.Result = sectionGroupResult;
             return methodResult;
         }
 

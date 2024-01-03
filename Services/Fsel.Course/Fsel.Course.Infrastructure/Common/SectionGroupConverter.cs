@@ -102,7 +102,7 @@ namespace Fsel.Course.Infrastructure.Common
             return skillScore;
         }
 
-        public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, string? type, CancellationToken cancellationToken)
+        public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult? sectionGroupResult, SectionGroup sectionGroup, string? type, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             ArgumentNullException.ThrowIfNull(sectionGroup);
@@ -273,8 +273,9 @@ namespace Fsel.Course.Infrastructure.Common
             };
         }
 
-        public async Task UpdateMockTestAnswers(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        public async Task UpdateMockTestAnswers(SectionGroup sectionGroup, SectionGroupResult? sectionGroupResult)
         {
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
             var questionIds = await GetUnansweredQuestionIds(sectionGroup, nameof(MockTest), sectionGroupResult);
             var mockTestAnswers = new List<MockTestAnswer>();
             if (questionIds.Item1 != null && questionIds.Item1.Any())
