@@ -176,19 +176,13 @@ namespace Fsel.Shared.Helpers
 
         public static EnumCourseLevel GetEnumNextCourseLevel(this EnumCourseType? courseType, EnumCourseLevel courseLevel)
         {
-            if (courseType == EnumCourseType.Academic)
+            if (courseType == EnumCourseType.Academic && courseLevel != EnumCourseLevel.C1)
             {
-                if (courseLevel != EnumCourseLevel.C1)
-                {
-                    courseLevel += 1;
-                }
+                courseLevel += 1;
             }
-            if (courseType == EnumCourseType.Ielts)
+            if (courseType == EnumCourseType.Ielts && courseLevel != EnumCourseLevel.MS3)
             {
-                if (courseLevel != EnumCourseLevel.MS3)
-                {
-                    courseLevel += 1;
-                }
+                courseLevel += 1;
             }
 
             return courseLevel;
