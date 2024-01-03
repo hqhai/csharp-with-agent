@@ -22,6 +22,7 @@ namespace Fsel.Shared.Constants
                 public const string SyncStudentShieldEveryDay = $"{KeyQueue}_SyncStudentShieldEveryDay";
                 public const string UpdateStudentsDailyStreak = $"{KeyQueue}_UpdateStudentsDailyStreak";
                 public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
+                public const string SetTimeToSendReviewFsel = $"{KeyQueue}_SetTimeToSendReviewFsel";
             }
         }
 
@@ -94,6 +95,7 @@ namespace Fsel.Shared.Constants
                 public const string SetCompleteApprovalPost = $"{KeyQueue}_SetCompleteApprovalPost";
                 public const string CompleteApprovalPostTimeOut = $"{KeyQueue}_CompleteApprovalPostTimeOut";
                 public const string SetCompleteApprovalPostTimeOut = $"{KeyQueue}_SetCompleteApprovalPostTimeOut";
+                public const string ReviewFsel = $"{KeyQueue}_ReviewFsel";
 
             }
         }

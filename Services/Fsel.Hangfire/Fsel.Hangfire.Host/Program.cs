@@ -27,12 +27,13 @@ builder.Services.AddScoped<UpdateTeacherGradingInClassForumAndMockTestPublisher>
 builder.Services.AddScoped<SyncStudentShieldEveryDayPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<CompleteTestWhenTimeOutPublisher>();
-builder.Services.AddScoped<CompleteApprovalWhenTimeOutWorker>();
+builder.Services.AddScoped<ReviewFselPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.LmsQueue.NameQueue.SetTimeToCompleteTest, typeof(SetTimeToCompleteTestConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPostTimeOut, typeof(SetTimeToCompleteApprovalConsumer) },
+    { QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
 });
 var app = builder.Build();
 

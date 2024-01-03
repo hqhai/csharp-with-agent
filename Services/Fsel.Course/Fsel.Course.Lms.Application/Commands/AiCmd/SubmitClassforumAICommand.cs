@@ -5,9 +5,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
 
@@ -19,12 +21,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IMediator _mediator;
-        public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator)
+        public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher)
         {
             _classForumResultRepository = classForumResultRepository;
             _submitAIResponsePublisher = submitAIResponsePublisher;
             _mediator = mediator;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<bool> Handle(SubmitClassforumAICommand request, CancellationToken cancellationToken)
@@ -69,6 +73,26 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 ClassForumResultId = request.ClassForumResultId,
             }, cancellationToken);
 
+
+            if (!string.IsNullOrEmpty(aIResponse))
+            {
+                var classForumResultOwner = _classForumResultRepository.Queryable.FirstOrDefault(x => x.Id == request.ClassForumResultId);
+
+                if (classForumResultOwner != null)
+                {
+
+                    NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
+                    {
+                        ObjectId = classForumResultOwner.Id,
+                        UserIds = new List<Guid>() { classForumResultOwner.CreatedUserId },
+                        Type = EnumNotificationType.LinkPage,
+                        Content = EnumNotificationContent.AIFeedBack,
+                        PlatformCode = EnumPlatformCode.LMS
+                    };
+                    await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
+                }
+
+            }
             return true;
         }
     }

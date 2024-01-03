@@ -21,6 +21,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using Fsel.Interaction.Application.Services.CourseServices.Models;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Shared.Constants;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
 
     public class CreateActionCommand : CreateActionCommandModel, IRequest<MethodResult<bool>>
     {
@@ -114,18 +115,22 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
                     if (action.Type == EnumInteractionActionType.Like)
                     {
-                        NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+
+                        var userNameLiked = await CustomNotificationLikeMessage(action.ObjectId);
+
+                        InterationActionQueueModel model = new InterationActionQueueModel()
                         {
                             ObjectId = request.ObjectId,
                             UserIds = new List<Guid>() { objectOwnerId },
                             SenderId = _authContext.CurrentUserId,
-                            ParamsMessage = new List<object> { _authContext.CurrentFullName! ?? string.Empty, },
+                            ParamsMessage = new List<object> { userNameLiked ?? string.Empty },
                             ParamsLink = returnedParamsLink,
                             Type = businessType,
                             Content = businessContent,
+                            InterationType = action.Type,
                             PlatformCode = EnumPlatformCode.LMS
                         };
-                        await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+                        await _interationActionPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                     }
 
 
@@ -257,5 +262,40 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
             return (paramsLink, ownerObjectId);
         }
+
+
+
+        /// <summary>
+        /// Custom lại Message khi một tài khoản like bài viết, comment của một tài khoản khác.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<string> CustomNotificationLikeMessage(Guid objectId)
+        {
+            string result = "";
+            List<Guid> listUserIdsLiked = new List<Guid>();
+            List<string?> listNameUserLiked = new List<string?>();
+
+            listUserIdsLiked = _interactionActionRepository.Queryable.OrderByDescending(x => x.CreatedDate).Where(x => x.Type == EnumInteractionActionType.Like && x.Id == objectId).Select(x => x.UserId).ToList();
+
+            GetUsersByIdsQueryModel model = new GetUsersByIdsQueryModel() { UserIds = listUserIdsLiked };
+            var listNameUserLikedResult = await _userService.GetUsersByIdsAsync(model);
+            listNameUserLiked = listNameUserLikedResult?.Content?.Result!.Select(x => x.FullName).ToList() ?? new List<string?>();
+
+            switch (listNameUserLiked.Count)
+            {
+                case 1:
+                    result = listNameUserLiked[0]!;
+                    break;
+                case 2:
+                    result = $"{string.Join(listNameUserLiked[0], " và ", listNameUserLiked[1])}";
+                    break;
+                default:
+                    result = $"{listNameUserLiked[0]} , {listNameUserLiked[1]}, {listNameUserLiked[2]} và {listNameUserLiked.Count - 3} người khác";
+                    break;
+            }
+
+            return result;
+        }
+
     }
 }

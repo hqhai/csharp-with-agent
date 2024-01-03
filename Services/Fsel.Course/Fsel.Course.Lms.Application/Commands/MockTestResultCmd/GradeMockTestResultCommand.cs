@@ -7,13 +7,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -29,18 +33,21 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
         public GradeMockTestResultCommandHandler(IMapper mapper,
             IMockTestResultRepository mockTestResultRepository,
             ISectionGroupRepository sectionGroupRepository,
             IUserService userService,
-            AuthContext authContext)
+            AuthContext authContext,
+            NotificationMessagePublisher notificationMessagePublisher)
         {
             _mapper = mapper;
             _mockTestResultRepository = mockTestResultRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _userService = userService;
             _authContext = authContext;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<List<MockTestScoreModel>>> Handle(GradeMockTestResultCommand request, CancellationToken cancellationToken)
@@ -130,6 +137,24 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             });
 
             return methodResult;
+        }
+
+
+        public async Task SendNotification(MockTestResult mockTestResult, CancellationToken cancellationToken)
+        {
+            if (mockTestResult != null)
+            {
+                NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
+                {
+                    ObjectId = mockTestResult!.Id,
+                    UserIds = new List<Guid> { mockTestResult.StudentId },
+                    Type = EnumNotificationType.LinkPage,
+                    Content = EnumNotificationContent.MockTest,
+                    PlatformCode = EnumPlatformCode.LMS,
+                    ParamsMessage = new List<object> { mockTestResult.MockTest!.Name ?? string.Empty },
+                };
+                await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
+            }
         }
     }
 }

@@ -14,6 +14,10 @@ namespace Fsel.Shared.Enums
         DeleteClassForumResult,
         DeleteComment,
         LikeComment,
-        LikeClassForum
+        LikeClassForum,
+        AIFeedBack,
+        ChangeClassLiveTeacher,
+        MockTest,
+        ReviewFsel
     }
 }

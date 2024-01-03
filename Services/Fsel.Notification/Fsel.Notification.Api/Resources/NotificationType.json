@@ -95,7 +95,7 @@
     "content": "LikeClassForum",
     "icon": "",
     "priority": 1,
-    "templateMessage": "{0} vừa thích bài viết của bạn.",
+    "templateMessage": "{0} đã thích bài viết của bạn.",
     "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
     "createdDate": "2023-08-28"
   },
@@ -105,8 +105,88 @@
     "content": "LikeComment",
     "icon": "",
     "priority": 1,
-    "templateMessage": "{0} vừa thích bình luận của bạn.",
+    "templateMessage": "{0} đã thích bình luận của bạn.",
     "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "59942527-CA1F-4F18-A66B-CDCFE87B317E",
+    "type": "LinkPage",
+    "content": "AIFeedBack",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài viết của bạn đã được hệ thống AI ChatGPT nhận xét. Nhấn để xem chi tiết",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "9CE45D16-A9B6-43C3-ADAA-061695D61A29",
+    "type": ":LinkPopup",
+    "content": "ChangeClassLiveTeacher",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Buổi {0} diễn ra vào ngày {1} đã thay đổi giáo viên",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "8D72ACC9-26ED-4E61-9858-DBB86AA394F3",
+    "type": ":LinkPopup",
+    "content": "CancelClassLive",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Buổi học trực tuyến {0} diễn ra vào ngày {1} đã bị huỷ bỏ. Nhấn để lựa chọn lịch học thay thế",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "D70FF67A-6097-4F37-96C5-BE122FF62881",
+    "type": ":LinkPopup",
+    "content": "UpdateClassLive",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Buổi học trực tuyến {0} diễn ra vào ngày {1} đã được cập nhật sang ngày {2}",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "D70FF67A-6097-4F37-96C5-BE122FF62881",
+    "type": ":LinkPopup",
+    "content": "UpdateClassLive",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài {0} đã được giáo viên chấm điểm. Nhấn để xem chi tiết",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "0EEB9205-E978-4AC8-B3A0-9D5387FA744A",
+    "type": ":LinkPage",
+    "content": "UpdateClassLive",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài {0} đã được giáo viên chấm điểm. Nhấn để xem chi tiết",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "85062A12-AB5B-486C-A8AB-DB329EA7F46D",
+    "type": ":LinkPage",
+    "content": "MockTest",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài {0} đã được giáo viên chấm điểm. Nhấn để xem chi tiết",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "1A7F9999-79E2-4EB1-85A8-CC8D1398F732",
+    "type": ":LinkPage",
+    "content": "ReviewFsel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Hãy chia sẻ cảm nhận của bạn về LMS! ",
+    "templateLink": "",
     "createdDate": "2023-08-28"
   }
 ]
