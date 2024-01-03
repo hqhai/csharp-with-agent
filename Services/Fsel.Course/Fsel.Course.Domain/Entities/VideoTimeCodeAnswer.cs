@@ -9,7 +9,6 @@ namespace Fsel.Course.Domain.Entities
     public class VideoTimeCodeAnswer : BaseAnswer
     {
         private bool? _isCorrect;
-        private int _correctCount;
 
         public override bool? IsCorrect
         {
@@ -20,18 +19,6 @@ namespace Fsel.Course.Domain.Entities
             set
             {
                 _isCorrect = value;
-            }
-        }
-
-        public override int CorrectCount
-        {
-            get
-            {
-                return Status == EnumAnswerStatus.Done ? _correctCount : default;
-            }
-            set
-            {
-                _correctCount = value;
             }
         }
 
