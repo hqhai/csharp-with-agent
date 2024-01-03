@@ -27,7 +27,7 @@ namespace Fsel.Course.Domain.Entities
         /// Số lượng câu trả lời đúng
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount { get; set; }
+        public virtual int CorrectCount { get; set; }
 
         public virtual bool? IsCorrect { get; set; }
     }

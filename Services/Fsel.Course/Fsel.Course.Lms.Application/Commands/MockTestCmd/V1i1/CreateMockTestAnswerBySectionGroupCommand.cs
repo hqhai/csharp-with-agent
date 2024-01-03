@@ -271,15 +271,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             }
             else
             {
-                var sectionTimeCodeIds = request.Answers.Where(x => x.SectionTimeCodeId.HasValue).Select(x => x.SectionTimeCodeId!.Value).ToList();
-                var sectionTimeCodes = await _sectionTimeCodeRepository.Queryable.Where(x => sectionTimeCodeIds.Contains(x.Id)).ToListAsync();
-                if (sectionTimeCodes == null)
+                var sectionTimeCodeId = request.Answers.Where(x => x.SectionTimeCodeId.HasValue).Select(x => x.SectionTimeCodeId!.Value).FirstOrDefault();
+                var sectionTimeCode = await _sectionTimeCodeRepository.GetByIdAsync(sectionTimeCodeId);
+                if (sectionTimeCode == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
-                anserResult = await CreateAnswer(request, sectionTimeCodes, sectionGroupResult);
-                sectionGroupResult.CurrentSectionTimeCodeId = sectionTimeCodeIds.Select(x => x).FirstOrDefault();
+                sectionGroupResult.CurrentSectionTimeCodeId = sectionTimeCodeId;
+
+                _mockTestAnswerRepository.Add(await CreateAnswer(request, sectionTimeCode, sectionGroupResult));
+                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
 
             if (!anserResult.IsOK)
@@ -354,31 +356,15 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswer(CreateMockTestAnswerBySectionGroupCommand request, IList<SectionTimeCode>? sectionTimeCodes, SectionGroupResult sectionGroupResult)
+        private async Task<MockTestAnswer> CreateAnswer(CreateMockTestAnswerBySectionGroupCommand request, SectionTimeCode sectionTimeCode, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
-            var methodResult = new MethodResult<IList<MockTestAnswer>>();
-            var mockTestAnswers = new List<MockTestAnswer>();
-            if (sectionTimeCodes != null && sectionTimeCodes.Any())
+            var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
+            if (mockTestAnswer == null)
             {
-                foreach (var item in request.Answers)
-                {
-                    var sectionTimeCode = sectionTimeCodes.FirstOrDefault(x => x.Id == item.SectionTimeCodeId);
-                    if (sectionTimeCode == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCode));
-                        return methodResult;
-                    }
-                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
-                    if (mockTestAnswer == null)
-                    {
-                        mockTestAnswers.Add(GetMockTestAnswer(item.Answer, default, sectionGroupResult, default, default, sectionTimeCode.Id));
-                    }
-                }
+                mockTestAnswer = GetMockTestAnswer(request.Answers.Select(x => x.Answer).FirstOrDefault(), default, sectionGroupResult, default, default, sectionTimeCode.Id);
             }
-
-            methodResult.Result = mockTestAnswers;
-            return methodResult;
+            return mockTestAnswer;
         }
 
         private static MockTestAnswer GetMockTestAnswer(object? answer, int correctCount, SectionGroupResult sectionGroupResult, Question? questionItem = null, Guid? sectionId = null, Guid? sectionTimeCodeId = null)
