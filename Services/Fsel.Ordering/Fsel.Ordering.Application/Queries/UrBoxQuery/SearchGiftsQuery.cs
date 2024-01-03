@@ -9,7 +9,8 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.UrBoxService;
-    using Fsel.Ordering.Domain.Models.EntityModels.UrBox;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
     using Fsel.Ordering.Domain.Models.QueryModels.UrBox;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using MediatR;
@@ -35,7 +36,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<GiftModel>>();
 
-            var getAllGift = await _urBoxService.GetAllGift(new GetTheGiftListFromUrBoxModel
+            var getAllGift = await _urBoxService.GetAllGift(new GetTheGiftListFromUrBoxModel(_appSetting)
             {
                 AppSecret = _appSetting.UrBoxConfig?.AppSecret,
                 AppId = _appSetting.UrBoxConfig?.AppId,

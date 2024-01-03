@@ -6,10 +6,10 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.UrBoxService;
-    using Fsel.Ordering.Domain.Models.EntityModels;
-    using MediatR;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
     using Fsel.Ordering.Infrastructure.ValueSettings;
-    using Fsel.Ordering.Domain.Models.QueryModels.UrBox;
+    using MediatR;
 
     public class GetListBrandQuery : IRequest<MethodResult<BrandModel>>
     {
@@ -32,10 +32,8 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<BrandModel>();
 
-            var categoriesResult = await _urBoxService.GetListBrand(new GetListBrandQueryModel
+            var categoriesResult = await _urBoxService.GetListBrand(new GetListBrandQueryModel(_appSetting)
             {
-                AppSecret = _appSetting.UrBoxConfig?.AppSecret,
-                AppId = _appSetting.UrBoxConfig?.AppId,
                 CategoryId = request.CategoryId
             });
             if (!categoriesResult.IsSuccessStatusCode)

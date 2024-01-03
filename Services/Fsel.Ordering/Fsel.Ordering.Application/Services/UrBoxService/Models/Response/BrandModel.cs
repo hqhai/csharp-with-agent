@@ -1,4 +1,4 @@
-namespace Fsel.Ordering.Domain.Models.EntityModels
+namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Response
 {
     using System.Text.Json.Serialization;
 

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Models.EntityModels
+namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Response
 {
     using System.Collections.Generic;
     using System.Text.Json.Serialization;

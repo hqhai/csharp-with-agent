@@ -9,9 +9,8 @@ namespace Fsel.Ordering.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Commands.UrBoxs;
     using Fsel.Ordering.Application.Queries.UrBoxQuery;
-    using Fsel.Ordering.Domain.Models.CommandModels.UrBox;
-    using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Ordering.Domain.Models.EntityModels.UrBox;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -95,7 +94,7 @@ namespace Fsel.Ordering.Api.Controllers
         [HttpGet("gift-exchange-history")]
         [ProducesResponseType(typeof(MethodResult<ExchangeHistoryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetGiftExchangeHistory([FromQuery] GetGiftExchangeHistoryQuery query)
+        public async Task<IActionResult> GetGiftExchangeHistory([FromQuery] GetListExchangeHistoryQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -107,7 +106,7 @@ namespace Fsel.Ordering.Api.Controllers
         [HttpGet("detail-exchange-history")]
         [ProducesResponseType(typeof(MethodResult<DetailExchangeHistoryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetDetailExchangeHistory([FromQuery] GetDetailExchangeHistoryQuery query)
+        public async Task<IActionResult> GetDetailExchangeHistory([FromQuery] GetExchangeHistoryQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

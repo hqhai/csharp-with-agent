@@ -3,10 +3,8 @@
 namespace Fsel.Ordering.Application.Services.UrBoxService
 {
     using System.Threading.Tasks;
-    using Fsel.Ordering.Domain.Models.CommandModels.UrBox;
-    using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Ordering.Domain.Models.EntityModels.UrBox;
-    using Fsel.Ordering.Domain.Models.QueryModels.UrBox;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -25,7 +23,7 @@ namespace Fsel.Ordering.Application.Services.UrBoxService
         Task<IApiResponse<BrandModel>> GetListBrand([FromBody] GetListBrandQueryModel model);
 
         [Post("/2.0/cart/cartPayVoucher")]
-        Task<IApiResponse<RedemptionResponseModel>> CreateARedemptionRequest([Body] CreateRedemptionRequestModel model, [Header("Signature")] string signature);
+        Task<IApiResponse<RedemptionResponseModel>> CreateRedemptionRequest([Body] CreateRedemptionRequestModel model, [Header("Signature")] string signature);
 
         [Get("/2.0/cart/getlist")]
         Task<IApiResponse<GiftExchangeHistoryModel>> GetGiftExchangeHistory([FromBody] GetGiftExchangeHistoryModel model);

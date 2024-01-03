@@ -1,11 +1,16 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Models.CommandModels.UrBox
+namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Request
 {
     using System.Text.Json.Serialization;
+    using Fsel.Ordering.Infrastructure.ValueSettings;
 
     public class CreateRedemptionRequestModel : UrBoxSignatureModel
     {
+        public CreateRedemptionRequestModel(AppSetting appSetting) : base(appSetting)
+        {
+        }
+
         [JsonPropertyName("ttphone")]
         public string? PhoneNumber { get; set; }
 

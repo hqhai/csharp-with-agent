@@ -1,24 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Models.EntityModels.UrBox
+namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Response
 {
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
 
-    public class RedemptionResponseModel
+    public class RedemptionResponseModel : UrBoxModel
     {
-        [JsonPropertyName("done")]
-        public long Done { get; set; }
-
-        [JsonPropertyName("msg")]
-        public string? Msg { get; set; }
-
-        [JsonPropertyName("microtime")]
-        public string? MicroTime { get; set; }
-
-        [JsonPropertyName("status")]
-        public long Status { get; set; }
-
         [JsonPropertyName("data")]
         public DataRedemptionRequestModel? Data { get; set; }
     }

@@ -13,12 +13,12 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.UrBoxQuery;
     using Fsel.Ordering.Application.Services.UrBoxService;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.UrBox;
-    using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Ordering.Domain.Models.EntityModels.UrBox;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -116,18 +116,15 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                     }
                 }
 
-                var urBoxTransaction = _urBoxTransactionRepository.Add(new UrBoxTransaction() { TransactionId = transactionId });
-                await _urBoxTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                var redemptionRequest = new CreateRedemptionRequestModel();
+                var redemptionRequest = new CreateRedemptionRequestModel(_appSetting);
 
                 redemptionRequest.AppSecret = _appSetting.UrBoxConfig?.AppSecret;
-                redemptionRequest.AppId = _appSetting.UrBoxConfig?.AppId.ToString(CultureInfo.CurrentCulture);
+                redemptionRequest.AppId = _appSetting.UrBoxConfig?.AppId?.ToString(CultureInfo.CurrentCulture);
                 redemptionRequest.SiteUserId = _authContext.CurrentUserId.ToString();
                 redemptionRequest.TransactionId = transactionId;
                 redemptionRequest.PhoneNumber = request.PhoneNumber;
                 redemptionRequest.IsSendSms = 0;
-                redemptionRequest.DataBuy = request.DataBuy;
+                redemptionRequest.DataBuy = request.DataBuy.Select(p => new DataBuy { PriceId = p.PriceId, Quantity = p.Quantity }).ToList();
 
                 if (!int.TryParse(gift.Result?.Type, out int type))
                 {
@@ -146,10 +143,8 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                     redemptionRequest.DeliveryNote = request.Note;
                 }
 
-                var urBoxSignature = new UrBoxSignatureModel
+                var urBoxSignature = new UrBoxSignatureModel(_appSetting)
                 {
-                    AppId = redemptionRequest.AppId,
-                    AppSecret = redemptionRequest.AppSecret,
                     DataBuy = redemptionRequest.DataBuy,
                     IsSendSms = redemptionRequest.IsSendSms,
                     SiteUserId = redemptionRequest.SiteUserId,
@@ -166,28 +161,30 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                     return methodResult;
                 }
 
-                var createRedemptionRequest = await _urBoxService.CreateARedemptionRequest(redemptionRequest, signature);
-                if (createRedemptionRequest.Content?.Status != 200)
+                var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
+                if (createRedemptionRequest.Content?.Status == 200)
+                {
+                    var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new Application.Services.UserService.Models.UpdateStudentByTokenModel { StudentId = studentResult.Content?.Result?.Id ?? default, NumberOfToken = price - token });
+                    if (!updateTokenResult.IsSuccessStatusCode)
+                    {
+                        methodResult.AddError(updateTokenResult.Error);
+                        return methodResult;
+                    }
+                    methodResult.Result = createRedemptionRequest.Content;
+                }
+                else
                 {
                     methodResult.AddErrorBadRequest(createRedemptionRequest.Content?.Msg);
-                    return methodResult;
                 }
 
-                var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new Application.Services.UserService.Models.UpdateStudentByTokenModel { StudentId = studentResult.Content?.Result?.Id ?? default, NumberOfToken = price - token });
-                if (!updateTokenResult.IsSuccessStatusCode)
+                _urBoxTransactionRepository.Add(new UrBoxTransaction()
                 {
-                    methodResult.AddError(updateTokenResult.Error);
-                    return methodResult;
-                }
-
-                urBoxTransaction.Status = createRedemptionRequest.Content?.Status != 200 ? EnumUrBoxTransactionStatus.Unsuccessful : EnumUrBoxTransactionStatus.Success;
-                urBoxTransaction.RequestBodyStr = requestBody;
-                urBoxTransaction.ResponseBodyStr = createRedemptionRequest.Content.Serialize();
-
-                urBoxTransaction = _urBoxTransactionRepository.Update(urBoxTransaction);
+                    TransactionId = transactionId,
+                    RequestBody = redemptionRequest,
+                    ResponseBody = createRedemptionRequest.Content,
+                    Status = createRedemptionRequest.Content?.Status == 200 ? EnumUrBoxTransactionStatus.Success : EnumUrBoxTransactionStatus.Unsuccessful
+                });
                 await _urBoxTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.Result = createRedemptionRequest.Content;
                 return methodResult;
             });
             return methodResult;

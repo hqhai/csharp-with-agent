@@ -1,12 +1,19 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Models.CommandModels.UrBox
+namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Request
 {
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
+    using Fsel.Ordering.Infrastructure.ValueSettings;
 
     public class UrBoxSignatureModel
     {
+        public UrBoxSignatureModel(AppSetting appSetting)
+        {
+            AppSecret = appSetting?.UrBoxConfig?.AppSecret;
+            AppId = appSetting?.UrBoxConfig?.AppId;
+        }
+
         [JsonPropertyName("app_id")]
         public string? AppId { get; set; }
 

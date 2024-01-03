@@ -7,8 +7,6 @@ namespace Fsel.Ordering.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
-    using Fsel.Ordering.Domain.Models.CommandModels.UrBox;
-    using Fsel.Ordering.Domain.Models.EntityModels.UrBox;
     using Fsel.Shared.Enums;
 
     public class UrBoxTransaction : Entity
@@ -22,17 +20,19 @@ namespace Fsel.Ordering.Domain.Entities
         public string? RequestBodyStr { get; set; }
 
         [NotMapped]
-        public CreateRedemptionRequestModel? RequestBody
+        public object? RequestBody
         {
-            get { return ConvertHelper.Deserialize<CreateRedemptionRequestModel?>(RequestBodyStr); }
+            get { return RequestBodyStr.Deserialize<object>(); }
+            set { RequestBodyStr = value.Serialize(); }
         }
 
         public string? ResponseBodyStr { get; set; }
 
         [NotMapped]
-        public RedemptionResponseModel? ResponseBody
+        public object? ResponseBody
         {
-            get { return ConvertHelper.Deserialize<RedemptionResponseModel?>(ResponseBodyStr); }
+            get { return ResponseBodyStr.Deserialize<object>(); }
+            set { ResponseBodyStr = value.Serialize(); }
         }
     }
 }

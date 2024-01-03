@@ -10,6 +10,12 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.UrBox
         public string? WardId { get; set; }
         public string? Address { get; set; }
         public string? Note { get; set; }
-        public IList<DataBuy>? DataBuy { get; set; }
+        public IList<DataBuyCommandModel>? DataBuy { get; set; }
+    }
+
+    public class DataBuyCommandModel
+    {
+        public string? PriceId { get; set; }
+        public string? Quantity { get; set; }
     }
 }

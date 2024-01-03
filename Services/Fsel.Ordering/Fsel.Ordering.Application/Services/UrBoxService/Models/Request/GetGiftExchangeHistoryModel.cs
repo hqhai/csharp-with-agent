@@ -1,12 +1,17 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Models.QueryModels.UrBox
+namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Request
 {
     using System;
+    using Fsel.Ordering.Infrastructure.ValueSettings;
     using Refit;
 
-    public class GetGiftExchangeHistoryModel : UrBoxQueryModel
+    public class GetGiftExchangeHistoryModel : UrBoxAuthModel
     {
+        public GetGiftExchangeHistoryModel(AppSetting appSetting) : base(appSetting)
+        {
+        }
+
         [AliasAs("site_user_id")]
         public string? SiteUserId { get; set; }
 

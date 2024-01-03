@@ -8,8 +8,8 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Application.Services.UrBoxService;
-    using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Ordering.Domain.Models.QueryModels.UrBox;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using MediatR;
 
@@ -35,10 +35,8 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<CategoryModel>>();
 
-            var categoriesResult = await _urBoxService.GetListCategory(new GetListCategoryQueryModel
+            var categoriesResult = await _urBoxService.GetListCategory(new GetListCategoryQueryModel(_appSetting)
             {
-                AppSecret = _appSetting.UrBoxConfig?.AppSecret,
-                AppId = _appSetting.UrBoxConfig?.AppId,
                 ParentId = request.ParentId,
                 Language = request.Language,
             });

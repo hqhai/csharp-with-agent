@@ -7,8 +7,8 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.UrBoxService;
-    using Fsel.Ordering.Domain.Models.EntityModels.UrBox;
-    using Fsel.Ordering.Domain.Models.QueryModels.UrBox;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
+    using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using MediatR;
 
@@ -34,7 +34,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<GiftDetailModel>();
 
-            var theGiftResult = await _urBoxService.Get(new GetTheGiftQueryModel
+            var theGiftResult = await _urBoxService.Get(new GetTheGiftQueryModel(_appSetting)
             {
                 AppSecret = _appSetting.UrBoxConfig?.AppSecret,
                 AppId = _appSetting.UrBoxConfig?.AppId,
