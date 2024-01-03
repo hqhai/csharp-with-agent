@@ -173,5 +173,25 @@ namespace Fsel.Shared.Helpers
                 return courseLevelIELSTs.Any(x => x == courseLevelSelected);
             }
         }
+
+        public static EnumCourseLevel GetEnumNextCourseLevel(this EnumCourseType? courseType, EnumCourseLevel courseLevel)
+        {
+            if (courseType == EnumCourseType.Academic)
+            {
+                if (courseLevel != EnumCourseLevel.C1)
+                {
+                    courseLevel += 1;
+                }
+            }
+            if (courseType == EnumCourseType.Ielts)
+            {
+                if (courseLevel != EnumCourseLevel.MS3)
+                {
+                    courseLevel += 1;
+                }
+            }
+
+            return courseLevel;
+        }
     }
 }
