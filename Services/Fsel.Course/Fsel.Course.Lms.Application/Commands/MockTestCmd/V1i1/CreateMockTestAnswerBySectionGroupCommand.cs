@@ -279,9 +279,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     return methodResult;
                 }
                 sectionGroupResult.CurrentSectionTimeCodeId = sectionTimeCodeId;
-
-                _mockTestAnswerRepository.Add(await CreateAnswer(request, sectionTimeCode, sectionGroupResult));
-                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                anserResult = await CreateAnswer(request, sectionTimeCode, sectionGroupResult);
             }
 
             if (!anserResult.IsOK)
@@ -356,15 +354,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task<MockTestAnswer> CreateAnswer(CreateMockTestAnswerBySectionGroupCommand request, SectionTimeCode sectionTimeCode, SectionGroupResult sectionGroupResult)
+        private async Task<MethodResult<IList<MockTestAnswer>>> CreateAnswer(CreateMockTestAnswerBySectionGroupCommand request, SectionTimeCode sectionTimeCode, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
+            var methodResult = new MethodResult<IList<MockTestAnswer>>();
             var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == request.SectionGroupId);
             if (mockTestAnswer == null)
             {
                 mockTestAnswer = GetMockTestAnswer(request.Answers.Select(x => x.Answer).FirstOrDefault(), default, sectionGroupResult, default, default, sectionTimeCode.Id);
             }
-            return mockTestAnswer;
+            methodResult.Result = new List<MockTestAnswer> { mockTestAnswer };
+            return methodResult;
         }
 
         private static MockTestAnswer GetMockTestAnswer(object? answer, int correctCount, SectionGroupResult sectionGroupResult, Question? questionItem = null, Guid? sectionId = null, Guid? sectionTimeCodeId = null)
