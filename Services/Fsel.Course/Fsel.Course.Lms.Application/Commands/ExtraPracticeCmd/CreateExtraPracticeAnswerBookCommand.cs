@@ -183,7 +183,8 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
-                var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
                 var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable
                        .FirstOrDefaultAsync(x => x.ExtraPracticeExerciseResultId == extraPracticeExerciseResult.Id && x.QuestionId == item.QuestionId, cancellationToken);
                 if (extraPracticeAnswer == null)

@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
-                var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                 var homeWorkQuestion = questionItem.HomeWorkQuestions.FirstOrDefault();
                 if (homeWorkQuestion == null)
                 {
@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 }
                 homeWorkAnswer.Answer = answerConfig;
                 homeWorkAnswer.CorrectCount = correctCount;
-                homeWorkAnswer.IsCorrect = request.IsSubmit ? correctCount == questionItem.CorrectTotal : null;
+                homeWorkAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
             }
 
             if (request.IsSubmit)
@@ -181,6 +181,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
+                return methodResult;
+            }
+            var listQuestionId = request.Answers.Select(x => x.QuestionId).GroupBy(x => x).Select(x => x.Count()).ToList();
+            if (listQuestionId.Any(x => x > 1))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.QuestionsDuplicate), nameof(listQuestionId));
                 return methodResult;
             }
             var listQuestion = homeWork.HomeWorkQuestions.Select(x => x.Question!).ToList();

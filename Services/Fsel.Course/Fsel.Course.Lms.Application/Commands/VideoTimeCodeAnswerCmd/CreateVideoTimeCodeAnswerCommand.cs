@@ -135,7 +135,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
-                var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
                 if (answer == null)
                 {
                     answer = new VideoTimeCodeAnswer
