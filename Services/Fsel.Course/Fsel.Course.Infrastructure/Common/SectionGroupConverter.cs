@@ -39,24 +39,25 @@ namespace Fsel.Course.Infrastructure.Common
             _mockTestAnswerRepository = mockTestAnswerRepository;
         }
 
-        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult, bool isMockTest = false)
+        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult)
         {
-            if (isMockTest)
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
+            var isHighestStreaks = new List<bool>();
+            if (sectionGroupResult.MockTestResultId.HasValue)
             {
-                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                isHighestStreaks = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                     .Include(x => x.SectionQuestion)
                     .OrderBy(x => x.CreatedDate)
                     .Select(x => x.IsCorrect == true).ToListAsync();
-                return _linQHelper.GetHighestStreak(mockTestAnswers);
             }
-            else
+            else if (sectionGroupResult.FinalTestResultId.HasValue)
             {
-                var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                isHighestStreaks = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                     .Include(x => x.SectionQuestion)
                     .OrderBy(x => x.CreatedDate)
                     .Select(x => x.IsCorrect == true).ToListAsync();
-                return _linQHelper.GetHighestStreak(finalTestAnswers);
             }
+            return _linQHelper.GetHighestStreak(isHighestStreaks);
         }
 
         private async Task<SkillScores> GetSkillScoreFinalTest(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
@@ -102,11 +103,11 @@ namespace Fsel.Course.Infrastructure.Common
             return skillScore;
         }
 
-        public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult? sectionGroupResult, SectionGroup sectionGroup, string? type, CancellationToken cancellationToken)
+        public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult? sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             ArgumentNullException.ThrowIfNull(sectionGroup);
-            var skillScore = await GetSkillScore(sectionGroupResult, sectionGroup, type, cancellationToken);
+            var skillScore = await GetSkillScore(sectionGroupResult, sectionGroup, cancellationToken);
             sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
             sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
             sectionGroupResult.Status = EnumResultStatus.Done;
@@ -125,17 +126,13 @@ namespace Fsel.Course.Infrastructure.Common
             return sectionGroupResult;
         }
 
-        private async Task<SkillScores> GetSkillScore(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, string? type, CancellationToken cancellationToken)
+        private async Task<SkillScores> GetSkillScore(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(type))
-            {
-                return new SkillScores();
-            }
-            if (type == nameof(MockTest))
+            if (sectionGroupResult.MockTestResultId.HasValue)
             {
                 return await GetSkillScoreMockTest(sectionGroupResult, sectionGroup, cancellationToken);
             }
-            else if (type == nameof(FinalTest))
+            else if (sectionGroupResult.FinalTestResultId.HasValue)
             {
                 return await GetSkillScoreFinalTest(sectionGroupResult, sectionGroup, cancellationToken);
             }
