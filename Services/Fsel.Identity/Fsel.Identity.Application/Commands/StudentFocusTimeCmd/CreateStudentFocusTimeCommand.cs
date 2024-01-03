@@ -13,6 +13,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
+    using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.StudentFocusTime;
@@ -36,8 +37,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly IStudentRepository _studentRepository;
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
-        private const int NUMBER_OF_WEEKDAY = 7;
-        private const double DEFAULT_TARGET_TIME = 1800; // 1800s tương ứng với 30p
 
         public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService)
         {
@@ -70,7 +69,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 return methodResult;
             }
 
-            var nearestConfigTargetTime = GetNearestConfigTime(_studentFocusTimeRepository, student.Id);
 
             //Thực hiện các hành động lưu xuống database , gửi lên websocket
             await _studentFocusTimeRepository.ExecuteTransactionAsync(async () =>
@@ -78,7 +76,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 if (studentFocusTime == null)
                 {
                     studentFocusTime = _mapper.Map<StudentFocusTime>(request);
-                    studentFocusTime.TargetTime = nearestConfigTargetTime;
+                    studentFocusTime.TargetTime = request.TargetTime;
                     studentFocusTime.StudentId = student.Id;
                     studentFocusTime.IsEstablished = false;
 
@@ -86,14 +84,14 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 }
                 else
                 {
-                    // Set TargetTime
-                    bool confitionChangeTarget = request.TargetTime != nearestConfigTargetTime && request.TargetTime != 0;
+                    // Set targetTime
+                    bool confitionChangeTarget = studentFocusTime.TargetTime == 0 && request.TargetTime != 0;
 
                     if (!studentFocusTime.IsEstablished && confitionChangeTarget)
                     {
                         studentFocusTime.TargetTime = request.TargetTime;
+                        studentFocusTime.IsEstablished = confitionChangeTarget;
                     }
-                    studentFocusTime.IsEstablished = confitionChangeTarget;
 
                     // Set AccessTime And NumberOfToken
                     var systemConfigMap = systemConfigResult!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
@@ -133,16 +131,5 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             return methodResult;
         }
 
-        /// <summary>
-        /// Lấy cấu hình của ngày gần nhất
-        /// </summary>
-        /// <param name="systemConfigResult"></param>
-        /// <returns></returns>
-        private static double GetNearestConfigTime(IStudentFocusTimeRepository studentFocusTimeRepository, Guid? studentId)
-        {
-            var nearestConfigTargetTime = studentFocusTimeRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date)?.TargetTime ?? DEFAULT_TARGET_TIME;
-
-            return nearestConfigTargetTime;
-        }
     }
 }
