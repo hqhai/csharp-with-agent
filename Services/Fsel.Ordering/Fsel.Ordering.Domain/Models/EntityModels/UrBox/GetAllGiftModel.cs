@@ -1,31 +1,19 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Models.EntityModels
+namespace Fsel.Ordering.Domain.Models.EntityModels.UrBox
 {
     using System.Text.Json.Serialization;
 
-    public class UrBoxModel
+    public class GetAllGiftModel : UrBoxModel
     {
-        [JsonPropertyName("done")]
-        public long Done { get; set; }
-
-        [JsonPropertyName("msg")]
-        public string? Msg { get; set; }
-
-        [JsonPropertyName("microtime")]
-        public string? Microtime { get; set; }
-
-        [JsonPropertyName("status")]
-        public long Status { get; set; }
-
         [JsonPropertyName("data")]
-        public DataListGift? Data { get; set; }
+        public DataGetAllModel? Data { get; set; }
     }
 
-    public class DataListGift
+    public class DataGetAllModel
     {
         [JsonPropertyName("items")]
-        public IList<ItemListGift>? Items { get; set; }
+        public IList<GiftModel>? Items { get; set; }
 
         [JsonPropertyName("totalPage")]
         public long TotalPage { get; set; }
@@ -34,7 +22,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public string? TotalResult { get; set; }
     }
 
-    public partial class ItemListGift
+    public partial class GiftModel
     {
         [JsonPropertyName("id")]
         public string? Id { get; set; }
@@ -109,7 +97,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public string? IsUnfix { get; set; }
 
         [JsonPropertyName("office")]
-        public IList<OfficeListGift>? Office { get; set; }
+        public IList<OfficeModel>? Offices { get; set; }
 
         [JsonPropertyName("brandLogoLoyalty")]
         public string? BrandLogoLoyalty { get; set; }
@@ -139,7 +127,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public string? CodeQuantity { get; set; }
     }
 
-    public partial class OfficeListGift
+    public partial class OfficeModel
     {
         [JsonPropertyName("brand_id")]
         public string? BrandId { get; set; }

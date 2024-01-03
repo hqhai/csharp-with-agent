@@ -3,23 +3,34 @@
 namespace Fsel.Ordering.Application.Services.UrBoxService
 {
     using System.Threading.Tasks;
+    using Fsel.Ordering.Domain.Models.CommandModels.UrBox;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Ordering.Domain.Models.EntityModels.UrBox;
     using Fsel.Ordering.Domain.Models.QueryModels.UrBox;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface IUrBoxService
     {
-        [Get("/gift/lists")]
-        Task<IApiResponse<UrBoxModel>> GetList([FromBody] GetTheGiftListFromUrBoxQueryModel query);
+        [Get("/4.0/gift/lists")]
+        Task<IApiResponse<GetAllGiftModel>> GetAllGift([FromBody] GetTheGiftListFromUrBoxModel model);
 
-        [Get("/gift/detail")]
-        Task<IApiResponse<GiftDetailModel>> Get([FromBody] GetTheGiftQueryModel query);
+        [Get("/4.0/gift/detail")]
+        Task<IApiResponse<GetGiftDetailModel>> Get([FromBody] GetTheGiftQueryModel model);
 
-        [Get("/category/catbyparent")]
-        Task<IApiResponse<CategoryModel>> GetListCategory([FromBody] GetListCategoryQueryModel query);
+        [Get("/2.0/category/catbyparent")]
+        Task<IApiResponse<GetListCategoryModel>> GetListCategory([FromBody] GetListCategoryQueryModel model);
 
-        [Get("/gift/brand")]
-        Task<IApiResponse<BrandModel>> GetListBrand([FromBody] GetListBrandQueryModel query);
+        [Get("/4.0/gift/brand")]
+        Task<IApiResponse<BrandModel>> GetListBrand([FromBody] GetListBrandQueryModel model);
+
+        [Post("/2.0/cart/cartPayVoucher")]
+        Task<IApiResponse<RedemptionResponseModel>> CreateARedemptionRequest([Body] CreateRedemptionRequestModel model, [Header("Signature")] string signature);
+
+        [Get("/2.0/cart/getlist")]
+        Task<IApiResponse<GiftExchangeHistoryModel>> GetGiftExchangeHistory([FromBody] GetGiftExchangeHistoryModel model);
+
+        [Get("/2.0/cart/getByTransaction")]
+        Task<IApiResponse<DetailExchangeHistoryModel>> GetDetailExchangeHistory([FromBody] GetDetailExchangeHistoryModel model);
     }
 }

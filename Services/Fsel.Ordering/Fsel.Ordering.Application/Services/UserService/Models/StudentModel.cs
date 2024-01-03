@@ -13,6 +13,7 @@ namespace Fsel.Ordering.Application.Services.UserService.Models
         public string? School { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public Guid? ClassId { get; set; }
+        public long NumberOfToken { get; set; }
         public HumanModel? Human { get; set; }
     }
 }

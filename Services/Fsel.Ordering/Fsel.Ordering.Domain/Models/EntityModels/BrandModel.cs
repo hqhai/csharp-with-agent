@@ -11,7 +11,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public string? Msg { get; set; }
 
         [JsonPropertyName("microtime")]
-        public string? Microtime { get; set; }
+        public string? MicroTime { get; set; }
 
         [JsonPropertyName("status")]
         public long Status { get; set; }

@@ -7,18 +7,18 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.UrBoxService;
-    using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Ordering.Domain.Models.EntityModels.UrBox;
     using Fsel.Ordering.Domain.Models.QueryModels.UrBox;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using MediatR;
 
-    public class GetTheGiftQuery : IRequest<MethodResult<GiftDetailModel>>
+    public class GetGiftQuery : IRequest<MethodResult<GiftDetailModel>>
     {
         public string? Id { get; set; }
         public string? Language { get; set; }
     }
 
-    public class GetTheGiftQueryHandler : IRequestHandler<GetTheGiftQuery, MethodResult<GiftDetailModel>>
+    public class GetTheGiftQueryHandler : IRequestHandler<GetGiftQuery, MethodResult<GiftDetailModel>>
     {
         private readonly IUrBoxService _urBoxService;
         private readonly AppSetting _appSetting;
@@ -29,24 +29,26 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             _appSetting = appSetting;
         }
 
-        public async Task<MethodResult<GiftDetailModel>> Handle(GetTheGiftQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<GiftDetailModel>> Handle(GetGiftQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<GiftDetailModel>();
 
-            var theGift = await _urBoxService.Get(new GetTheGiftQueryModel
+            var theGiftResult = await _urBoxService.Get(new GetTheGiftQueryModel
             {
                 AppSecret = _appSetting.UrBoxConfig?.AppSecret,
-                AppId = _appSetting.UrBoxConfig?.AppId ?? 20,
+                AppId = _appSetting.UrBoxConfig?.AppId,
                 Id = request.Id,
                 Language = request.Language,
             });
-            if (!theGift.IsSuccessStatusCode)
+
+            var theGift = theGiftResult.Content;
+            if (theGift?.Status != 200)
             {
-                methodResult.AddError(theGift.Error);
+                methodResult.AddErrorBadRequest(theGift?.Msg);
                 return methodResult;
             }
-            methodResult.Result = theGift.Content;
+            methodResult.Result = theGift.Data;
             return methodResult;
         }
     }

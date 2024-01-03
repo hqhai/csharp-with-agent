@@ -4,14 +4,8 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.UrBox
 {
     using Refit;
 
-    public class GetTheGiftQueryModel
+    public class GetTheGiftQueryModel : UrBoxQueryModel
     {
-        [AliasAs("app_secret")]
-        public string? AppSecret { get; set; }
-
-        [AliasAs("app_id")]
-        public int AppId { get; set; }
-
         [AliasAs("id")]
         public string? Id { get; set; }
 

@@ -6,12 +6,14 @@ namespace Fsel.Ordering.Api.Controllers
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Ordering.Application.Commands.UrBoxs;
     using Fsel.Ordering.Application.Queries.UrBoxQuery;
-    using Fsel.Ordering.Application.Queries.UserRefferalQuery;
+    using Fsel.Ordering.Domain.Models.CommandModels.UrBox;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Ordering.Domain.Models.EntityModels.UrBox;
     using Fsel.Shared.Constants;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1)]
@@ -28,12 +30,12 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// Get the gift list
+        /// search gift item
         /// </summary>
-        [HttpGet("get-list")]
-        [ProducesResponseType(typeof(MethodResult<UrBoxModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<GiftModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetList([FromQuery] GetTheGiftListFromUrBoxQuery query)
+        public async Task<IActionResult> GetList([FromQuery] SearchGiftsQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -43,9 +45,9 @@ namespace Fsel.Ordering.Api.Controllers
         /// Get the gift
         /// </summary>
         [HttpGet("get-detail")]
-        [ProducesResponseType(typeof(MethodResult<UrBoxModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<GiftDetailModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetTheGiftQuery query)
+        public async Task<IActionResult> Get([FromQuery] GetGiftQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -55,7 +57,7 @@ namespace Fsel.Ordering.Api.Controllers
         /// Get categories
         /// </summary>
         [HttpGet("get-list-category")]
-        [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<CategoryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListCategory([FromQuery] GetListCategoryQuery query)
         {
@@ -64,12 +66,48 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// Get categories
+        /// Get list brand
         /// </summary>
         [HttpGet("get-list-brand")]
         [ProducesResponseType(typeof(MethodResult<BrandModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListBrand([FromQuery] GetListBrandQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// create a redemption request
+        /// </summary>
+        [HttpPost("create-redemption")]
+        [ProducesResponseType(typeof(MethodResult<CreateRedemptionRequestModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateRedemptionRequest([FromBody] CreateRedemptionRequestCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get gift exchange history
+        /// </summary>
+        [HttpGet("gift-exchange-history")]
+        [ProducesResponseType(typeof(MethodResult<ExchangeHistoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetGiftExchangeHistory([FromQuery] GetGiftExchangeHistoryQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get gift exchange history
+        /// </summary>
+        [HttpGet("detail-exchange-history")]
+        [ProducesResponseType(typeof(MethodResult<DetailExchangeHistoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetDetailExchangeHistory([FromQuery] GetDetailExchangeHistoryQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

@@ -4,14 +4,8 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.UrBox
 {
     using Refit;
 
-    public class GetListCategoryQueryModel
+    public class GetListCategoryQueryModel : UrBoxQueryModel
     {
-        [AliasAs("app_secret")]
-        public string? AppSecret { get; set; }
-
-        [AliasAs("app_id")]
-        public int AppId { get; set; }
-
         [AliasAs("parent_id")]
         public int? ParentId { get; set; }
 

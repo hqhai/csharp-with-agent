@@ -35,7 +35,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             var categoriesResult = await _urBoxService.GetListBrand(new GetListBrandQueryModel
             {
                 AppSecret = _appSetting.UrBoxConfig?.AppSecret,
-                AppId = _appSetting.UrBoxConfig?.AppId ?? 20,
+                AppId = _appSetting.UrBoxConfig?.AppId,
                 CategoryId = request.CategoryId
             });
             if (!categoriesResult.IsSuccessStatusCode)

@@ -5,7 +5,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
 
-    public class CategoryModel
+    public class GetListCategoryModel
     {
         [JsonPropertyName("done")]
         public long Done { get; set; }
@@ -14,16 +14,16 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public string? Msg { get; set; }
 
         [JsonPropertyName("microtime")]
-        public string? Microtime { get; set; }
+        public string? MicroTime { get; set; }
 
         [JsonPropertyName("status")]
         public long Status { get; set; }
 
         [JsonPropertyName("data")]
-        public IList<DataCategory>? Data { get; set; }
+        public IList<CategoryModel>? Data { get; set; }
     }
 
-    public partial class DataCategory
+    public partial class CategoryModel
     {
         [JsonPropertyName("images")]
         public string? Images { get; set; }

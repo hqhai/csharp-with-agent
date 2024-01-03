@@ -22,7 +22,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     public class UrBoxConfig
     {
         public string? AppSecret { get; set; }
-        public int AppId { get; set; }
+        public string? AppId { get; set; }
     }
 
     public class PaymentConfig
