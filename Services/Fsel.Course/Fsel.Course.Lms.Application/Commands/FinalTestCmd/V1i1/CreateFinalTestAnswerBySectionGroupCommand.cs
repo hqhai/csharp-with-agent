@@ -139,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 if (request.IsSubmit)
                 {
                     await _sectionGroupConverter.UpdateFinalTestAnswers(sectionGroup, sectionGroupResult);
-                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, nameof(FinalTest), cancellationToken);
+                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
                 }
                 return methodResult;
             });
