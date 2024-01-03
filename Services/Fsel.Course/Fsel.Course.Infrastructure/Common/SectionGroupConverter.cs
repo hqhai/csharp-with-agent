@@ -103,11 +103,11 @@ namespace Fsel.Course.Infrastructure.Common
             return skillScore;
         }
 
-        public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, string? type, CancellationToken cancellationToken)
+        public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult? sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             ArgumentNullException.ThrowIfNull(sectionGroup);
-            var skillScore = await GetSkillScore(sectionGroupResult, sectionGroup, type, cancellationToken);
+            var skillScore = await GetSkillScore(sectionGroupResult, sectionGroup, cancellationToken);
             sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
             sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
             sectionGroupResult.Status = EnumResultStatus.Done;
@@ -126,17 +126,13 @@ namespace Fsel.Course.Infrastructure.Common
             return sectionGroupResult;
         }
 
-        private async Task<SkillScores> GetSkillScore(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, string? type, CancellationToken cancellationToken)
+        private async Task<SkillScores> GetSkillScore(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(type))
-            {
-                return new SkillScores();
-            }
-            if (type == nameof(MockTest))
+            if (sectionGroupResult.MockTestResultId.HasValue)
             {
                 return await GetSkillScoreMockTest(sectionGroupResult, sectionGroup, cancellationToken);
             }
-            else if (type == nameof(FinalTest))
+            else if (sectionGroupResult.FinalTestResultId.HasValue)
             {
                 return await GetSkillScoreFinalTest(sectionGroupResult, sectionGroup, cancellationToken);
             }
@@ -274,8 +270,9 @@ namespace Fsel.Course.Infrastructure.Common
             };
         }
 
-        public async Task UpdateMockTestAnswers(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
+        public async Task UpdateMockTestAnswers(SectionGroup sectionGroup, SectionGroupResult? sectionGroupResult)
         {
+            ArgumentNullException.ThrowIfNull(sectionGroupResult);
             var questionIds = await GetUnansweredQuestionIds(sectionGroup, nameof(MockTest), sectionGroupResult);
             var mockTestAnswers = new List<MockTestAnswer>();
             if (questionIds.Item1 != null && questionIds.Item1.Any())
