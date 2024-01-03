@@ -14,11 +14,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -41,12 +40,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IUserService _userService;
 
-
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
             IHomeWorkRepository homeWorkRepository,
             QuestionConverter questionConverter,
-            AnswerTypeConverter answerTypeConverter,
             IQuestionRepository questionRepository,
             AuthContext authContext,
             QuestBoardPublisher questBoardPublisher,
@@ -161,7 +158,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     Scores = 0
                 };
 
-
                 // làm nhiệm vụ
                 var courseId = homeWorkResult!.LessonResult?.CourseId ?? default;
                 await DoQuestBoard(courseId, request.Answers.Count, cancellationToken);
@@ -199,8 +195,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             return methodResult;
         }
 
-
-
         public async Task DoDailyQuest(CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CompleteHomeWorkAtLeastFiftyPercent };
@@ -226,8 +220,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 await _questBoardPublisher.Publish(questBoardModel, cancellationToken);
             }
         }
-
-
 
         private async Task DoQuestBoard(Guid courseId, int correctCount, CancellationToken cancellationToken)
         {
