@@ -16,13 +16,13 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
-                    var multichoice = config.Deserialize<MutipleChoiceQuestion>();
+                    var multichoice = config.Deserialize<MultipleChoiceQuestion>();
                     result = isDisableAnswers ? ClearAnswers(multichoice) : multichoice;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
                 case EnumQuestionType.Checklist:
-                    var checklist = config.Deserialize<MutipleChoiceQuestion>();
+                    var checklist = config.Deserialize<MultipleChoiceQuestion>();
                     result = isDisableAnswers ? ClearAnswers(checklist) : checklist;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checklist) : default;
                     break;
@@ -125,7 +125,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswers(MutipleChoiceQuestion? data)
+        private static object? ClearAnswers(MultipleChoiceQuestion? data)
         {
             if (data != null && data.Contents != null)
             {
@@ -179,7 +179,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrect(MutipleChoiceQuestion? data)
+        private static int GetTotalCorrect(MultipleChoiceQuestion? data)
         {
             int number = 0;
             if (data != null && data.Contents != null)

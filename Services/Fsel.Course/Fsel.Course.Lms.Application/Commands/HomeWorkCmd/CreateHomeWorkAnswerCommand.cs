@@ -27,31 +27,25 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     public class CreateHomeWorkAnswerCommandHandler : IRequestHandler<CreateHomeWorkAnswerCommand, MethodResult<bool>>
     {
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
-        private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
         private readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly QuestionConverter _questionConverter;
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
-        private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
-            IHomeWorkQuestionRepository homeWorkQuestionRepository,
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
             IHomeWorkRepository homeWorkRepository,
             QuestionConverter questionConverter,
             FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
-            AnswerTypeConverter answerTypeConverter,
             IQuestionRepository questionRepository
             )
         {
             _homeWorkResultRepository = homeWorkResultRepository;
-            _homeWorkQuestionRepository = homeWorkQuestionRepository;
             _homeWorkAnswerRepository = homeWorkAnswerRepository;
             _homeWorkRepository = homeWorkRepository;
             _questionConverter = questionConverter;
             _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
-            _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
         }
 
@@ -98,7 +92,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
-                var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
                 var homeWorkQuestion = questionItem.HomeWorkQuestions.FirstOrDefault();
                 if (homeWorkQuestion == null)
                 {

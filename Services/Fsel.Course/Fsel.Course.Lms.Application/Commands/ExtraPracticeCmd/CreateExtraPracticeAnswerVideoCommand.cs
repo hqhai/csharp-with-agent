@@ -34,7 +34,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IMapper _mapper;
         private readonly QuestionConverter _questionConverter;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
-        private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
 
@@ -43,7 +42,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , IMapper mapper
             , QuestionConverter questionConverter
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
-            , AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
             , IExtraPracticeResultRepository extraPracticeResultRepository)
         {
@@ -52,7 +50,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _mapper = mapper;
             _questionConverter = questionConverter;
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
-            _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
         }
@@ -112,7 +109,8 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                             methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                             return methodResult;
                         }
-                        var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                        var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
                         var exercise = questionItem.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                         var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
                         var currenVideoTimeCodeId = videoTimeCodeQuestion?.Id;

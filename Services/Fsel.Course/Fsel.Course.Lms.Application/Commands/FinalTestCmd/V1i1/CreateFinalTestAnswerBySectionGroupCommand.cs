@@ -230,22 +230,27 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 methodResult.AddErrorBadRequest(anwserResult.ErrorMessages);
                 return methodResult;
             }
-            var finalTestAnswers = anwserResult.Result;
-            if (finalTestAnswers != null && finalTestAnswers.Any())
+            var (createFinalTestAnswers, updateFinalTestAnswers) = anwserResult.Result;
+            if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
             {
-                await _finalTestAnswerRepository.AddList(finalTestAnswers);
+                await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
                 await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
-            methodResult.Result = anwserResult.Result;
+            if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
+            {
+                _finalTestAnswerRepository.UpdateList(updateFinalTestAnswers);
+                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            }
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, IList<Question>? questions, Guid sectionGroupResultId)
+        private async Task<MethodResult<(IList<FinalTestAnswer>, IList<FinalTestAnswer>)>> CreateAnswer(CreateFinalTestAnswerBySectionGroupCommand request, IList<Question>? questions, Guid sectionGroupResultId)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
-            var methodResult = new MethodResult<IList<FinalTestAnswer>>();
-            var finalTestAnswers = new List<FinalTestAnswer>();
+            var methodResult = new MethodResult<(IList<FinalTestAnswer>, IList<FinalTestAnswer>)>();
+            var createFinalTestAnswers = new List<FinalTestAnswer>();
+            var updateFinalTestAnswers = new List<FinalTestAnswer>();
             if (questions != null && questions.Any())
             {
                 foreach (var item in request.Answers)
@@ -257,30 +262,30 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                    var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
-                    var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == request.SectionGroupId);
+                    var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == request.FinalTestResultId && x.SectionQuestionId == sectionQuestionId);
                     if (finalTestAnswer == null)
                     {
-                        finalTestAnswers.Add(GetFinalTestAnswer(answerConfig, correctCount, request, questionItem, sectionGroupResultId));
+                        finalTestAnswer = new FinalTestAnswer
+                        {
+                            FinalTestResultId = request.FinalTestResultId,
+                            SectionGroupResultId = sectionGroupResultId,
+                            SectionQuestionId = question?.SectionQuestions.FirstOrDefault()?.Id ?? default,
+                        };
+                        createFinalTestAnswers.Add(finalTestAnswer);
                     }
+                    else
+                    {
+                        updateFinalTestAnswers.Add(finalTestAnswer);
+                    }
+                    finalTestAnswer.Answer = answerConfig;
+                    finalTestAnswer.CorrectCount = correctCount;
+                    finalTestAnswer.IsCorrect = isAnswered ? question?.CorrectTotal == correctCount : null;
                 }
             }
-            methodResult.Result = finalTestAnswers;
+            methodResult.Result = (createFinalTestAnswers, updateFinalTestAnswers);
             return methodResult;
-        }
-
-        private static FinalTestAnswer GetFinalTestAnswer(object? answer, int correctCount, CreateFinalTestAnswerBySectionGroupCommand request, Question? question, Guid sectionGroupResultId)
-        {
-            return new FinalTestAnswer
-            {
-                Answer = answer,
-                CorrectCount = correctCount,
-                FinalTestResultId = request.FinalTestResultId,
-                SectionGroupResultId = sectionGroupResultId,
-                SectionQuestionId = question?.SectionQuestions.FirstOrDefault()?.Id ?? default,
-                IsCorrect = question?.CorrectTotal == correctCount,
-            };
         }
     }
 }

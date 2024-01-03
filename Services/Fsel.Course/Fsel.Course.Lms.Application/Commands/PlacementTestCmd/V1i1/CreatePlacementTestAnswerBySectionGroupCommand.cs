@@ -279,7 +279,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                         methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                    var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
                     var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == request.PlacementTestResultId && x.SectionQuestionId == request.SectionGroupId);
                     if (placementTestAnswer == null)

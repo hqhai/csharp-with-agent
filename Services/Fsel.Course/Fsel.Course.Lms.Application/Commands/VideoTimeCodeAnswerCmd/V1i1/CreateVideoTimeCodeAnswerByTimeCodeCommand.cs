@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -21,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -166,7 +166,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
-                var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
 
                 if (answer == null)
                 {
@@ -178,11 +178,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                         VideoTimeCodeResultId = videoTimeCodeResult.Id,
                         VideoResultId = videoTimeCodeResult.VideoResultId,
                     };
-                    videoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit, videoTimeCodeResult.Status));
+                    videoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit, videoTimeCodeResult.Status, isAnswered));
                 }
                 else if (answer.Status != EnumAnswerStatus.Done)
                 {
-                    updateVideoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit, videoTimeCodeResult.Status));
+                    updateVideoTimeCodeAnswers.Add(GetVideoTimeCodeAnswer(answer, questionItem, correctCount, answerConfig ?? item.Answer, request.IsSubmit, videoTimeCodeResult.Status, isAnswered));
                 }
             }
             if (videoTimeCodeAnswers.Any())
@@ -198,12 +198,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             return methodResult;
         }
 
-        private static VideoTimeCodeAnswer GetVideoTimeCodeAnswer(VideoTimeCodeAnswer answer, Question question, int correctCount, object? answerConfig, bool isSubmit, EnumResultStatus status)
+        private static VideoTimeCodeAnswer GetVideoTimeCodeAnswer(VideoTimeCodeAnswer answer, Question question, int correctCount, object? answerConfig, bool isSubmit, EnumResultStatus status, bool isAnswered)
         {
             answer.Answer = answerConfig;
-            answer.CorrectCount = question.Ungraded ? default : correctCount;
+            answer.CorrectCount = correctCount;
             answer.Status = GetAnswerStatus(isSubmit, correctCount, question.CorrectTotal);
-            answer.IsCorrect = correctCount == question.CorrectTotal;
+            answer.IsCorrect = isAnswered ? correctCount == question.CorrectTotal : null;
             answer.IsFirstSubmit = status == EnumResultStatus.New;
             return answer;
         }
@@ -344,7 +344,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             }
             if (videoTimeCodeResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoTimeCodeResultDone), nameof(videoTimeCodeResult));
+                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(videoTimeCodeResult));
                 return methodResult;
             }
 
