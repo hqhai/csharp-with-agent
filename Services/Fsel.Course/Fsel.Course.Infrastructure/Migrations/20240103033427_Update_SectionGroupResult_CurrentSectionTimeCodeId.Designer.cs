@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240103033427_Update_SectionGroupResult_CurrentSectionTimeCodeId")]
+    partial class Update_SectionGroupResult_CurrentSectionTimeCodeId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -259,9 +262,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
-
-                    b.Property<bool>("IsViewed")
-                        .HasColumnType("bit");
 
                     b.Property<Guid>("LessonResultId")
                         .HasColumnType("uniqueidentifier");
@@ -2891,9 +2891,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<bool>("IsViewed")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("MockTestId")
                         .HasColumnType("uniqueidentifier");
 
@@ -4842,13 +4839,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CorrectCountUngraded")
-                        .HasColumnType("int");
-
                     b.Property<int>("CorrectTotal")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CorrectTotalUngraded")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
@@ -4893,9 +4884,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("RetryWorkingTime")
                         .HasColumnType("float");
-
-                    b.Property<string>("SkillScoreUngradedStr")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
