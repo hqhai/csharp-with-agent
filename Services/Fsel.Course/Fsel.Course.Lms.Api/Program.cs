@@ -100,7 +100,6 @@ builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRa
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
 builder.Services.AddScoped<QuestBoardPublisher>();
 
-
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();
