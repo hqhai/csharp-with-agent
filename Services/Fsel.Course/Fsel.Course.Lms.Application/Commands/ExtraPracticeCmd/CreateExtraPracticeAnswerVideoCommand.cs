@@ -34,7 +34,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IMapper _mapper;
         private readonly QuestionConverter _questionConverter;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
-        private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
 
@@ -43,7 +42,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , IMapper mapper
             , QuestionConverter questionConverter
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
-            , AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
             , IExtraPracticeResultRepository extraPracticeResultRepository)
         {
@@ -52,7 +50,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _mapper = mapper;
             _questionConverter = questionConverter;
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
-            _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
         }
