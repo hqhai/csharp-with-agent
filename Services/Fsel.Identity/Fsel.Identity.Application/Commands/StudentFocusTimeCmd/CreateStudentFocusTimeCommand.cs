@@ -13,6 +13,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
+    using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.StudentFocusTime;
@@ -36,8 +37,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly IStudentRepository _studentRepository;
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
-        private readonly QuestBoardPublisher _questBoardPublisher;
-        private readonly ITrainingService _trainingService;
 
         public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService)
         {
@@ -106,8 +105,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                             Mission = EnumTokenMission.FocusTime
                         });
                         var tokenConfigResult = tokenConfig.Content?.Result;
-                        // làm nhiệm vụ
-                        await DoQuestBoard(student, request.ExecuteTime, studentFocusTime.TargetTime, cancellationToken);
 
                         var checkSuperFireMode = await _mediator.Send(new CheckSuperFireModeQuery());
                         var isSuperMode = checkSuperFireMode.Result;
@@ -134,18 +131,5 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             return methodResult;
         }
 
-
-
-        /// <summary>
-        /// Lấy cấu hình của ngày gần nhất
-        /// </summary>
-        /// <param name="systemConfigResult"></param>
-        /// <returns></returns>
-        private static double GetNearestConfigTime(IStudentFocusTimeRepository studentFocusTimeRepository, Guid? studentId)
-        {
-            var nearestConfigTargetTime = studentFocusTimeRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date)?.TargetTime ?? DEFAULT_TARGET_TIME;
-
-            return nearestConfigTargetTime;
-        }
     }
 }
