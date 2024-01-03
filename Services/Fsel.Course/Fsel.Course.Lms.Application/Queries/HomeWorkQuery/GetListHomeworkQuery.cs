@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 .Select(x => new
                 {
                     HomeWorkResultId = x.Key,
-                    QuestionCompleted = x.Select(x => x).Count()
+                    QuestionCompleted = x.Select(x => x).Where(x => x.IsCorrect.HasValue).Count()
                 }).ToListAsync(cancellationToken);
             methodResult.Result = homeWorks.Select(x =>
             {

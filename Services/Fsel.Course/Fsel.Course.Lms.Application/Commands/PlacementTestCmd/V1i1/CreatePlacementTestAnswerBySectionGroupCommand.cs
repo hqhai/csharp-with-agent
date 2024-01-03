@@ -157,7 +157,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 if (request.IsSubmit)
                 {
                     await _sectionGroupConverter.UpdatePlacementTestAnswers(sectionGroup, sectionGroupResult);
-                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, nameof(PlacementTest), cancellationToken);
+                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
                 }
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
