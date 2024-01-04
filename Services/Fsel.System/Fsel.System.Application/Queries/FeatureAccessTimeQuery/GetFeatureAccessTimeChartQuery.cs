@@ -181,17 +181,12 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                      .Where(f => f.LastVisited.HasValue &&
                                  f.LastVisited.Value.Month == i &&
                                  features.Contains(f.EnumFeature))
-                     .GroupBy(f => f.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Month)
-                     .Select(group => new FeatureAccessTime
-                     {
-                         AccessTime = group.Sum(f => f.AccessTime),
-                     })
                      .ToList();
 
                 featureAccessTime.MonthActive = i;
                 foreach (var item in featureGroup)
                 {
-                    featureAccessTime.TotalHourActive = item.AccessTime;
+                    featureAccessTime.TotalHourActive += item.AccessTime;
                 }
 
                 featureAccessTimeByTypeMonthResult.Add(featureAccessTime);
