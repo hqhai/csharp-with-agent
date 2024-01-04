@@ -14,9 +14,12 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.Course, EnumReviewQuestionType.COURSERELEVANT),
             new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.Course, EnumReviewQuestionType.GAINEDKNOWLEDGE),
             new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.Course, EnumReviewQuestionType.QUALITYPICTURE),
-            new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.Platform, EnumReviewQuestionType.INTERFACEFRIENDLY),
-            new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.Platform, EnumReviewQuestionType.FEATURESACCESSIBLE),
-            new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.Platform, EnumReviewQuestionType.PROCESSINGPLATFORM)
+            new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.WebPlatform, EnumReviewQuestionType.INTERFACEFRIENDLY),
+            new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.WebPlatform, EnumReviewQuestionType.FEATURESACCESSIBLE),
+            new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.WebPlatform, EnumReviewQuestionType.PROCESSINGPLATFORM),
+            new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.MobilePlatform, EnumReviewQuestionType.INTERFACEFRIENDLY),
+            new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.MobilePlatform, EnumReviewQuestionType.FEATURESACCESSIBLE),
+            new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.MobilePlatform, EnumReviewQuestionType.PROCESSINGPLATFORM)
         };
 
         public static IList<object> GetEnumReviewQuestionTypes(this EnumReviewType? reviewType)

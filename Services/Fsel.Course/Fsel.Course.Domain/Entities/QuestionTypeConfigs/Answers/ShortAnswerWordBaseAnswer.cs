@@ -9,11 +9,11 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
         public string? Answers { get; set; }
         public bool? IsExact { get; set; }
 
-        public EnumSubAnswerStatus Status
+        public EnumCorrectStatus Status
         {
             get
             {
-                return IsExact.HasValue ? IsExact.Value ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail : EnumSubAnswerStatus.Process;
+                return IsExact.HasValue ? IsExact.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail : EnumCorrectStatus.Process;
             }
         }
 

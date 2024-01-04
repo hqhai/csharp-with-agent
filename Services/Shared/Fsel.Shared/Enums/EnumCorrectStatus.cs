@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumSubAnswerStatus
+    public enum EnumCorrectStatus
     {
         Process,
         Correct,

@@ -19,6 +19,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     public class GetFeatureAccessTimeChartQuery : IRequest<MethodResult<IList<FeatureAcessTimeChartModel>>>
     {
         public EnumFeatureTimeType? Type { get; set; }
+        public int? Year { get; set; }
     }
 
     public class GetFeatureAccessTimeChartQueryHandler : IRequestHandler<GetFeatureAccessTimeChartQuery, MethodResult<IList<FeatureAcessTimeChartModel>>>
@@ -44,6 +45,11 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 .OrderByDescending(x => x.LastVisited)
                 .ToListAsync(cancellationToken);
 
+            var featureAccessTimesByMonth = await _featureAccessTimeRepository.Queryable
+                .Where(x => x.CreatedUserId == _authContext.CurrentUserId && x.LastVisited!.Value.Year == request.Year)
+                .OrderByDescending(x => x.LastVisited)
+                .ToListAsync(cancellationToken);
+
             List<FeatureAcessTimeChartModel> chartData = new List<FeatureAcessTimeChartModel>();
             var socialFeatures = new[] { EnumFeature.ClassForum, EnumFeature.DiscussionBoard };
             var learnFeatures = Enum.GetValues(typeof(EnumFeature)).Cast<EnumFeature>().Except(socialFeatures).Except(new[] { EnumFeature.Other }).ToArray();
@@ -65,6 +71,14 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                             CreateFeatureAccessTimeAWeek(featureAccessTimes.AsReadOnly(), socialFeatures, EnumFeatureBussinessType.Social),
                             CreateFeatureAccessTimeAWeek(featureAccessTimes.AsReadOnly(), new[] { EnumFeature.Other }, EnumFeatureBussinessType.Other),
                             CreateFeatureAccessTimeAWeek(featureAccessTimes.AsReadOnly(), learnFeatures, EnumFeatureBussinessType.Learn )
+                        };
+                    break;
+                case EnumFeatureTimeType.Month:
+                    chartData = new List<FeatureAcessTimeChartModel>
+                        {
+                            CreateFeatureAccessTimeAMonth(featureAccessTimesByMonth.AsReadOnly(), socialFeatures, EnumFeatureBussinessType.Social),
+                            CreateFeatureAccessTimeAMonth(featureAccessTimesByMonth.AsReadOnly(), new[] { EnumFeature.Other }, EnumFeatureBussinessType.Other),
+                            CreateFeatureAccessTimeAMonth(featureAccessTimesByMonth.AsReadOnly(), learnFeatures, EnumFeatureBussinessType.Learn)
                         };
                     break;
 
@@ -151,6 +165,32 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             {
                 FeatureBussinessType = type,
                 FeatureAccessTimes = featureAccessTimeResult
+            };
+
+            return result;
+        }
+
+        private static FeatureAcessTimeChartModel CreateFeatureAccessTimeAMonth(ReadOnlyCollection<FeatureAccessTime> featureAccessTimesByMonth, EnumFeature[] features, EnumFeatureBussinessType type)
+        {
+            var featureAccessTimeByTypeMonthResult = new List<FeatureAccessTimeByTypeModel>();
+            for (int i = 1; i <= 12; i++)
+            {
+                var featureAccessTime = new FeatureAccessTimeByTypeModel();
+
+                featureAccessTime.TotalHourActive = featureAccessTimesByMonth
+                     .Where(f => f.LastVisited.HasValue &&
+                                 f.LastVisited.Value.Month == i &&
+                                 features.Contains(f.EnumFeature))
+                     .Sum(f => f.AccessTime);
+                featureAccessTime.MonthActive = i;
+
+                featureAccessTimeByTypeMonthResult.Add(featureAccessTime);
+            }
+
+            var result = new FeatureAcessTimeChartModel
+            {
+                FeatureBussinessType = type,
+                FeatureAccessTimes = featureAccessTimeByTypeMonthResult
             };
 
             return result;

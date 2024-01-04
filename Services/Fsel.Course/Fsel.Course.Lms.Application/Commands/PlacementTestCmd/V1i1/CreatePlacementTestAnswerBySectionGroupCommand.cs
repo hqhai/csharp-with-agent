@@ -142,23 +142,18 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             #endregion Validate
 
+            if (request.Answers != null && request.Answers.Any())
+            {
+                var answerResult = await CreateAnswerAsync(request, sectionGroupResult);
+                if (!answerResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
+                    return methodResult;
+                }
+            }
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                if (request.Answers != null && request.Answers.Any())
-                {
-                    var answerResult = await CreateAnswerAsync(request, sectionGroupResult.Id);
-                    if (!answerResult.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-
-                if (request.IsSubmit)
-                {
-                    await _sectionGroupConverter.UpdatePlacementTestAnswers(sectionGroup, sectionGroupResult);
-                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
-                }
+                sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
@@ -192,7 +187,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     {
                         await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
                         {
-                            Id = _authContext.CurrentUserId,
+                            Id = student.Human?.UserId ?? _authContext.CurrentUserId,
                             Level = currentLevel.Value
                         }).ConfigureAwait(false);
                     }
@@ -235,7 +230,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             return placementTestResult;
         }
 
-        private async Task<MethodResult<IList<PlacementTestAnswer>>> CreateAnswerAsync(CreatePlacementTestAnswerBySectionGroupCommand request, Guid sectionGroupResultId)
+        private async Task<MethodResult<IList<PlacementTestAnswer>>> CreateAnswerAsync(CreatePlacementTestAnswerBySectionGroupCommand request, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<IList<PlacementTestAnswer>>();
@@ -246,28 +241,33 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
-            var anwserResult = await CreateAnswer(request, questions, sectionGroupResultId);
+            var anwserResult = await CreateAnswer(request, questions, sectionGroupResult);
             if (!anwserResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(anwserResult.ErrorMessages);
                 return methodResult;
             }
-            var placementTestAnswers = anwserResult.Result;
-            if (placementTestAnswers != null && placementTestAnswers.Any())
+            var (createPlacementTestAnswers, updatePlacementTestAnswers) = anwserResult.Result;
+            if (createPlacementTestAnswers != null && createPlacementTestAnswers.Any())
             {
-                await _placementTestAnswerRepository.AddList(placementTestAnswers);
+                await _placementTestAnswerRepository.AddList(createPlacementTestAnswers);
                 await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
-            methodResult.Result = anwserResult.Result;
+            if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
+            {
+                _placementTestAnswerRepository.UpdateList(updatePlacementTestAnswers);
+                await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            }
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<PlacementTestAnswer>>> CreateAnswer(CreatePlacementTestAnswerBySectionGroupCommand request, IList<Question>? questions, Guid sectionGroupResultId)
+        private async Task<MethodResult<(IList<PlacementTestAnswer>, IList<PlacementTestAnswer>)>> CreateAnswer(CreatePlacementTestAnswerBySectionGroupCommand request, IList<Question>? questions, SectionGroupResult sectionGroupResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
-            var methodResult = new MethodResult<IList<PlacementTestAnswer>>();
-            var placementTestAnswers = new List<PlacementTestAnswer>();
+            var methodResult = new MethodResult<(IList<PlacementTestAnswer>, IList<PlacementTestAnswer>)>();
+            var createPlacementTestAnswers = new List<PlacementTestAnswer>();
+            var updatePlacementTestAnswers = new List<PlacementTestAnswer>();
             if (questions != null && questions.Any())
             {
                 foreach (var item in request.Answers)
@@ -280,24 +280,37 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                         return methodResult;
                     }
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
-                    var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == request.PlacementTestResultId && x.SectionQuestionId == request.SectionGroupId);
+                    var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == request.PlacementTestResultId && x.SectionQuestionId == sectionQuestionId);
                     if (placementTestAnswer == null)
                     {
-                        placementTestAnswers.Add(new PlacementTestAnswer
+                        placementTestAnswer = new PlacementTestAnswer
                         {
-                            Answer = answerConfig,
-                            CorrectCount = correctCount,
                             PlacementTestResultId = request.PlacementTestResultId,
-                            SectionGroupResultId = sectionGroupResultId,
+                            SectionGroupResultId = sectionGroupResult.Id,
                             SectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default,
-                            IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null
-                        });
+                        };
+                        createPlacementTestAnswers.Add(GetPlacementTestAnswer(placementTestAnswer, answerConfig, correctCount, isAnswered, questionItem));
+                    }
+                    else
+                    {
+                        updatePlacementTestAnswers.Add(GetPlacementTestAnswer(placementTestAnswer, answerConfig, correctCount, isAnswered, questionItem));
                     }
                 }
             }
-            methodResult.Result = placementTestAnswers;
+
+            methodResult.Result = (createPlacementTestAnswers, updatePlacementTestAnswers);
             return methodResult;
+        }
+
+        private static PlacementTestAnswer GetPlacementTestAnswer(PlacementTestAnswer placementTestAnswer, object? answer, int correctCount, bool isAnswered, Question questionItem)
+        {
+            placementTestAnswer.Answer = answer;
+            placementTestAnswer.CorrectCount = correctCount;
+            placementTestAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
+            placementTestAnswer.Status = questionItem.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
+            return placementTestAnswer;
         }
     }
 }

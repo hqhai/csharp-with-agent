@@ -11,6 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? PlacementTestResultId { get; set; }
         public Guid? CurrentSectionTimeCodeId { get; set; }
         public bool? IsTestDone { get; set; }
+
         public double RemainingTime { get; set; }
     }
 }

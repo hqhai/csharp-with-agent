@@ -30,21 +30,21 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     public class GetPlacementTestByLevelQueryHandler : IRequestHandler<GetPlacementTestByLevelQuery, MethodResult<PlacementTestDtoModel>>
     {
         private readonly AuthContext _authContext;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly IPlacementTestRepository _placementTestRepository;
 
         public GetPlacementTestByLevelQueryHandler(AuthContext authContext
-            , SectionConverter sectionConverter
+            , SectionGroupConverter sectionGroupConverter
             , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
             , IMapper mapper
             , IPlacementTestRepository placementTestRepository)
         {
             _authContext = authContext;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
             _mapper = mapper;
@@ -92,9 +92,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             ArgumentNullException.ThrowIfNull(placementTest);
             var placementTestDto = _mapper.Map<PlacementTestDtoModel>(placementTest);
             var sectionGroups = placementTest.PlacementTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
-            placementTestDto.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
+            placementTestDto.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(sectionGroups);
             placementTestDto.PlacementTestResult = _mapper.Map<PlacementTestResultModel>(placementTestResult);
-            placementTestDto.SectionGroups = _sectionConverter.GetSectionGroups(sectionGroups, placementTestDto.PlacementTestResult.Id, "PlacementTestResultId");
+            placementTestDto.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, placementTestDto.PlacementTestResult.Id, "PlacementTestResultId");
             return placementTestDto;
         }
 

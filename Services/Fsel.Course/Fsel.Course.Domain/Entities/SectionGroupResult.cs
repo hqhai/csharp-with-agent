@@ -22,6 +22,7 @@ namespace Fsel.Course.Domain.Entities
         public Guid? ExtraPracticeResultId { get; set; }
 
         public PlacementTestResult? PlacementTestResult { get; set; }
+
         public Guid? PlacementTestResultId { get; set; }
 
         public Guid? CurrentSectionTimeCodeId { get; set; }

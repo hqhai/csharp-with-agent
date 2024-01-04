@@ -8,5 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public object? Answer { get; set; }
         public int CorrectCount { get; set; }
+        public bool? IsCorrect { get; set; }
     }
 }
