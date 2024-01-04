@@ -7,10 +7,12 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.SupportTickets;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -37,7 +39,17 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
 
             #region Validation
 
-            if (supportTicket == null)
+            if (supportTicket == null || supportTicket.Status == EnumSupportTicketStatus.Solved)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportQuestionNotExist));
+                return methodResult;
+            }
+            if (supportTicket.Status == EnumSupportTicketStatus.NotSeen && request.Status == EnumSupportTicketStatus.Solved)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportQuestionNotExist));
+                return methodResult;
+            }
+            if (supportTicket.Status == EnumSupportTicketStatus.Seen && request.Status == EnumSupportTicketStatus.NotSeen)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportQuestionNotExist));
                 return methodResult;
@@ -46,17 +58,28 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
 
             #endregion Validation
 
-            await _supportTicketRepository.ExecuteTransactionAsync(async () =>
+            switch (supportTicket.Status)
             {
-                supportTicket = _supportTicketRepository.Update(supportTicket);
+                case EnumSupportTicketStatus.NotSeen:
+                    await TimeSupportTicket(supportTicket, cancellationToken);
+                    break;
+                case EnumSupportTicketStatus.Seen:
+                    await TimeSupportTicket(supportTicket, cancellationToken);
+                    break;
+                case EnumSupportTicketStatus.Solved:
+                    await TimeSupportTicket(supportTicket, cancellationToken);
+                    break;
+            }
 
-                await _supportTicketRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<SupportTicketModel>(supportTicket);
-                return methodResult;
-            });
-
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = _mapper.Map<SupportTicketModel>(supportTicket);
             return methodResult;
         }
+        public async Task TimeSupportTicket(SupportTicket supportTicket, CancellationToken cancellationToken)
+        {
+            _supportTicketRepository.Update(supportTicket);
+            await _supportTicketRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
+
 }
