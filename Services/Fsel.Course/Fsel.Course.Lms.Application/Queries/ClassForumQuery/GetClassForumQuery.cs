@@ -153,7 +153,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 if (classForumResultCurrentStudent != null && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Draft)
                 {
                     //feed back
-                    classForumResultCurrentStudent.IsFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultCurrentStudent.Id, cancellationToken);
+                    classForumResultCurrentStudent.IsTeacherFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultCurrentStudent.Id && x.Type == EnumStudentFeedBackType.Teacher, cancellationToken);
+                    classForumResultCurrentStudent.IsAIFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultCurrentStudent.Id && x.Type == EnumStudentFeedBackType.AI, cancellationToken);
 
                     // Lấy bài post học sinh trong lớp
                     var classForumResultAllStudents = classForumResults.Where(x => x.ClassForumId == classForum.Id &&
