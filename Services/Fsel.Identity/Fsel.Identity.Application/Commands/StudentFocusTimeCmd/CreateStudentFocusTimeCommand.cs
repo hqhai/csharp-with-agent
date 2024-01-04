@@ -100,7 +100,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                     var systemConfigMap = systemConfigResult!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
                     studentFocusTime.ExecuteTime = request.ExecuteTime;
 
-                    if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime && studentFocusTime.IsEstablished)
+                    if
+                    (
+                      systemConfigMap != null &&
+                      studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime &&
+                      studentFocusTime.IsEstablished
+                    )
                     {
                         var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
                         {
