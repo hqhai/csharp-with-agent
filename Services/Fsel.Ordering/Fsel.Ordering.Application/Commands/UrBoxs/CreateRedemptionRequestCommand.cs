@@ -118,8 +118,6 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
 
                 var redemptionRequest = new CreateRedemptionRequestModel(_appSetting);
 
-                redemptionRequest.AppSecret = _appSetting.UrBoxConfig?.AppSecret;
-                redemptionRequest.AppId = _appSetting.UrBoxConfig?.AppId?.ToString(CultureInfo.CurrentCulture);
                 redemptionRequest.SiteUserId = _authContext.CurrentUserId.ToString();
                 redemptionRequest.TransactionId = transactionId;
                 redemptionRequest.PhoneNumber = request.PhoneNumber;
@@ -132,7 +130,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                     return methodResult;
                 }
 
-                if (type == 9)
+                if (type == (int)EnumGiftType.Physics)
                 {
                     //redemptionRequest.Language = "vi";
                     redemptionRequest.ShippingInfoAvailable = 2;
@@ -164,7 +162,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
                 if (createRedemptionRequest.Content?.Status == 200)
                 {
-                    var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new Application.Services.UserService.Models.UpdateStudentByTokenModel { StudentId = studentResult.Content?.Result?.Id ?? default, NumberOfToken = price - token });
+                    var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new Application.Services.UserService.Models.UpdateStudentByTokenModel { StudentId = studentResult.Content?.Result?.Id ?? default, NumberOfToken = token - price });
                     if (!updateTokenResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(updateTokenResult.Error);
