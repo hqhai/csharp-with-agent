@@ -187,7 +187,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     {
                         await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
                         {
-                            Id = _authContext.CurrentUserId,
+                            Id = student.Human?.UserId ?? _authContext.CurrentUserId,
                             Level = currentLevel.Value
                         }).ConfigureAwait(false);
                     }
