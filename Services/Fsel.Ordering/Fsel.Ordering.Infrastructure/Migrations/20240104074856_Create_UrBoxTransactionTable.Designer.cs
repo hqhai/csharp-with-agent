@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingDbContext))]
-    [Migration("20240102062202_Create_UrBoxTransactionTable")]
+    [Migration("20240104074856_Create_UrBoxTransactionTable")]
     partial class Create_UrBoxTransactionTable
     {
         /// <inheritdoc />
@@ -284,11 +284,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("TransactionId")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")

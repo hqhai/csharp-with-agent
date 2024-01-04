@@ -3,7 +3,6 @@
 namespace Fsel.Ordering.Application.Commands.UrBoxs
 {
     using System;
-    using System.Globalization;
     using System.Security.Cryptography;
     using System.Threading;
     using System.Threading.Tasks;
@@ -24,7 +23,6 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
 
     public class CreateRedemptionRequestCommand : CreateRedemptionRequestCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
     {
@@ -106,20 +104,13 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
 
             await _urBoxTransactionRepository.ExecuteTransactionAsync(async () =>
             {
-                string transactionId;
-                while (true)
-                {
-                    transactionId = NumberHelper.GenerateCodeNumber(11);
-                    if (!await _urBoxTransactionRepository.Queryable.AnyAsync(p => p.TransactionId == transactionId))
-                    {
-                        break;
-                    }
-                }
+                var urBoxTransaction = _urBoxTransactionRepository.Add(new UrBoxTransaction());
+                await _urBoxTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 var redemptionRequest = new CreateRedemptionRequestModel(_appSetting);
 
                 redemptionRequest.SiteUserId = _authContext.CurrentUserId.ToString();
-                redemptionRequest.TransactionId = transactionId;
+                redemptionRequest.TransactionId = urBoxTransaction.Id.ToString();
                 redemptionRequest.PhoneNumber = request.PhoneNumber;
                 redemptionRequest.IsSendSms = 0;
                 redemptionRequest.DataBuy = request.DataBuy.Select(p => new DataBuy { PriceId = p.PriceId, Quantity = p.Quantity }).ToList();
@@ -175,13 +166,11 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                     methodResult.AddErrorBadRequest(createRedemptionRequest.Content?.Msg);
                 }
 
-                _urBoxTransactionRepository.Add(new UrBoxTransaction()
-                {
-                    TransactionId = transactionId,
-                    RequestBody = redemptionRequest,
-                    ResponseBody = createRedemptionRequest.Content,
-                    Status = createRedemptionRequest.Content?.Status == 200 ? EnumUrBoxTransactionStatus.Success : EnumUrBoxTransactionStatus.Unsuccessful
-                });
+                urBoxTransaction.RequestBody = redemptionRequest;
+                urBoxTransaction.ResponseBody = createRedemptionRequest.Content;
+                urBoxTransaction.Status = createRedemptionRequest.Content?.Status == 200 ? EnumUrBoxTransactionStatus.Success : EnumUrBoxTransactionStatus.Unsuccessful;
+
+                _urBoxTransactionRepository.Update(urBoxTransaction);
                 await _urBoxTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 return methodResult;
             });

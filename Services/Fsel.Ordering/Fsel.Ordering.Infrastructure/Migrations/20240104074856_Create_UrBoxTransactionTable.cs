@@ -27,7 +27,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    TransactionId = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     RequestBodyStr = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ResponseBodyStr = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
