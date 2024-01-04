@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class QuestionTestModel
     {
         public Guid QuestionId { get; set; }
-        public EnumSubAnswerStatus? Status { get; set; }
+        public EnumCorrectStatus? Status { get; set; }
     }
 }

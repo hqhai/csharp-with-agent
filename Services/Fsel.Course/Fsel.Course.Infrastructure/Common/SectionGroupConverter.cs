@@ -464,7 +464,7 @@ namespace Fsel.Course.Infrastructure.Common
             return sectionPartDto;
         }
 
-        private static EnumSubAnswerStatus? GetStatus(SectionQuestion sectionQuestion, bool isDone)
+        private static EnumCorrectStatus? GetStatus(SectionQuestion sectionQuestion, bool isDone)
         {
             if (sectionQuestion.MockTestAnswers.Any())
             {
@@ -481,9 +481,9 @@ namespace Fsel.Course.Infrastructure.Common
             return null;
         }
 
-        private static EnumSubAnswerStatus? GetStatus(BaseAnswer? baseAnswer, bool isDone)
+        private static EnumCorrectStatus? GetStatus(BaseAnswer? baseAnswer, bool isDone)
         {
-            return baseAnswer != null ? (isDone ? (baseAnswer.IsCorrect == true ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail) : EnumSubAnswerStatus.Process) : null;
+            return baseAnswer != null ? (isDone ? (baseAnswer.IsCorrect == true ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail) : EnumCorrectStatus.Process) : null;
         }
 
         public SectionGroupModel GetSectionGroupModel(SectionGroup? sectionGroup, bool isDisableAnswers = false)

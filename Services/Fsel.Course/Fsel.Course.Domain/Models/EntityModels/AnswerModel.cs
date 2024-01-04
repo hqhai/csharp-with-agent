@@ -10,11 +10,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public object? Answer { get; set; }
         public bool? IsCorrect { get; set; }
 
-        public EnumSubAnswerStatus? SubAnswerStatus
+        public EnumCorrectStatus? SubAnswerStatus
         {
             get
             {
-                return IsCorrect.HasValue ? IsCorrect.Value ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail : EnumSubAnswerStatus.Process;
+                return IsCorrect.HasValue ? IsCorrect.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail : EnumCorrectStatus.Process;
             }
         }
 

@@ -502,12 +502,6 @@ namespace Fsel.Course.Infrastructure.Common
             return videoTimeCodeResult;
         }
 
-        private static double GetRemainingTime(double executionTime, double workingTime)
-        {
-            var remainingTime = executionTime - workingTime;
-            return remainingTime > 0 ? remainingTime : default;
-        }
-
         private ExerciseModel GetExercise(Exercise? n, EnumResultStatus status, bool isShowSubStatus, bool isDisableAnswer)
         {
             ArgumentNullException.ThrowIfNull(n);

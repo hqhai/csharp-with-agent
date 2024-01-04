@@ -27,7 +27,6 @@ namespace Fsel.Course.Domain.Entities
         public EnumAnswerStatus Status { get; set; }
 
         private bool? _isCorrect;
-        private int _correctCount;
 
         public bool? IsCorrect
         {
@@ -45,16 +44,6 @@ namespace Fsel.Course.Domain.Entities
         /// Số lượng câu trả lời đúng
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount
-        {
-            get
-            {
-                return Status == EnumAnswerStatus.Done ? _correctCount : default;
-            }
-            set
-            {
-                _correctCount = value;
-            }
-        }
+        public virtual int CorrectCount { get; set; }
     }
 }
