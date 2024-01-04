@@ -12,5 +12,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public Guid? CourseId { get; set; }
 
         public DayOfWeek DayActive { get; set; }
+
+
     }
 }

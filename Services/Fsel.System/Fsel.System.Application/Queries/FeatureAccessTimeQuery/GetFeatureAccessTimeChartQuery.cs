@@ -19,6 +19,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     public class GetFeatureAccessTimeChartQuery : IRequest<MethodResult<IList<FeatureAcessTimeChartModel>>>
     {
         public EnumFeatureTimeType? Type { get; set; }
+        public int? Year { get; set; }
     }
 
     public class GetFeatureAccessTimeChartQueryHandler : IRequestHandler<GetFeatureAccessTimeChartQuery, MethodResult<IList<FeatureAcessTimeChartModel>>>
@@ -41,6 +42,11 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 
             var featureAccessTimes = await _featureAccessTimeRepository.Queryable
                 .Where(x => x.CreatedUserId == _authContext.CurrentUserId)
+                .OrderByDescending(x => x.LastVisited)
+                .ToListAsync(cancellationToken);
+
+            var featureAccessTimesByMonth = await _featureAccessTimeRepository.Queryable
+                .Where(x => x.CreatedUserId == _authContext.CurrentUserId && x.LastVisited!.Value.Year == request.Year)
                 .OrderByDescending(x => x.LastVisited)
                 .ToListAsync(cancellationToken);
 
@@ -70,9 +76,9 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 case EnumFeatureTimeType.Month:
                     chartData = new List<FeatureAcessTimeChartModel>
                         {
-                            CreateFeatureAccessTimeAMonth(featureAccessTimes.AsReadOnly(), socialFeatures, EnumFeatureBussinessType.Social),
-                            CreateFeatureAccessTimeAMonth(featureAccessTimes.AsReadOnly(), new[] { EnumFeature.Other }, EnumFeatureBussinessType.Other),
-                            CreateFeatureAccessTimeAMonth(featureAccessTimes.AsReadOnly(), learnFeatures, EnumFeatureBussinessType.Learn )
+                            CreateFeatureAccessTimeAMonth(featureAccessTimesByMonth.AsReadOnly(), socialFeatures, EnumFeatureBussinessType.Social),
+                            CreateFeatureAccessTimeAMonth(featureAccessTimesByMonth.AsReadOnly(), new[] { EnumFeature.Other }, EnumFeatureBussinessType.Other),
+                            CreateFeatureAccessTimeAMonth(featureAccessTimesByMonth.AsReadOnly(), learnFeatures, EnumFeatureBussinessType.Learn)
                         };
                     break;
 
@@ -164,43 +170,34 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             return result;
         }
 
-        private static FeatureAcessTimeChartModel CreateFeatureAccessTimeAMonth(ReadOnlyCollection<FeatureAccessTime> featureAccessTimes, EnumFeature[] features, EnumFeatureBussinessType type)
+        private static FeatureAcessTimeChartModel CreateFeatureAccessTimeAMonth(ReadOnlyCollection<FeatureAccessTime> featureAccessTimesByMonth, EnumFeature[] features, EnumFeatureBussinessType type)
         {
-            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumZoneRegion.Vietnam);
-
-            var startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
-            var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
-
-            var featureGroup = featureAccessTimes
-                                 .Where(f => f.LastVisited.HasValue &&
-                                             f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam) >= startOfMonth &&
-                                             f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam) <= endOfMonth &&
-                                             features.Contains(f.EnumFeature))
-                                 .GroupBy(f => f.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Date)
-                                 .Select(group => new FeatureAccessTime
-                                 {
-                                     LastVisited = group.Key, // Date
-                                     AccessTime = group.Sum(f => f.AccessTime),
-                                 })
-                                 .ToList();
-
-            var featureAccessTimeResult = new List<FeatureAccessTimeByTypeModel>();
-
-            for (var i = 0; i < endOfMonth.Day; i++)
+            var featureAccessTimeByTypeMonthResult = new List<FeatureAccessTimeByTypeMonth>();
+            for (int i = 0; i <= 12; i++)
             {
-                var featureGroupHour = featureGroup.FirstOrDefault(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Day == i + 1);
-                var featureAccessTime = new FeatureAccessTimeByTypeModel();
+                var featureAccessTime = new FeatureAccessTimeByTypeMonth();
 
-                featureAccessTime.AccessTime = featureGroupHour?.AccessTime ?? 0;
-                featureAccessTime.HourActive = featureGroupHour?.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour ?? 0;
-                featureAccessTime.DayActive = featureGroupHour?.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).DayOfWeek ?? DayOfWeek.Sunday;
-                featureAccessTimeResult.Add(featureAccessTime);
+                var featureGroup = featureAccessTimesByMonth
+                     .Where(f => f.LastVisited.HasValue &&
+                                 f.LastVisited.Value.Month == i &&
+                                 features.Contains(f.EnumFeature))
+                     .GroupBy(f => f.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).DayOfWeek)
+                     .Select(group => new FeatureAccessTime
+                     {
+                         AccessTime = group.Sum(f => f.AccessTime),
+                     })
+                     .ToList();
+
+                featureAccessTime.MonthActive = i;
+                featureAccessTime.TotalHourActive = featureGroup.Sum(x => x.AccessTime);
+
+                featureAccessTimeByTypeMonthResult.Add(featureAccessTime);
             }
 
             var result = new FeatureAcessTimeChartModel
             {
                 FeatureBussinessType = type,
-                FeatureAccessTimes = featureAccessTimeResult
+                FeatureAccessTimeByTypeMonth = featureAccessTimeByTypeMonthResult
             };
 
             return result;
