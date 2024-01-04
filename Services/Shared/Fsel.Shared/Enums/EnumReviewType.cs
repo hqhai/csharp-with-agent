@@ -4,7 +4,8 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumReviewType
     {
-        Platform,
+        WebPlatform,
+        MobilePlatform,
         Course
     }
 }

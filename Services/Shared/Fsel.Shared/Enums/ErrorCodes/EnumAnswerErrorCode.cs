@@ -8,5 +8,10 @@ namespace Fsel.Shared.Enums.ErrorCodes
         /// Not answered enough
         /// </summary>
         NotAnsweredEnough,
+
+        /// <summary>
+        /// Questions not completed
+        /// </summary>
+        QuestionsDuplicate
     }
 }

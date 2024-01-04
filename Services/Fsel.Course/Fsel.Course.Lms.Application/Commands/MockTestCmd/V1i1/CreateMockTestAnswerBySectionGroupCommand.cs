@@ -143,11 +143,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                     sectionGroupResult = answerResult.Result;
                 }
-                if (request.IsSubmit)
-                {
-                    await _sectionGroupConverter.UpdateMockTestAnswers(sectionGroup, sectionGroupResult);
-                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
-                }
+                sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
                 return methodResult;
             });
 
@@ -323,7 +319,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
 
-                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionQuestionId == sectionQuestionId);
+                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionQuestionId == sectionQuestionId);
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, correctCount, isAnswered, questionItem);
@@ -399,7 +395,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionId = sectionId ?? null,
                 SectionGroupResultId = sectionGroupResult.Id,
-                IsCorrect = null
+                IsCorrect = null,
+                Status = EnumAnswerStatus.Done
             };
         }
 
@@ -410,17 +407,19 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionTimeCodeId = sectionTimeCodeId ?? null,
                 SectionGroupResultId = sectionGroupResult.Id,
-                IsCorrect = null
+                IsCorrect = null,
+                Status = EnumAnswerStatus.Done
             };
         }
 
-        private static MockTestAnswer GetMockTestAnswer(SectionGroupResult sectionGroupResult, int correctCount, bool isAnswered, Question? questionItem = null)
+        private static MockTestAnswer GetMockTestAnswer(SectionGroupResult sectionGroupResult, int correctCount, bool isAnswered, Question questionItem)
         {
             return new MockTestAnswer
             {
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionQuestionId = questionItem?.SectionQuestions.FirstOrDefault()?.Id,
                 SectionGroupResultId = sectionGroupResult.Id,
+                Status = questionItem?.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
                 IsCorrect = isAnswered ? (questionItem == null || questionItem.CorrectTotal == correctCount) : null,
             };
         }

@@ -28,17 +28,16 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
 
         public UpdateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
-            , SectionConverter sectionConverter)
+            , SectionGroupManagerConverter sectionGroupManagerConverter)
 
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
-            _sectionConverter = sectionConverter;
-            _sectionConverter = sectionConverter;
+            _sectionGroupManagerConverter = sectionGroupManagerConverter;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(UpdateMockTestCommand request, CancellationToken cancellationToken)
@@ -89,7 +88,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 if (sectionGroup != null)
                 {
                     var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
+                    var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
                     if (!method.IsOK)
                     {
                         methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -115,7 +114,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             await _mockTestRepository.ExecuteTransactionAsync(async () =>
             {
-                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
+                await _sectionGroupManagerConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
                 mockTest = _mockTestRepository.Update(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
