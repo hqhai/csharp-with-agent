@@ -151,7 +151,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                             methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                             return methodResult;
                         }
-                        var (questionItem, answerConfig, correctCount) = questionResult.Result;
+                        var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
                         var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()!.Id;
                         var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == placementTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
 
