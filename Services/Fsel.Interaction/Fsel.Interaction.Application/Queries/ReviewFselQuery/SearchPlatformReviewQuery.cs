@@ -41,7 +41,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
             }
 
             var query = _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
-                .Where(x => x.ReviewType == EnumReviewType.Platform).Select(x => new StudentReviewTypeModel
+                .Where(x => x.ReviewType == EnumReviewType.MobilePlatform || x.ReviewType == EnumReviewType.WebPlatform).Select(x => new StudentReviewTypeModel
                 {
                     Id = x.Id,
                     CreatedDate = x.CreatedDate,
@@ -61,6 +61,10 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
             if (request.NumberOfStars != null)
             {
                 query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+            }
+            if (request.Type.HasValue)
+            {
+                query = query.Where(x => x.ReviewType == request.Type);
             }
             var result = await query.ToListAsync(cancellationToken);
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
