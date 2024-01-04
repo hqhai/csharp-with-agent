@@ -94,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
 
         private async Task<IList<LessonMockTestResultModel>> UpdateLessonResults(GetLessonsQuery request, Guid? studentId, Domain.Entities.Unit unit, CancellationToken cancellationToken)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).ToListAsync(cancellationToken);
             if (!lessonResults.Any())
             {
                 lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select((x, index) => new LessonResult
@@ -124,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
                     Status = EnumResultStatus.Unfinished,
                     CourseId = request.CourseId
                 }).FirstOrDefault();
-                _mockTestResultRepository.Add(mockTestResult);
+                _mockTestResultRepository.Add(mockTestResult ?? new MockTestResult());
                 await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
             }
             return _mapper.Map<LessonMockTestResultModel>(mockTestResult);
