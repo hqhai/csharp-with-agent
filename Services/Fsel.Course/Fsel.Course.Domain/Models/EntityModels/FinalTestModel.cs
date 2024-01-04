@@ -23,5 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
                 return SectionGroups?.Select(x => x.CourseSkill).ToList();
             }
         }
+
+        public double? ProgressPercent { get; set; }
     }
 }

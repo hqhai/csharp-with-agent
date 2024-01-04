@@ -139,19 +139,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return methodResult;
         }
 
-        private async Task<LessonOverview> HandleUnit(Domain.Entities.Unit unit, LessonResult? lessonResult, LessonOverview lessonOverview)
-        {
-            if (unit.LessonResults.Any() && lessonResult != null && lessonResult.UnitId == unit.Id)
-            {
-                lessonOverview = await HandleLessonResult(unit, lessonResult, lessonOverview);
-            }
-            else
-            {
-                (lessonOverview.Type, lessonOverview.ObjectId, lessonOverview.Status) = (nameof(Domain.Entities.Unit), lessonResult?.UnitId, EnumLessonOverviewStatus.Next);
-            }
-            return lessonOverview;
-        }
-
         private async Task<LessonOverview> GetUnitId(LessonResult? lessonResult, CourseResult courseResult, Course course)
         {
             var lessonOverview = new LessonOverview();
@@ -168,6 +155,19 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             if (courseResult.Status != EnumResultStatus.Process)
             {
                 (lessonOverview.ObjectId, lessonOverview.Type, lessonOverview.Status) = (course.Id, nameof(Course), GetStatusOverview(courseResult.Status, true));
+            }
+            return lessonOverview;
+        }
+
+        private async Task<LessonOverview> HandleUnit(Domain.Entities.Unit unit, LessonResult? lessonResult, LessonOverview lessonOverview)
+        {
+            if (unit.LessonResults.Any() && lessonResult != null && lessonResult.UnitId == unit.Id)
+            {
+                lessonOverview = await HandleLessonResult(unit, lessonResult, lessonOverview);
+            }
+            else
+            {
+                (lessonOverview.Type, lessonOverview.ObjectId, lessonOverview.Status) = (nameof(Domain.Entities.Unit), lessonResult?.UnitId, EnumLessonOverviewStatus.Next);
             }
             return lessonOverview;
         }

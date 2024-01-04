@@ -16,5 +16,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public MockTestModel? SkillMockTest { get; set; }
         public UnitResultModel? UnitResult { get; set; }
         public double Percent { get; set; }
+        public double? ProgressPercent { get; set; }
     }
 }
