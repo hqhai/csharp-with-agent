@@ -424,7 +424,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             var sectionDto = _mapper.Map<SectionDtoModel>(section);
             sectionDto.QuestionTests = section.SectionQuestions.OrderBy(x => x.CreatedDate)
-                                            .Select(x => new QuestionTestModel
+                                            .Select(x => new QuestionCorrectStatusModel
                                             {
                                                 QuestionId = x.QuestionId ?? default,
                                                 Status = GetStatus(x, isDone)
@@ -456,7 +456,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             var sectionPartDto = _mapper.Map<SectionPartDtoModel>(sectionPart);
             sectionPartDto.QuestionTests = sectionPart.SectionQuestions.OrderBy(x => x.CreatedDate)
-                                            .Select(x => new QuestionTestModel
+                                            .Select(x => new QuestionCorrectStatusModel
                                             {
                                                 QuestionId = x.QuestionId ?? default,
                                                 Status = GetStatus(x, isDone)

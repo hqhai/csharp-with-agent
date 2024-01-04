@@ -351,43 +351,6 @@ namespace Fsel.Course.Infrastructure.Common
             return (scoreQuery.ToList(), questions.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer));
         }
 
-        //public async Task<LessonReportModel?> GetLessonReport(VideoResult videoResult)
-        //{
-        //    ArgumentNullException.ThrowIfNull(videoResult);
-        //    var answerQuery = from baseQ in _videoRepository.Queryable
-        //                      join vt in _videoTimeCodeRepository.Queryable on baseQ.Id equals vt.VideoId
-        //                      join vtcr in _videoTimeCodeResultRepository.Queryable on vt.Id equals vtcr.VideoTimeCodeId
-        //                      join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
-        //                      join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
-        //                      join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
-        //                      join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-        //                      join vtca in _videoTimeCodeAnswerRepository.Queryable on q.Id equals vtca.QuestionId
-        //                      where baseQ.Id == videoResult.VideoId && vt.TimeCodeType == EnumTimeCodeType.Standalone && vtcr.VideoResultId == videoResult.Id
-        //                      group new { vtcr, q } by baseQ into g
-        //                      select new
-        //                      {
-        //                          CorrectCount = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Sum(x => x.CorrectCount),
-        //                          CorrectTotal = g.Sum(x => x.q.CorrectTotal),
-        //                          CorrectQuestion = g.Select(x => x.q).SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Count(x => x.IsCorrect == true),
-        //                          TotalQuestion = g.Select(x => x.q).Count(),
-        //                          AnswerTime = g.Select(x => x.vtcr).Where(x => x.VideoResultId == videoResult.Id).Sum(x => x.WorkingTime + x.RetryWorkingTime),
-        //                      };
-
-        //    var lessonReport = await answerQuery.FirstOrDefaultAsync();
-        //    if (lessonReport == null)
-        //    {
-        //        return default;
-        //    }
-        //    return new LessonReportModel
-        //    {
-        //        AnswerTime = lessonReport.AnswerTime,
-        //        CorrectQuestion = lessonReport.CorrectQuestion,
-        //        TotalQuestion = lessonReport.TotalQuestion,
-        //        Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal),
-        //        HighestStreak = videoResult.HighestStreak
-        //    };
-        //}
-
         public async Task<int> GetHighestStreak(VideoResult videoResult)
         {
             ArgumentNullException.ThrowIfNull(videoResult);

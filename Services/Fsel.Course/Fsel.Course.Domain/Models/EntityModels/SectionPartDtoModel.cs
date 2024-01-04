@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid Id { get; set; }
         public string? PartName { get; set; }
         public IList<Guid>? QuestionIds { get; set; }
-        public IList<QuestionTestModel>? QuestionTests { get; set; }
+        public IList<QuestionCorrectStatusModel>? QuestionTests { get; set; }
     }
 }
