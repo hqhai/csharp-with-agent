@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models.EntityModels
+namespace Fsel.Course.Lms.Application.Services.SystemService.Models
 {
     using Fsel.Shared.Enums;
 
@@ -11,6 +11,5 @@ namespace Fsel.System.Domain.Models.EntityModels
         public string? Label { get; set; }
 
         public IList<FeatureAccessTimeByTypeModel>? FeatureAccessTimes { get; set; }
-
     }
 }

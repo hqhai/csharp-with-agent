@@ -31,19 +31,19 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     public class GetPlacementTestQueryHandler : IRequestHandler<GetPlacementTestQuery, MethodResult<PlacementTestBankModel>>
     {
         private readonly AuthContext _authContext;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
         private readonly IPlacementTestRepository _placementTestRepository;
 
         public GetPlacementTestQueryHandler(AuthContext authContext
-            , SectionConverter sectionConverter
+            , SectionGroupConverter sectionGroupConverter
             , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
             , IPlacementTestRepository placementTestRepository)
         {
             _authContext = authContext;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
             _placementTestRepository = placementTestRepository;
@@ -125,7 +125,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             foreach (var skill in skills)
             {
                 var sectionGroup = sectionGroups.Where(x => x!.CourseSkill == skill).OrderBy(x => random.Next()).FirstOrDefault();
-                var sectionGroupModel = _sectionConverter.GetSectionGroupModel(sectionGroup, true);
+                var sectionGroupModel = _sectionGroupConverter.GetSectionGroupModel(sectionGroup, true);
                 sectionGroupModel.Sections = sectionGroupModel.Sections?.OrderBy(x => x.DisplayOrder).ToList();
                 if (sectionGroupModel != null)
                 {
@@ -166,7 +166,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                     }
                 }
 
-                var sectionGroupModel = _sectionConverter.GetSectionGroupModel(new SectionGroup
+                var sectionGroupModel = _sectionGroupConverter.GetSectionGroupModel(new SectionGroup
                 {
                     Sections = sectionsResult.OrderBy(x => x.DisplayOrder).ToList(),
                     CourseSkill = skill,

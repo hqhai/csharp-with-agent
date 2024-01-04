@@ -27,16 +27,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionGroupConverter sectionGroupConverter, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
@@ -140,7 +140,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                     .Where(x => !isCheckFull || (x!.CourseSkill != EnumCourseSkill.Reading || x.CourseSkill != EnumCourseSkill.Listening))
                     .Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing)
                     .OrderBy(x => x!.CreatedDate)
-                    .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList();
+                    .Select(x => _sectionGroupConverter.GetSectionGroupModel(x, false)).ToList();
             mockTestDto.MockTestResult = GetMockTestResult(mockTestResult, mockTest, isCheckFull);
 
             if (mockTestDto.MockTestType == EnumMockTestType.SkillMockTest)

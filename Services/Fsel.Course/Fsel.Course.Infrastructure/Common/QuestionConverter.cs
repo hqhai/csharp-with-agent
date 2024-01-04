@@ -2,34 +2,18 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Models.EntityModels;
 
     public class QuestionConverter
     {
-        private readonly IMapper _mapper;
-        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly AnswerTypeConverter _answerTypeConverter;
 
-        public QuestionConverter(IMapper mapper, QuestionTypeConverter questionTypeConverter, AnswerTypeConverter answerTypeConverter)
+        public QuestionConverter(AnswerTypeConverter answerTypeConverter)
         {
-            _mapper = mapper;
-            _questionTypeConverter = questionTypeConverter;
             _answerTypeConverter = answerTypeConverter;
-        }
-
-        public QuestionModel GetQuestion(Question question, object? answer = null, bool isShowAnswer = false)
-        {
-            ArgumentNullException.ThrowIfNull(question);
-            var questionModel = _mapper.Map<QuestionModel>(question);
-            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
-            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
-            questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.Section?.Id ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
-            return questionModel;
         }
 
         public MethodResult<(Question, object?, int, bool)> HandleQuestionAnswer(Question? question, object? answer, bool isSubmit, object? oldAnswer = default, bool isTryAgain = false, bool isMandatoryAnswer = false)

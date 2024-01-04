@@ -368,13 +368,6 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        /// <summary>
-        /// Hàm chung lấy dữ liệu của các loại category
-        /// </summary>
-        /// <param name="courseUnitMockTests"></param>
-        /// <param name="nameProperty"></param>
-        /// <param name="courseUnitMockTestsReq"></param>
-        /// <returns></returns>
         public (List<Guid>? categoryIds, List<Guid>? listUnFinishedIds) InitListCategories(IList<CourseUnitMockTest>? courseUnitMockTests, string nameProperty, IList<UpdateCourseUnitMockTestCommandModel>? courseUnitMockTestsReq)
         {
             var listCategoryIds = courseUnitMockTests?.Where(x => x.GetPropValue<Guid?>(nameProperty) != null).Select(x => x.GetPropValue<Guid>(nameProperty)).ToList();

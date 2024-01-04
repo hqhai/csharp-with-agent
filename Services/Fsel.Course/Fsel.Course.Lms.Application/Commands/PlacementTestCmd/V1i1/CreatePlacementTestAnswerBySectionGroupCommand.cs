@@ -142,23 +142,18 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             #endregion Validate
 
+            if (request.Answers != null && request.Answers.Any())
+            {
+                var answerResult = await CreateAnswerAsync(request, sectionGroupResult);
+                if (!answerResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
+                    return methodResult;
+                }
+            }
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                if (request.Answers != null && request.Answers.Any())
-                {
-                    var answerResult = await CreateAnswerAsync(request, sectionGroupResult);
-                    if (!answerResult.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-
-                if (request.IsSubmit)
-                {
-                    await _sectionGroupConverter.UpdatePlacementTestAnswers(sectionGroup, sectionGroupResult);
-                    sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupResultAsync(sectionGroupResult, sectionGroup, cancellationToken);
-                }
+                sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
@@ -192,7 +187,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     {
                         await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
                         {
-                            Id = _authContext.CurrentUserId,
+                            Id = student.Human?.UserId ?? _authContext.CurrentUserId,
                             Level = currentLevel.Value
                         }).ConfigureAwait(false);
                     }
@@ -304,6 +299,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     }
                 }
             }
+
             methodResult.Result = (createPlacementTestAnswers, updatePlacementTestAnswers);
             return methodResult;
         }
@@ -313,6 +309,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             placementTestAnswer.Answer = answer;
             placementTestAnswer.CorrectCount = correctCount;
             placementTestAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
+            placementTestAnswer.Status = questionItem.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
             return placementTestAnswer;
         }
     }
