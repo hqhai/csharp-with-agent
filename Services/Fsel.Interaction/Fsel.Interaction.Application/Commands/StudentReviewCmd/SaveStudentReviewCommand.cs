@@ -20,7 +20,6 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
-    using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -106,7 +105,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                 var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
                 {
                     Feature = EnumTokenFeature.ReviewSystem,
-                    Mission = request.ReviewType == EnumReviewType.Platform ? EnumTokenMission.ReviewPlatform : EnumTokenMission.ReviewCourse
+                    Mission = request.ReviewType != EnumReviewType.Course ? EnumTokenMission.ReviewPlatform : EnumTokenMission.ReviewCourse
                 });
                 var tokenConfigResult = tokenConfig.Content?.Result;
 
@@ -146,7 +145,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                 }
                 else
                 {
-                    if (request.ReviewType == EnumReviewType.Platform)
+                    if (request.ReviewType != EnumReviewType.Course)
                     {
                         var isCheckPlatform = request.Id.HasValue && studentReview?.Id == request.Id;
                         if (!isCheckPlatform && request.Id.HasValue)
@@ -173,7 +172,6 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                             methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentReview));
                             return methodResult;
                         }
-
                     }
                     _mapper.Map(request, studentReview);
                     if (!studentReview!.IsValid())
@@ -190,6 +188,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
             });
             return methodResult;
         }
+
         public async Task DoQuestBoard(Guid? studentId, CancellationToken cancellationToken)
         {
             var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
@@ -205,7 +204,6 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                     CourseId = (Guid)courseId
                 }, cancellationToken);
             }
-
         }
     }
 }
