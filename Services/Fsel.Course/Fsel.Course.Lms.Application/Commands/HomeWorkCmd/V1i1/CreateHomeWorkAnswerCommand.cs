@@ -178,7 +178,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             var listQuestionId = request.Answers.Select(x => x.QuestionId).GroupBy(x => x).Select(x => x.Count()).ToList();
             if (listQuestionId.Any(x => x > 1))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.ListQuestionIdDuplicate), nameof(listQuestionId));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.QuestionNotCompleted), nameof(listQuestionId));
                 return methodResult;
             }
 

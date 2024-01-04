@@ -150,6 +150,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                         return methodResult;
                     }
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()!.Id;
                     var finalAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == finalTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
 

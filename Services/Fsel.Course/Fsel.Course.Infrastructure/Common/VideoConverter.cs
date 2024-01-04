@@ -520,14 +520,15 @@ namespace Fsel.Course.Infrastructure.Common
         private QuestionModel GetQuestion(Question? question, EnumResultStatus status, bool isShowSubStatus, bool isDisableAnswer)
         {
             ArgumentNullException.ThrowIfNull(question);
-            var answer = _mapper.Map<AnswerModel>(question.VideoTimeCodeAnswers.FirstOrDefault());
-            var isCheck = answer?.Status == EnumAnswerStatus.Done;
+            var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
+            var isCheck = videoTimeCodeAnswer?.Status == EnumAnswerStatus.Done;
             var questionModel = _mapper.Map<QuestionModel>(question);
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
-            if (answer != null)
+            if (videoTimeCodeAnswer != null)
             {
-                answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, question.QuestionType, isShowSubStatus, status, isDisableAnswer);
-                questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
+                videoTimeCodeAnswer.CorrectCount = isCheck ? videoTimeCodeAnswer.CorrectCount : default;
+                videoTimeCodeAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(videoTimeCodeAnswer.Answer, question.QuestionType, isShowSubStatus, status, isDisableAnswer);
+                questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
             }
             return questionModel;
         }
