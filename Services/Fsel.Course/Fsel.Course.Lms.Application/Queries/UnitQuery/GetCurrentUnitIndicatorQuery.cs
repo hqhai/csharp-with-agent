@@ -83,11 +83,11 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
         private async Task<MethodResult<IList<SkillScores>>> GetSkillScores(GetCurrentUnitIndicatorQuery request, Guid studentId, CancellationToken cancellationToken)
         {
             MethodResult<IList<SkillScores>> methodResult = new MethodResult<IList<SkillScores>>();
-            if (await _unitResultRepository.AnyGuidAsync(request.ObjectId ?? default))
+            if (await _unitResultRepository.Queryable.AnyAsync(x => x.StudentId == studentId && x.UnitId == request.ObjectId && x.CourseId == request.CourseId, cancellationToken))
             {
                 return await GetSkillScoreOlds(request, studentId, cancellationToken);
             }
-            if (await _finalTestResultRepository.AnyGuidAsync(request.ObjectId ?? default))
+            else if (await _finalTestResultRepository.Queryable.AnyAsync(x => x.StudentId == studentId && x.FinalTestId == request.ObjectId && x.CourseId == request.CourseId, cancellationToken))
             {
                 var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.FinalTestId == request.ObjectId)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done, cancellationToken);
@@ -98,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                 }
                 methodResult.Result = finalTestResult.SkillScores;
             }
-            if (await _mockTestResultRepository.AnyGuidAsync(request.ObjectId ?? default))
+            if (await _mockTestResultRepository.Queryable.AnyAsync(x => x.StudentId == studentId && x.MockTestId == request.ObjectId && x.CourseId == request.CourseId, cancellationToken))
             {
                 var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.MockTestId == request.ObjectId)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done, cancellationToken);
