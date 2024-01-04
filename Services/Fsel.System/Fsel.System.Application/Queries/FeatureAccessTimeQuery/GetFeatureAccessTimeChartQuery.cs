@@ -172,16 +172,16 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 
         private static FeatureAcessTimeChartModel CreateFeatureAccessTimeAMonth(ReadOnlyCollection<FeatureAccessTime> featureAccessTimesByMonth, EnumFeature[] features, EnumFeatureBussinessType type)
         {
-            var featureAccessTimeByTypeMonthResult = new List<FeatureAccessTimeByTypeMonth>();
-            for (int i = 0; i <= 12; i++)
+            var featureAccessTimeByTypeMonthResult = new List<FeatureAccessTimeByTypeModel>();
+            for (int i = 1; i <= 12; i++)
             {
-                var featureAccessTime = new FeatureAccessTimeByTypeMonth();
+                var featureAccessTime = new FeatureAccessTimeByTypeModel();
 
                 var featureGroup = featureAccessTimesByMonth
                      .Where(f => f.LastVisited.HasValue &&
                                  f.LastVisited.Value.Month == i &&
                                  features.Contains(f.EnumFeature))
-                     .GroupBy(f => f.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).DayOfWeek)
+                     .GroupBy(f => f.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Month)
                      .Select(group => new FeatureAccessTime
                      {
                          AccessTime = group.Sum(f => f.AccessTime),
@@ -189,7 +189,10 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                      .ToList();
 
                 featureAccessTime.MonthActive = i;
-                featureAccessTime.TotalHourActive = featureGroup.Sum(x => x.AccessTime);
+                foreach (var item in featureGroup)
+                {
+                    featureAccessTime.TotalHourActive = item.AccessTime;
+                }
 
                 featureAccessTimeByTypeMonthResult.Add(featureAccessTime);
             }
@@ -197,7 +200,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             var result = new FeatureAcessTimeChartModel
             {
                 FeatureBussinessType = type,
-                FeatureAccessTimeByTypeMonth = featureAccessTimeByTypeMonthResult
+                FeatureAccessTimes = featureAccessTimeByTypeMonthResult
             };
 
             return result;

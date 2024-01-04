@@ -13,6 +13,8 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public DayOfWeek DayActive { get; set; }
 
+        public long TotalHourActive { get; set; }
 
+        public int MonthActive { get; set; }
     }
 }
