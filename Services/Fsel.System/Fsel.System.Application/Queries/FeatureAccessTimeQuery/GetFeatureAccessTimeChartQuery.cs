@@ -177,17 +177,12 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             {
                 var featureAccessTime = new FeatureAccessTimeByTypeModel();
 
-                var featureGroup = featureAccessTimesByMonth
+                featureAccessTime.TotalHourActive = featureAccessTimesByMonth
                      .Where(f => f.LastVisited.HasValue &&
                                  f.LastVisited.Value.Month == i &&
                                  features.Contains(f.EnumFeature))
-                     .ToList();
-
+                     .Sum(f => f.AccessTime);
                 featureAccessTime.MonthActive = i;
-                foreach (var item in featureGroup)
-                {
-                    featureAccessTime.TotalHourActive += item.AccessTime;
-                }
 
                 featureAccessTimeByTypeMonthResult.Add(featureAccessTime);
             }
