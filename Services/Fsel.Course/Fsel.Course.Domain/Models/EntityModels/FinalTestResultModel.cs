@@ -6,5 +6,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public Guid FinalTestId { get; set; }
         public Guid CourseId { get; set; }
+        public double? ProgressPercent { get; set; }
     }
 }
