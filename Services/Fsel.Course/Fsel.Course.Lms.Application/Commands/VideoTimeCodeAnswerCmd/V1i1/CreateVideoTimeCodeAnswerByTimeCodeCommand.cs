@@ -310,11 +310,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             }
         }
 
-        private static VideoTimeCodeResult? GetVideoTimeCodeResult(VideoResult videoResult, Guid videoTimeCodeId)
-        {
-            return videoResult.VideoTimeCodeResults.FirstOrDefault(x => x.VideoTimeCodeId == videoTimeCodeId && x.VideoResultId == videoResult.Id);
-        }
-
         private static EnumAnswerStatus GetAnswerStatus(bool isSubmit, int correctCount, int correctTotal)
         {
             if (correctCount == correctTotal && isSubmit)
