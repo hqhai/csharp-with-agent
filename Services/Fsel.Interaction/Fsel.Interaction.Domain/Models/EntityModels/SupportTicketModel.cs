@@ -30,17 +30,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public Guid? SupportQuestionId { get; set; }
 
         public string? QuestionName { get; set; }
-        public double TimeRemaining
-        {
-            get
-            {
-                if (CreatedDate.HasValue)
-                {
-                    var time = (CreatedDate.Value.AddDays(2) - DateTime.UtcNow).TotalSeconds;
-                    return time > 0 ? time : default;
-                }
-                return default(double);
-            }
-        }
+        public double TimeRemaining { get; set; }
     }
 }
