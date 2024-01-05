@@ -433,8 +433,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (courseResult != null)
             {
                 var userId = courseResult.CreatedUserId;
-                await DoQuestBoard(courseId, userId, cancellationToken);
-
+                //await DoQuestBoard(courseId, userId, cancellationToken);
 
                 courseResult.Status = EnumResultStatus.Done;
                 _courseResultRepository.Update(courseResult);
