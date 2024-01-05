@@ -179,7 +179,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 }
             }
             course = _courseRepository.Update(course);
-            await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _courseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public static void AddUnit(int index, IList<UnitResult>? checkUnitResultAll, IList<MockTestResult>? checkMockTestResultAll, IList<CourseUnitMockTest>? courseUnitMockTests, Course course, CourseUnitMockTest courseUnitMockTest, Guid? studentId)

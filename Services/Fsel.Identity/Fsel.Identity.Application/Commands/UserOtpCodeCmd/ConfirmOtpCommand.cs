@@ -18,6 +18,8 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     {
         public string? Otp { get; set; }
         public string? Email { get; set; }
+
+        public bool IsUseOtp { get; set; } = true;
     }
 
     public class ConfirmOtpCommandHandler : IRequestHandler<ConfirmOtpCommand, MethodResult<UserOtpCode>>
@@ -54,7 +56,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
+            if (!request.IsUseOtp || DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
                 return methodResult;

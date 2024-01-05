@@ -25,7 +25,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
             }
         }
 
-        public double? ProgressPercent { get; set; }
         public string? PostArea { get; set; }
     }
 }

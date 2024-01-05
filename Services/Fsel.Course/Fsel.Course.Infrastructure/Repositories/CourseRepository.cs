@@ -139,8 +139,11 @@ namespace Fsel.Course.Infrastructure.Repositories
                                      ExecutionTime = x.FinalTest.ExecutionTime,
                                      FinalTestLevel = x.FinalTest.FinalTestLevel,
                                      Name = x.FinalTest.Name,
-                                     ProgressPercent = NumberHelper.GetPercent(x.FinalTest.FinalTestResults.SelectMany(x => x.SectionGroupResults).Where(y => y.StudentId == studentId && y.Status == EnumResultStatus.Done).Count(), x.FinalTest.FinalTestSections.Count),
-                                     FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTest.FinalTestResults.FirstOrDefault(y => y.FinalTestId == x.FinalTestId && y.StudentId == studentId))
+                                     FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTest.FinalTestResults.AsQueryable().Include(x => x.SectionGroupResults)
+                                                                 .Include(x => x.FinalTest)
+                                                                 .ThenInclude(x => x!.FinalTestSections)
+                                                                 .Where(y => y.StudentId == studentId && y.CourseId == x.CourseId)
+                                                                 .AsNoTracking().FirstOrDefault()),
                                  } : null,
                                  MockTest = x.MockTest != null ? new MockTestModel
                                  {
@@ -148,8 +151,11 @@ namespace Fsel.Course.Infrastructure.Repositories
                                      ExecutionTime = x.MockTest.ExecutionTime,
                                      MockTestType = x.MockTest.MockTestType,
                                      Name = x.MockTest.Name,
-                                     ProgressPercent = NumberHelper.GetPercent(x.MockTest.MockTestResults.SelectMany(x => x.SectionGroupResults).Where(y => y.StudentId == studentId && y.Status == EnumResultStatus.Done).Count(), x.MockTest.MockTestSections.Count),
-                                     MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTest.MockTestResults.FirstOrDefault(y => y.MockTestId == x.MockTestId && y.StudentId == studentId))
+                                     MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTest.MockTestResults.AsQueryable().Include(x => x.SectionGroupResults)
+                                                                 .Include(x => x.MockTest)
+                                                                 .ThenInclude(x => x!.MockTestSections)
+                                                                 .Where(y => y.StudentId == studentId && y.CourseId == x.CourseId)
+                                                                 .AsNoTracking().FirstOrDefault()),
                                  } : null,
                                  Unit = x.Unit != null ? new UnitModel
                                  {
@@ -157,8 +163,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                                      Name = x.Unit.Name,
                                      Code = x.Unit.Code,
                                      CourseLevel = x.Unit.CourseLevel,
-                                     ProgressPercent = NumberHelper.GetPercent(x.Unit.LessonResults.Where(y => y.StudentId == studentId && y.Status == EnumResultStatus.Done).Count(), x.Unit.UnitLessons.Count),
-                                     UnitResult = _mapper.Map<UnitResultModel>(x.Unit.UnitResults.FirstOrDefault(y => y.UnitId == x.UnitId && y.StudentId == studentId))
+                                     UnitResult = _mapper.Map<UnitResultModel>(x.Unit.UnitResults.AsQueryable().Include(x => x.Unit).ThenInclude(x => x!.LessonResults.Where(x => x.StudentId == studentId))
+                                                                 .Include(x => x.Unit).ThenInclude(x => x!.UnitLessons)
+                                                                 .Where(y => y.StudentId == studentId && y.CourseId == x.CourseId)
+                                                                 .AsNoTracking().FirstOrDefault()),
                                  } : null,
                                  Type = x.FinalTest != null ? nameof(x.FinalTest) : x.MockTest != null ? nameof(x.MockTest) : x.Unit != null ? nameof(x.Unit) : null
                              }).ToList()

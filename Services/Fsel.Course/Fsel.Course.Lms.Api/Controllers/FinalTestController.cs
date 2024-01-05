@@ -31,8 +31,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get FinalTest
         /// </summary>
-        [HttpGet]
-        [ApiVersion(ApiSettings.APIVersion1)]
+        [HttpGet("final-test")]
         [ProducesResponseType(typeof(MethodResult<FinalTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetFinalTestQuery command)
