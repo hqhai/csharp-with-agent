@@ -87,6 +87,7 @@ namespace Fsel.Interaction.Domain.Entities
         /// <summary>
         /// Thời gian còn lại
         /// </summary>
+        [NotMapped]
         public double TimeRemaining
         {
             get
