@@ -260,6 +260,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<bool>("IsViewed")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("LessonResultId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1658,6 +1661,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("SectionQuestionId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -1987,6 +1995,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -2804,6 +2817,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("SectionTimeCodeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -2887,6 +2905,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<bool>("IsViewed")
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("MockTestId")
                         .HasColumnType("uniqueidentifier");
@@ -3220,6 +3241,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("SectionQuestionId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -4836,7 +4862,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CorrectCountUngraded")
+                        .HasColumnType("int");
+
                     b.Property<int>("CorrectTotal")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CorrectTotalUngraded")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
@@ -4881,6 +4913,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("RetryWorkingTime")
                         .HasColumnType("float");
+
+                    b.Property<string>("SkillScoreUngradedStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");

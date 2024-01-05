@@ -110,7 +110,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                             return methodResult;
                         }
                         var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
-
                         var exercise = questionItem.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                         var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
                         var currenVideoTimeCodeId = videoTimeCodeQuestion?.Id;

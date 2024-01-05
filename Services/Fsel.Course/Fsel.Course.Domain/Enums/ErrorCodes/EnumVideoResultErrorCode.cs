@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// You didn't do enough questions
         /// </summary>
-        NotEnoughQuestions,
+        NotEnoughQuestions
     }
 }

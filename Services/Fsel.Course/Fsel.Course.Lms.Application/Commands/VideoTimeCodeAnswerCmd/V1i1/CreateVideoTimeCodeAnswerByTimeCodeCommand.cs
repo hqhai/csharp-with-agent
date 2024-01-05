@@ -78,7 +78,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VideoTimeCodeModel>();
-
             var method = await CreateAnswer(request, cancellationToken);
             if (!method.IsOK)
             {
@@ -120,7 +119,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private async Task<MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult)>> CreateAnswer(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult)>();
             var method = await Validate(request, cancellationToken);
             if (!method.IsOK)
@@ -245,11 +243,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
             if (isSubmit)
             {
-                var (listSkillScore, isDone) = await GetSkillScores(videoTimeCode, videoTimeCodeResult, cancellationToken);
-                videoTimeCodeResult.Status = (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || isDone) ? EnumResultStatus.Done : EnumResultStatus.Process;
-                videoTimeCodeResult.CorrectCount = (int)listSkillScore.Sum(x => x.CorrectCount);
-                videoTimeCodeResult.CorrectTotal = (int)listSkillScore.Sum(x => x.TotalCount);
-                videoTimeCodeResult.SkillScores = listSkillScore;
+                var (skillScoreUngradeds, skillScores, isDone) = await GetSkillScoresAsync(videoTimeCodeResult, cancellationToken);
+                if (skillScoreUngradeds != null && skillScoreUngradeds.Any())
+                {
+                    videoTimeCodeResult.CorrectCountUngraded = (int)skillScoreUngradeds.Sum(x => x.CorrectCount);
+                    videoTimeCodeResult.CorrectTotalUngraded = (int)skillScoreUngradeds.Sum(x => x.TotalCount);
+                }
+                videoTimeCodeResult.Status = isDone ? EnumResultStatus.Process : EnumResultStatus.Done;
+                videoTimeCodeResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                videoTimeCodeResult.SkillScores = skillScores;
+                videoTimeCodeResult.SkillScoreUngraded = skillScoreUngradeds;
                 videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
             }
             videoTimeCodeResult.IsWorking = false;
@@ -324,7 +328,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult, IList<Question>)>();
-            var videoResult = await _videoResultRepository.Queryable.Include(x => x.VideoTimeCodeResults).FirstOrDefaultAsync(x => x.Id == request.VideoResultId, cancellationToken);
+            var videoResult = await _videoResultRepository.GetByIdAsync(request.VideoResultId);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
@@ -336,7 +340,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoTimeCodeId));
                 return methodResult;
             }
-            var videoTimeCodeResult = GetVideoTimeCodeResult(videoResult, request.VideoTimeCodeId);
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoTimeCode.Id, cancellationToken);
             if (videoTimeCodeResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeResult));
@@ -354,7 +358,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 return methodResult;
             }
 
-            videoResult.CurrentVideoTimeCodeId = request.VideoTimeCodeId;
+            videoResult.CurrentVideoTimeCodeId = videoTimeCode.Id;
             var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
             var questions = new List<Question>();
             if (questionIds.Any())
@@ -366,7 +370,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     return methodResult;
                 }
                 var timeCodeId = questions.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).SelectMany(x => x!.TimeCodeExercises).Select(x => x.VideoTimeCodeId).FirstOrDefault();
-                if (timeCodeId != request.VideoTimeCodeId)
+                if (timeCodeId != videoTimeCode.Id)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoTimeCodeId));
                     return methodResult;
@@ -402,34 +406,45 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             return videoTimeCode.ExecutionTime == default || (workingTime < videoTimeCode.ExecutionTime && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone);
         }
 
-        private static SkillScores GetSkillScore(IGrouping<EnumCourseSkill, Exercise> exercise)
+        private async Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(exercise);
-            var questions = exercise.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question).ToList();
-            var answers = questions.SelectMany(x => x!.VideoTimeCodeAnswers).ToList();
-            var correctCount = answers.Sum(x => x.CorrectCount);
-            return new SkillScores
-            {
-                CorrectCount = correctCount,
-                CountQuestion = answers.Count,
-                Skill = exercise.Key,
-                TotalCount = questions.Sum(x => x!.CorrectTotal),
-                TotalQuestion = questions.Count,
-                Scores = correctCount.GetIeltsScore(exercise.Key)
-            };
-        }
-
-        private async Task<(IList<SkillScores>, bool)> GetSkillScores(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
-        {
-            var exerciseIds = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeId == videoTimeCode.Id && x.VideoTimeCodeResultId == videoTimeCodeResult.Id && x.VideoResultId == videoTimeCodeResult.VideoResultId).Select(x => x.ExerciseId).Distinct().ToListAsync(cancellationToken);
+            var exerciseIds = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id).Select(x => x.ExerciseId).Distinct().ToListAsync(cancellationToken);
             var exercises = await _exerciseRepository.Queryable.Include(x => x.ExerciseQuestions)
                                     .ThenInclude(x => x.Question)
                                     .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id))
-                                    .Where(x => exerciseIds.Contains(x.Id))
-                                    .ToListAsync(cancellationToken);
-            var isDone = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question).SelectMany(x => x!.VideoTimeCodeAnswers).All(x => x.Status == EnumAnswerStatus.Done);
-            var skillScores = exercises.GroupBy(x => x.CourseSkill).Select(x => GetSkillScore(x)).ToList();
-            return (skillScores, isDone);
+                                    .Where(x => exerciseIds.Contains(x.Id)).ToListAsync(cancellationToken);
+            var isDone = exercises.SelectMany(x => x.ExerciseQuestions)
+                                    .Select(x => x.Question)
+                                    .SelectMany(x => x!.VideoTimeCodeAnswers)
+                                    .Any(x => x.Status != EnumAnswerStatus.Done);
+            var skillScores = exercises.GroupBy(x => x.CourseSkill).Select(x => GetSkillScores(x));
+            return (skillScores.Where(x => x.Item1 != null).Select(x => x.Item1!).ToList(), skillScores.Where(x => x.Item2 != null).Select(x => x.Item2!).ToList(), isDone);
+        }
+
+        private static (SkillScores?, SkillScores?) GetSkillScores(IGrouping<EnumCourseSkill, Exercise> exercise)
+        {
+            ArgumentNullException.ThrowIfNull(exercise);
+            var questions = exercise.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question);
+            return (GetSkillScore(questions.Where(x => x != null && x.Ungraded).ToList(), exercise.Key), GetSkillScore(questions.Where(x => x != null && !x.Ungraded).ToList(), exercise.Key));
+        }
+
+        private static SkillScores? GetSkillScore(IList<Question?>? questions, EnumCourseSkill courseSkill)
+        {
+            if (questions != null && questions.Any())
+            {
+                var answers = questions.SelectMany(x => x!.VideoTimeCodeAnswers);
+                var correctCount = answers?.Sum(x => x.CorrectCount) ?? default;
+                return new SkillScores
+                {
+                    CorrectCount = correctCount,
+                    CountQuestion = answers?.Count() ?? default,
+                    Skill = courseSkill,
+                    TotalCount = questions.Sum(x => x!.CorrectTotal),
+                    TotalQuestion = questions.Count,
+                    Scores = correctCount.GetIeltsScore(courseSkill)
+                };
+            }
+            return null;
         }
     }
 }

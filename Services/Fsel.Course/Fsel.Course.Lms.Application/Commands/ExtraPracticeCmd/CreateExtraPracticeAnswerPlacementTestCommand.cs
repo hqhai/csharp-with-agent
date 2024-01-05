@@ -161,7 +161,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                         return methodResult;
                     }
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
-
                     var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.QuestionId == answer.QuestionId && x.ExtraPracticeResultId == request.ExtraPracticeResultId, cancellationToken);
                     if (extraPracticeAnswer == null)
                     {

@@ -4,28 +4,10 @@ namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Shared.Enums;
 
     public class VideoTimeCodeAnswer : BaseAnswer
     {
-        private bool? _isCorrect;
-
-        public override bool? IsCorrect
-        {
-            get
-            {
-                return Status == EnumAnswerStatus.Done ? _isCorrect : null;
-            }
-            set
-            {
-                _isCorrect = value;
-            }
-        }
-
         public bool IsFirstSubmit { get; set; }
-
-        public EnumAnswerStatus Status { get; set; }
-
         public Question? Question { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]

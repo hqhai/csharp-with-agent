@@ -2,6 +2,7 @@
 
 namespace Fsel.Ordering.Api.Controllers
 {
+    using System.Collections.Generic;
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
@@ -48,6 +49,18 @@ namespace Fsel.Ordering.Api.Controllers
         public async Task<IActionResult> GetStatus([FromQuery] GetStatusOrderByUserQuery query)
         {
             MethodResult<EnumOrderStatus?> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Status User
+        /// </summary>
+        [HttpGet("get-list-order")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListOrder([FromQuery] GetListOrderQuery query)
+        {
+            MethodResult<Guid> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

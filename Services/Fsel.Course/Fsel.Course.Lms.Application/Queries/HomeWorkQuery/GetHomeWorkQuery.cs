@@ -31,24 +31,24 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly AuthContext _authContext;
+        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly AnswerTypeConverter _answerTypeConverter;
-        private readonly QuestionConverter _questionConverter;
         private readonly IUserService _userService;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
 
         public GetHomeWorkQueryHandler(IMapper mapper
             , IHomeWorkRepository homeWorkRepository
             , AuthContext authContext
+            , QuestionTypeConverter questionTypeConverter
             , AnswerTypeConverter answerTypeConverter
-            , QuestionConverter questionConverter
             , IHomeWorkResultRepository homeWorkResult
             , IUserService userService)
         {
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
             _authContext = authContext;
+            _questionTypeConverter = questionTypeConverter;
             _answerTypeConverter = answerTypeConverter;
-            _questionConverter = questionConverter;
             _userService = userService;
             _homeWorkResultRepository = homeWorkResult;
         }
@@ -100,10 +100,20 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                     answer.CorrectCount = checkDone ? answer.CorrectCount : default;
                     answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, n.Question!.QuestionType, !checkDone, homeWorkResult.Status, false);
                 }
-                return _questionConverter.GetQuestion(n.Question ?? new Question(), answer, checkDone);
+                return GetQuestion(n.Question ?? new Question(), answer, checkDone);
             }).ToList();
             homeWorkModel.HomeWorkResult = _mapper.Map<HomeWorkResultModel>(homeWorkResult);
             return homeWorkModel;
+        }
+
+        public QuestionModel GetQuestion(Question question, object? answer = null, bool isShowAnswer = false)
+        {
+            ArgumentNullException.ThrowIfNull(question);
+            var questionModel = _mapper.Map<QuestionModel>(question);
+            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
+            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
+            questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.Section?.Id ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
+            return questionModel;
         }
     }
 }

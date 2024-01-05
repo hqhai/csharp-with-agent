@@ -22,13 +22,13 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     public class GetMockTestByExtraPracticeQueryHandler : IRequestHandler<GetMockTestByExtraPracticeQuery, MethodResult<ExtraPracticeModel>>
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
 
-        public GetMockTestByExtraPracticeQueryHandler(IExtraPracticeRepository extraPracticeRepository, SectionConverter sectionConverter, IExtraPracticeResultRepository extraPracticeResultRepository)
+        public GetMockTestByExtraPracticeQueryHandler(IExtraPracticeRepository extraPracticeRepository, SectionGroupConverter sectionGroupConverter, IExtraPracticeResultRepository extraPracticeResultRepository)
         {
             _extraPracticeRepository = extraPracticeRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _extraPracticeResultRepository = extraPracticeResultRepository;
         }
 
@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                     IsActive = true,
                     SectionGroups = extraPractice.MockTest.MockTestSections.Where(x => x.SectionGroup != null)
                          .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
-                         .Select(x => _sectionConverter.GetSectionGroupModel(x, true)).ToList(),
+                         .Select(x => _sectionGroupConverter.GetSectionGroupModel(x, true)).ToList(),
                 },
                 ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.Id == request.ExtraPracticeResultId).Select(x => new ExtraPracticeResultModel
                 {

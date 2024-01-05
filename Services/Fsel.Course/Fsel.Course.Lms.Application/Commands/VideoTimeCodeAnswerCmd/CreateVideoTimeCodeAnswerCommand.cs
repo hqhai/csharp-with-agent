@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -13,9 +14,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,9 +36,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly VideoConverter _videoConverter;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
-        private readonly FinishOneUnitTestPublisher _finishOneUnitTestPublisher;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+
         private readonly IQuestionRepository _questionRepository;
 
+        private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
         public CreateVideoTimeCodeAnswerCommandHandler(
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , IVideoResultRepository videoResultRepository
@@ -42,8 +49,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             , DateTimeConverter dateTimeConverter
             , VideoConverter videoConverter
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
-            , FinishOneUnitTestPublisher finishOneUnitTestPublisher
-            , IQuestionRepository questionRepository)
+            , IQuestionRepository questionRepository,
+              QuestBoardPublisher questBoardPublisher,
+              AuthContext authContext,
+              IUserService userService)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoResultRepository = videoResultRepository;
@@ -51,8 +60,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             _dateTimeConverter = dateTimeConverter;
             _videoConverter = videoConverter;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
-            _finishOneUnitTestPublisher = finishOneUnitTestPublisher;
             _questionRepository = questionRepository;
+            _questBoardPublisher = questBoardPublisher;
+            _authContext = authContext;
+            _userService = userService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateVideoTimeCodeAnswerCommand request, CancellationToken cancellationToken)
@@ -136,7 +147,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     return methodResult;
                 }
                 var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
-
                 if (answer == null)
                 {
                     answer = new VideoTimeCodeAnswer
@@ -149,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         VideoResultId = videoResult.Id,
                         CorrectCount = questionItem.Ungraded ? default : correctCount,
                         Status = GetAnswerStatus(videoTimeCode.TimeCodeType, correctCount, questionItem.CorrectTotal),
-                        IsCorrect = correctCount == questionItem.CorrectTotal,
+                        IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null,
                         IsFirstSubmit = true,
                     };
 
@@ -182,7 +192,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             {
                 if (videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest)
                 {
-                    await _finishOneUnitTestPublisher.Publish(videoResult, cancellationToken);
+                    var courseId = videoResult.LessonResult?.CourseId;
+                    //if (courseId != null)
+                    //{
+                    //    await DoQuestBoard((Guid)courseId, cancellationToken);
+                    //}
                 }
                 if (videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
@@ -281,6 +295,27 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var exercise = questions?.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).FirstOrDefault();
             var videoTimeCode = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
             return (questions, videoTimeCode);
+        }
+
+        private async Task DoQuestBoard(Guid courseId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneHomeworkMiniProject };
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentId = student?.Content?.Result?.Id;
+
+            //Chỉ bài finaltest đầu tiên hoàn thành của khóa mới được tính là hoàn thành nhiệm vụ
+            bool checkFirstTimeDoneUnit = _videoTimeCodeResultRepository.Queryable.Any(v => v.Status == EnumResultStatus.Done);
+
+            if (!checkFirstTimeDoneUnit)
+            {
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId!,
+                    Categories = categories,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
+                    CourseId = courseId
+                }, cancellationToken);
+            }
         }
     }
 }

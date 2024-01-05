@@ -8,5 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double TotalQuestion { get; set; }
         public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }
+        public double? ProgressPercent { get; set; }
     }
 }

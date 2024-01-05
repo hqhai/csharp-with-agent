@@ -101,14 +101,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                       .Select(h => new LessonHomeWorkResultModel
                                       {
                                           Id = h.Id,
-                                          CreatedDate = h.LessonHomeWorks.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonId == lessonResult.LessonId)!.CreatedDate,
+                                          CreatedDate = h.LessonHomeWorks.FirstOrDefault(x => x.HomeWorkId == h.Id)!.CreatedDate,
                                           Code = h.Code,
                                           Name = h.Name,
                                           CourseSkill = h.CourseSkill,
                                           CourseLevel = h.CourseLevel,
                                           QuestionTotal = h.HomeWorkQuestions.Select(x => x.Question).Count(),
-                                          QuestionCompleted = h.HomeWorkResults.Where(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id).Select(x => x.HomeWorkAnswers.Count).FirstOrDefault(),
-                                          HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id))
+                                          QuestionCompleted = h.HomeWorkResults.Where(x => x.HomeWorkId == h.Id).SelectMany(x => x.HomeWorkAnswers).Where(x => x.IsCorrect.HasValue).Count(),
+                                          HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id))
                                       }).OrderBy(x => x.CreatedDate)
                                       .ToListAsync(cancellationToken);
             homeWorkStudentProgress.Status = GetStatusHomeWorks(homeWorks.Select(x => x.HomeWorkResult ?? new HomeWorkResultModel()).ToList());

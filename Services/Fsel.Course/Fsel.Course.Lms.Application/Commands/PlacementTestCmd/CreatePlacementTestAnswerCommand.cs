@@ -152,7 +152,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                             return methodResult;
                         }
                         var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
-
                         var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()!.Id;
                         var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == placementTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
 
@@ -165,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                                 CorrectCount = correctCount,
                                 Answer = answerConfig,
                                 SectionQuestionId = sectionQuestionId,
-                                IsCorrect = correctCount == questionItem.CorrectTotal
+                                IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null
                             };
                             placementTestAnswers.Add(placementTestAnswer);
                         }

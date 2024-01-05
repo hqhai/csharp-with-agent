@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
 
     public class BaseAnswer : Entity
     {
@@ -23,12 +24,26 @@ namespace Fsel.Course.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
+        public EnumAnswerStatus Status { get; set; }
+
+        private bool? _isCorrect;
+
+        public bool? IsCorrect
+        {
+            get
+            {
+                return Status == EnumAnswerStatus.Done ? _isCorrect : null;
+            }
+            set
+            {
+                _isCorrect = value;
+            }
+        }
+
         /// <summary>
         /// Số lượng câu trả lời đúng
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public virtual int CorrectCount { get; set; }
-
-        public virtual bool? IsCorrect { get; set; }
     }
 }

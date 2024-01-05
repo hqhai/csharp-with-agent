@@ -70,7 +70,8 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.QuestBoardStudentStatusDone), nameof(questBoardStudent));
                 return methodResult;
             }
-            questBoardStudent.Status = EnumQuestBoardStudentStatus.Completed;
+
+            questBoardStudent.Status = EnumQuestBoardStudentStatus.Achieved;
             var updateTokenStudent = await _userService.UpdateStudentByTokenAsync(new Services.UserServices.Models.UpdateStudentByTokenModel { NumberOfToken = questBoard.NumberOfStars, StudentId = student.Id });
             if (!updateTokenStudent.IsSuccessStatusCode)
             {

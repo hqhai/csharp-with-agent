@@ -18,7 +18,6 @@ using Fsel.Course.Lms.Application.Services.SystemService;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Shared.Constants;
-using Fsel.Shared.Models.ShareModels;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -98,18 +97,19 @@ builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository
 builder.Services.AddScoped<IMockTestScoreRepository, MockTestScoreRepository>();
 builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRandomRepository>();
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
+builder.Services.AddScoped<QuestBoardPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
-builder.Services.AddScoped<SectionConverter>();
 builder.Services.AddScoped<VideoConverter>();
 builder.Services.AddScoped<CourseHelper>();
 builder.Services.AddScoped<UnitHelper>();
 builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
+builder.Services.AddScoped<SectionGroupManagerConverter>();
 
 // Helper
 builder.Services.AddScoped<LinQHelper>();
@@ -123,6 +123,7 @@ builder.Services.AddScoped<FinishOneUnitPublisher>();
 builder.Services.AddScoped<FinishOneUnitTestPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateOrderPublisher>();
+builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<GetTimeToCompleteTestPublisher>();
 builder.Services.AddScoped<SubmitAIResponsePublisher>();
 builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
