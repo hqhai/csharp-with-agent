@@ -58,31 +58,19 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
 
             #endregion Validation
 
-            SupportTicketModel supportTicketModel = new SupportTicketModel();
             switch (supportTicket.Status)
             {
                 case EnumSupportTicketStatus.Seen:
                     await TimeSupportTicket(supportTicket, cancellationToken);
-                    var supportTicketUpdate = await _supportTicketRepository.GetIncludeByIdAsync(supportTicket.Id);
-
-                    if (supportTicketUpdate != null)
-                    {
-                        if (supportTicketUpdate.UpdatedDate.HasValue)
-                        {
-                            supportTicketModel.TimeRemaining = (supportTicketUpdate.UpdatedDate.Value.AddDays(2) - DateTime.UtcNow).TotalSeconds;
-                        }
-                    }
                     break;
 
                 case EnumSupportTicketStatus.Solved:
-                    supportTicketModel.TimeRemaining = 0;
                     await TimeSupportTicket(supportTicket, cancellationToken);
                     break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<SupportTicketModel>(supportTicket);
-            methodResult.Result.TimeRemaining = supportTicketModel.TimeRemaining;
             return methodResult;
         }
 

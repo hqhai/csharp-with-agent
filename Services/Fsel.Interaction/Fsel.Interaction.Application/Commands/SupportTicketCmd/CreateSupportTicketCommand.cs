@@ -8,7 +8,6 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.Entities;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.SupportTickets;
     using Fsel.Interaction.Domain.Models.EntityModels;
@@ -59,21 +58,14 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SupportQuestionId), request.SupportQuestionId);
                 return methodResult;
             }
-            SupportTicketModel supportTicketModel = new SupportTicketModel();
+
             await _supportTicketRepository.ExecuteTransactionAsync(async () =>
             {
                 supportTicket = _supportTicketRepository.Add(supportTicket);
                 await _supportTicketRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var newSupportTicket = await _supportTicketRepository.GetIncludeByIdAsync(supportTicket.Id).ConfigureAwait(false);
-                if (newSupportTicket != null)
-                {
-                    supportTicketModel.TimeRemaining = (newSupportTicket.CreatedDate.AddDays(2) - DateTime.UtcNow).TotalSeconds;
-                }
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<SupportTicketModel>(supportTicket);
-                methodResult.Result.TimeRemaining = supportTicketModel.TimeRemaining;
                 return methodResult;
             });
 
