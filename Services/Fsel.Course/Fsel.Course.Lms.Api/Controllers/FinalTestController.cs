@@ -14,7 +14,8 @@ namespace Fsel.Course.Lms.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/final-test")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
@@ -30,7 +31,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get FinalTest
         /// </summary>
-        [HttpGet("final-test")]
+        [HttpGet]
+        [ApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<FinalTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetFinalTestQuery command)
@@ -49,30 +51,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> CreateAnswer([FromBody] CreateFinalTestAnswerCommand command)
         {
             MethodResult<FinalTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get FinalTest
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<FinalTestModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetFinalTest([FromQuery] GetFinalTestByIdQuery query)
-        {
-            MethodResult<FinalTestModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get Sections
-        /// </summary>
-        [HttpGet("sections")]
-        [ProducesResponseType(typeof(MethodResult<SectionGroupDtoModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSections([FromQuery] GetSectionBySectionGroupIdQuery query)
-        {
-            MethodResult<SectionGroupDtoModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
