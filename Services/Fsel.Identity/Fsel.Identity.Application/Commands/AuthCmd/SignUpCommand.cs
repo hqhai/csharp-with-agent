@@ -8,7 +8,6 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.StudentCmd;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
-using Fsel.Identity.Application.Queries.StudentQuery;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
@@ -37,19 +36,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
         private readonly IHumanRepository _humanRepository;
 
-
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
             IMediator mediator,
-            IUserOtpCodeRepository userOtpCodeRepository,
             AppSetting appSetting,
             IPlatformRepository platformRepository,
             QuestBoardPublisher questBoardPublisher,
@@ -61,7 +57,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _roleManager = roleManager;
             _mapper = mapper;
             _mediator = mediator;
-            _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
             _platformRepository = platformRepository;
             _questBoardPublisher = questBoardPublisher;
@@ -168,7 +163,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                                 if (!string.IsNullOrEmpty(request.ReferralCode))
                                 {
-
                                     var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
                                     if (!updateReferralCodeResult.IsOK)
                                     {
@@ -177,7 +171,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     }
                                     // làm nhiệm vụ
                                     // await DoQuestBoard(request.ReferralCode, cancellationToken);
-
                                 }
                             }
 
@@ -234,6 +227,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
         }
+
         public async Task DoQuestBoard(string code, CancellationToken cancellationToken)
         {
             var humanId = _humanRepository!.Queryable!.FirstOrDefault(x => x.Code == code)!.Id;
@@ -244,8 +238,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SuccessfulIntroduceCode };
                 var studentId = humanInfo!.Student!.Id;
                 var classModel = await _trainingService.GetClassByStudentId(studentId!);
-
-
 
                 if (classModel?.Content?.Result != null && classModel?.Content?.Result.CourseId != null)
                 {
