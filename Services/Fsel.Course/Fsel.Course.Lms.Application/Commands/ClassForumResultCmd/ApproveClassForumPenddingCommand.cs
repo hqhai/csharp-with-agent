@@ -107,10 +107,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     classForumResult.CheckCsoId = csoId;
 
                     var courseId = classForumResult.LessonResult?.CourseId;
-                    if (classForumResult != null && courseId != null)
-                    {
-                        await DoQuestBoard(classForumResult.Id, (Guid)courseId, classForumResult.CreatedUserId, cancellationToken);
-                    }
+                    //if (classForumResult != null && courseId != null)
+                    //{
+                    //    await DoQuestBoard(classForumResult.Id, (Guid)courseId, classForumResult.CreatedUserId, cancellationToken);
+                    //}
                 }
                 else
                 {

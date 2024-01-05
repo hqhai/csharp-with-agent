@@ -140,7 +140,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                     }
                     _studentReviewRepository.Add(studentReview);
 
-                    await DoQuestBoard(studentId, cancellationToken);
+                    //  await DoQuestBoard(studentId, cancellationToken);
                     methodResult.StatusCode = StatusCodes.Status201Created;
                 }
                 else

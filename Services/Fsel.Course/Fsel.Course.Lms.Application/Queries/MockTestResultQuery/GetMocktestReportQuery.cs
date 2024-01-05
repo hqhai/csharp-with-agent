@@ -89,9 +89,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 mockTestResultModel.IsTeacherGraded = await IsTeacherGraded(mockTestResult);
             }
 
-            await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken);
-            await DoQuestBoardAllReviewsAndFeedback(request.MockTestResultId, mockTestResult.CourseId, cancellationToken);
-                              
+            //await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken);
+            //await DoQuestBoardAllReviewsAndFeedback(request.MockTestResultId, mockTestResult.CourseId, cancellationToken);
             methodResult.Result = mockTestResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

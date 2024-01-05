@@ -191,7 +191,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 var courseId = finalTestResult.CourseId;
 
                 // làm nhiệm vụ
-                await DoQuestBoard(courseId, cancellationToken);
+               // await DoQuestBoard(courseId, cancellationToken);
 
                 finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

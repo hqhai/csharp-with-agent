@@ -72,7 +72,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
 
                 if (courseId != null)
                 {
-                    await DoQuestBoard(post.Id, (Guid)courseId, post.CreatedUserId, cancellationToken);
+                    //   await DoQuestBoard(post.Id, (Guid)courseId, post.CreatedUserId, cancellationToken);
                 }
             }
 
