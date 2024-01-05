@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 {
+    using System.Text.Json.Serialization;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Helpers;
@@ -19,7 +20,8 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         public string? Otp { get; set; }
         public string? Email { get; set; }
 
-        public bool IsUseOtp { get; set; } = true;
+        [JsonIgnore]
+        public bool IsCheckExpiredTime { get; set; } = true;
     }
 
     public class ConfirmOtpCommandHandler : IRequestHandler<ConfirmOtpCommand, MethodResult<UserOtpCode>>
@@ -56,7 +58,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            if (!request.IsUseOtp || DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
+            if (request.IsCheckExpiredTime && DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
                 return methodResult;

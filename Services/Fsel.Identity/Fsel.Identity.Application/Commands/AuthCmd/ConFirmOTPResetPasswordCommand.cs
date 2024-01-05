@@ -52,7 +52,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.Otp, Email = request.Email, IsUseOtp = false }, cancellationToken);
+            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.Otp, Email = request.Email, IsCheckExpiredTime = false }, cancellationToken);
             if (!method.IsOK || method.Result == null)
             {
                 methodResult.AddError(method.ErrorMessages);
