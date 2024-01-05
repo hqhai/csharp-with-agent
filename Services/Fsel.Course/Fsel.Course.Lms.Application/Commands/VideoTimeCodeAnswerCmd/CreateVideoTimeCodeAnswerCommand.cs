@@ -193,10 +193,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 if (videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest)
                 {
                     var courseId = videoResult.LessonResult?.CourseId;
-                    if (courseId != null)
-                    {
-                        await DoQuestBoard((Guid)courseId, cancellationToken);
-                    }
+                    //if (courseId != null)
+                    //{
+                    //    await DoQuestBoard((Guid)courseId, cancellationToken);
+                    //}
                 }
                 if (videoTimeCodeResult.Status == EnumResultStatus.New)
                 {

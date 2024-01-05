@@ -159,8 +159,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 };
 
                 // làm nhiệm vụ
-                var courseId = homeWorkResult!.LessonResult?.CourseId ?? default;
-                await DoQuestBoard(courseId, request.Answers.Count, cancellationToken);
+                //var courseId = homeWorkResult!.LessonResult?.CourseId ?? default;
+                //await DoQuestBoard(courseId, request.Answers.Count, cancellationToken);
 
                 homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
             }

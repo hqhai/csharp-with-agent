@@ -176,7 +176,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                         return methodResult;
                                     }
                                     // làm nhiệm vụ
-                                    await DoQuestBoard(request.ReferralCode, cancellationToken);
+                                    // await DoQuestBoard(request.ReferralCode, cancellationToken);
 
                                 }
                             }
