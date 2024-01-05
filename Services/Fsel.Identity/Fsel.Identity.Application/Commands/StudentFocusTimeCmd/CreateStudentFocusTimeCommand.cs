@@ -100,7 +100,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                     var systemConfigMap = systemConfigResult!.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
                     studentFocusTime.ExecuteTime = request.ExecuteTime;
 
-                    if (studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime && studentFocusTime.IsEstablished)
+                    if
+                    (
+                      systemConfigMap != null &&
+                      studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime &&
+                      studentFocusTime.IsEstablished
+                    )
                     {
                         var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
                         {
@@ -110,7 +115,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                         var tokenConfigResult = tokenConfig.Content?.Result;
 
                         // làm nhiệm vụ
-                        await DoQuestBoard(student, request.ExecuteTime, studentFocusTime.TargetTime, cancellationToken);
+                        // await DoQuestBoard(student, request.ExecuteTime, studentFocusTime.TargetTime, cancellationToken);
 
                         var checkSuperFireMode = await _mediator.Send(new CheckSuperFireModeQuery());
                         var isSuperMode = checkSuperFireMode.Result;

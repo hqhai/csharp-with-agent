@@ -56,8 +56,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         // Làm nhiệm vụ
                         var unitId = unit.Id;
                         var userId = unitResult.CreatedUserId;
-                        await DoQuestBoard(userId, unitId, courseId, cancellationToken);
-                        //
+                       // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
 
                         await SendStudentCompleteUnit(studentId, unit, courseId, skillScores, percent, cancellationToken);
                     }

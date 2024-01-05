@@ -73,11 +73,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
                                             .Where(x => x.ClassForumResultId == request.ClassForumResultId)
                                             .ToListAsync(cancellationToken);
             var courseId = classForumResult?.LessonResult?.CourseId;
-            
             if (courseId != null)
             {
-                await DoQuestBoard(request.ClassForumResultId, classForumResult!.LessonResult!.CourseId, cancellationToken);
-                await DoQuestBoardAllReviewsAndFeedback(request.ClassForumResultId, classForumResult!.LessonResult!.CourseId, cancellationToken);
+                //await DoQuestBoard(request.ClassForumResultId, classForumResult!.LessonResult!.CourseId, cancellationToken);
+                //await DoQuestBoardAllReviewsAndFeedback(request.ClassForumResultId, classForumResult!.LessonResult!.CourseId, cancellationToken);
             }
 
             methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumScores);
