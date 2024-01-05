@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1;
+    using Fsel.Course.Lms.Application.Queries.FinalTestQuery;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -35,6 +36,30 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         public async Task<IActionResult> CreateAnswers([FromBody] CreateFinalTestAnswerBySectionGroupCommand command)
         {
             MethodResult<SectionGroupResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get FinalTest
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<FinalTestModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetFinalTest([FromQuery] GetFinalTestByIdQuery query)
+        {
+            MethodResult<FinalTestModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Sections
+        /// </summary>
+        [HttpGet("sections")]
+        [ProducesResponseType(typeof(MethodResult<SectionGroupDtoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSections([FromQuery] GetSectionBySectionGroupIdQuery query)
+        {
+            MethodResult<SectionGroupDtoModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -223,7 +223,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                     ObjectId = commentId,
                     CourseId = courseId,
                 };
-                await DoQuestBoard(questBoardModel, cancellationToken);
+                //await DoQuestBoard(questBoardModel, cancellationToken);
             }
         }
 
@@ -285,7 +285,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 questBoardModel.Categories!.Add(EnumQuestBoardCategory.DiscussionBoardInteract);
                 questBoardModel.AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point;
 
-                await DoQuestBoard(questBoardModel, cancellationToken);
+                // await DoQuestBoard(questBoardModel, cancellationToken);
             }
 
         }
@@ -309,7 +309,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 questBoardModel.AchievedPoint = (countCommentOnClassMatePost ?? 0);
                 questBoardModel.Categories!.Add(EnumQuestBoardCategory.CommentOnNewLessonOfTwoClassMate);
 
-                await DoQuestBoard(questBoardModel, cancellationToken);
+                // await DoQuestBoard(questBoardModel, cancellationToken);
             }
         }
     }

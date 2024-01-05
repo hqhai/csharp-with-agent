@@ -18,5 +18,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public bool IsWeekStreak { get; set; }
 
         public double NearestTargetTime { get; set; }
+
+        public bool IsFirstTimeInDay { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<EntityCourse?> GetAsync(Guid id, Guid? studentId);
 
-        Task<EntityCourse?> GetIncludeCourseResult(Guid id, Guid? studentId);
+        Task<CourseModel?> GetIncludeCourseResult(Guid id, Guid? studentId, string? classCode);
 
         Task<(int, int)> GetDisplayOrder(CourseResultModel courseResult);
 
