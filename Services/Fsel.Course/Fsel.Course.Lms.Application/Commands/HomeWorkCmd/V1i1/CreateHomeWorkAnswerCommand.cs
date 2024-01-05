@@ -55,7 +55,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             var methodResult = new MethodResult<bool>();
             if (request.Answers == null || !request.Answers.Any())
             {
-                methodResult.StatusCode = StatusCodes.Status200OK;
+                if (request.IsSubmit)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Answers));
+                }
+                else
+                {
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                }
                 return methodResult;
             }
 
@@ -74,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, default, default, request.IsSubmit);
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
