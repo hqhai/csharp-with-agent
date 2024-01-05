@@ -18,5 +18,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public object? MockTestScores { get; set; }
         public int? UnitDisplayOrder { get; set; }
         public string? CourseCode { get; set; }
+        public double? ProgressPercent { get; set; }
     }
 }

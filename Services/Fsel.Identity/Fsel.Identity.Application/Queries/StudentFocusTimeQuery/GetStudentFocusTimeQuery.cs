@@ -58,14 +58,18 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
             //Check xem học sinh có học liên tiếp trong 7 ngày hay không
             var hasContinuousData = await _mediator.Send(new CheckSuperFireModeQuery(), cancellationToken);
             studentFocusTime = _mapper.Map<StudentFocusTimeModel>(studentFocusTimesQuery.FirstOrDefault());
-            studentFocusTime.NearestTargetTime = GetNearestConfigTime(student.Id);
-
             if (studentFocusTime != null)
             {
                 studentFocusTime.StudentId = student.Id;
                 studentFocusTime.IsWeekStreak = hasContinuousData.Result;
             }
+            else
+            {
+                studentFocusTime = new StudentFocusTimeModel();
+                studentFocusTime.IsFirstTimeInDay = true;
+            }
 
+            studentFocusTime.NearestTargetTime = GetNearestConfigTime(student.Id);
             methodResult.Result = studentFocusTime;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -74,7 +78,7 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
 
         private double GetNearestConfigTime(Guid? studentId)
         {
-            var nearestConfigTargetTime = _studentFocusTimeRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date)?.TargetTime ?? 0;
+            var nearestConfigTargetTime = _studentFocusTimeRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date && x.TargetTime != 0)?.TargetTime ?? 0;
 
             return nearestConfigTargetTime;
         }

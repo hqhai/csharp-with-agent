@@ -620,7 +620,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     return objects.Any(x => string.IsNullOrEmpty(nameProperty) ? IsNullOrEmptyData(x) : IsNullOrEmptyData(x.GetPropValue(nameProperty)));
                 }
-                return false;
+                return true;
             }
             return string.IsNullOrEmpty(data?.ToString());
         }

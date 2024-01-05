@@ -77,9 +77,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             if (mockTestResult.MockTestScores != null)
             {
                 mockTestResult.IsViewed = true;
-
                 _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             var mockTestResultModel = GetMockTestResult(mockTestResult);
@@ -89,9 +88,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 mockTestResultModel.IsTeacherGraded = await IsTeacherGraded(mockTestResult);
             }
 
-            await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken);
-            await DoQuestBoardAllReviewsAndFeedback(request.MockTestResultId, mockTestResult.CourseId, cancellationToken);
-                              
+            //await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
+            //await DoQuestBoardAllReviewsAndFeedback(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
+
             methodResult.Result = mockTestResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
