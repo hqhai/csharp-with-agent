@@ -29,18 +29,24 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
+        private readonly IMockTestRepository _mockTestRepository;
+        private readonly IFinalTestRepository _finalTestRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
 
         public GetCurrentUnitIndicatorQueryHandler(IUserService userService
             , AuthContext authContext
             , IFinalTestResultRepository finalTestResultRepository
+            , IMockTestRepository mockTestRepository
+            , IFinalTestRepository finalTestRepository
             , IMockTestResultRepository mockTestResultRepository
             , IUnitResultRepository unitResultRepository)
         {
             _userService = userService;
             _authContext = authContext;
             _finalTestResultRepository = finalTestResultRepository;
+            _mockTestRepository = mockTestRepository;
+            _finalTestRepository = finalTestRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _unitResultRepository = unitResultRepository;
         }
@@ -62,32 +68,8 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 
             #endregion Validate
 
-            methodResult = request.ObjectId.HasValue ? await GetSkillScores(request, studentId, cancellationToken) : await GetSkillScoreOlds(request, studentId, cancellationToken);
-            return methodResult;
-        }
-
-        private async Task<MethodResult<IList<SkillScores>>> GetSkillScoreOlds(GetCurrentUnitIndicatorQuery request, Guid studentId, CancellationToken cancellationToken)
-        {
-            MethodResult<IList<SkillScores>> methodResult = new MethodResult<IList<SkillScores>>();
-            var unitResult = await GetUnitResult(request, studentId, cancellationToken);
-            if (unitResult == null)
-            {
-                methodResult.Result = new List<SkillScores>();
-                return methodResult;
-            }
-            methodResult.Result = unitResult.SkillScores;
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            return methodResult;
-        }
-
-        private async Task<MethodResult<IList<SkillScores>>> GetSkillScores(GetCurrentUnitIndicatorQuery request, Guid studentId, CancellationToken cancellationToken)
-        {
-            MethodResult<IList<SkillScores>> methodResult = new MethodResult<IList<SkillScores>>();
-            if (await _unitResultRepository.Queryable.AnyAsync(x => x.StudentId == studentId && x.UnitId == request.ObjectId && x.CourseId == request.CourseId, cancellationToken))
-            {
-                return await GetSkillScoreOlds(request, studentId, cancellationToken);
-            }
-            else if (await _finalTestResultRepository.Queryable.AnyAsync(x => x.StudentId == studentId && x.FinalTestId == request.ObjectId && x.CourseId == request.CourseId, cancellationToken))
+            request.ObjectId = request.ObjectId ?? request.UnitId;
+            if (await _finalTestRepository.AnyGuidAsync(request.ObjectId ?? default))
             {
                 var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.FinalTestId == request.ObjectId)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done, cancellationToken);
@@ -98,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                 }
                 methodResult.Result = finalTestResult.SkillScores;
             }
-            if (await _mockTestResultRepository.Queryable.AnyAsync(x => x.StudentId == studentId && x.MockTestId == request.ObjectId && x.CourseId == request.CourseId, cancellationToken))
+            else if (await _mockTestRepository.AnyGuidAsync(request.ObjectId ?? default))
             {
                 var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.MockTestId == request.ObjectId)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done, cancellationToken);
@@ -108,6 +90,16 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                     return methodResult;
                 }
                 methodResult.Result = mockTestResult.SkillScores;
+            }
+            else
+            {
+                var unitResult = await GetUnitResult(request, studentId, cancellationToken);
+                if (unitResult == null)
+                {
+                    methodResult.Result = new List<SkillScores>();
+                    return methodResult;
+                }
+                methodResult.Result = unitResult.SkillScores;
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
