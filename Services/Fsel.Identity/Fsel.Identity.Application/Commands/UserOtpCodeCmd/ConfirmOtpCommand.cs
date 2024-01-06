@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             {
                 if (!request.Email.IsValidEmail())
                 {
-                    methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                     return methodResult;
                 }
                 userOtpCode = await _userOtpCodeRepository.Queryable.Include(x => x.User)
