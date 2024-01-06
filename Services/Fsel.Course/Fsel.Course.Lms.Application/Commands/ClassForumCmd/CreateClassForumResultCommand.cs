@@ -15,7 +15,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
-    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -124,8 +123,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             FilePath = x,
                         }).ToList();
                     }
-                    classForumResult = _classForumResultRepository.Add(classForumResult);
 
+                    classForumResult = _classForumResultRepository.Add(classForumResult);
                     if (classForumResult.Status == EnumClassForumResultStatus.Draft)
                     {
                         await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -134,29 +133,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     {
                         await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
-
-                    //check AI feedback
-                    if (classForum.IsAlFeedBack)
-                    {
-                        await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
-                        {
-                            ClassForumResultId = classForumResult.Id,
-                            WordContent = request.WordContent,
-                            UserAIConfig = classForum.UserAlConfig,
-                            SettingModel = classForum.SettingModel,
-                            SettingFrequecy = classForum.SettingFrequecy,
-                            SettingPresence = classForum.SettingPresence,
-                            SettingTemperature = classForum.SettingTemperature,
-                            SettingTopP = classForum.SettingTopP,
-                            SettingWordMaxLength = classForum.SettingWordMaxLength,
-                            SystemRoleAlConfig = classForum.SystemRoleAlConfig,
-                        }, cancellationToken);
-                    }
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
                 {
                     _mapper.Map(request, classForumResult);
                     classForumResult.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
+                    classForumResult.GradingAlFeedback = null;
 
                     if (request.FilePaths != null)
                     {
@@ -173,6 +155,24 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumHasSubmitted));
                     return methodResult;
+                }
+
+                //check AI feedback
+                if (classForum.IsAlFeedBack)
+                {
+                    await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
+                    {
+                        ClassForumResultId = classForumResult.Id,
+                        WordContent = request.WordContent,
+                        UserAIConfig = classForum.UserAlConfig,
+                        SettingModel = classForum.SettingModel,
+                        SettingFrequecy = classForum.SettingFrequecy,
+                        SettingPresence = classForum.SettingPresence,
+                        SettingTemperature = classForum.SettingTemperature,
+                        SettingTopP = classForum.SettingTopP,
+                        SettingWordMaxLength = classForum.SettingWordMaxLength,
+                        SystemRoleAlConfig = classForum.SystemRoleAlConfig,
+                    }, cancellationToken);
                 }
 
                 //mặc định gửi cho tất cả CSO
