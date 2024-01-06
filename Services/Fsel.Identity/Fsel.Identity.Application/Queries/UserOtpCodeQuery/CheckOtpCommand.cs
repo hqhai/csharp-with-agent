@@ -50,7 +50,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
             {
                 if (!request.Email.IsValidEmail())
                 {
-                    methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                     return methodResult;
                 }
                 user = await _userManager.Users.FirstOrDefaultAsync(x => !x.IsDeleted && x.Email == request.Email, cancellationToken);

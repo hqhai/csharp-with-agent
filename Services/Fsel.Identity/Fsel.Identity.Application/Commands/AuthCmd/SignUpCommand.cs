@@ -73,7 +73,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 if (!request.PhoneNumber.IsValidPhoneNumber())
                 {
-                    methodResult.AddError(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
                     return methodResult;
                 }
                 user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
@@ -87,7 +87,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 if (!request.Email.IsValidEmail())
                 {
-                    methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                     return methodResult;
                 }
                 user = await _userManager.FindByEmailAsync(request.Email);
@@ -117,9 +117,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             Microsoft.AspNetCore.Identity.IdentityResult result;
                             if (user != null)
                             {
-                                var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
-                                user.PasswordHash = hashPassword;
                                 _mapper.Map(request, user);
+                                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
                                 user.UserName = request.Email;
                                 if (!user.IsValid())
                                 {
@@ -166,7 +165,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
                                     if (!updateReferralCodeResult.IsOK)
                                     {
-                                        methodResult.AddError(updateReferralCodeResult.ErrorMessages);
+                                        methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
                                         return methodResult;
                                     }
                                     // làm nhiệm vụ
