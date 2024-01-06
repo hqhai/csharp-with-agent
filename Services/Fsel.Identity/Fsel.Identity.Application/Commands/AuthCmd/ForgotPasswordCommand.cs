@@ -7,17 +7,14 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
-using Fsel.Shared.Helpers;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
@@ -59,14 +56,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
             if (!request.Email.IsValidEmail())
             {
-                methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                 return methodResult;
             }
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                methodResult.Result = true;
-                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
                 return methodResult;
             }
 
