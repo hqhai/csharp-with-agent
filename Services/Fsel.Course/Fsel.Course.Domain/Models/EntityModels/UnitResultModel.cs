@@ -2,11 +2,12 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class UnitResultModel : BaseResultScoreModel
+    public class UnitResultModel : BaseScoreResultModel
     {
         public double CountQuestion { get; set; }
         public double TotalQuestion { get; set; }
         public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }
+        public double? ProgressPercent { get; set; }
     }
 }

@@ -11,5 +11,9 @@ namespace Fsel.Shared.Enums
         Comment,
         ReplyComment,
         FlagComment,
+        DeleteClassForumResult,
+        DeleteComment,
+        LikeComment,
+        LikeClassForum
     }
 }

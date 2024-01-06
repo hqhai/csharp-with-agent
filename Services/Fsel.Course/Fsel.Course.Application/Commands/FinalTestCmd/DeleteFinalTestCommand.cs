@@ -13,6 +13,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class DeleteFinalTestCommand : IRequest<MethodResult<bool>>
     {
@@ -22,13 +23,16 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     public class DeleteFinalTestCommandHandler : IRequestHandler<DeleteFinalTestCommand, MethodResult<bool>>
     {
         private readonly IFinalTestRepository _finalTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public DeleteFinalTestCommandHandler(IFinalTestRepository finalTestRepository
-            , SectionConverter sectionConverter)
+            , SectionGroupManagerConverter sectionGroupManagerConverter
+            , ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _finalTestRepository = finalTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupManagerConverter = sectionGroupManagerConverter;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteFinalTestCommand request, CancellationToken cancellationToken)
@@ -41,12 +45,11 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
                 return methodResult;
             }
-            if (finalTest.IsActive)
+            if (await _courseUnitMockTestRepository.Queryable.AnyAsync(p => p.FinalTestId == finalTest.Id, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState), nameof(finalTest.IsActive), finalTest.IsActive);
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState));
                 return methodResult;
             }
-
             List<SectionGroup> sectionGroups = finalTest.FinalTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
             List<SectionQuestion> sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
@@ -54,7 +57,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
 
             await _finalTestRepository.ExecuteTransactionAsync(async () =>
             {
-                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
+                await _sectionGroupManagerConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
 
                 var result = await _finalTestRepository.DeleteAsync(finalTest);
                 await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

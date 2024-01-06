@@ -29,15 +29,18 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IFinalTestRepository _finalTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public UpdateFinalTestCommandHandler(IMapper mapper
             , IFinalTestRepository finalTestRepository
-            , SectionConverter sectionConverter)
+            , SectionGroupManagerConverter sectionGroupManagerConverter
+            , ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _mapper = mapper;
             _finalTestRepository = finalTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupManagerConverter = sectionGroupManagerConverter;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<FinalTestModel>> Handle(UpdateFinalTestCommand request, CancellationToken cancellationToken)
@@ -63,9 +66,9 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
                 return methodResult;
             }
-            if (finalTest.IsActive)
+            if (await _courseUnitMockTestRepository.Queryable.AnyAsync(p => p.FinalTestId == finalTest.Id, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState), nameof(finalTest.IsActive), finalTest.IsActive);
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState));
                 return methodResult;
             }
 
@@ -91,7 +94,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
                     //    return methodResult;
                     //}
-                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
+                    var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
                     if (!method.IsOK)
                     {
                         methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -117,7 +120,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
 
             await _finalTestRepository.ExecuteTransactionAsync(async () =>
             {
-                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
+                await _sectionGroupManagerConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
                 finalTest = _finalTestRepository.Update(finalTest);
                 await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

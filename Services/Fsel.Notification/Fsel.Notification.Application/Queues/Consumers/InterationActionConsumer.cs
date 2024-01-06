@@ -36,7 +36,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
                     CreateNotificationCommand model = new CreateNotificationCommand()
                     {
-                        UserId = dataReceipt.UserId ?? default,
+                        UserIds = dataReceipt.UserIds ?? default,
                         ObjectId = dataReceipt.ObjectId,
                         Message = message,
                         Link = link,
@@ -50,7 +50,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     CreateNotificationRemindCommand cmd = new CreateNotificationRemindCommand()
                     {
                         ObjectId = dataReceipt.ObjectId,
-                        UserId = dataReceipt.UserId,
+                        UserIds = dataReceipt.UserIds,
                         Status = EnumNotificationRemindStatus.Off
                     };
 
@@ -58,5 +58,5 @@ namespace Fsel.Notification.Application.Queues.Consumers
                 }
             }
         }
-    }
+    } 
 }

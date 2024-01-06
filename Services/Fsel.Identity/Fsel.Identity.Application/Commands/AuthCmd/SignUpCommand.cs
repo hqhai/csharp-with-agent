@@ -1,15 +1,16 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Globalization;
-using System.Text;
 using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.StudentCmd;
+using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+using Fsel.Identity.Application.Queues.Publishers;
+using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
@@ -18,10 +19,10 @@ using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
+using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using OtpNet;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -35,25 +36,32 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly ITrainingService _trainingService;
+        private readonly IHumanRepository _humanRepository;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
             IMediator mediator,
-            IUserOtpCodeRepository userOtpCodeRepository,
             AppSetting appSetting,
-            IPlatformRepository platformRepository)
+            IPlatformRepository platformRepository,
+            QuestBoardPublisher questBoardPublisher,
+            ITrainingService trainingService,
+            IHumanRepository humanRepository
+            )
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
             _mediator = mediator;
-            _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
             _platformRepository = platformRepository;
+            _questBoardPublisher = questBoardPublisher;
+            _trainingService = trainingService;
+            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -63,6 +71,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             User? user = null;
             if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
+                if (!request.PhoneNumber.IsValidPhoneNumber())
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
+                    return methodResult;
+                }
                 user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
                 if (user != null)
                 {
@@ -72,6 +85,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
             if (!string.IsNullOrEmpty(request.Email))
             {
+                if (!request.Email.IsValidEmail())
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    return methodResult;
+                }
                 user = await _userManager.FindByEmailAsync(request.Email);
                 if (user != null && user.EmailConfirmed)
                 {
@@ -99,9 +117,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             Microsoft.AspNetCore.Identity.IdentityResult result;
                             if (user != null)
                             {
-                                var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
-                                user.PasswordHash = hashPassword;
                                 _mapper.Map(request, user);
+                                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
                                 user.UserName = request.Email;
                                 if (!user.IsValid())
                                 {
@@ -148,43 +165,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
                                     if (!updateReferralCodeResult.IsOK)
                                     {
-                                        methodResult.AddError(updateReferralCodeResult.ErrorMessages);
+                                        methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
                                         return methodResult;
                                     }
+                                    // làm nhiệm vụ
+                                    // await DoQuestBoard(request.ReferralCode, cancellationToken);
                                 }
                             }
 
                             #region Send Code OTP
 
-                            var userOtpCode = await _userOtpCodeRepository.Queryable
-                                    .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
-
-                            RandomSecureHelper randomSecure = new RandomSecureHelper();
-                            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-                            var otp = totp.ComputeTotp();
-                            if (userOtpCode == null)
-                            {
-                                userOtpCode = new UserOtpCode
-                                {
-                                    UserId = user.Id,
-                                    OTPCode = otp,
-                                    Status = EnumOtpCodeStatus.New,
-                                    ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime)
-                                };
-                                _userOtpCodeRepository.Add(userOtpCode);
-                                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                            }
-                            else
-                            {
-                                userOtpCode.OTPCode = otp;
-                                userOtpCode.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
-                                _userOtpCodeRepository.Update(userOtpCode);
-                                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                            }
-
+                            var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
                             var param = new SendOtpTemplateModel
                             {
-                                OtpCode = userOtpCode.OTPCode,
+                                OtpCode = userOtpCode.Result,
                                 OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
                             };
                             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
@@ -231,6 +225,33 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
+        }
+
+        public async Task DoQuestBoard(string code, CancellationToken cancellationToken)
+        {
+            var humanId = _humanRepository!.Queryable!.FirstOrDefault(x => x.Code == code)!.Id;
+
+            var humanInfo = await _humanRepository.GetIncludeByIdAsync(humanId);
+            if (humanInfo?.Student != null)
+            {
+                IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SuccessfulIntroduceCode };
+                var studentId = humanInfo!.Student!.Id;
+                var classModel = await _trainingService.GetClassByStudentId(studentId!);
+
+                if (classModel?.Content?.Result != null && classModel?.Content?.Result.CourseId != null)
+                {
+                    var courseId = classModel.Content!.Result!.CourseId;
+                    QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
+                    {
+                        StudentId = studentId!,
+                        Categories = categories,
+                        AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
+                        CourseId = courseId
+                    };
+
+                    await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
+                }
+            }
         }
     }
 }

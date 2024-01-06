@@ -8,10 +8,12 @@ using Fsel.Identity.Application.Queries.CSOQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
+using Fsel.Shared.Constants;
 
 namespace Fsel.Identity.Api.Controllers
 {
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/cso")]
     [ApiController]
     public class CSOController : ControllerBase

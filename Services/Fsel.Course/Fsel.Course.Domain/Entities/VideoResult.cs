@@ -7,9 +7,10 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Course.Domain.IEntities;
     using Newtonsoft.Json;
 
-    public class VideoResult : BaseResult
+    public class VideoResult : BaseResult, IHighestStreak, ITokenResult
     {
         /// <summary>
         /// Số sao
@@ -18,7 +19,7 @@ namespace Fsel.Course.Domain.Entities
         public double NumberOfStars { get; set; }
 
         /// <summary>
-        /// Số sao
+        /// Feedback
         /// </summary>
         [MaxLength(10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Feedback { get; set; }
@@ -46,6 +47,16 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid VideoId { get; set; }
 
+        public int? HighestStreak { get; set; }
+
+        /// <summary>
+        /// Token Question Reward
+        /// </summary>
+        public int? TokenDone { get; set; }
+
+        public int? TokenHighestStreak { get; set; }
+        public int? TokenSuperFire { get; set; }
+        public int? TokenQuestionReward { get; set; }
         public ICollection<VideoTimeCodeResult> VideoTimeCodeResults { get; set; } = new List<VideoTimeCodeResult>();
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }

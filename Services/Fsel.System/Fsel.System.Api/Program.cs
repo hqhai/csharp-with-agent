@@ -3,6 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Shared.Constants;
 using Fsel.System.Application.Queues.Consumers;
+using Fsel.System.Application.Queues.Publisher;
 using Fsel.System.Application.Services.CourseServices;
 using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.UserServices;
@@ -35,6 +36,10 @@ builder.Services.AddScoped<IGameVocabularyRepository, GameVocabularyRepository>(
 builder.Services.AddScoped<IGameVocabularyTypeRepository, GameVocabularyTypeRepository>();
 builder.Services.AddScoped<IFocusTimeConfigRepository, FocusTimeRepository>();
 builder.Services.AddScoped<IGameVocabularyPlatformRepository, GameVocabularyPlatformRepository>();
+builder.Services.AddScoped<ITokenConfigRepository, TokenConfigRepository>();
+builder.Services.AddScoped<IApprovalTimeConfigRepository, ApprovalTimeConfigRepository>();
+builder.Services.AddScoped<IApprovalLogRepository, ApprovalLogRepository>();
+builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
@@ -44,6 +49,8 @@ builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardFinishConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(QuestBoardConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.CompleteApprovalPostTimeOut, typeof(CompleteApprovalConsumer) }
 });
 
 var app = builder.Build();

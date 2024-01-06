@@ -6,6 +6,7 @@ namespace Fsel.Shared.Constants
     {
         public const string NotificationType = "Resources//NotificationType.json";
         public const string QuestBoardFileName = "Resources//QuestBoardConfig.json";
+        public const string ApprovalTimeFileName = "Resources//ApprovalTimeConfig.json";
         public const string FocusTimeFileName = "Resources//FocusTimeConfig.json";
         public const string GameCenterFileName = "Resources//GameCenterConfig.json";
         public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
@@ -14,6 +15,12 @@ namespace Fsel.Shared.Constants
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
 
         public const string ZMatter = "Resources//ZMatter.json";
+        public const string SpaceShip = "Resources//SpaceShip.json";
+
         public const string GameplayRuleConfig = "Resources//GameplayRuleConfig.json";
+
+        public const string StudentTagName = "Resources//StudentTagName.json";
+        public const string AvatarImage = "Resources//AvatarImage.json";
+        public const string TokenConfig = "Resources//TokenConfig.json";
     }
 }

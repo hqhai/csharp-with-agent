@@ -2,6 +2,14 @@
   "GlobalConfiguration": {
     "BaseUrl": "http://localhost:5200"
   },
+  "RateLimitOptions": {
+    "DisableRateLimitHeaders": true,
+    "EnableRateLimiting": true,
+    "ClientWhitelist": [],
+    "Period": "1s",
+    "PeriodTimespan": 1,
+    "Limit": 100
+  },
   "Routes": [
     // Auth Service
     {
@@ -71,7 +79,12 @@
           "Host": "localhost",
           "Port": 5205
         }
-      ]
+      ],
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 99999,
+        "DurationOfBreak": 1000,
+        "TimeoutValue": 900000
+      }
     },
     // Sender Service
     {
@@ -129,6 +142,34 @@
         }
       ]
     },
+    // System Service
+    {
+      "SwaggerKey": "system",
+      "UpstreamPathTemplate": "/system-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 52010
+        }
+      ]
+    },
+    // Cms Planet Defender Service
+    {
+      "SwaggerKey": "cms-planet-defender",
+      "UpstreamPathTemplate": "/cms-planet-defender-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 52011
+        }
+      ]
+    },
     // Realtime Service
     {
       "SwaggerKey": "realtime",
@@ -166,6 +207,11 @@
           "Name": "Auths API",
           "Version": "v1",
           "Url": "http://localhost:5201/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Auths API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5201/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -176,6 +222,11 @@
           "Name": "Users API",
           "Version": "v1",
           "Url": "http://localhost:5202/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Users API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5202/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -186,6 +237,11 @@
           "Name": "Lcms Courses API",
           "Version": "v1",
           "Url": "http://localhost:5203/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Lcms Courses API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5203/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -196,6 +252,11 @@
           "Name": "Lms Courses API",
           "Version": "v1",
           "Url": "http://localhost:5204/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Lms Courses API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5204/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -206,6 +267,11 @@
           "Name": "Storage API",
           "Version": "v1",
           "Url": "http://localhost:5205/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Storage API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5205/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -216,6 +282,11 @@
           "Name": "Senders API",
           "Version": "v1",
           "Url": "http://localhost:5206/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Senders API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5206/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -226,6 +297,11 @@
           "Name": "Training API",
           "Version": "v1",
           "Url": "http://localhost:5207/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Training API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5207/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -236,6 +312,11 @@
           "Name": "Interaction API",
           "Version": "v1",
           "Url": "http://localhost:5208/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Interaction API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5208/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -246,6 +327,11 @@
           "Name": "Ordering API",
           "Version": "v1",
           "Url": "http://localhost:5209/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Ordering API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5209/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -256,6 +342,26 @@
           "Name": "System API",
           "Version": "v1",
           "Url": "http://localhost:52010/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "System API",
+          "Version": "v1.1",
+          "Url": "http://localhost:52010/swagger/v1.1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "cms-planet-defender",
+      "Config": [
+        {
+          "Name": "Cms Planet Defender API",
+          "Version": "v1",
+          "Url": "http://localhost:52011/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Cms Planet Defender API",
+          "Version": "v1.1",
+          "Url": "http://localhost:52011/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -266,6 +372,11 @@
           "Name": "Realtime API",
           "Version": "v1",
           "Url": "http://localhost:5501/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Realtime API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5501/swagger/v1.1/swagger.json"
         }
       ]
     },
@@ -276,6 +387,11 @@
           "Name": "Notification API",
           "Version": "v1",
           "Url": "http://localhost:5502/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Notification API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5502/swagger/v1.1/swagger.json"
         }
       ]
     }

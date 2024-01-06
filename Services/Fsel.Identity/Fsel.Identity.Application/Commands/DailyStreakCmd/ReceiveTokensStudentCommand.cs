@@ -3,9 +3,13 @@
 namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Helpers;
+    using Fsel.Core.Base;
+    using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SystemService.Model;
+    using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -20,12 +24,14 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
         private readonly IStudentRepository _studentRepository;
         private readonly AuthContext _authContext;
         private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
+        private readonly ISystemService _systemService;
 
-        public ReceiveTokensStudentCommandHandler(IStudentRepository studentRepository, AuthContext authContext, IStudentDailyStreakRepository studentDailyStreakRepository)
+        public ReceiveTokensStudentCommandHandler(IStudentRepository studentRepository, AuthContext authContext, IStudentDailyStreakRepository studentDailyStreakRepository, ISystemService systemService)
         {
             _studentRepository = studentRepository;
             _authContext = authContext;
             _studentDailyStreakRepository = studentDailyStreakRepository;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<bool>> Handle(ReceiveTokensStudentCommand request, CancellationToken cancellationToken)
@@ -50,7 +56,21 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 
             var date = DateTime.UtcNow.Date;
             studentDailyStreak.IsGiftReceive = true;
-            student.NumberOfToken += studentDailyStreak.LevelOfGift.HasValue ? studentDailyStreak.LevelOfGift.Value.GetNumberToken() : default;
+
+            var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+            {
+                Feature = EnumTokenFeature.DailyCheckin,
+                Mission = EnumTokenMission.DailyCheckin
+            });
+            var tokenConfigResult = tokenConfig.Content?.Result;
+
+            var targetConfig = tokenConfigResult.GetTokenNumber<TokenDailyCheckIn>();
+            var targetNumber = targetConfig?.DailyCheckIns?.FirstOrDefault(x => x.Level == studentDailyStreak.LevelOfGift)?.Number;
+            if (targetNumber.HasValue)
+            {
+                student.NumberOfToken += targetNumber.Value;
+            }
+
             await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>
              {
                  _studentRepository.Update(student);

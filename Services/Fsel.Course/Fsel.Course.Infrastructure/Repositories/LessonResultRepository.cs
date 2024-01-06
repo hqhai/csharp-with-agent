@@ -42,12 +42,11 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<LessonResult?> GetAsync(Guid? studentId, Guid courseId)
         {
-            return await Queryable.Include(x => x.Lesson)
-                                                        .ThenInclude(x => x!.LessonInstructions)
+            return await Queryable.Include(x => x.Lesson).ThenInclude(x => x!.LessonInstructions)
                                                         .Include(x => x.VideoResult)
                                                         .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                                         .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                        .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished && x.CourseId == courseId)
+                                                        .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.New && x.CourseId == courseId)
                                                         .OrderByDescending(x => x.CreatedDate)
                                                         .ThenBy(x => x.UpdatedDate)
                                                         .AsNoTracking()

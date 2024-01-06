@@ -11,11 +11,14 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,14 +35,18 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private float Default_Achieved_Point = 1;
+        private const double Standard_Ratio = 1; // tỉ lệ xem đánh giá 100/100
 
-        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, AuthContext authContext, IUserService userService, IMapper mapper, QuestBoardPublisher questBoardPublisher)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<MockTestResultModel>> Handle(GetMockTestReportQuery request, CancellationToken cancellationToken)
@@ -66,12 +73,23 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
+
+            if (mockTestResult.MockTestScores != null)
+            {
+                mockTestResult.IsViewed = true;
+                _mockTestResultRepository.Update(mockTestResult);
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
             var mockTestResultModel = GetMockTestResult(mockTestResult);
             if (mockTestResult.SkillScores != null)
             {
                 mockTestResultModel.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores), true);
                 mockTestResultModel.IsTeacherGraded = await IsTeacherGraded(mockTestResult);
             }
+
+            //await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
+            //await DoQuestBoardAllReviewsAndFeedback(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
 
             methodResult.Result = mockTestResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -95,6 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                             Skill = n.Key,
                                             MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).ToList())
                                         });
+
             return mockTestResult;
         }
 
@@ -116,6 +135,51 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 return false;
             }
             return true;
+        }
+
+        public async Task DoQuestBoard(Guid mockTestResultId, Guid courseId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeFiveTeacherReview, EnumQuestBoardCategory.SeeTenTeacherReview };
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentId = student?.Content?.Result?.Id;
+
+            var mockTestResultsViewed = await _mockTestResultRepository.Queryable
+                            .Where(x => x.Id == mockTestResultId && x.IsViewed && x.StudentId == studentId)
+                            .ToListAsync(cancellationToken);
+            var mockTestResultsViewedCount = mockTestResultsViewed.Count;
+
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel
+            {
+                StudentId = (Guid)studentId!,
+                Categories = categories,
+                AchievedPoint = mockTestResultsViewedCount,
+                ObjectId = mockTestResultId,
+                CourseId = courseId
+            }, cancellationToken);
+        }
+
+        public async Task DoQuestBoardAllReviewsAndFeedback(Guid mockTestResultId, Guid courseId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeAllReviewsAndFeedback };
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentId = student?.Content?.Result?.Id;
+
+            var mockTestResults = await _mockTestResultRepository.Queryable
+                            .Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done)
+                            .ToListAsync(cancellationToken);
+
+            double checkViewedAllRatio = (double)mockTestResults.Count(x => x.IsViewed) / mockTestResults.Count;
+            if (checkViewedAllRatio == Standard_Ratio)
+            {
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId!,
+                    Categories = categories,
+                    AchievedPoint = Default_Achieved_Point,
+                    ObjectId = mockTestResultId,
+                    CourseId = courseId
+                }, cancellationToken);
+            }
         }
     }
 }

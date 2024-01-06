@@ -126,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 var mockTestId = unit.UnitSkillMockTests.Select(x => x.MockTestId).FirstOrDefault();
                 var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.MockTestId == mockTestId && x.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
-                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, ObjectId = mockTestId, UserId = userId ?? default, EnumFeature = EnumFeature.MockTest });
+                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, ObjectId = mockTestResult?.Id, UserId = userId ?? default, EnumFeature = EnumFeature.MockTest });
                 var featureAccessTimeTest = featureAccessTimeResult?.Content?.Result;
                 listLessonProgress.Add(await GetMockTest(request, mockTestId, featureAccessTimeTest));
             }
@@ -194,7 +194,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         CountQuestion = skillScore?.CountQuestion ?? default,
                         TotalQuestion = skillScore?.TotalQuestion ?? default,
                         Scores = skillScore?.Scores ?? default,
-                        Percent = skillScore?.Percent ?? default,
                     };
                     if (x.Skill == EnumCourseSkill.Speaking || x.Skill == EnumCourseSkill.Writing)
                     {
@@ -225,6 +224,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     {
                         mockTestProgress.TimeSpent = featureAccessTime.AccessTime;
                         mockTestProgress.LastVisited = featureAccessTime.LastVisited ?? null;
+                        mockTestProgress.Visit = featureAccessTime.Visit;
                     }
                 }
             }

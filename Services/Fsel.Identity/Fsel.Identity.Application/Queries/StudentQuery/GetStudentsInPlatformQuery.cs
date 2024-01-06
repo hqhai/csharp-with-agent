@@ -59,7 +59,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                         join r in _roleManager.Roles on ur.RoleId equals r.Id
                         select new StudentInPlatformModel
                         {
-                            Id = a.Id,
+                            Id = b.Id,
                             Code = c.Code,
                             UserName = b.UserName,
                             Role = r.Name,

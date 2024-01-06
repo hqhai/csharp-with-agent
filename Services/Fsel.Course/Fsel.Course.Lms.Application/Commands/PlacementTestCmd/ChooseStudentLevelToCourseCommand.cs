@@ -3,7 +3,6 @@
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Lms.Application.Services.OrderServices;

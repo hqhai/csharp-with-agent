@@ -11,8 +11,10 @@ namespace Fsel.Notification.Api.Controllers
     using Fsel.Notification.Application.Queries;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Notification.Application.Commands;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/notifications")]
     [ApiController]
     public class NotificationController : ControllerBase

@@ -41,7 +41,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var courseQuery = _courseRepository.Queryable
+            var courseQuery = _courseRepository.Queryable.Where(p => !p.IsArchive)
                               .Include(course => course.CourseTeachers.Where(n => !n.IsDeleted))
                               .Select(course => new CourseSearchModel
                               {

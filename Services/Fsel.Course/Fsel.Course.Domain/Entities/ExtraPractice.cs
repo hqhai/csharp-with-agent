@@ -76,6 +76,11 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
 
+        /// <summary>
+        /// Trạng thái Archive
+        /// </summary>
+        public bool IsArchive { get; set; }
+
         public Guid? VideoId { get; set; }
         public Video? Video { get; set; }
         public Guid? PlacementTestId { get; set; }

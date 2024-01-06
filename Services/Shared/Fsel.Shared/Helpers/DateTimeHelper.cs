@@ -29,6 +29,11 @@ namespace Fsel.Shared.Helpers
             return age;
         }
 
+        public static double GetSecondBetweenDate(DateTime inputDate, DateTime outputDate)
+        {
+            return NumberHelper.ConvertRound((outputDate - inputDate).TotalSeconds);
+        }
+
         public static async Task<(int, bool)> CountContinuousDaysAsync(IList<DateTime>? dates)
         {
             if (dates == null || dates.Count == 0)
@@ -47,7 +52,7 @@ namespace Fsel.Shared.Helpers
 
                 foreach (var date in sortedDates)
                 {
-                    var numberOfDays = DateTime.UtcNow.Date - date;
+                    var numberOfDays = DateTime.UtcNow.Date - date.Date;
                     if (numberOfDays.Days == consecutiveDays + 1)
                     {
                         consecutiveDays++;
@@ -66,6 +71,5 @@ namespace Fsel.Shared.Helpers
                 return (firstDateDifference.Days <= 1 ? consecutiveDays : 0, firstDateDifference.Days <= 1);
             }
         }
-
     }
 }

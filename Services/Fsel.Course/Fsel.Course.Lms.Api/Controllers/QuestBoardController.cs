@@ -9,8 +9,10 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/quest-board")]
     [ApiController]
     public class QuestBoardController : ControllerBase

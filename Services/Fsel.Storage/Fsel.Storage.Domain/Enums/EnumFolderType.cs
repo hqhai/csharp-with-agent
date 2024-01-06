@@ -4,7 +4,9 @@ namespace Fsel.Storage.Domain.Enums
     {
         Files,
         Videos,
+        Images,
         Questions,
-        Fsis
+        Fsis,
+        AG,
     }
 }

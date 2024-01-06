@@ -12,8 +12,10 @@ namespace Fsel.Interaction.Api.Controllers.Student
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student/review")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
@@ -42,11 +44,11 @@ namespace Fsel.Interaction.Api.Controllers.Student
         /// Get Student Review
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<StudentReviewInfoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentReviewModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get()
         {
-            MethodResult<IList<StudentReviewInfoModel>> queryResult = await _mediator.Send(new GetReviewStudentsByStudentQuery()).ConfigureAwait(false);
+            MethodResult<IList<StudentReviewModel>> queryResult = await _mediator.Send(new GetReviewStudentsByStudentQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -5,10 +5,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
-    public class PlacementTestResultModel : BaseResultScoreModel
+    public class PlacementTestResultModel : BaseScoreResultModel
     {
         public double TotalQuestion { get; set; }
         public double CountQuestion { get; set; }
+        public Guid PlacementTestId { get; set; }
 
         public double? OverallScore
         { get { return SkillScores != null && SkillScores.Count > 0 ? NumberHelper.RoundNumberDouble(SkillScores.Select(x => x.Scores).Average()) : default; } }
@@ -16,5 +17,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumPlacementTestLevel Level { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public bool IsLock { get; set; }
+        public int ModuleNumber { get; set; }
     }
 }

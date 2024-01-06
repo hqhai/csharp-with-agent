@@ -42,7 +42,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 return methodResult;
             }
 
-            var unitQuery = _unitRepository.Queryable
+            var unitQuery = _unitRepository.Queryable.Where(p => !p.IsArchive)
                                     .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                                     .Include(unit => unit.UnitLessons.Where(y => !y.IsDeleted))
                                     .ThenInclude(unitLesson => unitLesson.Lesson)

@@ -16,8 +16,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,13 +36,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService)
+        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveClassForumPenddingCommand request, CancellationToken cancellationToken)
@@ -77,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot)
                     {
                         long score = 0;
-                        if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= request.WordLimit) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= request.TimeLimit))
+                        if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= classForumResult.WordCount) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= classForumResult.TimeCount))
                         {
                             score = 9;
                         }
@@ -99,6 +105,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
                     var csoId = csoResults.Content?.Result?.Id;
                     classForumResult.CheckCsoId = csoId;
+
+                    var courseId = classForumResult.LessonResult?.CourseId;
+                    //if (classForumResult != null && courseId != null)
+                    //{
+                    //    await DoQuestBoard(classForumResult.Id, (Guid)courseId, classForumResult.CreatedUserId, cancellationToken);
+                    //}
                 }
                 else
                 {
@@ -114,6 +126,28 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return methodResult;
             });
             return methodResult;
+        }
+
+
+        public async Task DoQuestBoard(Guid classForumResultId, Guid courseId, Guid userId, CancellationToken cancellationToken)
+        {
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
+            var student = await _userService.GetStudentByUserIdAsync(userId);
+            var studentId = student?.Content?.Result?.Id;
+
+            var hasFirstClassForumPost = _classForumResultRepository.Queryable.Any(c => c.CreatedUserId == userId && c.Status != EnumClassForumResultStatus.Pending && c.Status != EnumClassForumResultStatus.Draft && c.Status != EnumClassForumResultStatus.Denied);
+
+            if (!hasFirstClassForumPost)
+            {
+                await _questBoardPublisher.Publish(new QuestBoardQueueModel
+                {
+                    StudentId = (Guid)studentId!,
+                    Categories = categories,
+                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
+                    ObjectId = classForumResultId,
+                    CourseId = courseId
+                }, cancellationToken);
+            }
         }
     }
 }

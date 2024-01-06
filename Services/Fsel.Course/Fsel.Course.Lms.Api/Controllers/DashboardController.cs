@@ -9,8 +9,10 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.DashboardQuery;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/dashboard")]
     [ApiController]
     public class DashboardController : ControllerBase

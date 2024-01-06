@@ -33,7 +33,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
             var studentsInPlatformResult = await _userService.GetStudentsInPlatform(new GetStudentInPlatformQueryModel
             {
                 Keyword = request.Keyword,
-                PlatformCode = request.PlatformCode,
+                PlatformCode = Shared.Enums.EnumPlatformCode.PlanetDefender,
                 Role = request.Role,
                 Status = request.UserPlatformStatus
             });
@@ -46,12 +46,12 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
 
             studentsInPlatform.ForEach(p =>
             {
-                p.Level = _studentGameInfoRepository.Queryable.FirstOrDefault(x => x.StudentId == p.StudentId)?.Level;
+                p.CourseLevel = _studentGameInfoRepository.Queryable.FirstOrDefault(x => x.StudentId == p.StudentId)?.CourseLevel;
             });
 
             if (request.Level.HasValue)
             {
-                studentsInPlatform = studentsInPlatform.Where(p => p.Level == request.Level).ToList();
+                studentsInPlatform = studentsInPlatform.Where(p => p.CourseLevel == request.Level).ToList();
             }
 
             int totalItem = studentsInPlatform.Count;

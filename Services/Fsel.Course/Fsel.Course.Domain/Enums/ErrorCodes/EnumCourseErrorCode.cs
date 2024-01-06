@@ -57,16 +57,56 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// MockTest is up to two
         /// </summary>
-        MockTestIsUpToTwo,
+        MockTestCannotBeDreaterThan2,
 
         /// <summary>
         /// FinalTest is up to One
         /// </summary>
-        FinalTestIsUpToOne,
+        FinalTestCannotBeDreaterThan1,
 
         /// <summary>
         /// UnitTest is up to Eight
         /// </summary>
-        UnitTestIsUpToEight
+        UnitTestIsUpToEight,
+
+        /// <summary>
+        /// FinalTestId must be at the end
+        /// </summary>
+        FinalTestIdMustBeAtTheEnd,
+
+        /// <summary>
+        /// requires 13 courseUnitMockTests
+        /// </summary>
+        Requires13CourseUnitMockTests,
+
+        /// <summary>
+        /// Unit Results Exist
+        /// </summary>
+        UnitResultsExist,
+
+        /// <summary>
+        ///CourseUnitMockTests Is Ten
+        /// </summary>
+        TheNumberOfItemsCannotBeDifferentFrom10,
+
+        /// <summary>
+        /// MockTes tMust Be I nPositions 5 And 10
+        /// </summary>
+        MockTestMustBeInPositions5And10,
+
+        /// <summary>
+        ///  MocktestResults Exist
+        /// </summary>
+        MockTestResultsExist,
+
+        /// <summary>
+        ///  FinalTest HasBeen Used
+        /// </summary>
+        FinalTestHasBeenUsed,
+
+        /// <summary>
+        ///  Unit Has Been Used
+        /// </summary>
+        UnitHasBeenUsed
     }
 }

@@ -3,8 +3,10 @@
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Infrastructure.Maps
 {
@@ -12,10 +14,10 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public UnitProfile()
         {
-            CreateMap<Unit, UnitModel>().IgnoreAllNonExisting();
             CreateMap<CreateUnitCommandModel, Unit>().IgnoreAllNonExisting();
             CreateMap<UpdateUnitCommandModel, Unit>().IgnoreAllNonExisting();
-            CreateMap<UnitResult, UnitResultModel>().IgnoreAllNonExisting();
+            CreateMap<UnitResult, UnitResultModel>().ForMember(x => x.ProgressPercent, p => p.MapFrom(x => x.Unit != null ? NumberHelper.GetPercent(x.Unit.LessonResults.Where(y => y.Status == EnumResultStatus.Done).Count(), x.Unit.UnitLessons.Count) : default));
+            CreateMap<Unit, UnitModel>().ForMember(x => x.IsActive, p => p.MapFrom(o => o.CourseUnitMockTests.Any()));
         }
     }
 }

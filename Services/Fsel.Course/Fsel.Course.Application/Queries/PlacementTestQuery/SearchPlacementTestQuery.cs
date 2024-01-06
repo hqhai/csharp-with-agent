@@ -38,7 +38,7 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
                 return methodResult;
             }
 
-            var placementTestQuery = from i in _placementTestRepository.Queryable
+            var placementTestQuery = from i in _placementTestRepository.Queryable.Where(p => !p.IsArchive)
                                      select new PlacementTestModel
                                      {
                                          Id = i.Id,

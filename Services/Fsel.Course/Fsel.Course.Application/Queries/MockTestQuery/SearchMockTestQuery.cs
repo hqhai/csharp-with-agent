@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<MockTestSearchModel>> methodResult = new MethodResult<PagingItemsModel<MockTestSearchModel>>();
 
-            var mockTestQuery = _mockTestRepository.Queryable
+            var mockTestQuery = _mockTestRepository.Queryable.Where(p => !p.IsArchive)
                                       .Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
                                       .ThenInclude(x => x.SectionGroup)
                                       .Include(x => x.CourseUnitMockTests)

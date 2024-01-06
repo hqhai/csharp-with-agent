@@ -2,6 +2,7 @@
 
 using Fsel.Core.Base.BaseModels;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
@@ -12,6 +13,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Code { get; set; }
 
         public string? MediaPost { get; set; }
+        public string? MediaPostContent => StringHelper.ProcessHtml(MediaPost, false);
+
+        public IEnumerable<string>? AudioPaths => StringHelper.GetIframeUrls(MediaPost, true);
+
+        public IEnumerable<string>? VideoPaths => StringHelper.GetIframeUrls(MediaPost, false);
 
         public IList<QuestionModel>? Questions { get; set; }
 

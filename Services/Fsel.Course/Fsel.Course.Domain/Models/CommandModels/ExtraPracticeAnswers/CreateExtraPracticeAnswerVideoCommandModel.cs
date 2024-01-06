@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers
     {
         public Guid ExtraPracticeResultId { get; set; }
         public IList<ExtraPracticeAnswerTypeVideoModel>? Answers { get; set; }
+        public bool IsSubmit { get; set; }
     }
 
     public class ExtraPracticeAnswerTypeVideoModel

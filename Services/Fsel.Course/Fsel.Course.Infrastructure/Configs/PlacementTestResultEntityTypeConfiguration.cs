@@ -26,6 +26,11 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
+
+            builder.HasOne(a => a.PlacementTest)
+              .WithMany(b => b.PlacementTestResults)
+              .HasForeignKey(b => b.PlacementTestId)
+              .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

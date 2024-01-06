@@ -11,8 +11,10 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/flag")]
     [ApiController]
     public class FlagController : ControllerBase
@@ -51,14 +53,13 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Update status flag
         /// </summary>
-        [HttpPut("update-status/{id}")]
+        [HttpPut("update-status")]
         [ProducesResponseType(typeof(MethodResult<FlagModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateStatus([FromRoute] Guid id, [FromBody] UpdateStatusFlagCommand command)
+        public async Task<IActionResult> UpdateStatus([FromBody] ApproveFlagCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
-            MethodResult<FlagModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

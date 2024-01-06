@@ -5,17 +5,20 @@ namespace Fsel.Interaction.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Commands.SupportQuetionCmd;
     using Fsel.Interaction.Application.Queries.SupportQuestionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/support-question")]
     [ApiController]
-    public class SupportQuestionController : ControllerBase
+    public class SupportQuestionController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -32,6 +35,7 @@ namespace Fsel.Interaction.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchSupportQuestionQuery query)
         {
+            SetQuery(query);
             MethodResult<PagingItemsModel<SupportQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }

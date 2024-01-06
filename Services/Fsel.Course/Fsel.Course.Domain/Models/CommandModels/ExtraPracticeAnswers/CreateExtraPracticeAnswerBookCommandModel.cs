@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers
         public Guid ExtraPracticeResultId { get; set; }
         public Guid ExtraPracticeExerciseId { get; set; }
         public IList<ExtraPracticeAnswerTypeBookModel>? Answers { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsSubmit { get; set; }
     }
 
     public class ExtraPracticeAnswerTypeBookModel

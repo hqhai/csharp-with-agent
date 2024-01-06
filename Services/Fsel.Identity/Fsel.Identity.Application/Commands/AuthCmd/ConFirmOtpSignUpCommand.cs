@@ -9,27 +9,29 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Newtonsoft.Json;
 
     public class ConfirmOtpSignUpCommand : IRequest<MethodResult<ConfirmOtpModel>>
     {
         [Required]
         public string? OTP { get; set; }
+
+        [JsonIgnore]
+        public string? Email { get; set; }
     }
 
     public class ConfirmOtpSignUpCommandHandler : IRequestHandler<ConfirmOtpSignUpCommand, MethodResult<ConfirmOtpModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
         private readonly IHumanRepository _humanRepository;
         private readonly IMapper _mapper;
@@ -37,7 +39,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public ConfirmOtpSignUpCommandHandler(UserManager<User> userManager
             , IMediator mediator
-            , IUserOtpCodeRepository userOtpCodeRepository
             , AppSetting appSetting
             , IHumanRepository humanRepository
             , IMapper mapper
@@ -45,7 +46,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             _userManager = userManager;
             _mediator = mediator;
-            _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
             _humanRepository = humanRepository;
             _mapper = mapper;
@@ -58,29 +58,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             MethodResult<ConfirmOtpModel> methodResult = new MethodResult<ConfirmOtpModel>();
 
-            var userOtpCode = await _userOtpCodeRepository.Queryable.Include(x => x.User)
-                        .FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.OTPCode == request.OTP, cancellationToken);
-            if (userOtpCode == null)
+            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.OTP, Email = request.Email }, cancellationToken);
+            if (!method.IsOK || method.Result == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.OTP));
+                methodResult.AddError(method.ErrorMessages);
                 return methodResult;
             }
-
-            if (DateTime.Compare(DateTime.UtcNow, userOtpCode.ExpiredTime) > 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
-                return methodResult;
-            }
-            var user = userOtpCode.User;
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-
-            userOtpCode.Status = EnumOtpCodeStatus.Verified;
-            _userOtpCodeRepository.Update(userOtpCode);
-            await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await _userManager.ConfirmEmailAsync(user, token);

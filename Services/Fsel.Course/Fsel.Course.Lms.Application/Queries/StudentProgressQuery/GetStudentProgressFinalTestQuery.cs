@@ -121,9 +121,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         Skill = x.CourseSkill,
                         CorrectCount = correctCount,
                         TotalCount = correctTotal,
-                        Percent = correctTotal > 0 ? NumberHelper.ConvertPercentDouble((double)correctCount / correctTotal) : default,
                         CountQuestion = countQuestion,
-                        TotalQuestion = totalQuestion
+                        TotalQuestion = totalQuestion,
                     };
                     return skillScores;
                 }).ToList();

@@ -14,7 +14,7 @@ namespace Fsel.Interaction.Infrastructure.Maps
         {
             CreateMap<Flag, FlagModel>().IgnoreAllNonExisting();
             CreateMap<RateFlagCommandModel, Flag>().IgnoreAllNonExisting();
-            CreateMap<UpdateStatusFlagCommandModel, Flag>().IgnoreAllNonExisting();
+            CreateMap<ApproveFlagCommandModel, Flag>().IgnoreAllNonExisting();
         }
     }
 }

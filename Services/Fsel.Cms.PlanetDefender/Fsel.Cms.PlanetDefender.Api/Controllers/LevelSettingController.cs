@@ -11,8 +11,11 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
     using Fsel.Cms.PlanetDefender.Application.Queries.LevelSettingQuery;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Cms.PlanetDefender.Application.Commands;
+    using Asp.Versioning;
+    using Fsel.Shared.Constants;
 
-    [ApiVersion(Settings.APIVersion)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/level-setting")]
     [ApiController]
     [AllowAnonymous]

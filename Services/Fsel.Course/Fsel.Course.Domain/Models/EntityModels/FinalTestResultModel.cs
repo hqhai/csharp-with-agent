@@ -2,9 +2,10 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class FinalTestResultModel : BaseResultScoreModel
+    public class FinalTestResultModel : BaseLearnResultModel
     {
         public Guid FinalTestId { get; set; }
         public Guid CourseId { get; set; }
+        public double? ProgressPercent { get; set; }
     }
 }

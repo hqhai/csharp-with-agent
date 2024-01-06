@@ -5,9 +5,11 @@ namespace Fsel.Course.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Helpers;
 
     public class ClassForumResult : Entity
     {
@@ -15,6 +17,14 @@ namespace Fsel.Course.Domain.Entities
         public string? Content { get; set; }
 
         public string? WordContent { get; set; }
+
+        [NotMapped]
+        public int WordCount
+        { get { return StringHelper.CountWords(WordContent); } }
+
+        [NotMapped]
+        public int? TimeCount
+        { get { return ClassForumResultFiles.Select(p => p.TimeCount).Sum(); } }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
@@ -50,6 +60,8 @@ namespace Fsel.Course.Domain.Entities
         public string? RetryWordContent { get; set; }
 
         public string? RetryGradingAlFeedBack { get; set; }
+
+        public bool IsViewed { get; set; }
 
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 

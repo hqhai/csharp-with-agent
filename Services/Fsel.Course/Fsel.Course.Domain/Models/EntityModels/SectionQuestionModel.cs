@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     public class SectionQuestionModel
     {
+        public Guid? QuestionId { get; set; }
         public QuestionModel? Question { get; set; }
         public ExtraPracticeAnswerModel? ExtraPracticeAnswer { get; set; }
     }
