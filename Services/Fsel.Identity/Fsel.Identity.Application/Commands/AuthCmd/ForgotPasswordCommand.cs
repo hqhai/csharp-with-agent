@@ -56,13 +56,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
             if (!request.Email.IsValidEmail())
             {
-                methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                 return methodResult;
             }
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
                 return methodResult;
             }
 
