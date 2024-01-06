@@ -117,9 +117,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             Microsoft.AspNetCore.Identity.IdentityResult result;
                             if (user != null)
                             {
-                                var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
-                                user.PasswordHash = hashPassword;
                                 _mapper.Map(request, user);
+                                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
                                 user.UserName = request.Email;
                                 if (!user.IsValid())
                                 {
