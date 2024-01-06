@@ -66,7 +66,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                     .Include(x => x.MockTestScores)
                                         .ThenInclude(x => x.SectionGroup)
                                     .Where(x => x.Id == request.MockTestResultId && x.StudentId == studentId)
-                                    .AsNoTracking()
                                     .FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
@@ -117,21 +116,21 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             return mockTestResult;
         }
 
-        private async Task<bool> IsTeacherGraded(MockTestResult data)
+        private async Task<bool> IsTeacherGraded(MockTestResult mockTestResult)
         {
             var mockTest = await _mockTestRepository.Queryable
-                .Include(x => x.MockTestSections)
-                .ThenInclude(x => x.SectionGroup)
-                .Where(x => x.Id == data.MockTestId).FirstOrDefaultAsync();
-
-            var skills = mockTest?.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList();
-            if (skills != null && skills.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing))
+                            .Where(x => x.Id == mockTestResult.MockTestId)
+                            .Include(x => x.MockTestSections)
+                            .ThenInclude(x => x.SectionGroup).ThenInclude(x => x.MockTestScores.Where(x => x.MockTestResultId == mockTestResult.Id))
+                            .FirstOrDefaultAsync();
+            if (mockTest != null)
             {
-                if (data.MockTestScores != null && data.MockTestScores.Any())
+                var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup).Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing);
+                if (sectionGroups.Any())
                 {
-                    var courseSkills = data.MockTestScores.Select(x => x.SectionGroup!.CourseSkill).ToList();
-                    return courseSkills.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
+                    return sectionGroups.Any() && sectionGroups.SelectMany(x => x!.MockTestScores).Any();
                 }
+                return true;
             }
             return false;
         }

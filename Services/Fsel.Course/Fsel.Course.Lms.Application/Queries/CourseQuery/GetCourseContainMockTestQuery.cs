@@ -34,7 +34,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             var course = await _courseRepository.Queryable
                                 .Include(x => x.MockTestResults)
-                                .Where(x => x.MockTestResults.Any())
+                                .Where(x => x.MockTestResults.FirstOrDefault() != null)
                                 .Select(x => new CourseModel
                                 {
                                     Id = x.Id,

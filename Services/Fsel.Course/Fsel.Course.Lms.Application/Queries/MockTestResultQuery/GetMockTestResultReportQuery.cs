@@ -71,8 +71,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                             .FirstOrDefaultAsync();
             if (mockTest != null)
             {
-                var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup).Where(x => x.CourseSkill != EnumCourseSkill.Speaking && x.CourseSkill != EnumCourseSkill.Writing);
-                return sectionGroups.Any() && sectionGroups.SelectMany(x => x!.MockTestScores).Any();
+                var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup).Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing);
+                if (sectionGroups.Any())
+                {
+                    return sectionGroups.Any() && sectionGroups.SelectMany(x => x!.MockTestScores).Any();
+                }
+                return true;
             }
             return false;
         }
