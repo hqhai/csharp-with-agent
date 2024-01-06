@@ -13,15 +13,13 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using Fsel.Interaction.Domain.Models.QueryModels.Posts;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
-    public class GetPostsByStudentQuery : GetPostsByStudentQueryModel, IRequest<MethodResult<List<PostModel>>>
+    public class GetPostsByStudentQuery : GetPostsByStudentQueryModel, IRequest<MethodResult<IList<PostModel>>>
     {
         public EnumPostStatus? Status { get; set; }
     }
 
-    public class GetPostByStudentQueryHandler : IRequestHandler<GetPostsByStudentQuery, MethodResult<List<PostModel>>>
+    public class GetPostByStudentQueryHandler : IRequestHandler<GetPostsByStudentQuery, MethodResult<IList<PostModel>>>
     {
         private readonly IPostRepository _postRepository;
         private readonly IMapper _mapper;
@@ -34,18 +32,15 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<List<PostModel>>> Handle(GetPostsByStudentQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<PostModel>>> Handle(GetPostsByStudentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<List<PostModel>>();
+            var methodResult = new MethodResult<IList<PostModel>>();
 
-            var posts = await _postRepository.Queryable
-                                            .Where(x => x.UserId == _authContext.CurrentUserId && x.Status == request.Status)
-                                            .ToListAsync(cancellationToken);
+            var posts = _postRepository.Queryable
+                                            .Where(x => x.UserId == _authContext.CurrentUserId && x.Status == request.Status);
 
-            methodResult.Result = _mapper.Map<List<PostModel>>(posts);
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            return methodResult;
+            return await _postRepository.GetListResultAsync<PostModel>(posts, cancellationToken: cancellationToken);
         }
     }
 }
