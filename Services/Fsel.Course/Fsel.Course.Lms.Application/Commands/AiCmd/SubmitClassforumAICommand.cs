@@ -57,10 +57,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                 }
 
-
                 _classForumResultRepository.Update(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             }
 
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
