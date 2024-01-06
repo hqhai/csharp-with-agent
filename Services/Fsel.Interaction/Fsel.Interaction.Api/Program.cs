@@ -3,6 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Interaction.Application.Queues.Publishers;
 using Fsel.Interaction.Application.Services.CourseServices;
+using Fsel.Interaction.Application.Services.HarmfulContentService;
 using Fsel.Interaction.Application.Services.NotificationService;
 using Fsel.Interaction.Application.Services.SenderServices;
 using Fsel.Interaction.Application.Services.SystemService;
@@ -48,6 +49,7 @@ builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseA
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
+builder.AddRefitClients(typeof(IHarmfulContentService), appSetting?.HarmfulContentConfig?.HarmfulContentApiUrl);
 builder.AddMassTransit(appSetting);
 
 var app = builder.Build();
