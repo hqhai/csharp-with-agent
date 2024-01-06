@@ -129,12 +129,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             {
                 if (data.MockTestScores != null && data.MockTestScores.Any())
                 {
-                    var skillScores = data.MockTestScores.Select(x => x.SectionGroup!.CourseSkill).ToList();
-                    return skillScores.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
+                    var courseSkills = data.MockTestScores.Select(x => x.SectionGroup!.CourseSkill).ToList();
+                    return courseSkills.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
                 }
-                return false;
             }
-            return true;
+            return false;
         }
 
         public async Task DoQuestBoard(Guid mockTestResultId, Guid courseId, CancellationToken cancellationToken)

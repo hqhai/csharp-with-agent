@@ -17,8 +17,8 @@ namespace Fsel.Course.Infrastructure.Maps
                 .ForMember(x => x.ProgressPercent, p => p.MapFrom(x => x.MockTest != null ? NumberHelper.GetPercent(x.SectionGroupResults.Where(y => y.Status == EnumResultStatus.Done).Count(), x.MockTest.MockTestSections.Count) : default));
             CreateMap<MockTestResult, TestResultRankingModel>()
                 .ForMember(x => x.Score, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? o.SkillScores.Average(x => x.Scores) : default));
-            CreateMap<MockTestResult, TestResultReportModel>()
-                .ForMember(x => x.Score, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? o.SkillScores.Average(x => x.Scores) : default));
+            CreateMap<MockTestResult, MockTestResultReportModel>()
+              .ForMember(x => x.Score, p => p.MapFrom(o => o.SkillScores != null && o.SkillScores.Any() ? o.SkillScores.Average(x => x.Scores) : default));
             CreateMap<MockTestResult, LessonMockTestResultModel>()
             .ForMember(x => x.Type, p => p.MapFrom(o => nameof(EnumMockTestType.SkillMockTest)))
             .ForMember(x => x.ObjectId, p => p.MapFrom(o => o.MockTestId));
