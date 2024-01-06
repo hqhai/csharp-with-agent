@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     public class GetCourseContainMockTestQuery : BaseQueryModel, IRequest<MethodResult<IList<CourseModel>>>
     {
     }
+
     public class GetCourseContainMockTestQueryHandler : IRequestHandler<GetCourseContainMockTestQuery, MethodResult<IList<CourseModel>>>
     {
         private readonly ICourseRepository _courseRepository;
@@ -25,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         {
             _courseRepository = courseRepository;
         }
+
         public async Task<MethodResult<IList<CourseModel>>> Handle(GetCourseContainMockTestQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -32,7 +34,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             var course = await _courseRepository.Queryable
                                 .Include(x => x.MockTestResults)
-                                .Where(x => x.MockTestResults.FirstOrDefault() != null)
+                                .Where(x => x.MockTestResults.Any())
                                 .Select(x => new CourseModel
                                 {
                                     Id = x.Id,
