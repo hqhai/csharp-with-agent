@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     {
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public ClassForumResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher) : base(lessonResultRepository, systemService, appSetting,  courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
+        public ClassForumResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher) : base(lessonResultRepository, systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
         {
             _lessonResultRepository = lessonResultRepository;
         }
@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 if (classForumResult.Status == EnumClassForumResultStatus.Pending)
                 {
-                    await UpdateHomeWorks(classForumResult, cancellationToken).ConfigureAwait(false);
+                    await UpdateHomeWorks(classForumResult, cancellationToken);
                 }
                 await UpdateLessonResultAsync(lessonResult, cancellationToken).ConfigureAwait(false);
             }
