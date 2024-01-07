@@ -472,11 +472,27 @@ namespace Fsel.Course.Infrastructure.Common
             var exerciseModel = _mapper.Map<ExerciseModel>(n);
             exerciseModel.QuestionTests = questions.Select(x =>
             {
-                var answer = x.VideoTimeCodeAnswers.FirstOrDefault();
+                var answer = x!.VideoTimeCodeAnswers.FirstOrDefault();
+                EnumCorrectStatus? correctStatus = null;
+                if (answer != null)
+                {
+                    if (answer.Status != EnumAnswerStatus.Done)
+                    {
+                        if (answer.IsCorrect.HasValue)
+                        {
+                            correctStatus = EnumCorrectStatus.Process;
+                        }
+                    }
+                    else
+                    {
+                        correctStatus = answer.IsCorrect.HasValue ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
+                    }
+                }
+
                 return new QuestionCorrectStatusModel
                 {
                     QuestionId = x.Id,
-                    Status = answer != null && (answer.IsCorrect.HasValue || answer.Status == EnumAnswerStatus.Done) ? answer.IsCorrect == true ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail : null
+                    Status = correctStatus
                 };
             }).ToList();
             var questionDtos = questions.Select(m => GetQuestion(m, status, isShowSubStatus, isDisableAnswer)).ToList();
@@ -580,7 +596,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var status = GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal);
                     x.Status = isDone ? EnumAnswerStatus.Done : status;
-                    x.IsCorrect = x.CorrectCount == x.Question!.CorrectTotal;
+                    x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == x.Question!.CorrectTotal : null;
                 });
                 _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
