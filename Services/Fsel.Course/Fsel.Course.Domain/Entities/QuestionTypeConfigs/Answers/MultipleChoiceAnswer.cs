@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class MultipleChoiceAnswer
     {
-        public IList<MultipleChoiceAnswers>? Answers { get; set; }
+        public IList<MultipleChoiceAnswers> Answers { get; set; } = new List<MultipleChoiceAnswers>();
     }
 
     public class MultipleChoiceAnswers

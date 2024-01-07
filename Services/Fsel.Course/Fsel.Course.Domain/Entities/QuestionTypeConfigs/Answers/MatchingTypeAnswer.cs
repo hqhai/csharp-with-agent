@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class MatchingTypeAnswer
     {
-        public IList<MatchingTypeAnswers>? Answers { get; set; }
+        public IList<MatchingTypeAnswers> Answers { get; set; } = new List<MatchingTypeAnswers>();
     }
 
     public class MatchingTypeAnswers

@@ -16,6 +16,8 @@ namespace Fsel.Course.Infrastructure.Common
     public class SectionGroupConverter
     {
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly AnswerTypeConverter _answerTypeConverter;
+        private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
         private readonly DateTimeConverter _dateTimeConverter;
@@ -28,9 +30,11 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Clean Code
 
-        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
+        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, AnswerTypeConverter answerTypeConverter, ISectionQuestionRepository sectionQuestionRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
         {
             _sectionGroupResultRepository = sectionGroupResultRepository;
+            _answerTypeConverter = answerTypeConverter;
+            _sectionQuestionRepository = sectionQuestionRepository;
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
             _dateTimeConverter = dateTimeConverter;
@@ -255,51 +259,76 @@ namespace Fsel.Course.Infrastructure.Common
             var questionIds = await GetUnansweredQuestionIds(sectionGroup, sectionGroupResult);
             if (questionIds != null && questionIds.Any())
             {
-                if (sectionGroupResult.FinalTestResultId.HasValue)
+                if (sectionGroupResult.MockTestResultId.HasValue)
                 {
-                    await _finalTestAnswerRepository.AddList(questionIds.Select(x => new FinalTestAnswer
+                    var mockTestAnswers = new List<MockTestAnswer>();
+                    if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
                     {
-                        Answer = null,
-                        SectionQuestionId = x,
-                        SectionGroupResultId = sectionGroupResult.Id,
-                        FinalTestResultId = sectionGroupResult.FinalTestResultId ?? default,
-                        IsCorrect = null,
-                        Status = EnumAnswerStatus.Done
-                    }).ToList());
-                    await _finalTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-                }
-                else if (sectionGroupResult.PlacementTestResultId.HasValue)
-                {
-                    await _placementTestAnswerRepository.AddList(questionIds.Select(x => new PlacementTestAnswer
+                        var questions = await _sectionQuestionRepository.Queryable.Include(x => x.Question).Where(x => questionIds.Contains(x.Id)).Select(x => new
+                        {
+                            SectionQuestionId = x.Id,
+                            QuestionType = x.Question!.QuestionType
+                        }).ToListAsync();
+                        mockTestAnswers = questions.Select(x => new MockTestAnswer
+                        {
+                            Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
+                            SectionGroupResultId = sectionGroupResult.Id,
+                            MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
+                            IsCorrect = null,
+                            Status = EnumAnswerStatus.Done,
+                            SectionQuestionId = x.SectionQuestionId
+                        }).ToList();
+                    }
+                    else
                     {
-                        Answer = null,
-                        SectionQuestionId = x,
-                        SectionGroupResultId = sectionGroupResult.Id,
-                        PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
-                        IsCorrect = null,
-                        Status = EnumAnswerStatus.Done
-                    }).ToList());
-                    await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                        mockTestAnswers = questionIds.Select(x => new MockTestAnswer
+                        {
+                            Answer = null,
+                            SectionGroupResultId = sectionGroupResult.Id,
+                            MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
+                            IsCorrect = null,
+                            Status = EnumAnswerStatus.Done,
+                            SectionId = sectionGroup.CourseSkill == EnumCourseSkill.Writing ? x : null,
+                            SectionTimeCodeId = sectionGroup.CourseSkill == EnumCourseSkill.Speaking ? x : null
+                        }).ToList();
+                    }
+
+                    await _mockTestAnswerRepository.AddList(mockTestAnswers);
+                    await _mockTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 }
                 else
                 {
-                    var mockTestAnswers = questionIds.Select(x =>
-                     {
-                         var mocktestAnswer = new MockTestAnswer
-                         {
-                             Answer = null,
-                             SectionGroupResultId = sectionGroupResult.Id,
-                             MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
-                             IsCorrect = null,
-                             Status = EnumAnswerStatus.Done
-                         };
-                         mocktestAnswer.SectionId = sectionGroup.CourseSkill == EnumCourseSkill.Writing ? x : null;
-                         mocktestAnswer.SectionTimeCodeId = sectionGroup.CourseSkill == EnumCourseSkill.Speaking ? x : null;
-                         mocktestAnswer.SectionQuestionId = sectionGroup.CourseSkill != EnumCourseSkill.Writing && sectionGroup.CourseSkill != EnumCourseSkill.Speaking ? x : null;
-                         return mocktestAnswer;
-                     }).ToList();
-                    await _mockTestAnswerRepository.AddList(mockTestAnswers);
-                    await _mockTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                    var questions = await _sectionQuestionRepository.Queryable.Include(x => x.Question).Where(x => questionIds.Contains(x.Id)).Select(x => new
+                    {
+                        SectionQuestionId = x.Id,
+                        QuestionType = x.Question!.QuestionType
+                    }).ToListAsync();
+                    if (sectionGroupResult.FinalTestResultId.HasValue)
+                    {
+                        await _finalTestAnswerRepository.AddList(questions.Select(x => new FinalTestAnswer
+                        {
+                            Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
+                            SectionQuestionId = x.SectionQuestionId,
+                            SectionGroupResultId = sectionGroupResult.Id,
+                            FinalTestResultId = sectionGroupResult.FinalTestResultId ?? default,
+                            IsCorrect = null,
+                            Status = EnumAnswerStatus.Done
+                        }).ToList());
+                        await _finalTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                    }
+                    else if (sectionGroupResult.PlacementTestResultId.HasValue)
+                    {
+                        await _placementTestAnswerRepository.AddList(questions.Select(x => new PlacementTestAnswer
+                        {
+                            Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
+                            SectionQuestionId = x.SectionQuestionId,
+                            SectionGroupResultId = sectionGroupResult.Id,
+                            PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
+                            IsCorrect = null,
+                            Status = EnumAnswerStatus.Done
+                        }).ToList());
+                        await _placementTestAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                    }
                 }
             }
         }

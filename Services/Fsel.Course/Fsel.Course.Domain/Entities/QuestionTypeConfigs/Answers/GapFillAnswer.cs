@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class GapFillAnswer
     {
-        public IList<GapFillAnswers>? Answers { get; set; }
+        public IList<GapFillAnswers> Answers { get; set; } = new List<GapFillAnswers>();
     }
 
     public class GapFillAnswers
