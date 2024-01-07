@@ -468,9 +468,19 @@ namespace Fsel.Course.Infrastructure.Common
         private ExerciseModel GetExercise(Exercise? n, EnumResultStatus status, bool isShowSubStatus, bool isDisableAnswer)
         {
             ArgumentNullException.ThrowIfNull(n);
+            var questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question);
             var exerciseModel = _mapper.Map<ExerciseModel>(n);
-            var questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m, status, isShowSubStatus, isDisableAnswer)).ToList();
-            exerciseModel.Questions = questions;
+            exerciseModel.QuestionTests = questions.Select(x =>
+            {
+                var answer = x.VideoTimeCodeAnswers.FirstOrDefault();
+                return new QuestionCorrectStatusModel
+                {
+                    QuestionId = x.Id,
+                    Status = answer != null && (answer.IsCorrect.HasValue || answer.Status == EnumAnswerStatus.Done) ? answer.IsCorrect == true ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail : null
+                };
+            }).ToList();
+            var questionDtos = questions.Select(m => GetQuestion(m, status, isShowSubStatus, isDisableAnswer)).ToList();
+            exerciseModel.Questions = questionDtos;
             return exerciseModel;
         }
 
