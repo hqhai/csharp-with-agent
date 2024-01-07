@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -31,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     public class GetMockTestReportQueryHandler : IRequestHandler<GetMockTestReportQuery, MethodResult<MockTestResultModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly IMockTestRepository _mockTestRepository;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
@@ -39,10 +40,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private float Default_Achieved_Point = 1;
         private const double Standard_Ratio = 1; // tỉ lệ xem đánh giá 100/100
 
-        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, AuthContext authContext, IUserService userService, IMapper mapper, QuestBoardPublisher questBoardPublisher)
+        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, SectionGroupConverter sectionGroupConverter, AuthContext authContext, IUserService userService, IMapper mapper, QuestBoardPublisher questBoardPublisher)
         {
             _mockTestResultRepository = mockTestResultRepository;
-            _mockTestRepository = mockTestRepository;
+            _sectionGroupConverter = sectionGroupConverter;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
@@ -54,18 +55,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<MockTestResultModel> methodResult = new MethodResult<MockTestResultModel>();
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
-            var studentId = student?.Content?.Result?.Id;
-
             var mockTestResult = await _mockTestResultRepository.Queryable
-                                    .Include(x => x.MockTestScores)
+                                    .Where(x => x.Id == request.MockTestResultId)
+                                    .Include(x => x.MockTestScores.Where(x => x.MockTestResultId == request.MockTestResultId))
+                                    .Include(x => x.MockTest)
+                                        .ThenInclude(x => x!.MockTestSections)
                                         .ThenInclude(x => x.SectionGroup)
-                                    .Where(x => x.Id == request.MockTestResultId && x.StudentId == studentId)
+                                        .ThenInclude(x => x!.MockTestScores.Where(x => x.MockTestResultId == request.MockTestResultId))
                                     .FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
@@ -84,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             if (mockTestResult.SkillScores != null)
             {
                 mockTestResultModel.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores), true);
-                mockTestResultModel.IsTeacherGraded = await IsTeacherGraded(mockTestResult);
+                mockTestResultModel.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult);
             }
 
             //await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
@@ -114,25 +110,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         });
 
             return mockTestResult;
-        }
-
-        private async Task<bool> IsTeacherGraded(MockTestResult mockTestResult)
-        {
-            var mockTest = await _mockTestRepository.Queryable
-                            .Where(x => x.Id == mockTestResult.MockTestId)
-                            .Include(x => x.MockTestSections)
-                            .ThenInclude(x => x.SectionGroup).ThenInclude(x => x.MockTestScores.Where(x => x.MockTestResultId == mockTestResult.Id))
-                            .FirstOrDefaultAsync();
-            if (mockTest != null)
-            {
-                var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup).Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing);
-                if (sectionGroups.Any())
-                {
-                    return sectionGroups.Any() && sectionGroups.SelectMany(x => x!.MockTestScores).Any();
-                }
-                return true;
-            }
-            return false;
         }
 
         public async Task DoQuestBoard(Guid mockTestResultId, Guid courseId, CancellationToken cancellationToken)

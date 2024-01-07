@@ -11,8 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
+    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -25,14 +24,14 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     public class GetMockTestResultReportQueryHandler : IRequestHandler<GetMockTestResultReportQuery, MethodResult<MockTestResultReportModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly IMockTestRepository _mockTestRepository;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMapper _mapper;
 
-        public GetMockTestResultReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, IMockTestAnswerRepository mockTestAnswerRepository, IMapper mapper)
+        public GetMockTestResultReportQueryHandler(IMockTestResultRepository mockTestResultRepository, SectionGroupConverter sectionGroupConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
-            _mockTestRepository = mockTestRepository;
+            _sectionGroupConverter = sectionGroupConverter;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mapper = mapper;
         }
@@ -42,7 +41,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<MockTestResultReportModel>();
 
-            var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
+            var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.Id == request.MockTestResultId)
+                                            .Include(x => x.MockTest)
+                                            .ThenInclude(x => x!.MockTestSections)
+                                            .ThenInclude(x => x.SectionGroup)
+                                            .ThenInclude(x => x!.MockTestScores.Where(x => x.MockTestResultId == request.MockTestResultId))
+                                            .FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
@@ -59,27 +63,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var mockTestResultDto = _mapper.Map<MockTestResultReportModel>(mockTestResult);
             mockTestResultDto.CorrectQuestion = await query.Where(x => x.IsCorrect == true).CountAsync();
             mockTestResultDto.TotalQuestion = await query.CountAsync();
-            mockTestResultDto.IsTeacherGraded = await IsTeacherGraded(mockTestResult);
+            mockTestResultDto.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult);
             return mockTestResultDto;
-        }
-
-        private async Task<bool> IsTeacherGraded(MockTestResult mockTestResult)
-        {
-            var mockTest = await _mockTestRepository.Queryable
-                            .Where(x => x.Id == mockTestResult.MockTestId)
-                            .Include(x => x.MockTestSections)
-                            .ThenInclude(x => x.SectionGroup).ThenInclude(x => x.MockTestScores.Where(x => x.MockTestResultId == mockTestResult.Id))
-                            .FirstOrDefaultAsync();
-            if (mockTest != null)
-            {
-                var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup).Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing);
-                if (sectionGroups.Any())
-                {
-                    return sectionGroups.Any() && sectionGroups.SelectMany(x => x!.MockTestScores).Any();
-                }
-                return true;
-            }
-            return false;
         }
     }
 }
