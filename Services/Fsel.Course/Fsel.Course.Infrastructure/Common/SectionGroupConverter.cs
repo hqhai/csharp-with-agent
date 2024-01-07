@@ -607,6 +607,16 @@ namespace Fsel.Course.Infrastructure.Common
             return questionDto;
         }
 
+        public bool IsTeacherGraded(MockTestResult mockTestResult)
+        {
+            var sectionGroups = mockTestResult.MockTest?.MockTestSections.Select(x => x.SectionGroup).Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing);
+            if (sectionGroups != null && sectionGroups.Any())
+            {
+                return sectionGroups.Any() && sectionGroups.SelectMany(x => x!.MockTestScores).Any();
+            }
+            return true;
+        }
+
         #endregion Code Chưa Clearn
     }
 }
