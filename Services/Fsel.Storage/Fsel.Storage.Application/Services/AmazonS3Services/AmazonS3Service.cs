@@ -349,7 +349,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             foreach (var quality in qualities)
             {
                 string outputM3U8 = Path.Combine(rootFolderPath, $"{quality.Name}.m3u8");
-                string ffmpegArgs = $"-i {inputPath} -c:v libx264 -b:v {quality.Bitrate} -vf \"scale={quality.Resolution}\" -c:a aac -b:a 128k -hls_time 60 -hls_list_size 0 -f hls {outputM3U8}";
+                string ffmpegArgs = $"-i {inputPath} -c:v libx264 -preset ultrafast -b:v {quality.Bitrate} -vf \"scale={quality.Resolution}\" -c:a aac -b:a 128k -hls_time 120 -hls_list_size 0 -f hls {outputM3U8}";
 
                 await FfmpegStart(ffmpegArgs);
             }
