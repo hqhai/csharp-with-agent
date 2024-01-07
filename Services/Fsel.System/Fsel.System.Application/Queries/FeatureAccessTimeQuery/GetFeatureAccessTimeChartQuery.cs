@@ -129,8 +129,15 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
         {
             var currentDayOfWeek = DateTime.UtcNow.ConvertTimeFromUtc(EnumZoneRegion.Vietnam);
 
-            var startOfWeek = currentDayOfWeek.AddDays(-(int)currentDayOfWeek.DayOfWeek + (int)DayOfWeek.Monday).Date;
-            var endOfWeek = startOfWeek.AddDays(RANGE_WEEK_DAY).Date;
+            // Tính ngày bắt đầu của tuần (ngày thứ hai)
+            DateTime startOfWeek = currentDayOfWeek.AddDays(-(int)currentDayOfWeek.DayOfWeek + (int)DayOfWeek.Monday);
+            if (currentDayOfWeek.DayOfWeek == DayOfWeek.Sunday)
+            {
+                startOfWeek = startOfWeek.AddDays(-RANGE_WEEK_DAY);
+            }
+            startOfWeek = startOfWeek.Date;
+
+            DateTime endOfWeek = startOfWeek.AddDays(RANGE_WEEK_DAY);
 
             var featureGroup = featureAccessTimes
                                  .Where(f => f.LastVisited.HasValue &&
