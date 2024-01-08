@@ -379,8 +379,8 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return (default, isAnswerMissing, string.IsNullOrEmpty(dataAnswer?.Answers));
             }
-            var answerStrs = dataAnswer.Answers.Trim().Split(' ');
-            if (answerStrs != null && answerStrs.Length >= dataQuestion?.ExactWordCount)
+            var answerStrs = dataAnswer.Answers.Trim().Split(' ').Where(x => !string.IsNullOrEmpty(x));
+            if (answerStrs != null && answerStrs.Count() >= dataQuestion?.ExactWordCount)
             {
                 dataAnswer.IsExact = true;
                 number++;
