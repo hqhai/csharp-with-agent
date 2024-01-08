@@ -80,7 +80,9 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             }
             var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions)
                                         .ThenInclude(x => x.MockTestAnswers.Where(x => mockTestResult != null && x.MockTestResultId == mockTestResult.Id))
-                                        .Where(x => request.ListQuestionIds.Contains(x.Id)).ToListAsync();
+                                        .Where(x => request.ListQuestionIds.Contains(x.Id))
+                                        .OrderBy(x => x.CreatedDate)
+                                        .ToListAsync();
             if (questions == null || !questions.Any())
             {
                 return default;
@@ -97,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 return default;
             }
             var questions = await _questionRepository.Queryable.Include(x => x.ExtraPracticeAnswers.Where(x => extraPracticeResult != null && x.ExtraPracticeResultId == extraPracticeResult.Id))
-                                                              .Where(x => request.ListQuestionIds.Contains(x.Id)).ToListAsync();
+                                                              .Where(x => request.ListQuestionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync();
             if (questions == null || !questions.Any())
             {
                 return default;
@@ -116,7 +118,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.Section)
                                 .Include(x => x.SectionQuestions)
                                 .ThenInclude(x => x.FinalTestAnswers.Where(x => finalTestResult != null && x.FinalTestResultId == finalTestResult.Id))
-                                .Where(x => request.ListQuestionIds.Contains(x.Id)).ToListAsync();
+                                .Where(x => request.ListQuestionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync();
             if (questions == null || !questions.Any())
             {
                 return default;
@@ -135,7 +137,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.Section)
                                 .Include(x => x.SectionQuestions)
                                 .ThenInclude(x => x.PlacementTestAnswers.Where(x => placementTestResult != null && x.PlacementTestResultId == placementTestResult.Id))
-                                .Where(x => request.ListQuestionIds.Contains(x.Id)).ToListAsync();
+                                .Where(x => request.ListQuestionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync();
             if (questions == null || !questions.Any())
             {
                 return default;
