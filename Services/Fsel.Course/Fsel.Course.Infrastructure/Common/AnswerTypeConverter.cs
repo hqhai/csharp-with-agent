@@ -375,8 +375,8 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return (default, isAnswerMissing, string.IsNullOrEmpty(dataAnswer?.Answers));
             }
-            var answerStrs = dataAnswer.Answers.Trim().Split(' ');
-            if (answerStrs != null && answerStrs.Length >= dataQuestion?.ExactWordCount)
+            var answerStrs = dataAnswer.Answers.Trim().Split(' ').Where(x => !string.IsNullOrEmpty(x));
+            if (answerStrs != null && answerStrs.Count() >= dataQuestion?.ExactWordCount)
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -590,10 +590,10 @@ namespace Fsel.Course.Infrastructure.Common
             return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(MultipleOptionSentenceCompletionAnswers.AnswerId)));
         }
 
-        private static bool IsShortAnswer(string question, string answer)
+        private static bool IsShortAnswer(string? question, string? answer)
         {
-            string q = " " + question.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
-            string a = " " + answer.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            string q = " " + question?.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            string a = " " + answer?.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
             return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
 
