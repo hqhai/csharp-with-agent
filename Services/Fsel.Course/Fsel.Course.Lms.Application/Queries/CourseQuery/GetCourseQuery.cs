@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers?.Select(x => x.TeacherId).ToList() });
+            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseModel.CourseTeachers?.Select(x => x.TeacherId).ToList() });
             var teachers = teachersResult?.Content?.Result;
             if (teachersResult != null && teachersResult.IsSuccessStatusCode && teachers != null && courseModel.CourseTeachers != null)
             {
