@@ -51,7 +51,7 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
                     Text = request.Content,
                     Categories = HarmfulSetting.Categories,
                     OutputType = HarmfulSetting.OutputType
-                }, _appSetting.HarmfulContentConfig?.SubscriptionKey, HarmfulSetting.ContentType, _appSetting.HarmfulContentConfig?.Version);
+                }, _appSetting.HarmfulContentConfig?.Version);
 
                 if (checkHarmfulContentResult.StatusCode != HttpStatusCode.OK)
                 {
@@ -60,12 +60,6 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
                 }
 
                 var harmfulContent = checkHarmfulContentResult.Content?.CategoriesAnalysis?.ToList();
-
-                if (harmfulContent?.Count != 4)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-                    return methodResult;
-                }
 
                 isHarmfulContent = HarmfulContentHelper.HarmfulContentWords(harmfulContent);
             }
