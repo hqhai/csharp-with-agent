@@ -24,7 +24,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class SendOtpProfileCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
-
         public string? PhoneNumber { get; set; }
     }
 
