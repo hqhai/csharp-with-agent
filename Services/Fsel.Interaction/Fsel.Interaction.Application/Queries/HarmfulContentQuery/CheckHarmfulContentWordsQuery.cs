@@ -12,6 +12,7 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
     using Fsel.Interaction.Application.Services.HarmfulContentService.Models;
     using Fsel.Interaction.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -61,7 +62,7 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
 
                 var harmfulContent = checkHarmfulContentResult.Content?.CategoriesAnalysis?.ToList();
 
-                isHarmfulContent = HarmfulContentHelper.HarmfulContentWords(harmfulContent);
+                isHarmfulContent = HarmfulContentHelper.CheckHarmfulContent(harmfulContent, EnumHarmfulContentType.Word);
             }
             catch
             {
