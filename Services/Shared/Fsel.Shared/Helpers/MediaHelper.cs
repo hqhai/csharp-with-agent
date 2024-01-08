@@ -44,8 +44,15 @@ namespace Fsel.Shared.Helpers
                         int end = durationLine.IndexOf(",", StringComparison.CurrentCulture);
                         string duration = durationLine.Substring(start, end - start).Trim();
 
-                        TimeSpan timeSpan = TimeSpan.Parse(duration, CultureInfo.CurrentCulture);
-                        return (int)timeSpan.TotalSeconds;
+                        try
+                        {
+                            TimeSpan timeSpan = TimeSpan.Parse(duration, CultureInfo.CurrentCulture);
+                            return (int)timeSpan.TotalSeconds;
+                        }
+                        catch
+                        {
+                            return null;
+                        }
                     }
                     else
                     {

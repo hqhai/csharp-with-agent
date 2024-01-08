@@ -215,7 +215,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                         lessonOverview.Type = videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest ? nameof(EnumTimeCodeType.UnitTest) : nameof(EnumTimeCodeType.SkillTest);
                     }
                 }
-                else
+                if (lessonOverview.Type == nameof(Domain.Entities.Unit))
                 {
                     var lessonResultNew = unit.LessonResults.FirstOrDefault(x => x.Status == EnumResultStatus.New);
                     lessonOverview.Type = nameof(Lesson);
