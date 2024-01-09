@@ -27,15 +27,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMapper _mapper;
-        private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
 
-        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IFinalTestAnswerRepository finalTestAnswerRepository, IUserService userService, ITrainingService trainingService)
+        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
         {
             _finalTestResultRepository = finalTestResultRepository;
             _mapper = mapper;
-            _finalTestAnswerRepository = finalTestAnswerRepository;
             _userService = userService;
             _trainingService = trainingService;
         }
@@ -69,12 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 {
                     var finalTestResultStudent = finalTestResults.FirstOrDefault(x => x.StudentId == item.Id);
                     var finalTestResultDto = _mapper.Map<TestResultRankingModel>(finalTestResultStudent);
-                    if (finalTestResultStudent != null)
-                    {
-                        var correctQuestion = await _finalTestAnswerRepository.Queryable.Where(x => x.FinalTestResultId == finalTestResultStudent.Id && x.IsCorrect == true).CountAsync(cancellationToken);
-                        finalTestResultDto.CorrectQuestion = correctQuestion;
-                    }
-                    else
+                    if (finalTestResultStudent == null)
                     {
                         finalTestResultDto = new TestResultRankingModel();
                     }

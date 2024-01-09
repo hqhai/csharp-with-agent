@@ -74,12 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 {
                     var videoTimeCodeResultStudent = videoTimeCodeResults.FirstOrDefault(x => x.StudentId == item.Id);
                     var videoTimeCodeResultDto = _mapper.Map<TestResultRankingModel>(videoTimeCodeResultStudent);
-                    if (videoTimeCodeResultStudent != null)
-                    {
-                        var correctQuestion = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResultStudent.Id && x.IsCorrect == true).CountAsync(cancellationToken);
-                        videoTimeCodeResultDto.CorrectQuestion = correctQuestion;
-                    }
-                    else
+                    if (videoTimeCodeResultStudent == null)
                     {
                         videoTimeCodeResultDto = new TestResultRankingModel();
                     }
