@@ -173,13 +173,8 @@ namespace Fsel.Shared.Helpers
             {
                 return 0;
             }
-
-            input = input.Trim();
-
-            string[] words = input.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            int wordCount = words.Length;
-
-            return wordCount;
+            var words = input.Trim().Split(new[] { " ", "\n", "\r", Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrEmpty(x));
+            return words.Count();
         }
     }
 }
