@@ -2,6 +2,7 @@
 
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -20,7 +21,13 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public string? CreatedUserName { get; set; }
         public Guid? StudentId { get; set; }
         public Guid? UserId { get; set; }
-        public string? AvatarPath { get; set; }
+
+        private string? _avatarPath;
+        public string? AvatarPath
+        {
+            set { _avatarPath = value; }
+            get { return _avatarPath.AddS3BaseUrl(); }
+        }
         public Guid? ClassForumResultId { get; set; }
     }
 }

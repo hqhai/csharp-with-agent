@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Domain.Enums;
 
@@ -14,7 +15,13 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Address { get; set; }
         public EnumGender? Gender { get; set; }
         public string? Email { get; set; }
-        public string? AvatarPath { get; set; }
+
+        private string? _avatarPath;
+        public string? AvatarPath
+        {
+            set { _avatarPath = value; }
+            get { return _avatarPath.AddS3BaseUrl(); }
+        }
         public Guid? UserId { get; set; }
         public TeacherModel? Teacher { get; set; }
         public CSOModel? CSO { get; set; }

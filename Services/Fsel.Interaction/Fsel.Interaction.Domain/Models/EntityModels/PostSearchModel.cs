@@ -3,6 +3,7 @@
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
     using System;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;   
     using Fsel.Shared.Enums;
 
@@ -18,7 +19,12 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
         public Guid UserId { get; set; }
 
-        public string? AvatarPath { get; set; }
+        private string? _avatarPath;
+        public string? AvatarPath
+        {
+            set { _avatarPath = value; }
+            get { return _avatarPath.AddS3BaseUrl(); }
+        }
 
         public string? FullName { get; set; }
 
