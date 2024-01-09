@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
@@ -9,7 +10,14 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class VideoModel : BaseModel
     {
         public string? Name { get; set; }
-        public string? VideoFilePath { get; set; }
+
+        private string? _videoFilePath;
+        public string? VideoFilePath
+        {
+            set { _videoFilePath = value; }
+            get { return _videoFilePath.AddS3BaseUrl(); }
+        }
+
         public string? SubFilePath { get; set; }
         public bool IsActive { get; set; }
         public int TotalQuestion { get; set; }
