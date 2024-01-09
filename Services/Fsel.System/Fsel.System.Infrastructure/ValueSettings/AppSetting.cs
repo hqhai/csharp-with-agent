@@ -9,12 +9,18 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public Smtp? Smtp { get; set; }
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
+        public GoogleSheetConfig? GoogleSheetConfig { get; set; }
         public new Services? Services { get; set; }
     }
 
     public class ConstantUrl
     {
         public string? ConfirmOtpUrl { get; set; }
+    }
+
+    public class GoogleSheetConfig
+    {
+        public string? I18NSpreadSheetId { get; set; }
     }
 
     public class Services : BaseServices
