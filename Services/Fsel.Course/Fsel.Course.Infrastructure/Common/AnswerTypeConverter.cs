@@ -316,7 +316,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return (default, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers));
             }
 
-            if (dataAnswer.Answers.Where(x => !string.IsNullOrEmpty(x)).Count() >= dataQuestion?.ExactWordCount)
+            if (dataAnswer.Answers.Where(x => !string.IsNullOrEmpty(x.Trim())).Count() >= dataQuestion?.ExactWordCount)
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -375,8 +375,8 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return (default, isAnswerMissing, string.IsNullOrEmpty(dataAnswer?.Answers));
             }
-            var answerStrs = dataAnswer.Answers.Trim().Split(new[] { " ", "\n", "\r", Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrEmpty(x));
-            if (answerStrs != null && answerStrs.Count() >= dataQuestion?.ExactWordCount)
+            var exactWordCount = Shared.Helpers.StringHelper.CountWords(dataAnswer.Answers);
+            if (exactWordCount >= dataQuestion?.ExactWordCount)
             {
                 dataAnswer.IsExact = true;
                 number++;
