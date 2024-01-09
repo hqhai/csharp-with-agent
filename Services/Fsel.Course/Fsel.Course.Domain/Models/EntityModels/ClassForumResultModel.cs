@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System;
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
@@ -48,7 +49,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? GradingAlFeedback { get; set; }
 
-        public string? AvatarPath { get; set; }
+        private string? _avatarPath;
+        public string? AvatarPath
+        {
+            set { _avatarPath = value; }
+            get { return _avatarPath.AddS3BaseUrl(); }
+        }
 
         public EnumCourseLevel CourseLevel { get; set; }
 
