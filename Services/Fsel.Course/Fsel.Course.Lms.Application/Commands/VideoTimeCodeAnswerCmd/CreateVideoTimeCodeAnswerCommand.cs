@@ -42,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+
         public CreateVideoTimeCodeAnswerCommandHandler(
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , IVideoResultRepository videoResultRepository
@@ -169,7 +170,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     answer.Answer = answerConfig ?? item.Answer;
                     answer.Status = EnumAnswerStatus.Done;
-                    answer.IsCorrect = correctCount == questionItem.CorrectTotal;
+                    answer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
                     answer.CorrectCount = questionItem.Ungraded ? default : correctCount;
                     answer.IsFirstSubmit = false;
                     updateVideoTimeCodeAnswers.Add(answer);
