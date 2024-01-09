@@ -469,17 +469,18 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(n);
             var exerciseModel = _mapper.Map<ExerciseModel>(n);
-            var questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m, status, isShowSubStatus, isDisableAnswer)).ToList();
-            exerciseModel.Questions = questions;
+            exerciseModel.Questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(x => x.Question).Select(m => GetQuestion(m, status, isShowSubStatus, isDisableAnswer)).ToList();
             return exerciseModel;
         }
 
         private QuestionModel GetQuestion(Question? question, EnumResultStatus status, bool isShowSubStatus, bool isDisableAnswer)
         {
             ArgumentNullException.ThrowIfNull(question);
+
             var videoTimeCodeAnswer = question.VideoTimeCodeAnswers.FirstOrDefault();
             var isCheck = videoTimeCodeAnswer?.Status == EnumAnswerStatus.Done;
             var questionModel = _mapper.Map<QuestionModel>(question);
+            questionModel.CorrectStatus = GetCorrectStatus(videoTimeCodeAnswer);
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
             if (videoTimeCodeAnswer != null)
             {
@@ -488,6 +489,19 @@ namespace Fsel.Course.Infrastructure.Common
                 questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
             }
             return questionModel;
+        }
+
+        private static EnumCorrectStatus? GetCorrectStatus(VideoTimeCodeAnswer? videoTimeCodeAnswer)
+        {
+            if (videoTimeCodeAnswer != null)
+            {
+                if (videoTimeCodeAnswer.Status != EnumAnswerStatus.Done && videoTimeCodeAnswer.IsCorrect.HasValue)
+                {
+                    return EnumCorrectStatus.Process;
+                }
+                return videoTimeCodeAnswer.IsCorrect.HasValue ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
+            }
+            return null;
         }
 
         private static EnumResultStatus GetTimeCodeStatus(VideoTimeCode? videoTimeCode)
@@ -570,7 +584,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var status = GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal);
                     x.Status = isDone ? EnumAnswerStatus.Done : status;
-                    x.IsCorrect = x.CorrectCount == x.Question!.CorrectTotal;
+                    x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == x.Question!.CorrectTotal : null;
                 });
                 _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);

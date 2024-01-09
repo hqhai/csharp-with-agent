@@ -2,6 +2,7 @@
 
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
@@ -14,7 +15,12 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
 
         public DateTime? EndDate { get; set; }
 
-        public string? ContentFilePath { get; set; }
+        private string? _contentFilePath;
+        public string? ContentFilePath
+        {
+            set { _contentFilePath = value; }
+            get { return _contentFilePath.AddS3BaseUrl(); }
+        }
 
         public bool IsGlobal { get; set; }
         public bool? IsActive { get; set; }
