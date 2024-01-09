@@ -49,19 +49,28 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                 return methodResult;
             }
             var studentId = studentsResult?.Content?.Result?.Id;
-            var unit = await _unitRepository.Queryable
-                            .Include(x => x.CourseUnitMockTests)
-                            .Include(x => x.UnitResults.Where(x => x.CourseId == request.CourseId && x.StudentId == studentId))
-                            .Where(x => x.CourseUnitMockTests.Select(x => x.CourseId).Contains(request.CourseId))
+            var unitModel = await _unitRepository.Queryable
+                            .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId))
+                            .Select(x => new UnitModel
+                            {
+                                Id = x.Id,
+                                Code = x.Code,
+                                Name = x.Name,
+                                CourseLevel = x.CourseLevel,
+                                DisplayOrder = x.CourseUnitMockTests.Max(x => x.DisplayOrder),
+                                CreatedDate = x.CreatedDate,
+                                UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.AsQueryable().Include(x => x.Unit).ThenInclude(x => x!.LessonResults.Where(x => x.StudentId == studentId))
+                                                                 .Include(x => x.Unit).ThenInclude(x => x!.UnitLessons)
+                                                                 .Where(y => y.StudentId == studentId && y.CourseId == request.CourseId)
+                                                                 .AsNoTracking().FirstOrDefault()),
+                            })
                             .FirstOrDefaultAsync(cancellationToken);
-            if (unit == null)
+            if (unitModel == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unitModel));
                 return methodResult;
             }
-            var unitDto = _mapper.Map<UnitModel>(unit);
-            unitDto.UnitResult = _mapper.Map<UnitResultModel>(unit.UnitResults.FirstOrDefault());
-            methodResult.Result = unitDto;
+            methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
