@@ -249,7 +249,7 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
-                    return (!_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || !_linQAnswerHelper.IsNullOrEmptyDataValueBool(dataAnswer, "IsChecked"));
+                    return (!_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || !_linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(MultipleChoiceAnswers.IsChecked), false));
 
                 case EnumQuestionType.Listing:
                     return _linQAnswerHelper.IsNullOrEmptyData(dataAnswer);
@@ -257,7 +257,7 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.DragAndDropPicture:
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
-                    return (!_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || _linQAnswerHelper.IsNullOrEmptyDataHasValue(dataAnswer, "ToId"));
+                    return (!_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(MatchingTypeAnswers.ToId)));
 
                 case EnumQuestionType.ShortAnswerWordBase:
                 case EnumQuestionType.ShortAnswerWordCount:
@@ -268,10 +268,10 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
                 case EnumQuestionType.DragAndDropSentenceOrder:
-                    return (!_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, "Answer"));
+                    return (!_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(GapFillAnswers.Answer)));
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
-                    return _linQAnswerHelper.IsNullOrEmptyDataHasValue(dataAnswer, nameof(MultipleOptionSentenceCompletionAnswers.AnswerId));
+                    return _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(MultipleOptionSentenceCompletionAnswers.AnswerId));
 
                 default:
                     return default;
@@ -285,7 +285,7 @@ namespace Fsel.Course.Infrastructure.Common
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Contents, EnumQuestionType.Multichoice, isSubmit, isMandatoryAnswer);
             if (dataQuestion?.Contents == null || dataAnswer?.Answers == null || (isMandatoryAnswer && isAnswerMissing))
             {
-                return (default, isAnswerMissing, _linQAnswerHelper.IsNullOrEmptyDataValueBool(dataAnswer?.Answers, nameof(MultipleChoiceAnswers.IsChecked)));
+                return (default, isAnswerMissing, _linQAnswerHelper.IsNullOrEmptyData(dataAnswer?.Answers, nameof(MultipleChoiceAnswers.IsChecked), false));
             }
             foreach (var item in dataAnswer.Answers)
             {
@@ -308,7 +308,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number > 0 ? number : default, isAnswerMissing, _linQAnswerHelper.IsNullOrEmptyDataValueBool(dataAnswer?.Answers, nameof(MultipleChoiceAnswers.IsChecked)));
+            return (number > 0 ? number : default, isAnswerMissing, _linQAnswerHelper.IsNullOrEmptyData(dataAnswer?.Answers, nameof(MultipleChoiceAnswers.IsChecked), false));
         }
 
         private (int, bool, bool) HandleListingAnswer(ref object? configAnswer, ListingAnswer? dataOldAnswer, ListingQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)

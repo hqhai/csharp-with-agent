@@ -11,28 +11,39 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class LinQAnswerHelper
     {
-        public bool IsNullOrEmptyData(object? data, string? nameProperty = default)
+        public bool IsNullOrEmptyData(object? data, string? nameProperty = default, bool isLoop = true)
         {
             if (data is IList list)
             {
                 var objects = list.Cast<object>().ToList();
                 if (objects != null && objects.Any())
                 {
-                    return objects.Any(x => string.IsNullOrEmpty(nameProperty) ? IsNullOrEmptyData(x) : IsNullOrEmptyData(x.GetPropValue(nameProperty)));
+                    if (isLoop)
+                    {
+                        return objects.Any(x => string.IsNullOrEmpty(nameProperty) ? IsNullOrEmptyData(x) : IsNullOrEmptyData(x.GetPropValue(nameProperty)));
+                    }
+                    else
+                    {
+                        return objects.Any(x => x.GetPropValue<bool>(nameProperty));
+                    }
                 }
                 return true;
             }
             return string.IsNullOrEmpty(data?.ToString());
         }
 
-        public bool IsNullOrEmptyDataHasValue(object? data, string? nameProperty)
+        public bool IsAnswerHaveData(object? data, string? nameProperty = default)
         {
-            if (data is IList list && !string.IsNullOrEmpty(nameProperty))
+            if (data is IList list)
             {
                 var objects = list.Cast<object>().ToList();
-                return objects.Any(x => IsNullOrEmptyDataHasValue(x.GetPropValue(nameProperty), nameProperty));
+                if (objects != null && objects.Any())
+                {
+                    return objects.Any(x => !string.IsNullOrEmpty(nameProperty) ? IsAnswerHaveData(x.GetPropValue(nameProperty)) : IsAnswerHaveData(x));
+                }
+                return false;
             }
-            return string.IsNullOrEmpty(data?.ToString());
+            return !string.IsNullOrEmpty(data?.ToString());
         }
 
         public bool CheckAnswerCount(object? answer, object? question)
@@ -42,19 +53,6 @@ namespace Fsel.Course.Infrastructure.Common
                 return listAnswer.Count == listQuestion.Count;
             }
             return true;
-        }
-
-        public bool IsNullOrEmptyDataValueBool(object? data, string? nameProperty)
-        {
-            if (data is IList list && !string.IsNullOrEmpty(nameProperty))
-            {
-                var objects = list.Cast<object>().ToList();
-                if (objects != null && objects.Any())
-                {
-                    return objects.Any(x => x.GetPropValue<bool>(nameProperty));
-                }
-            }
-            return string.IsNullOrEmpty(data?.ToString());
         }
 
         public bool? CheckAnswer(IList<string>? words, string? word, int index)
@@ -78,20 +76,6 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             return false;
-        }
-
-        public bool IsAnswerHaveData(object? data, string? nameProperty = default)
-        {
-            if (data is IList list)
-            {
-                var objects = list.Cast<object>().ToList();
-                if (objects != null && objects.Any())
-                {
-                    return objects.Any(x => !string.IsNullOrEmpty(nameProperty) ? IsAnswerHaveData(x.GetPropValue(nameProperty)) : IsAnswerHaveData(x));
-                }
-                return false;
-            }
-            return !string.IsNullOrEmpty(data?.ToString());
         }
 
         public bool IsShortAnswer(string? question, string? answer)
