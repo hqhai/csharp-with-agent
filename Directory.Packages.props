@@ -8,6 +8,7 @@
     <PackageReference Include="AWSSDK.S3" Version="3.7.103.51" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.5" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.0.2" />
+    <PackageReference Include="Fsel.Core" Version="1.2.22-rc.14" />
     <PackageReference Include="Google.Apis.Sheets.v4" Version="1.64.0.3148" />
     <PackageReference Include="Fsel.Core" Version="1.2.22-rc.13" />
   </ItemGroup>
