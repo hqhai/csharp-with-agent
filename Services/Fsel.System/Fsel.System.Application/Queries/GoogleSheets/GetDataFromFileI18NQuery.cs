@@ -44,9 +44,11 @@ namespace Fsel.System.Application.Queries.GoogleSheets
 
                 foreach (var dataItem in dataVN)
                 {
-                    if (!string.IsNullOrEmpty(dataItem[0].ToString()) && !string.IsNullOrEmpty(dataItem[1].ToString()))
+                    var key = dataItem.FirstOrDefault()?.ToString();
+                    var value = dataItem.LastOrDefault()?.ToString();
+                    if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
                     {
-                        i18n.AddLanguage("vn", dataItem[0].ToString()!, dataItem[1].ToString()!);
+                        i18n.AddLanguage("vn", key, value);
                     }
                 }
             }

@@ -119,7 +119,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                     return string.Empty;
                 }
 
-                return GenerateAwsFileUrl(_appSetting.StorageConfig.BucketName, _appSetting.StorageConfig.AwsS3BaseUrl, key) ?? string.Empty;
+                return GenerateAwsFileUrl(_appSetting.StorageConfig.AwsS3BaseUrl, _appSetting.StorageConfig.BucketName, key) ?? string.Empty;
             }
         }
 
@@ -181,9 +181,9 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return result;
         }
 
-        private static string? GenerateAwsFileUrl(string? bucketName, string? baseUrl, string? fileName)
+        private static string? GenerateAwsFileUrl(string? baseUrl, string? bucketName, string? fileName)
         {
-            var url = $"{bucketName}.{baseUrl}/{fileName}";
+            var url = $"{baseUrl}/{bucketName}/{fileName}";
             return PathHelper.AddScheme(url);
         }
 
@@ -318,7 +318,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 }
             }
 
-            return GenerateAwsFileUrl(_appSetting.StorageConfig!.BucketName, _appSetting.StorageConfig.AwsS3BaseUrl, folderName) ?? string.Empty;
+            return GenerateAwsFileUrl(_appSetting.StorageConfig!.AwsS3BaseUrl, _appSetting.StorageConfig!.BucketName, folderName) ?? string.Empty;
         }
 
         private async Task<MethodResult<string>> StartResolutions(string? inputPath)

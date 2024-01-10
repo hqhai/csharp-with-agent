@@ -35,20 +35,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
                 string message = dataReceipt.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, dataReceipt.ParamsMessage.ToArray()) : notificationType?.TemplateMessage!;
 
                 string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : notificationType?.TemplateLink!;
-                string? url;
-
-                if (dataReceipt.PlatformCode == EnumPlatformCode.LMS)
-                {
-                    url = _appSetting.ConstantUrl?.LmsWebsiteDomain?.CombineUrl(link);
-                }
-                else if (dataReceipt.PlatformCode == EnumPlatformCode.LCMS)
-                {
-                    url = _appSetting.ConstantUrl?.LcmsWebsiteDomain?.CombineUrl(link);
-                }
-                else
-                {
-                    url = _appSetting.ConstantUrl?.LmsAdminWebsiteDomain?.CombineUrl(link);
-                }
 
                 CreateNotificationCommand model = new CreateNotificationCommand()
                 {
@@ -57,7 +43,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     NotificationTypeId = notificationType?.Id ?? default,
                     SenderId = dataReceipt.SenderId,
                     Message = message,
-                    Link = url
+                    Link = link
                 };
                 await _mediator.Send(model).ConfigureAwait(false);
             }
