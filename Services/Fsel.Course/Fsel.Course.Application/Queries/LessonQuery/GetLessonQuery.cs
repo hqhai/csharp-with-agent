@@ -7,6 +7,7 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.LessonQuery
 {
@@ -19,11 +20,13 @@ namespace Fsel.Course.Application.Queries.LessonQuery
     {
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
+        private readonly IHomeWorkRepository _homeWorkRepository;
 
-        public GetLessonQueryHandler(IMapper mapper, ILessonRepository lessonRepository)
+        public GetLessonQueryHandler(IMapper mapper, ILessonRepository lessonRepository, IHomeWorkRepository homeWorkRepository)
         {
             _mapper = mapper;
             _lessonRepository = lessonRepository;
+            _homeWorkRepository = homeWorkRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(GetLessonQuery request, CancellationToken cancellationToken)
@@ -43,10 +46,13 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             var lessonModel = _mapper.Map<LessonModel>(lesson);
             lessonModel.Video = _mapper.Map<VideoModel>(video);
             lessonModel.VideoId = video?.Id;
-            lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.OrderBy(x => x!.CreatedDate).Select(x => x.HomeWork));
             lessonModel.ExtraPracticeIds = lesson.LessonExtraPractices.OrderBy(x => x!.CreatedDate).Select(x => x.ExtracPraticeId).ToList();
             lessonModel.ClassForum = _mapper.Map<ClassForumModel>(lesson.ClassForum);
             lessonModel.IsActive = lesson.UnitLessons.Any();
+            lessonModel.HomeWorks = await _homeWorkRepository.Queryable.Include(x => x.LessonHomeWorks).Where(x => x.LessonHomeWorks.Any(n => n.LessonId == lesson.Id))
+                .Select(x => _mapper.Map<HomeWorkModel>(x))
+                .ToListAsync(cancellationToken);
+
             methodResult.Result = lessonModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
