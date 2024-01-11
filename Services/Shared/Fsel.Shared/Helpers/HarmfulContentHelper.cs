@@ -24,11 +24,21 @@ namespace Fsel.Shared.Helpers
         }
 
         private static readonly Setting s_wordSetting = new Setting(2, 0, 0, 0);
-        private static readonly Setting s_imageSetting = new Setting(2, 2, 0, 0);
+        private static readonly Setting s_imageSetting = new Setting(2, 0, 0, 0);
 
-        public static bool CheckHarmfulContent(ICollection<CategoriesAnalysisModel>? categories, EnumHarmfulContentType contentType)
+        public static bool CheckHarmfulContentWords(ICollection<CategoriesAnalysisModel>? categories)
         {
-            var setting = contentType == EnumHarmfulContentType.Word ? s_wordSetting : s_imageSetting;
+            var setting = s_wordSetting;
+
+            return CheckCategory(categories, EnumHarmfulContent.Hate, setting.Hate)
+                || CheckCategory(categories, EnumHarmfulContent.Sexual, setting.Sexual)
+                || CheckCategory(categories, EnumHarmfulContent.SelfHarm, setting.SelfHarm)
+                || CheckCategory(categories, EnumHarmfulContent.Violence, setting.Violence);
+        }
+
+        public static bool CheckHarmfulContentImages(ICollection<CategoriesAnalysisModel>? categories)
+        {
+            var setting = s_imageSetting;
 
             return CheckCategory(categories, EnumHarmfulContent.Hate, setting.Hate)
                 || CheckCategory(categories, EnumHarmfulContent.Sexual, setting.Sexual)
