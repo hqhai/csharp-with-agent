@@ -5,6 +5,7 @@ using Fsel.Ordering.Application.Queues.Publishers;
 using Fsel.Ordering.Application.Services.CourseService;
 using Fsel.Ordering.Application.Services.SystemService;
 using Fsel.Ordering.Application.Services.TrainingService;
+using Fsel.Ordering.Application.Services.UrBoxService;
 using Fsel.Ordering.Application.Services.UserService;
 using Fsel.Ordering.Domain.IRepositories;
 using Fsel.Ordering.Infrastructure;
@@ -30,6 +31,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
+builder.Services.AddScoped<IUrBoxTransactionRepository, UrBoxTransactionRepository>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<VnPayLibrary>();
 
@@ -37,6 +39,7 @@ builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
+builder.AddRefitClients(typeof(IUrBoxService), appSetting?.Services?.UrBoxApiUrl);
 builder.AddMassTransit(appSetting);
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>

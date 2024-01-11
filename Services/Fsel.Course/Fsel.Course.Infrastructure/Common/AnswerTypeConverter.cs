@@ -316,7 +316,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return (default, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers));
             }
 
-            if (dataAnswer.Answers.Where(x => !string.IsNullOrEmpty(x)).Count() >= dataQuestion?.ExactWordCount)
+            if (dataAnswer.Answers.Where(x => !string.IsNullOrEmpty(x.Trim())).Count() >= dataQuestion?.ExactWordCount)
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -375,8 +375,8 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return (default, isAnswerMissing, string.IsNullOrEmpty(dataAnswer?.Answers));
             }
-            var answerStrs = dataAnswer.Answers.Trim().Split(' ');
-            if (answerStrs != null && answerStrs.Length >= dataQuestion?.ExactWordCount)
+            var exactWordCount = Shared.Helpers.StringHelper.CountWords(dataAnswer.Answers);
+            if (exactWordCount >= dataQuestion?.ExactWordCount)
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -590,10 +590,10 @@ namespace Fsel.Course.Infrastructure.Common
             return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(MultipleOptionSentenceCompletionAnswers.AnswerId)));
         }
 
-        private static bool IsShortAnswer(string question, string answer)
+        private static bool IsShortAnswer(string? question, string? answer)
         {
-            string q = " " + question.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
-            string a = " " + answer.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            string q = " " + question?.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            string a = " " + answer?.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
             return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
 

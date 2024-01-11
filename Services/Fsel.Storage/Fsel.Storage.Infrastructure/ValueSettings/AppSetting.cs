@@ -6,7 +6,7 @@ namespace Fsel.Storage.Infrastructure.ValueSettings
 
     public class AppSetting : BaseAppSetting
     {
-        public StorageConfig? StorageConfig { get; set; }
+        public new StorageConfig? StorageConfig { get; set; }
     }
 
     public class StorageFolder

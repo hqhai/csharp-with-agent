@@ -2,8 +2,9 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Helpers;
+    using StringHelper = Shared.Helpers.StringHelper;
 
     public class SectionModel : BaseModel
     {
@@ -11,12 +12,22 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? MediaPost { get; set; }
         public string? MediaPostContent => StringHelper.ProcessHtml(MediaPost, false);
 
-        public IEnumerable<string>? AudioPaths => StringHelper.GetIframeUrls(MediaPost, true);
+        public IEnumerable<string>? AudioPaths => StringHelper.GetIframeUrls(MediaPost, true).AddS3BaseUrls();
 
-        public IEnumerable<string>? VideoPaths => StringHelper.GetIframeUrls(MediaPost, false);
+        public IEnumerable<string>? VideoPaths => StringHelper.GetIframeUrls(MediaPost, false).AddS3BaseUrls();
         public int TargetWord { get; set; }
-        public string? VideoFilePath { get; set; }
-        public string? SubFilePath { get; set; }
+        private string? _videoFilePath;
+        public string? VideoFilePath
+        {
+            set { _videoFilePath = value; }
+            get { return _videoFilePath.AddS3BaseUrl(); }
+        }
+        private string? _subFilePath;
+        public string? SubFilePath
+        {
+            set { _subFilePath = value; }
+            get { return _subFilePath.AddS3BaseUrl(); }
+        }
         public int DisplayOrder { get; set; }
         public IList<SectionPartModel>? SectionParts { get; set; }
         public IList<SectionQuestionModel>? SectionQuestions { get; set; }

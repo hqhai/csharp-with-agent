@@ -24,7 +24,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class SendOtpProfileCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
-
         public string? PhoneNumber { get; set; }
     }
 
@@ -55,7 +54,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 if (!request.Email.IsValidEmail())
                 {
-                    methodResult.AddError(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                     return methodResult;
                 }
                 user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);
@@ -70,7 +69,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 if (!request.PhoneNumber.IsValidPhoneNumber())
                 {
-                    methodResult.AddError(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
                     return methodResult;
                 }
                 user = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber && x.Id != _authContext.CurrentUserId, cancellationToken: cancellationToken);

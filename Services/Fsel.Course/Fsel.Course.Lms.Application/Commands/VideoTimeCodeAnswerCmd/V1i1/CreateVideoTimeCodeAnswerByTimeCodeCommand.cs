@@ -310,11 +310,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             }
         }
 
-        private static VideoTimeCodeResult? GetVideoTimeCodeResult(VideoResult videoResult, Guid videoTimeCodeId)
-        {
-            return videoResult.VideoTimeCodeResults.FirstOrDefault(x => x.VideoTimeCodeId == videoTimeCodeId && x.VideoResultId == videoResult.Id);
-        }
-
         private static EnumAnswerStatus GetAnswerStatus(bool isSubmit, int correctCount, int correctTotal)
         {
             if (correctCount == correctTotal && isSubmit)
@@ -403,7 +398,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 workingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
             }
-            return videoTimeCode.ExecutionTime == default || (workingTime < videoTimeCode.ExecutionTime && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone);
+            return videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone && (videoTimeCode.ExecutionTime == default || workingTime < videoTimeCode.ExecutionTime);
         }
 
         private async Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
