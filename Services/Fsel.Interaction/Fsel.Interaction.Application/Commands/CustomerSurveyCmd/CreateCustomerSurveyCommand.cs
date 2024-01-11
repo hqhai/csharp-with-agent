@@ -93,11 +93,11 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 await _customerSurveyRepository.AddList(customerSurveys);
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var student = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
-                var studentName = student.Content?.Result?.Human?.FullName;
+                var parentName = request.Answers.Where(x => x.Id == Guid.Parse("ee0e74f5-83ae-44dd-a7d0-0f7b650884f8")).FirstOrDefault();
+
                 var paramSurvey = new SendSurveyTemplateModel
                 {
-                    UserName = studentName
+                    UserName = parentName?.Answer?.ToString()
                 };
 
                 var subjectSurvey = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendSurveyResultSubject);
