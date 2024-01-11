@@ -17,7 +17,6 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class CreateCustomerSurveyCommand : CreateCustomerSurveyCommandModel, IRequest<MethodResult<IList<CustomerSurveyModel>>>
     {
@@ -94,13 +93,11 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 await _customerSurveyRepository.AddList(customerSurveys);
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var parentName = await _customerSurveyRepository.Queryable
-                            .Where(x => x.SurveyQuestionId == Guid.Parse("ee0e74f5-83ae-44dd-a7d0-0f7b650884f8") && x.UserId == request.UserId)
-                            .FirstOrDefaultAsync(cancellationToken);
+                var parentName = request.Answers.Where(x => x.Id == Guid.Parse("ee0e74f5-83ae-44dd-a7d0-0f7b650884f8")).FirstOrDefault();
 
                 var paramSurvey = new SendSurveyTemplateModel
                 {
-                    UserName = parentName?.AnswerStr
+                    UserName = parentName?.Answer?.ToString()
                 };
 
                 var subjectSurvey = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendSurveyResultSubject);
