@@ -159,18 +159,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     return methodResult;
                                 }
                                 await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);
-
-                                if (!string.IsNullOrEmpty(request.ReferralCode))
+                            }
+                            if (!string.IsNullOrEmpty(request.ReferralCode))
+                            {
+                                var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
+                                if (!updateReferralCodeResult.IsOK)
                                 {
-                                    var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = user.Id }, cancellationToken).ConfigureAwait(false);
-                                    if (!updateReferralCodeResult.IsOK)
-                                    {
-                                        methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
-                                        return methodResult;
-                                    }
-                                    // làm nhiệm vụ
-                                    // await DoQuestBoard(request.ReferralCode, cancellationToken);
+                                    methodResult.AddErrorBadRequest(updateReferralCodeResult.ErrorMessages);
+                                    return methodResult;
                                 }
+                                // làm nhiệm vụ
+                                // await DoQuestBoard(request.ReferralCode, cancellationToken);
                             }
 
                             #region Send Code OTP
