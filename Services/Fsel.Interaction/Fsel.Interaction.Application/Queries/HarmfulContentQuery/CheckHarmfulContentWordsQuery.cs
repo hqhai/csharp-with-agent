@@ -62,7 +62,7 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
 
                 var harmfulContent = checkHarmfulContentResult.Content?.CategoriesAnalysis?.ToList();
 
-                isHarmfulContent = HarmfulContentHelper.CheckHarmfulContentWords(harmfulContent);
+                isHarmfulContent = HarmfulContentHelper.CheckHarmfulWords(harmfulContent);
             }
             catch
             {

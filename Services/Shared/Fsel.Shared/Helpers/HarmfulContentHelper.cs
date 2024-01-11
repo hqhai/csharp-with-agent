@@ -7,49 +7,35 @@ namespace Fsel.Shared.Helpers
 
     public static class HarmfulContentHelper
     {
-        private class Setting
+        private static Dictionary<EnumHarmfulContent, int> s_wordSetting = new Dictionary<EnumHarmfulContent, int>()
         {
-            public int Hate { get; }
-            public int Sexual { get; }
-            public int SelfHarm { get; }
-            public int Violence { get; }
+            { EnumHarmfulContent.Hate, 2 },
+            { EnumHarmfulContent.Sexual, 0 },
+            { EnumHarmfulContent.SelfHarm, 0 },
+            { EnumHarmfulContent.Violence, 0 }
+        };
 
-            public Setting(int hate, int sexual, int selfHarm, int violence)
-            {
-                Hate = hate;
-                Sexual = sexual;
-                SelfHarm = selfHarm;
-                Violence = violence;
-            }
+        private static Dictionary<EnumHarmfulContent, int> s_imageSetting = new Dictionary<EnumHarmfulContent, int>()
+        {
+            { EnumHarmfulContent.Hate, 2 },
+            { EnumHarmfulContent.Sexual, 2 },
+            { EnumHarmfulContent.SelfHarm, 0 },
+            { EnumHarmfulContent.Violence, 0 }
+        };
+
+        public static bool CheckHarmfulWords(ICollection<CategoriesAnalysisModel>? categories)
+        {
+            return CheckHarmfulContents(categories, s_wordSetting);
         }
 
-        private static readonly Setting s_wordSetting = new Setting(2, 0, 0, 0);
-        private static readonly Setting s_imageSetting = new Setting(2, 0, 0, 0);
-
-        public static bool CheckHarmfulContentWords(ICollection<CategoriesAnalysisModel>? categories)
+        public static bool CheckHarmfulImages(ICollection<CategoriesAnalysisModel>? categories)
         {
-            var setting = s_wordSetting;
-
-            return CheckCategory(categories, EnumHarmfulContent.Hate, setting.Hate)
-                || CheckCategory(categories, EnumHarmfulContent.Sexual, setting.Sexual)
-                || CheckCategory(categories, EnumHarmfulContent.SelfHarm, setting.SelfHarm)
-                || CheckCategory(categories, EnumHarmfulContent.Violence, setting.Violence);
+            return CheckHarmfulContents(categories, s_imageSetting);
         }
 
-        public static bool CheckHarmfulContentImages(ICollection<CategoriesAnalysisModel>? categories)
+        private static bool CheckHarmfulContents(ICollection<CategoriesAnalysisModel>? categories, Dictionary<EnumHarmfulContent, int> harmfulSetting)
         {
-            var setting = s_imageSetting;
-
-            return CheckCategory(categories, EnumHarmfulContent.Hate, setting.Hate)
-                || CheckCategory(categories, EnumHarmfulContent.Sexual, setting.Sexual)
-                || CheckCategory(categories, EnumHarmfulContent.SelfHarm, setting.SelfHarm)
-                || CheckCategory(categories, EnumHarmfulContent.Violence, setting.Violence);
-        }
-
-        private static bool CheckCategory(ICollection<CategoriesAnalysisModel>? categories, EnumHarmfulContent harmfulContent, int settingValue)
-        {
-            var category = categories?.FirstOrDefault(p => p.Category == harmfulContent.ToString());
-            return category != null && category.Severity > settingValue;
+            return categories?.Any(p => p.Severity > harmfulSetting.FirstOrDefault(x => x.Key.ToString() == p.Category).Value) ?? default;
         }
     }
 }
