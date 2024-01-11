@@ -7,50 +7,39 @@ namespace Fsel.Shared.Helpers
 
     public static class HarmfulContentHelper
     {
-        private class WordSetting
+        private class Setting
         {
-            public const int Hate = 2;
-            public const int Sexual = 0;
-            public const int SelfHarm = 0;
-            public const int Violence = 0;
+            public int Hate { get; }
+            public int Sexual { get; }
+            public int SelfHarm { get; }
+            public int Violence { get; }
+
+            public Setting(int hate, int sexual, int selfHarm, int violence)
+            {
+                Hate = hate;
+                Sexual = sexual;
+                SelfHarm = selfHarm;
+                Violence = violence;
+            }
         }
 
-        private class ImageSetting
-        {
-            public const int Hate = 2;
-            public const int Sexual = 2;
-            public const int SelfHarm = 0;
-            public const int Violence = 0;
-        }
+        private static readonly Setting s_wordSetting = new Setting(2, 0, 0, 0);
+        private static readonly Setting s_imageSetting = new Setting(2, 2, 0, 0);
 
         public static bool CheckHarmfulContent(ICollection<CategoriesAnalysisModel>? categories, EnumHarmfulContentType contentType)
         {
-            int settingHate = contentType == EnumHarmfulContentType.Word ? WordSetting.Hate : ImageSetting.Hate;
-            int settingSexual = contentType == EnumHarmfulContentType.Word ? WordSetting.Sexual : ImageSetting.Sexual;
-            int settingSelfHarm = contentType == EnumHarmfulContentType.Word ? WordSetting.SelfHarm : ImageSetting.SelfHarm;
-            int settingViolence = contentType == EnumHarmfulContentType.Word ? WordSetting.Violence : ImageSetting.Violence;
+            var setting = contentType == EnumHarmfulContentType.Word ? s_wordSetting : s_imageSetting;
 
-            var hate = categories?.FirstOrDefault(p => p.Category == EnumHarmfulContent.Hate.ToString());
-            if (hate != null && hate.Severity > settingHate)
-            {
-                return true;
-            }
-            var sexual = categories?.FirstOrDefault(p => p.Category == EnumHarmfulContent.Sexual.ToString());
-            if (sexual != null && sexual.Severity > settingSexual)
-            {
-                return true;
-            }
-            var selfHarm = categories?.FirstOrDefault(p => p.Category == EnumHarmfulContent.SelfHarm.ToString());
-            if (selfHarm != null && selfHarm.Severity > settingSelfHarm)
-            {
-                return true;
-            }
-            var violence = categories?.FirstOrDefault(p => p.Category == EnumHarmfulContent.Violence.ToString());
-            if (violence != null && violence.Severity > settingViolence)
-            {
-                return true;
-            }
-            return false;
+            return CheckCategory(categories, EnumHarmfulContent.Hate, setting.Hate)
+                || CheckCategory(categories, EnumHarmfulContent.Sexual, setting.Sexual)
+                || CheckCategory(categories, EnumHarmfulContent.SelfHarm, setting.SelfHarm)
+                || CheckCategory(categories, EnumHarmfulContent.Violence, setting.Violence);
+        }
+
+        private static bool CheckCategory(ICollection<CategoriesAnalysisModel>? categories, EnumHarmfulContent harmfulContent, int settingValue)
+        {
+            var category = categories?.FirstOrDefault(p => p.Category == harmfulContent.ToString());
+            return category != null && category.Severity > settingValue;
         }
     }
 }
