@@ -54,7 +54,7 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
                     OutputType = HarmfulSetting.OutputType
                 }, _appSetting.HarmfulContentConfig?.Version);
 
-                if (checkHarmfulContentResult.StatusCode != HttpStatusCode.OK)
+                if (!checkHarmfulContentResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                     return methodResult;

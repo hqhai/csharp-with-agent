@@ -48,7 +48,7 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
                 var checkHarmfulContentResult = await _harmfulContentService.CheckHarmfulContentImage(new CheckHarmfulContentImagesModel() { Images = new ImageModel { FilePath = request.FilePath } }
                 , _appSetting.HarmfulContentConfig?.Version);
 
-                if (checkHarmfulContentResult.StatusCode != HttpStatusCode.OK)
+                if (!checkHarmfulContentResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                     return methodResult;
