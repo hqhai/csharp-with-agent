@@ -2,6 +2,7 @@
 
 using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
@@ -97,6 +98,8 @@ builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository
 builder.Services.AddScoped<IMockTestScoreRepository, MockTestScoreRepository>();
 builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRandomRepository>();
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
+builder.Services.AddScoped<IAutoGradeSettingRepository, AutoGradeSettingRepository>();
+
 builder.Services.AddScoped<QuestBoardPublisher>();
 
 // Converter
