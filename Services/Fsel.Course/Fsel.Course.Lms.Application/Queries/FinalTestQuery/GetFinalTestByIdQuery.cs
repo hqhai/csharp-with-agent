@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -81,7 +82,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             var sectionGroups = finalTest.FinalTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             finalTestDetail.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(sectionGroups);
             finalTestDetail.FinalTestResult = _mapper.Map<FinalTestResultModel>(finalTestResult);
-            finalTestDetail.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, finalTestDetail.FinalTestResult.Id, "FinalTestResultId");
+            finalTestDetail.FinalTestResult.ProgressPercent = NumberHelper.GetPercent(sectionGroups.SelectMany(x => x.SectionGroupResults).Count(x => x.Status == EnumResultStatus.Done), sectionGroups.Count);
+            finalTestDetail.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, finalTestDetail.FinalTestResult.Id, nameof(SectionGroupResult.FinalTestResultId));
             return finalTestDetail;
         }
     }

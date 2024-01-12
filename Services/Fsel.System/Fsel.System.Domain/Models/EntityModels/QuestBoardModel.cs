@@ -2,6 +2,7 @@
 
 namespace Fsel.System.Domain.Models.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -9,7 +10,12 @@ namespace Fsel.System.Domain.Models.EntityModels
     {
         public string? Name { get; set; }
         public string? Description { get; set; }
-        public string? ImagePath { get; set; }
+        private string? _imagePath;
+        public string? ImagePath
+        {
+            set { _imagePath = value; }
+            get { return _imagePath.AddS3BaseUrl(); }
+        }
         public EnumQuestBoardType Type { get; set; }
         public EnumQuestBoardCategory Category { get; set; }
         public DateTime StartDate { get; set; }
