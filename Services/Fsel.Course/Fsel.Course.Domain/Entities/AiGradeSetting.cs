@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
 
-    public class AutoGradeSetting : Entity
+    public class AiGradeSetting : Entity
     {
         public string? SystemRoleAlConfig { get; set; }
         public string? UserAlConfig { get; set; }

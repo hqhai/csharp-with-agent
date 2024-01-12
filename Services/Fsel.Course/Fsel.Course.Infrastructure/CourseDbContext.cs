@@ -79,6 +79,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumFile> ClassForumFiles { get; set; }
         public DbSet<StudentFeedback> StudentFeedbacks { get; set; }
         public DbSet<ClassForumResultRandom> ClassForumResultRandoms { get; set; }
+        public DbSet<AiGradeSetting> AiGradeSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -145,6 +146,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ClassForumResultFileEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentFeedbackEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumResultRandomEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new AiGradeSettingTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

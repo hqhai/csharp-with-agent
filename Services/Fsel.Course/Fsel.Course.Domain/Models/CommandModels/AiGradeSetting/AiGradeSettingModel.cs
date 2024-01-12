@@ -3,7 +3,7 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.AutoGradeSetting
 {
-    public class AutoGradeSettingModel
+    public class AiGradeSettingModel
     {
         public string? SystemRoleAlConfig { get; set; }
 

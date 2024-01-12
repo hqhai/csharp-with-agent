@@ -3,15 +3,13 @@
 namespace Fsel.Course.Infrastructure.Configs
 {
     using System;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class AutoGradeSettingTypeConfiguration : IEntityTypeConfiguration<AutoGradeSetting>
+    public class AiGradeSettingTypeConfiguration : IEntityTypeConfiguration<AiGradeSetting>
     {
-        public void Configure(EntityTypeBuilder<AutoGradeSetting> builder)
+        public void Configure(EntityTypeBuilder<AiGradeSetting> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
         }

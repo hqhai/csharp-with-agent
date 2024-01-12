@@ -98,9 +98,10 @@ builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository
 builder.Services.AddScoped<IMockTestScoreRepository, MockTestScoreRepository>();
 builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRandomRepository>();
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
-builder.Services.AddScoped<IAutoGradeSettingRepository, AutoGradeSettingRepository>();
+builder.Services.AddScoped<IAiGradeSettingRepository, AiGradeSettingRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -130,6 +131,7 @@ builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<GetTimeToCompleteTestPublisher>();
 builder.Services.AddScoped<SubmitAIResponsePublisher>();
 builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
+builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -155,7 +157,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.CompleteTestWhenTimeOut, typeof(CompleteTestWhenTimeOutConsumer) },
     { QueueSettings.LmsQueue.NameQueue.UpdateTeacherGradingInClassForumAndMockTest, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DeleteClassForumByFlag, typeof(DeleteClassForumByFlagConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.ClassForumAIResponse, typeof(RealTimeAIResponseConsumer) }
+    { QueueSettings.LmsQueue.NameQueue.ClassForumAIResponse, typeof(RealTimeAIResponseConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.MockTestAnwserResponse, typeof(AiFeedBackResponseConsumer) },
 });
 
 var app = builder.Build();

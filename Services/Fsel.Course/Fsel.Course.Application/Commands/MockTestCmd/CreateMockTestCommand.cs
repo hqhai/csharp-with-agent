@@ -73,6 +73,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 {
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
 
+
                     //if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
                     //{
                     //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
@@ -106,6 +107,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             {
                 mockTest = _mockTestRepository.Add(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                // custom config AI MockTest
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<MockTestModel>(mockTest);

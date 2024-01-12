@@ -14,4 +14,13 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
 
 
     }
+
+    public class MockTestAnswerResponseModel : SubmitAICommandModel
+    {
+        public Guid SectionId { get; set; }
+
+        public string? WordContent { get; set; }
+
+        public bool? IsRetry { get; set; } = false;
+    }
 }
