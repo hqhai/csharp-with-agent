@@ -10,17 +10,12 @@ namespace Fsel.Shared.Helpers
         private static Dictionary<EnumHarmfulContent, int> s_wordSetting = new Dictionary<EnumHarmfulContent, int>()
         {
             { EnumHarmfulContent.Hate, 2 },
-            { EnumHarmfulContent.Sexual, 0 },
-            { EnumHarmfulContent.SelfHarm, 0 },
-            { EnumHarmfulContent.Violence, 0 }
         };
 
         private static Dictionary<EnumHarmfulContent, int> s_imageSetting = new Dictionary<EnumHarmfulContent, int>()
         {
             { EnumHarmfulContent.Hate, 2 },
             { EnumHarmfulContent.Sexual, 2 },
-            { EnumHarmfulContent.SelfHarm, 0 },
-            { EnumHarmfulContent.Violence, 0 }
         };
 
         public static bool CheckHarmfulWords(ICollection<CategoriesAnalysisModel>? categories)
@@ -35,7 +30,7 @@ namespace Fsel.Shared.Helpers
 
         private static bool CheckHarmfulContents(ICollection<CategoriesAnalysisModel>? categories, Dictionary<EnumHarmfulContent, int> harmfulSetting)
         {
-            return categories?.Any(p => p.Severity > harmfulSetting.FirstOrDefault(x => x.Key.ToString() == p.Category).Value) ?? default;
+            return categories?.Any(p => p.Severity > (harmfulSetting.Any(x => x.Key.ToString() == p.Category) ? harmfulSetting.FirstOrDefault(x => x.Key.ToString() == p.Category).Value : default)) ?? default;
         }
     }
 }
