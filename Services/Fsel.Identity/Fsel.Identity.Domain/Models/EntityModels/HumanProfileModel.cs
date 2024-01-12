@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using System;
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Enums;
 
     public class HumanProfileModel
@@ -15,7 +16,13 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Address { get; set; }
         public EnumGender? Gender { get; set; }
         public string? Email { get; set; }
-        public string? AvatarPath { get; set; }
+
+        private string? _avatarPath;
+        public string? AvatarPath
+        {
+            set { _avatarPath = value; }
+            get { return _avatarPath.AddS3BaseUrl(); }
+        }
         public string? Role { get; set; }
         public Guid? UserId { get; set; }
     }
