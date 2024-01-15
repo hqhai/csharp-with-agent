@@ -42,17 +42,14 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             }
 
             var video = lesson.LessonVideos.Select(x => x.Video).FirstOrDefault();
-
+            var homeWorks = await _homeWorkRepository.Queryable.Include(x => x.LessonHomeWorks.Where(n => n.LessonId == lesson.Id)).Where(x => x.LessonHomeWorks.Any(n => n.LessonId == lesson.Id)).ToListAsync(cancellationToken);
             var lessonModel = _mapper.Map<LessonModel>(lesson);
             lessonModel.Video = _mapper.Map<VideoModel>(video);
             lessonModel.VideoId = video?.Id;
             lessonModel.ExtraPracticeIds = lesson.LessonExtraPractices.OrderBy(x => x!.CreatedDate).Select(x => x.ExtracPraticeId).ToList();
             lessonModel.ClassForum = _mapper.Map<ClassForumModel>(lesson.ClassForum);
             lessonModel.IsActive = lesson.UnitLessons.Any();
-            lessonModel.HomeWorks = await _homeWorkRepository.Queryable.Include(x => x.LessonHomeWorks).Where(x => x.LessonHomeWorks.Any(n => n.LessonId == lesson.Id))
-                .Select(x => _mapper.Map<HomeWorkModel>(x))
-                .ToListAsync(cancellationToken);
-
+            lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(homeWorks.OrderBy(x => x.LessonHomeWorks.Select(x => x.CreatedDate).FirstOrDefault()));
             methodResult.Result = lessonModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
