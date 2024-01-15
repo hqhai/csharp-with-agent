@@ -79,9 +79,14 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 sectionQuestions = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionQuestions).ToList();
                 questions = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionQuestions).Select(x => x.Question ?? new Question()).ToList();
             }
+            placementTest.PlacementTestSections.Clear();
 
             _mapper.Map(request, placementTest);
-            placementTest.PlacementTestSections.Clear();
+            if (!placementTest.IsValid())
+            {
+                methodResult.AddErrorBadRequest(placementTest.ErrorMessages);
+                return methodResult;
+            }
 
             foreach (var sectionGroup in request.SectionGroups)
             {
@@ -91,25 +96,18 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     return methodResult;
                 }
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                if (!newSectionGroup.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                    return methodResult;
+                }
                 var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
                 if (!method.IsOK)
                 {
                     methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
                 }
                 placementTest.PlacementTestSections.Add(new PlacementTestSection { SectionGroup = newSectionGroup });
-                if (!newSectionGroup.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
-                }
-            }
-            if (!placementTest.IsValid())
-            {
-                methodResult.AddErrorBadRequest(placementTest.ErrorMessages);
-                return methodResult;
-            }
-            else if (!methodResult.IsOK)
-            {
-                return methodResult;
             }
 
             #endregion Validation
