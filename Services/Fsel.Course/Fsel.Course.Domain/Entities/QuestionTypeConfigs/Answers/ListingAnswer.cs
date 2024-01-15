@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class ListingAnswer
     {
-        public IList<string>? Answers { get; set; }
+        public IList<string> Answers { get; set; } = new List<string>();
         public bool? IsExact { get; set; }
 
         public EnumCorrectStatus Status

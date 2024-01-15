@@ -564,7 +564,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 videoTimeCodeAnswers = questions.Select(x => new VideoTimeCodeAnswer
                 {
-                    Answer = null,
+                    Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
                     QuestionId = x.Id,
                     VideoResultId = videoTimeCodeResult.VideoResultId,
                     VideoTimeCodeResultId = videoTimeCodeResult.Id,
