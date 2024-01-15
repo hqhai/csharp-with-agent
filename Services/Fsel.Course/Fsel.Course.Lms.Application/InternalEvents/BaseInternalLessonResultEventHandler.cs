@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
             var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done);
-            var isClassForumDone = lessonResult.ClassForumResults.Any(x => (x.Status == EnumClassForumResultStatus.Pending));
+            var isClassForumDone = lessonResult.ClassForumResults.Any(x => (x.Status != EnumClassForumResultStatus.Draft));
             if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
             {
                 //làm nhiệm vụ
