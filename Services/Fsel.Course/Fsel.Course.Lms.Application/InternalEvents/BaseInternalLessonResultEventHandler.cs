@@ -30,20 +30,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             _lessonResultRepository = lessonResultRepository;
             _questBoardPublisher = questBoardPublisher;
-
         }
 
         public async Task UpdateLessonResultAsync(LessonResult? lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
             var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done);
-            var isClassForumDone = lessonResult.ClassForumResults.Any(x => (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
+            var isClassForumDone = lessonResult.ClassForumResults.Any(x => (x.Status != EnumClassForumResultStatus.Draft));
             if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
             {
                 //làm nhiệm vụ
                 var courseId = lessonResult.CourseId;
                 var userId = lessonResult.CreatedUserId;
-               // await DoQuestBoard(userId, courseId, cancellationToken);
+                // await DoQuestBoard(userId, courseId, cancellationToken);
 
                 lessonResult.Status = EnumResultStatus.Done;
                 await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
@@ -148,7 +147,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return (default, default, default, null);
             }
         }
-
 
         public async Task DoQuestBoard(Guid userId, Guid courseId, CancellationToken cancellationToken)
         {
