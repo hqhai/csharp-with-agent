@@ -52,19 +52,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
-            methodResult.Result = await GetMockTestReport(mockTestResult);
+            methodResult.Result = _mapper.Map<MockTestResultReportModel>(mockTestResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private async Task<MockTestResultReportModel> GetMockTestReport(MockTestResult mockTestResult)
-        {
-            var query = _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id);
-            var mockTestResultDto = _mapper.Map<MockTestResultReportModel>(mockTestResult);
-            mockTestResultDto.CorrectQuestion = await query.Where(x => x.IsCorrect == true).CountAsync();
-            mockTestResultDto.TotalQuestion = await query.CountAsync();
-            mockTestResultDto.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult);
-            return mockTestResultDto;
         }
     }
 }

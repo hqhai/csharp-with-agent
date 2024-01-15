@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             return videoResult;
         }
 
-        private static SkillScores GetSkillScore(IGrouping<EnumCourseSkill, SkillScores>? x)
+        private static SkillScores GetSkillScore(IGrouping<EnumCourseSkill, SkillScores> x)
         {
             SkillScores skillScores = new SkillScores();
             skillScores.Skill = x.Key;
