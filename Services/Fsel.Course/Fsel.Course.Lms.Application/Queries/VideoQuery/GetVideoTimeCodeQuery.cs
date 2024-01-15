@@ -68,8 +68,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             }
 
             var video = await _videoRepository.Queryable.Include(i => i.VideoTimeCodes)
-                                .ThenInclude(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
-                                .Include(i => i.VideoTimeCodes)
                                 .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
@@ -81,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
             var videoModel = _mapper.Map<VideoModel>(video);
-            videoModel.VideoTimeCodes = _videoConverter.GetTimeCodes(video, videoResult.Id);
+            videoModel.VideoTimeCodes = _videoConverter.GetTimeCodes(video, videoResult);
             videoModel.VideoResult = _mapper.Map<VideoResultModel>(videoResult);
             methodResult.Result = videoModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

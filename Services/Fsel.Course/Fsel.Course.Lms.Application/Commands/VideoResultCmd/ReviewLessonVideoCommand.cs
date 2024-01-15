@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
-            var videoTimeCodeResults = video.VideoTimeCodes.Select(x => x.VideoTimeCodeResults).ToList();
+            var videoTimeCodeResults = video.VideoTimeCodes.Where(x => x.VideoTimeCodeResults.Any()).Select(x => x.VideoTimeCodeResults).ToList();
             if (videoTimeCodeResults.Count != video.VideoTimeCodes.Count)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNotCompleted), nameof(videoTimeCodeResults));
