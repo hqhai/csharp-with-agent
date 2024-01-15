@@ -18,7 +18,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class UpdateMockTestCommand : UpdateMockTestCommandModel, IRequest<MethodResult<MockTestModel>>
     {
@@ -52,12 +51,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
                 return methodResult;
             }
-            if (await _mockTestRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name));
-                return methodResult;
-            }
-
+            request.SectionGroups = request.SectionGroups.OrderBy(obj => obj.CourseSkill).ToList();
             var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.Id);
             if (mockTest == null)
             {
@@ -75,39 +69,34 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             var sectionQuestions = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).ToList();
             var questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
 
-            _mapper.Map(request, mockTest);
             mockTest.MockTestSections.Clear();
-
-            foreach (var sectionGroup in request.SectionGroups)
-            {
-                //if (sectionGroup == null)
-                //{
-                //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
-                //    return methodResult;
-                //}
-                if (sectionGroup != null)
-                {
-                    var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
-                    if (!method.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(method.ErrorMessages);
-                    }
-                    mockTest.MockTestSections.Add(new MockTestSection { SectionGroup = newSectionGroup });
-                    if (!newSectionGroup.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
-                    }
-                }
-            }
+            _mapper.Map(request, mockTest);
             if (!mockTest.IsValid())
             {
                 methodResult.AddErrorBadRequest(mockTest.ErrorMessages);
                 return methodResult;
             }
-            else if (!methodResult.IsOK)
+
+            foreach (var sectionGroup in request.SectionGroups)
             {
-                return methodResult;
+                if (sectionGroup == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                    return methodResult;
+                }
+                var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                if (!newSectionGroup.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                    return methodResult;
+                }
+                var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
+                if (!method.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
+                }
+                mockTest.MockTestSections.Add(new MockTestSection { SectionGroup = newSectionGroup });
             }
 
             #endregion Validation

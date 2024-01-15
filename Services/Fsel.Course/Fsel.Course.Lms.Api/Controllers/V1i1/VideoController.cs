@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -28,7 +29,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// Create video time code answer
         /// </summary>
         [HttpPost("create-video-time-code-answer")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreateVideoTimeCodeAnswerByTimeCodeCommand query)
         {
