@@ -83,5 +83,27 @@ namespace Fsel.Interaction.Domain.Entities
         public SupportCategory? SupportCategory { get; set; }
 
         public SupportQuestion? SupportQuestion { get; set; }
+
+        /// <summary>
+        /// Thời gian còn lại
+        /// </summary>
+        [NotMapped]
+        public double TimeRemaining
+        {
+            get
+            {
+                if (!UpdatedDate.HasValue && Status == EnumSupportTicketStatus.NotSeen)
+                {
+                    var time = (CreatedDate.AddDays(2) - DateTime.UtcNow).TotalSeconds;
+                    return time > 0 ? time : default;
+                }
+                if (UpdatedDate.HasValue && Status != EnumSupportTicketStatus.Solved)
+                {
+                    var time = (UpdatedDate.Value.AddDays(2) - DateTime.UtcNow).TotalSeconds;
+                    return time > 0 ? time : default;
+                }
+                return default(double);
+            }
+        }
     }
 }
