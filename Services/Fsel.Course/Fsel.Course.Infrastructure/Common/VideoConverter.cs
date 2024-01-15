@@ -425,19 +425,20 @@ namespace Fsel.Course.Infrastructure.Common
             return timeCode;
         }
 
-        public IList<VideoTimeCodeModel> GetTimeCodes(Video? video, Guid videoResultId)
+        public IList<VideoTimeCodeModel> GetTimeCodes(Video? video, VideoResult videoResult)
         {
             ArgumentNullException.ThrowIfNull(video);
             var videoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).ToList();
             var videoTimeCodeModels = new List<VideoTimeCodeModel>();
-            var indexProcess = GetIndexProcess(videoTimeCodes, videoResultId);
+            var indexProcess = GetIndexProcess(videoTimeCodes, videoResult.CurrentVideoTimeCodeId);
             foreach (var item in videoTimeCodes)
             {
                 var indexTimeCode = videoTimeCodes.IndexOf(item);
-                var videoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(item.VideoTimeCodeResults.FirstOrDefault());
-                var videoTimeCode = GetVideoTimeCode(item, videoTimeCodeResult);
+                var videoTimeCodeResult = item.VideoTimeCodeResults.FirstOrDefault();
+                var videoTimeCodeResultModel = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult);
+                var videoTimeCode = GetVideoTimeCode(item, videoTimeCodeResultModel);
                 videoTimeCode.TotalCount = GetTotalQuestion(item);
-                videoTimeCode.Status = GetTimeCodeStatus(indexProcess, indexTimeCode);
+                videoTimeCode.Status = GetTimeCodeStatus(indexProcess, indexTimeCode, videoTimeCodeResult);
                 videoTimeCodeModels.Add(videoTimeCode);
             }
             return videoTimeCodeModels;
@@ -514,25 +515,29 @@ namespace Fsel.Course.Infrastructure.Common
             return status;
         }
 
-        private static EnumResultStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
+        private static EnumResultStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode, VideoTimeCodeResult? videoTimeCodeResult)
         {
             var status = EnumResultStatus.Unfinished;
             if (indexProcess == indexTimeCode)
             {
                 status = EnumResultStatus.Process;
+                if (videoTimeCodeResult != null && videoTimeCodeResult.Status == EnumResultStatus.Done)
+                {
+                    status = EnumResultStatus.Done;
+                }
             }
-            else if (indexProcess > indexTimeCode || indexProcess == null)
+            else if (indexProcess > indexTimeCode)
             {
                 status = EnumResultStatus.Done;
             }
             return status;
         }
 
-        private static int? GetIndexProcess(IList<VideoTimeCode>? videoTimeCodes, Guid videoResultId)
+        private static int? GetIndexProcess(IList<VideoTimeCode>? videoTimeCodes, Guid? currentVideoTimeCodeId)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCodes);
-            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeAnswers.Any() || x.VideoTimeCodeAnswers.Any(x => x.VideoResultId == videoResultId && x.Status != EnumAnswerStatus.Done)).FirstOrDefault();
-            return timeCode != null ? videoTimeCodes.IndexOf(timeCode) : null;
+            var videoTimeCode = videoTimeCodes.FirstOrDefault(x => x.Id == currentVideoTimeCodeId);
+            return videoTimeCode != null ? videoTimeCodes.IndexOf(videoTimeCode) : null;
         }
 
         private async Task<(List<Question>?, IList<VideoTimeCodeAnswer>?)> GetUnansweredQuestionIds(Guid videoTimeCodeId, VideoTimeCodeResult videoTimeCodeResult)
