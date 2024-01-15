@@ -69,111 +69,109 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public VoidMethodResult AddSessionToSessionGroup(dynamic sectionGroup, IList<CreateSectionCommandModel>? sectionModels, EnumCourseType? type)
+        public VoidMethodResult AddSessionToSessionGroup(dynamic sectionGroup, IList<CreateSectionCommandModel>? sectionModels, EnumCourseType type = EnumCourseType.Academic)
         {
             VoidMethodResult methodResult = new VoidMethodResult();
-            //if (sectionModels == null || sectionModels.Count == 0)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
-            //    return methodResult;
-            //}
-            if (sectionModels != null && sectionModels.Any())
+            if (type == EnumCourseType.Ielts)
             {
-                IList<Section> sections = sectionGroup.Sections;
-                foreach (var section in sectionModels)
+                var methodSG = ValidateSectionGroup(sectionGroup);
+                if (!methodSG.IsOK)
                 {
-                    if (section == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
-                        return methodResult;
-                    }
-                    Section newSection = sections.ElementAt(sectionModels.IndexOf(section));
-                    if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking && sectionGroup.CourseSkill != EnumCourseSkill.Writing)
-                    {
-                        if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
-                            return methodResult;
-                        }
-                        if (type == EnumCourseType.Ielts)
-                        {
-                            //if (section.SectionParts == null || section.SectionParts.Count == 0)
-                            //{
-                            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section.SectionParts));
-                            //    return methodResult;
-                            //}
-
-                            if (section.SectionParts != null && section.SectionParts.Any())
-                            {
-                                foreach (var sectionPart in section.SectionParts)
-                                {
-                                    if (sectionPart == null)
-                                    {
-                                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionPart));
-                                        return methodResult;
-                                    }
-                                    else
-                                    {
-                                        SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-
-                                        var method = AddQuestionToSession(newSectionPart, sectionPart.Questions);
-                                        if (!method.IsOK)
-                                        {
-                                            methodResult.AddErrorBadRequest(method.ErrorMessages);
-                                        }
-                                    }
-                                }
-                            }
-
-                            //var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                            //if (!SectionValidation.IsCheckSection(sectionGroup.CourseSkill, section.DisplayOrder, correctCount))
-                            //{
-                            //    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.MustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
-                            //    return methodResult;
-                            //}
-                        }
-                        else
-                        {
-                            var method = AddQuestionToSession(newSection, section.Questions);
-                            if (!method.IsOK)
-                            {
-                                methodResult.AddErrorBadRequest(method.ErrorMessages);
-                                return methodResult;
-                            }
-                        }
-                    }
-                    else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
-                    {
-                        //if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
-                        //{
-                        //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.CourseSkill));
-                        //    return methodResult;
-                        //}
-                        if (section.SectionTimeCodes != null && section.SectionTimeCodes.Any())
-                        {
-                            foreach (var sectionTimeCode in section.SectionTimeCodes)
-                            {
-                                if (sectionTimeCode == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCode));
-                                    return methodResult;
-                                }
-                                else
-                                {
-                                    SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
-                                }
-                            }
-                        }
-                    }
-
-                    if (!newSection.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(newSection.ErrorMessages);
-                        return methodResult;
-                    }
+                    methodResult.AddErrorBadRequest(methodSG.ErrorMessages);
+                    return methodResult;
                 }
             }
 
+            if (sectionModels == null || sectionModels.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
+                return methodResult;
+            }
+            IList<Section> sections = sectionGroup.Sections;
+            foreach (var section in sectionModels)
+            {
+                if (section == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
+                    return methodResult;
+                }
+                Section newSection = sections.ElementAt(sectionModels.IndexOf(section));
+                if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking && sectionGroup.CourseSkill != EnumCourseSkill.Writing)
+                {
+                    if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
+                        return methodResult;
+                    }
+                    if (type == EnumCourseType.Ielts)
+                    {
+                        if (section.SectionParts == null || section.SectionParts.Count == 0)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section.SectionParts));
+                            return methodResult;
+                        }
+                        foreach (var sectionPart in section.SectionParts)
+                        {
+                            if (sectionPart == null)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionPart));
+                                return methodResult;
+                            }
+                            else
+                            {
+                                SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
+                                var method = AddQuestionToSession(newSectionPart, sectionPart.Questions);
+                                if (!method.IsOK)
+                                {
+                                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                                    return methodResult;
+                                }
+                            }
+                        }
+                        var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                        if (!SectionValidation.IsCheckSection(sectionGroup.CourseSkill, section.DisplayOrder, correctCount))
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.MustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
+                            return methodResult;
+                        }
+                    }
+                    else
+                    {
+                        var method = AddQuestionToSession(newSection, section.Questions);
+                        if (!method.IsOK)
+                        {
+                            methodResult.AddErrorBadRequest(method.ErrorMessages);
+                            return methodResult;
+                        }
+                    }
+                }
+                else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
+                {
+                    if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.CourseSkill));
+                        return methodResult;
+                    }
+                    foreach (var sectionTimeCode in section.SectionTimeCodes)
+                    {
+                        if (sectionTimeCode == null)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCode));
+                            return methodResult;
+                        }
+                        else
+                        {
+                            SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
+                        }
+                    }
+                }
+
+                if (!newSection.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(newSection.ErrorMessages);
+                    return methodResult;
+                }
+            }
             return methodResult;
         }
 
@@ -189,6 +187,33 @@ namespace Fsel.Course.Infrastructure.Common
             await _questionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
             return true;
+        }
+
+        public VoidMethodResult ValidateSectionGroup(SectionGroup sectionGroup)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+            ArgumentNullException.ThrowIfNull(sectionGroup);
+            if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
+                return methodResult;
+            }
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Reading && sectionGroup.Sections.Count != 3)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections));
+                return methodResult;
+            }
+            else if (sectionGroup.CourseSkill == EnumCourseSkill.Listening && sectionGroup.Sections.Count != 4)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections));
+                return methodResult;
+            }
+            else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.Count != 2)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sectionGroup.Sections));
+                return methodResult;
+            }
+            return methodResult;
         }
     }
 }
