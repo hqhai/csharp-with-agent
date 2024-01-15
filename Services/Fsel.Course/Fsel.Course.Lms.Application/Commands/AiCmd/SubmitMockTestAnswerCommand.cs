@@ -19,29 +19,39 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     {
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
+        private readonly IAiGradeSettingRepository _aiGradeSettingRepository;
         private readonly IMediator _mediator;
-        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository)
+        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IAiGradeSettingRepository aiGradeSettingRepository)
         {
             _submitAIResponsePublisher = submitAIResponsePublisher;
             _mediator = mediator;
             _mockTestAnswerRepository = mockTestAnswerRepository;
+            _aiGradeSettingRepository = aiGradeSettingRepository;
         }
 
         public async Task<bool> Handle(SubmitMockTestAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var mockTestAnswer =  _mockTestAnswerRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId);
+            var mockTestAnswer = _mockTestAnswerRepository.Queryable.FirstOrDefault(x => x.SectionId == request.ObjectId);
+
+            var aiConfig = _aiGradeSettingRepository.Queryable.FirstOrDefault(x => x.ObjectId == request.ObjectId);
 
             var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
+
+            if (userAiConfig == null)
+            {
+                return false;
+            }
+
             var aIResponse = await _mediator.Send(new SubmitAICommand
             {
-                SettingModel = request.SettingModel,
-                SettingTemperature = request.SettingTemperature,
-                SettingFrequecy = request.SettingFrequecy,
-                SettingWordMaxLength = request.SettingWordMaxLength,
-                SettingPresence = request.SettingPresence,
-                SettingTopP = request.SettingTopP,
-                SystemRoleAlConfig = request.SystemRoleAlConfig,
+                SettingModel = aiConfig?.SettingModel,
+                SettingTemperature = aiConfig!.SettingTemperature,
+                SettingFrequecy = aiConfig!.SettingFrequecy,
+                SettingWordMaxLength = aiConfig!.SettingWordMaxLength,
+                SettingPresence = aiConfig!.SettingPresence,
+                SettingTopP = aiConfig!.SettingTopP,
+                SystemRoleAlConfig = aiConfig!.SystemRoleAlConfig,
                 UserAIConfig = userAiConfig,
             }, cancellationToken).ConfigureAwait(false);
 

@@ -1,12 +1,15 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Course.Application.Queues.Consumers;
+using Fsel.Course.Application.Queues.Publishers;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
+using Fsel.Shared.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +88,14 @@ builder.Services.AddScoped<SectionGroupManagerConverter>();
 // Helper
 builder.Services.AddScoped<LinQHelper>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
+
+// Publisher
+builder.Services.AddScoped<CreateAiGradeSettingPublisher>();
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
+{
+    { QueueSettings.LcmsQueue.NameQueue.CreateAiGradeSetting, typeof(CreateAiGradeSettingConsumer) },
+});
 
 var app = builder.Build();
 

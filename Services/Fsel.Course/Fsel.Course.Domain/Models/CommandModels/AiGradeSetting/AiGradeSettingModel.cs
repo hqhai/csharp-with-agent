@@ -1,8 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 
-namespace Fsel.Course.Domain.Models.CommandModels.AutoGradeSetting
+namespace Fsel.Course.Domain.Models.CommandModels.AiGradeSetting
 {
+    public class AiGradeSettingFeatureModel
+    {
+        public IList<AiGradeSettingModel>? AiGradeSettingModels { get; set; }
+    }
+
     public class AiGradeSettingModel
     {
         public string? SystemRoleAlConfig { get; set; }

@@ -4,13 +4,13 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.CommandModels.Lessons;
+using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
 namespace Fsel.Course.Application.Commands.AiGradeSettingCmd
 {
-    public class CreateAiGradeSettingCmd : CreateLessonCommandModel, IRequest<MethodResult<bool>>
+    public class CreateAiGradeSettingCmd : AiGradeSettingFeatureModel, IRequest<MethodResult<bool>>
     {
     }
 
@@ -29,18 +29,17 @@ namespace Fsel.Course.Application.Commands.AiGradeSettingCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            AiGradeSetting autoGradeSetting = new AiGradeSetting();
+            List<AiGradeSetting> autoGradeSetting = new List<AiGradeSetting>();
 
-            autoGradeSetting = _mapper.Map<AiGradeSetting>(request);
+            autoGradeSetting = _mapper.Map<List<AiGradeSetting>>(request.AiGradeSettingModels);
 
             await _aiGradeSettingRepository.ExecuteTransactionAsync(async () =>
             {
-                autoGradeSetting = _aiGradeSettingRepository.Add(autoGradeSetting);
+                await _aiGradeSettingRepository.AddList(autoGradeSetting);
                 await _aiGradeSettingRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<bool>(autoGradeSetting);
+                methodResult.Result = true;
                 return methodResult;
             });
 

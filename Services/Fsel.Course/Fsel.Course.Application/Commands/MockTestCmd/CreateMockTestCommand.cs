@@ -8,8 +8,10 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Application.Queues.Publishers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -27,15 +29,18 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
+        private readonly CreateAiGradeSettingPublisher _createAiGradeSettingPublisher;
+
 
         public CreateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
             , SectionGroupManagerConverter sectionGroupManagerConverter
-            )
+            , CreateAiGradeSettingPublisher createAiGradeSettingPublisher)
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
             _sectionGroupManagerConverter = sectionGroupManagerConverter;
+            _createAiGradeSettingPublisher = createAiGradeSettingPublisher;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(CreateMockTestCommand request, CancellationToken cancellationToken)
@@ -109,6 +114,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 // custom config AI MockTest
+                await SaveAiGradeSetting(request, mockTest, cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<MockTestModel>(mockTest);
@@ -116,6 +122,46 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             });
 
             return methodResult;
+        }
+
+
+        /// <summary>
+        /// Luu cau hinh Ai GradeSetting
+        /// </summary>
+        /// <param name="mockTest"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task SaveAiGradeSetting(CreateMockTestCommand request, MockTest mockTest, CancellationToken cancellationToken)
+        {
+            var sectionIds = mockTest?.MockTestSections.FirstOrDefault()!.SectionGroup!.Sections.Select(x => x.Id).ToList();
+            var sections = request?.SectionGroups?.FirstOrDefault()?.Sections;
+
+            
+            List<AiGradeSettingModel> settingModel = new List<AiGradeSettingModel>();
+            int i = 0;
+            foreach (var item in sections!)
+            {
+                AiGradeSettingModel model = new AiGradeSettingModel()
+                {
+                    SystemRoleAlConfig = item.AiGradeSettings?.SystemRoleAlConfig,
+                    UserAlConfig = item.AiGradeSettings?.UserAlConfig,
+                    SettingModel = item.AiGradeSettings?.SettingModel,
+                    SettingTemperature = (double)item.AiGradeSettings?.SettingTemperature!,
+                    SettingWordMaxLength = (double)item.AiGradeSettings?.SettingWordMaxLength!,
+                    SettingTopP = (double)item.AiGradeSettings?.SettingTopP!,
+                    SettingFrequecy = (double)item.AiGradeSettings?.SettingFrequecy!,
+                    SettingPresence = (double)item.AiGradeSettings?.SettingPresence!,
+                    ObjectId = sectionIds[i]!
+                };
+                i++;
+                settingModel.Add(model);
+            }
+
+            AiGradeSettingFeatureModel queueModel = new AiGradeSettingFeatureModel()
+            {
+                AiGradeSettingModels = settingModel,
+            };
+            await _createAiGradeSettingPublisher.Publish(queueModel, cancellationToken);
         }
     }
 }

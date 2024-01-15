@@ -225,7 +225,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 {
                     await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
                     {
-                        SectionId = (Guid)item.SectionId!,
+                        ObjectId = (Guid)item.SectionId!,
                         WordContent = item.AnswerStr,
 
                     }, cancellationToken);

@@ -62,6 +62,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string CreateAiGradeSetting = $"{KeyQueue}_CreateAiGradeSetting";
             }
         }
 

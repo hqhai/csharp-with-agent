@@ -26,17 +26,8 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
 
             await _mediator.Send(new SubmitMockTestAnswerCommand
             {
-                SectionId = data.SectionId,
-                UserAIConfig = data.UserAIConfig,
-                SystemRoleAlConfig = data.SystemRoleAlConfig,
-                SettingWordMaxLength = data.SettingWordMaxLength,
-                SettingTopP = data.SettingTopP,
-                SettingTemperature = data.SettingTemperature,
-                SettingPresence = data.SettingPresence,
-                SettingFrequecy = data.SettingFrequecy,
-                SettingModel = data.SettingModel,
+                ObjectId = data.ObjectId,
                 WordContent = data.WordContent,
-                IsRetry = data.IsRetry,
             }).ConfigureAwait(false);
         }
     }

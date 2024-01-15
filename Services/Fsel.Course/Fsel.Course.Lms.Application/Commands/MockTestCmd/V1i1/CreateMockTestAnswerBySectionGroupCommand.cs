@@ -17,7 +17,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -48,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly SubmitMockTestAnswerPublisher _submitMockTestAnswerPublisher;
         private readonly IMapper _mapper;
 
         public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
@@ -62,7 +65,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             , ISectionGroupResultRepository sectionGroupResultRepository
             , ISectionTimeCodeRepository sectionTimeCodeRepository
             , ISectionGroupRepository sectionGroupRepository
-            , IMapper mapper)
+            , IMapper mapper
+            , SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -77,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
+            _submitMockTestAnswerPublisher = submitMockTestAnswerPublisher;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -142,6 +147,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         return methodResult;
                     }
                     sectionGroupResult = answerResult.Result;
+
+                    foreach (var item in request.Answers)
+                    {
+                        await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
+                        {
+                            ObjectId = (Guid)item.SectionId!,
+                            WordContent = item.Answer?.ToString() ?? string.Empty,
+
+                        }, cancellationToken);
+                    }
+
                 }
                 sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
                 return methodResult;
@@ -430,5 +446,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             mockTestAnswer.CorrectCount = correctCount;
             return mockTestAnswer;
         }
+
+
+
     }
 }
