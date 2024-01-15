@@ -365,7 +365,7 @@ namespace Fsel.Course.Infrastructure.Common
                               group q by baseQ into g
                               select new
                               {
-                                  HighestStreaks = g.Select(x => x).Distinct().OrderBy(x => x.CreatedDate)
+                                  HighestStreaks = g.Select(x => x).Where(x => !x.Ungraded || x.QuestionType != EnumQuestionType.ExercisePreparation).Distinct().OrderBy(x => x.CreatedDate)
                                                   .SelectMany(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                                   .Select(x => x.IsCorrect == true && x.IsFirstSubmit)
                               };
