@@ -61,8 +61,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                         var (levelNext, isLock) = item.Level.GetLevelInScore(item.Percent, age);
                         placementTestResultExports.Add(new PlacementTestResultExportModel
                         {
-                            Level = student.CourseLevel,
-                            LevelDone = levelNext ?? default,
+                            CurrentLevel = student.CourseLevel,
+                            LevelCompleted = levelNext ?? default,
                             Name = student.Human?.FullName
                         });
                     }
