@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             var aiConfig = _aiGradeSettingRepository.Queryable.FirstOrDefault(x => x.ObjectId == request.ObjectId);
 
-            var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
+            var userAiConfig = aiConfig!.UserAlConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
 
             if (userAiConfig == null)
             {

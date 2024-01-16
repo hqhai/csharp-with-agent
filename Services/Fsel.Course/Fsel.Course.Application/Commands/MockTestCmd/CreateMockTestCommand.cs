@@ -133,14 +133,14 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         /// <returns></returns>
         public async Task SaveAiGradeSetting(CreateMockTestCommand request, MockTest mockTest, CancellationToken cancellationToken)
         {
-            var sectionIds = mockTest?.MockTestSections.FirstOrDefault()!.SectionGroup!.Sections.Select(x => x.Id).ToList();
+            var section = mockTest?.MockTestSections.FirstOrDefault()!.SectionGroup!.Sections.ToList();
             var sections = request?.SectionGroups?.FirstOrDefault()?.Sections;
 
-            
             List<AiGradeSettingModel> settingModel = new List<AiGradeSettingModel>();
-            int i = 0;
+
             foreach (var item in sections!)
             {
+                var sectionId = section!.FirstOrDefault(x => x.Name == item.Name)!.Id;
                 AiGradeSettingModel model = new AiGradeSettingModel()
                 {
                     SystemRoleAlConfig = item.AiGradeSettings?.SystemRoleAlConfig,
@@ -151,9 +151,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     SettingTopP = (double)item.AiGradeSettings?.SettingTopP!,
                     SettingFrequecy = (double)item.AiGradeSettings?.SettingFrequecy!,
                     SettingPresence = (double)item.AiGradeSettings?.SettingPresence!,
-                    ObjectId = sectionIds[i]!
+                    ObjectId = sectionId
                 };
-                i++;
                 settingModel.Add(model);
             }
 
