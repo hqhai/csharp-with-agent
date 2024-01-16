@@ -44,11 +44,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var methodResult = new MethodResult<Stream>();
             var placementTestResultExports = new List<PlacementTestResultExportModel>();
             var placementTestResults = await _placementTestResultRepository.Queryable
-                .Where(x => x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date)
                 .GroupBy(x => x.StudentId)
-                .Select(x => x.OrderByDescending(x => x.CreatedDate).FirstOrDefault())
+                .Select(x => x.OrderByDescending(x => x.UpdatedDate).FirstOrDefault())
                 .ToListAsync(cancellationToken);
-
+            placementTestResults = placementTestResults.Where(x => x!.UpdatedDate.HasValue && x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date).ToList();
             foreach (var item in placementTestResults)
             {
                 if (item != null)
@@ -62,13 +61,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                         placementTestResultExports.Add(new PlacementTestResultExportModel
                         {
                             CurrentLevel = student.CourseLevel,
-                            LevelCompleted = levelCompleted ?? default,
-                            Name = item.CreatedFullName
+                            LevelCompleted = levelCompleted,
+                            Name = item.CreatedFullName,
+                            UpdatedDate = item.UpdatedDate.HasValue ? item.UpdatedDate.Value.Date : null,
                         });
                     }
                 }
             }
-            methodResult.Result = placementTestResultExports.OrderBy(x => x.Name).ToList().ExportExcel();
+            methodResult.Result = placementTestResultExports.OrderBy(x => x.Name).OrderBy(x => x.UpdatedDate).ToList().ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
