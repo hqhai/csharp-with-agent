@@ -7,10 +7,12 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.LessonNotes;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -21,16 +23,24 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
     public class SearchLessonNoteQueryHandler : IRequestHandler<SearchLessonNoteQuery, MethodResult<PagingItemsModel<LessonNoteModel>>>
     {
         private readonly ILessonNoteRepository _lessonNoteRepository;
+        private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
 
-        public SearchLessonNoteQueryHandler(ILessonNoteRepository lessonNoteRepository)
+        public SearchLessonNoteQueryHandler(ILessonNoteRepository lessonNoteRepository, AuthContext authContext, IUserService userService)
         {
             _lessonNoteRepository = lessonNoteRepository;
+            _authContext = authContext;
+            _userService = userService;
         }
 
         public async Task<MethodResult<PagingItemsModel<LessonNoteModel>>> Handle(SearchLessonNoteQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var query = _lessonNoteRepository.Queryable.Include(x => x.LessonResult).AsQueryable();
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = studentResult?.Content?.Result;
+
+            var query = _lessonNoteRepository.Queryable.Include(x => x.LessonResult).Where(x => x.LessonResult!.StudentId == student!.Id).AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
