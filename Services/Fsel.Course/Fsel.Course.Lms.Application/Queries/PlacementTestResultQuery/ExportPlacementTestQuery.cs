@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var placementTestResults = await _placementTestResultRepository.Queryable
                 .Where(x => x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date)
                 .GroupBy(x => x.StudentId)
-                .Select(x => x.OrderBy(x => x.CreatedDate).FirstOrDefault())
+                .Select(x => x.OrderByDescending(x => x.CreatedDate).FirstOrDefault())
                 .ToListAsync(cancellationToken);
 
             foreach (var item in placementTestResults)
