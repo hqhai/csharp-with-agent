@@ -58,12 +58,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     if (student != null)
                     {
                         int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
-                        var (levelNext, isLock) = item.Level.GetLevelInScore(item.Percent, age);
+                        var (levelCompleted, isLock) = item.Level.GetLevelInScore(item.Percent, age);
                         placementTestResultExports.Add(new PlacementTestResultExportModel
                         {
                             CurrentLevel = student.CourseLevel,
-                            LevelCompleted = levelNext ?? default,
-                            Name = student.Human?.FullName
+                            LevelCompleted = levelCompleted ?? default,
+                            Name = item.CreatedFullName
                         });
                     }
                 }
