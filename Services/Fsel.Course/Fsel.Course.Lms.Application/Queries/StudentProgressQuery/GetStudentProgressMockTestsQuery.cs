@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var studentId = student?.Id;
             var userId = student?.Human?.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
-            if (course == null)
+            if (course == null || course.CourseType == EnumCourseType.Academic)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
@@ -77,14 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-
-            if (course.CourseType == EnumCourseType.Academic)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
             var mockTestIds = courseUnitMockTests.Where(x => x.MockTestId != null).Select(x => x.MockTestId ?? default).ToList();
-
             var mockTestResults = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).Where(x => mockTestIds.Contains(x.MockTestId) && x.CourseId == request.CourseId && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
             var featureAccessTimes = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
