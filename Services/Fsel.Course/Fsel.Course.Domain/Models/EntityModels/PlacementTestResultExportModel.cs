@@ -11,9 +11,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Name { get; set; }
 
         [EpplusTableColumn(Header = "The student's student level achieved")]
-        public EnumCourseLevel LevelCompleted { get; set; }
+        public EnumCourseLevel? LevelCompleted { get; set; }
 
         [EpplusTableColumn(Header = "Level students choose")]
         public EnumCourseLevel CurrentLevel { get; set; }
+
+        [EpplusTableColumn(Header = "Finish day", NumberFormat = "dd/MM/yyyy")]
+        public DateTime? UpdatedDate { get; set; }
     }
 }
