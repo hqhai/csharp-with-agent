@@ -24,6 +24,6 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumNoteType Type { get; set; }
         public LessonResult? LessonResult { get; set; }
-        public Guid LessonResultId { get; set; }
+        public Guid? LessonResultId { get; set; }
     }
 }

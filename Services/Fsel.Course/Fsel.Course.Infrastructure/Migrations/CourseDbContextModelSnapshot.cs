@@ -2487,7 +2487,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid>("LessonResultId")
+                    b.Property<Guid?>("LessonResultId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -5446,8 +5446,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasOne("Fsel.Course.Domain.Entities.LessonResult", "LessonResult")
                         .WithMany("LessonNotes")
                         .HasForeignKey("LessonResultId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("LessonResult");
                 });

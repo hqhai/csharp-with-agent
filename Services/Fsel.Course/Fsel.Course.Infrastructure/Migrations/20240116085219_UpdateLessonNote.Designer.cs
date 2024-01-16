@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20240116071906_UpdateLessonNote")]
+    [Migration("20240116085219_UpdateLessonNote")]
     partial class UpdateLessonNote
     {
         /// <inheritdoc />
@@ -2490,7 +2490,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid>("LessonResultId")
+                    b.Property<Guid?>("LessonResultId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -5449,8 +5449,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasOne("Fsel.Course.Domain.Entities.LessonResult", "LessonResult")
                         .WithMany("LessonNotes")
                         .HasForeignKey("LessonResultId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("LessonResult");
                 });

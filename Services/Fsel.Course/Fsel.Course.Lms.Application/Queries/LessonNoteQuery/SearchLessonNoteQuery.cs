@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
 
-            var query = _lessonNoteRepository.Queryable.Include(x => x.LessonResult).Where(x => x.LessonResult!.StudentId == student!.Id).AsQueryable();
+            var query = _lessonNoteRepository.Queryable.Include(x => x.LessonResult).Where(x => x.LessonResult!.StudentId == student!.Id).OrderByDescending(x => x.CreatedDate).AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -55,6 +55,11 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
             if (request.LessonId != null)
             {
                 query = query.Where(m => m.LessonResult!.LessonId == request.LessonId);
+            }
+
+            if (request.Type != null)
+            {
+                query = query.Where(m => m.Type == request.Type);
             }
 
             var methodResult = await _lessonNoteRepository.GetListByPageResultAsync<LessonNoteModel>(query, request, cancellationToken);

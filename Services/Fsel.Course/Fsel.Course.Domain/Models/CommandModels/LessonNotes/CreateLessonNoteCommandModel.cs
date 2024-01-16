@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.LessonNotes
 
     public class CreateLessonNoteCommandModel
     {
-        public Guid LessonResultId { get; set; }
+        public Guid? LessonResultId { get; set; }
         public string? Name { get; set; }
         public string? Note { get; set; }
 
