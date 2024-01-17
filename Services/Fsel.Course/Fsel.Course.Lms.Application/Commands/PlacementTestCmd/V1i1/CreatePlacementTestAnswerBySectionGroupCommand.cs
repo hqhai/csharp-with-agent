@@ -195,7 +195,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
                     if (isLockPT)
                     {
-                        await SendStudentPlacementTest(student, placementTestResult);
+                        #region Disable send PR result to email Student
+                        //await SendStudentPlacementTest(student, placementTestResult);
+                        #endregion
                     }
                     return isLockPT;
                 }

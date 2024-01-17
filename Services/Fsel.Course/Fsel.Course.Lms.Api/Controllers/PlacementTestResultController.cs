@@ -65,5 +65,20 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<PlacementTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Export Class
+        /// </summary>
+        [HttpGet("export")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Export([FromQuery] ExportPlacementTestQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "placementTest_export.xlsx");
+        }
     }
 }
