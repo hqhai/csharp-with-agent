@@ -45,12 +45,12 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
 
             if (request.Type == EnumNoteType.Individual && request.LessonResultId != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonNoteErrorCode.LessonResultIdMustBeNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonResultId));
                 return methodResult;
             }
             else if (request.Type == EnumNoteType.Platform && request.LessonResultId == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonNoteErrorCode.LessonResultIdNotNullAble));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonResultId));
                 return methodResult;
             }
 
