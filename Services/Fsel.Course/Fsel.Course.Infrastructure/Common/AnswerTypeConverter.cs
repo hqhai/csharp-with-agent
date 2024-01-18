@@ -591,6 +591,7 @@ namespace Fsel.Course.Infrastructure.Common
                         }
                     }
                 }
+                number = dataAnswer.Answers.All(x => x.IsExact == true) ? ++number : default;
             }
             configAnswer = dataAnswer;
             return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers));
