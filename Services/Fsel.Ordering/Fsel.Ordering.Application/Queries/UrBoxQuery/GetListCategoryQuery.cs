@@ -16,7 +16,6 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     public class GetListCategoryQuery : IRequest<MethodResult<IList<CategoryModel>>>
     {
         public int? ParentId { get; set; }
-        public string? Language { get; set; }
     }
 
     public class GetListCategoryQueryHandler : IRequestHandler<GetListCategoryQuery, MethodResult<IList<CategoryModel>>>
@@ -38,7 +37,6 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             var categoriesResult = await _urBoxService.GetListCategory(new GetListCategoryQueryModel(_appSetting)
             {
                 ParentId = request.ParentId,
-                Language = request.Language,
             });
 
             var categories = categoriesResult.Content?.Data;
