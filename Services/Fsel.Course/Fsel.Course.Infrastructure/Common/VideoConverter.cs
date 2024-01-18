@@ -98,6 +98,7 @@ namespace Fsel.Course.Infrastructure.Common
                     methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
                     return methodResult;
                 }
+                newQuestion.Config = config;
                 newQuestion.CorrectTotal = correctTotal;
                 if (!newQuestion.IsValid())
                 {
