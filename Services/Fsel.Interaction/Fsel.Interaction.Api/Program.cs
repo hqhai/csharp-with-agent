@@ -1,8 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.Constants;
+using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Interaction.Application.Queues.Publishers;
 using Fsel.Interaction.Application.Services.CourseServices;
+using Fsel.Interaction.Application.Services.HarmfulContentService;
 using Fsel.Interaction.Application.Services.NotificationService;
 using Fsel.Interaction.Application.Services.SenderServices;
 using Fsel.Interaction.Application.Services.SystemService;
@@ -12,6 +15,7 @@ using Fsel.Interaction.Domain.IRepositories;
 using Fsel.Interaction.Infrastructure;
 using Fsel.Interaction.Infrastructure.Repositories;
 using Fsel.Interaction.Infrastructure.ValueSettings;
+using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +52,16 @@ builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseA
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
+
+builder.Services.AddRefitClient<IHarmfulContentService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
+{
+    httpClient.BaseAddress = new Uri(appSetting?.HarmfulContentConfig?.HarmfulContentApiUrl ?? string.Empty);
+    if (!string.IsNullOrEmpty(appSetting?.HarmfulContentConfig?.SubscriptionKey))
+    {
+        httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", $"{appSetting?.HarmfulContentConfig?.SubscriptionKey}");
+    }
+});
+
 builder.AddMassTransit(appSetting);
 
 var app = builder.Build();
