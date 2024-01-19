@@ -401,21 +401,11 @@ namespace Fsel.Course.Infrastructure.Common
             return videoTimeCode?.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal) ?? default;
         }
 
-        public static int GetTotalQuestion(VideoTimeCode? videoTimeCode)
-        {
-            return videoTimeCode?.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null)
-                                                  .Select(x => x.Exercise)
-                                                  .SelectMany(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted && x.Question != null))
-                                                  .Select(m => m.Question)
-                                                  .Count() ?? default;
-        }
-
         public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode? videoTimeCode, VideoTimeCodeResultModel? videoTimeCodeResult, bool isShowSubStatus = false)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
             var isTimeCodeProcess = videoTimeCodeResult != null && videoTimeCodeResult.Status == EnumResultStatus.Process;
             var timeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode);
-            timeCode.TotalCount = GetTotalQuestion(videoTimeCode);
             timeCode.Ungraded = GetUngraded(videoTimeCode);
             timeCode.CorrectCount = GetCorrectCount(videoTimeCode);
             timeCode.CorrectTotal = GetCorrectTotal(videoTimeCode);
@@ -428,6 +418,7 @@ namespace Fsel.Course.Infrastructure.Common
         public IList<VideoTimeCodeModel> GetTimeCodes(Video? video, VideoResult videoResult)
         {
             ArgumentNullException.ThrowIfNull(video);
+            ArgumentNullException.ThrowIfNull(videoResult);
             var videoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).ToList();
             var videoTimeCodeModels = new List<VideoTimeCodeModel>();
             var indexProcess = GetIndexProcess(videoTimeCodes, videoResult.CurrentVideoTimeCodeId);
@@ -437,7 +428,6 @@ namespace Fsel.Course.Infrastructure.Common
                 var videoTimeCodeResult = item.VideoTimeCodeResults.FirstOrDefault();
                 var videoTimeCodeResultModel = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult);
                 var videoTimeCode = GetVideoTimeCode(item, videoTimeCodeResultModel);
-                videoTimeCode.TotalCount = GetTotalQuestion(item);
                 videoTimeCode.Status = GetTimeCodeStatus(indexProcess, indexTimeCode, videoTimeCodeResult);
                 videoTimeCodeModels.Add(videoTimeCode);
             }
