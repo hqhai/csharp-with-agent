@@ -53,12 +53,21 @@ builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiU
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 
-builder.Services.AddRefitClient<IHarmfulContentService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
+builder.Services.AddRefitClient<IHarmfulContentWordsService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
-    httpClient.BaseAddress = new Uri(appSetting?.HarmfulContentConfig?.HarmfulContentApiUrl ?? string.Empty);
-    if (!string.IsNullOrEmpty(appSetting?.HarmfulContentConfig?.SubscriptionKey))
+    httpClient.BaseAddress = new Uri(appSetting?.HarmfulContentConfigs?.HarmfulContentWordsConfig?.HarmfulContentApiUrl ?? string.Empty);
+    if (!string.IsNullOrEmpty(appSetting?.HarmfulContentConfigs?.HarmfulContentWordsConfig?.SubscriptionKey))
     {
-        httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", $"{appSetting?.HarmfulContentConfig?.SubscriptionKey}");
+        httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", $"{appSetting?.HarmfulContentConfigs?.HarmfulContentWordsConfig.SubscriptionKey}");
+    }
+});
+
+builder.Services.AddRefitClient<IHarmfulContentImageService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
+{
+    httpClient.BaseAddress = new Uri(appSetting?.HarmfulContentConfigs?.HarmfulContentImageConfig?.HarmfulContentApiUrl ?? string.Empty);
+    if (!string.IsNullOrEmpty(appSetting?.HarmfulContentConfigs?.HarmfulContentImageConfig?.SubscriptionKey))
+    {
+        httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", $"{appSetting?.HarmfulContentConfigs?.HarmfulContentImageConfig.SubscriptionKey}");
     }
 });
 
