@@ -3,12 +3,12 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.AiGradeSetting
 {
-    public class AiGradeSettingFeatureModel
+    public class MockTestAiSettingModel
     {
-        public IList<AiGradeSettingModel>? AiGradeSettingModels { get; set; }
+        public IList<SectionAiSettingModel>? MockTestAiSettingModels { get; set; }
     }
 
-    public class AiGradeSettingModel
+    public class SectionAiSettingModel
     {
         public string? SystemRoleAlConfig { get; set; }
 
@@ -26,6 +26,10 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiGradeSetting
 
         public double SettingPresence { get; set; }
 
+        public string? Task { get; set; }
+
         public Guid ObjectId { get; set; }
+
+        public IList<MockTestPromptModel>? Prompts { get; set; }
     }
 }

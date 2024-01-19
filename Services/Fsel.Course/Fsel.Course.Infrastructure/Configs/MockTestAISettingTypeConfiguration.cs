@@ -7,9 +7,9 @@ namespace Fsel.Course.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class AiGradeSettingTypeConfiguration : IEntityTypeConfiguration<AiGradeSetting>
+    public class MockTestAISettingTypeConfiguration : IEntityTypeConfiguration<MockTestAISetting>
     {
-        public void Configure(EntityTypeBuilder<AiGradeSetting> builder)
+        public void Configure(EntityTypeBuilder<MockTestAISetting> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
         }

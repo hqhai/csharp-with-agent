@@ -7,16 +7,16 @@ namespace Fsel.Course.Application.Queues.Publishers
     using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
     using Fsel.Shared.Constants;
 
-    public class CreateAiGradeSettingPublisher
+    public class CreateMockTestAISettingPublisher
     {
         private readonly IQueueProvider _queueProvider;
 
-        public CreateAiGradeSettingPublisher(IQueueProvider queueProvider)
+        public CreateMockTestAISettingPublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(AiGradeSettingFeatureModel? request, CancellationToken cancellationToken)
+        public async Task Publish(MockTestAiSettingModel? request, CancellationToken cancellationToken)
         {
             if (request == null)
             {

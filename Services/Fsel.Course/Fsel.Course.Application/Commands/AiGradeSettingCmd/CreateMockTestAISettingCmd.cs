@@ -10,28 +10,28 @@ using Microsoft.AspNetCore.Http;
 
 namespace Fsel.Course.Application.Commands.AiGradeSettingCmd
 {
-    public class CreateAiGradeSettingCmd : AiGradeSettingFeatureModel, IRequest<MethodResult<bool>>
+    public class CreateMockTestAISettingCmd : MockTestAiSettingModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class CreateAutoGradeSettingCmdHandler : IRequestHandler<CreateAiGradeSettingCmd, MethodResult<bool>>
+    public class CreateAutoGradeSettingCmdHandler : IRequestHandler<CreateMockTestAISettingCmd, MethodResult<bool>>
     {
         private readonly IMapper _mapper;
-        private readonly IAiGradeSettingRepository _aiGradeSettingRepository;
-        public CreateAutoGradeSettingCmdHandler(IMapper mapper, IAiGradeSettingRepository aiGradeSettingRepository)
+        private readonly IMockTestAISettingRepository _aiGradeSettingRepository;
+        public CreateAutoGradeSettingCmdHandler(IMapper mapper, IMockTestAISettingRepository aiGradeSettingRepository)
         {
             _mapper = mapper;
             _aiGradeSettingRepository = aiGradeSettingRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(CreateAiGradeSettingCmd request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(CreateMockTestAISettingCmd request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            List<AiGradeSetting> autoGradeSetting = new List<AiGradeSetting>();
+            List<MockTestAISetting> autoGradeSetting = new List<MockTestAISetting>();
 
-            autoGradeSetting = _mapper.Map<List<AiGradeSetting>>(request.AiGradeSettingModels);
+            autoGradeSetting = _mapper.Map<List<MockTestAISetting>>(request.MockTestAiSettingModels);
 
             await _aiGradeSettingRepository.ExecuteTransactionAsync(async () =>
             {

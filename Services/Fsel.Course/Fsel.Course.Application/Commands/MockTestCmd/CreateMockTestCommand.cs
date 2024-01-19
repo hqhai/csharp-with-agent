@@ -13,12 +13,14 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
+    using Fsel.Course.Domain.Models.CommandModels.Sections;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Identity.Client;
 
     public class CreateMockTestCommand : CreateMockTestCommandModel, IRequest<MethodResult<MockTestModel>>
     {
@@ -29,13 +31,13 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
-        private readonly CreateAiGradeSettingPublisher _createAiGradeSettingPublisher;
+        private readonly CreateMockTestAISettingPublisher _createAiGradeSettingPublisher;
 
 
         public CreateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
             , SectionGroupManagerConverter sectionGroupManagerConverter
-            , CreateAiGradeSettingPublisher createAiGradeSettingPublisher)
+            , CreateMockTestAISettingPublisher createAiGradeSettingPublisher)
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
@@ -136,29 +138,22 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             var section = mockTest?.MockTestSections.FirstOrDefault()!.SectionGroup!.Sections.ToList();
             var sections = request?.SectionGroups?.FirstOrDefault()?.Sections;
 
-            List<AiGradeSettingModel> settingModel = new List<AiGradeSettingModel>();
+            List<SectionAiSettingModel> settingModel = new List<SectionAiSettingModel>();
 
             foreach (var item in sections!)
             {
                 var sectionId = section!.FirstOrDefault(x => x.Name == item.Name)!.Id;
-                AiGradeSettingModel model = new AiGradeSettingModel()
-                {
-                    SystemRoleAlConfig = item.AiGradeSettings?.SystemRoleAlConfig,
-                    UserAlConfig = item.AiGradeSettings?.UserAlConfig,
-                    SettingModel = item.AiGradeSettings?.SettingModel,
-                    SettingTemperature = (double)item.AiGradeSettings?.SettingTemperature!,
-                    SettingWordMaxLength = (double)item.AiGradeSettings?.SettingWordMaxLength!,
-                    SettingTopP = (double)item.AiGradeSettings?.SettingTopP!,
-                    SettingFrequecy = (double)item.AiGradeSettings?.SettingFrequecy!,
-                    SettingPresence = (double)item.AiGradeSettings?.SettingPresence!,
-                    ObjectId = sectionId
-                };
+
+
+                SectionAiSettingModel model = _mapper.Map<SectionAiSettingModel>(item.MockTestAISetting);
+                model.ObjectId = sectionId;
+
                 settingModel.Add(model);
             }
 
-            AiGradeSettingFeatureModel queueModel = new AiGradeSettingFeatureModel()
+            MockTestAiSettingModel queueModel = new MockTestAiSettingModel()
             {
-                AiGradeSettingModels = settingModel,
+                MockTestAiSettingModels = settingModel,
             };
             await _createAiGradeSettingPublisher.Publish(queueModel, cancellationToken);
         }

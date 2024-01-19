@@ -73,7 +73,7 @@ builder.Services.AddScoped<IFinalTestAnswerRepository, FinalTestAnswerRepository
 builder.Services.AddScoped<IFinalTestResultRepository, FinalTestResultRepository>();
 builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultRepository>();
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
-builder.Services.AddScoped<IAiGradeSettingRepository, AiGradeSettingRepository>();
+builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -90,11 +90,11 @@ builder.Services.AddScoped<LinQHelper>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 
 // Publisher
-builder.Services.AddScoped<CreateAiGradeSettingPublisher>();
+builder.Services.AddScoped<CreateMockTestAISettingPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.LcmsQueue.NameQueue.CreateAiGradeSetting, typeof(CreateAiGradeSettingConsumer) },
+    { QueueSettings.LcmsQueue.NameQueue.CreateAiGradeSetting, typeof(CreateMockTestAISettingConsumer) },
 });
 
 var app = builder.Build();

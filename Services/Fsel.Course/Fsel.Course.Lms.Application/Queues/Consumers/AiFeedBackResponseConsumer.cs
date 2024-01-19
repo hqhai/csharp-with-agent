@@ -24,7 +24,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             }
             var data = context.Message;
 
-            await _mediator.Send(new SubmitMockTestAnswerCommand
+            await _mediator.Send(new SubmitMockTestAnswerAICommand
             {
                 ObjectId = data.ObjectId,
                 WordContent = data.WordContent,

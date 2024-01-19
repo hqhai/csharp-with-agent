@@ -2,9 +2,11 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.Sections
 {
+    using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
     using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.CommandModels.SectionParts;
     using Fsel.Course.Domain.Models.CommandModels.SectionTimeCodes;
+    using Fsel.Shared.Enums;
 
     public class CreateSectionCommandModel
     {
@@ -19,11 +21,11 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
         public IList<CreateQuestionCommandModel>? Questions { get; set; }
         public IList<CreateSectionTimeCodeCommandModel>? SectionTimeCodes { get; set; }
 
-        public AiGradeSettingModel? AiGradeSettings { get; set; }
+        public MockTestAISettingModel? MockTestAISetting { get; set; }
 
     }
 
-    public class AiGradeSettingModel
+    public class MockTestAISettingModel
     {
         public bool IsUseAIGrade { get; set; }
         public string? SystemRoleAlConfig { get; set; }
@@ -34,5 +36,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
         public double? SettingTopP { get; set; }
         public double? SettingFrequecy { get; set; }
         public double? SettingPresence { get; set; }
+        public string? Task { get; set; }
+        public IList<MockTestPromptModel>? Prompts { get; set; }
     }
 }

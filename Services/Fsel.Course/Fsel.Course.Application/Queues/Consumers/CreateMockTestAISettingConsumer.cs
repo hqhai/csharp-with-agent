@@ -6,18 +6,17 @@ namespace Fsel.Course.Application.Queues.Consumers
     using MediatR;
     using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
     using Fsel.Course.Application.Commands.AiGradeSettingCmd;
-    using Fsel.Course.Domain.Models.CommandModels.Sections;
 
-    public class CreateAiGradeSettingConsumer : IConsumer<AiGradeSettingFeatureModel>
+    public class CreateMockTestAISettingConsumer : IConsumer<MockTestAiSettingModel>
     {
         private readonly IMediator _mediator;
 
-        public CreateAiGradeSettingConsumer(IMediator mediator)
+        public CreateMockTestAISettingConsumer(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<AiGradeSettingFeatureModel> context)
+        public async Task Consume(ConsumeContext<MockTestAiSettingModel> context)
         {
             if (context == null)
             {
@@ -25,9 +24,9 @@ namespace Fsel.Course.Application.Queues.Consumers
             }
             var data = context.Message;
 
-            await _mediator.Send(new CreateAiGradeSettingCmd()
+            await _mediator.Send(new CreateMockTestAISettingCmd()
             {
-                AiGradeSettingModels = data.AiGradeSettingModels
+                MockTestAiSettingModels = data.MockTestAiSettingModels
             }).ConfigureAwait(false);
         }
     }

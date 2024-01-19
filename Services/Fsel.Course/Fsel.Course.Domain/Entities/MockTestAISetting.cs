@@ -6,8 +6,12 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
+    using Fsel.Common.Helpers;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
 
-    public class AiGradeSetting : Entity
+    public class MockTestAISetting : Entity
     {
         public string? SystemRoleAlConfig { get; set; }
         public string? UserAlConfig { get; set; }
@@ -32,5 +36,19 @@ namespace Fsel.Course.Domain.Entities
         public double SettingPresence { get; set; }
 
         public Guid ObjectId { get; set; }
+
+        public string? Task { get; set; }
+
+        public string? PromptStr { get; set; }
+
+        [NotMapped]
+        public IList<MockTestPromptModel>? Prompts
+        {
+            get
+            {
+                return ConvertHelper.Deserialize<IList<MockTestPromptModel>>(PromptStr);
+            }
+            set { PromptStr = ConvertHelper.Serialize(value); }
+        }
     }
 }
