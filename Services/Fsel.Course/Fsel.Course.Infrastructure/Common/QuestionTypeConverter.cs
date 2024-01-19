@@ -81,6 +81,16 @@ namespace Fsel.Course.Infrastructure.Common
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropSentenceOrderQuestion) : default;
                     break;
 
+                case EnumQuestionType.DragAndDropListSentenceOrder:
+                    var dragAndDropList = config.Deserialize<DragAndDropListSentenceOrderQuestion>();
+                    if (dragAndDropList != null)
+                    {
+                        dragAndDropList.Contents = dragAndDropList.Contents?.Select((x, index) => { x.Id = ++index; return x; }).ToList();
+                    }
+                    result = isDisableAnswers ? ClearAnswers(dragAndDropList) : dragAndDropList;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    break;
+
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     var multipleOption = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
                     result = isDisableAnswers ? ClearAnswers(multipleOption) : multipleOption;
@@ -147,6 +157,11 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             return data;
+        }
+
+        private static object? ClearAnswers(DragAndDropListSentenceOrderQuestion? data)
+        {
+            return GenerateRandomLoop(data?.Contents);
         }
 
         private static object? ClearAnswers(MatchingTypeQuestion? data)
@@ -237,20 +252,13 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static IList<string>? GenerateRandomLoop(IList<string>? datas)
+        private static IList<T>? GenerateRandomLoop<T>(IList<T>? datas)
         {
             var rand = new Random();
             if (datas != null)
             {
-                for (int i = datas.Count - 1; i > 0; i--)
-                {
-                    var k = rand.Next(i + 1);
-                    var value = datas[k];
-                    datas[k] = datas[i];
-                    datas[i] = value;
-                }
+                return datas.OrderBy(_ => rand.Next()).ToList();
             }
-
             return datas;
         }
     }
