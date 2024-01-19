@@ -6,13 +6,9 @@ namespace Fsel.Interaction.Application.Services.HarmfulContentService.Models
 
     public class CheckHarmfulContentImagesModel
     {
-        [JsonPropertyName("image")]
-        public ImageModel? Images { get; set; }
-    }
-
-    public class ImageModel
-    {
-        [JsonPropertyName("blobUrl")]
-        public string? FilePath { get; set; }
+        [JsonPropertyName("DataRepresentation")]
+        public string? DataRepresentation { get; set; }
+        [JsonPropertyName("Value")]
+        public string? Value { get; set; }
     }
 }
