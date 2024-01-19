@@ -3,7 +3,6 @@
 namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
 {
     using System;
-    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -12,7 +11,6 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
     using Fsel.Interaction.Application.Services.HarmfulContentService.Models;
     using Fsel.Interaction.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -24,10 +22,10 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
 
     public class CheckHarmfulContentWordsQueryHandler : IRequestHandler<CheckHarmfulContentWordsQuery, MethodResult<bool>>
     {
-        private readonly IHarmfulContentService _harmfulContentService;
+        private readonly IHarmfulContentWordsService _harmfulContentService;
         private readonly AppSetting _appSetting;
 
-        public CheckHarmfulContentWordsQueryHandler(IHarmfulContentService harmfulContentService, AppSetting appSetting)
+        public CheckHarmfulContentWordsQueryHandler(IHarmfulContentWordsService harmfulContentService, AppSetting appSetting)
         {
             _harmfulContentService = harmfulContentService;
             _appSetting = appSetting;
@@ -52,7 +50,7 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
                     Text = request.Content,
                     Categories = HarmfulSetting.Categories,
                     OutputType = HarmfulSetting.OutputType
-                }, _appSetting.HarmfulContentConfig?.Version);
+                }, _appSetting.HarmfulContentConfigs?.HarmfulContentWordsConfig?.Version);
 
                 if (!checkHarmfulContentResult.IsSuccessStatusCode)
                 {

@@ -12,20 +12,9 @@ namespace Fsel.Shared.Helpers
             { EnumHarmfulContent.Hate, 2 },
         };
 
-        private static Dictionary<EnumHarmfulContent, int> s_imageSetting = new Dictionary<EnumHarmfulContent, int>()
-        {
-            { EnumHarmfulContent.Hate, 2 },
-            { EnumHarmfulContent.Sexual, 2 },
-        };
-
         public static bool CheckHarmfulWords(ICollection<CategoriesAnalysisModel>? categories)
         {
             return CheckHarmfulContents(categories, s_wordSetting);
-        }
-
-        public static bool CheckHarmfulImages(ICollection<CategoriesAnalysisModel>? categories)
-        {
-            return CheckHarmfulContents(categories, s_imageSetting);
         }
 
         private static bool CheckHarmfulContents(ICollection<CategoriesAnalysisModel>? categories, Dictionary<EnumHarmfulContent, int> harmfulSetting)

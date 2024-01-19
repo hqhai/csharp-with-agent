@@ -2,7 +2,6 @@
 
 namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
 {
-    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -10,8 +9,6 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
     using Fsel.Interaction.Application.Services.HarmfulContentService;
     using Fsel.Interaction.Application.Services.HarmfulContentService.Models;
     using Fsel.Interaction.Infrastructure.ValueSettings;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -22,10 +19,10 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
 
     public class CheckHarmfulContentImageQueryHandler : IRequestHandler<CheckHarmfulContentImageQuery, MethodResult<bool>>
     {
-        private readonly IHarmfulContentService _harmfulContentService;
+        private readonly IHarmfulContentImageService _harmfulContentService;
         private readonly AppSetting _appSetting;
 
-        public CheckHarmfulContentImageQueryHandler(IHarmfulContentService harmfulContentService, AppSetting appSetting)
+        public CheckHarmfulContentImageQueryHandler(IHarmfulContentImageService harmfulContentService, AppSetting appSetting)
         {
             _harmfulContentService = harmfulContentService;
             _appSetting = appSetting;
@@ -45,8 +42,7 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
             bool isHarmfulContent;
             try
             {
-                var checkHarmfulContentResult = await _harmfulContentService.CheckHarmfulContentImage(new CheckHarmfulContentImagesModel() { Images = new ImageModel { FilePath = request.FilePath } }
-                , _appSetting.HarmfulContentConfig?.Version);
+                var checkHarmfulContentResult = await _harmfulContentService.CheckHarmfulContentImage(new CheckHarmfulContentImagesModel { DataRepresentation = "URL", Value = request.FilePath}, true);
 
                 if (!checkHarmfulContentResult.IsSuccessStatusCode)
                 {
@@ -54,9 +50,9 @@ namespace Fsel.Interaction.Application.Queries.HarmfulContentQuery
                     return methodResult;
                 }
 
-                var harmfulContent = checkHarmfulContentResult.Content?.CategoriesAnalysis?.ToList();
+                var harmfulContent = checkHarmfulContentResult.Content;
 
-                isHarmfulContent = HarmfulContentHelper.CheckHarmfulImages(harmfulContent);
+                isHarmfulContent = harmfulContent!.Result;
             }
             catch
             {
