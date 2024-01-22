@@ -57,12 +57,20 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
 
                 if (!string.IsNullOrEmpty(request.Keyword))
                 {
-                    data = data.Where(p => !string.IsNullOrEmpty(p.Title) && p.Title.ToLower(CultureInfo.CurrentCulture) == request.Keyword.ToLower(CultureInfo.CurrentCulture)).ToList();
+                    data = data.Where(p => !string.IsNullOrEmpty(p.Title) && p.Title.Contains(request.Keyword, StringComparison.CurrentCulture)).ToList();
                 }
 
                 if (request.Min.HasValue && request.Max.HasValue)
                 {
                     data = data.Where(p => long.TryParse(p.Price, out long priceValue) && priceValue >= request.Min && priceValue <= request.Max).ToList();
+                }
+                else if (request.Min.HasValue)
+                {
+                    data = data.Where(p => long.TryParse(p.Price, out long priceValue) && priceValue >= request.Min).ToList();
+                }
+                else if (request.Max.HasValue)
+                {
+                    data = data.Where(p => long.TryParse(p.Price, out long priceValue) && priceValue <= request.Max).ToList();
                 }
 
                 int totalItem = data.Count;
