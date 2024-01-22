@@ -42,19 +42,17 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public MethodResult<Question> HandleQuestionLCMS(Question? question, bool isTypeHomeWork = false)
+        public MethodResult<Question> HandleQuestion(Question? question, bool isUseTypeExercisePreparation = false)
         {
             ArgumentNullException.ThrowIfNull(question);
             var methodResult = new MethodResult<Question>();
-            var isShowCorrectTotal = isTypeHomeWork ? !question.Ungraded : question.QuestionType != EnumQuestionType.ExercisePreparation && !question.Ungraded;
-            var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal);
-            if (config == null)
+            var isShowCorrectTotal = isUseTypeExercisePreparation ? !question.Ungraded : question.QuestionType != EnumQuestionType.ExercisePreparation && !question.Ungraded;
+            (question.Config, question.CorrectTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal);
+            if (question.Config == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
                 return methodResult;
             }
-            question.Config = config;
-            question.CorrectTotal = correctTotal;
             if (!question.IsValid())
             {
                 methodResult.AddErrorBadRequest(question.ErrorMessages);
