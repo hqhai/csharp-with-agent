@@ -18,16 +18,17 @@ namespace Fsel.Training.Api.Controllers.Admin
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/class")]
     [ApiController]
-    //[Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class ClassController : ControllerBase
     {
         private readonly IMediator _mediator;
 
         public ClassController(IMediator mediator)
-        {   
+        {
             _mediator = mediator;
         }
 

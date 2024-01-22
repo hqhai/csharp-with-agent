@@ -24,7 +24,7 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Put("/admin/order/change-status-order")]
         Task<IApiResponse<MethodResult<bool>>> ChangeStatusOrder([Body] ChangeStatusOrderCommandModel command);
-        [Delete("/admin/student")]
+        [Delete("/admin/order/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
     }
 }

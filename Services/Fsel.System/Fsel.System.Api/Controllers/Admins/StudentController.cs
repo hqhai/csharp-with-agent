@@ -6,6 +6,7 @@ namespace Fsel.System.Api.Controllers.Admins
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.StudentCmd;
     using global::System.Net;
     using MediatR;
@@ -15,7 +16,7 @@ namespace Fsel.System.Api.Controllers.Admins
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/student")]
     [ApiController]
-    //[Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class StudentController : ControllerBase
     {
         private readonly IMediator _mediator;

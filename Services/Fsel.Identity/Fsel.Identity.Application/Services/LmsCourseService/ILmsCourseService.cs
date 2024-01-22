@@ -29,7 +29,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
         [Get("/admin/course/get-course-by-code/{code}")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByCode([FromRoute] string code);
 
-        [Delete("/admin/student")]
+        [Delete("/admin/student/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
     }
 }

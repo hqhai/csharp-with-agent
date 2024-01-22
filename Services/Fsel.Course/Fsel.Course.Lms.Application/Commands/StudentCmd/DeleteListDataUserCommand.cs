@@ -31,7 +31,6 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
-        private readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
 
         public DeleteListDataUserCommandHandler(IUserService userService
                                               , ICourseResultRepository courseResultRepository
@@ -44,8 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
                                               , IClassForumResultRepository classForumResultRepository
                                               , IHomeWorkResultRepository homeWorkResultRepository
                                               , IVideoResultRepository videoResultRepository
-                                              , ISectionGroupResultRepository sectionGroupResultRepository
-                                              , IHomeWorkAnswerRepository homeWorkAnswerRepository)
+                                              , ISectionGroupResultRepository sectionGroupResultRepository)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
@@ -59,7 +57,6 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             _homeWorkResultRepository = homeWorkResultRepository;
             _videoResultRepository = videoResultRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
-            _homeWorkAnswerRepository = homeWorkAnswerRepository;
         }
         public async Task<MethodResult<bool>> Handle(DeleteListDataUserCommand request, CancellationToken cancellationToken)
         {
@@ -83,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             if (courseResult.Count != 0)
             {
                 await _courseResultRepository.DeleteListAsync(courseResult);
-                await _courseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // delete placement test result va placement test answers
@@ -94,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             if (placementTestResult.Count != 0)
             {
                 await _placementTestResultRepository.DeleteListAsync(placementTestResult);
-                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // delete final test answers
@@ -105,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             if (finalTestResult.Count != 0)
             {
                 await _finalTestResultRepository.DeleteListAsync(finalTestResult);
-                await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _finalTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // delete unit result
@@ -115,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             if (unitResult.Count != 0)
             {
                 await _unitResultRepository.DeleteListAsync(unitResult);
-                await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // delete lesson result va lesson note
@@ -126,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             if (lessonResult.Count != 0)
             {
                 await _lessonResultRepository.DeleteListAsync(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // delete mock test result
@@ -138,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             if (mockTestResult.Count != 0)
             {
                 await _mockTestResultRepository.DeleteListAsync(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // delete ExtraPracticeResult
@@ -150,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             if (extraPracticeResult.Count != 0)
             {
                 await _extraPracticeResultRepository.DeleteListAsync(extraPracticeResult);
-                await _extraPracticeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // delete ClassForumResult
@@ -163,31 +160,19 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             if (classForumResult.Count != 0)
             {
                 await _classForumResultRepository.DeleteListAsync(classForumResult);
-                await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // delete HomeworkResult
             var homeWorkResult = await _homeWorkResultRepository.Queryable
+                                                                .Include(x => x.HomeWorkAnswers)
                                                                 .Where(x => x.StudentId == studentId && x.IsDeleted != true)
                                                                 .ToListAsync(cancellationToken);
 
             if (homeWorkResult.Count != 0)
             {
-                // delete HomeWorkAnswers
-                foreach (var item in homeWorkResult)
-                {
-                    var homeWorkAnswer = await _homeWorkAnswerRepository.Queryable
-                                                                        .Where(x => x.HomeWorkResultId == item.Id)
-                                                                        .ToListAsync(cancellationToken);
-                    if (homeWorkAnswer.Count != 0)
-                    {
-                        await _homeWorkAnswerRepository.DeleteListAsync(homeWorkAnswer);
-                        await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                }
-
                 await _homeWorkResultRepository.DeleteListAsync(homeWorkResult);
-                await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _homeWorkResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // delete Video Result
@@ -201,7 +186,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             if (videoResult.Count != 0)
             {
                 await _videoResultRepository.DeleteListAsync(videoResult);
-                await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             //delete SectionGroupResult
@@ -211,7 +196,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             if (sectionGroupResult.Count != 0)
             {
                 await _sectionGroupResultRepository.DeleteListAsync(sectionGroupResult);
-                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

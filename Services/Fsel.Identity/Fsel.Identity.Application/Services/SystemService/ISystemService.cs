@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Get("/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
-        [Delete("/admin/student")]
+        [Delete("/admin/student/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
     }
 }

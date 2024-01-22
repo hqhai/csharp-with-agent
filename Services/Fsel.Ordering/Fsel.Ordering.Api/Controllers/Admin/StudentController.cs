@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
     using Fsel.Common.Constants;
     using Fsel.Ordering.Application.Commands.StudentCmd;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +16,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/order")]
     [ApiController]
-    //[Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class StudentController : ControllerBase
     {
         private readonly IMediator _mediator;
