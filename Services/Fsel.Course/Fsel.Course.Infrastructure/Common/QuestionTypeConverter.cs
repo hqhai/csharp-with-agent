@@ -99,6 +99,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.ExercisePreparation:
                     result = config.Deserialize<ExercisePreparationQuestion>();
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
                 default:
