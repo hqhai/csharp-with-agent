@@ -24,6 +24,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? OrderApiUrl { get; set; }
         public string? LmsCourseApiUrl { get; set; }
         public string? SystemApiUrl { get; set; }
+        public string? ClassApiUrl { get; set; }
     }
 
     public class Otp

@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Services.SystemService
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Shared.Models.ShareModels;
+    using Microsoft.AspNetCore.Mvc;
     //using Fsel.Identity.Application.Services.SystemService.Model;
     using Refit;
 
@@ -15,5 +16,7 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Get("/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
+        [Delete("/admin/student")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
     }
 }
