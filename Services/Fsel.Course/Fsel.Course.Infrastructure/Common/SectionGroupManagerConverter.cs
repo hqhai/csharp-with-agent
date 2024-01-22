@@ -15,14 +15,16 @@ namespace Fsel.Course.Infrastructure.Common
     public class SectionGroupManagerConverter
     {
         private readonly QuestionTypeConverter _questionTypeConverter;
+        private readonly QuestionConverter _questionConverter;
         private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly IQuestionRepository _questionRepository;
 
-        public SectionGroupManagerConverter(QuestionTypeConverter questionTypeConverter, IMapper mapper, ISectionGroupRepository sectionGroupRepository, ISectionQuestionRepository sectionQuestionRepository, IQuestionRepository questionRepository)
+        public SectionGroupManagerConverter(QuestionTypeConverter questionTypeConverter, QuestionConverter questionConverter, IMapper mapper, ISectionGroupRepository sectionGroupRepository, ISectionQuestionRepository sectionQuestionRepository, IQuestionRepository questionRepository)
         {
             _questionTypeConverter = questionTypeConverter;
+            _questionConverter = questionConverter;
             _mapper = mapper;
             _sectionGroupRepository = sectionGroupRepository;
             _sectionQuestionRepository = sectionQuestionRepository;
@@ -40,22 +42,18 @@ namespace Fsel.Course.Infrastructure.Common
             }
             foreach (var question in questions)
             {
-                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                if (config == null)
+                var newQuestion = _mapper.Map<Question>(question);
+                var method = _questionConverter.HandleQuestionLCMS(newQuestion);
+                if (!method.IsOK)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                }
-                question.CorrectTotal = correctTotal;
-                if (!question.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(question.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
                 if (section != null)
                 {
                     section.SectionQuestions.Add(new SectionQuestion
                     {
-                        Question = question,
+                        Question = method.Result,
                     });
                 }
             }

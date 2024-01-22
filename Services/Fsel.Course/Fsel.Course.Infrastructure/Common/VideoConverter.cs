@@ -32,6 +32,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly QuestionConverter _questionConverter;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
         private readonly LinQHelper _linQHelper;
@@ -47,6 +48,7 @@ namespace Fsel.Course.Infrastructure.Common
             , AnswerTypeConverter answerTypeConverter
             , IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , IVideoTimeCodeRepository videoTimeCodeRepository
+            , QuestionConverter questionConverter
             , IExerciseQuestionRepository exerciseQuestionRepository
             , ITimeCodeExerciseRepository timeCodeExerciseRepository
             , LinQHelper linQHelper
@@ -62,6 +64,7 @@ namespace Fsel.Course.Infrastructure.Common
             _answerTypeConverter = answerTypeConverter;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoTimeCodeRepository = videoTimeCodeRepository;
+            _questionConverter = questionConverter;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _timeCodeExerciseRepository = timeCodeExerciseRepository;
             _linQHelper = linQHelper;
@@ -87,24 +90,17 @@ namespace Fsel.Course.Infrastructure.Common
                     return methodResult;
                 }
                 var newQuestion = _mapper.Map<Question>(question);
+                var method = _questionConverter.HandleQuestionLCMS(newQuestion);
+                if (!method.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
+                }
                 newExercise.ExerciseQuestions.Add(new ExerciseQuestion
                 {
                     Exercise = newExercise,
-                    Question = newQuestion
+                    Question = method.Result
                 });
-                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, question.QuestionType != EnumQuestionType.ExercisePreparation && !question.Ungraded, false);
-                if (config == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                    return methodResult;
-                }
-                newQuestion.Config = config;
-                newQuestion.CorrectTotal = correctTotal;
-                if (!newQuestion.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
-                    return methodResult;
-                }
             }
             if (!newExercise.IsValid())
             {
