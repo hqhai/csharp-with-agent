@@ -7,6 +7,6 @@ namespace Fsel.Shared.Enums
         TaskResponse,
         Coherence,
         LexicalResource,
-        GrammaticalRage
+        GrammaticalRange
     }
 }

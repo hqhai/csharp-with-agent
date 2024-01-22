@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 TaskResponse = resultDictionary[EnumMockTestAIType.TaskResponse],
                 Coherence = resultDictionary[EnumMockTestAIType.Coherence],
                 LexicalResource = resultDictionary[EnumMockTestAIType.LexicalResource],
-                GrammaticalRage = resultDictionary[EnumMockTestAIType.GrammaticalRage]
+                GrammaticalRange = resultDictionary[EnumMockTestAIType.GrammaticalRange]
             };
 
             string? gradingAiFeedBack = ConvertHelper.Serialize(gradingAiFeedBackResult);
