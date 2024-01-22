@@ -5,20 +5,8 @@ namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Response
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
 
-    public class GetListCategoryModel
+    public class GetListCategoryModel : UrBoxModel
     {
-        [JsonPropertyName("done")]
-        public long Done { get; set; }
-
-        [JsonPropertyName("msg")]
-        public string? Msg { get; set; }
-
-        [JsonPropertyName("microtime")]
-        public string? MicroTime { get; set; }
-
-        [JsonPropertyName("status")]
-        public long Status { get; set; }
-
         [JsonPropertyName("data")]
         public IList<CategoryModel>? Data { get; set; }
     }
