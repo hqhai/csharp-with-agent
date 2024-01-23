@@ -11,5 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public int? TimeCount => MediaHelper.GetMediaDurationAsync(Answer?.ToString());
         public int? WordCount => StringHelper.CountWords(Answer?.ToString());
+
+        public string? GradingAlFeedback { get; set; }
     }
 }

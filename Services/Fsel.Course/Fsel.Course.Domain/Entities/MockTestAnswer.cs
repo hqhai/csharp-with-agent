@@ -22,5 +22,7 @@ namespace Fsel.Course.Domain.Entities
 
         public SectionGroupResult? SectionGroupResult { get; set; }
         public Guid? SectionGroupResultId { get; set; }
+
+        public string? GradingAlFeedback { get; set; }
     }
 }
