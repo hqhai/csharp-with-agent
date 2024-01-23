@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 {
     using System.Linq;
+    using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
@@ -66,8 +67,19 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return methodResult;
             }
 
-            #region Validation
+            await _homeWorkAnswerRepository.ExecuteTransactionAsync(async () =>
+            {
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                return methodResult;
+            });
+            methodResult = await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, cancellationToken);
+            return methodResult;
+        }
 
+        private async Task<MethodResult<bool>> SaveAnswer(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request.Answers);
+            var methodResult = new MethodResult<bool>();
             var method = await Validate(request, cancellationToken);
             if (!method.IsOK)
             {
@@ -75,13 +87,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return methodResult;
             }
             var (questions, homeWorkResult, homeWork) = method.Result;
+            var isTryAgain = homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
+
             var createHomeWorkAnswers = new List<HomeWorkAnswer>();
             var updateHomeWorkAnswers = new List<HomeWorkAnswer>();
-            int correctTotal = default;
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, default, default, request.IsSubmit);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, default, isTryAgain, request.IsSubmit);
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
@@ -95,7 +108,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     return methodResult;
                 }
                 var homeWorkAnswer = await _homeWorkAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == homeWorkResult.Id, cancellationToken);
-                correctTotal += correctCount;
                 if (homeWorkAnswer == null)
                 {
                     homeWorkAnswer = new HomeWorkAnswer
@@ -109,31 +121,28 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 {
                     updateHomeWorkAnswers.Add(homeWorkAnswer);
                 }
-                homeWorkAnswer.Status = request.IsSubmit ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
+                homeWorkAnswer.Status = GetStatusAnswer(request.IsSubmit, homeWorkResult);
                 homeWorkAnswer.Answer = answerConfig;
                 homeWorkAnswer.CorrectCount = correctCount;
                 homeWorkAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
             }
-
-            #endregion Validation
-
-            await _homeWorkAnswerRepository.ExecuteTransactionAsync(async () =>
+            if (createHomeWorkAnswers.Any())
             {
-                if (createHomeWorkAnswers.Any())
-                {
-                    await _homeWorkAnswerRepository.AddList(createHomeWorkAnswers);
-                    await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                if (updateHomeWorkAnswers.Any())
-                {
-                    _homeWorkAnswerRepository.UpdateList(updateHomeWorkAnswers);
-                    await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                return methodResult;
-            });
-            methodResult = await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, cancellationToken);
+                await _homeWorkAnswerRepository.AddList(createHomeWorkAnswers);
+                await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            if (updateHomeWorkAnswers.Any())
+            {
+                _homeWorkAnswerRepository.UpdateList(updateHomeWorkAnswers);
+                await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            methodResult.Result = true;
             return methodResult;
+        }
+
+        private static EnumAnswerStatus GetStatusAnswer(bool isSubmit, HomeWorkResult homeWorkResult)
+        {
+            return isSubmit && homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
         }
 
         private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult homeWorkResult, bool isSubmit, CancellationToken cancellationToken)
@@ -157,19 +166,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                         methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.QuestionNotCompleted));
                         return methodResult;
                     }
-                    homeWorkResult.CorrectCount = homeWorkQuestionCount.CorrectCount;
-                    homeWorkResult.CorrectTotal = homeWorkQuestionCount.CorrectTotal;
-                    homeWorkResult.Status = EnumResultStatus.Done;
-                    var skillScores = new SkillScores
+                    if (homeWorkQuestionCount.CorrectCount == homeWorkQuestionCount.CorrectTotal)
                     {
-                        Skill = homeWorkQuestionCount.CourseSkill,
-                        CorrectCount = homeWorkQuestionCount.CorrectCount,
-                        TotalCount = homeWorkQuestionCount.CorrectTotal,
-                        CountQuestion = homeWorkQuestionCount.TotalAnswer,
-                        TotalQuestion = homeWorkQuestionCount.TotalQuestion,
-                    };
-                    homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
-                    await _finishOneHomeWorkPublisher.Publish(homeWorkResult, cancellationToken);
+                        homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, cancellationToken);
+                    }
+                    else
+                    {
+                        homeWorkResult.SubmissionCount = EnumSubmissionCount.SecondSubmit;
+                    }
                 }
                 else
                 {
@@ -180,6 +184,24 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             }
             methodResult.Result = true;
             return methodResult;
+        }
+
+        private async Task<HomeWorkResult> GetHomeWorkResult(HomeWorkResult homeWorkResult, dynamic homeWorkQuestionCount, CancellationToken cancellationToken)
+        {
+            homeWorkResult.CorrectCount = homeWorkQuestionCount.CorrectCount;
+            homeWorkResult.CorrectTotal = homeWorkQuestionCount.CorrectTotal;
+            homeWorkResult.Status = EnumResultStatus.Done;
+            var skillScores = new SkillScores
+            {
+                Skill = homeWorkQuestionCount.CourseSkill,
+                CorrectCount = homeWorkQuestionCount.CorrectCount,
+                TotalCount = homeWorkQuestionCount.CorrectTotal,
+                CountQuestion = homeWorkQuestionCount.TotalAnswer,
+                TotalQuestion = homeWorkQuestionCount.TotalQuestion,
+            };
+            homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
+            await _finishOneHomeWorkPublisher.Publish(homeWorkResult, cancellationToken);
+            return homeWorkResult;
         }
 
         public async Task<MethodResult<(IList<Question>, HomeWorkResult, HomeWork)>> Validate(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
