@@ -10,6 +10,6 @@ namespace Fsel.System.Application.Services.DictionaryServices
     public interface IDictionaryService
     {
         [Get("/entries/en/{word}")]
-        Task<IApiResponse<IList<DictionaryModel>>> GetDictionaryByWordAsync([FromQuery] string word);
+        Task<IApiResponse<IList<DictionaryModel>>> GetDictionaryByWordAsync([FromQuery] string? word);
     }
 }

@@ -6,12 +6,12 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.System.Application.Services.DictionaryServices;
     using Fsel.System.Application.Services.DictionaryServices.Models;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using global::System.Collections.Generic;
     using global::System.Linq;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class GetDictionaryByWordQuery : IRequest<MethodResult<IList<DictionaryModel>>>
     {
@@ -34,8 +34,7 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<DictionaryModel>> methodResult = new MethodResult<IList<DictionaryModel>>();
 
-            var responseResult = await _dictionaryService.GetDictionaryByWordAsync(request.Word!);
-
+            var responseResult = await _dictionaryService.GetDictionaryByWordAsync(request.Word);
             var result = responseResult.Content;
 
             if (result == null)
@@ -43,114 +42,87 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(result));
                 return methodResult;
             }
+
             var forbiddenWord = _forbiddenWordRepository.Queryable;
 
-            if (forbiddenWord.Any(x => result.Select(x => x.Word).Contains(x.Word)))
+            foreach (var word in result)
             {
-                foreach (var word in result)
-                {
-                    word.Word = null;
-                }
-            }
-
-            if (forbiddenWord.Any(x => result.Select(x => x.Phonetic).Contains(x.Word)))
-            {
-                foreach (var word in result)
-                {
-                    word.Phonetics = null;
-                }
-            }
-
-            var phonetics = result.SelectMany(x => x.Phonetics!);
-
-            if (forbiddenWord.Any(x => phonetics.Select(x => x.Text).Contains(x.Word)))
-            {
-                foreach (var p in phonetics)
-                {
-                    p.Text = null;
-                }
-            }
-
-            if (forbiddenWord.Any(x => phonetics.Select(x => x.Audio).Contains(x.Word)))
-            {
-                foreach (var p in phonetics)
-                {
-                    p.Audio = null;
-                }
-            }
-
-            if (forbiddenWord.Any(x => result.Select(x => x.Origin).Contains(x.Word)))
-            {
-                foreach (var word in result)
-                {
-                    word.Origin = null;
-                }
-            }
-
-            var license = result.Select(x => x.License);
-            if (license != null)
-            {
-                if (forbiddenWord.Any(x => license.Select(x => x!.Name).Contains(x.Word)))
-                {
-                    foreach (var p in license)
-                    {
-                        p!.Name = null;
-                    }
-                }
-                if (forbiddenWord.Any(x => license.Select(x => x!.Url).Contains(x.Word)))
-                {
-                    foreach (var p in license)
-                    {
-                        p!.Url = null;
-                    }
-                }
-            }
-
-            var meanings = result.SelectMany(x => x.Meanings!);
-
-            if (forbiddenWord.Any(x => meanings.Select(x => x.PartOfSpeech).Contains(x.Word)))
-            {
-                foreach (var p in meanings)
-                {
-                    p.PartOfSpeech = null;
-                }
-            }
-
-            var definitions = meanings.SelectMany(x => x.Definitions!);
-
-            foreach (var p in definitions)
-            {
-                if (p.Definition != null)
-                {
-                    if (forbiddenWord.Any(x => p.Definition.Contains(x.Word!)))
-                    {
-                        p.Definition = null;
-                    }
-                }
-                if (p.Example != null)
-                {
-                    if (forbiddenWord.Any(x => p.Example.Contains(x.Word!)))
-                    {
-                        p.Example = null;
-                    }
-                }
-            }
-
-            foreach (var p in meanings)
-            {
-                if (forbiddenWord.Any(x => p.Synonyms!.Contains(x.Word!)))
-                {
-                    p.Synonyms = null;
-                }
-                if (forbiddenWord.Any(x => p.Antonyms!.Contains(x.Word!)))
-                {
-                    p.Antonyms = null;
-                }
+                ProcessForbiddenWord(word, forbiddenWord);
             }
 
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+
+            // Helper method to process forbidden words for a single word entry
+            void ProcessForbiddenWord(DictionaryModel word, IQueryable<ForbiddenWord> forbiddenWords)
+            {
+                void SetToNullIfForbidden(Func<DictionaryModel, string?> propertySelector)
+                {
+                    var propertyValue = propertySelector(word);
+                    if (propertyValue != null && forbiddenWords.Any(x => x.Word == propertyValue))
+                    {
+                        propertySelector(word) = null;
+                    }
+                }
+
+                SetToNullIfForbidden(w => w.Word);
+                SetToNullIfForbidden(w => w.Phonetic);
+                SetToNullIfForbidden(w => w.Origin);
+                SetToNullIfForbidden(w => w.License?.Name);
+                SetToNullIfForbidden(w => w.License?.Url);
+
+                var phonetics = word.Phonetics;
+                if (phonetics != null)
+                {
+                    foreach (var phonetic in phonetics)
+                    {
+                        SetToNullIfForbidden(p => p.Text);
+                        SetToNullIfForbidden(p => p.Audio);
+                    }
+                }
+
+                var meanings = word.Meanings;
+                if (meanings != null)
+                {
+                    foreach (var meaning in meanings)
+                    {
+                        if (forbiddenWords.Any(x => x.Word == meaning.PartOfSpeech))
+                        {
+                            meaning.PartOfSpeech = null;
+                        }
+
+                        foreach (var definition in meaning.Definitions ?? Enumerable.Empty<DefinitionsModel>())
+                        {
+                            SetToNullIfForbidden(d => d.Definition);
+                            SetToNullIfForbidden(d => d.Example);
+                        }
+
+                        SetToNullIfForbidden(m => m.Synonyms);
+                        SetToNullIfForbidden(m => m.Antonyms);
+                    }
+                }
+            }
         }
+
+        /* private async Task<object?> loop(object? data, string? nameProperty)
+         {
+             var query = _forbiddenWordRepository.Queryable;
+             if (data is IList list)
+             {
+                 var objects = list.Cast<object>().ToList();
+                 if (objects != null && objects.Any())
+                 {
+                     if (await query.AnyAsync(x => objects.Select(x => x.GetPropValue<string>(nameProperty)).Contains(x.Word)))
+                     {
+                         foreach (var word in objects)
+                         {
+                             word.GetPropValue<string>(nameProperty) = null;
+                         }
+                     }
+                 }
+             }
+             return data;
+         }*/
     }
 }
