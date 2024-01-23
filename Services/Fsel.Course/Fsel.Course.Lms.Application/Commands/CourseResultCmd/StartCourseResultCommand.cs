@@ -33,17 +33,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseResultModel> methodResult = new MethodResult<CourseResultModel>();
 
-            #region Validation
-
             var courseResult = await _courseResultRepository.GetByIdAsync(request.CourseResultId);
             if (courseResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
                 return methodResult;
             }
-
-            #endregion Validation
-
             if (courseResult.Status == EnumResultStatus.New)
             {
                 courseResult.Status = EnumResultStatus.Process;

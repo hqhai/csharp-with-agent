@@ -8,7 +8,6 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.Entities;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.SupportTickets;
     using Fsel.Interaction.Domain.Models.EntityModels;

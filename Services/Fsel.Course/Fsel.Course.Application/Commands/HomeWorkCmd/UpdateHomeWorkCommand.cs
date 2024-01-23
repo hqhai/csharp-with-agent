@@ -25,24 +25,29 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     {
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
+        private readonly QuestionConverter _questionConverter;
         private readonly IQuestionRepository _questionRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
 
         public UpdateHomeWorkCommandHandler(IMapper mapper
             , IHomeWorkRepository homeWorkRepository
-            , IQuestionRepository questionRepository
-            , QuestionTypeConverter questionTypeConverter)
+            , QuestionConverter questionConverter
+            , IQuestionRepository questionRepository)
         {
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
+            _questionConverter = questionConverter;
             _questionRepository = questionRepository;
-            _questionTypeConverter = questionTypeConverter;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(UpdateHomeWorkCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<HomeWorkModel> methodResult = new MethodResult<HomeWorkModel>();
+            if (request.Questions == null || request.Questions.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
+                return methodResult;
+            }
             var homeWork = await _homeWorkRepository.Queryable
                             .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
                             .ThenInclude(x => x.Question)
@@ -53,54 +58,37 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                 return methodResult;
             }
             var questionDeletes = homeWork.HomeWorkQuestions.Where(x => x.Question != null && !x.IsDeleted).Select(x => x.Question!);
-
             homeWork = _mapper.Map(request, homeWork);
 
-            if (request.Questions == null || request.Questions.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
-                return methodResult;
-            }
             var homeWorkQuestions = new List<HomeWorkQuestion>();
-            request.Questions.ForEach(q =>
+            foreach (var question in request.Questions)
             {
-                if (q == null)
+                if (question == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
+                    return methodResult;
                 }
                 else
                 {
-                    Question question = _mapper.Map<Question>(q);
-                    var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                    if (config == null)
+                    var newQuestion = _mapper.Map<Question>(question);
+                    var method = _questionConverter.HandleQuestion(newQuestion, true);
+                    if (!method.IsOK)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                        return methodResult;
                     }
-                    question.CorrectTotal = correctTotal;
-
-                    if (!question.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(question.ErrorMessages);
-                    }
-
                     homeWorkQuestions.Add(new HomeWorkQuestion
                     {
-                        Question = question
+                        Question = method.Result
                     });
                 }
-            });
-
+            }
             homeWork.HomeWorkQuestions = homeWorkQuestions;
             if (!homeWork.IsValid())
             {
                 methodResult.AddErrorBadRequest(homeWork.ErrorMessages);
                 return methodResult;
             }
-            else if (!methodResult.IsOK)
-            {
-                return methodResult;
-            }
-
             var isHomeWorkUsed = await _homeWorkRepository.IsHomeWorkUsed(request.Id);
             if (isHomeWorkUsed)
             {

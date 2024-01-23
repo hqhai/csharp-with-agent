@@ -42,6 +42,9 @@ namespace Fsel.Shared.Enums
         [Description("Gap fill with word bank (score by gap)")]
         GapFillWordBankScoreByGap,
 
+        [Description("Drag and Drop (List Sentence Order)")]
+        DragAndDropListSentenceOrder,
+
         [Description("Drag and Drop (Sentence Order)")]
         DragAndDropSentenceOrder,
 

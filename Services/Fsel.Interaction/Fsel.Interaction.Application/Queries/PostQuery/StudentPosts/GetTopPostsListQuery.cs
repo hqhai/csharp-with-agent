@@ -6,6 +6,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
@@ -48,7 +49,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
 
             var postQuery = _postRepository.Queryable
                 .Include(post => post.PostTags.Where(y => !y.IsDeleted))
-                .Where(post => post.CourseLevel == courseLevel)
+                .Where(post => post.CourseLevel == courseLevel && post.Status == EnumPostStatus.Active)
                 .OrderByDescending(post => post.PostTags.Count)
                 .ThenByDescending(post => post.CreatedDate)
                 .Select(post => new PostSearchModel
@@ -68,6 +69,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             int totalItem = await postQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var lists = await postQuery
+                    .ApplyPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
             .ConfigureAwait(false);

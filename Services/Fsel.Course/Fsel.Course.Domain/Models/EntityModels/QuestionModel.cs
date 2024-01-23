@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
@@ -13,6 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool Ungraded { get; set; }
         public string? Explanation { get; set; }
         public object? Config { get; set; }
+        public EnumCorrectStatus? CorrectStatus { get; set; }
         public AnswerModel? ResultAnswer { get; set; }
         public Guid? SectionId { get; set; }
     }

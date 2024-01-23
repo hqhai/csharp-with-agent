@@ -18,7 +18,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
             get { return _videoFilePath.AddS3BaseUrl(); }
         }
 
-        public string? SubFilePath { get; set; }
+        private string? _subFilePath;
+        public string? SubFilePath
+        {
+            set { _subFilePath = value; }
+            get { return _subFilePath.AddS3BaseUrl(); }
+        }
         public bool IsActive { get; set; }
         public int TotalQuestion { get; set; }
         public EnumVideoType Type { get; set; }

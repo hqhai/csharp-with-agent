@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 videoTimeCodeResult = _videoTimeCodeResultRepository.Add(videoTimeCodeResult);
                 await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 await UpdateVideoResult(videoResult, request.VideoTimeCodeId).ConfigureAwait(false);
-                if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+                if ((videoTimeCode.TimeCodeType == EnumTimeCodeType.SkillTest && videoTimeCode.ExecutionTime == default) || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
                 {
                     await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
                     {
@@ -99,18 +99,29 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             }
             else if (videoTimeCodeResult.Status != EnumResultStatus.Done && request.IsActive)
             {
-                if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.New)
+                if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
                 {
                     videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
                 }
-                else if ((videoTimeCodeResult.IsWorking || videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone) && videoTimeCodeResult.Status == EnumResultStatus.Process)
-                {
-                    videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
-                }
                 else
                 {
-                    videoTimeCodeResult.IsWorking = true;
+                    if (videoTimeCodeResult.IsWorking)
+                    {
+                        if (videoTimeCodeResult.Status == EnumResultStatus.New)
+                        {
+                            videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                        }
+                        else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+                        {
+                            videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                        }
+                    }
+                    else
+                    {
+                        videoTimeCodeResult.IsWorking = true;
+                    }
                 }
+
                 videoTimeCodeResult = _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
                 await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
