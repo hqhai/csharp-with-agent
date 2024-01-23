@@ -8,7 +8,6 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.HomeWorks;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -23,15 +22,15 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     public class CreateHomeWorkCommandHandler : IRequestHandler<CreateHomeWorkCommand, MethodResult<HomeWorkModel>>
     {
         private readonly IMapper _mapper;
+        private readonly QuestionConverter _questionConverter;
         private readonly IHomeWorkRepository _homeWorkRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
 
         public CreateHomeWorkCommandHandler(IMapper mapper
-            , QuestionTypeConverter questionTypeConverter
+            , QuestionConverter questionConverter
             , IHomeWorkRepository homeWorkRepository)
         {
             _mapper = mapper;
-            _questionTypeConverter = questionTypeConverter;
+            _questionConverter = questionConverter;
             _homeWorkRepository = homeWorkRepository;
         }
 
@@ -47,41 +46,31 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
                 return methodResult;
             }
-
-            request.Questions.ForEach(q =>
+            foreach (var question in request.Questions)
             {
-                if (q == null)
+                if (question == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
+                    return methodResult;
                 }
                 else
                 {
-                    Question question = _mapper.Map<Question>(q);
-                    var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                    if (config == null)
+                    var newQuestion = _mapper.Map<Question>(question);
+                    var method = _questionConverter.HandleQuestionLCMS(newQuestion, true);
+                    if (!method.IsOK)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                        return methodResult;
                     }
-                    question.CorrectTotal = correctTotal;
-                    if (!question.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(question.ErrorMessages);
-                    }
-
                     homeWork.HomeWorkQuestions.Add(new HomeWorkQuestion
                     {
-                        Question = question
+                        Question = method.Result
                     });
                 }
-            });
-
+            }
             if (!homeWork.IsValid())
             {
                 methodResult.AddErrorBadRequest(homeWork.ErrorMessages);
-                return methodResult;
-            }
-            else if (!methodResult.IsOK)
-            {
                 return methodResult;
             }
 

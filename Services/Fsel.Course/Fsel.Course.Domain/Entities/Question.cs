@@ -19,13 +19,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Check câu hỏi có tính điểm không
         /// </summary>
-        private bool _ungraded;
-
-        public bool Ungraded
-        {
-            get { return _ungraded; }
-            set { _ungraded = QuestionType == EnumQuestionType.ExercisePreparation || value; }
-        }
+        public bool Ungraded { get; set; }
 
         /// <summary>
         /// Lưu câu giải thích
