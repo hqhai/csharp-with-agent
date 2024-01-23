@@ -23,6 +23,10 @@ namespace Fsel.Identity.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(builder);
 
+            builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
+
             SeedPlatforms(builder);
             SeedRoles(builder);
 

@@ -368,9 +368,9 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        public async Task<SectionGroupResult> UpdateSectionGroupToIsSubmit(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, bool isSubmit)
+        public async Task<SectionGroupResult?> UpdateSectionGroupToIsSubmit(SectionGroup sectionGroup, SectionGroupResult? sectionGroupResult, bool isSubmit)
         {
-            if (isSubmit)
+            if (isSubmit && sectionGroupResult != null)
             {
                 await UpdateUnansweredQuestions(sectionGroup, sectionGroupResult);
                 await UpdateAnswerProcessByTest(sectionGroupResult).ConfigureAwait(false);
