@@ -70,7 +70,7 @@ namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Response
         public object? Images { get; set; }
 
         [JsonPropertyName("images_rectangle")]
-        public IList<object>? ImagesRectangle { get; set; }
+        public object? ImagesRectangle { get; set; }
 
         [JsonPropertyName("expire_duration")]
         public string? ExpireDuration { get; set; }

@@ -353,16 +353,9 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
         private static (EnumResultStatus, double) GetStatus(ClassForumResult? classForumResult, EnumResultStatus status)
         {
-            if (classForumResult != null)
+            if (classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft)
             {
-                if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
-                {
-                    return (EnumResultStatus.Done, PercentClassForum);
-                }
-                else if (classForumResult.Status == EnumClassForumResultStatus.Pending)
-                {
-                    return (EnumResultStatus.Process, default);
-                }
+                return (EnumResultStatus.Done, PercentClassForum);
             }
             return (status == EnumResultStatus.Done ? EnumResultStatus.New : EnumResultStatus.Unfinished, default);
         }
