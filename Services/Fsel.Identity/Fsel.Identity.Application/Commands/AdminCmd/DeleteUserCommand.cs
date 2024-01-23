@@ -35,7 +35,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
 
-            await _userManager.DeleteAsync(user, !request.IsHashDelete);
+            await _userManager.DeleteAsync(user);
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;
             return methodResult;
