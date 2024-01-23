@@ -140,11 +140,11 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
 
             foreach (var p in meanings)
             {
-                if (forbiddenWord.Where(x => p.Synonyms!.Contains(x.Word!)).Any())
+                if (forbiddenWord.Any(x => p.Synonyms!.Contains(x.Word!)))
                 {
                     p.Synonyms = null;
                 }
-                if (forbiddenWord.Where(x => p.Antonyms!.Contains(x.Word!)).Any())
+                if (forbiddenWord.Any(x => p.Antonyms!.Contains(x.Word!)))
                 {
                     p.Antonyms = null;
                 }
