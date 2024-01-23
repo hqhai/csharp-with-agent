@@ -16,8 +16,10 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Identity.Application.Commands.StudentCmd;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/student")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
@@ -114,6 +116,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete User
+        /// </summary>
+        [HttpDelete("delete-user/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteAccountStudentByUserId { UserId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

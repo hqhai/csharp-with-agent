@@ -91,7 +91,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
                 user = await _userManager.FindByEmailAsync(request.Email);
-                if (user != null && user.EmailConfirmed)
+                if (user != null && user.EmailConfirmed && !user.IsDeleted)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
                     return methodResult;
