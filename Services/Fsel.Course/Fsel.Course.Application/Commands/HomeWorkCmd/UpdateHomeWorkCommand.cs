@@ -71,7 +71,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                 else
                 {
                     var newQuestion = _mapper.Map<Question>(question);
-                    var method = _questionConverter.HandleQuestionLCMS(newQuestion, true);
+                    var method = _questionConverter.HandleQuestion(newQuestion, true);
                     if (!method.IsOK)
                     {
                         methodResult.AddErrorBadRequest(method.ErrorMessages);

@@ -43,7 +43,7 @@ namespace Fsel.Course.Infrastructure.Common
             foreach (var question in questions)
             {
                 var newQuestion = _mapper.Map<Question>(question);
-                var method = _questionConverter.HandleQuestionLCMS(newQuestion);
+                var method = _questionConverter.HandleQuestion(newQuestion);
                 if (!method.IsOK)
                 {
                     methodResult.AddErrorBadRequest(method.ErrorMessages);
