@@ -117,17 +117,5 @@ namespace Fsel.Identity.Api.Controllers.Admin
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Delete User
-        /// </summary>
-        [HttpDelete("delete-user/{id}")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Delete([FromRoute] Guid id)
-        {
-            MethodResult<bool> commandResult = await _mediator.Send(new DeleteAccountStudentByUserId { UserId = id }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
     }
 }
