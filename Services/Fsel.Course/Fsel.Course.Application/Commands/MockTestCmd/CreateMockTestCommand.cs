@@ -8,19 +8,14 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Application.Queues.Publishers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
-    using Fsel.Course.Domain.Models.CommandModels.Sections;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Identity.Client;
 
     public class CreateMockTestCommand : CreateMockTestCommandModel, IRequest<MethodResult<MockTestModel>>
     {
@@ -31,18 +26,16 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
-        private readonly CreateMockTestAISettingPublisher _createAiGradeSettingPublisher;
 
 
         public CreateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
             , SectionGroupManagerConverter sectionGroupManagerConverter
-            , CreateMockTestAISettingPublisher createAiGradeSettingPublisher)
+            )
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
             _sectionGroupManagerConverter = sectionGroupManagerConverter;
-            _createAiGradeSettingPublisher = createAiGradeSettingPublisher;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(CreateMockTestCommand request, CancellationToken cancellationToken)
