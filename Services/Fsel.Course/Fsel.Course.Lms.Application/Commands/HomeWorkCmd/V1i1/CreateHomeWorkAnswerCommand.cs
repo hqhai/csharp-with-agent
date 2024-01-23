@@ -220,9 +220,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             }
 
             var questionIds = listQuestion.Select(x => x.QuestionId).ToList();
-            var homeWork = await _homeWorkRepository.Queryable
-                           .Where(x => x.Id == homeWorkResult.HomeWorkId)
-                           .FirstOrDefaultAsync(cancellationToken);
+            var homeWork = await _homeWorkRepository.GetByIdAsync(homeWorkResult.HomeWorkId);
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
