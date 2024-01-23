@@ -46,7 +46,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(question);
             var methodResult = new MethodResult<Question>();
-            var isShowCorrectTotal = isUseTypeExercisePreparation ? !question.Ungraded : question.QuestionType != EnumQuestionType.ExercisePreparation && !question.Ungraded;
+            var isShowCorrectTotal = (isUseTypeExercisePreparation || question.QuestionType != EnumQuestionType.ExercisePreparation) && !question.Ungraded;
             (question.Config, question.CorrectTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal);
             if (question.Config == null)
             {
