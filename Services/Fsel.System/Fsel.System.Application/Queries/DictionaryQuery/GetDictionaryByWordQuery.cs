@@ -60,24 +60,22 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
                     word.Phonetics = null;
                 }
             }
-            else
+
+            var phonetics = result.SelectMany(x => x.Phonetics!);
+
+            if (forbiddenWord.Any(x => phonetics.Select(x => x.Text).Contains(x.Word)))
             {
-                var phonetics = result.SelectMany(x => x.Phonetics!);
-
-                if (forbiddenWord.Any(x => phonetics.Select(x => x.Text).Contains(x.Word)))
+                foreach (var p in phonetics)
                 {
-                    foreach (var p in phonetics)
-                    {
-                        p.Text = null;
-                    }
+                    p.Text = null;
                 }
+            }
 
-                if (forbiddenWord.Any(x => phonetics.Select(x => x.Audio).Contains(x.Word)))
+            if (forbiddenWord.Any(x => phonetics.Select(x => x.Audio).Contains(x.Word)))
+            {
+                foreach (var p in phonetics)
                 {
-                    foreach (var p in phonetics)
-                    {
-                        p.Audio = null;
-                    }
+                    p.Audio = null;
                 }
             }
 
