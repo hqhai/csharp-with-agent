@@ -12,6 +12,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class DeleteUserCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
+        public bool IsHashDelete { get; set; }
     }
 
     public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, MethodResult<bool>>
@@ -34,7 +35,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
 
-            await _userManager.DeleteAsync(user);
+            await _userManager.DeleteAsync(user, !request.IsHashDelete);
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;
             return methodResult;
