@@ -38,7 +38,7 @@ namespace Fsel.Ordering.Application.Commands.StudentCmd
             if (order.Count != 0)
             {
                 await _orderRepository.DeleteListAsync(order);
-                await _orderRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _orderRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
             }
 
             var userVoucher = await _userVoucherRepository.Queryable
@@ -47,7 +47,7 @@ namespace Fsel.Ordering.Application.Commands.StudentCmd
             if (userVoucher.Count != 0)
             {
                 await _userVoucherRepository.DeleteListAsync(userVoucher);
-                await _userVoucherRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _userVoucherRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
             }
 
             var userReferral = await _userReferralRepository.Queryable
@@ -56,7 +56,7 @@ namespace Fsel.Ordering.Application.Commands.StudentCmd
             if (userReferral.Count != 0)
             {
                 await _userReferralRepository.DeleteListAsync(userReferral);
-                await _userReferralRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _userReferralRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;

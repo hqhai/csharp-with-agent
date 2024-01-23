@@ -45,7 +45,7 @@ namespace Fsel.System.Application.Commands.StudentCmd
             await _questBoardStudentRepository.ExecuteTransactionAsync(async () =>
             {
                 await _questBoardStudentRepository.DeleteListAsync(questBoardStudent);
-                await _questBoardStudentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _questBoardStudentRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;

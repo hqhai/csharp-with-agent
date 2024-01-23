@@ -60,7 +60,7 @@ namespace Fsel.Interaction.Application.Commands.StudentCmd
             if (studentReview.Count != 0)
             {
                 await _studentReviewRepository.DeleteListAsync(studentReview);
-                await _studentReviewRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _studentReviewRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
             }
 
             //delete interactionAction
@@ -70,7 +70,7 @@ namespace Fsel.Interaction.Application.Commands.StudentCmd
             if (interactionAction.Count != 0)
             {
                 await _interactionActionRepository.DeleteListAsync(interactionAction);
-                await _interactionActionRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _interactionActionRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
             }
 
             //delete comment
@@ -80,7 +80,7 @@ namespace Fsel.Interaction.Application.Commands.StudentCmd
             if (comment.Count != 0)
             {
                 await _commentRepository.DeleteListAsync(comment);
-                await _commentRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _commentRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
             }
 
             //delete post
@@ -91,7 +91,7 @@ namespace Fsel.Interaction.Application.Commands.StudentCmd
             if (post.Count != 0)
             {
                 await _postRepository.DeleteListAsync(post);
-                await _postRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _postRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
             }
 
             //delete customerSurvey
@@ -101,7 +101,7 @@ namespace Fsel.Interaction.Application.Commands.StudentCmd
             if (customerSurvey.Count != 0)
             {
                 await _customerSurveyRepository.DeleteListAsync(customerSurvey);
-                await _customerSurveyRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _customerSurveyRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
