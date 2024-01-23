@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             ArgumentNullException.ThrowIfNull(request);
             var mockTestAnswer = _mockTestAnswerRepository.Queryable.FirstOrDefault(x => x.SectionId == request.ObjectId);
 
-            var aiConfig = _aiGradeSettingRepository.Queryable.FirstOrDefault(x => x.ObjectId == request.ObjectId);
+            var aiConfig = _aiGradeSettingRepository.Queryable.FirstOrDefault(x => x.SectionId == request.ObjectId);
 
 
             var resultDictionary = new Dictionary<EnumMockTestAIType, string>();

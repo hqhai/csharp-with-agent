@@ -12,6 +12,11 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<MockTestAISetting> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
+            builder.HasOne(a => a.Section)
+                   .WithOne(b=>b.MockTestAISetting)
+                   .HasForeignKey<MockTestAISetting>(b => b.SectionId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

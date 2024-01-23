@@ -97,9 +97,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 mockTest = _mockTestRepository.Add(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                // custom config AI MockTest
-                await SaveAiGradeSetting(request, mockTest, cancellationToken);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<MockTestModel>(mockTest);
                 return methodResult;
@@ -108,36 +105,5 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             return methodResult;
         }
 
-
-        /// <summary>
-        /// Luu cau hinh Ai GradeSetting
-        /// </summary>
-        /// <param name="mockTest"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public async Task SaveAiGradeSetting(CreateMockTestCommand request, MockTest mockTest, CancellationToken cancellationToken)
-        {
-            var section = mockTest?.MockTestSections.FirstOrDefault()!.SectionGroup!.Sections.ToList();
-            var sections = request?.SectionGroups?.FirstOrDefault()?.Sections;
-
-            List<SectionAiSettingModel> settingModel = new List<SectionAiSettingModel>();
-
-            foreach (var item in sections!)
-            {
-                var sectionId = section!.FirstOrDefault(x => x.Name == item.Name)!.Id;
-
-
-                SectionAiSettingModel model = _mapper.Map<SectionAiSettingModel>(item.MockTestAISetting);
-                model.ObjectId = sectionId;
-
-                settingModel.Add(model);
-            }
-
-            MockTestAiSettingModel queueModel = new MockTestAiSettingModel()
-            {
-                MockTestAiSettingModels = settingModel,
-            };
-            await _createAiGradeSettingPublisher.Publish(queueModel, cancellationToken);
-        }
     }
 }

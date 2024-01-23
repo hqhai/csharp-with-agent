@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,19 +6,19 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateTable_MockTestAnswer_AddTable_AiGradeSetting : Migration
+    public partial class CreateTable_MockTestAISetting : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "GradingAlFeedback",
-                table: "MockTestAnswers",
-                type: "nvarchar(max)",
-                nullable: true);
+               name: "GradingAlFeedback",
+               table: "MockTestAnswers",
+               type: "nvarchar(max)",
+               nullable: true);
 
             migrationBuilder.CreateTable(
-                name: "AiGradeSettings",
+                name: "MockTestAISettings",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -40,23 +40,38 @@ namespace Fsel.Course.Infrastructure.Migrations
                     SettingTopP = table.Column<double>(type: "float", nullable: false),
                     SettingFrequecy = table.Column<double>(type: "float", nullable: false),
                     SettingPresence = table.Column<double>(type: "float", nullable: false),
-                    ObjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    SectionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Task = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PromptStr = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AiGradeSettings", x => x.Id);
+                    table.PrimaryKey("PK_MockTestAISettings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MockTestAISettings_Sections_SectionId",
+                        column: x => x.SectionId,
+                        principalTable: "Sections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MockTestAISettings_SectionId",
+                table: "MockTestAISettings",
+                column: "SectionId",
+                unique: true,
+                filter: "[SectionId] IS NOT NULL");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AiGradeSettings");
+                name: "MockTestAISettings");
 
             migrationBuilder.DropColumn(
-                name: "GradingAlFeedback",
-                table: "MockTestAnswers");
+               name: "GradingAlFeedback",
+               table: "MockTestAnswers");
         }
     }
 }

@@ -6,9 +6,8 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
-    using Fsel.Shared.Enums;
     using Fsel.Common.Helpers;
-    using System.ComponentModel.DataAnnotations.Schema;
+    using System.ComponentModel.DataAnnotations.Schema; 
     using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
 
     public class MockTestAISetting : Entity
@@ -35,7 +34,7 @@ namespace Fsel.Course.Domain.Entities
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingPresence { get; set; }
 
-        public Guid ObjectId { get; set; }
+        public Guid? SectionId { get; set; }
 
         public string? Task { get; set; }
 
@@ -50,5 +49,7 @@ namespace Fsel.Course.Domain.Entities
             }
             set { PromptStr = ConvertHelper.Serialize(value); }
         }
+
+        public Section? Section { get; set; }
     }
 }

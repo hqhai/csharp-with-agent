@@ -20,7 +20,5 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
         public Guid ObjectId { get; set; }
 
         public string? WordContent { get; set; }
-
-        public bool? IsRetry { get; set; } = false;
     }
 }

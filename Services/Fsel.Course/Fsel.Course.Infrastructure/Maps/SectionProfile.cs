@@ -16,6 +16,7 @@ namespace Fsel.Course.Infrastructure.Maps
                 .ForMember(p => p.Answer, x => x.MapFrom(n => n.MockTestAnswers.Select(x => x.Answer).FirstOrDefault() ?? n.ExtraPracticeAnswers.Select(x => x.Answer).FirstOrDefault() ?? default));
             CreateMap<CreateSectionCommandModel, Section>().IgnoreAllNonExisting();
             CreateMap<UpdateSectionCommandModel, Section>().IgnoreAllNonExisting();
+            CreateMap<MockTestAISettingModel, MockTestAISetting>().IgnoreAllNonExisting();
 
             CreateMap<Section, SectionDtoModel>()
                 .ForMember(p => p.Answer, x => x.MapFrom(n => n.MockTestAnswers.Select(x => x.Answer).FirstOrDefault() ?? n.ExtraPracticeAnswers.Select(x => x.Answer).FirstOrDefault() ?? default))

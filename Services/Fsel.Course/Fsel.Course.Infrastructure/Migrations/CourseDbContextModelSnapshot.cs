@@ -2792,11 +2792,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid>("ObjectId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("PromptStr")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("SectionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("SettingFrequecy")
                         .HasColumnType("float");
@@ -2840,6 +2840,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SectionId")
+                        .IsUnique()
+                        .HasFilter("[SectionId] IS NOT NULL");
 
                     b.ToTable("MockTestAISettings");
                 });
@@ -5590,6 +5594,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("Video");
                 });
 
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.MockTestAISetting", b =>
+                {
+                    b.HasOne("Fsel.Course.Domain.Entities.Section", "Section")
+                        .WithOne("MockTestAISetting")
+                        .HasForeignKey("Fsel.Course.Domain.Entities.MockTestAISetting", "SectionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Section");
+                });
+
             modelBuilder.Entity("Fsel.Course.Domain.Entities.MockTestAnswer", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.MockTestResult", "MockTestResult")
@@ -6217,6 +6231,8 @@ namespace Fsel.Course.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Section", b =>
                 {
                     b.Navigation("ExtraPracticeAnswers");
+
+                    b.Navigation("MockTestAISetting");
 
                     b.Navigation("MockTestAnswers");
 
