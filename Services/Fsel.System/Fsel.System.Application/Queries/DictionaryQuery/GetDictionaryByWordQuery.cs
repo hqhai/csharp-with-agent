@@ -4,18 +4,15 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.System.Application.Services.DictionaryServices;
     using Fsel.System.Application.Services.DictionaryServices.Models;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
-    using global::System.Collections;
     using global::System.Collections.Generic;
     using global::System.Linq;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-
 
     public class GetDictionaryByWordQuery : IRequest<MethodResult<IList<DictionaryModel>>>
     {
@@ -49,127 +46,96 @@ namespace Fsel.System.Application.Queries.DictionaryQuery
             }
             var forbiddenWord = _forbiddenWordRepository.Queryable;
 
-            if (forbiddenWord.Any(x => result.Select(x => x.Word).Contains(x.Word)))
-            {
-                foreach (var word in result)
-                {
-                    word.Word = null;
-                }
-            }
+            UpdateResultDictionaryAsync(result, x => x.Word!, (word, value) => word.Word = value);
+            UpdateResultDictionaryAsync(result, x => x.Phonetic!, (word, value) => word.Phonetic = value);
+            UpdateResultDictionaryAsync(result, x => x.Origin!, (word, value) => word.Origin = value);
 
-            if (forbiddenWord.Any(x => result.Select(x => x.Phonetic).Contains(x.Word)))
-            {
-                foreach (var word in result)
-                {
-                    word.Phonetics = null;
-                }
-            }
-
+            //phonetics
             var phonetics = result.SelectMany(x => x.Phonetics!);
 
-            if (forbiddenWord.Any(x => phonetics.Select(x => x.Text).Contains(x.Word)))
-            {
-                foreach (var p in phonetics)
-                {
-                    p.Text = null;
-                }
-            }
+            UpdatePropertiesIfForbidden(phonetics, x => x.Text!, (p, value) => p.Text = value);
+            UpdatePropertiesIfForbidden(phonetics, x => x.Audio!, (p, value) => p.Audio = value);
 
-            if (forbiddenWord.Any(x => phonetics.Select(x => x.Audio).Contains(x.Word)))
-            {
-                foreach (var p in phonetics)
-                {
-                    p.Audio = null;
-                }
-            }
-
-            if (forbiddenWord.Any(x => result.Select(x => x.Origin).Contains(x.Word)))
-            {
-                foreach (var word in result)
-                {
-                    word.Origin = null;
-                }
-            }
-
+            //license
             var license = result.Select(x => x.License);
             if (license != null)
             {
-                if (forbiddenWord.Any(x => license.Select(x => x!.Name).Contains(x.Word)))
-                {
-                    foreach (var p in license)
-                    {
-                        p!.Name = null;
-                    }
-                }
-                if (forbiddenWord.Any(x => license.Select(x => x!.Url).Contains(x.Word)))
-                {
-                    foreach (var p in license)
-                    {
-                        p!.Url = null;
-                    }
-                }
+                UpdatePropertiesIfForbidden(license, x => x.Name!, (p, value) => p.Name = value);
+                UpdatePropertiesIfForbidden(license, x => x.Url!, (p, value) => p.Url = value);
             }
 
+            //meanings
             var meanings = result.SelectMany(x => x.Meanings!);
 
-            if (forbiddenWord.Any(x => meanings.Select(x => x.PartOfSpeech).Contains(x.Word)))
-            {
-                foreach (var p in meanings)
-                {
-                    p.PartOfSpeech = null;
-                }
-            }
+            UpdatePropertiesIfForbidden(meanings, x => x.PartOfSpeech!, (p, value) => p.PartOfSpeech = value);
+
+            UpdatePropertiesIfForbiddenType2(meanings, _forbiddenWordRepository.Queryable, x => x.Synonyms, (p, value) => p.Synonyms = value);
+            UpdatePropertiesIfForbiddenType2(meanings, _forbiddenWordRepository.Queryable, x => x.Antonyms, (p, value) => p.Antonyms = value);
 
             var definitions = meanings.SelectMany(x => x.Definitions!);
-
-            foreach (var p in definitions)
-            {
-                if (p.Definition != null && forbiddenWord.Any(x => p.Definition.Contains(x.Word!)))
-                {
-                    p.Definition = null;
-                }
-
-                if (p.Example != null && forbiddenWord.Any(x => p.Example.Contains(x.Word!)))
-                {
-                    p.Example = null;
-                }
-            }
-
-            foreach (var p in meanings)
-            {
-                if (p.Synonyms != null && forbiddenWord.Any(x => p.Synonyms.Contains(x.Word!)))
-                {
-                    p.Synonyms = null;
-                }
-                if (p.Antonyms != null && forbiddenWord.Any(x => p.Antonyms.Contains(x.Word!)))
-                {
-                    p.Antonyms = null;
-                }
-            }
+            UpdatePropertiesIfForbiddenType1(definitions, _forbiddenWordRepository.Queryable, x => x.Definition, (p, value) => p.Definition = value);
+            UpdatePropertiesIfForbiddenType1(definitions, _forbiddenWordRepository.Queryable, x => x.Example, (p, value) => p.Example = value);
 
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<object?> loop(object? data, string? nameProperty)
+        private void UpdateResultDictionaryAsync(IEnumerable<DictionaryModel> result, Func<DictionaryModel, string> propertySelector, Action<DictionaryModel, string> propertyUpdater)
         {
-            var query = _forbiddenWordRepository.Queryable;
-            if (data is IList list)
+            if (_forbiddenWordRepository.Queryable.Any(x => result.Select(propertySelector).Contains(x.Word)))
             {
-                var objects = list.Cast<object>().ToList();
-                if (objects != null && objects.Any())
+                foreach (var word in result)
                 {
-                    if (await query.AnyAsync(x => objects.Select(x => x.GetPropValue<string>(nameProperty)).Contains(x.Word)))
+                    propertyUpdater(word, string.Empty);
+                }
+            }
+        }
+
+        public void UpdatePropertiesIfForbidden<T>(IEnumerable<T> items, Func<T, string> propertySelector, Action<T, string?> propertyUpdater)
+        {
+            if (items != null && propertyUpdater != null)
+            {
+                if (_forbiddenWordRepository.Queryable.Any(x => items.Select(propertySelector).Contains(x.Word)))
+                {
+                    foreach (var item in items)
                     {
-                        foreach (var word in objects)
-                        {
-                            word. = null;
-                        }
+                        propertyUpdater(item, null);
                     }
                 }
             }
-            return data;
+        }
+
+        public void UpdatePropertiesIfForbiddenType1<T>(IEnumerable<T> items, IQueryable<ForbiddenWord> forbiddenWord, Func<T, string?> propertySelector, Action<T, string?> propertyUpdater)
+        {
+            if (items != null && propertySelector != null)
+            {
+                foreach (var item in items)
+                {
+                    var propertyValue = propertySelector(item);
+
+                    if (propertyValue != null && forbiddenWord.Any(x => propertyValue.Contains(x.Word!)) && propertyUpdater != null)
+                    {
+                        propertyUpdater(item, null);
+                    }
+                }
+            }
+        }
+
+        public void UpdatePropertiesIfForbiddenType2<T>(IEnumerable<T> items, IQueryable<ForbiddenWord> forbiddenWord, Func<T, IList<string>?> propertySelector, Action<T, IList<string>?> propertyUpdater)
+        {
+            if (items != null && propertySelector != null)
+            {
+                foreach (var item in items)
+                {
+                    var propertyValue = propertySelector(item);
+
+                    if (propertyValue != null && forbiddenWord.Any(x => propertyValue.Contains(x.Word!)) && propertyUpdater != null)
+                    {
+                        propertyUpdater(item, null);
+                    }
+                }
+            }
         }
     }
 }
