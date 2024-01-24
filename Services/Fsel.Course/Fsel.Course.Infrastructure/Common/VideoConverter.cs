@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using AutoMapper;
@@ -542,7 +541,7 @@ namespace Fsel.Course.Infrastructure.Common
             return videoTimeCode != null ? videoTimeCodes.IndexOf(videoTimeCode) : null;
         }
 
-        private async Task<(List<Question>?, IList<VideoTimeCodeAnswer>?)> GetUnansweredQuestionIds(Guid videoTimeCodeId, VideoTimeCodeResult videoTimeCodeResult)
+        private async Task<(List<Question>?, IList<VideoTimeCodeAnswer>?)> GetUnansweredQuestionIds(VideoTimeCodeResult videoTimeCodeResult)
         {
             var videoTimeCode = await _videoTimeCodeRepository.Queryable
                                     .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
@@ -550,7 +549,7 @@ namespace Fsel.Course.Infrastructure.Common
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                     .ThenInclude(x => x.Question)
                                     .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id))
-                                    .FirstOrDefaultAsync(x => x.Id == videoTimeCodeId);
+                                    .FirstOrDefaultAsync(x => x.Id == videoTimeCodeResult.VideoTimeCodeId);
             if (videoTimeCode == null)
             {
                 return default;
@@ -565,9 +564,9 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<VideoTimeCodeResult> UpdateVideoAnswers(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, bool isDone = false, bool isSubmit = true)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
-            var (questions, updateVideoTimeCodeAnswers) = await GetUnansweredQuestionIds(videoTimeCode.Id, videoTimeCodeResult);
+            var (questions, updateVideoTimeCodeAnswers) = await GetUnansweredQuestionIds(videoTimeCodeResult);
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
-            if (ValidateList(questions) && questions != null)
+            if (questions != null && questions.Any())
             {
                 videoTimeCodeAnswers = questions.Select(x => new VideoTimeCodeAnswer
                 {
@@ -575,7 +574,7 @@ namespace Fsel.Course.Infrastructure.Common
                     QuestionId = x.Id,
                     VideoResultId = videoTimeCodeResult.VideoResultId,
                     VideoTimeCodeResultId = videoTimeCodeResult.Id,
-                    VideoTimeCodeId = videoTimeCode.Id,
+                    VideoTimeCodeId = videoTimeCodeResult.VideoTimeCodeId,
                     ExerciseId = x.ExerciseQuestions.FirstOrDefault()?.ExerciseId ?? default,
                     Status = isDone ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
                     IsCorrect = null
@@ -584,9 +583,9 @@ namespace Fsel.Course.Infrastructure.Common
                 await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
-            if (ValidateList(updateVideoTimeCodeAnswers) && updateVideoTimeCodeAnswers != null)
+            if (updateVideoTimeCodeAnswers != null && updateVideoTimeCodeAnswers.Any())
             {
-                isDone = !ValidateList(questions) && (isDone || updateVideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done));
+                isDone = !(questions != null && questions.Any()) && (isDone || updateVideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done));
                 updateVideoTimeCodeAnswers.ForEach(x =>
                 {
                     var status = GetAnswerStatus(videoTimeCode.TimeCodeType, isSubmit, x.CorrectCount, x.Question!.CorrectTotal);
@@ -606,16 +605,6 @@ namespace Fsel.Course.Infrastructure.Common
                 return correctCount == correctTotal && isSubmit ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
             }
             return EnumAnswerStatus.Done;
-        }
-
-        public bool ValidateList(object? objectList)
-        {
-            if (objectList is IList list)
-            {
-                var objects = list.Cast<object>().ToList();
-                return objects != null && objects.Any();
-            }
-            return false;
         }
     }
 }

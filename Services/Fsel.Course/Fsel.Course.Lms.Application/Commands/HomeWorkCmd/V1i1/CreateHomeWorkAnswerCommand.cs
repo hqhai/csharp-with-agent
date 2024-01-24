@@ -97,27 +97,23 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, default, isTryAgain, request.IsSubmit);
-                if (!questionResult.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
-                    return methodResult;
-                }
-                var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
-                var homeWorkQuestion = questionItem.HomeWorkQuestions.FirstOrDefault();
+                var homeWorkQuestion = question?.HomeWorkQuestions.FirstOrDefault();
                 if (homeWorkQuestion == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkQuestion));
                     return methodResult;
                 }
                 var homeWorkAnswer = await _homeWorkAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == homeWorkResult.Id, cancellationToken);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, homeWorkAnswer?.Answer, isTryAgain, request.IsSubmit);
+                if (!questionResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
+                    return methodResult;
+                }
+                var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                 if (homeWorkAnswer == null)
                 {
-                    homeWorkAnswer = new HomeWorkAnswer
-                    {
-                        HomeWorkQuestionId = homeWorkQuestion.Id,
-                        HomeWorkResultId = homeWorkResult.Id
-                    };
+                    homeWorkAnswer = new HomeWorkAnswer { HomeWorkQuestionId = homeWorkQuestion.Id, HomeWorkResultId = homeWorkResult.Id };
                     createHomeWorkAnswers.Add(homeWorkAnswer);
                 }
                 else
@@ -257,6 +253,24 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             }
             methodResult.Result = (questions, homeWorkResult);
             return methodResult;
+        }
+
+        public async Task UpdateHomeWorkAnswers(HomeWorkResult? homeWorkResult, bool isDone = false, bool isSubmit = true)
+        {
+            ArgumentNullException.ThrowIfNull(homeWorkResult);
+            isDone = (isDone || await _homeWorkAnswerRepository.Queryable.AllAsync(x => x.Status == EnumAnswerStatus.Done));
+            var homeWorkAnswers = await _homeWorkAnswerRepository.Queryable.Include(x => x.HomeWorkQuestion).ThenInclude(x => x!.Question).Where(x => x.HomeWorkResultId == homeWorkResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
+            if (homeWorkAnswers != null && homeWorkAnswers.Any())
+            {
+                homeWorkAnswers.ForEach(x =>
+                {
+                    var correctTotal = x.HomeWorkQuestion?.Question?.CorrectTotal ?? default;
+                    x.Status = (isSubmit && x.CorrectCount == correctTotal || isDone) ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
+                    x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == correctTotal : null;
+                });
+                _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
+                await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            }
         }
     }
 }
