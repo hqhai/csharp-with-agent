@@ -26,7 +26,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
 
             await _mediator.Send(new SubmitMockTestAnswerAICommand
             {
-                ObjectId = data.ObjectId,
+                SectionId = data.SectionId,
                 WordContent = data.WordContent,
             }).ConfigureAwait(false);
         }

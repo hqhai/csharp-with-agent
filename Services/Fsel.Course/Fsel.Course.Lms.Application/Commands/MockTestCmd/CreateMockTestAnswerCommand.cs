@@ -221,16 +221,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 _mockTestResultRepository.Update(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                foreach (var item in mockTestAnswers)
-                {
-                    await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
-                    {
-                        ObjectId = (Guid)item.SectionId!,
-                        WordContent = item.AnswerStr,
-
-                    }, cancellationToken);
-                }
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
                 return methodResult;
