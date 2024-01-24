@@ -148,14 +148,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                     sectionGroupResult = answerResult.Result;
 
-                    foreach (var item in request.Answers)
+                    if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
                     {
-                        await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
+                        foreach (var item in request.Answers)
                         {
-                            ObjectId = (Guid)item.SectionId!,
-                            WordContent = item.Answer?.ToString() ?? string.Empty,
+                            await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
+                            {
+                                SectionId = (Guid)item.SectionId!,
+                                WordContent = item.Answer?.ToString() ?? string.Empty,
 
-                        }, cancellationToken);
+                            }, cancellationToken);
+                        }
                     }
 
                 }
