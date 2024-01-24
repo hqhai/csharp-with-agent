@@ -12,6 +12,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class DeleteUserCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
+        public bool IsHashDelete { get; set; }
     }
 
     public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, MethodResult<bool>>

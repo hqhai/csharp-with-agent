@@ -16,8 +16,10 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Identity.Application.Commands.StudentCmd;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/student")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]

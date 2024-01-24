@@ -24,7 +24,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         public async Task<MethodResult<bool>> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            return await _mediator.Send(new AdminCmd.DeleteUserCommand { Id = _authContext.CurrentUserId }, cancellationToken);
+            return await _mediator.Send(new AdminCmd.DeleteUserCommand { Id = _authContext.CurrentUserId, IsHashDelete = true }, cancellationToken);
         }
     }
 }
