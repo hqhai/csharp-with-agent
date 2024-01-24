@@ -27,6 +27,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
 
+
         public CreateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
             , SectionGroupManagerConverter sectionGroupManagerConverter
@@ -96,5 +97,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             return methodResult;
         }
+
     }
 }
