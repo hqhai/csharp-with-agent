@@ -73,6 +73,11 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
         public async Task<MethodResult<TestResultReportModel>> HandleGeneralTimeCodeToStudent(MethodResult<TestResultReportModel> methodResult, Guid lessonResultId, EnumTimeCodeType type)
         {
             ArgumentNullException.ThrowIfNull(methodResult);
+            if (type == EnumTimeCodeType.Standalone)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumTimeCodeType.Standalone));
+                return methodResult;
+            }
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultId);
             if (videoResult == null)
             {

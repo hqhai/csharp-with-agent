@@ -118,6 +118,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
         private async Task<MethodResult<IList<TestResultRankingModel>>> GetRankingToTimeCode(MethodResult<IList<TestResultRankingModel>> methodResult, Guid lessonResultId, EnumTimeCodeType type, CancellationToken cancellationToken)
         {
             List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
+            if (type == EnumTimeCodeType.Standalone)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumTimeCodeType.Standalone));
+                return methodResult;
+            }
+
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultId, cancellationToken);
             if (videoResult == null)
             {

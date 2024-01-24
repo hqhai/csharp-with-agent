@@ -42,7 +42,11 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<VideoTimeCodeModel>> methodResult = new MethodResult<IList<VideoTimeCodeModel>>();
-
+            if (request.Type == EnumTimeCodeType.Standalone)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumTimeCodeType.Standalone));
+                return methodResult;
+            }
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken);
             if (videoResult == null)
             {
