@@ -9,16 +9,16 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class NewsAndUpdateEntityTypeConfiguration : IEntityTypeConfiguration<NewsAndUpdate>
+    public class EventEntityTypeConfiguration : IEntityTypeConfiguration<Event>
     {
-        public void Configure(EntityTypeBuilder<NewsAndUpdate> builder)
+        public void Configure(EntityTypeBuilder<Event> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Type)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumNewsAndUpdateType>());
+                    v => v.EnumParse<EnumEventType>());
         }
     }
 }

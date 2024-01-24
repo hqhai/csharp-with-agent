@@ -2,7 +2,7 @@
 
 namespace Fsel.Cms.PlanetDefender.Domain.Enums
 {
-    public enum EnumNewsAndUpdateType
+    public enum EnumEventType
     {
         News, Update
     }

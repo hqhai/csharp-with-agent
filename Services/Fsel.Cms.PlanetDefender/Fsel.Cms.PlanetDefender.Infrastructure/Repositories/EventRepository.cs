@@ -7,9 +7,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Repositories
     using Fsel.Cms.PlanetDefender.Domain.IRepositories;
     using Fsel.Core.Base;
 
-    public class NewsAndUpdateRepository : BaseRepository<NewsAndUpdate>, INewsAndUpdateRepository
+    public class EventRepository : BaseRepository<Event>, IEventRepository
     {
-        public NewsAndUpdateRepository(CmsPlanetDefenderDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public EventRepository(CmsPlanetDefenderDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

@@ -4,9 +4,9 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.CommandModel.NewsAndUpdates
 {
     using Fsel.Cms.PlanetDefender.Domain.Enums;
 
-    public class CreateNewsAndUpdateCommandModel
+    public class CreateEventCommandModel
     {
-        public string? Titile { get; set; }
+        public string? Title { get; set; }
 
         public DateTime StartDate { get; set; }
 
@@ -14,6 +14,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.CommandModel.NewsAndUpdates
 
         public string? FilePath { get; set; }
 
-        public EnumNewsAndUpdateType Type { get; set; }
+        public EnumEventType Type { get; set; }
     }
 }

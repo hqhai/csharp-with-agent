@@ -11,21 +11,21 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class DeleteNewsAndUpdateCommand : IRequest<MethodResult<bool>>
+    public class DeleteEventCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
     }
 
-    public class DeleteNewsAndUpdateCommandHandler : IRequestHandler<DeleteNewsAndUpdateCommand, MethodResult<bool>>
+    public class DeleteNewsAndUpdateCommandHandler : IRequestHandler<DeleteEventCommand, MethodResult<bool>>
     {
-        private readonly INewsAndUpdateRepository _newsAndUpdateRepository;
+        private readonly IEventRepository _newsAndUpdateRepository;
 
-        public DeleteNewsAndUpdateCommandHandler(INewsAndUpdateRepository newsAndUpdateRepository)
+        public DeleteNewsAndUpdateCommandHandler(IEventRepository newsAndUpdateRepository)
         {
             _newsAndUpdateRepository = newsAndUpdateRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(DeleteNewsAndUpdateCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(DeleteEventCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();

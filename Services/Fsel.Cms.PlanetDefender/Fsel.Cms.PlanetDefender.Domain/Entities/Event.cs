@@ -6,14 +6,14 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
     using Fsel.Cms.PlanetDefender.Domain.Enums;
     using Fsel.Core.Entities;
 
-    public class NewsAndUpdate : Entity
+    public class Event : Entity
     {
-        public string? Titile { get; set; }
+        public string? Title { get; set; }
 
         public DateTime StartDate { get; set; }
 
         [NotMapped]
-        public bool IsActive
+        public bool Status
         {
             get
             {
@@ -34,6 +34,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
 
         public string? FilePath { get; set; }
 
-        public EnumNewsAndUpdateType Type { get; set; }
+        public EnumEventType Type { get; set; }
     }
 }

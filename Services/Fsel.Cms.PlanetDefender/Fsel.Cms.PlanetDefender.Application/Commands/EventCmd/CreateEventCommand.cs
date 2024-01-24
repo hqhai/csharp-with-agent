@@ -19,26 +19,26 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class CreateNewsAndUpdateCommand : CreateNewsAndUpdateCommandModel, IRequest<MethodResult<NewsAndUpdateModel>>
+    public class CreateEventCommand : CreateEventCommandModel, IRequest<MethodResult<EventModel>>
     {
     }
-    public class CreateNewsAndUpdateCommandHandler : IRequestHandler<CreateNewsAndUpdateCommand, MethodResult<NewsAndUpdateModel>>
+    public class CreateNewsAndUpdateCommandHandler : IRequestHandler<CreateEventCommand, MethodResult<EventModel>>
     {
         private readonly IMapper _mapper;
-        private readonly INewsAndUpdateRepository _newsAndUpdateRepository;
+        private readonly IEventRepository _newsAndUpdateRepository;
 
-        public CreateNewsAndUpdateCommandHandler(IMapper mapper, INewsAndUpdateRepository newsAndUpdateRepository)
+        public CreateNewsAndUpdateCommandHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
         {
             _mapper = mapper;
             _newsAndUpdateRepository = newsAndUpdateRepository;
         }
 
-        public async Task<MethodResult<NewsAndUpdateModel>> Handle(CreateNewsAndUpdateCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<EventModel>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<NewsAndUpdateModel> methodResult = new MethodResult<NewsAndUpdateModel>();
+            MethodResult<EventModel> methodResult = new MethodResult<EventModel>();
 
-            NewsAndUpdate newsAndUpdate = _mapper.Map<NewsAndUpdate>(request);
+            Event newsAndUpdate = _mapper.Map<Event>(request);
 
             await _newsAndUpdateRepository.ExecuteTransactionAsync(async () =>
             {
@@ -46,7 +46,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
                 await _newsAndUpdateRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<NewsAndUpdateModel>(newsAndUpdate);
+                methodResult.Result = _mapper.Map<EventModel>(newsAndUpdate);
                 return methodResult;
             });
 

@@ -35,8 +35,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             modelBuilder.ApplyConfiguration(new StudentSpaceShipEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTagNameEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameAnswerEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new NewsAndUpdateEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentCharacterEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new EventEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
@@ -54,7 +54,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         public DbSet<GameAnswer> GameAnswers { get; set; }
         public DbSet<Character> Characters { get; set; }
         public DbSet<StudentCharacter> StudentCharacters { get; set; }
-        public DbSet<NewsAndUpdate> NewsAndUpdates { get; set; }
+        public DbSet<Event> Events { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
