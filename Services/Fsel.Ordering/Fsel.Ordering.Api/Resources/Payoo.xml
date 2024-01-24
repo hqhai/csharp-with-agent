@@ -1,0 +1,23 @@
+<shops>
+    <shop>
+        <username>[Username]</username>
+        <shop_id>[ShopId]</shop_id>
+        <session>[Session]</session>
+        <shop_title>ShopDemo</shop_title>
+        <shop_domain>[ShopDomain]</shop_domain>
+        <shop_back_url>[ShopBackUrl]</shop_back_url>
+        <order_no>[OrderNo]</order_no>
+        <order_cash_amount>[OrderCashAmount]</order_cash_amount>
+        <order_ship_date>[OrderShipDate]</order_ship_date>
+        <order_ship_days>[OrderShipDays]</order_ship_days>
+        <order_description>[OrderDescription]</order_description>
+        <notify_url>[NotifyUrl]</notify_url>
+        <validity_time>[ValidityTime]</validity_time>
+        <customer>
+            <name>[CustomerName]</name>
+            <phone>[CustomerPhone]</phone>
+            <address>[CustomerAddress]</address>
+            <email>[CustomerEmail]</email>
+        </customer>
+    </shop>
+</shops>
