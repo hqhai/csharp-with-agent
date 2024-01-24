@@ -54,6 +54,19 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+            if (request.Answers == null || !request.Answers.Any())
+            {
+                if (request.IsSubmit)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Answers));
+                }
+                else
+                {
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                }
+                return methodResult;
+            }
+
             var method = await Validate(request);
             if (!method.IsOK)
             {
@@ -157,14 +170,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                         methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.QuestionNotCompleted));
                         return methodResult;
                     }
-                    if (homeWorkQuestionCount.CorrectCount == homeWorkQuestionCount.CorrectTotal)
+                    if (homeWorkQuestionCount.CorrectCount == homeWorkQuestionCount.CorrectTotal || homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit)
                     {
-                        homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, cancellationToken);
+                        homeWorkResult.Status = EnumResultStatus.Done;
+                        await _finishOneHomeWorkPublisher.Publish(homeWorkResult, cancellationToken);
                     }
                     else
                     {
                         homeWorkResult.SubmissionCount = EnumSubmissionCount.SecondSubmit;
                     }
+                    homeWorkResult = GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount);
                 }
                 else
                 {
@@ -177,11 +192,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return methodResult;
         }
 
-        private async Task<HomeWorkResult> GetHomeWorkResult(HomeWorkResult homeWorkResult, dynamic homeWorkQuestionCount, CancellationToken cancellationToken)
+        private static HomeWorkResult GetHomeWorkResult(HomeWorkResult homeWorkResult, dynamic homeWorkQuestionCount)
         {
             homeWorkResult.CorrectCount = homeWorkQuestionCount.CorrectCount;
             homeWorkResult.CorrectTotal = homeWorkQuestionCount.CorrectTotal;
-            homeWorkResult.Status = EnumResultStatus.Done;
             var skillScores = new SkillScores
             {
                 Skill = homeWorkQuestionCount.CourseSkill,
@@ -191,26 +205,15 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 TotalQuestion = homeWorkQuestionCount.TotalQuestion,
             };
             homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
-            await _finishOneHomeWorkPublisher.Publish(homeWorkResult, cancellationToken);
             return homeWorkResult;
         }
 
         public async Task<MethodResult<(IList<Question>, HomeWorkResult)>> Validate(CreateHomeWorkAnswerCommand request)
         {
             ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<(IList<Question>, HomeWorkResult)>();
-            if (request.Answers == null || !request.Answers.Any())
-            {
-                if (request.IsSubmit)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Answers));
-                }
-                else
-                {
-                    methodResult.StatusCode = StatusCodes.Status200OK;
-                }
-                return methodResult;
-            }
+
             var homeWorkResult = await _homeWorkResultRepository.GetByIdAsync(request.HomeWorkResultId);
             if (homeWorkResult == null)
             {
