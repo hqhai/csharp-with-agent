@@ -54,41 +54,31 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            if (request.Answers == null || !request.Answers.Any())
-            {
-                if (request.IsSubmit)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Answers));
-                }
-                else
-                {
-                    methodResult.StatusCode = StatusCodes.Status200OK;
-                }
-                return methodResult;
-            }
-
-            await _homeWorkAnswerRepository.ExecuteTransactionAsync(async () =>
-            {
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                return methodResult;
-            });
-            methodResult = await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, cancellationToken);
-            return methodResult;
-        }
-
-        private async Task<MethodResult<bool>> SaveAnswer(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(request.Answers);
-            var methodResult = new MethodResult<bool>();
-            var method = await Validate(request, cancellationToken);
+            var method = await Validate(request);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            var (questions, homeWorkResult, homeWork) = method.Result;
-            var isTryAgain = homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
+            var (questions, homeWorkResult) = method.Result;
+            var methodSave = await SaveAnswer(homeWorkResult, questions, request, cancellationToken);
+            if (!methodSave.IsOK)
+            {
+                methodResult.AddErrorBadRequest(methodSave.ErrorMessages);
+                return methodResult;
+            }
+            methodResult.StatusCode = StatusCodes.Status201Created;
+            methodResult = await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, cancellationToken);
+            return methodResult;
+        }
 
+        private async Task<MethodResult<bool>> SaveAnswer(HomeWorkResult? homeWorkResult, IList<Question>? questions, CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request.Answers);
+            ArgumentNullException.ThrowIfNull(homeWorkResult);
+            ArgumentNullException.ThrowIfNull(questions);
+            var methodResult = new MethodResult<bool>();
+            var isTryAgain = homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
             var createHomeWorkAnswers = new List<HomeWorkAnswer>();
             var updateHomeWorkAnswers = new List<HomeWorkAnswer>();
             foreach (var item in request.Answers)
@@ -145,8 +135,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return isSubmit && homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
         }
 
-        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult homeWorkResult, bool isSubmit, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, bool isSubmit, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(homeWorkResult);
             var methodResult = new MethodResult<bool>();
             var homeWorkQuestionCount = await _homeWorkResultRepository.Queryable.Where(x => x.Id == homeWorkResult.Id).Select(x => new
             {
@@ -204,13 +195,20 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return homeWorkResult;
         }
 
-        public async Task<MethodResult<(IList<Question>, HomeWorkResult, HomeWork)>> Validate(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<(IList<Question>, HomeWorkResult)>> Validate(CreateHomeWorkAnswerCommand request)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<(IList<Question>, HomeWorkResult, HomeWork)>();
+            var methodResult = new MethodResult<(IList<Question>, HomeWorkResult)>();
             if (request.Answers == null || !request.Answers.Any())
             {
-                methodResult.StatusCode = StatusCodes.Status200OK;
+                if (request.IsSubmit)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Answers));
+                }
+                else
+                {
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                }
                 return methodResult;
             }
             var homeWorkResult = await _homeWorkResultRepository.GetByIdAsync(request.HomeWorkResultId);
@@ -254,7 +252,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
-            methodResult.Result = (questions, homeWorkResult, homeWork);
+            methodResult.Result = (questions, homeWorkResult);
             return methodResult;
         }
     }
