@@ -50,7 +50,6 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
                             Id = x.Id,
                             StudentId = x.StudentId,
                             CreatedDate = x.CreatedDate,
-                            Gender = x.Gender,
                             Level = x.Level,
                             TagNameId = x.TagNameId,
                             CourseLevel = x.CourseLevel,

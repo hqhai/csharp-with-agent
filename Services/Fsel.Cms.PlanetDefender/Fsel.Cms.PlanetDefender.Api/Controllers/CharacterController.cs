@@ -4,60 +4,60 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
     using Asp.Versioning;
-    using Fsel.Cms.PlanetDefender.Application.Commands.SpaceShipCmds;
-    using Fsel.Cms.PlanetDefender.Application.Queries.SpaceShipQuery;
+    using Fsel.Cms.PlanetDefender.Application.Commands.CharacterCmds;
+    using Fsel.Cms.PlanetDefender.Application.Queries.CharacterQuery;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
-    [Route(Settings.APIDefaultRoute + "/space-ship")]
+    [Route(Settings.APIDefaultRoute + "/character")]
     [ApiController]
-    public class SpaceShipController : ControllerBase
+    public class CharacterController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public SpaceShipController(IMediator mediator)
+        public CharacterController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
+
         /// <summary>
-        /// Search space ship
+        /// get list character
         /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SpaceShipModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-list-character")]
+        [ProducesResponseType(typeof(MethodResult<IList<SpaceShipModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchSpaceShipQuery query)
+        public async Task<IActionResult> GetAccordingToUser([FromQuery] GetListCharacterQuery query)
         {
-            MethodResult<PagingItemsModel<SpaceShipModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// get list space ship according to user
+        /// get list character according to user
         /// </summary>
         [HttpGet("get-according-to-user")]
         [ProducesResponseType(typeof(MethodResult<IList<SpaceShipModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetAccordingToUser()
         {
-            var queryResult = await _mediator.Send(new GetListSpaceShipAccordingToUserQuery()).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetListCharacterAccordingToUserQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// buy space ship
+        /// buy character
         /// </summary>
-        [HttpPost("buy-space-ship")]
+        [HttpPost("buy-character")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> BuySpaceShip([FromBody] BuySpaceShipCommand command)
+        public async Task<IActionResult> BuyCharacter([FromBody] BuyCharacterCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

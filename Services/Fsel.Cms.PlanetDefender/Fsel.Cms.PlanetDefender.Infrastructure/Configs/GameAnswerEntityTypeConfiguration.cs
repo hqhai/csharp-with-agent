@@ -16,6 +16,10 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
                   .WithMany(b => b.GameAnswers)
                   .HasForeignKey(b => b.GameHistoryId)
                   .OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(a => a.ZMatter)
+                  .WithMany(b => b.GameAnswers)
+                  .HasForeignKey(b => b.ZMatterId)
+                  .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

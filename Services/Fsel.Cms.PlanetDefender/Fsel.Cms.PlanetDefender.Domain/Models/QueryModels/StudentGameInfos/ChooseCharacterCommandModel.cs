@@ -2,10 +2,8 @@
 
 namespace Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.StudentGameInfos
 {
-    using Fsel.Shared.Enums;
-
-    public class ChooseUserLevelCommandModel
+    public class ChooseCharacterCommandModel
     {
-        public EnumGameCourseLevel? CourseLevel { get; set; }
+        public Guid CharacterId { get; set; }
     }
 }

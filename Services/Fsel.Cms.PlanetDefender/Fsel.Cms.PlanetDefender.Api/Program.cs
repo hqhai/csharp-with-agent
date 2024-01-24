@@ -30,6 +30,7 @@ builder.Services.AddScoped<IAvatarImageRepository, AvatarImageRepository>();
 builder.Services.AddScoped<IStudentSpaceShipRepository, StudentSpaceShipRepository>();
 builder.Services.AddScoped<IStudentTagNameRepository, StudentTagNameRepository>();
 builder.Services.AddScoped<IGameAnswerRepository, GameAnswerRepository>();
+builder.Services.AddScoped<ICharacterRepository, CharacterRepository>();
 
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
