@@ -15,7 +15,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
-    [Route(Settings.APIDefaultRoute + "/news-and-update")]
+    [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class EventController : ControllerBase
@@ -28,7 +28,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         }
 
         /// <summary>
-        /// get list album
+        /// get list event
         /// </summary>
         [HttpGet("get-list-event")]
         [ProducesResponseType(typeof(MethodResult<IList<EventModel>>), (int)HttpStatusCode.OK)]
