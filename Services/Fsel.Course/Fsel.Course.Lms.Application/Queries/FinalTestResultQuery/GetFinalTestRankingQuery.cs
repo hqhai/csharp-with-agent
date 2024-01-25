@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
@@ -55,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var finalTestResults = await _finalTestResultRepository.Queryable
-                            .Where(x => x.FinalTestId == finalTestResult.FinalTestId && classStudentIds!.Contains(x.StudentId))
+                            .Where(x => x.FinalTestId == finalTestResult.FinalTestId && classStudentIds!.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
                             .ToListAsync(cancellationToken);
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
