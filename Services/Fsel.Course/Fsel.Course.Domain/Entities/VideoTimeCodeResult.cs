@@ -61,9 +61,9 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                return CorrectTotal + CorrectTotalUngraded > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : _percentUngraded;
+                return CorrectTotal + (CorrectTotalUngraded ?? default) > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : _percentUngraded;
             }
-            set { _percentUngraded = CorrectTotal + CorrectTotalUngraded > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : value; }
+            set { _percentUngraded = CorrectTotal + (CorrectTotalUngraded ?? default) > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : value; }
         }
 
         public int? TokenDone { get; set; }
