@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
@@ -59,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 return methodResult;
             }
             var mockTestResults = await _mockTestResultRepository.Queryable
-                                .Where(x => x.MockTestId == mockTestResult.MockTestId && classStudentIds.Contains(x.StudentId))
+                                .Where(x => x.MockTestId == mockTestResult.MockTestId && classStudentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
                                 .ToListAsync(cancellationToken);
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);

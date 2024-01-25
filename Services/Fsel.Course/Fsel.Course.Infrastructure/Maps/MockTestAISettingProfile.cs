@@ -14,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<SectionAiSettingModel, MockTestAISetting>().IgnoreAllNonExisting();
             CreateMap<MockTestAISettingModel, SectionAiSettingModel>().IgnoreAllNonExisting();
+            CreateMap<MockTestAISetting, MockTestAISettingModel>().IgnoreAllNonExisting();
         }
     }
 }

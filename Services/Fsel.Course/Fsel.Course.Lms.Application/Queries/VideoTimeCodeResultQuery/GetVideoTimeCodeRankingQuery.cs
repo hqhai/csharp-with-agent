@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 return methodResult;
             }
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
-                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && students.Select(x => x.Id).Contains(x.StudentId))
+                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && students.Select(x => x.Id).Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
                             .ToListAsync(cancellationToken);
 
             foreach (var item in students)
@@ -139,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             foreach (var item in students)
             {
                 var videoTimeCodeResultStudent = await _videoTimeCodeResultRepository.Queryable
-                                        .Where(x => x.VideoTimeCode != null && x.VideoTimeCode.VideoId == videoResult.VideoId && x.VideoTimeCode.TimeCodeType == type && x.StudentId == item.Id)
+                                        .Where(x => x.VideoTimeCode != null && x.VideoTimeCode.VideoId == videoResult.VideoId && x.VideoTimeCode.TimeCodeType == type && x.StudentId == item.Id && x.Status == EnumResultStatus.Done)
                                         .GroupBy(x => x.StudentId)
                                         .Select(x => new TestResultRankingModel
                                         {
