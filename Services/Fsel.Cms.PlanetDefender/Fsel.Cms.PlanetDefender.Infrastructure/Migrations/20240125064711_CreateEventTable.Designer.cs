@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 {
     [DbContext(typeof(CmsPlanetDefenderDbContext))]
-    [Migration("20240124091454_CreateEventTable")]
+    [Migration("20240125064711_CreateEventTable")]
     partial class CreateEventTable
     {
         /// <inheritdoc />
@@ -136,7 +136,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("FilePath")
                         .HasColumnType("nvarchar(max)");
@@ -149,7 +150,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Type")
                         .IsRequired()

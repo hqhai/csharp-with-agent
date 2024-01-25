@@ -2,12 +2,15 @@
 
 namespace Fsel.Cms.PlanetDefender.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Cms.PlanetDefender.Domain.Enums;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
 
     public class Event : Entity
     {
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Title { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -30,6 +33,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
             }
         }
 
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 
         public string? FilePath { get; set; }

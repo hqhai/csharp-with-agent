@@ -236,7 +236,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("FilePath")
                         .HasColumnType("nvarchar(max)");
@@ -249,7 +250,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Type")
                         .IsRequired()
