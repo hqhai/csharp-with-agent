@@ -66,7 +66,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             if (userOtpCode.Count != 0)
             {
                 await _userOtpCodeRepository.DeleteListAsync(userOtpCode);
-                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
+                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(true, !request.IsHashDelete, cancellationToken);
             }
 
             // delete User Setting
@@ -76,7 +76,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             if (userSetting.Count != 0)
             {
                 await _userSettingRepository.DeleteListAsync(userSetting);
-                await _userSettingRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
+                await _userSettingRepository.UnitOfWork.SaveChangesAsync(true, !request.IsHashDelete, cancellationToken);
             }
 
             // delete user platform
@@ -86,7 +86,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             if (userPlatform.Count != 0)
             {
                 await _userPlatformRepository.DeleteListAsync(userPlatform);
-                await _userPlatformRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
+                await _userPlatformRepository.UnitOfWork.SaveChangesAsync(true, !request.IsHashDelete, cancellationToken);
             }
 
             var human = await _humanRepository.Queryable
@@ -106,7 +106,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     if (studentRankings.Count != 0)
                     {
                         await _studentRankingRepository.DeleteListAsync(studentRankings);
-                        await _studentRankingRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
+                        await _studentRankingRepository.UnitOfWork.SaveChangesAsync(true, !request.IsHashDelete, cancellationToken);
                     }
 
                     // delete student daily streak
@@ -116,7 +116,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     if (studentDailyStreak.Count != 0)
                     {
                         await _studentDailyStreakRepository.DeleteListAsync(studentDailyStreak);
-                        await _studentDailyStreakRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
+                        await _studentDailyStreakRepository.UnitOfWork.SaveChangesAsync(true, !request.IsHashDelete, cancellationToken);
                     }
 
                     // delete student focus time
@@ -127,13 +127,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     if (studentFocusTime.Count != 0)
                     {
                         await _studentFocusTimeRepository.DeleteListAsync(studentFocusTime);
-                        await _studentFocusTimeRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
+                        await _studentFocusTimeRepository.UnitOfWork.SaveChangesAsync(true, !request.IsHashDelete, cancellationToken);
                     }
                 }
 
                 // delete human va student va parent student
                 await _humanRepository.DeleteAsync(human);
-                await _humanRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken);
+                await _humanRepository.UnitOfWork.SaveChangesAsync(true, !request.IsHashDelete, cancellationToken);
             }
 
             await _userManager.DeleteAsync(user, !request.IsHashDelete);
