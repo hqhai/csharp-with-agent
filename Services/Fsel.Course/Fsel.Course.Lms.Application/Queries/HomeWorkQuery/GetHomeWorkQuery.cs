@@ -92,16 +92,10 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 
         private HomeWorkModel GetHomeWork(HomeWork homeWork, HomeWorkResult homeWorkResult, bool isShowSubStatus)
         {
-            var checkDone = homeWorkResult.Status == EnumResultStatus.Done;
             var homeWorkModel = _mapper.Map<HomeWorkModel>(homeWork);
             homeWorkModel.Questions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).Select(n =>
             {
                 var answer = n.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id);
-                if (answer != null)
-                {
-                    answer.CorrectCount = checkDone ? answer.CorrectCount : default;
-                    answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, n.Question!.QuestionType, !checkDone, homeWorkResult.Status, false);
-                }
                 return GetQuestion(n.Question, answer, homeWorkResult, isShowSubStatus);
             }).ToList();
             homeWorkModel.HomeWorkResult = _mapper.Map<HomeWorkResultModel>(homeWorkResult);
@@ -118,6 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             if (homeWorkAnswer != null)
             {
                 homeWorkAnswer.CorrectCount = isCheck ? homeWorkAnswer.CorrectCount : default;
+                homeWorkAnswer.IsCorrect = isCheck ? homeWorkAnswer.IsCorrect : default;
                 homeWorkAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(homeWorkAnswer.Answer, question.QuestionType, isShowSubStatus, homeWorkResult.Status);
                 questionModel.ResultAnswer = _mapper.Map<AnswerModel>(homeWorkAnswer);
             }
