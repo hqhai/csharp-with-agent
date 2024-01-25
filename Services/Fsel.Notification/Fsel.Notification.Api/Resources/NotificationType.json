@@ -100,7 +100,7 @@
     "createdDate": "2023-08-28"
   },
   {
-    "id": "810C70CA-4F3C-20D4-A491-708FA45D42EA",
+    "id": "3AD02DE7-A8A8-4DB6-8286-486C81390ED3",
     "type": "LinkComment",
     "content": "LikeComment",
     "icon": "",
@@ -120,8 +120,8 @@
     "createdDate": "2023-08-28"
   },
   {
-    "id": "9CE45D16-A9B6-43C3-ADAA-061695D61A29",
-    "type": ":LinkPopup",
+    "id": "4B5173D1-3D0B-4DF6-B3CA-15CD175926A1",
+    "type": "LinkPopup",
     "content": "ChangeClassLiveTeacher",
     "icon": "",
     "priority": 1,
@@ -130,48 +130,8 @@
     "createdDate": "2023-08-28"
   },
   {
-    "id": "8D72ACC9-26ED-4E61-9858-DBB86AA394F3",
-    "type": ":LinkPopup",
-    "content": "CancelClassLive",
-    "icon": "",
-    "priority": 1,
-    "templateMessage": "Buổi học trực tuyến {0} diễn ra vào ngày {1} đã bị huỷ bỏ. Nhấn để lựa chọn lịch học thay thế",
-    "templateLink": "",
-    "createdDate": "2023-08-28"
-  },
-  {
-    "id": "D70FF67A-6097-4F37-96C5-BE122FF62881",
-    "type": ":LinkPopup",
-    "content": "UpdateClassLive",
-    "icon": "",
-    "priority": 1,
-    "templateMessage": "Buổi học trực tuyến {0} diễn ra vào ngày {1} đã được cập nhật sang ngày {2}",
-    "templateLink": "",
-    "createdDate": "2023-08-28"
-  },
-  {
-    "id": "D70FF67A-6097-4F37-96C5-BE122FF62881",
-    "type": ":LinkPopup",
-    "content": "UpdateClassLive",
-    "icon": "",
-    "priority": 1,
-    "templateMessage": "Bài {0} đã được giáo viên chấm điểm. Nhấn để xem chi tiết",
-    "templateLink": "",
-    "createdDate": "2023-08-28"
-  },
-  {
-    "id": "0EEB9205-E978-4AC8-B3A0-9D5387FA744A",
-    "type": ":LinkPage",
-    "content": "UpdateClassLive",
-    "icon": "",
-    "priority": 1,
-    "templateMessage": "Bài {0} đã được giáo viên chấm điểm. Nhấn để xem chi tiết",
-    "templateLink": "",
-    "createdDate": "2023-08-28"
-  },
-  {
     "id": "85062A12-AB5B-486C-A8AB-DB329EA7F46D",
-    "type": ":LinkPage",
+    "type": "LinkPage",
     "content": "MockTest",
     "icon": "",
     "priority": 1,
@@ -181,11 +141,21 @@
   },
   {
     "id": "1A7F9999-79E2-4EB1-85A8-CC8D1398F732",
-    "type": ":LinkPage",
+    "type": "LinkPage",
     "content": "ReviewFsel",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Hãy chia sẻ cảm nhận của bạn về LMS! ",
+    "templateMessage": "Hãy chia sẻ cảm nhận của bạn về LMS!",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "59BC5071-1EF7-4362-9BB0-8848BB6F8CED",
+    "type": "LinkPage",
+    "content": "DiscussionBoardInActive",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bay! Bay cao! Bay xa! Hãy cùng khám phá với các bạn trên khắp thế giới qua Diễn đàn chung nào!",
     "templateLink": "",
     "createdDate": "2023-08-28"
   }

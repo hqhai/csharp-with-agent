@@ -18,6 +18,7 @@ namespace Fsel.Shared.Enums
         AIFeedBack,
         ChangeClassLiveTeacher,
         MockTest,
-        ReviewFsel
+        ReviewFsel,
+        DiscussionBoardInActive
     }
 }

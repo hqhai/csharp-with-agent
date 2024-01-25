@@ -40,6 +40,7 @@ builder.Services.AddScoped<ITokenConfigRepository, TokenConfigRepository>();
 builder.Services.AddScoped<IApprovalTimeConfigRepository, ApprovalTimeConfigRepository>();
 builder.Services.AddScoped<IApprovalLogRepository, ApprovalLogRepository>();
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
+builder.Services.AddScoped<NotificationMessagePublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
