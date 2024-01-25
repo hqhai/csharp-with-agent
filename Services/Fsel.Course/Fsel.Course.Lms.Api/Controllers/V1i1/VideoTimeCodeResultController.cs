@@ -49,5 +49,17 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get video time code ranking
+        /// </summary>
+        [HttpGet("video-time-code-test")]
+        [ProducesResponseType(typeof(MethodResult<IList<VideoTimeCodeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetVideoTimeCodeTest([FromQuery] GetVideoTimeCodeTestQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
