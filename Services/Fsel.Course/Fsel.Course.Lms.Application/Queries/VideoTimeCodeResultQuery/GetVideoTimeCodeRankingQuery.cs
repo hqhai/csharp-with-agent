@@ -145,6 +145,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                                         {
                                             CorrectCount = x.Sum(x => x.CorrectCount),
                                             CorrectTotal = x.Sum(x => x.CorrectTotal),
+                                            Score = x.Sum(x => x.CorrectCount),
                                             StudentId = x.Key,
                                             WorkingTime = x.Sum(x => x.WorkingTime),
                                             Percent = NumberHelper.GetPercent(x.Sum(x => x.CorrectCount), x.Sum(x => x.CorrectTotal)),

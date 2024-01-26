@@ -18,6 +18,38 @@ namespace Fsel.Shared.Helpers
         public double ListeningScore { get; set; }
     }
 
+    public class TargetBandScoreConfig
+    {
+        public TargetBandScoreConfig(EnumCourseLevel courseLevel, double score)
+        {
+            CourseLevel = courseLevel;
+            Score = score;
+        }
+
+        public EnumCourseLevel CourseLevel { get; set; }
+        public double Score { get; set; }
+    }
+
+    public static class TargetBandScoreHelper
+    {
+        private static IList<TargetBandScoreConfig> s_targetBandScoreConfigs = new List<TargetBandScoreConfig>
+        {
+            new TargetBandScoreConfig(EnumCourseLevel.MS1, 5),
+            new TargetBandScoreConfig(EnumCourseLevel.MS2, 6),
+            new TargetBandScoreConfig(EnumCourseLevel.MS3, 7),
+        };
+
+        public static (bool, double) CheckScoreColor(this EnumCourseLevel courseLevel, double score)
+        {
+            var targetBandScoreConfig = s_targetBandScoreConfigs.FirstOrDefault(x => x.CourseLevel == courseLevel);
+            if (targetBandScoreConfig != null)
+            {
+                return (score >= targetBandScoreConfig.Score, targetBandScoreConfig.Score);
+            }
+            return (false, default);
+        }
+    }
+
     public static class IeltsScoreHelper
     {
         public const double MaxScorePT = 6.5;
