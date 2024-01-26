@@ -1,11 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
+namespace Fsel.Cms.PlanetDefender.Application.Commands.EventCmd
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -20,12 +17,13 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
     public class UpdateEventCommand : UpdateEventCommandModel, IRequest<MethodResult<EventModel>>
     {
     }
-    public class UpdateNewsAndUpdateCommandHandler : IRequestHandler<UpdateEventCommand, MethodResult<EventModel>>
+
+    public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand, MethodResult<EventModel>>
     {
         private readonly IMapper _mapper;
         private readonly IEventRepository _newsAndUpdateRepository;
 
-        public UpdateNewsAndUpdateCommandHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
+        public UpdateEventCommandHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
         {
             _mapper = mapper;
             _newsAndUpdateRepository = newsAndUpdateRepository;
@@ -34,7 +32,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
         public async Task<MethodResult<EventModel>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<EventModel> methodResult = new MethodResult<EventModel>();
+            var methodResult = new MethodResult<EventModel>();
             var newsAndUpdate = await _newsAndUpdateRepository.GetByIdAsync(request.Id);
 
             #region Validation

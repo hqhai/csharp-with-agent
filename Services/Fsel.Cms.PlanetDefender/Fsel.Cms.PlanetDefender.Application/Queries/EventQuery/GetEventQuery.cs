@@ -1,11 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Cms.PlanetDefender.Application.Queries.NewsAndUpdateQuery
+namespace Fsel.Cms.PlanetDefender.Application.Queries.EventQuery
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -20,12 +17,13 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.NewsAndUpdateQuery
     {
         public Guid Id { get; set; }
     }
-    public class GetNewsAndUpdateQueryHandler : IRequestHandler<GetEventQuery, MethodResult<EventModel>>
+
+    public class GetEventQueryHandler : IRequestHandler<GetEventQuery, MethodResult<EventModel>>
     {
         private readonly IMapper _mapper;
         private readonly IEventRepository _newsAndUpdateRepository;
 
-        public GetNewsAndUpdateQueryHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
+        public GetEventQueryHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
         {
             _mapper = mapper;
             _newsAndUpdateRepository = newsAndUpdateRepository;
@@ -34,7 +32,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.NewsAndUpdateQuery
         public async Task<MethodResult<EventModel>> Handle(GetEventQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<EventModel> methodResult = new MethodResult<EventModel>();
+            var methodResult = new MethodResult<EventModel>();
 
             var newsAndUpdate = await _newsAndUpdateRepository.GetByIdAsync(request.Id);
 

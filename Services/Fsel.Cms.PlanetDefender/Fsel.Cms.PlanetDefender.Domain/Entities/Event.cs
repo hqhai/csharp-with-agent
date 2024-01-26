@@ -6,6 +6,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
     using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Cms.PlanetDefender.Domain.Enums;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
 
     public class Event : Entity
@@ -36,7 +37,13 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 
-        public string? FilePath { get; set; }
+        private string? _filePath;
+        public string? FilePath
+        {
+            set { _filePath = value; }
+            get { return _filePath.AddS3BaseUrl(); }
+        }
+
 
         public EnumEventType Type { get; set; }
     }

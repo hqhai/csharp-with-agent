@@ -1,11 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Cms.PlanetDefender.Application.Queries.NewsAndUpdateQuery
+namespace Fsel.Cms.PlanetDefender.Application.Queries.EventQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Cms.PlanetDefender.Domain.IRepositories;
@@ -14,16 +12,16 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.NewsAndUpdateQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using MediatR;
-    using static log4net.Appender.RollingFileAppender;
 
     public class SearchEventQuery : SearchEventQueryModel, IRequest<MethodResult<PagingItemsModel<EventModel>>>
     {
     }
-    public class SearchNewsAndUpdateQueryHandler : IRequestHandler<SearchEventQuery, MethodResult<PagingItemsModel<EventModel>>>
+
+    public class SearchEventQueryHandler : IRequestHandler<SearchEventQuery, MethodResult<PagingItemsModel<EventModel>>>
     {
         private readonly IEventRepository _newsAndUpdateRepository;
 
-        public SearchNewsAndUpdateQueryHandler(IEventRepository newsAndUpdateRepository)
+        public SearchEventQueryHandler(IEventRepository newsAndUpdateRepository)
         {
             _newsAndUpdateRepository = newsAndUpdateRepository;
         }

@@ -1,12 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
+namespace Fsel.Cms.PlanetDefender.Application.Commands.EventCmd
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -15,19 +11,19 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
     using Fsel.Cms.PlanetDefender.Domain.Models.CommandModel.NewsAndUpdates;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
     public class CreateEventCommand : CreateEventCommandModel, IRequest<MethodResult<EventModel>>
     {
     }
-    public class CreateNewsAndUpdateCommandHandler : IRequestHandler<CreateEventCommand, MethodResult<EventModel>>
+
+    public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, MethodResult<EventModel>>
     {
         private readonly IMapper _mapper;
         private readonly IEventRepository _newsAndUpdateRepository;
 
-        public CreateNewsAndUpdateCommandHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
+        public CreateEventCommandHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
         {
             _mapper = mapper;
             _newsAndUpdateRepository = newsAndUpdateRepository;
@@ -36,9 +32,9 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
         public async Task<MethodResult<EventModel>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<EventModel> methodResult = new MethodResult<EventModel>();
+            var methodResult = new MethodResult<EventModel>();
 
-            Event newsAndUpdate = _mapper.Map<Event>(request);
+            var newsAndUpdate = _mapper.Map<Event>(request);
 
             await _newsAndUpdateRepository.ExecuteTransactionAsync(async () =>
             {

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Cms.PlanetDefender.Application.Queries.NewsAndUpdateQuery
+namespace Fsel.Cms.PlanetDefender.Application.Queries.EventQuery
 {
     using System.Collections.Generic;
     using System.Threading;
@@ -17,12 +17,12 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.NewsAndUpdateQuery
     {
     }
 
-    public class GetListNewsAndUpdateQueryHandler : IRequestHandler<GetListEventQuery, MethodResult<IList<EventModel>>>
+    public class GetListEventQueryHandler : IRequestHandler<GetListEventQuery, MethodResult<IList<EventModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IEventRepository _newsAndUpdateRepository;
 
-        public GetListNewsAndUpdateQueryHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
+        public GetListEventQueryHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
         {
             _mapper = mapper;
             _newsAndUpdateRepository = newsAndUpdateRepository;
@@ -31,11 +31,11 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.NewsAndUpdateQuery
         public async Task<MethodResult<IList<EventModel>>> Handle(GetListEventQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<EventModel>> methodResult = new MethodResult<IList<EventModel>>();
+            var methodResult = new MethodResult<IList<EventModel>>();
 
-            var newsAndUpdate = await _newsAndUpdateRepository.Queryable.Where(m => m.StartDate >= DateTime.UtcNow && DateTime.UtcNow <= DateTime.UtcNow.AddDays(1)).ToListAsync(cancellationToken);
+            var events = await _newsAndUpdateRepository.Queryable.Where(m => m.StartDate.Date == DateTime.UtcNow.Date).ToListAsync(cancellationToken);
 
-            methodResult.Result = _mapper.Map<IList<EventModel>>(newsAndUpdate);
+            methodResult.Result = _mapper.Map<IList<EventModel>>(events);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
+namespace Fsel.Cms.PlanetDefender.Application.Commands.EventCmd
 {
     using System;
     using System.Threading;
@@ -16,11 +16,11 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
         public Guid Id { get; set; }
     }
 
-    public class DeleteNewsAndUpdateCommandHandler : IRequestHandler<DeleteEventCommand, MethodResult<bool>>
+    public class DeleteEventCommandHandler : IRequestHandler<DeleteEventCommand, MethodResult<bool>>
     {
         private readonly IEventRepository _newsAndUpdateRepository;
 
-        public DeleteNewsAndUpdateCommandHandler(IEventRepository newsAndUpdateRepository)
+        public DeleteEventCommandHandler(IEventRepository newsAndUpdateRepository)
         {
             _newsAndUpdateRepository = newsAndUpdateRepository;
         }
@@ -28,7 +28,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.NewsAndUpdateCmd
         public async Task<MethodResult<bool>> Handle(DeleteEventCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
 
             #region Validation
 
