@@ -61,8 +61,9 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             var student = studentResult.Content?.Result;
 
             var orderNo = NumberHelper.GenerateCode(32);
-            var validityTime = DateTime.Now;
-            var validityTime1 = validityTime.AddMinutes(30).ToString("yyyyMMddHHmmss", CultureInfo.CurrentCulture);
+
+            var validityTime = DateTime.Now.AddMinutes(30).ToString("yyyyMMddHHmmss", CultureInfo.CurrentCulture);
+
             var param = new
             {
                 UserName = _appSetting.PayooConfig?.Username,
@@ -74,7 +75,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                 OrderCashAmount = order.TotalPrice,
                 OrderDescription = PaymentSetting.Payoo.OrderDescription,
                 NotifyUrl = _appSetting.PayooConfig?.NotifyUrl,
-                ValidityTime = validityTime1,
+                ValidityTime = validityTime,
                 OrderId = order.Id,
                 CustomerName = student?.Human?.FullName,
                 CustomerPhone = student?.Human?.PhoneNumber,
