@@ -21,12 +21,12 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.EventQuery
     public class GetEventQueryHandler : IRequestHandler<GetEventQuery, MethodResult<EventModel>>
     {
         private readonly IMapper _mapper;
-        private readonly IEventRepository _newsAndUpdateRepository;
+        private readonly IEventRepository _eventRepository;
 
-        public GetEventQueryHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
+        public GetEventQueryHandler(IMapper mapper, IEventRepository eventRepository)
         {
             _mapper = mapper;
-            _newsAndUpdateRepository = newsAndUpdateRepository;
+            _eventRepository = eventRepository;
         }
 
         public async Task<MethodResult<EventModel>> Handle(GetEventQuery request, CancellationToken cancellationToken)
@@ -34,15 +34,15 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.EventQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<EventModel>();
 
-            var newsAndUpdate = await _newsAndUpdateRepository.GetByIdAsync(request.Id);
+            var @event = await _eventRepository.GetByIdAsync(request.Id);
 
-            if (newsAndUpdate == null)
+            if (@event == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(newsAndUpdate));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@event));
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<EventModel>(newsAndUpdate);
+            methodResult.Result = _mapper.Map<EventModel>(@event);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

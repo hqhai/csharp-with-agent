@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Cms.PlanetDefender.Domain.Models.CommandModel.NewsAndUpdates
+namespace Fsel.Cms.PlanetDefender.Domain.Models.CommandModel.Events
 {
     using Fsel.Cms.PlanetDefender.Domain.Enums;
 

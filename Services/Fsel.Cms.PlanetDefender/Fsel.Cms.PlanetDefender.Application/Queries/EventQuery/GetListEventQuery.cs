@@ -20,12 +20,12 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.EventQuery
     public class GetListEventQueryHandler : IRequestHandler<GetListEventQuery, MethodResult<IList<EventModel>>>
     {
         private readonly IMapper _mapper;
-        private readonly IEventRepository _newsAndUpdateRepository;
+        private readonly IEventRepository _eventRepository;
 
-        public GetListEventQueryHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
+        public GetListEventQueryHandler(IMapper mapper, IEventRepository eventRepository)
         {
             _mapper = mapper;
-            _newsAndUpdateRepository = newsAndUpdateRepository;
+            _eventRepository = eventRepository;
         }
 
         public async Task<MethodResult<IList<EventModel>>> Handle(GetListEventQuery request, CancellationToken cancellationToken)
@@ -33,7 +33,11 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.EventQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<EventModel>>();
 
-            var events = await _newsAndUpdateRepository.Queryable.Where(m => m.StartDate.Date == DateTime.UtcNow.Date).ToListAsync(cancellationToken);
+            var events = await _eventRepository.Queryable
+                                               .Where(m => m.StartDate.Date == DateTime.UtcNow.Date &&
+                                                           m.StartDate.Month == DateTime.UtcNow.Month &&
+                                                           m.StartDate.Year == DateTime.UtcNow.Year)
+                                               .ToListAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<EventModel>>(events);
             methodResult.StatusCode = StatusCodes.Status200OK;

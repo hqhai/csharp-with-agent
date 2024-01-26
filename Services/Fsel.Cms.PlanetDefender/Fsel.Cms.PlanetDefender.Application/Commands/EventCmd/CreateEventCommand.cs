@@ -8,7 +8,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.EventCmd
     using AutoMapper;
     using Fsel.Cms.PlanetDefender.Domain.Entities;
     using Fsel.Cms.PlanetDefender.Domain.IRepositories;
-    using Fsel.Cms.PlanetDefender.Domain.Models.CommandModel.NewsAndUpdates;
+    using Fsel.Cms.PlanetDefender.Domain.Models.CommandModel.Events;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using MediatR;
@@ -21,12 +21,12 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.EventCmd
     public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, MethodResult<EventModel>>
     {
         private readonly IMapper _mapper;
-        private readonly IEventRepository _newsAndUpdateRepository;
+        private readonly IEventRepository _eventRepository;
 
-        public CreateEventCommandHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
+        public CreateEventCommandHandler(IMapper mapper, IEventRepository eventRepository)
         {
             _mapper = mapper;
-            _newsAndUpdateRepository = newsAndUpdateRepository;
+            _eventRepository = eventRepository;
         }
 
         public async Task<MethodResult<EventModel>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
@@ -34,15 +34,15 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.EventCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<EventModel>();
 
-            var newsAndUpdate = _mapper.Map<Event>(request);
+            var @event = _mapper.Map<Event>(request);
 
-            await _newsAndUpdateRepository.ExecuteTransactionAsync(async () =>
+            await _eventRepository.ExecuteTransactionAsync(async () =>
             {
-                newsAndUpdate = _newsAndUpdateRepository.Add(newsAndUpdate);
-                await _newsAndUpdateRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                @event = _eventRepository.Add(@event);
+                await _eventRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<EventModel>(newsAndUpdate);
+                methodResult.Result = _mapper.Map<EventModel>(@event);
                 return methodResult;
             });
 

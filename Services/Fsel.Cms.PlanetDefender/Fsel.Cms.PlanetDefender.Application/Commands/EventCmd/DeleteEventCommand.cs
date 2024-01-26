@@ -18,11 +18,11 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.EventCmd
 
     public class DeleteEventCommandHandler : IRequestHandler<DeleteEventCommand, MethodResult<bool>>
     {
-        private readonly IEventRepository _newsAndUpdateRepository;
+        private readonly IEventRepository _eventRepository;
 
-        public DeleteEventCommandHandler(IEventRepository newsAndUpdateRepository)
+        public DeleteEventCommandHandler(IEventRepository eventRepository)
         {
-            _newsAndUpdateRepository = newsAndUpdateRepository;
+            _eventRepository = eventRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteEventCommand request, CancellationToken cancellationToken)
@@ -32,19 +32,19 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.EventCmd
 
             #region Validation
 
-            var newsAndUpdate = await _newsAndUpdateRepository.GetByIdAsync(request.Id);
-            if (newsAndUpdate == null)
+            var @event = await _eventRepository.GetByIdAsync(request.Id);
+            if (@event == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(newsAndUpdate));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@event));
                 return methodResult;
             }
 
             #endregion Validation
 
-            await _newsAndUpdateRepository.ExecuteTransactionAsync(async () =>
+            await _eventRepository.ExecuteTransactionAsync(async () =>
             {
-                var result = await _newsAndUpdateRepository.DeleteAsync(newsAndUpdate);
-                await _newsAndUpdateRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                var result = await _eventRepository.DeleteAsync(@event);
+                await _eventRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = result;

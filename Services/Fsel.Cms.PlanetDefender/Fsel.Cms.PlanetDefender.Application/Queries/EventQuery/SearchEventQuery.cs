@@ -8,7 +8,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.EventQuery
     using System.Threading.Tasks;
     using Fsel.Cms.PlanetDefender.Domain.IRepositories;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
-    using Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.NewsAndUpdates;
+    using Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.Events;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using MediatR;
@@ -19,17 +19,17 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.EventQuery
 
     public class SearchEventQueryHandler : IRequestHandler<SearchEventQuery, MethodResult<PagingItemsModel<EventModel>>>
     {
-        private readonly IEventRepository _newsAndUpdateRepository;
+        private readonly IEventRepository _eventRepository;
 
-        public SearchEventQueryHandler(IEventRepository newsAndUpdateRepository)
+        public SearchEventQueryHandler(IEventRepository eventRepository)
         {
-            _newsAndUpdateRepository = newsAndUpdateRepository;
+            _eventRepository = eventRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<EventModel>>> Handle(SearchEventQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var query = _newsAndUpdateRepository.Queryable;
+            var query = _eventRepository.Queryable;
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -50,7 +50,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.EventQuery
                 query = query.Where(m => m.Type == request.Type);
             }
 
-            var methodResult = await _newsAndUpdateRepository.GetListByPageResultAsync<EventModel>(query, request, cancellationToken);
+            var methodResult = await _eventRepository.GetListByPageResultAsync<EventModel>(query, request, cancellationToken);
             return methodResult;
         }
     }

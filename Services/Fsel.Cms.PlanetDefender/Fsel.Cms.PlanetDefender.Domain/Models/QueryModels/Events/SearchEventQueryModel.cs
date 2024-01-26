@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.NewsAndUpdates
+namespace Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.Events
 {
     using Fsel.Cms.PlanetDefender.Domain.Enums;
     using Fsel.Core.Base.BaseModels;

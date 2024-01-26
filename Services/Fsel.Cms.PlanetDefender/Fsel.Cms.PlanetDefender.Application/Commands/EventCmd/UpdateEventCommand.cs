@@ -7,7 +7,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.EventCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Cms.PlanetDefender.Domain.IRepositories;
-    using Fsel.Cms.PlanetDefender.Domain.Models.CommandModel.NewsAndUpdates;
+    using Fsel.Cms.PlanetDefender.Domain.Models.CommandModel.Events;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -21,39 +21,39 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.EventCmd
     public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand, MethodResult<EventModel>>
     {
         private readonly IMapper _mapper;
-        private readonly IEventRepository _newsAndUpdateRepository;
+        private readonly IEventRepository _eventRepository;
 
-        public UpdateEventCommandHandler(IMapper mapper, IEventRepository newsAndUpdateRepository)
+        public UpdateEventCommandHandler(IMapper mapper, IEventRepository eventRepository)
         {
             _mapper = mapper;
-            _newsAndUpdateRepository = newsAndUpdateRepository;
+            _eventRepository = eventRepository;
         }
 
         public async Task<MethodResult<EventModel>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<EventModel>();
-            var newsAndUpdate = await _newsAndUpdateRepository.GetByIdAsync(request.Id);
+            var @event = await _eventRepository.GetByIdAsync(request.Id);
 
             #region Validation
 
-            if (newsAndUpdate == null)
+            if (@event == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(newsAndUpdate));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@event));
                 return methodResult;
             }
 
-            _mapper.Map(request, newsAndUpdate);
+            _mapper.Map(request, @event);
 
             #endregion Validation
 
-            await _newsAndUpdateRepository.ExecuteTransactionAsync(async () =>
+            await _eventRepository.ExecuteTransactionAsync(async () =>
             {
-                newsAndUpdate = _newsAndUpdateRepository.Update(newsAndUpdate);
+                @event = _eventRepository.Update(@event);
 
-                await _newsAndUpdateRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _eventRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<EventModel>(newsAndUpdate);
+                methodResult.Result = _mapper.Map<EventModel>(@event);
                 return methodResult;
             });
 
