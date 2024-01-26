@@ -12,7 +12,8 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public VideoTimeCodeProfile()
         {
-            CreateMap<VideoTimeCode, VideoTimeCodeModel>().IgnoreAllNonExisting();
+            CreateMap<VideoTimeCode, VideoTimeCodeModel>()
+            .ForMember(x => x.CourseSkills, p => p.MapFrom(o => o.TimeCodeExercises != null && o.TimeCodeExercises.Any() ? o.TimeCodeExercises.Select(x => x.Exercise!.CourseSkill).Distinct().ToList() : null));
             CreateMap<CreateVideoTimeCodeCommandModel, VideoTimeCode>().IgnoreAllNonExisting();
         }
     }

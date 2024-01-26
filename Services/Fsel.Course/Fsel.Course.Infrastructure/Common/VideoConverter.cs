@@ -415,7 +415,6 @@ namespace Fsel.Course.Infrastructure.Common
             timeCode.CorrectCount = GetCorrectCount(videoTimeCode);
             timeCode.CorrectTotal = GetCorrectTotal(videoTimeCode);
             timeCode.Status = GetTimeCodeStatus(videoTimeCode);
-            timeCode.CourseSkills = videoTimeCode.TimeCodeExercises.Where(x => x.Exercise != null).Select(x => x.Exercise!.CourseSkill).Distinct().ToList();
             timeCode.VideoTimeCodeResult = GetVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
             return timeCode;
         }
