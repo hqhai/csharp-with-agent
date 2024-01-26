@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// Section Group Result Report
         /// </summary>
         [HttpGet("report")]
-        [ProducesResponseType(typeof(MethodResult<SectionGroupResultReportModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<SectionGroupResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetSectionGroupResultReportQuery query)
         {

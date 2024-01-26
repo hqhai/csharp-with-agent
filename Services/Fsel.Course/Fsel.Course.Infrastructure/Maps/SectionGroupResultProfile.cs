@@ -12,7 +12,6 @@ namespace Fsel.Course.Infrastructure.Maps
         public SectionGroupResultProfile()
         {
             CreateMap<SectionGroupResult, SectionGroupResultModel>().IgnoreAllNonExisting();
-            CreateMap<SectionGroupResult, SectionGroupResultReportModel>().IgnoreAllNonExisting();
         }
     }
 }

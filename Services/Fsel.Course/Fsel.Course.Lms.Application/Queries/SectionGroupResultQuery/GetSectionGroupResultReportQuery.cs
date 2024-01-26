@@ -22,13 +22,13 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetSectionGroupResultReportQuery : IRequest<MethodResult<SectionGroupResultReportModel>>
+    public class GetSectionGroupResultReportQuery : IRequest<MethodResult<SectionGroupResultModel>>
     {
         public Guid MockTestResultId { get; set; }
         public Guid SectionGroupId { get; set; }
     }
 
-    public class GetSectionGroupResultReportQueryHandler : IRequestHandler<GetSectionGroupResultReportQuery, MethodResult<SectionGroupResultReportModel>>
+    public class GetSectionGroupResultReportQueryHandler : IRequestHandler<GetSectionGroupResultReportQuery, MethodResult<SectionGroupResultModel>>
     {
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
@@ -45,10 +45,10 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<SectionGroupResultReportModel>> Handle(GetSectionGroupResultReportQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SectionGroupResultModel>> Handle(GetSectionGroupResultReportQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<SectionGroupResultReportModel>();
+            var methodResult = new MethodResult<SectionGroupResultModel>();
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentsResult.IsSuccessStatusCode)
             {
@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.SectionGroupResultQuery
             var courseSkill = sectionGroupResult.SectionGroup!.CourseSkill;
             if ((courseSkill == EnumCourseSkill.Reading || courseSkill == EnumCourseSkill.Listening) && sectionGroupResult.SkillScores != null)
             {
-                var sectionGroupResultReport = _mapper.Map<SectionGroupResultReportModel>(sectionGroupResult);
+                var sectionGroupResultReport = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
                 var scores = sectionGroupResult.SkillScores.Select(x => x.Scores).FirstOrDefault();
                 sectionGroupResultReport.BandScoresReport = GetBandScoresReport(sectionGroupResult, scores);
                 (sectionGroupResultReport.IsCheckScoreColor, sectionGroupResultReport.TargetBandScore) = mockTestResult.Course!.CourseLevel.CheckScoreColor(scores);

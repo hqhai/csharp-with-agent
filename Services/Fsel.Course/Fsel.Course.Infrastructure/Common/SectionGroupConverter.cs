@@ -390,7 +390,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
                 sectionGroup.Status = GetResultStatus(indexProcess, index);
-                sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultReportModel>(x.SectionGroupResults.FirstOrDefault());
+                sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
                 return sectionGroup;
             }).ToList();
         }
