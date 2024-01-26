@@ -33,7 +33,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         [HttpGet("get-list-character")]
         [ProducesResponseType(typeof(MethodResult<IList<SpaceShipModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetAccordingToUser([FromQuery] GetListCharacterQuery query)
+        public async Task<IActionResult> GetListCharacter([FromQuery] GetListCharacterQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
