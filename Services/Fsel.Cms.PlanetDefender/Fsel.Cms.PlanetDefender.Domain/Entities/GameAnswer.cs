@@ -14,6 +14,8 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
         public Guid GameVocabularyTypeId { get; set; }
         public Guid StudentId { get; set; }
         public Guid GameHistoryId { get; set; }
+        public Guid? ZMatterId { get; set; }
         public GameHistory? GameHistory { get; set; }
+        public ZMatter? ZMatter { get; set; }
     }
 }

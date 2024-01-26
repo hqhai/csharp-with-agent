@@ -9,5 +9,8 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
         public bool IsDefault { get; set; }
         public string? Name { get; set; }
         public string? Code { get; set; }
+        public long Price { get; set; }
+        public string? Description { get; set; }
+        public bool IsOwned { get; set; }
     }
 }

@@ -16,6 +16,7 @@ namespace Fsel.Shared.Constants
 
         public const string ZMatter = "Resources//ZMatter.json";
         public const string SpaceShip = "Resources//SpaceShip.json";
+        public const string Character = "Resources//Character.json";
 
         public const string GameplayRuleConfig = "Resources//GameplayRuleConfig.json";
 
