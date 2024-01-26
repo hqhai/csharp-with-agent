@@ -611,7 +611,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(mockTestResult);
             var isTeacherGradedSkill = courseSkills?.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
-            if (isTeacherGradedSkill != null)
+            if (isTeacherGradedSkill.HasValue && isTeacherGradedSkill.Value)
             {
                 return mockTestResult.MockTestScores.Any();
             }

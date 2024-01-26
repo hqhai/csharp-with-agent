@@ -90,8 +90,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             var mockTestDetail = _mapper.Map<MockTestModel>(mockTest);
             var sectionGroups = mockTest.MockTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).OrderBy(x => x.CourseSkill).ToList();
             mockTestDetail.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(sectionGroups);
+            mockTestDetail.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, mockTestResult.Id, nameof(SectionGroupResult.MockTestResultId));
             mockTestDetail.MockTestResult = GetMockTestResult(mockTestDetail, mockTestResult, sectionGroups);
-            mockTestDetail.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, mockTestDetail.MockTestResult.Id, nameof(SectionGroupResult.MockTestResultId));
             return mockTestDetail;
         }
 
