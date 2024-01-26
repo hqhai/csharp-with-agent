@@ -36,7 +36,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa bình luận bài viết của bạn.",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
     "createdDate": "2023-08-28"
   },
   {
@@ -46,7 +46,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} vừa trả lời bình luận của bạn.",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={1}&commentId={2}&repCommentId={3}",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
     "createdDate": "2023-08-28"
   },
   {
@@ -75,8 +75,8 @@
     "content": "DeleteComment",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Bình luận của bạn đã vi phạm Tiêu chuẩn cộng đồng của FSEL và đã bị xóa",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
+    "templateMessage": "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
     "createdDate": "2023-08-28"
   },
   {
@@ -85,8 +85,8 @@
     "content": "DeleteClassForumResult",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Bài viết của bạn đã vi phạm Tiêu chuẩn cộng đồng của FSEL và đã bị xóa",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
+    "templateMessage": "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
     "createdDate": "2023-08-28"
   },
   {
@@ -96,7 +96,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "{0} đã thích bài viết của bạn.",
-    "templateLink": "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
     "createdDate": "2023-08-28"
   },
   {
@@ -116,7 +116,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của bạn đã được hệ thống AI ChatGPT nhận xét. Nhấn để xem chi tiết",
-    "templateLink": "",
+    "templateLink": "learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
     "createdDate": "2023-08-28"
   },
   {
@@ -146,7 +146,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Hãy chia sẻ cảm nhận của bạn về LMS!",
-    "templateLink": "",
+    "templateLink": "/review",
     "createdDate": "2023-08-28"
   },
   {

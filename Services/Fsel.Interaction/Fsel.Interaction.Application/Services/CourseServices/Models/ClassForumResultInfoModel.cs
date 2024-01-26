@@ -10,7 +10,7 @@ namespace Fsel.Interaction.Application.Services.CourseServices.Models
         public string? WordContent { get; set; }
         public string? GradingAlFeedback { get; set; }
         public Guid? GradingTeacherId { get; set; }
-        public Guid LessonResultId { get; set; }
+        public Guid? LessonResultId { get; set; }
         public Guid StudentId { get; set; }
         public Guid ClassForumId { get; set; }
         public Guid? CheckCsoId { get; set; }

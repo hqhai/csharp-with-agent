@@ -89,7 +89,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
                     if (!action.IsValid())
                     {
-                        methodResult.AddErrorBadRequest(action.ErrorMessages);
+                        methodResult.AddErrorBadRequest(action.ErrorMessages);  
                         return methodResult;
                     }
 
@@ -101,13 +101,15 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                     //class forum
                     var classForumResultTemp = await GetClassForumResultModel(request.ObjectId);
 
-                    var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(request.ObjectId, classForumResultTemp!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId);
+                    var lesson = await _courseService.GetLessonResult(classForumResultTemp.LessonResultId ?? default);
+
+                    var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(classForumResultTemp!, classForumResultTemp?.CourseId, classForumResultTemp?.CurrentUnitId, lesson?.Content?.Result?.Id);
                     bool conditionCheckIsClassForum = await CheckObjecIsClassForum(request.ObjectId);
                     if (!conditionCheckIsClassForum)
                     {
                         var comment = await _commentRepository.GetByIdAsync(request.ObjectId);
                         classForumResultTemp = await GetClassForumResultModel(comment!.ObjectId);
-                        (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(request.ObjectId, comment!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId);
+                        (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(comment!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId, lesson?.Content?.Result?.Id);
 
                         businessType = EnumNotificationType.LinkComment;
                         businessContent = EnumNotificationContent.LikeComment;
@@ -248,7 +250,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         /// <param name="userService"></param>
         /// <param name="trainingService"></param>
         /// <returns></returns>
-        public (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(Guid objectId, dynamic templateResult, Guid? courseId, Guid? unitId)
+        public (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(dynamic templateResult, Guid? courseId, Guid? unitId, Guid? lessonId)
         {
             if (templateResult == null)
             {
@@ -256,7 +258,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             }
 
             // param
-            var paramsLink = new List<object> { unitId?.ToString() ?? string.Empty, courseId?.ToString() ?? string.Empty, templateResult?.Id.ToString() ?? string.Empty, objectId };
+            var paramsLink = new List<object> { lessonId?.ToString() ?? string.Empty, courseId?.ToString() ?? string.Empty, unitId?.ToString() ?? string.Empty };
             var ownerObjectId = templateResult?.CreatedUserId ?? default;
 
 

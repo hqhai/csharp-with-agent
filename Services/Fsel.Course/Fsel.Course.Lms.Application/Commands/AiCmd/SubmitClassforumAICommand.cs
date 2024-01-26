@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Fsel.Core.Base;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -20,12 +19,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     public class SubmitAIResponseCommandHandler : IRequestHandler<SubmitClassforumAICommand, bool>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IMediator _mediator;
-        public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher)
+        public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher)
         {
             _classForumResultRepository = classForumResultRepository;
+            _lessonResultRepository = lessonResultRepository;
             _submitAIResponsePublisher = submitAIResponsePublisher;
             _mediator = mediator;
             _notificationMessagePublisher = notificationMessagePublisher;
@@ -80,6 +81,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                 if (classForumResultOwner != null)
                 {
+                    var lessonResult = await _lessonResultRepository.GetIncludeByIdAsync(classForumResultOwner.LessonResultId);
+                    var paramsLink = new List<object> { lessonResult?.LessonId.ToString() ?? string.Empty, lessonResult?.CourseId.ToString() ?? string.Empty, lessonResult?.UnitId.ToString() ?? string.Empty };
 
                     NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
                     {
@@ -87,7 +90,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         UserIds = new List<Guid>() { classForumResultOwner.CreatedUserId },
                         Type = EnumNotificationType.LinkPage,
                         Content = EnumNotificationContent.AIFeedBack,
-                        PlatformCode = EnumPlatformCode.LMS
+                        PlatformCode = EnumPlatformCode.LMS,
+                        ParamsLink = paramsLink
                     };
                     await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
                 }
