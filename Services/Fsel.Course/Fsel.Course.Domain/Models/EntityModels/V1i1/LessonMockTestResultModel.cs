@@ -8,5 +8,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public Guid UnitId { get; set; }
         public Guid ObjectId { get; set; }
         public string? Type { get; set; }
+        public bool? IsCheckScoreColor { get; set; }
+        public double? TargetBandScore { get; set; }
+        public double? Scores { get; set; }
     }
 }

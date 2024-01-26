@@ -6,7 +6,10 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.LessonNotes;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -37,6 +40,17 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
             if (!lessonNote.IsValid())
             {
                 methodResult.AddErrorBadRequest(lessonNote.ErrorMessages);
+                return methodResult;
+            }
+
+            if (request.Type == EnumNoteType.Individual && request.LessonResultId != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonResultId));
+                return methodResult;
+            }
+            else if (request.Type == EnumNoteType.Platform && request.LessonResultId == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonResultId));
                 return methodResult;
             }
 

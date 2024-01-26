@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Enums;
 
     public class LessonNote : Entity
     {
@@ -21,7 +22,8 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Note { get; set; }
 
+        public EnumNoteType Type { get; set; }
         public LessonResult? LessonResult { get; set; }
-        public Guid LessonResultId { get; set; }
+        public Guid? LessonResultId { get; set; }
     }
 }

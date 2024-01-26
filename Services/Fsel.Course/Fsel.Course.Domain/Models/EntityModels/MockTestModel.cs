@@ -26,5 +26,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         }
 
         public string? PostArea { get; set; }
+
     }
 }

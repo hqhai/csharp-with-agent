@@ -24,5 +24,7 @@ namespace Fsel.Shared.Constants
         public const string TokenConfig = "Resources//TokenConfig.json";
         public const string PrivateKeyUrBox = "Resources//UrBox//private_key_rsa";
         public const string I18NCredentialsFilePath = "Resources//file-i18n.json";
+
+        public const string BandScoreFileName = "Resources//BandScores.json";
     }
 }
