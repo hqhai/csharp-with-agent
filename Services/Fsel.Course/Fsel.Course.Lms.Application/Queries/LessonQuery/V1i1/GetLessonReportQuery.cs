@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
+namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;

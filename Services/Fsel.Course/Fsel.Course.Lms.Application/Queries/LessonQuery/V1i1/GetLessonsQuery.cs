@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
+namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 {
     using System;
     using System.Collections.Generic;
@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
+        private readonly ICourseRepository _courseRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMapper _mapper;
         private readonly ILessonResultRepository _lessonResultRepository;
@@ -39,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
             IMapper mapper,
             ILessonResultRepository lessonResultRepository,
             IUserService userService,
+            ICourseRepository courseRepository,
             IMockTestResultRepository mockTestResultRepository,
             IUnitRepository unitRepository)
         {
@@ -46,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
             _lessonResultRepository = lessonResultRepository;
             _authContext = authContext;
             _userService = userService;
+            _courseRepository = courseRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _unitRepository = unitRepository;
         }
@@ -61,6 +65,12 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
                 return methodResult;
             }
             var studentId = studentsResult.Content?.Result?.Id;
+            var course = await _courseRepository.GetByIdAsync(request.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
             var unit = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
                                  .Include(x => x.UnitLessons)
                                  .Include(x => x.UnitSkillMockTests)
@@ -85,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
             data.AddRange(await UpdateLessonResults(request, studentId, unit, cancellationToken));
             if (unit.UnitSkillMockTests.Any())
             {
-                data.Add(await UpdateMockTestResults(request, studentId, unit, cancellationToken));
+                data.Add(await UpdateMockTestResults(request, studentId, unit, course, cancellationToken));
             }
             methodResult.Result = data;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -111,7 +121,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
             return _mapper.Map<IList<LessonMockTestResultModel>>(lessonResults.OrderBy(x => x.CreatedDate).ToList());
         }
 
-        private async Task<LessonMockTestResultModel> UpdateMockTestResults(GetLessonsQuery request, Guid? studentId, Domain.Entities.Unit unit, CancellationToken cancellationToken)
+        private async Task<LessonMockTestResultModel> UpdateMockTestResults(GetLessonsQuery request, Guid? studentId, Domain.Entities.Unit unit, Course course, CancellationToken cancellationToken)
         {
             var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
             if (mockTestResult == null)
@@ -127,7 +137,10 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
                 _mockTestResultRepository.Add(mockTestResult ?? new MockTestResult());
                 await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
             }
-            return _mapper.Map<LessonMockTestResultModel>(mockTestResult);
+            var scores = mockTestResult?.SkillScores?.Select(x => x.Scores).FirstOrDefault() ?? default;
+            var lessonMockTestResult = _mapper.Map<LessonMockTestResultModel>(mockTestResult);
+            (lessonMockTestResult.IsCheckScoreColor, lessonMockTestResult.TargetBandScore) = course.CourseLevel.CheckScoreColor(scores);
+            return lessonMockTestResult;
         }
     }
 }

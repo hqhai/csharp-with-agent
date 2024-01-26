@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 courseUnitMockTest = await GetCourseUnitMockTestFollow(courseUnitMockTests, unitId, courseResult.StudentId);
                 unitId = courseUnitMockTest?.UnitId ?? unitId;
             }
-            (lessonOverview.UnitId, lessonOverview.ObjectId, lessonOverview.Type, lessonOverview.Status, lessonOverview.IsUnitFirst) = (unitId, GetObjectId(courseUnitMockTest), GetObjectType(courseUnitMockTest), await GetStatusLessonOverview(courseUnitMockTest, courseResult.StudentId), unitId == unitFirstId);
+            (lessonOverview.UnitId, lessonOverview.ObjectId, lessonOverview.Type, lessonOverview.Status, lessonOverview.IsUnitFirst) = (unitId, GetObjectId(courseUnitMockTest), GetObjectType(courseUnitMockTest), await GetStatusLessonOverview(courseUnitMockTest, courseResult.StudentId, !(courseUnitMockTest != null && courseUnitMockTest.UnitId.HasValue)), unitId == unitFirstId);
             if (courseResult.Status != EnumResultStatus.Process)
             {
                 (lessonOverview.ObjectId, lessonOverview.Type, lessonOverview.Status) = (course.Id, nameof(Course), GetStatusOverview(courseResult.Status, true));
@@ -230,7 +230,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return courseUnitMockTests.Skip(currentIndex + 1).FirstOrDefault();
         }
 
-        private async Task<EnumLessonOverviewStatus> GetStatusLessonOverview(CourseUnitMockTest? courseUnitMockTest, Guid? studentId)
+        private async Task<EnumLessonOverviewStatus> GetStatusLessonOverview(CourseUnitMockTest? courseUnitMockTest, Guid? studentId, bool isStart = false)
         {
             var status = await GetStatus(courseUnitMockTest, studentId);
             return GetStatusOverview(status);

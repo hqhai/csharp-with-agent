@@ -390,7 +390,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
                 sectionGroup.Status = GetResultStatus(indexProcess, index);
-                sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
+                sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultReportModel>(x.SectionGroupResults.FirstOrDefault());
                 return sectionGroup;
             }).ToList();
         }
@@ -607,12 +607,13 @@ namespace Fsel.Course.Infrastructure.Common
             return questionDto;
         }
 
-        public bool IsTeacherGraded(MockTestResult mockTestResult)
+        public bool IsTeacherGraded(MockTestResult mockTestResult, IList<EnumCourseSkill>? courseSkills)
         {
-            var sectionGroups = mockTestResult.MockTest?.MockTestSections.Select(x => x.SectionGroup).Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing);
-            if (sectionGroups != null && sectionGroups.Any())
+            ArgumentNullException.ThrowIfNull(mockTestResult);
+            var isTeacherGradedSkill = courseSkills?.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
+            if (isTeacherGradedSkill != null)
             {
-                return sectionGroups.Any() && sectionGroups.SelectMany(x => x!.MockTestScores).Any();
+                return mockTestResult.MockTestScores.Any();
             }
             return true;
         }
