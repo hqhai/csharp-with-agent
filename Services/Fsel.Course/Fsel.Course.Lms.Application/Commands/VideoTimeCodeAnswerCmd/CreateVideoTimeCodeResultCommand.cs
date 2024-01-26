@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 videoTimeCodeResult = _videoTimeCodeResultRepository.Add(videoTimeCodeResult);
                 await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 await UpdateVideoResult(videoResult, request.VideoTimeCodeId).ConfigureAwait(false);
-                if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+                if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || videoTimeCode.ExecutionTime != default)
                 {
                     await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
                     {
