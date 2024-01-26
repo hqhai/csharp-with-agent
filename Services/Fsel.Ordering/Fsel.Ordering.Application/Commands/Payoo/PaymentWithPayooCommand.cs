@@ -2,14 +2,19 @@
 
 namespace Fsel.Ordering.Application.Commands.Payoo
 {
+    using System.Globalization;
+    using System.Security.Cryptography;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Web;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Services.PayooService;
     using Fsel.Ordering.Application.Services.PayooService.Models;
+    using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Helpers;
@@ -17,79 +22,118 @@ namespace Fsel.Ordering.Application.Commands.Payoo
 
     public class PaymentWithPayooCommand : IRequest<MethodResult<PayooModel>>
     {
+        public Guid OrderId { get; set; }
     }
     public class PaymentWithPayooCommandHandler : IRequestHandler<PaymentWithPayooCommand, MethodResult<PayooModel>>
     {
         private readonly IPayooService _payooService;
         private readonly AppSetting _appSetting;
-        public PaymentWithPayooCommandHandler(IPayooService payooService, AppSetting appSetting)
+        private readonly IOrderRepository _orderRepository;
+        private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
+        public PaymentWithPayooCommandHandler(IPayooService payooService, AppSetting appSetting, IOrderRepository orderRepository, IUserService userService, AuthContext authContext)
         {
             _payooService = payooService;
             _appSetting = appSetting;
+            _orderRepository = orderRepository;
+            _userService = userService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PayooModel>> Handle(PaymentWithPayooCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PayooModel>();
-            string originalString = "Thanh toan hoa đon mua khoa hoc cho cong ty FSEL, chi tiet lien he voi cong ty FSEL tai 35 Lac Trung, Hai Ba Trung, Ha Noi, hoac so dien thoai: 0972123654, Hay lien he ngay khi co van de de duoc giai quyet ngay lam tuc, chung toi luon ho tro 24/7 moi luc moi noi.";
 
-            // Encode the string
-            string encodedString = HttpUtility.UrlEncode(originalString);
+            var order = await _orderRepository.GetByIdAsync(request.OrderId);
+            if (order == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+
+            var orderNo = NumberHelper.GenerateCode(32);
+            var validityTime = DateTime.Now;
+            var validityTime1 = validityTime.AddMinutes(30).ToString("yyyyMMddHHmmss", CultureInfo.CurrentCulture);
             var param = new
             {
                 UserName = _appSetting.PayooConfig?.Username,
                 ShopId = _appSetting.PayooConfig?.ShopId,
-                Session = "007121170526",
+                ShopTitle = _appSetting.PayooConfig?.ShopTitle,
                 ShopDomain = _appSetting.PayooConfig?.ShopDomain,
-                ShopBackUrl = HttpUtility.UrlEncode(_appSetting.PayooConfig?.ShopBackUrl),
-                OrderNo = Guid.NewGuid().ToString(),
-                OrderCashAmount = 10000,
-                OrderShipDays = 1,
-                OrderShipDate = "23/01/2024",
-                OrderDescription = encodedString,
-                NotifyUrl = HttpUtility.UrlEncode(_appSetting.PayooConfig?.NotifyUrl),
-                ValidityTime = "20240125010101",
-                CustomerName = "Khoa",
-                CustomerPhone = "0972439693",
-                CustomerAddress = "HN",
-                CustomerEmail = "huukhoa@atlantic.edu.vn"
+                ShopBackUrl = _appSetting.PayooConfig?.ShopBackUrl,
+                OrderNo = orderNo.ToString(),
+                OrderCashAmount = order.TotalPrice,
+                OrderDescription = PaymentSetting.Payoo.OrderDescription,
+                NotifyUrl = _appSetting.PayooConfig?.NotifyUrl,
+                ValidityTime = validityTime1,
+                OrderId = order.Id,
+                CustomerName = student?.Human?.FullName,
+                CustomerPhone = student?.Human?.PhoneNumber,
+                CustomerAddress = student?.Human?.Address,
+                CustomerEmail = student?.Human?.Email,
             };
 
-            var path = ResourceSettings.Payoo;
-            using StreamReader streamReader = new StreamReader(path);
+            using StreamReader streamReader = new StreamReader(ResourceSettings.Payoo);
+
             var body = await streamReader.ReadToEndAsync(cancellationToken);
+
             body = RemoveWhitespace(body);
+
             var @params = ObjectHelper.GetDictionary(param);
+
             @params.ForEach(item =>
             {
                 body = body.Replace($"[{item.Key}]", item.Value, StringComparison.CurrentCultureIgnoreCase);
             });
-            var checkSum = EncodeHelper.HmacSHA512(_appSetting.PayooConfig?.Key ?? string.Empty, body);
+
+            var checkSum = GenerateChecksum(_appSetting.PayooConfig?.Key ?? string.Empty, body);
 
             var payooResult = await _payooService.Create(new CreatePayooModel
             {
                 Data = body,
                 CheckSum = checkSum,
                 Refer = _appSetting.PayooConfig?.ShopDomain,
-                Method = "Bank-account",
-                Bank = "ABB"
             });
             methodResult.Result = payooResult.Content;
             return methodResult;
         }
-        public static string RemoveWhitespace(string input)
+        public string RemoveWhitespace(string input)
         {
             StringBuilder sb = new StringBuilder();
             using (StringReader sr = new StringReader(input))
             {
                 string line;
+
                 while ((line = sr.ReadLine()) != null)
                 {
                     sb.Append(line.Trim());
                 }
             }
             return sb.ToString();
+        }
+
+
+        public string GenerateChecksum(string checksumKey, string data)
+        {
+            string checksumData = checksumKey + data;
+            byte[] dataBytes = Encoding.UTF8.GetBytes(checksumData);
+            byte[] hashValue = SHA512.HashData(dataBytes);
+            StringBuilder builder = new StringBuilder();
+            foreach (byte b in hashValue)
+            {
+                builder.Append(b.ToString("x2", CultureInfo.InvariantCulture));
+            }
+
+            return builder.ToString();
         }
     }
 }

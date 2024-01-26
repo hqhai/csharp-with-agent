@@ -8,7 +8,7 @@ namespace Fsel.Ordering.Application.Services.PayooService
 
     public interface IPayooService
     {
-        [Post("/v2/paynow/order/create")]
+        [Post("/create-preorder")]
         Task<IApiResponse<PayooModel>> Create([Body] CreatePayooModel model);
     }
 }

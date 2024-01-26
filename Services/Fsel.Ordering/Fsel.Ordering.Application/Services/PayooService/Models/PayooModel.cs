@@ -8,6 +8,8 @@ namespace Fsel.Ordering.Application.Services.PayooService.Models
     {
         [JsonPropertyName("result")]
         public string? Result { get; set; }
+        [JsonPropertyName("checksum")]
+        public string? CheckSum { get; set; }
         [JsonPropertyName("order")]
         public OrderPayooModel? Order { get; set; }
         [JsonPropertyName("message")]
@@ -15,8 +17,6 @@ namespace Fsel.Ordering.Application.Services.PayooService.Models
     }
     public class OrderPayooModel
     {
-        [JsonPropertyName("order_id")]
-        public string? OrderId { get; set; }
         [JsonPropertyName("order_no")]
         public string? OrderNo { get; set; }
         [JsonPropertyName("amount")]

@@ -7,9 +7,7 @@ namespace Fsel.Ordering.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Ordering.Application.Commands.Payoo;
-    using Fsel.Ordering.Application.Queries.PayooQuery;
     using Fsel.Ordering.Application.Services.PayooService.Models;
-    using Fsel.Ordering.Domain.Models.EntityModels.Payoo;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -28,26 +26,26 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// shop back url
+        /// create link payment
         /// </summary>
-        [HttpGet("shop-back-url")]
-        [ProducesResponseType(typeof(MethodResult<ShopBackUrlModel>), (int)HttpStatusCode.OK)]
+        [HttpPost("create")]
+        [ProducesResponseType(typeof(MethodResult<PayooModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ShopBackUrl([FromQuery] ShopBackUrlQuery query)
+        public async Task<IActionResult> CreatePayoo([FromBody] PaymentWithPayooCommand command)
         {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
-        /// shop back url
+        /// notify url
         /// </summary>
-        [HttpGet("create")]
-        [ProducesResponseType(typeof(MethodResult<PayooModel>), (int)HttpStatusCode.OK)]
+        [HttpPost("notify-url")]
+        [ProducesResponseType(typeof(MethodResult<NotifyUrlModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreatePayoo()
+        public async Task<IActionResult> NotifyUrl([FromBody] NotifyUrlCommand command)
         {
-            var commandResult = await _mediator.Send(new PaymentWithPayooCommand ()).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

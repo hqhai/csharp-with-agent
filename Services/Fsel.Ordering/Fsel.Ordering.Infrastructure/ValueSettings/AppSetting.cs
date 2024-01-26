@@ -34,6 +34,8 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public string? ShopBackUrl { get; set; }
         public string? NotifyUrl { get; set; }
         public string? Key { get; set; }
+        public string? PayooIP { get; set; }
+        public string? ShopTitle { get; set; }
     }
 
     public class PaymentConfig
