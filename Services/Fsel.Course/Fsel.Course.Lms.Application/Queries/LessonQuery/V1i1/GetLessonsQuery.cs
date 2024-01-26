@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -32,24 +33,30 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly ICourseRepository _courseRepository;
+        private readonly IMockTestRepository _mockTestRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMapper _mapper;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly AuthContext _authContext;
+        private readonly SectionGroupConverter _sectionGroupConverter;
 
         public GetLessonsQueryHandler(AuthContext authContext,
+            SectionGroupConverter sectionGroupConverter,
             IMapper mapper,
             ILessonResultRepository lessonResultRepository,
             IUserService userService,
             ICourseRepository courseRepository,
+            IMockTestRepository mockTestRepository,
             IMockTestResultRepository mockTestResultRepository,
             IUnitRepository unitRepository)
         {
             _mapper = mapper;
             _lessonResultRepository = lessonResultRepository;
             _authContext = authContext;
+            _sectionGroupConverter = sectionGroupConverter;
             _userService = userService;
             _courseRepository = courseRepository;
+            _mockTestRepository = mockTestRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _unitRepository = unitRepository;
         }
@@ -123,22 +130,34 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 
         private async Task<LessonMockTestResultModel> UpdateMockTestResults(GetLessonsQuery request, Guid? studentId, Domain.Entities.Unit unit, Course course, CancellationToken cancellationToken)
         {
-            var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
             if (mockTestResult == null)
             {
-                mockTestResult = unit.UnitSkillMockTests.Select(x => new MockTestResult
+                var unitSkillMockTest = unit.UnitSkillMockTests.FirstOrDefault();
+                mockTestResult = new MockTestResult
                 {
-                    UnitId = x.UnitId,
-                    MockTestId = x.MockTestId,
+                    UnitId = unitSkillMockTest?.UnitId,
+                    MockTestId = unitSkillMockTest?.MockTestId ?? default,
                     StudentId = studentId ?? default,
                     Status = EnumResultStatus.Unfinished,
                     CourseId = request.CourseId
-                }).FirstOrDefault();
-                _mockTestResultRepository.Add(mockTestResult ?? new MockTestResult());
+                };
+
+                _mockTestResultRepository.Add(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
             }
-            var scores = mockTestResult?.SkillScores?.Select(x => x.Scores).FirstOrDefault() ?? default;
+            var mockTest = await _mockTestRepository.Queryable.Where(x => x.Id == mockTestResult.MockTestId)
+                                        .Include(x => x!.MockTestSections)
+                                        .ThenInclude(x => x.SectionGroup)
+                                        .FirstOrDefaultAsync(cancellationToken);
+            if (mockTest == null)
+            {
+                return new LessonMockTestResultModel();
+            }
+
+            var scores = mockTestResult.SkillScores?.Select(x => x.Scores).FirstOrDefault() ?? default;
             var lessonMockTestResult = _mapper.Map<LessonMockTestResultModel>(mockTestResult);
+            lessonMockTestResult.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
             (lessonMockTestResult.IsCheckScoreColor, lessonMockTestResult.TargetBandScore) = course.CourseLevel.CheckScoreColor(scores);
             return lessonMockTestResult;
         }

@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public string? Type { get; set; }
         public bool? IsCheckScoreColor { get; set; }
         public double? TargetBandScore { get; set; }
+        public bool? IsTeacherGraded { get; set; }
         public double? Scores { get; set; }
     }
 }
