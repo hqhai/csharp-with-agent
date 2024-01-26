@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 videoTimeCodeResultDto.AvatarPath = item.Human?.AvatarPath;
                 testResultRankings.Add(videoTimeCodeResultDto);
             }
-            methodResult.Result = testResultRankings.OrderByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
+            methodResult.Result = testResultRankings.OrderByDescending(x => x.Percent).ThenByDescending(x => x.Status).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -147,6 +147,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                                             CorrectTotal = x.Sum(x => x.CorrectTotal),
                                             Score = x.Sum(x => x.CorrectCount),
                                             StudentId = x.Key,
+                                            Score = x.Sum(x => x.CorrectCount),
                                             WorkingTime = x.Sum(x => x.WorkingTime),
                                             Percent = NumberHelper.GetPercent(x.Sum(x => x.CorrectCount), x.Sum(x => x.CorrectTotal)),
                                             Status = x.Select(x => x.VideoResult).Select(x => x!.Status).FirstOrDefault(),
@@ -162,7 +163,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 videoTimeCodeResultStudent.AvatarPath = item.Human?.AvatarPath;
                 testResultRankings.Add(videoTimeCodeResultStudent);
             }
-            methodResult.Result = testResultRankings.OrderByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
+            methodResult.Result = testResultRankings.OrderByDescending(x => x.Percent).ThenByDescending(x => x.Status).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
