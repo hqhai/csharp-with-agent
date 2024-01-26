@@ -20,12 +20,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumGameCourseLevel>());
 
-            builder.Property(e => e.Gender)
-               .HasMaxLength(100)
-               .HasConversion(
-                   v => v.ToString(),
-                   v => v.EnumParse<EnumGender>());
-
             builder.Property(b => b.Level).HasDefaultValue(1);
         }
     }

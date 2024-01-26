@@ -25,6 +25,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             SeedSpaceShip(modelBuilder);
             StudentTagName(modelBuilder);
             AvatarImage(modelBuilder);
+            SeedCharacter(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new StudentGameInfoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new WheelOfBuffEntityTypeConfiguration());
@@ -34,6 +35,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             modelBuilder.ApplyConfiguration(new StudentSpaceShipEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTagNameEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new GameAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentCharacterEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
@@ -49,6 +51,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         public DbSet<StudentSpaceShip> StudentSpaceShips { get; set; }
         public DbSet<StudentTagName> StudentTagNames { get; set; }
         public DbSet<GameAnswer> GameAnswers { get; set; }
+        public DbSet<Character> Characters { get; set; }
+        public DbSet<StudentCharacter> StudentCharacters { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -71,6 +75,14 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
             var zMatters = ConvertHelper.DeserializeFromFilePath<IList<ZMatter>>(path);
             ArgumentNullException.ThrowIfNull(zMatters);
             builder.Entity<ZMatter>().HasData(zMatters);
+        }
+
+        private static void SeedCharacter(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.Character);
+            var characters = ConvertHelper.DeserializeFromFilePath<IList<Character>>(path);
+            ArgumentNullException.ThrowIfNull(characters);
+            builder.Entity<Character>().HasData(characters);
         }
 
         private static void SeedSpaceShip(ModelBuilder builder)

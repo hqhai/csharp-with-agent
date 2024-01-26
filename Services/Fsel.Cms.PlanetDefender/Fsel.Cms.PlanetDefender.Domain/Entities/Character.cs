@@ -2,11 +2,11 @@
 
 namespace Fsel.Cms.PlanetDefender.Domain.Entities
 {
-    using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using System.ComponentModel.DataAnnotations;
 
-    public class SpaceShip : Entity
+    public class Character : Entity
     {
         public bool IsDefault { get; set; }
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
@@ -16,11 +16,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
         public long Price { get; set; }
-        [MaxLength(750, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
-
-        public ICollection<GameHistory> GameHistories { get; set; } = new List<GameHistory>();
-        public ICollection<StudentTagName> StudentTagNames { get; set; } = new List<StudentTagName>();
-        public ICollection<SpaceShip> SpaceShips { get; set; } = new List<SpaceShip>();
+        public ICollection<StudentCharacter> StudentCharacters { get; set; } = new List<StudentCharacter>();
     }
 }

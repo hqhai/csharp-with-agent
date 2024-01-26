@@ -27,5 +27,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
         public string? FilePath { get; set; }
 
         public bool IsActive { get; set; }
+        public ICollection<GameAnswer> GameAnswers { get; set; } = new List<GameAnswer>();
     }
 }
