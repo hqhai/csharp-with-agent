@@ -17,5 +17,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public BandScoresReport? BandScoresReport { get; set; }
         public double TargetBandScore { get; set; }
         public bool IsCheckScoreColor { get; set; }
+        public bool IsFeedBack { get; set; }
     }
 }
