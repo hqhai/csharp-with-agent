@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                             UnitDisplayOrder = x.MockTest.MockTestType == EnumMockTestType.FullMockTest ? x.MockTest.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault() : x.MockTest.UnitSkillMockTests.Where(y => y.UnitId == x.UnitId).Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.Number).FirstOrDefault(),
                                                                             CourseCode = x.MockTest.MockTestResults.Select(x => x.Course!.Code).FirstOrDefault(),
                                                                         });
-            mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing || x.Type == EnumMockTestType.FullMockTest);
+            mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.Type == EnumMockTestType.FullMockTest);
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -90,10 +90,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 {
                     case EnumMockTestFilter.Speaking:
                         mockTestResultQuery = mockTestResultQuery.Where(m => m.Type == EnumMockTestType.SkillMockTest && m.CourseSkill == EnumCourseSkill.Speaking);
-                        break;
-
-                    case EnumMockTestFilter.Writing:
-                        mockTestResultQuery = mockTestResultQuery.Where(m => m.Type == EnumMockTestType.SkillMockTest && m.CourseSkill == EnumCourseSkill.Writing);
                         break;
 
                     case EnumMockTestFilter.Full:
