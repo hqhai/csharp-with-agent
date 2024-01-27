@@ -5,7 +5,6 @@ namespace Fsel.Course.Infrastructure.Configs
     using System;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,15 +20,15 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumMockTestScoreCriteria>());
 
-            builder.HasOne(a => a.MockTestResult)
-                 .WithMany(b => b.MockTestScores)
-                 .HasForeignKey(p => p.MockTestResultId)
-                 .OnDelete(DeleteBehavior.Cascade);
+            //builder.HasOne(a => a.MockTestResult)
+            //     .WithMany(b => b.MockTestScores)
+            //     .HasForeignKey(p => p.MockTestResultId)
+            //     .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(a => a.SectionGroup)
-                .WithMany(b => b.MockTestScores)
-                .HasForeignKey(p => p.MockTestResultId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //builder.HasOne(a => a.SectionGroup)
+            //    .WithMany(b => b.MockTestScores)
+            //    .HasForeignKey(p => p.MockTestResultId)
+            //    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

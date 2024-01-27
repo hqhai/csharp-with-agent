@@ -65,7 +65,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.MockTestScores));
                 return methodResult;
             }
-
+            request.MockTestScores = request.MockTestScores.OrderBy(x => x.Criteria).ToList();
+            if (request.MockTestScores.GroupBy(x => x.Criteria).Any(x => x.Count() > 1))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(MockTestScore.Criteria));
+                return methodResult;
+            }
             var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
