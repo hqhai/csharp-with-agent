@@ -4,6 +4,53 @@
     "createdDate": "2023-07-21",
     "isDefault": true,
     "name": "Atlantic",
-    "code": "AG222"
+    "code": "AG222",
+    "price": 100,
+    "description": "Thiên hoa hạ phàm: Triệu hồi 1 cầu thiên thạch giữa màn hình, animation hút không khí xung quanh trong 3 giây, rồi tỏa ra luồng khí băng bao phủ toàn bộ sân đấu (Thiên thạch sẽ xoay vòng và tỏa ra thành hình bông hoa sen băng nở rộ). Tất cả thiên thạch sẽ giảm bị đóng băng và đứng yên trong 1s"
+  },
+  {
+    "id": "0e92e6cb-6d08-48a6-9c08-740d38ed994e",
+    "createdDate": "2024-01-24",
+    "isDefault": false,
+    "name": "Kinght",
+    "code": "KINGHT",
+    "price": 100,
+    "description": "Triệu hồi 1 thanh hồn kiếm xuống giữa màn hình, tỏa sóng xung kính ra xung quanh, tất cả thiên thạch sẽ bị giảm tốc độ 2s mỗi thiên thạch (Thời gian : 10s, hồi 100point)"
+  },
+  {
+    "id": "bb1e3626-3292-4e46-943a-a9f853a19f37",
+    "createdDate": "2021-01-24",
+    "isDefault": false,
+    "name": "Windy",
+    "code": "WINDY",
+    "price": 100,
+    "description": "Lãnh thổ Bồ Công Anh: Triệu hồi gió kèm các bông hoa bồ công anh mờ ảo bay lên, cuốn các thiên thạch vào trong 1 vùng tròn ở giữa (ưu tiên hút các thiên thạch gần nhất người dùng), hút tối đa 3 thiên thạch, sau 10s các thiên thạch sẽ tách nhau ra và rơi xuống tiếp, trong thời gian này nếu trả lời đúng 1 câu hỏi (2 với vòng 10 trở đi) trong 3 thiên thạch lập tức phá hủy cả 3 thiên thạch và lập tức tắt lãnh thổ"
+  },
+  {
+    "id": "4c09ef0c-58de-4ab6-a02a-bafaef2c8fb9",
+    "createdDate": "2021-01-24",
+    "isDefault": false,
+    "name": "Poseidon",
+    "code": "POSEIDON",
+    "price": 100,
+    "description": "Triệu hồi đinh ba xuất hiện phía trên con thuyền, từ con thuyền lên nửa màn hình sẽ tạo ra các đợt sóng đâm thẳng lên ( 3 đợt trong 10s), mỗi đợt đi qua 1 thiên thạch sẽ khiến nó bị đẩy lùi ( thời gian rơi + 2s)"
+  },
+  {
+    "id": "c83475cb-9980-4bfb-8fe8-2de32512ed88",
+    "createdDate": "2021-01-24",
+    "isDefault": false,
+    "name": "Horizon",
+    "code": "HORIZON",
+    "price": 100,
+    "description": "Heaven's Wrath: Triệu hồi 1 cơn bão sấm sét, trong vòng 10s sẽ đánh xuống các địa điểm bất kỳ , các địa điểm này sau đó sẽ tồn tại 1 cục bóng điện, các thiên thạch đi qua sẽ bị giật và đứng yên trong 3s ( Địa điểm sét đánh tối đa: 4 - cứ 2.5s sẽ đánh xuống 1 tia sét - thiên thạch đi qua sẽ lập tức biến mất)"
+  },
+  {
+    "id": "2e056340-c4a6-4fdf-9200-13b096322afc",
+    "createdDate": "2021-01-24",
+    "isDefault": false,
+    "name": "Sigma",
+    "code": "SIGMA",
+    "price": 100,
+    "description": "Terrabrain Synchronization (Đồng bộ hóa địa hình): tạo ra 1 cổng không gian ngay trước phi thuyền, các thiên thạch đi qua lập tức reset thời gian thiên thạch về tối đa - thiên thạch chuyển vị trí rơi lại từ đầu"
   }
 ]

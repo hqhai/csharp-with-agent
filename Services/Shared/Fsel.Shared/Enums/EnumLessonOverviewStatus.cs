@@ -5,7 +5,6 @@ namespace Fsel.Shared.Enums
     public enum EnumLessonOverviewStatus
     {
         StartNow,
-        Next,
         Continue,
         Done
     }

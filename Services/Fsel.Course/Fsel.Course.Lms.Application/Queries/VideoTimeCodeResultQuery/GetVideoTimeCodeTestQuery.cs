@@ -54,7 +54,10 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 return methodResult;
             }
 
-            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.TimeCodeExercises).ThenInclude(x => x.Exercise).Where(x => x.VideoId == videoResult.VideoId && x.TimeCodeType == request.Type).ToListAsync(cancellationToken: cancellationToken);
+            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.TimeCodeExercises).ThenInclude(x => x.Exercise)
+                .Where(x => x.VideoId == videoResult.VideoId && x.TimeCodeType == request.Type)
+                .OrderBy(x => x.DisplayTime)
+                .ToListAsync(cancellationToken: cancellationToken);
             if (videoTimeCodes == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodes));

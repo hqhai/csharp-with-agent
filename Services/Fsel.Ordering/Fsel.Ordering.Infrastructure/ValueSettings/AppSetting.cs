@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
         public PaymentConfig? PaymentConfig { get; set; }
+        public PayooConfig? PayooConfig { get; set; }
         public new Services? Services { get; set; }
         public UrBoxConfig? UrBoxConfig { get; set; }
     }
@@ -23,6 +24,18 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     {
         public string? AppSecret { get; set; }
         public string? AppId { get; set; }
+    }
+
+    public class PayooConfig
+    {
+        public string? Username { get; set; }
+        public string? ShopId { get; set; }
+        public string? ShopDomain { get; set; }
+        public string? ShopBackUrl { get; set; }
+        public string? NotifyUrl { get; set; }
+        public string? Key { get; set; }
+        public string? PayooIP { get; set; }
+        public string? ShopTitle { get; set; }
     }
 
     public class PaymentConfig
@@ -43,6 +56,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public string? LmsCourseApiUrl { get; set; }
         public string? SystemApiUrl { get; set; }
         public string? UrBoxApiUrl { get; set; }
+        public string? PayooApiUrl { get; set; }
     }
 
     public class Otp

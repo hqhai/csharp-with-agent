@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Resources\Payoo.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\UrBox\private_key_rsa">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
