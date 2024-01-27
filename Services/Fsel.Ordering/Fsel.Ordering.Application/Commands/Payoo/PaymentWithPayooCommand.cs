@@ -19,6 +19,8 @@ namespace Fsel.Ordering.Application.Commands.Payoo
     using Fsel.Shared.Constants;
     using Fsel.Shared.Helpers;
     using MediatR;
+    using Fsel.Common.Helpers;
+    using Fsel.Common.Enums;
 
     public class PaymentWithPayooCommand : IRequest<MethodResult<PayooModel>>
     {
@@ -62,7 +64,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
 
             var orderNo = NumberHelper.GenerateCode(32);
 
-            var validityTime = DateTime.Now.AddMinutes(30).ToString("yyyyMMddHHmmss", CultureInfo.CurrentCulture);
+            var validityTime = DateTime.UtcNow.AddMinutes(30).ConvertTimeFromUtc(EnumZoneRegion.Vietnam).ToString("yyyyMMddHHmmss", CultureInfo.CurrentCulture);
 
             var param = new
             {
