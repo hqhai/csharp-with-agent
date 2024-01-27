@@ -368,9 +368,9 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        public async Task<SectionGroupResult> UpdateSectionGroupToIsSubmit(SectionGroup sectionGroup, SectionGroupResult sectionGroupResult, bool isSubmit)
+        public async Task<SectionGroupResult?> UpdateSectionGroupToIsSubmit(SectionGroup sectionGroup, SectionGroupResult? sectionGroupResult, bool isSubmit)
         {
-            if (isSubmit)
+            if (isSubmit && sectionGroupResult != null)
             {
                 await UpdateUnansweredQuestions(sectionGroup, sectionGroupResult);
                 await UpdateAnswerProcessByTest(sectionGroupResult).ConfigureAwait(false);
@@ -607,12 +607,13 @@ namespace Fsel.Course.Infrastructure.Common
             return questionDto;
         }
 
-        public bool IsTeacherGraded(MockTestResult mockTestResult)
+        public bool IsTeacherGraded(MockTestResult mockTestResult, IList<EnumCourseSkill>? courseSkills)
         {
-            var sectionGroups = mockTestResult.MockTest?.MockTestSections.Select(x => x.SectionGroup).Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing);
-            if (sectionGroups != null && sectionGroups.Any())
+            ArgumentNullException.ThrowIfNull(mockTestResult);
+            var isTeacherGradedSkill = courseSkills?.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
+            if (isTeacherGradedSkill.HasValue && isTeacherGradedSkill.Value)
             {
-                return sectionGroups.Any() && sectionGroups.SelectMany(x => x!.MockTestScores).Any();
+                return mockTestResult.MockTestScores.Any();
             }
             return true;
         }

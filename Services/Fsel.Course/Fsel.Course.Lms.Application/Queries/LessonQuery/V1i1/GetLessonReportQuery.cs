@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
+namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -55,7 +55,6 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
                                                        .ThenInclude(x => x.Exercise)
                                                        .ThenInclude(x => x!.ExerciseQuestions)
                                                        .ThenInclude(x => x.Question)
-                                                       .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                                        .Where(x => x.Id == videoResult.VideoId)
                                                        .AsNoTracking()
                                                        .FirstOrDefaultAsync(cancellationToken);
@@ -74,11 +73,10 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
             var lessonReport = new LessonReportModel();
             var videoTimeCodes = video.VideoTimeCodes.Where(x => x.TimeCodeType == EnumTimeCodeType.Standalone);
             var questions = videoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question);
-            var answers = questions.SelectMany(x => x!.VideoTimeCodeAnswers);
             lessonReport.AnswerTime = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Sum(x => x.WorkingTime + x.RetryWorkingTime);
-            lessonReport.Percent = NumberHelper.GetPercent(answers.Sum(x => x.CorrectCount), questions.Where(x => !x!.Ungraded).Sum(x => x!.CorrectTotal));
-            lessonReport.CorrectCount = answers.Sum(x => x.CorrectCount);
-            lessonReport.CorrectTotal = questions.Sum(x => x!.CorrectTotal);
+            lessonReport.CorrectCount = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Sum(x => x.CorrectCount);
+            lessonReport.CorrectTotal = questions.Where(x => !x!.Ungraded).Sum(x => x!.CorrectTotal);
+            lessonReport.Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal);
             lessonReport.HighestStreak = videoResult.HighestStreak;
             return lessonReport;
         }

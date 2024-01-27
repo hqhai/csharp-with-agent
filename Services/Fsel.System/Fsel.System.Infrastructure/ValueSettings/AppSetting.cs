@@ -27,6 +27,7 @@ namespace Fsel.System.Infrastructure.ValueSettings
     {
         public string? LmsCourseApiUrl { get; set; }
         public string? OrderApiUrl { get; set; }
+        public string? DictionaryApiUrl { get; set; }
     }
 
     public class Otp

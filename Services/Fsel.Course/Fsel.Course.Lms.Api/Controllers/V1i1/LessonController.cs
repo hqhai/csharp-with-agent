@@ -9,7 +9,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1;
-    using Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery;
+    using Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;

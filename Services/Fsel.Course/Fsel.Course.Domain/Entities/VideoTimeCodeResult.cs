@@ -7,8 +7,8 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
-    using Fsel.Shared.Helpers;
     using Fsel.Course.Domain.IEntities;
+    using Fsel.Shared.Helpers;
 
     public class VideoTimeCodeResult : BaseLearnResult, ITokenResult
     {
@@ -61,9 +61,9 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                return CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : _percentUngraded;
+                return CorrectTotal + (CorrectTotalUngraded ?? default) > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : _percentUngraded;
             }
-            set { _percentUngraded = CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : value; }
+            set { _percentUngraded = CorrectTotal + (CorrectTotalUngraded ?? default) > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : value; }
         }
 
         public int? TokenDone { get; set; }

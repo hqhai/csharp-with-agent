@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Course.Infrastructure
 {
-    public class CourseDbContext  : BaseDbContext
+    public class CourseDbContext : BaseDbContext
     {
         public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -79,6 +79,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumFile> ClassForumFiles { get; set; }
         public DbSet<StudentFeedback> StudentFeedbacks { get; set; }
         public DbSet<ClassForumResultRandom> ClassForumResultRandoms { get; set; }
+        public DbSet<MockTestAISetting> MockTestAISettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -121,6 +122,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new HomeWorkAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkQuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonNoteEntityTypeConfiguration());
 
             modelBuilder.ApplyConfiguration(new PlacementTestSectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestAnswerEntityTypeConfiguration());
@@ -145,6 +147,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ClassForumResultFileEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentFeedbackEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumResultRandomEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestAISettingTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

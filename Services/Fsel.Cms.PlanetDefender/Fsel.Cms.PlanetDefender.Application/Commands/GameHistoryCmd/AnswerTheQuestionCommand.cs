@@ -31,8 +31,8 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.GameHistoryCmd
         private readonly AuthContext _authContext;
         private readonly IGameHistoryRepository _gameHistoryRepository;
         private readonly IMapper _mapper;
-
-        public AnswerTheQuestionCommandHandler(ISystemService systemService, IGameAnswerRepository gameAnswerRepository, IUserService userService, AuthContext authContext, IGameHistoryRepository gameHistoryRepository, IMapper mapper)
+        private readonly IZMatterRepository _zMatterRepository;
+        public AnswerTheQuestionCommandHandler(ISystemService systemService, IGameAnswerRepository gameAnswerRepository, IUserService userService, AuthContext authContext, IGameHistoryRepository gameHistoryRepository, IMapper mapper, IZMatterRepository zMatterRepository)
         {
             _systemService = systemService;
             _gameAnswerRepository = gameAnswerRepository;
@@ -40,6 +40,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.GameHistoryCmd
             _authContext = authContext;
             _gameHistoryRepository = gameHistoryRepository;
             _mapper = mapper;
+            _zMatterRepository = zMatterRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(AnswerTheQuestionCommand request, CancellationToken cancellationToken)
@@ -47,6 +48,12 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.GameHistoryCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
             if (!await _gameHistoryRepository.Queryable.AnyAsync(p => p.Id == request.GameHistoryId, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            if (request.ZMatterId.HasValue && !await _zMatterRepository.Queryable.AnyAsync(p => p.Id == request.ZMatterId, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;

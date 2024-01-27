@@ -74,7 +74,8 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
-                    (totalCorrect, isAnswerMissing, isAnswered) = (default, false, true);
+                    totalCorrect = question.CorrectTotal;
+                    (isAnswerMissing, isAnswered) = (false, true);
                     break;
 
                 default:

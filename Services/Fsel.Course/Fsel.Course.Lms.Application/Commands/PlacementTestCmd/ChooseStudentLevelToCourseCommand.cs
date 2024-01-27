@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
+using Fsel.Common.Constants;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -14,24 +15,28 @@ using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 {
     public class ChooseStudentLevelToCourseCommand : IRequest<MethodResult<bool>>
     {
         public EnumCourseLevel Level { get; set; }
+        public Guid? CourseId { get; set; }
     }
 
     public class ChooseStudentLevelToCourseCommandHandler : IRequestHandler<ChooseStudentLevelToCourseCommand, MethodResult<bool>>
     {
         private readonly IUserService _userService;
+        private readonly IHostEnvironment _environment;
         private readonly IOrderService _orderService;
         private readonly AuthContext _authContext;
         private readonly ICourseRepository _courseRepository;
 
-        public ChooseStudentLevelToCourseCommandHandler(IUserService userService, IOrderService orderService, AuthContext authContext, ICourseRepository courseRepository)
+        public ChooseStudentLevelToCourseCommandHandler(IUserService userService, IHostEnvironment environment, IOrderService orderService, AuthContext authContext, ICourseRepository courseRepository)
         {
             _userService = userService;
+            _environment = environment;
             _orderService = orderService;
             _authContext = authContext;
             _courseRepository = courseRepository;
@@ -57,6 +62,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
             Random random = new Random();
             var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == request.Level && x.Status == EnumCourseStatus.Active).ToListAsync(cancellationToken);
+            if (request.CourseId.HasValue && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
+            {
+                courses = courses.Where(x => x.Id == request.CourseId.Value).ToList();
+            }
             var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();
             if (course == null)
             {

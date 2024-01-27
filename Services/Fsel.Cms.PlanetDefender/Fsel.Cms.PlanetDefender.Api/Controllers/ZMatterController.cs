@@ -4,13 +4,13 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
     using Asp.Versioning;
-    using Fsel.Shared.Constants;
     using Fsel.Cms.PlanetDefender.Application.Commands.ZMatterCmd;
     using Fsel.Cms.PlanetDefender.Application.Queries.ZMatterQuery;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -51,6 +51,18 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
             command.Id = id;
             MethodResult<ZMatterModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get list ZMatter according to user
+        /// </summary>
+        [HttpGet("get-according-to-user")]
+        [ProducesResponseType(typeof(MethodResult<IList<ZMatterModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetAccordingToUser()
+        {
+            var queryResult = await _mediator.Send(new GetListZMatterAccordingToUserQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

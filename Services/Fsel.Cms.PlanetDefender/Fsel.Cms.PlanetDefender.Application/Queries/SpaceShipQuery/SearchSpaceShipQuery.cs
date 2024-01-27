@@ -12,7 +12,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.SpaceShipQuery
 
     public class SearchSpaceShipQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<SpaceShipModel>>>
     {
-        public bool IsDefault { get; set; }
+        public bool? IsDefault { get; set; }
     }
 
     public class SearchSpaceShipQueryHandler : IRequestHandler<SearchSpaceShipQuery, MethodResult<PagingItemsModel<SpaceShipModel>>>
@@ -27,7 +27,14 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.SpaceShipQuery
         public async Task<MethodResult<PagingItemsModel<SpaceShipModel>>> Handle(SearchSpaceShipQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var spaceShipsQuery = _spaceShipRepository.Queryable.Where(x => x.IsDefault == request.IsDefault);
+
+            var spaceShipsQuery = _spaceShipRepository.Queryable;
+
+            if (request.IsDefault.HasValue)
+            {
+                spaceShipsQuery = spaceShipsQuery.Where(x => x.IsDefault == request.IsDefault);
+            }
+
             return await _spaceShipRepository.GetListByPageResultAsync<SpaceShipModel>(spaceShipsQuery, request, cancellationToken).ConfigureAwait(false);
         }
     }

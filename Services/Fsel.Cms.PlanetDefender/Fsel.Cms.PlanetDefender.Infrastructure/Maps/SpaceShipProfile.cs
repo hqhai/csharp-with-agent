@@ -12,6 +12,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Maps
         public SpaceShipProfile()
         {
             CreateMap<SpaceShip, SpaceShipModel>().IgnoreAllNonExisting();
+            CreateMap<Character, SpaceShipModel>().IgnoreAllNonExisting();
         }
     }
 }

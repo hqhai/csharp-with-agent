@@ -98,6 +98,184 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.Character", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<long>("Price")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Characters");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("098c3d4a-93bb-407e-b359-64d869abf1ba"),
+                            Code = "COSMO",
+                            CreatedDate = new DateTime(2024, 1, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Cosmo là tên bí danh của Ethan Van der Woodsen hay Ethan Woodsen, con trai duy nhất của cựu thống đốc bang Wisconsin – John Van der Woodsen. Sự nghiệp chính trị cũng như tiền đồ của nhà Woodsen sụp đổ khi John Woodsen bị cáo buộc góp phần chính vào thảm hoạ tại Rambabos. Trước khi ứng cử cho vị trí thống đốc, ông Woodsen từng ở vị trí chỉ huy của A.A.A. Lệnh ngừng bắn quá muộn màng của ông đã khiến cho các đối thủ chính trị lấy đây làm cớ để hạ bệ ông. John Woodsen không chỉ bị tước đi vị trí, các danh hiệu mà còn bị bắt giam. Ethan vốn là một chàng trai ham học, yêu sách vở và tốt bụng. Năm 18 tuổi, cậu từ bỏ trường đại học và đăng ký làm ứng viên cho A.A.A vì muốn cứu vãn bộ mặt của dòng họ danh giá Van der Woodsen sau sự việc đáng tiếc của người cha. Ethan tự mang trong mình trọng trách điều tra vụ việc năm xưa để giải oan cho cha và cho cả loài người. Khi mới bắt đầu quá trình luyện tập, nhiều đồng đội coi thường Ethan bởi vẻ ngoài yếu ớt công tử của cậu. Trải qua 3 năm tập huấn cực nhọc, không ai có thể tin rằng chàng trai mảnh khảnh này có thể vượt qua được bài kiểm tra khắc nhiệt của A.A.A. Ethan biến điểm yếu của mình thành lợi thế, cậu luôn nhanh nhạy hơn các đối thủ cả về đầu óc lẫn thể chất. Khi trở thành một astroguard, Ethan lấy tên nhiệm vụ là Cosmo. Trong ngày đầu làm nhiệm vụ, Cosmo tìm thấy chiếc tàu vũ trụ thất lạc có Zina đã bị băng hoá ở bên trong. Anh giúp cô sống lại nhưng cô hoàn toàn quên mất mình là ai, thuộc hành tinh nào. Cosmo tốt bụng, quyết định giúp đỡ cô gái xa lạ tìm đường về nhà.",
+                            IsDefault = true,
+                            IsDeleted = false,
+                            Name = "Cosmo",
+                            Price = 100L
+                        },
+                        new
+                        {
+                            Id = new Guid("fa9289ea-0502-4b01-8f54-ca742a95d048"),
+                            Code = "ZINA",
+                            CreatedDate = new DateTime(2024, 1, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Zina – công chúa của Zaeperi là một cô gái xinh đẹp và quả cảm. Trong trận Rambabos, cả gia đình hoàng gia bị những kẻ lạ mặt bắt đi nhưng Zina tìm cách trốn thoát. Cô trốn vào khoang băng của một con tàu vũ trụ không người lái và mắc kẹt luôn ở đó. Sau này, Zina được Cosmo tìm thấy nhưng cô đã mất một phần trí nhớ. Cosmo muốn giúp cô tìm lại hành tinh của mình. Họ bước vào hành trình đi qua 27 hành tinh để tìm kiếm dữ liệu, đầu mối. Zina học tiếng Anh và văn hoá của loài người dưới sự hướng dẫn đầy kiên nhẫn của Cosmo. Quá trình học tập chăm chỉ khiến các chức năng não tốt lên, Zina dần khôi phục lại các ký ức. Một ngày, khi các ký ức khôi phục hoàn toàn, Zina nhận ra Cosmo – vị ân nhân cứu cô thuộc về đội quân đã huỷ diệt quê hương, cô đối mặt với sự đấu tranh tâm lý nặng nề. Cosmo cùng với lòng tốt và sự thông minh đã chứng minh sự vô tội của loài người và thuyết phục Zina đứng về phía mình. Zina có một người em song sinh là Zinie. Zinie có phần cá tính, phá phách hơn. Bằng cách nào đó, Zinie cũng thoát khỏi thế lực bí ẩn kia và cố gắng tìm chị gái. Khi biết Zina đi cùng Cosmo, cô bé nghĩ rằng loài người đã tẩy não và bắt cóc chị mình. Zinie từng bước lập kế hoạch phá tàu Atlantic của Cosmo để giải cứu chị.",
+                            IsDefault = true,
+                            IsDeleted = false,
+                            Name = "Zina",
+                            Price = 100L
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.Event", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Events");
+                });
+
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.GameAnswer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -170,9 +348,14 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
+                    b.Property<Guid?>("ZMatterId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GameHistoryId");
+
+                    b.HasIndex("ZMatterId");
 
                     b.ToTable("GameAnswers");
                 });
@@ -482,6 +665,10 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(750)
+                        .HasColumnType("nvarchar(750)");
+
                     b.Property<bool>("IsDefault")
                         .HasColumnType("bit");
 
@@ -493,6 +680,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<long>("Price")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("SpaceShipId")
                         .HasColumnType("uniqueidentifier");
@@ -524,10 +714,146 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Thiên hoa hạ phàm: Triệu hồi 1 cầu thiên thạch giữa màn hình, animation hút không khí xung quanh trong 3 giây, rồi tỏa ra luồng khí băng bao phủ toàn bộ sân đấu (Thiên thạch sẽ xoay vòng và tỏa ra thành hình bông hoa sen băng nở rộ). Tất cả thiên thạch sẽ giảm bị đóng băng và đứng yên trong 1s",
                             IsDefault = true,
                             IsDeleted = false,
-                            Name = "Atlantic"
+                            Name = "Atlantic",
+                            Price = 100L
+                        },
+                        new
+                        {
+                            Id = new Guid("0e92e6cb-6d08-48a6-9c08-740d38ed994e"),
+                            Code = "KINGHT",
+                            CreatedDate = new DateTime(2024, 1, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Triệu hồi 1 thanh hồn kiếm xuống giữa màn hình, tỏa sóng xung kính ra xung quanh, tất cả thiên thạch sẽ bị giảm tốc độ 2s mỗi thiên thạch (Thời gian : 10s, hồi 100point)",
+                            IsDefault = false,
+                            IsDeleted = false,
+                            Name = "Kinght",
+                            Price = 100L
+                        },
+                        new
+                        {
+                            Id = new Guid("bb1e3626-3292-4e46-943a-a9f853a19f37"),
+                            Code = "WINDY",
+                            CreatedDate = new DateTime(2021, 1, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Lãnh thổ Bồ Công Anh: Triệu hồi gió kèm các bông hoa bồ công anh mờ ảo bay lên, cuốn các thiên thạch vào trong 1 vùng tròn ở giữa (ưu tiên hút các thiên thạch gần nhất người dùng), hút tối đa 3 thiên thạch, sau 10s các thiên thạch sẽ tách nhau ra và rơi xuống tiếp, trong thời gian này nếu trả lời đúng 1 câu hỏi (2 với vòng 10 trở đi) trong 3 thiên thạch lập tức phá hủy cả 3 thiên thạch và lập tức tắt lãnh thổ",
+                            IsDefault = false,
+                            IsDeleted = false,
+                            Name = "Windy",
+                            Price = 100L
+                        },
+                        new
+                        {
+                            Id = new Guid("4c09ef0c-58de-4ab6-a02a-bafaef2c8fb9"),
+                            Code = "POSEIDON",
+                            CreatedDate = new DateTime(2021, 1, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Triệu hồi đinh ba xuất hiện phía trên con thuyền, từ con thuyền lên nửa màn hình sẽ tạo ra các đợt sóng đâm thẳng lên ( 3 đợt trong 10s), mỗi đợt đi qua 1 thiên thạch sẽ khiến nó bị đẩy lùi ( thời gian rơi + 2s)",
+                            IsDefault = false,
+                            IsDeleted = false,
+                            Name = "Poseidon",
+                            Price = 100L
+                        },
+                        new
+                        {
+                            Id = new Guid("c83475cb-9980-4bfb-8fe8-2de32512ed88"),
+                            Code = "HORIZON",
+                            CreatedDate = new DateTime(2021, 1, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Heaven's Wrath: Triệu hồi 1 cơn bão sấm sét, trong vòng 10s sẽ đánh xuống các địa điểm bất kỳ , các địa điểm này sau đó sẽ tồn tại 1 cục bóng điện, các thiên thạch đi qua sẽ bị giật và đứng yên trong 3s ( Địa điểm sét đánh tối đa: 4 - cứ 2.5s sẽ đánh xuống 1 tia sét - thiên thạch đi qua sẽ lập tức biến mất)",
+                            IsDefault = false,
+                            IsDeleted = false,
+                            Name = "Horizon",
+                            Price = 100L
+                        },
+                        new
+                        {
+                            Id = new Guid("2e056340-c4a6-4fdf-9200-13b096322afc"),
+                            Code = "SIGMA",
+                            CreatedDate = new DateTime(2021, 1, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Terrabrain Synchronization (Đồng bộ hóa địa hình): tạo ra 1 cổng không gian ngay trước phi thuyền, các thiên thạch đi qua lập tức reset thời gian thiên thạch về tối đa - thiên thạch chuyển vị trí rơi lại từ đầu",
+                            IsDefault = false,
+                            IsDeleted = false,
+                            Name = "Sigma",
+                            Price = 100L
                         });
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentCharacter", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("StudentGameInfoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("StudentGameInfoId");
+
+                    b.ToTable("StudentCharacters");
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", b =>
@@ -571,11 +897,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -1189,7 +1510,14 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.ZMatter", "ZMatter")
+                        .WithMany("GameAnswers")
+                        .HasForeignKey("ZMatterId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("GameHistory");
+
+                    b.Navigation("ZMatter");
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.GameHistory", b =>
@@ -1216,6 +1544,25 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.SpaceShip", null)
                         .WithMany("SpaceShips")
                         .HasForeignKey("SpaceShipId");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentCharacter", b =>
+                {
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.Character", "Character")
+                        .WithMany("StudentCharacters")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", "StudentGameInfo")
+                        .WithMany("StudentCharacters")
+                        .HasForeignKey("StudentGameInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+
+                    b.Navigation("StudentGameInfo");
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", b =>
@@ -1264,6 +1611,11 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Navigation("SpaceShip");
                 });
 
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.Character", b =>
+                {
+                    b.Navigation("StudentCharacters");
+                });
+
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.GameHistory", b =>
                 {
                     b.Navigation("GameAnswers");
@@ -1282,7 +1634,14 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                 {
                     b.Navigation("GameHistories");
 
+                    b.Navigation("StudentCharacters");
+
                     b.Navigation("StudentSpaceShips");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.ZMatter", b =>
+                {
+                    b.Navigation("GameAnswers");
                 });
 #pragma warning restore 612, 618
         }
