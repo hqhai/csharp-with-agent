@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 }
             }
 
-            methodResult.Result = testResultRankings.OrderByDescending(x => x.Percent).ThenByDescending(x => x.Status).ThenBy(x => x.FullName).ToList();
+            methodResult.Result = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
