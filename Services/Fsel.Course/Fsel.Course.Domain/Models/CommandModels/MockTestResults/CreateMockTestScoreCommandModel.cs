@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.MockTestResults
 {
+    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class CreateMockTestScoreCommandModel
