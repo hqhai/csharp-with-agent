@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -52,11 +53,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (isDone)
                     {
                         unitResult.Status = EnumResultStatus.Done;
-
+                        var courseType = unit.CourseLevel.GetEnumCourseType();
                         // Làm nhiệm vụ
                         var unitId = unit.Id;
                         var userId = unitResult.CreatedUserId;
-                       // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
+                        // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
 
                         await SendStudentCompleteUnit(studentId, unit, courseId, skillScores, percent, cancellationToken);
                     }
@@ -137,7 +138,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             };
             return parameter;
         }
-
 
         public async Task DoQuestBoard(Guid userId, Guid unitId, Guid courseId, CancellationToken cancellationToken)
         {
