@@ -27,5 +27,6 @@ namespace Fsel.Shared.Constants
         public const string I18NCredentialsFilePath = "Resources//file-i18n.json";
 
         public const string BandScoreFileName = "Resources//BandScores.json";
+        public const string Payoo = "Resources//Payoo.xml";
     }
 }
