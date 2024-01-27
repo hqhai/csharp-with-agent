@@ -27,18 +27,22 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
         private readonly IMapper _mapper;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private static int Criteria = 4;
 
         public GradeMockTestResultCommandHandler(IMapper mapper,
             IMockTestResultRepository mockTestResultRepository,
             ISectionGroupRepository sectionGroupRepository,
+            ISectionGroupResultRepository sectionGroupResultRepository,
             IUserService userService,
             AuthContext authContext)
         {
             _mapper = mapper;
             _mockTestResultRepository = mockTestResultRepository;
             _sectionGroupRepository = sectionGroupRepository;
+            _sectionGroupResultRepository = sectionGroupResultRepository;
             _userService = userService;
             _authContext = authContext;
         }
@@ -74,10 +78,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 return methodResult;
             }
             var sectionGroupIds = request.MockTestScores.Select(y => y.SectionGroupId).Distinct().ToList();
+
             var sectionGroups = await _sectionGroupRepository.Queryable.Where(x => sectionGroupIds.Contains(x.Id)).ToListAsync(cancellationToken);
             if (sectionGroups.Count != sectionGroupIds.Count)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroups));
+                return methodResult;
+            }
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(x => sectionGroupIds.Contains(x.SectionGroupId) && x.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
+            if (sectionGroupResults == null || !sectionGroupResults.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResults));
                 return methodResult;
             }
             IList<MockTestScore> mockTestScores = new List<MockTestScore>();
@@ -102,15 +113,27 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             var skillScores = mockTestResult.SkillScores?.Where(x => !sectionGroups.Select(x => x.CourseSkill).Contains(x.Skill)).ToList();
             foreach (var item in sectionGroups)
             {
+                var sectionGroupResult = sectionGroupResults.FirstOrDefault(x => x.SectionGroupId == item.Id);
+
                 var listMockTestScore = mockTestScores.Where(x => x.SectionGroupId == item.Id).ToList();
                 var sumScore = listMockTestScore.Sum(x => x.Score);
                 var skillScore = mockTestResult.SkillScores?.FirstOrDefault(x => x.Skill == item.CourseSkill);
+                if (sectionGroupResult != null)
+                {
+                    sectionGroupResult.CorrectCount = (int)sumScore;
+                    sectionGroupResult.SkillScores = sectionGroupResult.SkillScores?.Select(x =>
+                    {
+                        x.CorrectCount = (int)sumScore;
+                        x.Scores = NumberHelper.RoundNumberDouble((double)sumScore / Criteria, true);
+                        return x;
+                    }).ToList();
+                }
                 if (skillScore != null)
                 {
                     skillScore.CorrectCount = sumScore;
                     skillScore.TotalCount = 36;
                     skillScore.Skill = item.CourseSkill;
-                    skillScore.Scores = NumberHelper.RoundNumberDouble((double)sumScore / listMockTestScore.Count, true);
+                    skillScore.Scores = NumberHelper.RoundNumberDouble((double)sumScore / Criteria, true);
                     skillScores!.Add(skillScore);
                 }
             }
@@ -121,14 +144,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
 
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
+                _sectionGroupResultRepository.UpdateList(sectionGroupResults);
+                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
                 _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<List<MockTestScoreModel>>(mockTestResult.MockTestScores);
                 return methodResult;
             });
-
             return methodResult;
         }
     }
