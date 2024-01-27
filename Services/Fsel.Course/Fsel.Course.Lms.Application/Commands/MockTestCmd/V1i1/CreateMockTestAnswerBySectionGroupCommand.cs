@@ -152,9 +152,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     {
                         foreach (var item in request.Answers)
                         {
+                            if (item.SectionId == null || sectionGroupResult == null)
+                            {
+                                continue;
+                            }
                             await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
                             {
-                                SectionId = (Guid)item.SectionId!,
+                                SectionId =(Guid)item.SectionId!,
+                                MockTestResultId = mockTestResult.Id,
                                 WordContent = item.Answer?.ToString() ?? string.Empty,
                             }, cancellationToken);
                         }
