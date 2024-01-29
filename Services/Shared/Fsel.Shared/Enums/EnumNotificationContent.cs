@@ -19,6 +19,9 @@ namespace Fsel.Shared.Enums
         ChangeClassLiveTeacher,
         MockTest,
         ReviewFsel,
-        DiscussionBoardInActive
+        DiscussionBoardInActive,
+        LeaderBoard,
+        ApprovePostClassForum,
+        RejectApprovalPostClassForum
     }
 }

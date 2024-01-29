@@ -10,7 +10,7 @@
     "createdDate": "2023-08-28"
   },
   {
-    "id": "D789788A-1BA6-405B-F280-AE92CD3B4FC2",
+    "id": "E89B5850-33FF-4922-89E1-1A2F7DE29375",
     "type": "Text",
     "content": "CreateClassForumResult",
     "icon": "",
@@ -50,7 +50,7 @@
     "createdDate": "2023-08-28"
   },
   {
-    "id": "a805f268-467b-4149-8d01-b2ea05e1f3bd",
+    "id": "CD8A1EDB-029F-4B2D-9725-C796E6FD7E5B",
     "type": "Text",
     "content": "OrderChangeStatus",
     "icon": "",
@@ -60,7 +60,7 @@
     "createdDate": "2023-08-28"
   },
   {
-    "id": "86c0df96-f131-42bf-b315-0a8a85584f6a",
+    "id": "3881403A-D412-4593-AEE5-5A38F4E078F9",
     "type": "Text",
     "content": "OrderCreate",
     "icon": "",
@@ -70,7 +70,7 @@
     "createdDate": "2023-08-28"
   },
   {
-    "id": "96c0df96-f131-42bf-b315-0a8a85524f6f",
+    "id": "27007EDB-25D8-493E-84D8-85F6F9E165B2",
     "type": "LinkComment",
     "content": "DeleteComment",
     "icon": "",
@@ -80,7 +80,7 @@
     "createdDate": "2023-08-28"
   },
   {
-    "id": "17c0df26-f131-42bf-b315-0a8a85524f6f",
+    "id": "57C709A6-03BD-4A3F-AD34-F9449587E1DF",
     "type": "LinkPage",
     "content": "DeleteClassForumResult",
     "icon": "",
@@ -116,7 +116,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "Bài viết của bạn đã được hệ thống AI ChatGPT nhận xét. Nhấn để xem chi tiết",
-    "templateLink": "learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
     "createdDate": "2023-08-28"
   },
   {
@@ -157,6 +157,36 @@
     "priority": 1,
     "templateMessage": "Bay! Bay cao! Bay xa! Hãy cùng khám phá với các bạn trên khắp thế giới qua Diễn đàn chung nào!",
     "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "9DA28757-2D28-40CB-B88C-CC51FC15BB43",
+    "type": "LinkPage",
+    "content": "LeaderBoard",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúc mừng bạn đã đạt top {0} trên Bảng xếp hạng!",
+    "templateLink": "/home",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "69CC9E39-82D5-4D1A-81B9-8C97EC54BFAD",
+    "type": "LinkPage",
+    "content": "ApprovePostClassForum",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "75540141-A6D9-409D-A3CE-90C9A7577E8A",
+    "type": "LinkPage",
+    "content": "RejectApprovalPostClassForum",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
+    "templateLink": "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
     "createdDate": "2023-08-28"
   }
 ]

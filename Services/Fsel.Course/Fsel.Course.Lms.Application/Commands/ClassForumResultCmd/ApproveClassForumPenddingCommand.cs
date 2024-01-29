@@ -37,14 +37,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher)
+        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
             _questBoardPublisher = questBoardPublisher;
+            _lessonResultRepository = lessonResultRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveClassForumPenddingCommand request, CancellationToken cancellationToken)
@@ -78,6 +82,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             //}
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
+                Dictionary<EnumNotificationType, EnumNotificationContent> enumNotification = new();
+
                 if (request.IsApprove)
                 {
                     if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot)
@@ -111,16 +117,30 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     {
                         await DoQuestBoard(classForumResult.Id, (Guid)courseId, classForumResult.CreatedUserId, cancellationToken);
                     }
+
+                    enumNotification = new Dictionary<EnumNotificationType, EnumNotificationContent>()
+                    {
+                        { EnumNotificationType.LinkPage, EnumNotificationContent.ApprovePostClassForum }
+                    };
                 }
                 else
                 {
                     classForumResult.Status = EnumClassForumResultStatus.Denied;
                     classForumResult.CheckStartDate = null;
                     classForumResult.CheckCsoId = null;
+
+                    enumNotification = new Dictionary<EnumNotificationType, EnumNotificationContent>()
+                    {
+                        { EnumNotificationType.LinkPage, EnumNotificationContent.RejectApprovalPostClassForum }
+                    };
                 }
 
                 _classForumResultRepository.Update(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                //Thông báo cho user khi bài viết được phê duyệt
+                await SendNotification(classForumResult, enumNotification, cancellationToken);
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
@@ -147,6 +167,31 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     ObjectId = classForumResultId,
                     CourseId = courseId
                 }, cancellationToken);
+            }
+        }
+
+        public async Task SendNotification(ClassForumResult classForumResult, Dictionary<EnumNotificationType, EnumNotificationContent> enumNotification, CancellationToken cancellationToken)
+        {
+            var lessonResult = await _lessonResultRepository.GetIncludeByIdAsync(classForumResult.LessonResultId);
+            if (lessonResult != null)
+            {
+                var user = await _userService.GetUserByStudentId(lessonResult.StudentId);
+                var userId = user?.Content?.Result?.Human?.UserId;
+
+                List<object> paramLinksValue = new List<object> { lessonResult.LessonId.ToString() ?? string.Empty, lessonResult.CourseId.ToString() ?? string.Empty, lessonResult?.UnitId.ToString() ?? string.Empty };
+
+                NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+                {
+                    ObjectId = lessonResult!.StudentId,
+                    UserIds = new List<Guid>() { userId ?? default },
+                    SenderId = _authContext.CurrentUserId,
+                    ParamsLink = paramLinksValue,
+                    ParamsMessage = new List<object> { classForumResult?.ClassForum?.PromptName ?? string.Empty, },
+                    Type = enumNotification.FirstOrDefault().Key,
+                    Content = enumNotification.FirstOrDefault().Value
+                };
+
+                await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
             }
         }
     }
