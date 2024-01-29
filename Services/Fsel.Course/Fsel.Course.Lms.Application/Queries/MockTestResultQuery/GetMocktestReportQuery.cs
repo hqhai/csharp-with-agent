@@ -59,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             var mockTestResult = await _mockTestResultRepository.Queryable
                                     .Include(x => x.MockTestScores)
+                                    .ThenInclude(x => x.SectionGroup)
                                     .Where(x => x.Id == request.MockTestResultId)
                                     .FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
@@ -113,8 +114,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         .Select(n => new
                                         {
                                             Skill = n.Key,
-                                            MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).ToList())
-                                        });
+                                            MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).OrderBy(x => x.CreatedDate).ToList())
+                                        }).ToList();
 
             return mockTestResult;
         }
