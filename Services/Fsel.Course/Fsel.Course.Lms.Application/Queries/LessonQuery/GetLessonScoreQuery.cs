@@ -85,9 +85,11 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             var answerQuery = from baseQ in baseQuery
                               join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join q in _questionRepository.Queryable on vtca.QuestionId equals q.Id
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
+                              where q.Ungraded == false
                               group new { vt, vtca } by new { vt.TimeCodeType, e.CourseSkill } into g
                               select new
                               {
