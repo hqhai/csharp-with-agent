@@ -158,7 +158,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                             }
                             await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
                             {
-                                SectionId =(Guid)item.SectionId!,
+                                SectionId = (Guid)item.SectionId,
                                 MockTestResultId = mockTestResult.Id,
                                 WordContent = item.Answer?.ToString() ?? string.Empty,
                             }, cancellationToken);
