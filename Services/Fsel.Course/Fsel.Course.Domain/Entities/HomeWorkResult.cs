@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Enums;
 
     public class HomeWorkResult : BaseScoreResult
     {
@@ -14,7 +15,7 @@ namespace Fsel.Course.Domain.Entities
         public Guid LessonResultId { get; set; }
 
         public HomeWork? HomeWork { get; set; }
-
+        public EnumSubmissionCount SubmissionCount { get; set; }
         public LessonResult? LessonResult { get; set; }
 
         public ICollection<HomeWorkAnswer> HomeWorkAnswers { get; set; } = new List<HomeWorkAnswer>();

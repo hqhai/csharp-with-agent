@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Threading.Tasks;
     using Fsel.Core.Applications.InternalEvents;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -19,7 +20,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     {
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public HomeWorkResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher) : base(lessonResultRepository, systemService, appSetting,  courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
+        public HomeWorkResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher) : base(lessonResultRepository, systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
         {
             _lessonResultRepository = lessonResultRepository;
         }
@@ -28,12 +29,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var homeWorkResult = notification.Data;
-            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId))
-                                                                        .Include(x => x.ClassForumResults.Where(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId))
-                                                                        .FirstOrDefaultAsync(x => x.Id == homeWorkResult.LessonResultId, cancellationToken);
-            if (lessonResult != null)
+            var finishAllHomework = await _homeWorkResultRepository.Queryable.AllAsync(x => x.LessonResultId == homeWorkResult.LessonResultId && x.Status == EnumResultStatus.Done, cancellationToken);
+            if (finishAllHomework)
             {
-                await UpdateLessonResultAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+                var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == homeWorkResult.LessonResultId))
+                                                                     .Include(x => x.ClassForumResults.Where(x => x.LessonResultId == homeWorkResult.LessonResultId))
+                                                                     .FirstOrDefaultAsync(x => x.Id == homeWorkResult.LessonResultId, cancellationToken);
+                if (lessonResult != null)
+                {
+                    await UpdateLessonResultAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+                }
             }
         }
     }
