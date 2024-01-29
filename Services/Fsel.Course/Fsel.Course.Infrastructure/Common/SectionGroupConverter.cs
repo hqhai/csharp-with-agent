@@ -473,7 +473,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (skill == EnumCourseSkill.Speaking)
             {
-                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => GetSectionTimeCodeDto(x)).ToList();
+                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => GetSectionTimeCodeDto(x)).OrderBy(x => x.DisplayTime).ToList();
             }
             return sectionDetail;
         }
