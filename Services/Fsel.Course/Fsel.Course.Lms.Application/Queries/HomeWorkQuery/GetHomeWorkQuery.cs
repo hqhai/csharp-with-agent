@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             {
                 homeWorkAnswer.CorrectCount = isCheck ? homeWorkAnswer.CorrectCount : default;
                 homeWorkAnswer.IsCorrect = isCheck ? homeWorkAnswer.IsCorrect : default;
-                homeWorkAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(homeWorkAnswer.Answer, question.QuestionType, isShowSubStatus, homeWorkResult.Status);
+                homeWorkAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(homeWorkAnswer.Answer, question.QuestionType, isShowSubStatus, homeWorkResult.Status, homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit);
                 questionModel.ResultAnswer = _mapper.Map<AnswerModel>(homeWorkAnswer);
             }
             return questionModel;
