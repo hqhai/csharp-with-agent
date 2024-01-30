@@ -57,11 +57,10 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                                                                               StudentId = x.StudentId,
                                                                           });
 
-            var queryResult = from student in studentRankingsQuery.ToList()
-                              join studentFile in listStudentCompetion on student.StudentId equals studentFile.StudentId
+            var queryResult = from studentFile in listStudentCompetion
                               select new StudentRankingModel
                               {
-                                  StudentId = student.StudentId,
+                                  StudentId = studentFile.StudentId,
                                   SchoolName = studentFile.SchoolName,
                                   Grade = studentFile.Grade,
                                   Process = 0,

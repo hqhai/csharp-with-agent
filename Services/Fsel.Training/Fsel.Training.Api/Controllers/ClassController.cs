@@ -119,7 +119,7 @@ namespace Fsel.Training.Api.Controllers
         /// <summary>
         /// Search Class Forum
         /// </summary>
-        [HttpGet("search-class")]
+        [HttpGet("search-class")] 
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchClass([FromQuery] Application.Queries.ClassQuery.Admin.SearchClassQuery query)
