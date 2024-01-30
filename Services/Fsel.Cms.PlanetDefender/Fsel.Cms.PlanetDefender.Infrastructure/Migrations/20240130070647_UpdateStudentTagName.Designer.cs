@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 {
     [DbContext(typeof(CmsPlanetDefenderDbContext))]
-    [Migration("20240130041605_UpdateStudentTagName")]
+    [Migration("20240130070647_UpdateStudentTagName")]
     partial class UpdateStudentTagName
     {
         /// <inheritdoc />
@@ -1061,9 +1061,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Property<Guid?>("MaxLevelSpaceShipId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("StudentGameInfoId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("TagName")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -1086,8 +1083,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 
                     b.HasIndex("MaxLevelSpaceShipId");
 
-                    b.HasIndex("StudentGameInfoId");
-
                     b.ToTable("StudentTagNames");
 
                     b.HasData(
@@ -1099,7 +1094,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Level = 1,
-                            StudentGameInfoId = new Guid("00000000-0000-0000-0000-000000000000"),
                             TagName = "Captain"
                         },
                         new
@@ -1110,7 +1104,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Level = 10,
-                            StudentGameInfoId = new Guid("00000000-0000-0000-0000-000000000000"),
                             TagName = "Major"
                         },
                         new
@@ -1121,7 +1114,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Level = 20,
-                            StudentGameInfoId = new Guid("00000000-0000-0000-0000-000000000000"),
                             TagName = "Colonel"
                         },
                         new
@@ -1132,7 +1124,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Level = 30,
-                            StudentGameInfoId = new Guid("00000000-0000-0000-0000-000000000000"),
                             TagName = "Brigadier"
                         },
                         new
@@ -1143,7 +1134,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Level = 40,
-                            StudentGameInfoId = new Guid("00000000-0000-0000-0000-000000000000"),
                             TagName = "General"
                         },
                         new
@@ -1154,7 +1144,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
                             Level = 50,
-                            StudentGameInfoId = new Guid("00000000-0000-0000-0000-000000000000"),
                             TagName = "Supreme Leader"
                         });
                 });
@@ -1584,7 +1573,15 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.StudentTagName", "StudentTagName")
+                        .WithMany("StudentGameInfos")
+                        .HasForeignKey("TagNameId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.Navigation("AvatarImage");
+
+                    b.Navigation("StudentTagName");
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentSpaceShip", b =>
@@ -1613,15 +1610,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .HasForeignKey("MaxLevelSpaceShipId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.StudentGameInfo", "StudentGameInfo")
-                        .WithOne("StudentTagName")
-                        .HasForeignKey("Fsel.Cms.PlanetDefender.Domain.Entities.StudentTagName", "StudentGameInfoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("SpaceShip");
-
-                    b.Navigation("StudentGameInfo");
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.Character", b =>
@@ -1650,8 +1639,11 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Navigation("StudentCharacters");
 
                     b.Navigation("StudentSpaceShips");
+                });
 
-                    b.Navigation("StudentTagName");
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentTagName", b =>
+                {
+                    b.Navigation("StudentGameInfos");
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.ZMatter", b =>

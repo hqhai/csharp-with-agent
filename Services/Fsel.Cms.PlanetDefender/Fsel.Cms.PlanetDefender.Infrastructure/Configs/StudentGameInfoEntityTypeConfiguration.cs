@@ -21,11 +21,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
                     v => v.EnumParse<EnumGameCourseLevel>());
 
             builder.HasOne(x => x.StudentTagName)
-                .WithOne(b => b.StudentGameInfo)
-                .HasForeignKey<StudentGameInfo>(b => b.TagNameId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasIndex(x => x.TagNameId).IsUnique(false);
+                .WithMany(b => b.StudentGameInfos)
+                  .HasForeignKey(b => b.TagNameId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Property(b => b.Level).HasDefaultValue(1);
         }

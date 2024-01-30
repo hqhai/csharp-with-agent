@@ -17,13 +17,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
                   .HasForeignKey(b => b.MaxLevelSpaceShipId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(x => x.StudentGameInfo)
-                .WithOne(b => b.StudentTagName)
-                .HasForeignKey<StudentTagName>(b => b.StudentGameInfoId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasIndex(x => x.StudentGameInfoId).IsUnique(false);
-
             builder.Property(b => b.Level).HasDefaultValue(1);
         }
     }

@@ -19,8 +19,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
 
         public SpaceShip? SpaceShip { get; set; }
 
-        public Guid StudentGameInfoId { get; set; }
-
-        public virtual StudentGameInfo? StudentGameInfo { get; set; }
+        public virtual ICollection<StudentGameInfo>? StudentGameInfos { get; set; } = new List<StudentGameInfo>();
     }
 }
