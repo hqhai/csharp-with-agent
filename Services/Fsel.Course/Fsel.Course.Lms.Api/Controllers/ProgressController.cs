@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/progress")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class ProgressController : ControllerBase
     {
         private readonly IMediator _mediator;
