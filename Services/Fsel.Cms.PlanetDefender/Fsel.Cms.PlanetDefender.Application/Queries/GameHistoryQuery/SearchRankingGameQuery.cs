@@ -50,7 +50,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.GameHistoryQuery
 
             IOrderedQueryable<RankingGameModel>? query = default;
 
-            if (EnumRanking.Season == request.EnumRanking)
+            if (EnumRanking.Season == request.Ranking)
             {
                 query = _gameHistoryRepository.Queryable
                                               .Where(x => x.CreatedDate.Year == DateTime.UtcNow.Year)
@@ -66,7 +66,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.GameHistoryQuery
                                                 .ThenByDescending(x => x.UpdatedDate);
             }
 
-            else if (EnumRanking.Level == request.EnumRanking)
+            else if (EnumRanking.Level == request.Ranking)
             {
                 query = _studentGameInfoRepository.Queryable
                                                   .Select(p => new RankingGameModel

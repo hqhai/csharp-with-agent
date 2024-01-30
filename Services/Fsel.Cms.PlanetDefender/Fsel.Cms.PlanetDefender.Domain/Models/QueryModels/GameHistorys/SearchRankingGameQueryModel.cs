@@ -7,6 +7,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.GameHistorys
 
     public class SearchRankingGameQueryModel : BaseQueryModel
     {
-        public EnumRanking EnumRanking { get; set; }
+        public EnumRanking Ranking { get; set; }
     }
 }
