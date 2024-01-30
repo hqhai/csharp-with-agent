@@ -29,8 +29,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var homeWorkResult = notification.Data;
-            var finishAllHomework = await _homeWorkResultRepository.Queryable.AllAsync(x => x.LessonResultId == homeWorkResult.LessonResultId && x.Status == EnumResultStatus.Done, cancellationToken);
-            if (finishAllHomework)
+            var isHomeWorkOtherDone = await _homeWorkResultRepository.Queryable.AnyAsync(x => x.LessonResultId == homeWorkResult.LessonResultId && x.Status != EnumResultStatus.Done, cancellationToken);
+            if (!isHomeWorkOtherDone)
             {
                 var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == homeWorkResult.LessonResultId))
                                                                      .Include(x => x.ClassForumResults.Where(x => x.LessonResultId == homeWorkResult.LessonResultId))
