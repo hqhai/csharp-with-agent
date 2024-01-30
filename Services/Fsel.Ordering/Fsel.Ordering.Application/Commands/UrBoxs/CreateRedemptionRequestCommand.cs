@@ -153,7 +153,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
                 if (createRedemptionRequest.Content?.Status == 200)
                 {
-                    var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new Application.Services.UserService.Models.UpdateStudentByTokenModel { StudentId = studentResult.Content?.Result?.Id ?? default, NumberOfToken = token - price });
+                    var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new Application.Services.UserService.Models.UpdateStudentByTokenModel { StudentId = studentResult.Content?.Result?.Id ?? default, NumberOfToken = -price });
                     if (!updateTokenResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(updateTokenResult.Error);

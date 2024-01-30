@@ -152,15 +152,18 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     {
                         foreach (var item in request.Answers)
                         {
+                            if (item.SectionId == null || sectionGroupResult == null)
+                            {
+                                continue;
+                            }
                             await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
                             {
-                                SectionId = (Guid)item.SectionId!,
+                                SectionId = (Guid)item.SectionId,
+                                MockTestResultId = mockTestResult.Id,
                                 WordContent = item.Answer?.ToString() ?? string.Empty,
-
                             }, cancellationToken);
                         }
                     }
-
                 }
                 sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
                 return methodResult;
@@ -201,7 +204,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 {
                     mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                     mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
-                    mockTestResult = await GetMockTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), mockTestResult, isSkillTest);
+                    mockTestResult = await GetMockTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList(), mockTestResult, isSkillTest);
                     await UpdateUserToken(mockTestResult).ConfigureAwait(false);
                 }
             }
@@ -449,8 +452,5 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             mockTestAnswer.CorrectCount = correctCount;
             return mockTestAnswer;
         }
-
-
-
     }
 }

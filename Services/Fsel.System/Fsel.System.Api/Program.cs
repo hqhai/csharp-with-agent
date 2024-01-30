@@ -5,6 +5,7 @@ using Fsel.Shared.Constants;
 using Fsel.System.Application.Queues.Consumers;
 using Fsel.System.Application.Queues.Publisher;
 using Fsel.System.Application.Services.CourseServices;
+using Fsel.System.Application.Services.DictionaryServices;
 using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.UserServices;
 using Fsel.System.Domain.IRepositories;
@@ -44,6 +45,7 @@ builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
+builder.AddRefitClients(typeof(IDictionaryService), appSetting?.Services?.DictionaryApiUrl);
 
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>

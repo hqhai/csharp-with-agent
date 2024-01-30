@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     public class GetMockTestReportQueryHandler : IRequestHandler<GetMockTestReportQuery, MethodResult<MockTestResultModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
@@ -40,9 +41,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private float Default_Achieved_Point = 1;
         private const double Standard_Ratio = 1; // tỉ lệ xem đánh giá 100/100
 
-        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, SectionGroupConverter sectionGroupConverter, AuthContext authContext, IUserService userService, IMapper mapper, QuestBoardPublisher questBoardPublisher)
+        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionGroupConverter sectionGroupConverter, AuthContext authContext, IUserService userService, IMapper mapper, QuestBoardPublisher questBoardPublisher)
         {
             _mockTestResultRepository = mockTestResultRepository;
+            _mockTestRepository = mockTestRepository;
             _sectionGroupConverter = sectionGroupConverter;
             _authContext = authContext;
             _userService = userService;
@@ -56,16 +58,22 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             MethodResult<MockTestResultModel> methodResult = new MethodResult<MockTestResultModel>();
 
             var mockTestResult = await _mockTestResultRepository.Queryable
+                                    .Include(x => x.MockTestScores)
+                                    .ThenInclude(x => x.SectionGroup)
                                     .Where(x => x.Id == request.MockTestResultId)
-                                    .Include(x => x.MockTestScores.Where(x => x.MockTestResultId == request.MockTestResultId))
-                                    .Include(x => x.MockTest)
-                                        .ThenInclude(x => x!.MockTestSections)
-                                        .ThenInclude(x => x.SectionGroup)
-                                        .ThenInclude(x => x!.MockTestScores.Where(x => x.MockTestResultId == request.MockTestResultId))
                                     .FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                return methodResult;
+            }
+            var mockTest = await _mockTestRepository.Queryable
+                                        .Include(x => x!.MockTestSections)
+                                        .ThenInclude(x => x.SectionGroup)
+                                    .FirstOrDefaultAsync(cancellationToken);
+            if (mockTest == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
                 return methodResult;
             }
 
@@ -80,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             if (mockTestResult.SkillScores != null)
             {
                 mockTestResultModel.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores), true);
-                mockTestResultModel.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult);
+                mockTestResultModel.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
             }
 
             //await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
@@ -106,8 +114,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         .Select(n => new
                                         {
                                             Skill = n.Key,
-                                            MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).ToList())
-                                        });
+                                            MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).OrderBy(x => x.CreatedDate).ToList())
+                                        }).ToList();
 
             return mockTestResult;
         }

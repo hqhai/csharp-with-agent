@@ -3,6 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Ordering.Application.Queues.Publishers;
 using Fsel.Ordering.Application.Services.CourseService;
+using Fsel.Ordering.Application.Services.PayooService;
 using Fsel.Ordering.Application.Services.SystemService;
 using Fsel.Ordering.Application.Services.TrainingService;
 using Fsel.Ordering.Application.Services.UrBoxService;
@@ -40,6 +41,7 @@ builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCour
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUrBoxService), appSetting?.Services?.UrBoxApiUrl);
+builder.AddRefitClients(typeof(IPayooService), appSetting?.Services?.PayooApiUrl);
 builder.AddMassTransit(appSetting);
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>

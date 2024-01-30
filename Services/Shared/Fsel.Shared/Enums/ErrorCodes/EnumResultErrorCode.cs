@@ -10,6 +10,11 @@ namespace Fsel.Shared.Enums.ErrorCodes
         ResultStatusDone,
 
         /// <summary>
+        /// Result Status Not Done
+        /// </summary>
+        ResultStatusNotDone,
+
+        /// <summary>
         /// Result Status Unfinished
         /// </summary>
         ResultStatusUnfinished

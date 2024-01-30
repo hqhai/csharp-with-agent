@@ -17,6 +17,7 @@ namespace Fsel.Shared.Constants
 
         public const string ZMatter = "Resources//ZMatter.json";
         public const string SpaceShip = "Resources//SpaceShip.json";
+        public const string Character = "Resources//Character.json";
 
         public const string GameplayRuleConfig = "Resources//GameplayRuleConfig.json";
 
@@ -25,5 +26,8 @@ namespace Fsel.Shared.Constants
         public const string TokenConfig = "Resources//TokenConfig.json";
         public const string PrivateKeyUrBox = "Resources//UrBox//private_key_rsa";
         public const string I18NCredentialsFilePath = "Resources//file-i18n.json";
+
+        public const string BandScoreFileName = "Resources//BandScores.json";
+        public const string Payoo = "Resources//Payoo.xml";
     }
 }

@@ -14,6 +14,6 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<IList<HomeWork>> GetListAsync(LessonResult lessonResult);
 
-        Task<HomeWork?> GetAsync(Guid? id, HomeWorkResult homeWorkResult);
+        Task<HomeWork?> GetAsync(HomeWorkResult homeWorkResult);
     }
 }

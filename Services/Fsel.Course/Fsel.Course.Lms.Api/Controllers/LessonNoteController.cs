@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.LessonNoteCmd;
     using Fsel.Course.Lms.Application.Queries.LessonNoteQuery;
@@ -90,6 +91,18 @@ namespace Fsel.Course.Lms.Api.Controllers
             ArgumentNullException.ThrowIfNull(command);
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search lesson note 
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LessonNoteModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] SearchLessonNoteQuery query)
+        {
+            MethodResult<PagingItemsModel<LessonNoteModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
