@@ -67,19 +67,20 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             var studentInfos = _studentRepository.Queryable.Include(x => x.Human).Where(x => competitionStudentIds.Contains(x.Id)).ToList();
 
             var result = from studentFile in listStudentCompetion
-                         join studentResult in studentResults! on studentFile.StudentId equals studentResult.StudentId
-                         join studentInfo in studentInfos
-                            on studentFile.StudentId equals studentInfo.Id
+                         join studentResult in studentResults! on studentFile.StudentId equals studentResult.StudentId into resultGroup
+                         from studentResult in resultGroup.DefaultIfEmpty()
+                         join studentInfo in studentInfos on studentFile.StudentId equals studentInfo.Id into infoGroup
+                         from studentInfo in infoGroup.DefaultIfEmpty()
                          select new StudentRankingModel
                          {
                              StudentId = studentFile.StudentId,
                              SchoolName = studentFile.SchoolName,
                              Grade = studentFile.Grade,
-                             Process = studentResult.ContentCompleted,
-                             OverallScore = studentResult.TotalScore,
+                             Process = studentResult?.ContentCompleted ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
+                             OverallScore = studentResult?.TotalScore ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
                              CompetitionEndDate = new DateTime(2024, 2, 29),
                              FullName = studentFile.FullName,
-                             AvatarPath = studentInfo.Human?.AvatarPath ?? string.Empty,
+                             AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
                              UserId = studentFile.UserId
                          };
 
