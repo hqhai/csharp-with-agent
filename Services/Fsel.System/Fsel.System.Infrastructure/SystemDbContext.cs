@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
@@ -94,50 +92,11 @@ namespace Fsel.System.Infrastructure
         private static void SeedTokenConfig(ModelBuilder builder)
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TokenConfig);
-            var tokenConfigs = DeserializeFromFilePath<IList<TokenConfig>>(path);
+            var tokenConfigs = ConvertHelper.DeserializeFromFilePath<IList<TokenConfig>>(path);
             Console.WriteLine(path.Serialize());
             Console.WriteLine(tokenConfigs.Serialize());
             ArgumentNullException.ThrowIfNull(tokenConfigs);
             builder.Entity<TokenConfig>().HasData(tokenConfigs);
-        }
-
-        public static T? DeserializeFromFilePath<T>(string path)
-        {
-            if (!File.Exists(path))
-            {
-                return default(T);
-            }
-
-            using StreamReader streamReader = new StreamReader(path);
-            return Deserialize<T>(streamReader.ReadToEnd());
-        }
-
-        public static T? Deserialize<T>(string? data, JsonSerializerOptions? options = null)
-        {
-            try
-            {
-                JsonSerializerOptions s_jsonSerializerOptions = new JsonSerializerOptions
-                {
-                    Converters = { (JsonConverter)new JsonStringEnumConverter() },
-                    PropertyNameCaseInsensitive = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                };
-                if (string.IsNullOrEmpty(data))
-                {
-                    return default(T);
-                }
-
-                if (options == null)
-                {
-                    options = s_jsonSerializerOptions;
-                }
-
-                return JsonSerializer.Deserialize<T>(data, options);
-            }
-            catch
-            {
-                return default(T);
-            }
         }
 
         private static void SeedApprovalTimeConfig(ModelBuilder builder)
