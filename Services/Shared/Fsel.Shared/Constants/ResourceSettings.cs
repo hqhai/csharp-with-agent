@@ -12,6 +12,7 @@ namespace Fsel.Shared.Constants
         public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
         public const string PlatformFileName = "Resources//Platform.json";
         public const string AcademicStudentsName = "Resources//AcademicStudents.json";
+        public const string AcademicStudentsNameTest = "Resources//AcademicStudentsNameTest.json";
         public const string RoleFileName = "Resources//Role.json";
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
 
@@ -28,6 +29,7 @@ namespace Fsel.Shared.Constants
         public const string I18NCredentialsFilePath = "Resources//file-i18n.json";
 
         public const string BandScoreFileName = "Resources//BandScores.json";
+        public const string LeaderBoardPercentFileName = "Resources//LeaderBoardScorePercentage.json";
         public const string Payoo = "Resources//Payoo.xml";
     }
 }
