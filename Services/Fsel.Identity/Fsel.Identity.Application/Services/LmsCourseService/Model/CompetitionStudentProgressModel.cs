@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels
+namespace Fsel.Identity.Application.Services.LmsCourseService.Model
 {
     public class CompetitionStudentProgressModel
     {
@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? CourseName { get; set; }
         public double ContentCompleted { get; set; }
         public Guid StudentId { get; set; }
-
         public double TotalScore { get; set; }
+
     }
 }

@@ -4,36 +4,40 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
 {
     using System.Linq.Dynamic.Core;
-    using AutoMapper;
+
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Application.Services.LmsCourseService;
+    using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Hosting;
 
     public class GetStudentRankingCompetitionQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentRankingModel>>>
     {
+        public EnumCourseType CourseType { get; set; }
     }
 
     public class GetStudentRankingCompetitionQueryHandler : IRequestHandler<GetStudentRankingCompetitionQuery, MethodResult<PagingItemsModel<StudentRankingModel>>>
     {
-        private readonly IStudentRankingRepository _studentRankingRepository;
-        private readonly IMapper _mapper;
+        private readonly ILmsCourseService _lmsCourseService;
+        private readonly IHostEnvironment _environment;
         private readonly IStudentRepository _studentRepository;
-        private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
+        private const double Process_Ratio = 0.75;
+        private const double Overall_Ratio = 0.25;
 
-        public GetStudentRankingCompetitionQueryHandler(IStudentRankingRepository studentRankingRepository, IMapper mapper, IStudentRepository studentRepository, IStudentDailyStreakRepository studentDailyStreakRepository)
+        public GetStudentRankingCompetitionQueryHandler(ILmsCourseService lmsCourseService, IHostEnvironment environment, IStudentRepository studentRepository)
         {
-            _studentRankingRepository = studentRankingRepository;
-            _mapper = mapper;
+            _lmsCourseService = lmsCourseService;
+            _environment = environment;
             _studentRepository = studentRepository;
-            _studentDailyStreakRepository = studentDailyStreakRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentRankingModel>>> Handle(GetStudentRankingCompetitionQuery request, CancellationToken cancellationToken)
@@ -41,104 +45,51 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<StudentRankingModel>> methodResult = new MethodResult<PagingItemsModel<StudentRankingModel>>();
 
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsTestName);
+            if (_environment.IsProduction())
+            {
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
+            }
+            else if(_environment.IsStaging())
+            {
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsStagingName);
+
+            }
 
             var listStudentCompetition = ConvertHelper.DeserializeFromFilePath<IList<StudentJoinCompetitionModel>>(path);
-
             List<Guid> competitionStudentIds = listStudentCompetition!.Select(x => x.StudentId).ToList();
-
             var listStudentCompetion = listStudentCompetition!.ToList();
 
 
-            var studentRankingsQuery = _studentRankingRepository.Queryable.Where(x => competitionStudentIds.Contains(x.StudentId))
-                                                                          .OrderBy(x => x.CurrentPosition)
-                                                                          .Select(x => new StudentRankingModel
-                                                                          {
-                                                                              StudentId = x.StudentId,
-                                                                          });
+            var studentProgressAndOverall = await _lmsCourseService.GetStudentProgress(new StudentCompetitionStatQueryModel { StudentIds = competitionStudentIds });
+            var studentResults = studentProgressAndOverall?.Content?.Result;
 
-            var queryResult = from studentFile in listStudentCompetion
-                              select new StudentRankingModel
-                              {
-                                  StudentId = studentFile.StudentId,
-                                  SchoolName = studentFile.SchoolName,
-                                  Grade = studentFile.Grade,
-                                  Process = 0,
-                                  OverallScore = 0,
-                                  CompetitionEndDate = DateTime.UtcNow.AddDays(10),
-                                  FullName = studentFile.FullName,
-                                  AvatarPath = string.Empty,
-                                  CurrentPosition = 0,
-                                  UserId = studentFile.UserId
-                              };
+            var studentInfos = _studentRepository.Queryable.Include(x => x.Human).Where(x => competitionStudentIds.Contains(x.Id)).ToList();
 
+            var result = from studentFile in listStudentCompetion
+                         join studentResult in studentResults! on studentFile.StudentId equals studentResult.StudentId
+                         join studentInfo in studentInfos
+                            on studentFile.StudentId equals studentInfo.Id
+                         select new StudentRankingModel
+                         {
+                             StudentId = studentFile.StudentId,
+                             SchoolName = studentFile.SchoolName,
+                             Grade = studentFile.Grade,
+                             Process = studentResult.ContentCompleted,
+                             OverallScore = studentResult.TotalScore,
+                             CompetitionEndDate = new DateTime(2024, 2, 29),
+                             FullName = studentFile.FullName,
+                             AvatarPath = studentInfo.Human?.AvatarPath ?? string.Empty,
+                             UserId = studentFile.UserId
+                         };
 
-            var studentIds = studentRankingsQuery.Select(s => s.StudentId);
-            var studentInfo = _studentRepository.Queryable.Include(x => x.Human).Where(x => studentIds.Contains(x.Id)).ToList();
-
-            // var studentRankingResult = _mapper.Map<List<StudentRankingModel>>(studentRankingsQuery);
-            var studentDailyStreak = _studentDailyStreakRepository.Queryable.Where(x => studentIds.Contains(x.StudentId)).ToList();
-
-            // Lấy số ngày đăng nhập liên tiếp của từng user dựa vào ngày hiện tại trở về
-            var listDailyStreakByStudents = studentIds.Select(studentId => new
-            {
-                StudentId = studentId,
-                ConsecutiveDays = GetConsecutiveDays(studentDailyStreak, studentId)
-            }).ToList();
-
-
-            int totalItem = queryResult.Count();
-
-            var lists = queryResult.ApplyPaging(request).ToList();
-
+            result = result.OrderByDescending(x => (Process_Ratio * x.Process + Overall_Ratio * x.TotalScore));
+            int totalItem = result.Count();
+            var lists = result.ApplyPaging(request).ToList();
             methodResult.Result = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
 
             return methodResult;
         }
-
-        public static int GetConsecutiveDays(ICollection<StudentDailyStreak> studentDailyStreaks, Guid studentId)
-        {
-            var userStreaks = studentDailyStreaks?
-                .Where(s => s.StudentId == studentId)
-                .OrderBy(s => s.DailyDate)
-                .ToList() ?? new List<StudentDailyStreak>();
-
-            int consecutiveDays = 0;
-            DateTime currentDate = DateTime.UtcNow.Date;
-
-            var todayStreak = userStreaks.LastOrDefault(s => s.DailyDate.Date == currentDate);
-            var yesterdayStreak = userStreaks.LastOrDefault(s => s.DailyDate.Date == currentDate.AddDays(-1));
-
-            if (todayStreak == null && yesterdayStreak == null)
-            {
-                return consecutiveDays;
-            }
-
-            var targetStreak = todayStreak ?? yesterdayStreak;
-
-            if (targetStreak == yesterdayStreak)
-            {
-                currentDate = currentDate.AddDays(-1);
-            }
-
-            for (int i = userStreaks.IndexOf(targetStreak!); i >= 0; i--)
-            {
-                double dailyRange = (currentDate - userStreaks[i].DailyDate.Date).TotalDays;
-
-                if (dailyRange >= 0 && dailyRange <= consecutiveDays)
-                {
-                    consecutiveDays++;
-                }
-                else
-                {
-                    break;  // Ngừng nếu gặp ngày không liền kề
-                }
-            }
-
-            return consecutiveDays;
-        }
-
-
     }
 }
