@@ -50,6 +50,11 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             {
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
             }
+            else if(_environment.IsStaging())
+            {
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsStagingName);
+
+            }
 
             var listStudentCompetition = ConvertHelper.DeserializeFromFilePath<IList<StudentJoinCompetitionModel>>(path);
             List<Guid> competitionStudentIds = listStudentCompetition!.Select(x => x.StudentId).ToList();
