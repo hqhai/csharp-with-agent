@@ -10,9 +10,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.HomeWorkQuery;
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
     using Fsel.Course.Lms.Application.Queries.ProgressQuery;
-    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
@@ -21,7 +19,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/progress")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class ProgressController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -239,10 +236,10 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get studentprogress
         /// </summary>
-        [HttpGet("list-student-progress")]
+        [HttpPost("students-competition")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetManageStudentCourse([FromQuery] GetStudentsProgressCoursesQuery query)
+        public async Task<IActionResult> GetListStudentProgress([FromBody] GetStudentsProgressCoursesQuery query)
         {
             MethodResult<IList<CompetitionStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
