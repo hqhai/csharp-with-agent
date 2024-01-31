@@ -21,13 +21,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
-    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -230,35 +228,35 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             mockTestResult.Status = EnumResultStatus.Done;
             mockTestResult.SkillScores = skillScores;
-            mockTestResult = await GetTokenMockTestResult(mockTestResult, isSkillTest);
+            //mockTestResult = await GetTokenMockTestResult(mockTestResult, isSkillTest);
             return mockTestResult;
         }
 
-        private async Task<MockTestResult> GetTokenMockTestResult(MockTestResult mockTestResult, bool isSkillTest)
-        {
-            var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
-            var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
-            {
-                Feature = isSkillTest ? EnumTokenFeature.SkillMockTest : EnumTokenFeature.FullMockTest,
-                Missions = string.Join(",", misstions)
-            });
-            var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
-            if (!tokenConfigResults.IsSuccessStatusCode || !isSuperFireModeResult.IsSuccessStatusCode)
-            {
-                return mockTestResult;
-            }
-            var tokenConfigs = tokenConfigResults.Content?.Result;
-            var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
+        //private async Task<MockTestResult> GetTokenMockTestResult(MockTestResult mockTestResult, bool isSkillTest)
+        //{
+        //    var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
+        //    var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+        //    {
+        //        Feature = isSkillTest ? EnumTokenFeature.SkillMockTest : EnumTokenFeature.FullMockTest,
+        //        Missions = string.Join(",", misstions)
+        //    });
+        //    var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
+        //    if (!tokenConfigResults.IsSuccessStatusCode || !isSuperFireModeResult.IsSuccessStatusCode)
+        //    {
+        //        return mockTestResult;
+        //    }
+        //    var tokenConfigs = tokenConfigResults.Content?.Result;
+        //    var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
 
-            var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
-            var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
-            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
+        //    var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
+        //    var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
+        //    var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
 
-            mockTestResult.TokenDone = configDone?.Number;
-            mockTestResult.TokenHighestStreak = configHighestStreak?.Number * mockTestResult.HighestStreak;
-            mockTestResult.TokenSuperFire = configSuperFire?.Number;
-            return mockTestResult;
-        }
+        //    mockTestResult.TokenDone = configDone?.Number;
+        //    mockTestResult.TokenHighestStreak = configHighestStreak?.Number * mockTestResult.HighestStreak;
+        //    mockTestResult.TokenSuperFire = configSuperFire?.Number;
+        //    return mockTestResult;
+        //}
 
         private async Task<MethodResult<SectionGroupResult>> SaveAnswerAsync(CreateMockTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
         {

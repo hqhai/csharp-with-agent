@@ -72,7 +72,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 return methodResult;
             }
 
-
             //Thực hiện các hành động lưu xuống database , gửi lên websocket
             await _studentFocusTimeRepository.ExecuteTransactionAsync(async () =>
             {
@@ -107,12 +106,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                       studentFocusTime.IsEstablished
                     )
                     {
-                        var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
-                        {
-                            Feature = EnumTokenFeature.FocusMode,
-                            Mission = EnumTokenMission.FocusTime
-                        });
-                        var tokenConfigResult = tokenConfig.Content?.Result;
+                        //var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+                        //{
+                        //    Feature = EnumTokenFeature.FocusMode,
+                        //    Mission = EnumTokenMission.FocusTime
+                        //});
+                        //var tokenConfigResult = tokenConfig.Content?.Result;
 
                         // làm nhiệm vụ
                         // await DoQuestBoard(student, request.ExecuteTime, studentFocusTime.TargetTime, cancellationToken);
@@ -120,13 +119,13 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                         var checkSuperFireMode = await _mediator.Send(new CheckSuperFireModeQuery());
                         var isSuperMode = checkSuperFireMode.Result;
 
-                        var targetConfig = tokenConfigResult.GetTokenNumber<TokenFocusTime>(isSuperMode);
-                        var targetNumber = targetConfig?.FocusTimes?.FirstOrDefault(x => x.FocusTimeId == systemConfigMap.Id)?.Number;
+                        //var targetConfig = tokenConfigResult.GetTokenNumber<TokenFocusTime>(isSuperMode);
+                        //var targetNumber = targetConfig?.FocusTimes?.FirstOrDefault(x => x.FocusTimeId == systemConfigMap.Id)?.Number;
 
-                        if (targetNumber.HasValue)
-                        {
-                            student.NumberOfToken += targetNumber.Value;
-                        }
+                        //if (targetNumber.HasValue)
+                        //{
+                        //    student.NumberOfToken += targetNumber.Value;
+                        //}
                         _studentRepository.Update(student);
                         await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -155,19 +154,22 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 case (double)EnumQuestBoardFocusMode.FocusModeThirtyMinutes:
                     categoryToElement = EnumQuestBoardCategory.ThirtyMinutesFocusMode;
                     break;
+
                 case (double)EnumQuestBoardFocusMode.FocusModeSixtyMinutes:
                     categoryToElement = EnumQuestBoardCategory.SixtyMinutesFocusMode;
                     break;
+
                 case (double)EnumQuestBoardFocusMode.FocusModeNinetyMinutes:
                     categoryToElement = EnumQuestBoardCategory.NinetyMinutesFocusMode;
                     break;
+
                 case (double)EnumQuestBoardFocusMode.FocusModeOneHundredTwentytyMinutes:
                     categoryToElement = EnumQuestBoardCategory.OneHundredTwentytyMinutesFocusMode;
                     break;
+
                 case (double)EnumQuestBoardFocusMode.FocusModeOneHundredEightyMinutes:
                     categoryToElement = EnumQuestBoardCategory.OneHundredEightyMinutesFocusMode;
                     break;
-
             };
             categories.Add(categoryToElement);
 
@@ -185,6 +187,5 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
             }
         }
-
     }
 }

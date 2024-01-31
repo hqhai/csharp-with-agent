@@ -254,61 +254,61 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
                 videoTimeCodeResult.SkillScores = skillScores;
                 videoTimeCodeResult.SkillScoreUngraded = skillScoreUngradeds;
-                videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
+                //videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
             }
             videoTimeCodeResult.IsWorking = false;
             return videoTimeCodeResult;
         }
 
-        private async Task<VideoTimeCodeResult> GetTokenVideoTimeCodeResult(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode)
-        {
-            var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
-            if (!isSuperFireModeResult.IsSuccessStatusCode)
-            {
-                return videoTimeCodeResult;
-            }
-            var tokenConfigs = await GetTokenConfig(videoTimeCode);
-            var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
-            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
-            {
-                var configQuestionReward = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.QuestionReward).GetTokenNumber<TokenNumber>(isSuperFireMode);
-                videoTimeCodeResult.TokenQuestionReward = configQuestionReward?.Number * videoTimeCodeResult.CorrectCount;
-            }
-            else
-            {
-                var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
-                var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
-                videoTimeCodeResult.TokenDone = configDone?.Number;
-                videoTimeCodeResult.TokenHighestStreak = configHighestStreak?.Number * videoTimeCodeResult.HighestStreak ?? default;
-            }
-            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
-            videoTimeCodeResult.TokenSuperFire = configSuperFire?.Number;
-            return videoTimeCodeResult;
-        }
+        //private async Task<VideoTimeCodeResult> GetTokenVideoTimeCodeResult(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode)
+        //{
+        //    var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
+        //    if (!isSuperFireModeResult.IsSuccessStatusCode)
+        //    {
+        //        return videoTimeCodeResult;
+        //    }
+        //    var tokenConfigs = await GetTokenConfig(videoTimeCode);
+        //    var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
+        //    if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+        //    {
+        //        var configQuestionReward = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.QuestionReward).GetTokenNumber<TokenNumber>(isSuperFireMode);
+        //        videoTimeCodeResult.TokenQuestionReward = configQuestionReward?.Number * videoTimeCodeResult.CorrectCount;
+        //    }
+        //    else
+        //    {
+        //        var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
+        //        var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
+        //        videoTimeCodeResult.TokenDone = configDone?.Number;
+        //        videoTimeCodeResult.TokenHighestStreak = configHighestStreak?.Number * videoTimeCodeResult.HighestStreak ?? default;
+        //    }
+        //    var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
+        //    videoTimeCodeResult.TokenSuperFire = configSuperFire?.Number;
+        //    return videoTimeCodeResult;
+        //}
 
-        private async Task<IList<TokenConfigModel>?> GetTokenConfig(VideoTimeCode videoTimeCode)
-        {
-            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
-            {
-                var misstions = new List<string> { nameof(EnumTokenMission.QuestionReward), nameof(EnumTokenMission.SuperFire) };
-                var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
-                {
-                    Feature = EnumTokenFeature.TimeCode,
-                    Missions = string.Join(",", misstions)
-                });
-                return tokenConfigResults?.Content?.Result;
-            }
-            else
-            {
-                var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
-                var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
-                {
-                    Feature = videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest ? EnumTokenFeature.UnitTest : EnumTokenFeature.SkillTest,
-                    Missions = string.Join(",", misstions)
-                });
-                return tokenConfigResults?.Content?.Result;
-            }
-        }
+        //private async Task<IList<TokenConfigModel>?> GetTokenConfig(VideoTimeCode videoTimeCode)
+        //{
+        //    if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+        //    {
+        //        var misstions = new List<string> { nameof(EnumTokenMission.QuestionReward), nameof(EnumTokenMission.SuperFire) };
+        //        var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+        //        {
+        //            Feature = EnumTokenFeature.TimeCode,
+        //            Missions = string.Join(",", misstions)
+        //        });
+        //        return tokenConfigResults?.Content?.Result;
+        //    }
+        //    else
+        //    {
+        //        var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
+        //        var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+        //        {
+        //            Feature = videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest ? EnumTokenFeature.UnitTest : EnumTokenFeature.SkillTest,
+        //            Missions = string.Join(",", misstions)
+        //        });
+        //        return tokenConfigResults?.Content?.Result;
+        //    }
+        //}
 
         private static EnumAnswerStatus GetAnswerStatus(bool isSubmit, int correctCount, int correctTotal)
         {

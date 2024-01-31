@@ -5,7 +5,6 @@ namespace Fsel.Shared.Enums
     public enum EnumSubmissionCount
     {
         FirstSubmit,
-        SecondSubmit,
-        ThirdSubmit,
+        SecondSubmit
     }
 }

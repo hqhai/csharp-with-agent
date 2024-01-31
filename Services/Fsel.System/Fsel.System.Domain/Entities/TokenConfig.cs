@@ -12,7 +12,8 @@ namespace Fsel.System.Domain.Entities
         public EnumTokenFeature Feature { get; set; }
 
         public EnumTokenMission Mission { get; set; }
-
+        public EnumCourseType? CourseType { get; set; }
+        public int DisplayOrder { get; set; }
         public string? ConfigStr { get; set; }
 
         [NotMapped]
@@ -20,15 +21,6 @@ namespace Fsel.System.Domain.Entities
         {
             get { return ConvertHelper.Deserialize<object>(ConfigStr); }
             set { ConfigStr = ConvertHelper.Serialize(value); }
-        }
-
-        public string? SuperConfigStr { get; set; }
-
-        [NotMapped]
-        public object? SuperConfig
-        {
-            get { return ConvertHelper.Deserialize<object>(SuperConfigStr); }
-            set { SuperConfigStr = ConvertHelper.Serialize(value); }
         }
     }
 }

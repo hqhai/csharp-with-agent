@@ -18,13 +18,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.SystemService;
-    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -154,46 +151,46 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 finalTestResult = await GetFinalTestResult(sectionGroupResults, finalTestResult);
-                await UpdateUserToken(finalTestResult).ConfigureAwait(false);
+                //await UpdateUserToken(finalTestResult).ConfigureAwait(false);
                 _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private async Task<FinalTestResult> GetTokenFinalTestResult(FinalTestResult finalTestResult)
-        {
-            var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
-            var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
-            {
-                Feature = EnumTokenFeature.FinalTest,
-                Missions = string.Join(",", misstions)
-            });
-            var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
-            if (!tokenConfigResults.IsSuccessStatusCode || !isSuperFireModeResult.IsSuccessStatusCode)
-            {
-                return finalTestResult;
-            }
-            var tokenConfigs = tokenConfigResults.Content?.Result;
-            var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
-            var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
-            var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
-            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
+        //private async Task<FinalTestResult> GetTokenFinalTestResult(FinalTestResult finalTestResult)
+        //{
+        //    var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
+        //    var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+        //    {
+        //        Feature = EnumTokenFeature.FinalTest,
+        //        Missions = string.Join(",", misstions)
+        //    });
+        //    var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
+        //    if (!tokenConfigResults.IsSuccessStatusCode || !isSuperFireModeResult.IsSuccessStatusCode)
+        //    {
+        //        return finalTestResult;
+        //    }
+        //    var tokenConfigs = tokenConfigResults.Content?.Result;
+        //    var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
+        //    var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
+        //    var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
+        //    var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
 
-            finalTestResult.TokenDone = configDone?.Number;
-            finalTestResult.TokenHighestStreak = configHighestStreak?.Number * finalTestResult.HighestStreak;
-            finalTestResult.TokenSuperFire = configSuperFire?.Number;
-            return finalTestResult;
-        }
+        //    finalTestResult.TokenDone = configDone?.Number;
+        //    finalTestResult.TokenHighestStreak = configHighestStreak?.Number * finalTestResult.HighestStreak;
+        //    finalTestResult.TokenSuperFire = configSuperFire?.Number;
+        //    return finalTestResult;
+        //}
 
-        private async Task UpdateUserToken(FinalTestResult finalTestResult)
-        {
-            var tokens = new List<int?> { finalTestResult.TokenDone, finalTestResult.TokenHighestStreak, finalTestResult.TokenQuestionReward, finalTestResult.TokenSuperFire };
-            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-            {
-                NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
-                StudentId = finalTestResult.StudentId,
-            }).ConfigureAwait(false);
-        }
+        //private async Task UpdateUserToken(FinalTestResult finalTestResult)
+        //{
+        //    var tokens = new List<int?> { finalTestResult.TokenDone, finalTestResult.TokenHighestStreak, finalTestResult.TokenQuestionReward, finalTestResult.TokenSuperFire };
+        //    await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+        //    {
+        //        NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
+        //        StudentId = finalTestResult.StudentId,
+        //    }).ConfigureAwait(false);
+        //}
 
         private async Task<FinalTestResult> GetFinalTestResult(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult)
         {
@@ -204,7 +201,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             finalTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             finalTestResult.Status = EnumResultStatus.Done;
             finalTestResult.SkillScores = skillScores;
-            finalTestResult = await GetTokenFinalTestResult(finalTestResult);
+            //finalTestResult = await GetTokenFinalTestResult(finalTestResult);
             return finalTestResult;
         }
 

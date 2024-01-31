@@ -57,19 +57,19 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             var date = DateTime.UtcNow.Date;
             studentDailyStreak.IsGiftReceive = true;
 
-            var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
-            {
-                Feature = EnumTokenFeature.DailyCheckin,
-                Mission = EnumTokenMission.DailyCheckin
-            });
-            var tokenConfigResult = tokenConfig.Content?.Result;
+            //var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+            //{
+            //    Feature = EnumTokenFeature.DailyCheckin,
+            //    Mission = EnumTokenMission.DailyCheckin
+            //});
+            //var tokenConfigResult = tokenConfig.Content?.Result;
 
-            var targetConfig = tokenConfigResult.GetTokenNumber<TokenDailyCheckIn>();
-            var targetNumber = targetConfig?.DailyCheckIns?.FirstOrDefault(x => x.Level == studentDailyStreak.LevelOfGift)?.Number;
-            if (targetNumber.HasValue)
-            {
-                student.NumberOfToken += targetNumber.Value;
-            }
+            //var targetConfig = tokenConfigResult.GetTokenNumber<TokenDailyCheckIn>();
+            //var targetNumber = targetConfig?.DailyCheckIns?.FirstOrDefault(x => x.Level == studentDailyStreak.LevelOfGift)?.Number;
+            //if (targetNumber.HasValue)
+            //{
+            //    student.NumberOfToken += targetNumber.Value;
+            //}
 
             await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>
              {
