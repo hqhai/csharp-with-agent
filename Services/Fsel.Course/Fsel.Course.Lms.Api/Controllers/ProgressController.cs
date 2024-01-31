@@ -15,7 +15,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
     using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
-    using Fsel.Course.Lms.Application.Queries.LeaderBoardCompetitionQuery;
 
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/progress")]

@@ -12,7 +12,7 @@ namespace Fsel.Shared.Constants
         public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
         public const string PlatformFileName = "Resources//Platform.json";
         public const string AcademicStudentsName = "Resources//AcademicStudents.json";
-        public const string AcademicStudentsNameTest = "Resources//AcademicStudentsNameTest.json";
+        public const string AcademicStudentsTestName = "Resources//AcademicStudentsName.Testing.json";
         public const string RoleFileName = "Resources//Role.json";
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
 
