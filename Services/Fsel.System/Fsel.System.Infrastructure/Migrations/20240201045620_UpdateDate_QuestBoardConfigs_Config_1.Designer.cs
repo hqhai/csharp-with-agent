@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20240201030831_UpdateDate_FocusModeTime_Config")]
-    partial class UpdateDate_FocusModeTime_Config
+    [Migration("20240201045620_UpdateDate_QuestBoardConfigs_Config_1")]
+    partial class UpdateDate_QuestBoardConfigs_Config_1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -401,7 +401,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Bắt đầu nhẹ nhàng",
                             IsDeleted = false,
-                            TargetTime = 900.0
+                            TargetTime = 1800.0
                         },
                         new
                         {
@@ -411,7 +411,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Hình thành thói quen chưa?",
                             IsDeleted = false,
-                            TargetTime = 1800.0
+                            TargetTime = 3600.0
                         },
                         new
                         {
@@ -421,7 +421,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Tập trung hơn nữa nào",
                             IsDeleted = false,
-                            TargetTime = 2700.0
+                            TargetTime = 5400.0
                         },
                         new
                         {
@@ -431,7 +431,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Chăm chỉ phết",
                             IsDeleted = false,
-                            TargetTime = 3600.0
+                            TargetTime = 7200.0
                         },
                         new
                         {
@@ -441,7 +441,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Thách đấu FSEL",
                             IsDeleted = false,
-                            TargetTime = 5400.0
+                            TargetTime = 10800.0
                         });
                 });
 
