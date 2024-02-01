@@ -79,13 +79,16 @@ namespace Fsel.Course.Infrastructure.Common
             sectionGroupResult.Status = EnumResultStatus.Done;
             sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult);
             sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.CreatedDate, DateTime.UtcNow, sectionGroup.ExecutionTime);
-            if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
+            if (sectionGroup.CourseSkill != EnumCourseSkill.Writing)
             {
-                sectionGroupResult.SkillScores.Add(skillScore);
-            }
-            else
-            {
-                sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
+                if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
+                {
+                    sectionGroupResult.SkillScores.Add(skillScore);
+                }
+                else
+                {
+                    sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
+                }
             }
             _sectionGroupResultRepository.Update(sectionGroupResult);
             await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
