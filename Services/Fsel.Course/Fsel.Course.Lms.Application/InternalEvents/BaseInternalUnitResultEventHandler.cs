@@ -56,9 +56,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         // Làm nhiệm vụ
                         var unitId = unit.Id;
                         var userId = unitResult.CreatedUserId;
-                       // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
+                        // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
 
-                        await SendStudentCompleteUnit(studentId, unit, courseId, skillScores, percent, cancellationToken);
+                        //await SendStudentCompleteUnit(studentId, unit, courseId, skillScores, percent, cancellationToken);
                     }
                     unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                     unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
@@ -137,7 +137,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             };
             return parameter;
         }
-
 
         public async Task DoQuestBoard(Guid userId, Guid unitId, Guid courseId, CancellationToken cancellationToken)
         {
