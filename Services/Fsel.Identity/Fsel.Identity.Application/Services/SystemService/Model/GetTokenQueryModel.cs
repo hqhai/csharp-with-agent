@@ -8,5 +8,6 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
     {
         public EnumTokenFeature Feature { get; set; }
         public EnumTokenMission Mission { get; set; }
+        public EnumCourseType CourseType { get; set; }
     }
 }

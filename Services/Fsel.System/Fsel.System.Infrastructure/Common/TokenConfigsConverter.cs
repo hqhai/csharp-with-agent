@@ -5,7 +5,7 @@ namespace Fsel.System.Infrastructure.Common
     using AutoMapper;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
-    using Fsel.System.Domain.Entities.Configs;
+    using Fsel.Shared.Models.ShareModels;
 
     public class TokenConfigsConverter
     {

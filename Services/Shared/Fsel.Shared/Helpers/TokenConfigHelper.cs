@@ -7,7 +7,7 @@ namespace Fsel.Shared.Helpers
 
     public static class TokenConfigHelper
     {
-        public static T? GetTokenNumber<T>(this TokenConfigModel? tokenConfigModel) where T : class
+        public static T? GetTokenConfig<T>(this TokenConfigModel? tokenConfigModel) where T : class
         {
             if (tokenConfigModel == null)
             {

@@ -6,7 +6,6 @@ namespace Fsel.System.Infrastructure.Maps
     using Fsel.Core.Extensions;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.Entities;
-    using Fsel.System.Domain.Entities.Configs;
     using Fsel.System.Domain.Models.CommandModels.TokenConfigs;
 
     public class TokenConfigProfile : Profile
@@ -17,14 +16,8 @@ namespace Fsel.System.Infrastructure.Maps
             CreateMap<UpdateTokenConfigCommandModel, TokenConfig>().IgnoreAllNonExisting();
 
             CreateMap<TokenCoinConfigs, TokenConfigDailyCheckIns>();
-            //.ForMember(dest => dest.Description, act => act.Ignore())
-            //.ForMember(dest => dest.Level, act => act.Ignore());
             CreateMap<TokenCoinConfigs, TokenConfigs>();
-            //.ForMember(dest => dest.Description, act => act.Ignore());
             CreateMap<TokenCoinConfigs, TokenConfigFocusModes>();
-            //.ForMember(dest => dest.Description, act => act.Ignore())
-            //.ForMember(dest => dest.DisplayOrder, act => act.Ignore())
-            //.ForMember(dest => dest.FocusTimeId, act => act.Ignore());
         }
     }
 }

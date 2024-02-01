@@ -3,12 +3,12 @@
 namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Shared.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -57,19 +57,20 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             var date = DateTime.UtcNow.Date;
             studentDailyStreak.IsGiftReceive = true;
 
-            //var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
-            //{
-            //    Feature = EnumTokenFeature.DailyCheckin,
-            //    Mission = EnumTokenMission.DailyCheckin
-            //});
-            //var tokenConfigResult = tokenConfig.Content?.Result;
+            var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+            {
+                Feature = EnumTokenFeature.DailyCheckin,
+                Mission = EnumTokenMission.DailyCheckin,
+                CourseType = student.CourseLevel.GetEnumCourseType()
+            });
+            var tokenConfigResult = tokenConfig.Content?.Result;
 
-            //var targetConfig = tokenConfigResult.GetTokenNumber<TokenDailyCheckIn>();
-            //var targetNumber = targetConfig?.DailyCheckIns?.FirstOrDefault(x => x.Level == studentDailyStreak.LevelOfGift)?.Number;
-            //if (targetNumber.HasValue)
-            //{
-            //    student.NumberOfToken += targetNumber.Value;
-            //}
+            var tokenConfigDailyCheckIns = tokenConfigResult.GetTokenConfig<List<TokenConfigDailyCheckIns>>();
+            if (tokenConfigDailyCheckIns != null)
+            {
+                var targetNumber = tokenConfigDailyCheckIns.Where(x => x.Level == studentDailyStreak.LevelOfGift).Max(x => x.BaseValue);
+                student.NumberOfToken += targetNumber;
+            }
 
             await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>
              {
