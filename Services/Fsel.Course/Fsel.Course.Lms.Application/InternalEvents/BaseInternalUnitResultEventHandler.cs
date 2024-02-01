@@ -433,20 +433,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }, cancellationToken).ConfigureAwait(false);
         }
 
-        private SendStudentCompleteUnitModel GetParameter(string? fullName, int? unitNumber, string? unitName, string? csoPhonenumber, List<SkillScores> groupedSkillScores)
-        {
-            var parameter = new SendStudentCompleteUnitModel
-            {
-                StudentName = fullName,
-                UnitNumber = unitNumber.ToString(),
-                UnitName = unitName,
-                AccessLink = _appSetting.ResourceContent?.LmsWebsiteUrl,
-                CsoPhonenumber = csoPhonenumber,
-                Scores = string.Join("", groupedSkillScores.Select(item => $"<li style=\"line-height: 1.5rem\">{item.Skill}: {item.Percent}%</li>"))
-            };
-            return parameter;
-        }
-
 
         public async Task DoQuestBoard(Guid userId, Guid unitId, Guid courseId, CancellationToken cancellationToken)
         {
