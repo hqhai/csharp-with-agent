@@ -1,3 +1,4 @@
+using Fsel.Core.Base.Interfaces;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
@@ -9,10 +10,12 @@ namespace Fsel.Realtime.Application.Queues.Consumers
     public class DiscussionBoardConsumer : IConsumer<DiscussionBoardQueueModel>
     {
         private readonly IHubContext<DiscussionBoardHub> _discussionBoardHubContext;
+        private readonly IQueueProvider _queueProvider;
 
-        public DiscussionBoardConsumer(IHubContext<DiscussionBoardHub> discussionBoardHubContext)
+        public DiscussionBoardConsumer(IHubContext<DiscussionBoardHub> discussionBoardHubContext, IQueueProvider queueProvider)
         {
             _discussionBoardHubContext = discussionBoardHubContext;
+            _queueProvider = queueProvider;
         }
 
         public async Task Consume(ConsumeContext<DiscussionBoardQueueModel> context)
@@ -20,6 +23,12 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             if (context != null)
             {
                 await _discussionBoardHubContext.Clients.All.SendAsync(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, context.Message);
+
+                try
+                {
+                    _queueProvider.Publish(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, context.Message);
+                }
+                catch { }
             }
         }
     }
