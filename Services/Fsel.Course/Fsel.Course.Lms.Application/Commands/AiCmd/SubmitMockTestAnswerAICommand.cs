@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -165,22 +166,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             double average = totalScore / bandScoreDescriptions.Length;
 
-            // Kiểm tra nếu phần thập phân là 0.5, giữ nguyên giá trị
-            if (IsDecimalPartHalf(average))
-            {
-                return average;
-            }
-
-            // Làm tròn bình thường cho các trường hợp khác
-            double roundedAverage = Math.Round(average, MidpointRounding.AwayFromZero);
-
-            return roundedAverage;
-        }
-
-        private static bool IsDecimalPartHalf(double number)
-        {
-            double decimalPart = number - Math.Floor(number);
-            return decimalPart == ValueSettings.CaculateNumber.DecimalPartHalf;
+            return NumberHelper.RoundNumberDouble(average, true);
         }
 
     }
