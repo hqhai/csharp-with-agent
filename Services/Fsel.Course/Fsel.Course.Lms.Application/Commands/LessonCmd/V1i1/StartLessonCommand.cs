@@ -117,7 +117,8 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
                 HomeWorkId = x.Id,
                 Status = EnumResultStatus.Unfinished,
                 StudentId = lessonResult.StudentId,
-                CorrectTotal = x.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal)
+                CorrectTotal = x.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                SubmissionCount = EnumSubmissionCount.FirstSubmit,
             }).ToList();
 
             lessonResult.Status = EnumResultStatus.Process;

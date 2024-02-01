@@ -457,9 +457,9 @@ namespace Fsel.Course.Infrastructure.Common
                         if (answer != null && answer.IsFirstSubmits != null && answer.IsExacts != null)
                         {
                             var isFirstSubmit = new List<bool>();
+                            var index = 0;
                             foreach (var data in answer.IsExacts)
                             {
-                                var index = answer.IsExacts.IndexOf(data);
                                 if (answer.IsFirstSubmits[index] && data.HasValue && !data.Value)
                                 {
                                     isFirstSubmit.Add(false);
@@ -468,6 +468,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 {
                                     isFirstSubmit.Add(answer.IsFirstSubmits[index]);
                                 }
+                                index++;
                             }
                             item.IsFirstSubmits = isFirstSubmit;
                         }
@@ -500,9 +501,9 @@ namespace Fsel.Course.Infrastructure.Common
                         if (answer != null && answer.IsFirstSubmits != null && answer.IsExacts != null)
                         {
                             var isFirstSubmit = new List<bool>();
+                            var index = 0;
                             foreach (var data in answer.IsExacts)
                             {
-                                var index = answer.IsExacts.IndexOf(data);
                                 if (answer.IsFirstSubmits[index] && data.HasValue && !data.Value)
                                 {
                                     isFirstSubmit.Add(false);
@@ -511,6 +512,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 {
                                     isFirstSubmit.Add(answer.IsFirstSubmits[index]);
                                 }
+                                index++;
                             }
                             item.IsFirstSubmits = isFirstSubmit;
                         }

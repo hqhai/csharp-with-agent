@@ -10,17 +10,15 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.HomeWorkQuery;
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
     using Fsel.Course.Lms.Application.Queries.ProgressQuery;
-    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
 
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/progress")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class ProgressController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -231,6 +229,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetListHomeWork([FromRoute] Guid lessonResultId)
         {
             MethodResult<IList<LessonHomeWorkResultModel>> queryResult = await _mediator.Send(new GetListHomeworkQuery { LessonResultId = lessonResultId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+
+        /// <summary>
+        /// get studentprogress
+        /// </summary>
+        [HttpPost("students-competition")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionStudentProgressModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListStudentProgress([FromBody] GetStudentsProgressCoursesQuery query)
+        {
+            MethodResult<IList<CompetitionStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

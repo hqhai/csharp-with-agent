@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -59,11 +60,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (isDone)
                     {
                         unitResult.Status = EnumResultStatus.Done;
-
+                        var courseType = unit.CourseLevel.GetEnumCourseType();
                         // Làm nhiệm vụ
                         var unitId = unit.Id;
                         var userId = unitResult.CreatedUserId;
-
                         // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
 
                         var listClassForumResult = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
@@ -431,6 +431,20 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Params = model,
                 Template = model.SenderTemplate,
             }, cancellationToken).ConfigureAwait(false);
+        }
+
+        private SendStudentCompleteUnitModel GetParameter(string? fullName, int? unitNumber, string? unitName, string? csoPhonenumber, List<SkillScores> groupedSkillScores)
+        {
+            var parameter = new SendStudentCompleteUnitModel
+            {
+                StudentName = fullName,
+                UnitNumber = unitNumber.ToString(),
+                UnitName = unitName,
+                AccessLink = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                CsoPhonenumber = csoPhonenumber,
+                Scores = string.Join("", groupedSkillScores.Select(item => $"<li style=\"line-height: 1.5rem\">{item.Skill}: {item.Percent}%</li>"))
+            };
+            return parameter;
         }
 
 

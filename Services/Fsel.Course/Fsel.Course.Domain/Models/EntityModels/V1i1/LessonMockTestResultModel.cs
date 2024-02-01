@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 {
+    using Fsel.Shared.Enums;
+
     public class LessonMockTestResultModel : BaseScoreResultModel
     {
         public Guid CourseId { get; set; }
@@ -11,6 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public bool? IsCheckScoreColor { get; set; }
         public double? TargetBandScore { get; set; }
         public bool? IsTeacherGraded { get; set; }
+        public EnumCourseSkill? CourseSkill { get; set; }
         public double? Scores { get; set; }
     }
 }
