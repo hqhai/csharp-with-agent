@@ -81,13 +81,13 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                          select new StudentRankingModel
                          {
                              StudentId = studentFile.StudentId,
-                             SchoolName = studentFile?.SchoolName ?? string.Empty,
+                             SchoolName = studentFile.SchoolName,
                              Grade = studentFile.Grade,
-                             Process = 0,
-                             OverallScore = 0,
-                             CompetitionEndDate = new DateTime(2024, 6, 15),
-                             FullName = studentFile?.FullName ?? string.Empty,
-                             AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty,
+                             Process = studentResult?.ContentCompleted ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
+                             OverallScore = studentResult?.TotalScore ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
+                             CompetitionEndDate = new DateTime(2024, 2, 29),
+                             FullName = studentFile.FullName,
+                             AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
                              UserId = studentFile.UserId
                          };
 
