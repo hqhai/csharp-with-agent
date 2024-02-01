@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -100,12 +101,23 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             var skillScore = mockTestResult.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
 
-            if (skillScore != null)
+            if (skillScore != null && skillScore.SaveFirstTime)
+            {
+                averageScore = CaculateAverageScoreWritingSection(skillScore, averageScore);
+                skillScore.CorrectCount = averageScore;
+                skillScore.TotalCount = 36;
+                skillScore.Skill = EnumCourseSkill.Writing;
+                skillScore.Scores = averageScore;
+                skillScores!.Add(skillScore);
+
+            }
+            else if (skillScore != null && !skillScore.SaveFirstTime)
             {
                 skillScore.CorrectCount = averageScore;
                 skillScore.TotalCount = 36;
                 skillScore.Skill = EnumCourseSkill.Writing;
                 skillScore.Scores = averageScore;
+                skillScore.SaveFirstTime = true;
                 skillScores!.Add(skillScore);
             }
 
@@ -167,6 +179,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             double average = totalScore / bandScoreDescriptions.Length;
 
             return NumberHelper.RoundNumberDouble(average, true);
+        }
+
+
+        private static double CaculateAverageScoreWritingSection(SkillScores skillScore, double average)
+        {
+            return NumberHelper.RoundNumberDouble((skillScore.Scores + average * 2) / 3, true);
         }
 
     }
