@@ -23,4 +23,11 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
         public Guid MockTestResultId { get; set; }
 
     }
+
+    public class MockTestAIGradingModel
+    {
+        public string? BandScore { get; set; }
+
+        public string? BandDescriptorText { get; set; }
+    }
 }

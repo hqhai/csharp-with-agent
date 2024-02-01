@@ -13,5 +13,10 @@ namespace Fsel.Shared.Constants
 
         public const int DelayOneMinute = 1;
         public const int DelayWorkerSecond = 60;
+        public static class CaculateNumber
+        {
+            public const double DecimalPartHalf = 0.5; // phần thập phân 0.5 dùng để làm tròn số
+
+        }
     }
 }

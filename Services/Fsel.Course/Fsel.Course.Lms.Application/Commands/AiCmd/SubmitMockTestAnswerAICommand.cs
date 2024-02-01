@@ -9,9 +9,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public class SubmitMockTestAnswerAICommand : MockTestAnswerResponseModel, IRequest<bool>
     {
@@ -22,13 +24,15 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly IMockTestAISettingRepository _aiGradeSettingRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMediator _mediator;
-        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository)
+        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, IMockTestResultRepository mockTestResultRepository)
         {
             _submitAIResponsePublisher = submitAIResponsePublisher;
             _mediator = mediator;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _aiGradeSettingRepository = aiGradeSettingRepository;
+            _mockTestResultRepository = mockTestResultRepository;
         }
 
         public async Task<bool> Handle(SubmitMockTestAnswerAICommand request, CancellationToken cancellationToken)
@@ -77,6 +81,35 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 GrammaticalRange = resultDictionary[EnumMockTestAIType.GrammaticalRange]
             };
 
+            var taskResponse = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.TaskResponse);
+            var coherence = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.Coherence);
+            var lexicalResource = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.LexicalResource);
+            var grammaticalRange = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.GrammaticalRange);
+
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
+
+            if (mockTestResult == null)
+            {
+                return true;
+            }
+
+            var skillScores = mockTestResult.SkillScores?.Where(x => !(x.Skill == EnumCourseSkill.Writing)).ToList();
+
+            double averageScore = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
+
+            var skillScore = mockTestResult.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
+
+            if (skillScore != null)
+            {
+                skillScore.CorrectCount = averageScore;
+                skillScore.TotalCount = 36;
+                skillScore.Skill = EnumCourseSkill.Writing;
+                skillScore.Scores = averageScore;
+                skillScores!.Add(skillScore);
+            }
+
+            mockTestResult.SkillScores = skillScores;
+
             string? gradingAiFeedBack = ConvertHelper.Serialize(gradingAiFeedBackResult);
 
             if (mockTestAnswer != null)
@@ -84,6 +117,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 mockTestAnswer.GradingAlFeedback = gradingAiFeedBack;
 
                 _mockTestAnswerRepository.Update(mockTestAnswer);
+                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                _mockTestResultRepository.Update(mockTestResult);
                 await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
@@ -94,5 +130,58 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             return true;
         }
+
+        private static double CaculateAverageScore(List<MockTestAIGradingModel>? bandScoreDescription)
+        {
+            double bandScore = 0;
+
+            if (bandScoreDescription == null || bandScoreDescription.Count == 0)
+            {
+                return bandScore;
+            }
+
+            MockTestAIGradingModel firstItem = bandScoreDescription.FirstOrDefault()!;
+
+            if (firstItem == null || firstItem.BandScore == null || firstItem.BandScore == string.Empty)
+            {
+                return bandScore;
+            }
+
+            double.TryParse(firstItem.BandScore, out bandScore);
+
+            return bandScore;
+        }
+
+
+
+        private static double CalculateOverallAverage(params List<MockTestAIGradingModel>[] bandScoreDescriptions)
+        {
+            double totalScore = 0;
+
+            foreach (var bandScoreDescription in bandScoreDescriptions)
+            {
+                totalScore += CaculateAverageScore(bandScoreDescription);
+            }
+
+            double average = totalScore / bandScoreDescriptions.Length;
+
+            // Kiểm tra nếu phần thập phân là 0.5, giữ nguyên giá trị
+            if (IsDecimalPartHalf(average))
+            {
+                return average;
+            }
+
+            // Làm tròn bình thường cho các trường hợp khác
+            double roundedAverage = Math.Round(average, MidpointRounding.AwayFromZero);
+
+            return roundedAverage;
+        }
+
+        private static bool IsDecimalPartHalf(double number)
+        {
+            double decimalPart = number - Math.Floor(number);
+            return decimalPart == ValueSettings.CaculateNumber.DecimalPartHalf;
+        }
+
     }
 }
