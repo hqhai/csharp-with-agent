@@ -18,6 +18,8 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
         public Guid AvatarImageId { get; set; }
 
         public Guid TagNameId { get; set; }
+        public Guid? SpaceShipId { get; set; }
+        public Guid? CharacterId { get; set; }
 
         public string? TagName { get; set; }
         public int? HighestRoundNumber { get; set; }

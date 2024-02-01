@@ -12,5 +12,8 @@ namespace Fsel.Identity.Domain.Entities
         public string? RefreshToken { get; set; }
 
         public DateTime? RefreshTokenExpiryTime { get; set; }
+
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? IpAddress { get; set; }
     }
 }

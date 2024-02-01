@@ -70,7 +70,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<HomeWork?> GetAsync(Guid? id, HomeWorkResult homeWorkResult)
+        public async Task<HomeWork?> GetAsync(HomeWorkResult homeWorkResult)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                         .ThenInclude(x => x.Question)
                         .Include(x => x.HomeWorkQuestions)
                         .ThenInclude(x => x.HomeWorkAnswers.Where(n => n.HomeWorkResultId == homeWorkResult.Id))
-                        .Where(x => x.Id == id)
+                        .Where(x => x.Id == homeWorkResult.HomeWorkId)
                         .AsNoTracking()
                         .FirstOrDefaultAsync();
             }

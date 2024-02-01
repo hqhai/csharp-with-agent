@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -24,6 +25,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     {
         public Guid HomeWorkId { get; set; }
         public Guid LessonResultId { get; set; }
+        public bool IsShowSubStatus { get; set; }
     }
 
     public class GetHomeWorkQueryHandler : IRequestHandler<GetHomeWorkQuery, MethodResult<HomeWorkModel>>
@@ -76,44 +78,58 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(homeWorkResult));
                 return methodResult;
             }
-            var homeWork = await _homeWorkRepository.GetAsync(request.HomeWorkId, homeWorkResult);
+            var homeWork = await _homeWorkRepository.GetAsync(homeWorkResult);
 
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
                 return methodResult;
             }
-            methodResult.Result = GetHomeWork(homeWork, homeWorkResult);
+            methodResult.Result = GetHomeWork(homeWork, homeWorkResult, request.IsShowSubStatus);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private HomeWorkModel GetHomeWork(HomeWork homeWork, HomeWorkResult homeWorkResult)
+        private HomeWorkModel GetHomeWork(HomeWork homeWork, HomeWorkResult homeWorkResult, bool isShowSubStatus)
         {
-            var checkDone = homeWorkResult.Status == EnumResultStatus.Done;
             var homeWorkModel = _mapper.Map<HomeWorkModel>(homeWork);
             homeWorkModel.Questions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).Select(n =>
             {
                 var answer = n.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id);
-                if (answer != null)
-                {
-                    answer.CorrectCount = checkDone ? answer.CorrectCount : default;
-                    answer.Answer = _answerTypeConverter.AnswerTypeConverterObject(answer.Answer, n.Question!.QuestionType, !checkDone, homeWorkResult.Status, false);
-                }
-                return GetQuestion(n.Question ?? new Question(), answer, checkDone);
+                return GetQuestion(n.Question, answer, homeWorkResult, isShowSubStatus);
             }).ToList();
             homeWorkModel.HomeWorkResult = _mapper.Map<HomeWorkResultModel>(homeWorkResult);
             return homeWorkModel;
         }
 
-        public QuestionModel GetQuestion(Question question, object? answer = null, bool isShowAnswer = false)
+        private QuestionModel GetQuestion(Question? question, HomeWorkAnswer? homeWorkAnswer, HomeWorkResult homeWorkResult, bool isShowSubStatus)
         {
             ArgumentNullException.ThrowIfNull(question);
+            var isCheck = homeWorkAnswer?.Status == EnumAnswerStatus.Done;
             var questionModel = _mapper.Map<QuestionModel>(question);
-            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
-            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
-            questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.Section?.Id ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
+            questionModel.CorrectStatus = GetCorrectStatus(homeWorkAnswer);
+            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
+            if (homeWorkAnswer != null)
+            {
+                homeWorkAnswer.CorrectCount = isCheck ? homeWorkAnswer.CorrectCount : default;
+                homeWorkAnswer.IsCorrect = isCheck ? homeWorkAnswer.IsCorrect : default;
+                homeWorkAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(homeWorkAnswer.Answer, question.QuestionType, isShowSubStatus, homeWorkResult.Status, homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit);
+                questionModel.ResultAnswer = _mapper.Map<AnswerModel>(homeWorkAnswer);
+            }
             return questionModel;
+        }
+
+        private static EnumCorrectStatus? GetCorrectStatus(HomeWorkAnswer? homeWorkAnswer)
+        {
+            if (homeWorkAnswer != null)
+            {
+                if (homeWorkAnswer.Status != EnumAnswerStatus.Done && homeWorkAnswer.IsCorrect.HasValue)
+                {
+                    return EnumCorrectStatus.Process;
+                }
+                return homeWorkAnswer.IsCorrect.HasValue ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
+            }
+            return null;
         }
     }
 }

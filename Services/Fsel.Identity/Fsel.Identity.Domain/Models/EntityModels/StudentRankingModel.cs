@@ -32,5 +32,16 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public EnumCourseLevel Level { get; set; }
 
+        //Tham gia cuộc thi
+        public string? SchoolName { get; set; }
+
+        public double? Grade { get; set; }
+
+        public double? Process { get; set; }
+
+        public double? OverallScore { get; set; }
+
+        public DateTime? CompetitionEndDate { get; set; }
+
     }
 }
