@@ -38,6 +38,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IUserTokenRepository _userTokenRepository;
         private readonly IOrderService _orderService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AppSetting _appSetting;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
@@ -46,7 +47,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ILmsCourseService lmsCourseService,
             IUserTokenRepository userTokenRepository,
             IOrderService orderService,
-            AppSetting appSetting)
+            AppSetting appSetting,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -55,6 +57,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _userTokenRepository = userTokenRepository;
             _orderService = orderService;
             _appSetting = appSetting;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
@@ -105,7 +108,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 RefreshToken = refreshToken,
                 LoginProvider = JwtBearerDefaults.AuthenticationScheme,
                 UserId = user.Id,
-                RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
+                RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default),
+                IpAddress = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString()
             });
 
             var tokenLogin = new TokenModel
