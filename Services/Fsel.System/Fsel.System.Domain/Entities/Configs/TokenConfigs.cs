@@ -8,10 +8,8 @@ namespace Fsel.System.Domain.Entities.Configs
         public long TotalActions { get; set; }
     }
 
-    public class TokenConfigs
+    public class TokenConfigs : TokenCoinConfigs
     {
-        public long BaseValue { get; set; }
-        public long TotalActions { get; set; }
         public string? Description { get; set; }
 
         public long TotalCoinValue
@@ -23,36 +21,15 @@ namespace Fsel.System.Domain.Entities.Configs
         }
     }
 
-    public class TokenFocusModeConfigs
+    public class TokenConfigFocusModes : TokenConfigs
     {
-        public long BaseValue { get; set; }
-        public long TotalActions { get; set; }
         public Guid FocusTimeId { get; set; }
+        public double TargetTime { get; set; }
         public int DisplayOrder { get; set; }
-        public string? Description { get; set; }
-
-        public long TotalCoinValue
-        {
-            get
-            {
-                return BaseValue * TotalActions;
-            }
-        }
     }
 
-    public class TokenConfigDailyCheckIns
+    public class TokenConfigDailyCheckIns : TokenConfigs
     {
-        public long BaseValue { get; set; }
-        public long TotalActions { get; set; }
         public int Level { get; set; }
-        public string? Description { get; set; }
-
-        public long TotalCoinValue
-        {
-            get
-            {
-                return BaseValue * TotalActions;
-            }
-        }
     }
 }

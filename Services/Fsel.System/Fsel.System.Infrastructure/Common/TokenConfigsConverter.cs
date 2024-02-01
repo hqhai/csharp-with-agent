@@ -25,7 +25,7 @@ namespace Fsel.System.Infrastructure.Common
                     var configFocusModes = config.Deserialize<IList<TokenCoinConfigs>>();
                     validateData = Validate(configFocusModes);
 
-                    var configFocusModeOlds = configOld.Deserialize<IList<TokenFocusModeConfigs>>();
+                    var configFocusModeOlds = configOld.Deserialize<IList<TokenConfigFocusModes>>();
                     configFocusModeOlds = configFocusModeOlds?.OrderBy(x => x.DisplayOrder).ToList();
                     if (configFocusModes != null && configFocusModeOlds != null)
                     {

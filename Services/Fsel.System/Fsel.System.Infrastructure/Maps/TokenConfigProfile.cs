@@ -21,7 +21,7 @@ namespace Fsel.System.Infrastructure.Maps
             //.ForMember(dest => dest.Level, act => act.Ignore());
             CreateMap<TokenCoinConfigs, TokenConfigs>();
             //.ForMember(dest => dest.Description, act => act.Ignore());
-            CreateMap<TokenCoinConfigs, TokenFocusModeConfigs>();
+            CreateMap<TokenCoinConfigs, TokenConfigFocusModes>();
             //.ForMember(dest => dest.Description, act => act.Ignore())
             //.ForMember(dest => dest.DisplayOrder, act => act.Ignore())
             //.ForMember(dest => dest.FocusTimeId, act => act.Ignore());

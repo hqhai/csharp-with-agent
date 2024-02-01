@@ -5,8 +5,11 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.System.Domain.Entities;
+    using Fsel.System.Domain.Entities.Configs;
     using Fsel.System.Domain.IRepositories;
     using global::System;
     using global::System.Collections.Generic;
@@ -26,11 +29,13 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     {
         private readonly ITokenConfigRepository _tokenConfigRepository;
         private readonly IMapper _mapper;
+        private readonly IFocusTimeConfigRepository _focusTimeConfigRepository;
 
-        public GetTokenConfigsByAdminQueryHandler(ITokenConfigRepository tokenConfigRepository, IMapper mapper)
+        public GetTokenConfigsByAdminQueryHandler(ITokenConfigRepository tokenConfigRepository, IMapper mapper, IFocusTimeConfigRepository focusTimeConfigRepository)
         {
             _tokenConfigRepository = tokenConfigRepository;
             _mapper = mapper;
+            _focusTimeConfigRepository = focusTimeConfigRepository;
         }
 
         public async Task<MethodResult<IList<TokenConfigModel>>> Handle(GetTokenConfigsByAdminQuery request, CancellationToken cancellationToken)
@@ -43,9 +48,44 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(tokenConfigs));
                 return methodResult;
             }
-            methodResult.Result = _mapper.Map<IList<TokenConfigModel>>(tokenConfigs);
+            var tokenConfigModels = new List<TokenConfigModel>();
+            if (request.Feature == EnumTokenFeature.FocusMode)
+            {
+                var focusTimeConfigs = await _focusTimeConfigRepository.Queryable.ToListAsync(cancellationToken);
+                foreach (var tokenConfig in tokenConfigs)
+                {
+                    tokenConfigModels.Add(GetTokenConfigToFocusMode(tokenConfig, focusTimeConfigs));
+                }
+            }
+            else
+            {
+                _mapper.Map(tokenConfigs, tokenConfigModels);
+            }
+
+            methodResult.Result = tokenConfigModels;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private TokenConfigModel GetTokenConfigToFocusMode(TokenConfig tokenConfig, IList<FocusTimeConfig>? focusTimeConfigs)
+        {
+            if (tokenConfig.Mission == EnumTokenMission.FocusMode)
+            {
+                var tokenConfigFocusModes = tokenConfig.Config.Deserialize<IList<TokenConfigFocusModes>>();
+                if (tokenConfigFocusModes != null)
+                {
+                    foreach (var item in tokenConfigFocusModes)
+                    {
+                        var focusTimeConfig = focusTimeConfigs?.FirstOrDefault(x => x.Id == item.FocusTimeId);
+                        if (focusTimeConfig != null)
+                        {
+                            item.TargetTime = focusTimeConfig.TargetTime;
+                        }
+                    }
+                    tokenConfig.Config = tokenConfigFocusModes;
+                }
+            }
+            return _mapper.Map<TokenConfigModel>(tokenConfig);
         }
     }
 }
