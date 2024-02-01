@@ -50,7 +50,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             {
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
             }
-            else if(_environment.IsStaging())
+            else if (_environment.IsStaging())
             {
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsStagingName);
 
@@ -64,13 +64,20 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             var studentProgressAndOverall = await _lmsCourseService.GetStudentProgress(new StudentCompetitionStatQueryModel { StudentIds = competitionStudentIds });
             var studentResults = studentProgressAndOverall?.Content?.Result;
 
+            if (studentResults == null)
+            {
+                studentResults = new List<CompetitionStudentProgressModel>();
+            }
+
             var studentInfos = _studentRepository.Queryable.Include(x => x.Human).Where(x => competitionStudentIds.Contains(x.Id)).ToList();
 
             var result = from studentFile in listStudentCompetion
+                         where studentFile != null
                          join studentResult in studentResults! on studentFile.StudentId equals studentResult.StudentId into resultGroup
                          from studentResult in resultGroup.DefaultIfEmpty()
                          join studentInfo in studentInfos on studentFile.StudentId equals studentInfo.Id into infoGroup
                          from studentInfo in infoGroup.DefaultIfEmpty()
+                         where studentInfo != null
                          select new StudentRankingModel
                          {
                              StudentId = studentFile.StudentId,
