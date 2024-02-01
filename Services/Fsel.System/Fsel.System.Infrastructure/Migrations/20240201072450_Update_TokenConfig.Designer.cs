@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20231214075800_UpdateTokenConfigConfigTable")]
-    partial class UpdateTokenConfigConfigTable
+    [Migration("20240201072450_Update_TokenConfig")]
+    partial class Update_TokenConfig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,165 @@ namespace Fsel.System.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("ApprovalTimeConfigId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<DateTime>("ExpiredDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("ObjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("UserIdsStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovalTimeConfigId");
+
+                    b.ToTable("ApprovalLog");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalTimeConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("ApprovalType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<long>("ExpiredTime")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApprovalTimeConfigs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("380388c3-f4ca-4062-8698-47b61f4703c9"),
+                            ApprovalType = "DiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            ExpiredTime = 180L,
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = new Guid("80b1eee1-ddb1-4599-8008-959c5e3f6bb2"),
+                            ApprovalType = "DiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            ExpiredTime = 120L,
+                            IsDeleted = false
+                        });
+                });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.Configs.CourseTimeConfig", b =>
                 {
@@ -931,9 +1090,25 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("DisplayType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<int>("MaxPoints")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Operator")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TaskPageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -965,7 +1140,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -975,17 +1153,23 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
                         {
                             Id = new Guid("cfce3f4b-66d5-467d-8f57-50a089257bcb"),
-                            Category = "FinishOneUnitTest",
+                            Category = "FinishOneLesson",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -995,7 +1179,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -1005,7 +1192,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -1015,8 +1205,297 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("1b35cdbf-98a7-4ce7-9b71-f457b386d62c"),
+                            Category = "FinishOneClassForumPost",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("9935cdbf-98a7-4ce7-9b71-f457b386d64c"),
+                            Category = "CommentOnOtherPost",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("8333c5e5-e853-45fb-8abf-1a09336af78e"),
+                            Category = "SeeFiveTeacherReview",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 5,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("ac0f0c74-cc2a-41a2-a82f-748ed5f2c75c"),
+                            Category = "SeeTenTeacherReview",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 10,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("7a37fa61-1a04-4d70-8590-90fa3d563d8e"),
+                            Category = "SeeAllTeacherReview",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Percent",
+                            IsDeleted = false,
+                            MaxPoints = 100,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("f31d44ff-226e-4244-a9a0-a06ed397368a"),
+                            Category = "PostOneDiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0c1633d5-f145-44c7-80c3-a167c0bbd1a1"),
+                            Category = "PostThreeDiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 3,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("85659470-7d45-4ddf-8b3c-dba6458bf4f4"),
+                            Category = "PostFiveDiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 5,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0407d174-a779-46e9-bbe4-5f27ae6075b6"),
+                            Category = "ParticipationScore",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Percent",
+                            IsDeleted = false,
+                            MaxPoints = 80,
+                            Operator = "GreaterThan",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0aee60ff-65bc-4277-803c-8a21c38b2b84"),
+                            Category = "ThirtyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("d34cf82a-8582-4dd8-b76b-e89857f4c910"),
+                            Category = "NinetyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("e0608ce3-6514-4fd2-88f6-f62db89e5fa7"),
+                            Category = "OneHundredTwentytyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("e527e048-f02e-4a22-bec4-427b67c93d63"),
+                            Category = "OneHundredEightyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("f62373aa-3fde-4848-8fef-7567fd0c7e8b"),
+                            Category = "SixtyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("c3c2c8aa-fc4a-4b01-8d55-1026062a47c6"),
+                            Category = "SuccessfulIntroduceCode",
+                            CreatedDate = new DateTime(2023, 11, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0417a848-1cd0-4aef-ae33-2757652701d0"),
+                            Category = "RateAndComment",
+                            CreatedDate = new DateTime(2023, 11, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("012a3990-47bc-436f-8d7d-10fd824bd579"),
+                            Category = "SeeAllReviewsAndFeedback",
+                            CreatedDate = new DateTime(2023, 11, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("38045664-20f8-4780-9c62-9736c2bce90c"),
+                            Category = "FinishDailyFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "DailyQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("31c2d3aa-ec1d-4ebb-99d1-5a8a2ae391c7"),
+                            Category = "LearnInteractTwentyMinutes",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "DailyQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("2ea59046-ea24-4f3f-b390-36d9629ae11e"),
+                            Category = "CommentOnNewLessonOfTwoClassMate",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 2,
+                            Operator = "Equal",
+                            Type = "DailyQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("9d333771-8c0d-481c-95e7-542a12002684"),
+                            Category = "CompleteHomeWorkAtLeastFiftyPercent",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "DailyQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("f8c5416c-118e-45dc-942c-f61e985b9827"),
+                            Category = "ReviseYourNotes",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "DailyQuests"
                         });
                 });
 
@@ -1026,6 +1505,12 @@ namespace Fsel.System.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
+
+                    b.Property<float>("AchievedPoints")
+                        .HasColumnType("real");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1245,6 +1730,10 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<string>("ConfigStr")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CourseType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -1272,6 +1761,9 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
                     b.Property<string>("Feature")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1285,9 +1777,6 @@ namespace Fsel.System.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SuperConfigStr")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -1309,328 +1798,535 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("928b4f17-be50-4798-8657-54e93d3cf450"),
-                            ConfigStr = "{\"focusTimes\":[{\"number\":1,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\"},{\"number\":3,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\"},{\"number\":6,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\"},{\"number\":12,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\"},{\"number\":24,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\"}]}",
+                            Id = new Guid("e5361e72-412e-4022-bc66-c813c56f1b10"),
+                            ConfigStr = "{\"baseValue\":2,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":2160}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 1,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "TimeCodeFirstSubmit"
+                        },
+                        new
+                        {
+                            Id = new Guid("7a0e28c0-520b-4148-b6d3-150c70c74b50"),
+                            ConfigStr = "{\"baseValue\":1,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":2160}",
+                            CourseType = "Academic",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 2,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "TimeCodeSecondSubmit"
+                        },
+                        new
+                        {
+                            Id = new Guid("ba97013a-9ad2-44a7-8c4c-883ba04956d0"),
+                            ConfigStr = "{\"baseValue\":20,\"description\":\"When a user posts on the class forum, they will receive Coin, only the first attempt will be counted (Reposting/ second attempt will not be counted).\",\"totalActions\":36}",
+                            CourseType = "Academic",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 3,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "ClassForumWriting"
+                        },
+                        new
+                        {
+                            Id = new Guid("9dd5bbbd-69c0-4705-81f4-388bb2fd59bc"),
+                            ConfigStr = "{\"baseValue\":1,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":2160}",
+                            CourseType = "Academic",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 4,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "ClassForumSpeakingAudio"
+                        },
+                        new
+                        {
+                            Id = new Guid("5868a03a-8624-4ebc-b553-6d6b2034924b"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"When a user posts on the class forum, they will receive Coin, only the first attempt will be counted (Reposting/ second attempt will not be counted).\",\"totalActions\":36}",
+                            CourseType = "Academic",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 5,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "ClassForumSpeakingVideo"
+                        },
+                        new
+                        {
+                            Id = new Guid("4959d4a0-b063-40d9-90b2-983d11853e60"),
+                            ConfigStr = "{\"baseValue\":2,\"description\":\"When the user clicks submit homework, they immediately receive Coin when the HW Result Report screen appears, count by \",\"totalActions\":1080}",
+                            CourseType = "Academic",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 6,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "HomeworkFirstSubmit"
+                        },
+                        new
+                        {
+                            Id = new Guid("48c53c52-fcf5-4715-8edf-35c343663708"),
+                            ConfigStr = "{\"baseValue\":1,\"description\":\"When the user clicks submit homework, they immediately receive Coin when the HW Result Report screen appears, count by \",\"totalActions\":1080}",
+                            CourseType = "Academic",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 7,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "HomeworkSecondSubmit"
+                        },
+                        new
+                        {
+                            Id = new Guid("41be49bc-d0f5-481c-9298-51cb9613262f"),
+                            ConfigStr = "{\"baseValue\":2,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":1280}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 8,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "TimeCodeFirstSubmit"
+                        },
+                        new
+                        {
+                            Id = new Guid("03a07cf2-6f6e-4971-9b52-d3a7330eec2f"),
+                            ConfigStr = "{\"baseValue\":1,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":1280}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 9,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "TimeCodeSecondSubmit"
+                        },
+                        new
+                        {
+                            Id = new Guid("5e550e64-1acc-41f9-ba80-5a29e71d9e11"),
+                            ConfigStr = "{\"baseValue\":20,\"description\":\"When a user posts on the class forum, they will receive Coin, only the first attempt will be counted (Reposting/ second attempt will not be counted).\",\"totalActions\":16}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 10,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "ClassForumWriting"
+                        },
+                        new
+                        {
+                            Id = new Guid("a1f9a0fb-97f8-415e-aed1-21128d6c3740"),
+                            ConfigStr = "{\"baseValue\":20,\"description\":\"When a user posts on the class forum, they will receive Coin, only the first attempt will be counted (Reposting/ second attempt will not be counted).\",\"totalActions\":16}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 11,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "ClassForumSpeakingAudio"
+                        },
+                        new
+                        {
+                            Id = new Guid("b900f59e-f0cb-404d-b088-14b19162572a"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"When a user posts on the class forum, they will receive Coin, only the first attempt will be counted (Reposting/ second attempt will not be counted).\",\"totalActions\":16}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 12,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "ClassForumSpeakingVideo"
+                        },
+                        new
+                        {
+                            Id = new Guid("74b95903-f5c1-4191-98b4-199e23b68c61"),
+                            ConfigStr = "{\"baseValue\":2,\"description\":\"When the user clicks submit homework, they immediately receive Coin when the HW Result Report screen appears, count by \",\"totalActions\":1024}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 13,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "HomeworkFirstSubmit"
+                        },
+                        new
+                        {
+                            Id = new Guid("a2f039ce-bf5d-4777-8aa9-cacb3c40cd0a"),
+                            ConfigStr = "{\"baseValue\":1,\"description\":\"When the user clicks submit homework, they immediately receive Coin when the HW Result Report screen appears, count by \",\"totalActions\":1024}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 14,
+                            Feature = "Learn",
+                            IsDeleted = false,
+                            Mission = "HomeworkFirstSubmit"
+                        },
+                        new
+                        {
+                            Id = new Guid("bc261be5-f658-415a-9498-8b813742708c"),
+                            ConfigStr = "[{\"baseValue\":5,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\",\"totalActions\":720,\"description\":\"User is active in focus mode 15\\u0027 continues\",\"displayOrder\":1},{\"baseValue\":15,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\",\"description\":\"User is active in focus mode 30\\u0027 continues\",\"totalActions\":720,\"displayOrder\":2},{\"baseValue\":25,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\",\"description\":\"User is active in focus mode 45\\u0027 continues\",\"totalActions\":720,\"displayOrder\":3},{\"baseValue\":40,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\",\"description\":\"User is active in focus mode 60\\u0027 continues\",\"totalActions\":720,\"displayOrder\":4},{\"baseValue\":60,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\",\"description\":\"User is active in focus mode 90\\u0027 continues\",\"totalActions\":720,\"displayOrder\":5}]",
+                            CourseType = "Academic",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 15,
                             Feature = "FocusMode",
                             IsDeleted = false,
-                            Mission = "FocusTime",
-                            SuperConfigStr = "{\"focusTimes\":[{\"number\":2,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\"},{\"number\":6,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\"},{\"number\":12,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\"},{\"number\":24,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\"},{\"number\":48,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\"}]}"
+                            Mission = "FocusMode"
                         },
                         new
                         {
-                            Id = new Guid("95c9f9b7-cc16-43af-b32e-4ee3689d4e27"),
-                            ConfigStr = "{\"dailyCheckIns\":[{\"level\":1,\"number\":5},{\"level\":2,\"number\":20},{\"level\":3,\"number\":40}]}",
+                            Id = new Guid("f08945d0-3b03-4299-ae22-e3ce2408b74b"),
+                            ConfigStr = "[{\"baseValue\":5,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\",\"totalActions\":720,\"description\":\"User is active in focus mode 15\\u0027 continues\",\"displayOrder\":1},{\"baseValue\":15,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\",\"description\":\"User is active in focus mode 30\\u0027 continues\",\"totalActions\":720,\"displayOrder\":2},{\"baseValue\":25,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\",\"description\":\"User is active in focus mode 45\\u0027 continues\",\"totalActions\":720,\"displayOrder\":3},{\"baseValue\":40,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\",\"description\":\"User is active in focus mode 60\\u0027 continues\",\"totalActions\":720,\"displayOrder\":4},{\"baseValue\":60,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\",\"description\":\"User is active in focus mode 90\\u0027 continues\",\"totalActions\":720,\"displayOrder\":5}]",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 16,
+                            Feature = "FocusMode",
+                            IsDeleted = false,
+                            Mission = "FocusMode"
+                        },
+                        new
+                        {
+                            Id = new Guid("45ff5759-8c5d-4cc6-87f4-ef0a13577e3c"),
+                            ConfigStr = "[{\"level\":1,\"baseValue\":10,\"description\":\"user checks in for 7 days in a row\",\"totalActions\":12},{\"level\":2,\"baseValue\":30,\"description\":\"user checks in for 14 days in a row\",\"totalActions\":12},{\"level\":3,\"baseValue\":100,\"description\":\"user checks in for 30 days in a row\",\"totalActions\":12}]",
+                            CourseType = "Academic",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 17,
                             Feature = "DailyCheckin",
                             IsDeleted = false,
-                            Mission = "DailyCheckin",
-                            SuperConfigStr = "null"
+                            Mission = "DailyCheckin"
                         },
                         new
                         {
-                            Id = new Guid("394fe972-3e4b-4daf-9fcf-e6720204be24"),
-                            ConfigStr = "{\"number\":1}",
+                            Id = new Guid("24e0c9f4-f4f7-4592-bd04-7f03d33847f4"),
+                            ConfigStr = "[{\"level\":1,\"baseValue\":10,\"description\":\"user checks in for 7 days in a row\",\"totalActions\":12},{\"level\":2,\"baseValue\":30,\"description\":\"user checks in for 14 days in a row\",\"totalActions\":12},{\"level\":3,\"baseValue\":100,\"description\":\"user checks in for 30 days in a row\",\"totalActions\":12}]",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "TimeCode",
+                            DisplayOrder = 18,
+                            Feature = "DailyCheckin",
                             IsDeleted = false,
-                            Mission = "QuestionReward",
-                            SuperConfigStr = "{\"number\":2}"
+                            Mission = "DailyCheckin"
                         },
                         new
                         {
-                            Id = new Guid("5e19b75e-f16c-4e44-8299-3c626804159c"),
-                            ConfigStr = "{\"number\":10}",
+                            Id = new Guid("de3f2ec0-542c-4247-86e2-438f7ad0b389"),
+                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":360}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "SkillTest",
+                            DisplayOrder = 19,
+                            Feature = "Test",
                             IsDeleted = false,
-                            Mission = "TestDone",
-                            SuperConfigStr = "{\"number\":15}"
+                            Mission = "SkillTest"
                         },
                         new
                         {
-                            Id = new Guid("6915a722-1268-45b8-adee-9d038799b020"),
-                            ConfigStr = "{\"number\":1}",
+                            Id = new Guid("464577de-eb10-4bd6-8a82-0a0101821675"),
+                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":600}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "SkillTest",
+                            DisplayOrder = 20,
+                            Feature = "Test",
                             IsDeleted = false,
-                            Mission = "HighestStreak",
-                            SuperConfigStr = "{\"number\":2}"
+                            Mission = "UnitTest"
                         },
                         new
                         {
-                            Id = new Guid("89f2e48c-308a-411f-9950-441af87d861e"),
-                            ConfigStr = "{\"number\":0}",
+                            Id = new Guid("550d36c4-eeb5-4fed-95d0-0b12e7dc83d9"),
+                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":100}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "SkillTest",
+                            DisplayOrder = 21,
+                            Feature = "Test",
                             IsDeleted = false,
-                            Mission = "SuperFire",
-                            SuperConfigStr = "{\"number\":4}"
+                            Mission = "FinalTest"
                         },
                         new
                         {
-                            Id = new Guid("e7bc1ee5-9151-453b-a369-aafffa8dac53"),
-                            ConfigStr = "{\"number\":10}",
+                            Id = new Guid("191471af-a9ab-4571-a868-74b33a77f125"),
+                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "UnitTest",
+                            DisplayOrder = 22,
+                            Feature = "Test",
                             IsDeleted = false,
-                            Mission = "TestDone",
-                            SuperConfigStr = "{\"number\":15}"
+                            Mission = "SkillMockTestSpeaking"
                         },
                         new
                         {
-                            Id = new Guid("f1657e49-02df-44d8-aba1-46a42654cf40"),
-                            ConfigStr = "{\"number\":1}",
+                            Id = new Guid("93ed1ded-3e21-4825-8b1e-2f0db7cefcbd"),
+                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":36}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "UnitTest",
+                            DisplayOrder = 23,
+                            Feature = "Test",
                             IsDeleted = false,
-                            Mission = "HighestStreak",
-                            SuperConfigStr = "{\"number\":2}"
+                            Mission = "SkillMockTestSpeaking"
                         },
                         new
                         {
-                            Id = new Guid("ef5dce88-eb01-4d9f-98b5-ef709bc736f7"),
-                            ConfigStr = "{\"number\":0}",
+                            Id = new Guid("ff3046a5-40e3-48ea-bf41-194739810496"),
+                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":4}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "UnitTest",
+                            DisplayOrder = 24,
+                            Feature = "Test",
                             IsDeleted = false,
-                            Mission = "SuperFire",
-                            SuperConfigStr = "{\"number\":4}"
+                            Mission = "SkillMockTestWriting"
                         },
                         new
                         {
-                            Id = new Guid("e00c5780-7d72-4cfe-872e-5b8954cff205"),
-                            ConfigStr = "{\"number\":10}",
+                            Id = new Guid("45a943af-08d0-4886-9479-34eaa32500b1"),
+                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "SkillMockTest",
+                            DisplayOrder = 25,
+                            Feature = "Test",
                             IsDeleted = false,
-                            Mission = "TestDone",
-                            SuperConfigStr = "{\"number\":15}"
+                            Mission = "SkillMockTestListening"
                         },
                         new
                         {
-                            Id = new Guid("cfeefec6-e53e-4cb6-a341-5f945e94a470"),
-                            ConfigStr = "{\"number\":1}",
+                            Id = new Guid("0b6208a1-28b8-4721-af0b-f8298e373e91"),
+                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":200}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "SkillMockTest",
+                            DisplayOrder = 26,
+                            Feature = "Test",
                             IsDeleted = false,
-                            Mission = "HighestStreak",
-                            SuperConfigStr = "{\"number\":2}"
+                            Mission = "FullMockTest"
                         },
                         new
                         {
-                            Id = new Guid("09fc6407-064e-4260-92de-12fc36c5eeda"),
-                            ConfigStr = "{\"number\":0}",
+                            Id = new Guid("d8020699-4aa7-45bd-8ccc-15aca3b23db5"),
+                            ConfigStr = "{\"baseValue\":2,\"description\":\"Complete mission in Achievement question list\",\"totalActions\":100}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "SkillMockTest",
+                            DisplayOrder = 27,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "SuperFire",
-                            SuperConfigStr = "{\"number\":4}"
+                            Mission = "QuestionCompleted"
                         },
                         new
                         {
-                            Id = new Guid("a2457d1c-2331-4624-8f94-2530bb5b21e5"),
-                            ConfigStr = "{\"number\":40}",
+                            Id = new Guid("69dd58e2-b764-4ab3-b745-cbe0c44f20f5"),
+                            ConfigStr = "{\"baseValue\":10,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "FullMockTest",
+                            DisplayOrder = 28,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "TestDone",
-                            SuperConfigStr = "{\"number\":60}"
+                            Mission = "PhaseI"
                         },
                         new
                         {
-                            Id = new Guid("272f4fdc-91d8-475b-8394-843c43c89e56"),
-                            ConfigStr = "{\"number\":1}",
+                            Id = new Guid("62f66584-b41a-4d09-ad88-6cef530d6734"),
+                            ConfigStr = "{\"baseValue\":20,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "FullMockTest",
+                            DisplayOrder = 29,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "HighestStreak",
-                            SuperConfigStr = "{\"number\":2}"
+                            Mission = "PhaseII"
                         },
                         new
                         {
-                            Id = new Guid("6dd62758-60c3-42cc-88eb-9acb246ebda5"),
-                            ConfigStr = "{\"number\":0}",
+                            Id = new Guid("ee75a055-1a67-4222-a1de-b7265bc7edbb"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "FullMockTest",
+                            DisplayOrder = 30,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "SuperFire",
-                            SuperConfigStr = "{\"number\":10}"
+                            Mission = "PhaseIII"
                         },
                         new
                         {
-                            Id = new Guid("f0f20824-1354-4267-bf44-812455aa85d0"),
-                            ConfigStr = "{\"number\":40}",
+                            Id = new Guid("7e3ec81c-702b-4e22-915d-89b6775794d8"),
+                            ConfigStr = "{\"baseValue\":40,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "FinalTest",
+                            DisplayOrder = 31,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "TestDone",
-                            SuperConfigStr = "{\"number\":60}"
+                            Mission = "PhaseIV"
                         },
                         new
                         {
-                            Id = new Guid("061242a9-7e64-4fb1-ab8d-99b5e250c389"),
-                            ConfigStr = "{\"number\":1}",
+                            Id = new Guid("5e5be781-893e-4f3c-8878-0ccada255a8e"),
+                            ConfigStr = "{\"baseValue\":50,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "FinalTest",
+                            DisplayOrder = 32,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "HighestStreak",
-                            SuperConfigStr = "{\"number\":2}"
+                            Mission = "PhaseV"
                         },
                         new
                         {
-                            Id = new Guid("1e3c6f57-25d6-40bd-a9be-d5571be1a7ae"),
-                            ConfigStr = "{\"number\":0}",
+                            Id = new Guid("eb0cfb65-f451-4e66-a05f-e518e740d67e"),
+                            ConfigStr = "{\"baseValue\":60,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "FinalTest",
+                            DisplayOrder = 33,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "SuperFire",
-                            SuperConfigStr = "{\"number\":10}"
+                            Mission = "PhaseVI"
                         },
                         new
                         {
-                            Id = new Guid("5d1628c6-6c44-4afa-a911-687ae7ba753c"),
-                            ConfigStr = "{\"number\":1}",
+                            Id = new Guid("9385bbac-01e8-4192-a244-f811bdcd6e8f"),
+                            ConfigStr = "{\"baseValue\":2,\"description\":\"Complete mission in Achievement question list\",\"totalActions\":100}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "QuestBoard",
+                            DisplayOrder = 34,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "DailyQuest",
-                            SuperConfigStr = "null"
+                            Mission = "QuestionCompleted"
                         },
                         new
                         {
-                            Id = new Guid("d3340516-ab0b-471e-8117-2b6fd6ec1680"),
-                            ConfigStr = "{\"number\":10}",
+                            Id = new Guid("5e802055-5c1e-4554-a772-bca241d486b4"),
+                            ConfigStr = "{\"baseValue\":10,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "QuestBoard",
+                            DisplayOrder = 35,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "MainQuest",
-                            SuperConfigStr = "null"
+                            Mission = "PhaseI"
                         },
                         new
                         {
-                            Id = new Guid("ce5000ba-788c-4872-b5e1-46d582c6f596"),
-                            ConfigStr = "{\"number\":5}",
+                            Id = new Guid("b037baa5-ef10-4746-83b7-eeb3d1cc9a56"),
+                            ConfigStr = "{\"baseValue\":20,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "QuestBoard",
+                            DisplayOrder = 36,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "SideQuest",
-                            SuperConfigStr = "null"
+                            Mission = "PhaseII"
                         },
                         new
                         {
-                            Id = new Guid("65a9971f-22d0-4730-a99f-33e7ac7b3698"),
-                            ConfigStr = "{\"number\":10}",
+                            Id = new Guid("e9f76d4c-ab72-4184-8092-45c6f2fecbc7"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "QuestBoard",
+                            DisplayOrder = 37,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "PermiumQuest",
-                            SuperConfigStr = "null"
+                            Mission = "PhaseIII"
                         },
                         new
                         {
-                            Id = new Guid("8042aeda-9f73-4981-8262-eb70f993a92c"),
-                            ConfigStr = "{\"number\":50}",
+                            Id = new Guid("579f2fab-75fb-422f-95c3-ff50577fcbb8"),
+                            ConfigStr = "{\"baseValue\":40,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "BuyNextCourse",
+                            DisplayOrder = 38,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "Standard",
-                            SuperConfigStr = "null"
+                            Mission = "PhaseIV"
                         },
                         new
                         {
-                            Id = new Guid("cb48fa8e-b45f-4599-a87f-971668bf8907"),
-                            ConfigStr = "{\"number\":100}",
+                            Id = new Guid("88a385bd-d532-497a-bac9-2dd0a7d72fe9"),
+                            ConfigStr = "{\"baseValue\":50,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "BuyNextCourse",
+                            DisplayOrder = 39,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "Permium",
-                            SuperConfigStr = "null"
+                            Mission = "PhaseV"
                         },
                         new
                         {
-                            Id = new Guid("b2dd2846-a565-438f-aa5f-e3af66f191aa"),
-                            ConfigStr = "{\"number\":50}",
+                            Id = new Guid("bbecaf5f-b2a5-4036-b3d5-15a02a2ce35b"),
+                            ConfigStr = "{\"baseValue\":60,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}",
+                            CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "UpGradeCourse",
+                            DisplayOrder = 40,
+                            Feature = "Achievement",
                             IsDeleted = false,
-                            Mission = "UpgradeCourse",
-                            SuperConfigStr = "null"
-                        },
-                        new
-                        {
-                            Id = new Guid("d33de316-efe4-46d7-89e8-d27d49e8186a"),
-                            ConfigStr = "{\"number\":10}",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "ReviewSystem",
-                            IsDeleted = false,
-                            Mission = "ReviewCourse",
-                            SuperConfigStr = "null"
-                        },
-                        new
-                        {
-                            Id = new Guid("e5361e72-412e-4022-bc66-c813c56f1b10"),
-                            ConfigStr = "{\"number\":10}",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Feature = "ReviewSystem",
-                            IsDeleted = false,
-                            Mission = "ReviewPlatform",
-                            SuperConfigStr = "null"
+                            Mission = "PhaseVI"
                         });
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalLog", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.ApprovalTimeConfig", "ApprovalTimeConfig")
+                        .WithMany("ApprovalLogs")
+                        .HasForeignKey("ApprovalTimeConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApprovalTimeConfig");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.GameVocabulary", b =>
@@ -1674,6 +2370,11 @@ namespace Fsel.System.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("QuestBoard");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalTimeConfig", b =>
+                {
+                    b.Navigation("ApprovalLogs");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.GameTopic", b =>

@@ -4,45 +4,43 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
     using global::System;
+    using global::System.Collections.Generic;
     using global::System.Linq;
-    using global::System.Text.Json.Serialization;
+    using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetTokenConfigsQuery : IRequest<MethodResult<IList<TokenConfigModel>>>
+    public class GetTokenConfigsByAdminQuery : IRequest<MethodResult<IList<TokenConfigModel>>>
     {
         public EnumTokenFeature Feature { get; set; }
-        public string? Missions { get; set; }
-
-        [JsonIgnore]
-        public IList<EnumTokenMission>? ListMissions
-        { get { return Missions?.Split(',').ToList<EnumTokenMission>(); } }
+        public EnumCourseType? CourseType { get; set; }
     }
 
-    public class GetTokenConfigsQueryHandler : IRequestHandler<GetTokenConfigsQuery, MethodResult<IList<TokenConfigModel>>>
+    public class GetTokenConfigsByAdminQueryHandler : IRequestHandler<GetTokenConfigsByAdminQuery, MethodResult<IList<TokenConfigModel>>>
     {
         private readonly ITokenConfigRepository _tokenConfigRepository;
         private readonly IMapper _mapper;
 
-        public GetTokenConfigsQueryHandler(ITokenConfigRepository tokenConfigRepository, IMapper mapper)
+        public GetTokenConfigsByAdminQueryHandler(ITokenConfigRepository tokenConfigRepository, IMapper mapper)
         {
             _tokenConfigRepository = tokenConfigRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<IList<TokenConfigModel>>> Handle(GetTokenConfigsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TokenConfigModel>>> Handle(GetTokenConfigsByAdminQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<TokenConfigModel>>();
-            var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => x.Feature == request.Feature && request.ListMissions != null && request.ListMissions.Contains(x.Mission)).ToListAsync(cancellationToken);
+            var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => x.Feature == request.Feature && (!request.CourseType.HasValue || x.CourseType == request.CourseType)).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
             if (tokenConfigs == null || !tokenConfigs.Any())
             {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(tokenConfigs));
                 return methodResult;
             }
             methodResult.Result = _mapper.Map<IList<TokenConfigModel>>(tokenConfigs);

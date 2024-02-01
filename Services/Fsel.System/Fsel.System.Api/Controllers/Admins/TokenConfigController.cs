@@ -1,19 +1,23 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Api.Controllers
+namespace Fsel.System.Api.Controllers.Admins
 {
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.System.Application.Commands.TokenConfigCmd;
     using Fsel.System.Application.Queries.TokenConfigQuery;
     using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1)]
-    [Route(Settings.APIDefaultRoute + "/token-config")]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [Route(Settings.APIDefaultRoute + "/admin/token-config")]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     [ApiController]
     public class TokenConfigController : ControllerBase
     {
@@ -25,38 +29,26 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// get list blog
+        /// get list TokenConfig
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<TokenConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetList()
-        {
-            var commandResult = await _mediator.Send(new GetListTokenConfigQuery { }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// get token
-        /// </summary>
-        [HttpGet("get-token")]
-        [ProducesResponseType(typeof(MethodResult<TokenConfigModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetTokenConfigQuery query)
+        public async Task<IActionResult> GetList([FromQuery] GetTokenConfigsByAdminQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
-        /// get token
+        /// Update a token
         /// </summary>
-        [HttpGet("get-tokens")]
+        [HttpPut]
         [ProducesResponseType(typeof(MethodResult<IList<TokenConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromQuery] GetTokenConfigsQuery query)
+        public async Task<IActionResult> Update([FromBody] UpdateTokenConfigCommand command)
         {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<TokenConfigModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

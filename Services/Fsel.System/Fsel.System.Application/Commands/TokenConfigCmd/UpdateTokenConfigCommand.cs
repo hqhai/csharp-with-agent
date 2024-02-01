@@ -8,48 +8,71 @@ namespace Fsel.System.Application.Commands.TokenConfigCmd
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.TokenConfigs;
+    using Fsel.System.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class UpdateTokenConfigCommand : UpdateTokenConfigCommandModel, IRequest<MethodResult<TokenConfigModel>>
+    public class UpdateTokenConfigCommand : UpdateTokenConfigsCommandModel, IRequest<MethodResult<IList<TokenConfigModel>>>
     {
     }
 
-    public class UpdateTokenConfigCommandHandler : IRequestHandler<UpdateTokenConfigCommand, MethodResult<TokenConfigModel>>
+    public class UpdateTokenConfigCommandHandler : IRequestHandler<UpdateTokenConfigCommand, MethodResult<IList<TokenConfigModel>>>
     {
         private readonly IMapper _mapper;
         private readonly ITokenConfigRepository _tokenConfigRepository;
+        private readonly TokenConfigsConverter _tokenConfigsConverter;
 
-        public UpdateTokenConfigCommandHandler(IMapper mapper, ITokenConfigRepository tokenConfigRepository)
+        public UpdateTokenConfigCommandHandler(IMapper mapper, ITokenConfigRepository tokenConfigRepository, TokenConfigsConverter tokenConfigsConverter)
         {
             _mapper = mapper;
             _tokenConfigRepository = tokenConfigRepository;
+            _tokenConfigsConverter = tokenConfigsConverter;
         }
 
-        public async Task<MethodResult<TokenConfigModel>> Handle(UpdateTokenConfigCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TokenConfigModel>>> Handle(UpdateTokenConfigCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<TokenConfigModel> methodResult = new MethodResult<TokenConfigModel>();
-            var tokenConfig = await _tokenConfigRepository.GetByIdAsync(request.Id);
-
-            #region Validation
-
-            if (tokenConfig == null)
+            var methodResult = new MethodResult<IList<TokenConfigModel>>();
+            if (request.TokenConfigs == null || !request.TokenConfigs.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(tokenConfig));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.TokenConfigs));
                 return methodResult;
             }
+            if (request.TokenConfigs.Any(x => x.Id == Guid.Empty))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.TokenConfigs));
+                return methodResult;
+            }
+            var tokenConfigIds = request.TokenConfigs.Select(x => x.Id).ToList();
+            var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => request.TokenConfigs.Select(x => x.Id).Contains(x.Id)).ToListAsync(cancellationToken);
 
-            #endregion Validation
-
-            _mapper.Map(request, tokenConfig);
+            if (tokenConfigs == null || !tokenConfigs.Any() || tokenConfigs.Count != tokenConfigIds.Count)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(tokenConfigs));
+                return methodResult;
+            }
+            foreach (var item in request.TokenConfigs)
+            {
+                var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Id == item.Id);
+                if (tokenConfig != null)
+                {
+                    var (configs, validateData) = _tokenConfigsConverter.GetTokenConfigs(item.Config, tokenConfig.Config, tokenConfig.Feature);
+                    if (!validateData)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(tokenConfig));
+                        return methodResult;
+                    }
+                    tokenConfig.Config = configs;
+                }
+            }
 
             await _tokenConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                tokenConfig = _tokenConfigRepository.Update(tokenConfig);
+                _tokenConfigRepository.UpdateList(tokenConfigs);
                 await _tokenConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.Result = _mapper.Map<IList<TokenConfigModel>>(tokenConfigs);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<TokenConfigModel>(tokenConfig);
                 return methodResult;
             });
 

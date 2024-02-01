@@ -162,18 +162,39 @@ namespace Fsel.System.Infrastructure.Migrations
                 defaultValue: 0);
 
             migrationBuilder.UpdateData(
-                table: "QuestBoardConfigs",
+                table: "FocusTimeConfigs",
                 keyColumn: "Id",
-                keyValue: new Guid("2ea59046-ea24-4f3f-b390-36d9629ae11e"),
-                column: "MaxPoints",
-                value: 2);
+                keyValue: new Guid("0a7b57f3-c964-4f1b-8986-df1579c5d08b"),
+                column: "TargetTime",
+                value: 1800.0);
 
             migrationBuilder.UpdateData(
-                table: "QuestBoardConfigs",
+                table: "FocusTimeConfigs",
                 keyColumn: "Id",
-                keyValue: new Guid("cfce3f4b-66d5-467d-8f57-50a089257bcb"),
-                column: "Category",
-                value: "FinishOneLesson");
+                keyValue: new Guid("124f4341-4c87-4e5f-ba4d-2481d8d36737"),
+                column: "TargetTime",
+                value: 5400.0);
+
+            migrationBuilder.UpdateData(
+                table: "FocusTimeConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("82061293-c9d0-4598-99f1-8dfd8162b999"),
+                column: "TargetTime",
+                value: 7200.0);
+
+            migrationBuilder.UpdateData(
+                table: "FocusTimeConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("9b4fa7b6-1af4-458b-82d9-621c1a88654a"),
+                column: "TargetTime",
+                value: 3600.0);
+
+            migrationBuilder.UpdateData(
+                table: "FocusTimeConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("fd7e66d3-a29b-4da7-bb29-2283536d836a"),
+                column: "TargetTime",
+                value: 10800.0);
 
             migrationBuilder.UpdateData(
                 table: "TokenConfigs",
@@ -232,16 +253,6 @@ namespace Fsel.System.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData(
-                table: "QuestBoardConfigs",
-                keyColumn: "Id",
-                keyValue: new Guid("012a3990-47bc-436f-8d7d-10fd824bd579"));
-
-            migrationBuilder.DeleteData(
-                table: "QuestBoardConfigs",
-                keyColumn: "Id",
-                keyValue: new Guid("0417a848-1cd0-4aef-ae33-2757652701d0"));
-
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
@@ -452,18 +463,39 @@ namespace Fsel.System.Infrastructure.Migrations
                 nullable: true);
 
             migrationBuilder.UpdateData(
-                table: "QuestBoardConfigs",
+                table: "FocusTimeConfigs",
                 keyColumn: "Id",
-                keyValue: new Guid("2ea59046-ea24-4f3f-b390-36d9629ae11e"),
-                column: "MaxPoints",
-                value: 1);
+                keyValue: new Guid("0a7b57f3-c964-4f1b-8986-df1579c5d08b"),
+                column: "TargetTime",
+                value: 900.0);
 
             migrationBuilder.UpdateData(
-                table: "QuestBoardConfigs",
+                table: "FocusTimeConfigs",
                 keyColumn: "Id",
-                keyValue: new Guid("cfce3f4b-66d5-467d-8f57-50a089257bcb"),
-                column: "Category",
-                value: "FinishOneUnitTest");
+                keyValue: new Guid("124f4341-4c87-4e5f-ba4d-2481d8d36737"),
+                column: "TargetTime",
+                value: 2700.0);
+
+            migrationBuilder.UpdateData(
+                table: "FocusTimeConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("82061293-c9d0-4598-99f1-8dfd8162b999"),
+                column: "TargetTime",
+                value: 3600.0);
+
+            migrationBuilder.UpdateData(
+                table: "FocusTimeConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("9b4fa7b6-1af4-458b-82d9-621c1a88654a"),
+                column: "TargetTime",
+                value: 1800.0);
+
+            migrationBuilder.UpdateData(
+                table: "FocusTimeConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("fd7e66d3-a29b-4da7-bb29-2283536d836a"),
+                column: "TargetTime",
+                value: 5400.0);
 
             migrationBuilder.UpdateData(
                 table: "TokenConfigs",
