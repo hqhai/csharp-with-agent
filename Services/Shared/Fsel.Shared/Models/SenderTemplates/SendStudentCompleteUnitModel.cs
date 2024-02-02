@@ -44,6 +44,8 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? ColorSocial { get; set; }
         public string? ColorOther { get; set; }
         public string? TotalHourPrevious { get; set; }
+        public string? UnitDisplay { get; set; }
+        public string? SkillDisplay { get; set; }
 
 
     }
