@@ -9,9 +9,10 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Helpers;
 
-    public class ClassForumResult : Entity
+    public class ClassForumResult : Entity, ITokenResult
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
@@ -62,6 +63,8 @@ namespace Fsel.Course.Domain.Entities
         public string? RetryGradingAlFeedBack { get; set; }
 
         public bool IsViewed { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
 
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
