@@ -1,0 +1,26 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Shared.Models.SenderTemplates
+{
+    public class WeeklyReportModel
+    {
+        public string? FullName { get; set; }
+        public string? SkillScores { get; set; }
+        public string? StartDate { get; set; }
+        public string? EndDate { get; set; }
+        public string? TotalDay { get; set; }
+        public string? SaturdayIsActive { get; set; }
+        public string? SundayIsActive { get; set; }
+        public string? MondayIsActive { get; set; }
+        public string? TuesdayIsActive { get; set; }
+        public string? WednesdayIsActive { get; set; }
+        public string? ThursdayIsActive { get; set; }
+        public string? FridayIsActive { get; set; }
+        public string? TotalHour { get; set; }
+        public string? TotalLearn { get; set; }
+        public string? TotalSocial { get; set; }
+        public string? TotalOther { get; set; }
+        public string? CoursePercent { get; set; }
+        public string? ContinueLearn { get; set; }
+    }
+}

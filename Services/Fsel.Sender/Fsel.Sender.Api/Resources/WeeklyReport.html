@@ -1,1354 +1,734 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <!-- <link rel="stylesheet" href="style.css" /> -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-          crossorigin="anonymous" />
-    <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</head>
-<style>
-    /*  */
-    .font-809FE5 {
-        color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-    }
-
-    .mb-26px {
-        margin-bottom: 26px;
-    }
-    /*  */
-    .container,
-    .header {
-        max-width: 612px; /* Giới hạn chiều rộng tối đa của container */
-        margin: 0 auto; /* Canh giữa container */
-        padding: 0px 30px;
-    }
-
-    .logo {
-        display: flex;
-        padding: 36px 0px 0px 0px;
-        align-items: center;
-        margin-bottom: 36px;
-    }
-
-    .techie {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .greeting {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        /* FSEL_LMS/AG Fsel/headline5 */
-        font-family: "Inter";
-        font-size: 22px;
-        font-style: normal;
-        font-weight: 700;
-        line-height: 28px;
-        text-align: center;
-    }
-
-        .greeting .text {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            max-width: 548px;
-        }
-
-    .cheer {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-        .cheer .text {
-            color: var(--FSEL_LMS-Sys-suface-container-lowest, #212b45);
-            text-align: center;
-            /* FSEL_LMS/Inter/headline6 */
-            font-family: "Inter";
-            font-size: 18px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 24px; /* 133.333% */
-        }
-
-    .button-next-study {
-        width: 100%;
-    }
-
-        .button-next-study .button {
-            display: flex;
-            padding: 10px 16px 10px 24px;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            border-radius: 10px;
-            background: var(--FSEL_LMS-Sys-primary, #2c5fd3);
-            color: var(--FSEL_LMS-Sys-on-primary, #fff);
-            text-align: center;
-            /* FSEL_LMS/Inter/Body/large */
-            font-family: "Inter";
-            font-size: 16px;
-            font-style: normal;
-            font-weight: 600;
-            line-height: 24px; /* 150% */
-        }
-
-            .button-next-study .button:hover {
-                color: #fff;
-            }
-
-    .hr-title {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 36px 0;
-    }
-
-        .hr-title .hr {
-            width: 544px;
-            height: 1px;
-            background: #d2d2d2;
-        }
-
-    .report-your-study-progress,
-    .time-day,
-    .calendar {
-        width: 100%;
-    }
-
-        .report-your-study-progress .title,
-        .title-welcome {
-            color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            text-align: center;
-            /* FSEL_LMS/AG Fsel/headline5 */
-            font-family: "Inter";
-            font-size: 22px;
-            font-style: normal;
-            font-weight: 700;
-            line-height: 28px; /* 127.273% */
-        }
-
-        .report-your-study-progress .time-day {
-            color: var(--FSEL_LMS-Sys-suface-container-lowest, #212b45);
-            text-align: center;
-            /* FSEL_LMS/Inter/headline6 */
-            font-family: "Inter";
-            font-size: 18px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 24px; /* 133.333% */
-        }
-
-        .calendar .header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .calendar .header-calendar-week {
-            padding: 16px 26px;
-            align-self: stretch;
-            border-radius: 8px 8px 0px 0px;
-            background: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            margin-bottom: -16px;
-            position: relative;
-            margin-top: 26px;
-        }
-
-            .calendar .header-calendar-week .text {
-                color: #fff;
-                text-align: center;
-                /* FSEL_LMS/Inter/headline3 */
-                font-family: "Inter";
-                font-size: 26px;
-                font-style: normal;
-                font-weight: 400;
-                line-height: 36px; /* 138.462% */
-            }
-
-    .all-calendar .words-of-encouragement {
-        color: var(--FSEL_LMS-Sys-suface-container-lowest, #212b45);
-        text-align: center;
-        /* FSEL_LMS/Inter/headline6 */
-        font-family: "Inter";
-        font-size: 18px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 24px; /* 133.333% */
-        margin-top: 36px;
-    }
-
-    .calendar .header span {
-        color: var(--FSEL_LMS-Sys-suface-container-lowest, #212b45);
-        /* FSEL_LMS/Inter/Headline/small */
-        font-family: "Inter";
-        font-size: 24px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 32px;
-    }
-
-    .calendar .header .to-day {
-        color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-        text-align: center;
-        /* FSEL_LMS/AG Fsel/Headline/large */
-        font-family: "Inter";
-        font-size: 32px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 40px; /* 125% */
-    }
-
-    .calendar {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .calendar-week {
-        margin-top: 12px;
-        padding: 10px 45px 10px 45px;
-        display: flex;
-        max-width: 548px;
-        justify-content: center;
-        align-items: center;
-        gap: 40px;
-        flex-shrink: 0;
-        border-radius: 8px;
-        border: 1px solid var(--FSEL_LMS-Ref-Neutral-Neutral90, #e2e4e9);
-    }
-
-        .calendar-week .day .name-day {
-            margin-bottom: 16px;
-            color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-            text-align: center;
-            /* FSEL_LMS/AG Fsel/headline6 */
-            font-family: "Inter";
-            font-size: 18px;
-            font-style: normal;
-            font-weight: 700;
-            line-height: 24px; /* 133.333% */
-        }
-
-    .lesson-progress-course-level {
-        width: 100%;
-    }
-
-        .lesson-progress-course-level .title {
-            color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            text-align: center;
-            /* FSEL_LMS/AG Fsel/headline5 */
-            font-family: "Inter";
-            font-size: 22px;
-            font-style: normal;
-            font-weight: 700;
-            line-height: 28px; /* 127.273% */
-        }
-
-        .lesson-progress-course-level .name-unit {
-            color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-            text-align: center;
-            /* FSEL_LMS/AG Fsel/Headline/large */
-            font-family: "Inter";
-            font-size: 32px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 40px; /* 125% */
-        }
-
-        .lesson-progress-course-level .unit {
-            text-align: center;
-        }
-
-            .lesson-progress-course-level .unit span {
-                text-align: center;
-                color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-                text-align: center;
-                /* FSEL_LMS/AG Fsel/headline6 */
-                font-family: "Inter";
-                font-size: 18px;
-                font-style: normal;
-                font-weight: 700;
-                line-height: 24px; /* 133.333% */
-            }
-
-        .lesson-progress-course-level .unit-number .number {
-            color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-            /* FSEL_LMS/AG Fsel/headline2 */
-            font-family: "Inter";
-            font-size: 32px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 40px;
-        }
-
-    .skill-percent {
-        width: 100%;
-    }
-
-        .skill-percent .header-bar,
-        .skill-percent .skill {
-            display: flex;
-            justify-content: start;
-            color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            /* FSEL_LMS/Inter/Title/small */
-            font-family: "Inter";
-            font-size: 14px;
-            font-style: normal;
-            font-weight: 600;
-            line-height: 20px; /* 142.857% */
-        }
-
-    .unit {
-        width: 100%;
-    }
-
-        .unit .skill-percent .percentage-bar {
-            display: flex;
-            width: 100%;
-            height: 10px;
-            justify-content: center;
-            align-items: center;
-            border-radius: 100px;
-            background: var(--FSEL_LMS-Ref-Neutral-Neutral90, #e2e4e9);
-        }
-
-    .unit-skill {
-        display: flex;
-        margin-top: 26px;
-        justify-content: center;
-        align-items: center;
-        gap: 12px;
-    }
-
-        .unit-skill .percent {
-            display: flex;
-            width: 174px;
-            padding: 14px 10px;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-        }
-
-            .unit-skill .percent span {
-                color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-                /* FSEL_LMS/Inter/Title/medium */
-                font-family: "Inter";
-                font-size: 16px;
-                font-style: normal;
-                font-weight: 400;
-                line-height: 24px; /* 150% */
-            }
-
-            .unit-skill .percent .color {
-                color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-                /* FSEL_LMS/Inter/Title/medium */
-                font-family: "Inter";
-                font-size: 16px;
-                font-style: normal;
-                font-weight: 400;
-                line-height: 24px; /* 150% */
-            }
-
-            .unit-skill .percent .hr-height {
-                width: 1px;
-                height: 40px;
-                background: #809fe5;
-                margin: 0 10px;
-            }
-
-    .skill-percent .header-bar {
-        margin-bottom: 6px;
-    }
-
-    .skill-percent .percent-bar {
-        width: 300px;
-        position: relative;
-    }
-
-    .time-study-week {
-        width: 100%;
-    }
-
-        .time-study-week .content span {
-            color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-            /* FSEL_LMS/AG Fsel/Headline/large */
-            font-family: "Inter";
-            font-size: 32px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 40px; /* 125% */
-            margin-left: 16px;
-        }
-
-        .time-study-week .title {
-            color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            text-align: center;
-            /* FSEL_LMS/AG Fsel/headline5 */
-            font-family: "Inter";
-            font-size: 22px;
-            font-style: normal;
-            font-weight: 700;
-            line-height: 28px; /* 127.273% */
-        }
-
-        .time-study-week .unit-skill .percent {
-            border-radius: 8px;
-            border: 1px solid var(--FSEL_LMS-Ref-Neutral-Neutral90, #e2e4e9);
-        }
-
-    .congratulatory {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 36px;
-    }
-
-        .congratulatory .text {
-            position: absolute;
-            top: 0;
-            z-index: 9999;
-            color: #fff;
-            top: 35%;
-            color: var(--FSEL_LMS-Ref-Primary-Primary100, #fff);
-            text-align: center;
-            /* FSEL_LMS/Inter/headline6 */
-            font-family: "Inter";
-            font-size: 18px;
-            font-style: normal;
-            font-weight: 600;
-            line-height: 24px; /* 133.333% */
-        }
-
-            .congratulatory .text .color {
-                background: var( --FSEL_LMS-Custom-Gradient-Orange, linear-gradient(180deg, #ffd746 0%, #ff984c 100%) );
-                background-clip: text;
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                /* FSEL_LMS/Inter/headline2 */
-                font-family: "Inter";
-                font-size: 32px;
-                font-style: normal;
-                font-weight: 600;
-                line-height: 40px;
-            }
-
-        .congratulatory img {
-            width: 100%;
-        }
-
-    .time-study-week-than-two .skill-percent .percent-bar {
-        width: 480px;
-    }
-
-    .time-this-and-last-week,
-    .time-week-count {
-        width: 100%;
-    }
-
-        .time-this-and-last-week .text-week,
-        .time-week-count .text-week {
-            color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            text-align: center;
-            /* FSEL_LMS/Inter/Title/medium */
-            font-family: "Inter";
-            font-size: 16px;
-            font-style: normal;
-            font-weight: 600;
-            line-height: 24px; /* 150% */
-            padding: 10px;
-        }
-
-    .time-week-count {
-        padding: 10px 0;
-        border-radius: 8px;
-        border: 1px solid var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-        background: var(--FSEL_LMS-Ref-Primary-Primary100, #fff);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        align-content: center;
-        row-gap: 22px;
-        flex-wrap: wrap;
-        margin-bottom: 36px;
-    }
-
-        .time-week-count .text-week {
-            color: var(--FSEL_LMS-Sys-text-tertiary, #6e7891);
-            /* FSEL_LMS/Inter/Title/medium */
-            font-family: Inter;
-            font-size: 16px;
-            font-style: normal;
-            font-weight: 600;
-            line-height: 24px; /* 150% */
-        }
-
-        .time-week-count .this-week {
-            color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-            /* FSEL_LMS/Inter/Title/medium */
-            font-family: Inter;
-            font-size: 16px;
-            font-style: normal;
-            font-weight: 600;
-            line-height: 24px; /* 150% */
-        }
-
-    .lesson-progress {
-        text-align: center;
-        width: 100%;
-    }
-
-        .lesson-progress .small-title {
-            color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            text-align: center;
-            /* FSEL_LMS/AG Fsel/headline5 */
-            font-family: "Inter";
-            font-size: 22px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 28px; /* 127.273% */
-        }
-
-        .lesson-progress .title {
-            color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-            /* FSEL_LMS/AG Fsel/Headline/large */
-            font-family: "Inter";
-            font-size: 32px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 40px; /* 125% */
-            margin: 16px 0;
-        }
-
-        .lesson-progress .content {
-            color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            text-align: center;
-            /* FSEL_LMS/AG Fsel/headline6 */
-            font-family: "AG Fsel 2022";
-            font-size: 18px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 24px; /* 133.333% */
-        }
-
-            .lesson-progress .content .color {
-                color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-                /* FSEL_LMS/AG Fsel/headline2 */
-                font-family: "Inter";
-                font-size: 32px;
-                font-style: normal;
-                font-weight: 400;
-                line-height: 40px;
-            }
-
-    .current-progress {
-        width: 100%;
-        text-align: center;
-    }
-
-        .current-progress .title {
-            color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            text-align: center;
-            /* FSEL_LMS/AG Fsel/headline5 */
-            font-family: "Inter";
-            font-size: 22px;
-            font-style: normal;
-            font-weight: 700;
-            line-height: 28px; /* 127.273% */
-            margin-bottom: 16px;
-        }
-
-        .current-progress .percent {
-            color: var(--FSEL_LMS-Sys-tertiary, #ec9213);
-            /* FSEL_LMS/AG Fsel/display1 */
-            font-family: "Inter";
-            font-size: 64px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 76px; /* 118.75% */
-            margin-bottom: 16px;
-        }
-
-        .current-progress .unit-number {
-            color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            text-align: center;
-            /* FSEL_LMS/AG Fsel/headline6 */
-            font-family: "Inter";
-            font-size: 18px;
-            font-style: normal;
-            font-weight: 700;
-            line-height: 24px; /* 133.333% */
-            margin-bottom: 16px;
-        }
-
-            .current-progress .unit-number .color {
-                color: var(--FSEL_LMS-Sys-surface-tint, #809fe5);
-                /* FSEL_LMS/AG Fsel/headline2 */
-                font-family: "Inter";
-                font-size: 32px;
-                font-style: normal;
-                font-weight: 400;
-                line-height: 40px;
-            }
-
-        .current-progress .current-progress-mes {
-            color: var(--FSEL_LMS-Sys-suface-container-lowest, #212b45);
-            text-align: center;
-            /* FSEL_LMS/Inter/headline6 */
-            font-family: "Inter";
-            font-size: 18px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 24px; /* 133.333% */
-        }
-
-            .current-progress .current-progress-mes .color {
-                color: var(--FSEL_LMS-Sys-suface-container-lowest, #212b45);
-                /* FSEL_LMS/Inter/headline6 */
-                font-family: "Inter";
-                font-size: 18px;
-                font-style: normal;
-                font-weight: 600;
-                line-height: 24px;
-            }
-
-    .good-sentence {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 36px;
-    }
-
-        .good-sentence .content {
-            max-width: 328px;
-        }
-
-            .good-sentence .content .title {
-                color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-                font-family: "Inter";
-                font-size: 16px;
-                font-style: normal;
-                font-weight: 700;
-                line-height: 24px; /* 150% */
-            }
-
-            .good-sentence .content .content-text {
-                color: var(--FSEL_LMS-Sys-suface-container-lowest, #212b45);
-                font-family: "Inter";
-                font-size: 16px;
-                font-style: normal;
-                font-weight: 400;
-                line-height: 24px; /* 150% */
-                margin: 14px 0;
-            }
-
-            .good-sentence .content .creator {
-                color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-                font-family: "Inter";
-                font-size: 16px;
-                font-style: normal;
-                font-weight: 400;
-                line-height: 24px;
-            }
-
-    .yelow-text {
-        color: var(--FSEL_LMS-Sys-tertiary, #ec9213);
-        text-align: center;
-        /* FSEL_LMS/AG Fsel/headline5 */
-        font-family: "Inter";
-        font-size: 22px;
-        font-style: normal;
-        font-weight: 700;
-        line-height: 28px; /* 127.273% */
-        margin-bottom: 36px;
-    }
-
-    .instruct {
-        width: 100%;
-        text-align: center;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-        .instruct .title {
-            color: var(--FSEL_LMS-Sys-surface-container-highest, #3a4b78);
-            text-align: center;
-            /* FSEL_LMS/AG Fsel/headline5 */
-            font-family: "Inter";
-            font-size: 22px;
-            font-style: normal;
-            font-weight: 700;
-            line-height: 28px; /* 127.273% */
-        }
-
-        .instruct .small-title {
-            color: var(--FSEL_LMS-Sys-suface-container-lowest, #212b45);
-            text-align: center;
-            /* FSEL_LMS/Inter/headline6 */
-            font-family: "Inter";
-            font-size: 18px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 24px; /* 133.333% */
-            margin: 16px 0;
-        }
-
-    .footer {
-        width: 100%;
-        padding: 32px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 23px;
-        background: var(--FSEL_LMS-Sys-surface-bright, #3a4b78);
-    }
-
-        .footer .info {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .footer .content .text-info {
-            display: flex;
-            justify-content: end;
-            color: var( --FSEL_LMS-Ref-Neutral-Variant-Neutral-variant90, #dce1ef ) !important;
-            text-align: right;
-            /* FSEL_LMS/Inter/Label/small */
-            font-family: "Inter";
-            font-size: 11px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 16px; /* 145.455% */
-        }
-
-        .footer .end {
-            margin-top: 23px;
-            display: flex;
-            padding: 8px 16px;
-            justify-content: space-between;
-            align-items: center;
-            align-self: stretch;
-            border-radius: 50px;
-            background: var(--FSEL_LMS-Ref-Neutral-Variant-Neutral-variant40, #42558a);
-        }
-
-        .footer .left,
-        .right {
-            display: flex;
-            align-items: center;
-        }
-
-        .footer span {
-            color: var(--FSEL_LMS-Ref-Neutral-Variant-Neutral-variant90, #dce1ef);
-            text-align: center;
-            /* FSEL_LMS/Inter/Label/small */
-            font-family: "Inter";
-            font-size: 11px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 16px; /* 145.455% */
-        }
-
-        .footer svg {
-            margin: 0 5px;
-        }
-
-    /* media */
-    @media screen and (max-width: 530px) {
-        .calendar-week {
-            gap: 20px;
-            padding: 10px 20px 10px 20px;
-        }
-
-        .skill-percent .percent-bar {
-            width: 200px;
-        }
-
-        .hr-title .hr {
-            width: 100%;
-        }
-
-        .skill-percent {
-            width: fit-content;
-        }
-
-        .percent {
-            display: none;
-        }
-
-        .time-study-week .unit-skill .percent {
-            border: none !important;
-        }
-
-        .time-study-week .unit-skill .percent {
-            width: fit-content;
-        }
-    }
-
-    @media screen and (max-width: 595px) {
-        .time-study-week-than-two .skill-percent .percent-bar {
-            width: 300px;
-        }
-
-        .congratulatory .text {
-            top: 30%;
-            font-size: 15.5px;
-        }
-    }
-
-    @media screen and (max-width: 430px) {
-        .unit-skill .percent {
-            width: fit-content;
-            border: none;
-            gap: 2px;
-            padding: 0;
-        }
-
-            .unit-skill .percent span,
-            .unit-skill .percent .color {
-                font-size: 12px;
-            }
-    }
-
-    @media screen and (max-width: 390px) {
-        .skill-percent .percent-bar {
-            width: 150px;
-        }
-
-        .unit-skill .percent .hr-height {
-            margin: 0 5px;
-        }
-
-        .time-study-week-than-two .skill-percent .percent-bar {
-            width: 200px;
-        }
-
-        .time-week-count .text-week {
-            font-size: 14px;
-        }
-
-        .calendar-week {
-            gap: 13px;
-        }
-
-        .congratulatory .text {
-            top: 12%;
-            font-size: 9.5px;
-        }
-    }
-
-    @media screen and (max-width: 300px) {
-        .time-study-week-than-two .skill-percent .percent-bar {
-            width: 100px;
-        }
-    }
-    /* đổi màu cho bar */
-    .unit .listening .skill-percent .percentage-bar-percent {
-        position: absolute;
-        display: flex;
-        height: 10px;
-        justify-content: center;
-        align-items: center;
-        border-radius: 100px;
-        background: #53bf65;
-        top: 0;
-    }
-
-    .unit .speaking .skill-percent .percentage-bar-percent {
-        position: absolute;
-        display: flex;
-        height: 10px;
-        justify-content: center;
-        align-items: center;
-        border-radius: 100px;
-        background: #5966ff;
-        top: 0;
-    }
-
-    .unit .reading .skill-percent .percentage-bar-percent {
-        position: absolute;
-        display: flex;
-        height: 10px;
-        justify-content: center;
-        align-items: center;
-        border-radius: 100px;
-        background: #bd86e3;
-        top: 0;
-    }
-
-    .unit .writing .skill-percent .percentage-bar-percent {
-        position: absolute;
-        display: flex;
-        height: 10px;
-        justify-content: center;
-        align-items: center;
-        border-radius: 100px;
-        background: #38b1f1;
-        top: 0;
-    }
-
-    .unit .grammar .skill-percent .percentage-bar-percent {
-        position: absolute;
-        display: flex;
-        height: 10px;
-        justify-content: center;
-        align-items: center;
-        border-radius: 100px;
-        background: #ff984c;
-        top: 0;
-    }
-
-    .unit .vocabulary .skill-percent .percentage-bar-percent {
-        position: absolute;
-        display: flex;
-        height: 10px;
-        justify-content: center;
-        align-items: center;
-        border-radius: 100px;
-        background: #ff428d;
-        top: 0;
-    }
-</style>
-<body class="container">
-    <div class="header">
-        <!-- logo công ty -->
-        <div class="logo">
-            <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Logo.png" alt="" />
+<div class="G3 G2">
+    <div>
+        <div id=":49">
+            <div class="adn ads" style="" data-message-id="#msg-f:1789611564902225262" data-legacy-message-id="18d5fa3c8bed956e">
+                <div class="gs">
+                    <div class="gE iv gt">
+                        <table cellpadding="0" class="cf gJ">
+                        </table>
+                    </div>
+                    <div id=":48">
+                        <div class="qQVYZb"></div>
+                        <div class="utdU2e"></div>
+                        <div class="lQs8Hd" jsaction="SN3rtf:rcuQ6b" jscontroller="i3Ohde"></div>
+                        <div class="wl4W9b" jsaction="LNSvUb:.CLIENT;xSdBYb:.CLIENT;CDWmBe:.CLIENT;EtHLdc:.CLIENT;pQnh7:.CLIENT;pKHw7e:.CLIENT;Z03mxd:.CLIENT;NZLNxf:.CLIENT;bXglpe:.CLIENT;mzh2Bc:.CLIENT">
+                        </div>
+                    </div>
+                    <div class="">
+                        <div class="aHl"></div>
+                        <div id=":40" tabindex="-1"></div>
+                        <div id=":46" class="ii gt" jslog="20277; u014N:xr6bB; 1:WyIjdGhyZWFkLWY6MTc4OTYxMTU2NDkwMjIyNTI2MiJd; 4:WyIjbXNnLWY6MTc4OTYxMTU2NDkwMjIyNTI2MiJd">
+                            <div id=":47" class="a3s aiL">
+
+
+                                <div style="
+                width: 612px;
+                margin: 0 auto;
+              ">
+                                    <div style="
+                  max-width: 612px;
+                  margin: 0 auto;
+                ">
+                                        <div style="
+                    max-width: 612px;
+                    margin: 0 auto;
+                  ">
+                                            <div style="
+                      display: flex;
+                      padding: 36px 0px 0px 0px;
+                      margin-bottom: 36px;
+                    ">
+                                                <img src="https://ci3.googleusercontent.com/meips/ADKq_NZgANWvM3ZwUfLhV-fySW9UqZdOPCZu51QoW9CWgJCC_TrILbZjxiiCevImrA-tWQM1yvMuiXAi_CvzbJuYkdjvel-0lwLxBA=s0-d-e1-ft#https://s3-sgn10.fptcloud.com/fsel/Images/Logo.png" alt="" class="CToWUd" data-bit="iit">
+                                            </div>
+                                        </div>
+
+                                        <div style="display: block; text-align: center">
+                                            <div style="margin-bottom: 26px">
+                                                <img src="https://ci3.googleusercontent.com/meips/ADKq_Naltnm0a_PojXon9gMI2IVqhy-XpWEolzlamCKPmV3ewgEkSD-or1IhITGIfH72ocLy5uFPC1G5ClCmy8mxPzrbzumOTTbTiCaIrugn=s0-d-e1-ft#https://s3-sgn10.fptcloud.com/fsel/Images/Character.png" alt="" class="CToWUd" data-bit="iit">
+                                            </div>
+
+                                            <div style="
+                      margin-bottom: 26px;
+                      width: 100%;
+                      font-family: Arial, Helvetica, sans-serif;
+                      font-size: 22px;
+                      font-style: normal;
+                      font-weight: 700;
+                      line-height: 28px;
+                      text-align: center;
+                    ">
+                                                <div>
+                                                    <span>
+                                                        Xin chào Khách hàng sáng lập<span style="color: #809fe5">
+                                                            “[FullName]”
+                                                        </span>,
+                                                        <br>
+                                                        Chào mừng bạn đến với Học kỳ trải nghiệm
+                                                        <br>
+                                                        <span style="color: #809fe5">
+                                                            FSEL Experience
+                                                            Semester 2024 !
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div style="margin-bottom: 26px; width: 100%">
+                                                <div style="
+                        color: #212b45;
+                        text-align: center;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 20px;
+                        font-style: normal;
+                        font-weight: 400;
+                        line-height: 24px;
+                      ">
+                                                    <span>
+                                                        Nỗ lực chăm chỉ của bạn đã có kết quả! <br>
+                                                        Cùng xem lại quá trình học ở bên dưới nhé.
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div style="width: 100%; text-align: center">
+                                                <a href="[ContinueLearn]" style="
+    text-decoration: none;
+                        padding: 10px 16px 10px 16px;
+                        border-radius: 10px;
+                        background: #2c5fd3;
+                        color: #fff;
+                        text-align: center;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 20px;
+                        font-style: normal;
+                        font-weight: 600;
+                        line-height: 24px;
+                        border: none;
+                      ">
+                                                    Tiếp tục học
+                                                    <u></u>
+                                                    <u></u><u></u>
+                                                    <u></u>
+                                                </a>
+                                            </div>
+
+                                            <div style="width: 100%; display: flex; margin: 36px 0">
+                                                <div style="
+                        width: 100%;
+                        height: 1px;
+                        background: #d2d2d2;
+                      "></div>
+                                            </div>
+
+                                            <div style="width: 100%">
+                                                <div style="
+                        margin-bottom: 26px;
+                        color: #3a4b78;
+                        text-align: center;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 22px;
+                        font-style: normal;
+                        font-weight: 700;
+                        line-height: 28px;
+                      ">
+                                                    Báo cáo tiến trình học tập của bạn
+                                                </div>
+
+                                                <div style="
+                        margin-bottom: 26px;
+                        width: 100%;
+                        color: #212b45;
+                        text-align: center;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 20px;
+                        font-style: normal;
+                        font-weight: 400;
+                        line-height: 24px;
+                      ">
+                                                    <span>[StartDate] - [EndDate]</span>
+                                                    <div style="
+                          margin-top: 26px;
+                          font-size: 20px;
+                          font-family: 'Inter';
+                          font-weight: 700;
+                          color: #3a4b78;
+                        ">
+                                                        <span>Số ngày hoạt động</span>
+                                                    </div>
+                                                </div>
+
+                                                <div style="width: 100%">
+                                                    <div>
+                                                        <div style="
+                            max-width: 612px;
+                            margin: 0 auto;
+                            padding: 0px 30px;
+                            display: inline-block;
+                            margin-bottom: 26px;
+                          ">
+                                                            <div style="
+width: 50px;
+float: left;
+">
+                                                                <img src="https://ci3.googleusercontent.com/meips/ADKq_Nbjh4LxedfcoBiMQn1MWebVXXHl2vdFGNXPElKa6t4UtS1-dWEncBj0Pqf5mdTZVZbTuSkPJ1SGYFhIy3Lid5ymlKUVPRKWWqmfWHQ=s0-d-e1-ft#https://s3-sgn10.fptcloud.com/fsel/Images/Calendar.png" alt="" class="CToWUd" data-bit="iit" style="
+">
+                                                            </div>
+
+                                                            <span style="
+                              color: #212b45;
+                              font-family: Arial, Helvetica,
+                                sans-serif;
+                              font-size: 20px;
+                              font-style: normal;
+                              font-weight: 400;
+                              line-height: 32px;
+                            ">
+                                                                <span style="
+                                color: #809fe5;
+                                font-family: Arial, Helvetica,
+                                  sans-serif;
+                                font-size: 32px;
+                                font-style: normal;
+                                font-weight: 400;
+                                line-height: 40px;
+                                text-align: center;
+                              ">
+                                                                    [TotalDay]
+                                                                </span>
+                                                                trên
+                                                                <span style="
+                                color: #809fe5;
+                                font-family: Arial, Helvetica,
+                                  sans-serif;
+                                font-size: 32px;
+                                font-style: normal;
+                                font-weight: 400;
+                                line-height: 40px;
+                                text-align: center;
+                              ">
+                                                                    7 ngày
+                                                                </span>
+                                                            </span>
+                                                        </div>
+
+
+
+                                                        <div style="
+                            display: inline-flex;
+                            width: 100%;
+                            border-radius: 8px;
+                            border: 1px solid #e2e4e9;
+                            padding: 16px 0px;
+                          ">
+                                                            <div style="
+padding-left: 20px;
+margin-right: 4rem;
+">
+                                                                <div style="
+                                margin-bottom: 16px;
+                                color: #809fe5;
+                                text-align: center;
+                                font-family: Arial, Helvetica,
+                                  sans-serif;
+                                font-size: 20px;
+                                font-style: normal;
+                                font-weight: 700;
+                                line-height: 24px;
+                              ">
+                                                                    T7
+                                                                </div>
+
+                                                                <div>
+                                                                    <img src="[SaturdayIsActive]" alt="" class="CToWUd" data-bit="iit">
+                                                                </div>
+
+                                                                <div>
+                                                                    <u></u>
+                                                                    <u></u><u></u>
+                                                                    <u></u>
+                                                                </div>
+                                                            </div>
+                                                            <div style="
+margin-right: 4rem;
+">
+                                                                <div style="
+                                margin-bottom: 16px;
+                                color: #809fe5;
+                                text-align: center;
+                                font-family: Arial, Helvetica,
+                                  sans-serif;
+                                font-size: 20px;
+                                font-style: normal;
+                                font-weight: 700;
+                                line-height: 24px;
+                              ">
+                                                                    CN
+                                                                </div>
+
+                                                                <div>
+                                                                    <img src="[SundayIsActive]" alt="" class="CToWUd" data-bit="iit">
+                                                                </div>
+
+                                                                <div>
+                                                                    <u></u>
+                                                                    <u></u><u></u>
+                                                                    <u></u>
+                                                                </div>
+                                                            </div>
+                                                            <div style="
+margin-right: 4rem;
+">
+                                                                <div style="
+                                margin-bottom: 16px;
+                                color: #809fe5;
+                                text-align: center;
+                                font-family: Arial, Helvetica,
+                                  sans-serif;
+                                font-size: 20px;
+                                font-style: normal;
+                                font-weight: 700;
+                                line-height: 24px;
+                              ">
+                                                                    T2
+                                                                </div>
+
+                                                                <div>
+                                                                    <img src="[MondayIsActive]" alt="" class="CToWUd" data-bit="iit">
+                                                                </div>
+
+                                                                <div>
+                                                                    <u></u>
+                                                                    <u></u><u></u>
+                                                                    <u></u>
+                                                                </div>
+                                                            </div>
+                                                            <div style="
+margin-right: 4rem;
+">
+                                                                <div style="
+                                margin-bottom: 16px;
+                                color: #809fe5;
+                                text-align: center;
+                                font-family: Arial, Helvetica,
+                                  sans-serif;
+                                font-size: 20px;
+                                font-style: normal;
+                                font-weight: 700;
+                                line-height: 24px;
+                              ">
+                                                                    T3
+                                                                </div>
+
+                                                                <div>
+                                                                    <img src="[TuesdayIsActive]" alt="" class="CToWUd" data-bit="iit">
+                                                                </div>
+
+                                                                <div>
+                                                                    <u></u>
+                                                                    <u></u><u></u>
+                                                                    <u></u>
+                                                                </div>
+                                                            </div>
+                                                            <div style="
+margin-right: 4rem;
+">
+                                                                <div style="
+                                margin-bottom: 16px;
+                                color: #809fe5;
+                                text-align: center;
+                                font-family: Arial, Helvetica,
+                                  sans-serif;
+                                font-size: 20px;
+                                font-style: normal;
+                                font-weight: 700;
+                                line-height: 24px;
+                              ">
+                                                                    T4
+                                                                </div>
+
+                                                                <div>
+                                                                    <img src="[WednesdayIsActive]" alt="" class="CToWUd" data-bit="iit">
+                                                                </div>
+
+                                                                <div>
+                                                                    <u></u>
+                                                                    <u></u><u></u>
+                                                                    <u></u>
+                                                                </div>
+                                                            </div>
+                                                            <div style="
+margin-right: 4rem;
+">
+                                                                <div style="
+                                margin-bottom: 16px;
+                                color: #809fe5;
+                                text-align: center;
+                                font-family: Arial, Helvetica,
+                                  sans-serif;
+                                font-size: 20px;
+                                font-style: normal;
+                                font-weight: 700;
+                                line-height: 24px;
+                              ">
+                                                                    T5
+                                                                </div>
+
+                                                                <div>
+                                                                    <img src="[ThursdayIsActive]" alt="" class="CToWUd" data-bit="iit">
+                                                                </div>
+
+                                                                <div>
+                                                                    <u></u>
+                                                                    <u></u><u></u>
+                                                                    <u></u>
+                                                                </div>
+                                                            </div>
+                                                            <div style="
+">
+                                                                <div style="
+                                margin-bottom: 16px;
+                                color: #809fe5;
+                                text-align: center;
+                                font-family: Arial, Helvetica,
+                                  sans-serif;
+                                font-size: 20px;
+                                font-style: normal;
+                                font-weight: 700;
+                                line-height: 24px;
+                              ">
+                                                                    T6
+                                                                </div>
+
+                                                                <div>
+                                                                    <img src="[FridayIsActive]" alt="" class="CToWUd" data-bit="iit">
+                                                                </div>
+
+                                                                <div>
+                                                                    <u></u>
+                                                                    <u></u><u></u>
+                                                                    <u></u>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div style="width: 100%; display: flex; margin: 36px 0">
+                                                <div style="
+                        width: 100%;
+                        height: 1px;
+                        background: #d2d2d2;
+                      "></div>
+                                            </div>
+
+                                            <div style="width: 100%; display: flex">
+                                                <div style="width: 100%">
+                                                    <div style="
+                          width: 100%;
+                          margin-bottom: 26px;
+                          color: #3a4b78;
+                          text-align: center;
+                          font-family: Arial, Helvetica, sans-serif;
+                          font-size: 22px;
+                          font-style: normal;
+                          font-weight: 700;
+                          line-height: 28px;
+                        ">
+                                                        Tổng thời gian học của tuần này
+                                                    </div>
+
+                                                    <div style="width: 100%; display: flex">
+                                                        <div style="width: 25%"></div>
+                                                        <div style="
+                            margin-bottom: 26px;
+                            display: flex;
+                            width: 50%;
+                          ">
+                                                            <img src="https://ci3.googleusercontent.com/meips/ADKq_NaYIXnz70WD1VKm81c1dp5tXwEDbfnTkG8KmPtbQ3lJi95tt5zsNNLaRebNMCMUJ1E_LxD8hvvGF9x45C7mP1svyt1VQEbxgg=s0-d-e1-ft#https://s3-sgn10.fptcloud.com/fsel/Images/Icon.png" alt="" class="CToWUd" data-bit="iit">
+                                                            <span style="
+                              color: #809fe5;
+                              font-family: Arial, Helvetica,
+                                sans-serif;
+                              font-size: 32px;
+                              font-style: normal;
+                              font-weight: 400;
+                              line-height: 46px;
+                              margin-left: 16px;
+                            ">
+                                                                [TotalHour]
+                                                            </span>
+                                                        </div>
+                                                        <div style="width: 25%"></div>
+                                                    </div>
+                                                    <div style="width: 100%">
+                                                        <div style="margin-bottom: 26px; width: 100%">
+
+
+                                                            <div style="
+                              margin-top: 26px;
+                              width: 100%;
+                            ">
+                                                                <div style="width: 100%;height: 55px;">
+
+                                                                    <div style="width: 10%;float: left;margin-top: 6px;">
+                                                                        <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Level_1706698312.png" alt="" class="CToWUd" data-bit="iit">
+                                                                    </div>
+                                                                    <div style="width: 65%;float: left;margin-top: 6px;">
+                                                                        <div style="
+                                    display: flex;
+                                    color: #3a4b78 !important;
+                                    font-family: Arial, Helvetica,
+                                      sans-serif !important;
+                                    font-size: 20px !important;
+                                    font-style: normal !important;
+                                    font-weight: 400 !important;
+                                    line-height: 16px !important;
+                                    margin-bottom: 6px;
+                                    margin-top: 12px;
+                                    margin-right: 5%;
+                                  ">
+                                                                            Học video tương tác
+                                                                            và
+                                                                            Bài tập về nhà
+                                                                        </div>
+                                                                    </div>
+                                                                    <div style="
+                                  width: 20%;
+                                  padding: 14px 10px;
+                                  border-radius: 8px;
+                                  color: #3a4b78;
+                                  font-family: Arial, Helvetica,
+                                    sans-serif;
+                                  font-size: 20px;
+                                  font-style: normal;
+                                  font-weight: 400;
+                                  line-height: 24px;
+                                  border: 1px solid #809fe5;
+                                  text-align: center;
+                                  float: left;
+                                ">
+                                                                        <u></u>
+                                                                        [TotalLearn]’
+                                                                        <u></u>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div style="
+                              margin-top: 26px;
+                              width: 100%;
+                            ">
+                                                                <div style="width: 100%;height: 55px;">
+
+                                                                    <div style="width: 10%;float: left;margin-top: 6px;">
+                                                                        <img src="https://ci3.googleusercontent.com/meips/ADKq_NbKcgVQockBvpO5Uu5fLMpUBfWRL_SITRN3igPypsibpe3kUllLWpht2qxfRLNDpaS1ewg4ChDNps0nCPW711E2t6VcLeR-uToCpnrYZi6al6VgMQ=s0-d-e1-ft#https://s3-sgn10.fptcloud.com/fsel/Images/Stars_1706698327.png" alt="" class="CToWUd" data-bit="iit">
+                                                                    </div>
+                                                                    <div style="width: 65%;float: left;margin-top: 6px;">
+                                                                        <div style="
+                                    display: flex;
+                                    color: #3a4b78 !important;
+                                    font-family: Arial, Helvetica,
+                                      sans-serif !important;
+                                    font-size: 20px !important;
+                                    font-style: normal !important;
+                                    font-weight: 400 !important;
+                                    line-height: 16px !important;
+                                    margin-bottom: 6px;
+                                    margin-top: 12px;
+                                    margin-right: 5%;
+                                  ">
+                                                                            Diễn đàn lớp học và Diễn đàn chung
+                                                                        </div>
+                                                                    </div>
+                                                                    <div style="
+                                  width: 20%;
+                                  padding: 14px 10px;
+                                  border-radius: 8px;
+                                  color: #3a4b78;
+                                  font-family: Arial, Helvetica,
+                                    sans-serif;
+                                  font-size: 20px;
+                                  font-style: normal;
+                                  font-weight: 400;
+                                  line-height: 24px;
+                                  border: 1px solid #809fe5;
+                                  text-align: center;
+                                  float: left;
+                                ">
+                                                                        <u></u>
+                                                                        [TotalSocial]’
+                                                                        <u></u>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div style="
+                              margin-top: 26px;
+                              width: 100%;
+                            ">
+                                                                <div style="width: 100%;height: 55px;">
+
+                                                                    <div style="width: 10%;float: left;margin-top: 6px;">
+                                                                        <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Clock_1706698299.png" alt="" class="CToWUd" data-bit="iit">
+                                                                    </div>
+                                                                    <div style="width: 65%;float: left;margin-top: 6px;">
+                                                                        <div style="
+                                    display: flex;
+                                    color: #3a4b78 !important;
+                                    font-family: Arial, Helvetica,
+                                      sans-serif !important;
+                                    font-size: 20px !important;
+                                    font-style: normal !important;
+                                    font-weight: 400 !important;
+                                    line-height: 16px !important;
+                                    margin-bottom: 6px;
+                                    margin-top: 12px;
+                                    margin-right: 5%;
+                                  ">
+                                                                            Hoạt động khác
+                                                                        </div>
+                                                                    </div>
+                                                                    <div style="
+                                  width: 20%;
+                                  padding: 14px 10px;
+                                  border-radius: 8px;
+                                  color: #3a4b78;
+                                  font-family: Arial, Helvetica,
+                                    sans-serif;
+                                  font-size: 20px;
+                                  font-style: normal;
+                                  font-weight: 400;
+                                  line-height: 24px;
+                                  border: 1px solid #809fe5;
+                                  text-align: center;
+                                  float: left;
+                                ">
+                                                                        <u></u>
+                                                                        [TotalOther]’
+                                                                        <u></u>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div style="width: 100%; display: flex; margin: 36px 0">
+                                                <div style="
+                        width: 100%;
+                        height: 1px;
+                        background: #d2d2d2;
+                      "></div>
+                                            </div>
+
+                                            <div style="width: 100%">
+                                                <div style="
+                        margin-bottom: 26px;
+                        color: #3a4b78;
+                        text-align: center;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 22px;
+                        font-style: normal;
+                        font-weight: 700;
+                        line-height: 28px;
+                      ">
+                                                    Tiến độ bài học Level
+                                                </div>
+
+
+
+
+                                            </div>
+                                            [SkillScores]
+                                            <div style="width: 100%; display: flex; margin: 36px 0">
+                                                <div style="
+                        width: 100%;
+                        height: 1px;
+                        background: #d2d2d2;
+                      "></div>
+                                            </div>
+
+                                            <div style="
+                      width: 100%;
+                      display: flex;
+                      margin-bottom: 36px;
+                    ">
+                                                <div style="
+                        display: flex;
+                        background-image: url('https://ci3.googleusercontent.com/meips/ADKq_NY3Mjwq4K-8d58FqnFuM4Ssmt-ejEZidf9usBOxJpOri_CGPGfvyZFelg_xXpgmqSlcImo8TXE6YUNsb6ad8a1mXH2Hj6-FjyCy=s0-d-e1-ft#https://s3-sgn10.fptcloud.com/fsel/Images/Banner.png');
+                        width: 612px;
+                        height: 194px;
+                      ">
+                                                    <div dir="ltr" style="opacity: 0.01">
+                                                        <div id="m_-1510541461631223417:18n" role="button" aria-label="Tải xuống tệp đính kèm ">
+                                                            <div>
+                                                                <div></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="
+                          color: #fff;
+                          text-align: center;
+                          font-family: Arial, Helvetica, sans-serif;
+                          font-size: 20px;
+                          font-style: normal;
+                          font-weight: 600;
+                          line-height: 24px;
+                          margin: 60px 100px;
+                        ">
+                                                        <span>
+                                                            Bạn đã hoàn thành được
+                                                            <span style="
+                              background: #ffd746;
+                              background-clip: text;
+                              font-family: Arial, Helvetica,
+                                sans-serif;
+                              font-size: 32px;
+                              font-style: normal;
+                              font-weight: 600;
+                              line-height: 40px;
+                            ">[CoursePercent]%</span>
+                                                            của <br>
+                                                            khóa học. Cố lên nào!
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+
+
+
+
+                                        <!-- fotter -->
+                                    </div>
+
+                                </div>
+                                <div>
+                                    <div style="
+                  max-width: 612px;
+                  width: 100%;
+                  margin: auto;
+                ">
+                                        <img src="https://s3-sgn10.fptcloud.com/fsel/Images/footer_1706703730.png" alt="">
+                                    </div>
+                                </div>
+                                <div class="iX">
+
+                                </div>
+                            </div>
+                            <div class="yj6qo"></div>
+                            <div class="yj6qo"></div>
+                        </div>
+                        <div class="hi"></div>
+                    </div>
+                </div>
+                <div class="ajx"></div>
+            </div>
+
         </div>
     </div>
-
-    <div class="temp-mail">
-        <div class="content">
-            <!-- icon techie -->
-            <div class="techie mb-26px">
-                <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Character.png"
-                     alt="" />
-            </div>
-            <!-- lời chào -->
-            <div class="greeting mb-26px">
-                <div class="text">
-                    <span class="title-welcome">
-                        Xin chào Khách hàng sáng lập<span class="font-809FE5">
-                            “[FullName]”
-                        </span>,
-                        <br />
-                        Chào mừng bạn đến với Học kỳ trải nghiệm <br />
-                        <span class="font-809FE5">FSEL Experience Semester 2024 !</span>
-                    </span>
-                </div>
-            </div>
-            <!-- câu cổ vũ -->
-            <div class="cheer mb-26px">
-                <div class="text">
-                    <span>Những nỗ lực đầu tiên của bạn đã được ghi nhận!</span>
-                </div>
-            </div>
-            <!-- button tiếp tục bài học -->
-            <div class="button-next-study d-flex justify-content-center align-items-center">
-                <a href="[ReturnUrl]" class="button btn">
-                    Tiếp tục học
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         width="18"
-                         height="18"
-                         viewBox="0 0 18 18"
-                         fill="none">
-                        <path d="M14.9965 9.28717C15.0329 9.19939 15.0531 9.1032 15.0534 9.00233V8.99783C15.0528 8.80664 14.9796 8.61562 14.8337 8.46975L9.53041 3.16645C9.23752 2.87355 8.76264 2.87355 8.46975 3.16645C8.17686 3.45934 8.17686 3.93421 8.46975 4.22711L12.4927 8.25008L3.69678 8.25008C3.28256 8.25008 2.94678 8.58587 2.94678 9.00008C2.94678 9.41429 3.28256 9.75008 3.69678 9.75008H12.4927L8.46975 13.773C8.17685 14.0659 8.17685 14.5408 8.46975 14.8337C8.76264 15.1266 9.23751 15.1266 9.53041 14.8337L14.8333 9.53078L14.8353 9.52882C14.9064 9.45728 14.9601 9.37497 14.9965 9.28717Z"
-                              fill="white" />
-                    </svg>
-                </a>
-            </div>
-            <!-- thẻ hr -->
-            <div class="hr-title">
-                <div class="hr"></div>
-            </div>
-            <!-- Báo cáo tiến trình học tập của bạn -->
-            <div class="report-your-study-progress">
-                <!-- title -->
-                <div class="title mb-26px">Báo cáo tiến trình học tập của bạn</div>
-                <!-- thơi gian ( ngày tháng năm) -->
-                <div class="time-day mb-26px">
-                    <span>[StartDate] - [EndDate]</span>
-                </div>
-                <div class="title mb-26px"><span style="font-size: 18px">Số ngày hoạt động</span></div>
-                <!-- table-lịch -->
-                <div class="calendar">
-                    <div class="all-calendar">
-                        <div class="header">
-                            <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Calendar.png"
-                                 alt="" />
-
-                            <span>
-                                <span class="to-day">[NumberDay] </span> trên
-                                <span class="to-day">7 ngày</span>
-                            </span>
-                        </div>
-                        <!--  -->
-                        <div class="calendar-week">
-                            <div class="day">
-                                <!-- thứ trong ngày -->
-                                <div class="name-day">T7</div>
-                                [Thu7]
-                            </div>
-                            <div class="day">
-                                <!-- thứ trong ngày -->
-                                <div class="name-day">CN</div>
-                                [CN]
-                            </div>
-                            <div class="day">
-                                <!-- thứ trong ngày -->
-                                <div class="name-day">T2</div>
-                                [Thu2]
-                            </div>
-                            <div class="day">
-                                <!-- thứ trong ngày -->
-                                <div class="name-day">T3</div>
-                                [Thu3]
-                            </div>
-                            <div class="day">
-                                <!-- thứ trong ngày -->
-                                <div class="name-day">T4</div>
-                                [Thu4]
-                            </div>
-                            <div class="day">
-                                <!-- thứ trong ngày -->
-                                <div class="name-day">T5</div>
-                                [Thu5]
-                            </div>
-                            <div class="day">
-                                <!-- thứ trong ngày -->
-                                <div class="name-day">T6</div>
-                                [Thu6]
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- hr -->
-            <div class="hr-title">
-                <div class="hr"></div>
-            </div>
-            <!-- tổng thời gian học tuần này -->
-            <div class="time-study-week time-study-week-than-two d-flex justify-content-center align-items-center">
-            </div>
-            <!-- tổng thời gian học tuần này tuần 2 trở lên -->
-            <div class="time-study-week d-flex justify-content-center align-items-center">
-                <div class="content">
-                    <div class="title mb-26px">Tổng thời gian học của tuần này</div>
-                    <div class="time d-flex justify-content-center align-items-center mb-26px">
-                        <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Icon.png"
-                             alt="" />
-                        <span>[TotalHour] giờ [TotalMinute] phút</span>
-                    </div>
-                    <div class="bar-time-study">
-                        <div class="unit mb-26px">
-                            <!-- Thời lượng Học video tương tác và Bài tập về nhà -->
-                            <div class="unit-skill listening d-flex">
-                                <div class="d-flex align-items-center" style="gap: 12px">
-                                    <div class="icon">
-                                        <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Icon (1).png"
-                                             alt="" />
-                                    </div>
-                                    <div class="skill-percent">
-                                        <div class="header-bar">Thời lượng Học video tương tác và Bài tập về nhà</div>
-                                        <div class="skill">
-                                            <div class="percent-bar">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="percent justify-content-center align-items-center">
-                                        <span>8H30’</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Thời lượng tham gia Diễn đàn lớp học và Diễn đàn chung -->
-                            <div class="unit-skill listening d-flex">
-                                <div class="d-flex align-items-center" style="gap: 12px">
-                                    <div class="icon">
-                                        <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Icon (2).png"
-                                             alt="" />
-                                    </div>
-                                    <div class="skill-percent">
-                                        <div class="header-bar">Thời lượng tham gia Diễn đàn lớp học và Diễn đàn chung</div>
-                                        <div class="skill">
-                                            <div class="percent-bar">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="percent justify-content-center align-items-center">
-                                        <span>8H30’</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Thời lượng tham gia các hoạt động khác trên Platform -->
-                            <div class="unit-skill listening d-flex">
-                                <div class="d-flex align-items-center" style="gap: 12px">
-                                    <div class="icon">
-                                        <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Icon (3).png"
-                                             alt="" />
-                                    </div>
-                                    <div class="skill-percent">
-                                        <div class="header-bar">Thời lượng tham gia các hoạt động khác trên Platform</div>
-                                        <div class="skill">
-                                            <div class="percent-bar">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="percent justify-content-center align-items-center">
-                                        <span>8H30’</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="hr-title">
-                <div class="hr"></div>
-            </div>
-            <!-- Tiến độ bài học Level  -->
-            <div class="lesson-progress-course-level">
-                <div class="title mb-26px">Tiến độ bài học Level</div>
-                <!-- tên unit -->
-                <div class="name-unit mb-26px">
-                    <span>Unit 1: Heal the World</span>
-                </div>
-                <!-- bài học -->
-                <div class="unit mb-26px">
-                    <div class="unit-number">
-                        <span>Bài học số <span class="number"> 4</span></span>
-                    </div>
-                    <!-- listening -->
-                    <div class="unit-skill listening d-flex">
-                        <div class="d-flex align-items-center" style="gap: 12px">
-                            <div class="icon">
-                                <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Icon Skill.png"
-                                     alt="" />
-                            </div>
-                            <div class="skill-percent">
-                                <div class="header-bar">Kỹ năng Nghe</div>
-                                <div class="skill">
-                                    <div class="percent-bar">
-                                        <div class="percentage-bar"></div>
-                                        <div class="percentage-bar-percent"
-                                             style="width: 30%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="percent justify-content-center align-items-center">
-                                <div class="d-flex">
-                                    <span class="color">100% </span>
-                                </div>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- speaking -->
-                    <div class="unit-skill speaking d-flex">
-                        <div class="d-flex align-items-center" style="gap: 12px">
-                            <div class="icon">
-                                <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Icon Skill (1).png"
-                                     alt="" />
-                            </div>
-                            <div class="skill-percent">
-                                <div class="header-bar">Kỹ năng Nghe</div>
-                                <div class="skill">
-                                    <div class="percent-bar">
-                                        <div class="percentage-bar"></div>
-                                        <div class="percentage-bar-percent"
-                                             style="width: 30%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="percent justify-content-center align-items-center">
-                                <div class="d-flex">
-                                    <span class="color">100% </span>
-                                </div>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- reading -->
-                    <div class="unit-skill reading d-flex">
-                        <div class="d-flex align-items-center" style="gap: 12px">
-                            <div class="icon">
-                                <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Icon Skill (2).png"
-                                     alt="" />
-                            </div>
-                            <div class="skill-percent">
-                                <div class="header-bar">Kỹ năng Nghe</div>
-                                <div class="skill">
-                                    <div class="percent-bar">
-                                        <div class="percentage-bar"></div>
-                                        <div class="percentage-bar-percent"
-                                             style="width: 30%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="percent justify-content-center align-items-center">
-                                <div class="d-flex">
-                                    <span class="color">100% </span>
-                                </div>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- writing -->
-                    <div class="unit-skill writing d-flex">
-                        <div class="d-flex align-items-center" style="gap: 12px">
-                            <div class="icon">
-                                <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Icon Skill (3).png"
-                                     alt="" />
-                            </div>
-                            <div class="skill-percent">
-                                <div class="header-bar">Kỹ năng Nghe</div>
-                                <div class="skill">
-                                    <div class="percent-bar">
-                                        <div class="percentage-bar"></div>
-                                        <div class="percentage-bar-percent"
-                                             style="width: 30%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="percent justify-content-center align-items-center">
-                                <div class="d-flex">
-                                    <span class="color">100% </span>
-                                </div>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- ngữ pháp -->
-                    <div class="unit-skill grammar d-flex">
-                        <div class="d-flex align-items-center" style="gap: 12px">
-                            <div class="icon">
-                                <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Icon Skill (4).png"
-                                     alt="" />
-                            </div>
-                            <div class="skill-percent">
-                                <div class="header-bar">Kỹ năng Nghe</div>
-                                <div class="skill">
-                                    <div class="percent-bar">
-                                        <div class="percentage-bar"></div>
-                                        <div class="percentage-bar-percent"
-                                             style="width: 30%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="percent justify-content-center align-items-center">
-                                <div class="d-flex">
-                                    <span class="color">100% </span>
-                                </div>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Từ vựng  -->
-                    <div class="unit-skill vocabulary d-flex">
-                        <div class="d-flex align-items-center" style="gap: 12px">
-                            <div class="icon">
-                                <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Icon Skill (5).png"
-                                     alt="" />
-                            </div>
-                            <div class="skill-percent">
-                                <div class="header-bar">Kỹ năng Nghe</div>
-                                <div class="skill">
-                                    <div class="percent-bar">
-                                        <div class="percentage-bar"></div>
-                                        <div class="percentage-bar-percent"
-                                             style="width: 30%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="percent justify-content-center align-items-center">
-                                <div class="d-flex">
-                                    <span class="color">100% </span>
-                                </div>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="hr-title">
-                <div class="hr"></div>
-            </div>
-            <!-- congratulatory photo -->
-            <div class="congratulatory">
-                <div class="d-flex justify-content-center align-items-center" style="justify-items: center;position: relative;">
-                    <img src="https://s3-sgn10.fptcloud.com/fsel/Images/Banner.png" alt="">
-                    <div class="text">
-                        <span>
-                            Bạn đã hoàn thành được <span class="color">12%</span> của <br> khóa học. Cố lên nào!
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <!-- fotter -->
-            <div class="d-flex justify-content-center align-items-center">
-                <div class="footer" style="max-width: 612px;">
-                    <div class="info">
-                        <div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="100" height="35" viewBox="0 0 100 35" fill="none">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M25.8636 33.1639C23.5339 34.2332 20.9274 34.8322 18.1754 34.8322C11.4581 34.8322 5.60516 31.2664 2.53613 25.9897L3.82492 25.4224C4.53615 25.0789 5.17081 25.3369 5.71894 25.796L9.50569 29.2224C9.12022 29.3142 8.73129 29.4202 8.33933 29.5413C11.9197 29.2303 12.8209 29.2249 16.6033 28.9156C14.852 28.6447 12.6634 28.5925 10.2935 29.0521C6.89913 27.1926 4.60883 23.6748 4.60883 19.6398C4.60883 15.2813 7.27681 11.5264 11.1267 9.81427L12.5946 15.4846L11.7674 9.55214L11.7709 9.55089C11.7744 9.55006 11.7501 9.41774 11.7333 9.28793C11.6904 8.9561 11.8133 8.86386 12.168 8.82212L14.9091 8.5579C15.4119 8.53119 15.5615 8.54914 15.4936 9.05335L14.3627 17.4718C16.3052 17.7135 17.8397 19.2136 18.0643 21.0986L27.0187 20.0914C26.8314 24.4975 23.912 28.2236 19.8514 29.735C22.0894 30.4975 24.1262 31.6721 25.8636 33.1639ZM13.3872 26.1253C14.676 26.1253 15.8311 25.5748 16.6163 24.7045C15.8648 25.3348 14.8841 25.7163 13.8116 25.7163C11.4464 25.7163 9.52905 23.863 9.52905 21.5774C9.52905 20.5364 9.92706 19.5855 10.5829 18.858C9.6783 19.6168 9.10594 20.7367 9.10594 21.986C9.10594 24.2721 11.0225 26.1253 13.3872 26.1253ZM8.19311 15.1816C7.63503 15.1816 7.1825 15.6186 7.1825 16.157C7.1825 16.6955 7.63503 17.1321 8.19311 17.1321C8.42197 17.1321 8.63352 17.0586 8.80311 16.9351C10.3627 18.0846 11.6156 19.5697 12.364 20.8415C12.2442 21.061 12.1758 21.3115 12.1758 21.5774C12.1758 22.4489 12.9078 23.1555 13.8116 23.1555C14.7145 23.1555 15.4469 22.4489 15.4469 21.5774C15.4469 20.7488 14.785 20.0693 13.9435 20.0046C14.1157 20.2425 14.2693 20.4683 14.4445 20.7555C14.2247 20.5034 14.0197 20.2287 13.7843 19.9996H13.7826C12.701 18.623 10.6266 17.2293 9.15007 16.4722C9.18511 16.3732 9.20415 16.2672 9.20415 16.157C9.20415 15.6186 8.75119 15.1816 8.19311 15.1816ZM18.6271 2.28526L19.687 2.61876L20.4368 1.82278L20.435 2.89842L21.4513 3.34044L20.3905 3.67185L20.2689 4.74081L19.6148 3.8697L18.5233 4.08842L19.18 3.21898L18.6271 2.28526ZM23.3899 3.27115L24.3295 3.84966L25.2614 3.25905L24.9819 4.30045L25.8519 4.9733L24.7392 5.03883L24.3446 6.04476L23.9367 5.04384L22.8223 4.9925L23.6832 4.3088L23.3899 3.27115ZM32.4823 14.0592L32.9266 15.0459L34.041 15.0593L33.2061 15.7714L33.5375 16.7986L32.5766 16.2522L31.6668 16.8737L31.9091 15.824L31.0148 15.1807L32.1245 15.0781L32.4823 14.0592ZM30.7332 9.66067L31.3458 10.5597L32.4464 10.3894L31.7494 11.2288L32.2578 12.1863L31.2147 11.8061L30.4278 12.5683L30.4801 11.4939L29.4864 11.0072L30.5614 10.7234L30.7332 9.66067ZM27.62 6.04977L28.4719 6.74348L29.4777 6.27892L29.0563 7.27483L29.8255 8.05327L28.7133 7.97438L28.1837 8.92104L27.9177 7.87713L26.821 7.68304L27.768 7.1158L27.62 6.04977ZM18.1413 10.086C18.3671 10.0647 18.5955 10.0534 18.827 10.0534C22.654 10.0534 25.7554 13.0466 25.7554 16.7376C25.7554 16.9609 25.7437 17.1826 25.7217 17.4005C24.6496 13.8885 21.7805 11.1203 18.1413 10.086Z" fill="#DCE1EF" />
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M48.9474 12.7202H47.4622H46.2154L46.215 9.66613L46.937 9.67365H49.0283H52.5451C53.3714 9.67365 54.1277 8.93778 54.1277 8.14013V6.62623H48.9474H46.8561H43.0508C42.1137 6.62623 41.4683 7.37671 41.4683 8.14013C41.4683 12.6121 41.4726 17.4118 41.4683 21.8834H44.6381C45.4648 21.8834 46.2154 21.2898 46.2154 20.4926V18.8748V17.3625V15.7731H47.4622H48.9474H51.0336C51.8603 15.7731 52.5369 15.1203 52.5369 14.3226V12.7202H48.9474ZM100 20.1011V18.8272H92.0882V6.62623H89.251C88.201 6.62623 87.3427 7.45518 87.3427 8.46779V19.1861V21.9426H91.977H98.0921C99.1416 21.9426 100 21.1137 100 20.1011ZM77.8631 6.61371C80.0976 6.61371 82.1149 7.50903 83.5542 8.94821C84.1054 8.59551 84.6444 8.26952 85.1679 7.97693C86.7574 7.15549 86.9521 7.29741 85.7649 8.64226C81.8834 12.8045 76.1966 16.827 69.5827 21.1208C69.128 21.4004 69.0185 21.2063 69.3841 20.8695C70.0339 20.2167 70.7438 19.5209 71.4983 18.8009C70.5262 17.5307 69.9513 15.9601 69.9513 14.2592C69.9513 10.0364 73.4936 6.61371 77.8631 6.61371ZM79.947 11.4989C79.3626 11.0861 78.6427 10.8428 77.8631 10.8428C75.9102 10.8428 74.3273 12.3721 74.3273 14.2592C74.3273 14.8264 74.4709 15.3611 74.7235 15.8319C76.4086 14.3364 78.1897 12.8434 79.947 11.4989ZM85.7753 14.2592C85.7753 18.4816 82.233 21.9046 77.8631 21.9046C75.6645 21.9046 73.6753 21.0377 72.2416 19.6386L76.2667 17.3087C76.7465 17.5433 77.2886 17.676 77.8631 17.676C79.2535 17.676 80.4567 16.9 81.0338 15.7718L85.7753 14.2592ZM68.3895 17.2657C68.3895 18.747 68.0374 20.0405 66.7953 20.8403C65.6445 21.5816 64.1048 21.9518 62.1693 21.9518C58.2683 21.9518 55.7214 20.3536 55.7214 16.7727H60.4565C60.4565 19.4119 63.9283 19.3664 63.9283 17.3784C63.9283 16.9489 63.7185 16.5995 63.3027 16.3332C62.5569 15.8749 61.0868 15.4717 60.2757 15.195C59.1729 14.8285 58.0014 14.3689 57.0894 13.6535C56.1783 12.9181 55.7253 12.0228 55.7253 10.9609C55.7253 9.6557 56.4136 8.58424 57.7907 7.75195C59.0539 6.99312 60.5361 6.61371 62.2445 6.61371C65.2487 6.61371 68.332 8.06249 68.332 11.2038H63.622C63.214 9.03294 60.4608 9.48498 60.4608 10.9208C60.4608 11.1938 60.5153 11.4033 60.6326 11.5465C60.8216 11.7995 61.3884 12.1125 62.341 12.4819L64.3103 13.1844C66.4847 13.9624 68.3895 15.0105 68.3895 17.2657Z" fill="#DCE1EF" />
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M18.139 0C28.156 0 36.2771 7.83496 36.2771 17.4998C36.2771 27.165 28.156 35 18.139 35C8.12119 35 0 27.165 0 17.4998C0 7.83496 8.12119 0 18.139 0ZM30.7279 5.35353C27.5062 2.2456 23.0549 0.322648 18.139 0.322648C13.2222 0.322648 8.77099 2.2456 5.54925 5.35353C2.32794 8.46231 0.33485 12.7569 0.33485 17.4998C0.33485 22.2435 2.32794 26.5381 5.54925 29.6465C8.77099 32.7544 13.2222 34.6773 18.139 34.6773C23.0549 34.6773 27.5062 32.7544 30.7279 29.6465C33.9496 26.5381 35.9423 22.2435 35.9423 17.4998C35.9423 12.7569 33.9496 8.46231 30.7279 5.35353Z" fill="#DCE1EF" />
-                                <path d="M43.0002 28.2423L42.2608 27.2535H42.2522V28.2423H41.4683V25.1782H42.481C42.5875 25.1782 42.6735 25.1803 42.7384 25.184C42.8345 25.1878 42.9201 25.197 42.9967 25.2099C43.1879 25.2412 43.345 25.3038 43.4678 25.3986C43.7313 25.6006 43.8628 25.8794 43.8628 26.2354C43.8628 26.4788 43.7932 26.6887 43.6539 26.8636C43.5089 27.0494 43.3125 27.1621 43.0659 27.1992L43.9346 28.2423H43.0002ZM43.0789 26.2793C43.0789 26.1382 43.0261 26.0318 42.9201 25.96C42.8284 25.8974 42.7051 25.8652 42.5502 25.8652H42.2522V26.7184H42.542C42.9002 26.7184 43.0789 26.5719 43.0789 26.2793ZM47.6548 27.1203C47.6548 27.1867 47.6487 27.2472 47.637 27.3027H45.8365C45.8819 27.5924 46.0688 27.7372 46.3984 27.7372C46.571 27.7372 46.7168 27.6654 46.8367 27.5227H47.5717C47.4648 27.7614 47.3113 27.9509 47.1114 28.0924C46.8985 28.2423 46.661 28.317 46.3984 28.317C46.048 28.317 45.7486 28.198 45.5003 27.9593C45.2515 27.7222 45.1269 27.4359 45.1269 27.1003C45.1269 26.763 45.2485 26.4738 45.4925 26.2334C45.7382 25.9875 46.0363 25.8652 46.3863 25.8652C46.7497 25.8652 47.0534 25.9875 47.2974 26.2334C47.5354 26.4738 47.6548 26.7701 47.6548 27.1203ZM46.9362 26.8398C46.8769 26.5769 46.6952 26.4458 46.3906 26.4458C46.0861 26.4458 45.9044 26.5769 45.8451 26.8398H46.9362ZM50.925 28.2423V27.9939H50.9172C50.8566 28.1045 50.7554 28.1884 50.6148 28.2465C50.4936 28.2961 50.3604 28.3212 50.215 28.3212C49.8529 28.3212 49.5596 28.2018 49.3338 27.9635C49.1175 27.7318 49.0084 27.4413 49.0084 27.0924C49.0084 26.7484 49.1188 26.46 49.3403 26.2271C49.5696 25.9854 49.8616 25.8652 50.215 25.8652C50.3587 25.8652 50.4915 25.8911 50.6126 25.942C50.7476 25.9984 50.8492 26.0806 50.9172 26.1883H50.925V25.9441H51.6435V28.2423H50.925ZM50.925 27.0924C50.925 26.9237 50.8683 26.7843 50.7541 26.6741C50.6403 26.5631 50.4958 26.5076 50.321 26.5076C50.1475 26.5076 50.0043 26.5656 49.8923 26.6816C49.7815 26.7935 49.727 26.9333 49.727 27.1003C49.727 27.2606 49.7837 27.3962 49.8983 27.5081C50.0152 27.622 50.1575 27.6784 50.3249 27.6784C50.4988 27.6784 50.642 27.6229 50.7562 27.5102C50.8687 27.3983 50.925 27.2593 50.925 27.0924ZM55.6635 27.3687C55.5943 27.6496 55.4428 27.8779 55.2092 28.0545C54.9769 28.2293 54.7078 28.317 54.4041 28.317C54.0446 28.317 53.7409 28.198 53.493 27.9593C53.2434 27.7222 53.1188 27.4317 53.1188 27.0878C53.1188 26.7472 53.2404 26.4587 53.4844 26.2229C53.7297 25.9846 54.0303 25.8652 54.3868 25.8652C54.6983 25.8652 54.9717 25.9537 55.2071 26.1298C55.4463 26.3077 55.5973 26.5414 55.6592 26.8315H54.9323C54.8276 26.6161 54.6485 26.5076 54.3955 26.5076C54.2276 26.5076 54.0922 26.5664 53.9892 26.6837C53.891 26.7939 53.8413 26.9308 53.8413 27.0924C53.8413 27.2576 53.8932 27.395 53.9957 27.5047C54.1034 27.6179 54.2419 27.6746 54.4119 27.6746C54.6472 27.6746 54.8212 27.5724 54.9323 27.3687H55.6635ZM58.6321 28.2423V26.9926C58.6321 26.8486 58.6066 26.7376 58.5564 26.6595C58.4928 26.561 58.3886 26.5118 58.2454 26.5118C58.1 26.5118 57.9949 26.5556 57.9287 26.6416C57.8724 26.7155 57.8439 26.824 57.8439 26.9667V28.2423H57.1249V25.1782H57.8439V26.1566H57.8521C57.9114 26.0551 58.0001 25.98 58.1182 25.9295C58.2198 25.8869 58.3375 25.8652 58.4716 25.8652C58.7559 25.8652 58.9739 25.9495 59.1245 26.1177C59.227 26.2313 59.2932 26.3636 59.323 26.5159C59.336 26.5769 59.3438 26.6478 59.3468 26.7305C59.3481 26.7622 59.349 26.8002 59.3503 26.8436V28.2423H58.6321ZM63.2785 26.4658V28.2423H62.5599V26.4658H62.2908V25.9441H62.5599V25.8247C62.5599 25.5647 62.6499 25.3777 62.8303 25.2633C62.9796 25.1686 63.1946 25.1218 63.4766 25.1218H63.5805V25.639C63.4524 25.639 63.3698 25.6578 63.333 25.6957C63.2962 25.7316 63.2785 25.8143 63.2785 25.9441H63.5805V26.4658H63.2785ZM67.4369 27.0924C67.4369 27.4426 67.3127 27.7339 67.0648 27.9656C66.8186 28.1976 66.5106 28.3132 66.1412 28.3132C65.7721 28.3132 65.4654 28.1976 65.2201 27.9656C64.9718 27.7339 64.8481 27.4426 64.8481 27.0924C64.8481 26.7401 64.9718 26.4483 65.2201 26.2167C65.4654 25.9846 65.7721 25.869 66.1412 25.869C66.5106 25.869 66.8186 25.9846 67.0648 26.2167C67.3127 26.4483 67.4369 26.7401 67.4369 27.0924ZM66.7187 27.0924C66.7187 26.9333 66.6646 26.7977 66.5556 26.6858C66.4444 26.5698 66.3064 26.5118 66.1412 26.5118C65.9785 26.5118 65.8405 26.5698 65.7293 26.6858C65.6203 26.7977 65.5666 26.9333 65.5666 27.0924C65.5666 27.2501 65.6203 27.3854 65.7293 27.4985C65.8405 27.6129 65.9785 27.6705 66.1412 27.6705C66.3064 27.6705 66.4444 27.6129 66.5556 27.4985C66.6646 27.3854 66.7187 27.2501 66.7187 27.0924ZM70.1901 26.5568C70.0058 26.5614 69.8712 26.5886 69.7886 26.6374C69.6787 26.7025 69.6238 26.816 69.6238 26.9788V28.2423H68.9056V25.9441H69.5792V26.1883H69.59C69.7038 25.9729 69.9037 25.8652 70.1901 25.8652V26.5568ZM74.0145 26.4658V28.2423H73.2959V26.4658H72.9411V25.9441H73.2959V25.1782H74.0145V25.9441H74.3606V26.4658H74.0145ZM77.2453 28.2423V26.9926C77.2453 26.8486 77.2202 26.7376 77.1696 26.6595C77.106 26.561 77.0022 26.5118 76.8585 26.5118C76.7136 26.5118 76.608 26.5556 76.5418 26.6416C76.4856 26.7155 76.4575 26.824 76.4575 26.9667V28.2423H75.7385V25.1782H76.4575V26.1566H76.4653C76.5245 26.0551 76.6132 25.98 76.7318 25.9295C76.8334 25.8869 76.9511 25.8652 77.0852 25.8652C77.3695 25.8652 77.5871 25.9495 77.738 26.1177C77.8406 26.2313 77.9068 26.3636 77.9362 26.5159C77.9492 26.5769 77.9574 26.6478 77.9604 26.7305C77.9617 26.7622 77.9626 26.8002 77.9639 26.8436V28.2423H77.2453ZM81.9414 27.1203C81.9414 27.1867 81.9354 27.2472 81.9241 27.3027H80.1235C80.169 27.5924 80.3558 27.7372 80.6855 27.7372C80.8577 27.7372 81.0035 27.6654 81.1233 27.5227H81.8583C81.7515 27.7614 81.5979 27.9509 81.398 28.0924C81.1852 28.2423 80.9481 28.317 80.6855 28.317C80.3346 28.317 80.0353 28.198 79.7869 27.9593C79.5382 27.7222 79.4136 27.4359 79.4136 27.1003C79.4136 26.763 79.5356 26.4738 79.7792 26.2334C80.0253 25.9875 80.323 25.8652 80.673 25.8652C81.0368 25.8652 81.3405 25.9875 81.5841 26.2334C81.8224 26.4738 81.9414 26.7701 81.9414 27.1203ZM81.2228 26.8398C81.1636 26.5769 80.9818 26.4458 80.6773 26.4458C80.3731 26.4458 80.191 26.5769 80.1322 26.8398H81.2228ZM86.8127 27.5386C86.8127 27.7827 86.7111 27.9772 86.5069 28.1229C86.3226 28.2552 86.098 28.3212 85.8346 28.3212C85.5728 28.3212 85.3535 28.2569 85.1774 28.1292C84.9901 27.9931 84.8832 27.8028 84.8564 27.559H85.5707C85.5914 27.7005 85.6827 27.771 85.8432 27.771C85.9055 27.771 85.9609 27.7564 86.0098 27.7268C86.0665 27.693 86.0942 27.6483 86.0942 27.5916C86.0942 27.5198 86.0569 27.4613 85.9804 27.4158L85.8752 27.3666L85.4586 27.2234C85.2908 27.1654 85.1593 27.0936 85.0658 27.0072C84.946 26.8995 84.8858 26.7714 84.8858 26.6232C84.8858 26.3953 84.9827 26.2096 85.1774 26.0656C85.3565 25.9316 85.5698 25.8652 85.8181 25.8652C86.0699 25.8652 86.2776 25.9257 86.4415 26.0447C86.6172 26.1732 86.7167 26.3552 86.7392 26.5906H86.0332C86.0293 26.4746 85.9544 26.4166 85.8095 26.4166C85.6723 26.4166 85.6044 26.4684 85.6044 26.5706C85.6044 26.647 85.668 26.71 85.7943 26.7589C85.8367 26.776 85.9012 26.7968 85.9869 26.8211C85.9942 26.8223 86.0029 26.8244 86.0141 26.8273L86.2092 26.8857C86.2949 26.9129 86.3684 26.9413 86.4303 26.9709C86.5069 27.0072 86.5713 27.0485 86.6233 27.0965C86.75 27.208 86.8127 27.3557 86.8127 27.5386ZM89.0996 26.4658V28.2423H88.381V26.4658H88.0262V25.9441H88.381V25.1782H89.0996V25.9441H89.4457V26.4658H89.0996ZM92.6281 28.2423V27.9939H92.6203C92.5597 28.1045 92.4589 28.1884 92.3179 28.2465C92.1967 28.2961 92.0635 28.3212 91.9185 28.3212C91.5564 28.3212 91.2627 28.2018 91.0369 27.9635C90.8206 27.7318 90.7115 27.4413 90.7115 27.0924C90.7115 26.7484 90.8218 26.46 91.0434 26.2271C91.2726 25.9854 91.5651 25.8652 91.9185 25.8652C92.0622 25.8652 92.1946 25.8911 92.3161 25.942C92.4507 25.9984 92.5523 26.0806 92.6203 26.1883H92.6281V25.9441H93.3466V28.2423H92.6281ZM92.6281 27.0924C92.6281 26.9237 92.5714 26.7843 92.4576 26.6741C92.3434 26.5631 92.1989 26.5076 92.0245 26.5076C91.8506 26.5076 91.7079 26.5656 91.5954 26.6816C91.4851 26.7935 91.4301 26.9333 91.4301 27.1003C91.4301 27.2606 91.4868 27.3962 91.6019 27.5081C91.7187 27.622 91.8606 27.6784 92.028 27.6784C92.2019 27.6784 92.3455 27.6229 92.4593 27.5102C92.5718 27.3983 92.6281 27.2593 92.6281 27.0924ZM96.2193 26.5568C96.0345 26.5614 95.9004 26.5886 95.8173 26.6374C95.7075 26.7025 95.653 26.816 95.653 26.9788V28.2423H94.9344V25.9441H95.608V26.1883H95.6188C95.733 25.9729 95.9329 25.8652 96.2193 25.8652V26.5568ZM99.38 27.5386C99.38 27.7827 99.2783 27.9772 99.0741 28.1229C98.8894 28.2552 98.6649 28.3212 98.4018 28.3212C98.1401 28.3212 97.9208 28.2569 97.7447 28.1292C97.5569 27.9931 97.4505 27.8028 97.4237 27.559H98.1379C98.1587 27.7005 98.2495 27.771 98.4105 27.771C98.4724 27.771 98.5282 27.7564 98.577 27.7268C98.6333 27.693 98.6614 27.6483 98.6614 27.5916C98.6614 27.5198 98.6242 27.4613 98.5476 27.4158L98.4421 27.3666L98.0259 27.2234C97.858 27.1654 97.7265 27.0936 97.6326 27.0072C97.5132 26.8995 97.4531 26.7714 97.4531 26.6232C97.4531 26.3953 97.55 26.2096 97.7447 26.0656C97.9238 25.9316 98.1371 25.8652 98.3854 25.8652C98.6372 25.8652 98.8448 25.9257 99.0084 26.0447C99.1845 26.1732 99.284 26.3552 99.3064 26.5906H98.6004C98.5965 26.4746 98.5217 26.4166 98.3763 26.4166C98.2396 26.4166 98.1717 26.4684 98.1717 26.5706C98.1717 26.647 98.2353 26.71 98.3616 26.7589C98.404 26.776 98.468 26.7968 98.5541 26.8211C98.561 26.8223 98.5701 26.8244 98.5814 26.8273L98.7761 26.8857C98.8621 26.9129 98.9357 26.9413 98.9976 26.9709C99.0741 27.0072 99.1386 27.0485 99.1905 27.0965C99.3173 27.208 99.38 27.3557 99.38 27.5386Z" fill="#DCE1EF" />
-                            </svg>
-                        </div>
-                        <div class="content">
-                            <div class="text-info">Công ty TNHH Five Star E-learning</div>
-                            <div class="text-info">
-                                35 phố Lạc Trung, phường Vĩnh Tuy, quận Hai Bà Trưng, Hà Nội
-                            </div>
-                        </div>
-                    </div>
-                    <div class="end">
-                        <div class="left">
-                            <span>2023</span>
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 width="2"
-                                 height="2"
-                                 viewBox="0 0 2 2"
-                                 fill="none">
-                                <circle cx="1" cy="1" r="1" fill="#DCE1EF" />
-                            </svg>
-                            <span>All rights reserved</span>
-                        </div>
-                        <div class="right">
-                            <span>Cookie policy</span>
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 width="2"
-                                 height="2"
-                                 viewBox="0 0 2 2"
-                                 fill="none">
-                                <circle cx="1" cy="1" r="1" fill="#DCE1EF" />
-                            </svg>
-                            <span>Privacy policy</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-</body>
-</html>
+</div>
