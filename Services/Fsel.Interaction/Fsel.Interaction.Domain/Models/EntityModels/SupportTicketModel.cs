@@ -30,5 +30,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public Guid? SupportQuestionId { get; set; }
 
         public string? QuestionName { get; set; }
+        public double TimeRemaining { get; set; }
     }
 }

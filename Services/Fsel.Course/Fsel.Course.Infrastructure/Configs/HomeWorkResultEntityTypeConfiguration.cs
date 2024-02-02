@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Configs
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,6 +20,13 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
+
+            builder.Property(e => e.SubmissionCount)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumSubmissionCount>());
+
             builder.HasOne(a => a.LessonResult)
               .WithMany(b => b.HomeWorkResults)
               .HasForeignKey(b => b.LessonResultId)

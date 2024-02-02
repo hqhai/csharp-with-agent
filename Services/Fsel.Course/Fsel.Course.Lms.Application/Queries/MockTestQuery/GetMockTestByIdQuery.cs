@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -64,7 +65,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 return methodResult;
             }
 
-            var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.MockTestId == request.MockTestId && x.StudentId == studentId && (!request.UnitId.HasValue || x.UnitId == request.UnitId), cancellationToken);
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x!.MockTestScores)
+                .Include(x => x.Course)
+                .Where(x => x.CourseId == request.CourseId && x.MockTestId == request.MockTestId && x.StudentId == studentId && (!request.UnitId.HasValue || x.UnitId == request.UnitId))
+                .FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
@@ -84,11 +88,21 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private MockTestModel GetMockTest(MockTest mockTest, MockTestResult mockTestResult)
         {
             var mockTestDetail = _mapper.Map<MockTestModel>(mockTest);
-            var sectionGroups = mockTest.MockTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
+            var sectionGroups = mockTest.MockTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).OrderBy(x => x.CourseSkill).ToList();
             mockTestDetail.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(sectionGroups);
-            mockTestDetail.MockTestResult = _mapper.Map<MockTestResultModel>(mockTestResult);
-            mockTestDetail.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, mockTestDetail.MockTestResult.Id, "MockTestResultId");
+            mockTestDetail.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, mockTestResult.Id, nameof(SectionGroupResult.MockTestResultId));
+            mockTestDetail.MockTestResult = GetMockTestResult(mockTestDetail, mockTestResult, sectionGroups);
             return mockTestDetail;
+        }
+
+        private MockTestResultModel GetMockTestResult(MockTestModel mockTestDetail, MockTestResult mockTestResult, IList<SectionGroup>? sectionGroups)
+        {
+            ArgumentNullException.ThrowIfNull(sectionGroups);
+            var mockTestResultDto = _mapper.Map<MockTestResultModel>(mockTestResult);
+            mockTestResultDto.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTestDetail.CourseSkills);
+            mockTestResultDto.ProgressPercent = NumberHelper.GetPercent(sectionGroups.SelectMany(x => x.SectionGroupResults).Count(x => x.Status == EnumResultStatus.Done), sectionGroups.Count);
+            (mockTestResultDto.IsCheckScoreColor, mockTestResultDto.TargetBandScore) = mockTestResult.Course!.CourseLevel.CheckScoreColor(mockTestResultDto.Scores);
+            return mockTestResultDto;
         }
     }
 }

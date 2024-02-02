@@ -16,7 +16,20 @@ namespace Fsel.Shared.Constants
         public const string SendPTResultSubject = "THÔNG BÁO KẾT QUẢ LÀM BÀI PLACEMENT TEST";
 
         public const string SendSurveyResultSubject = "THÔNG BÁO KẾT QUẢ KHẢO SÁT FSEL";
-        public const string SendStudentCompleteUnit = "Unit {0}_Thông báo kết quả học tập";
+        public const string SendStudentCompleteUnit = "{0}_THÔNG BÁO KẾT QUẢ HỌC TẬP";
         public const string SendStudentCompleteCourse = "{0}_KẾT QUẢ HỌC TẬP CUỐI KHOÁ_{1}";
+
+
+        public const string TitleUnit1 = "[FSEL] CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH UNIT 1!";
+        public const string TitleUnit2 = "[FSEL] NHỮNG NỖ LỰC CỦA BẠN ĐÃ ĐƯỢC GHI NHẬN! CÙNG XEM KẾT QUẢ BẠN NHÉ!";
+
+        public const string TitleIeltUnit1 = "[FSEL] CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH UNIT 1!";
+        public const string TitleIeltUnit2 = "[FSEL] HÀNH TRÌNH CHINH PHỤC ĐIỂM IELTS MỤC TIÊU CỦA BẠN ĐÃ GẦN HƠN!";
+        public const string TitleIeltUnit3 = "[FSEL] ĐÍCH ĐẾN IELTS MỤC TIÊU ĐÃ RẤT GẦN! CỐ GẮNG BẠN NHÉ!";
+
+        public const string TitleWeekly1 = "[FSEL] CÙNG XEM KẾT QUẢ HỌC TẬP CỦA TUẦN ĐẦU TIÊN BẠN NHÉ!";
+        public const string TitleWeekly2 = "[FSEL] BÁO CÁO TIẾN TRÌNH HỌC TẬP TUẦN NÀY BẠN NHÉ!";
+        public const string TitleWeekly3 = "[FSEL] BẠN ƠI! BẠN CÓ QUÊN GÌ KHÔNG?";
+        public const string TitleWeekly4 = "[FSEL] BẠN ƠI! FSEL VẪN ĐANG ĐỢI BẠN TRÊN PLATFORM NHÉ!";
     }
 }

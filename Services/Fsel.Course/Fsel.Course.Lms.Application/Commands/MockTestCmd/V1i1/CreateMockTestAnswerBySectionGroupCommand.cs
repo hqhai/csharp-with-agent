@@ -17,7 +17,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -48,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly SubmitMockTestAnswerPublisher _submitMockTestAnswerPublisher;
         private readonly IMapper _mapper;
 
         public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
@@ -62,7 +65,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             , ISectionGroupResultRepository sectionGroupResultRepository
             , ISectionTimeCodeRepository sectionTimeCodeRepository
             , ISectionGroupRepository sectionGroupRepository
-            , IMapper mapper)
+            , IMapper mapper
+            , SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -77,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
+            _submitMockTestAnswerPublisher = submitMockTestAnswerPublisher;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -142,10 +147,31 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         return methodResult;
                     }
                     sectionGroupResult = answerResult.Result;
+
                 }
                 sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
                 return methodResult;
             });
+
+
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.FirstOrDefault() != null && request.IsSubmit)
+            {
+                var sectionGroupId = sectionGroup.Sections.FirstOrDefault()!.SectionGroupId;
+                foreach (var item in request.Answers!)
+                {
+                    if (item.SectionId == null)
+                    {
+                        continue;
+                    }
+                    await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
+                    {
+                        SectionId = (Guid)item.SectionId,
+                        SectionGroupId = sectionGroupId,
+                        MockTestResultId = mockTestResult.Id,
+                        WordContent = item.Answer?.ToString() ?? string.Empty
+                    }, cancellationToken);
+                }
+            }
 
             await UpdateMockTestResultAsync(mockTestResult, cancellationToken);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
@@ -182,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 {
                     mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                     mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
-                    mockTestResult = await GetMockTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), mockTestResult, isSkillTest);
+                    mockTestResult = await GetMockTestResult(sectionGroupResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList(), mockTestResult, isSkillTest);
                     await UpdateUserToken(mockTestResult).ConfigureAwait(false);
                 }
             }
@@ -203,9 +229,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private async Task<MockTestResult> GetMockTestResult(IList<SkillScores>? skillScores, MockTestResult mockTestResult, bool isSkillTest)
         {
-            ArgumentNullException.ThrowIfNull(skillScores);
-            mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
-            mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+            if (skillScores != null && skillScores.Any())
+            {
+                mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+            }
             mockTestResult.Status = EnumResultStatus.Done;
             mockTestResult.SkillScores = skillScores;
             mockTestResult = await GetTokenMockTestResult(mockTestResult, isSkillTest);

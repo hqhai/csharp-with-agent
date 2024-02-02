@@ -13,7 +13,8 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student-progress")]
     [ApiController]
     public class StudentProgressController : ControllerBase

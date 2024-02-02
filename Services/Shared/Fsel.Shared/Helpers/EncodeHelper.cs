@@ -3,6 +3,7 @@
 namespace Fsel.Shared.Helpers
 {
     using System.Globalization;
+    using System.IO;
     using System.Security.Cryptography;
     using System.Text;
 
@@ -23,6 +24,37 @@ namespace Fsel.Shared.Helpers
             }
 
             return hash.ToString();
+        }
+
+        public static string? CreateDigitalSignature(string jsonData, string privateKeyPath, HashAlgorithmName hash)
+        {
+            try
+            {
+                string privateKeyFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, privateKeyPath);
+                string privateKey = File.ReadAllText(privateKeyFile);
+
+                using RSA rsa = RSA.Create();
+
+                rsa.ImportFromPem(privateKey);
+
+                string xmlData = rsa.ToXmlString(true);
+
+                rsa.FromXmlString(xmlData);
+
+                byte[] jsonDataBytes = Encoding.UTF8.GetBytes(jsonData);
+                byte[] hashValue;
+
+                hashValue = SHA256.HashData(jsonDataBytes);
+
+                byte[] signature = rsa.SignHash(hashValue, hash, RSASignaturePadding.Pkcs1);
+                string signatureBase64 = Convert.ToBase64String(signature);
+
+                return signatureBase64;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

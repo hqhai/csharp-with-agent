@@ -3,8 +3,6 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using System;
-    using System.Collections;
-    using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
@@ -15,6 +13,13 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class AnswerTypeConverter
     {
+        private readonly LinQAnswerHelper _linQAnswerHelper;
+
+        public AnswerTypeConverter(LinQAnswerHelper linQAnswerHelper)
+        {
+            _linQAnswerHelper = linQAnswerHelper;
+        }
+
         public (object?, int, bool, bool) GetTotalCorrectByAnswerType(object? configAnswer, object? configOldAnswer, Question question, bool isTryAgain = false, bool isSubmit = false, bool isMandatoryAnswer = false)
         {
             int totalCorrect;
@@ -60,12 +65,17 @@ namespace Fsel.Course.Infrastructure.Common
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleDragDropOrderAnswer(ref configAnswer, configOldAnswer.Deserialize<DragAndDropSentenceOrderAnswer>(), question.Config.Deserialize<DragAndDropSentenceOrderQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
+                case EnumQuestionType.DragAndDropListSentenceOrder:
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswer(ref configAnswer, configOldAnswer.Deserialize<DragAndDropListSentenceOrderAnswer>(), question.Config.Deserialize<DragAndDropListSentenceOrderQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
+                    break;
+
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleMultipleOptionAnswer(ref configAnswer, configOldAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>(), question.Config.Deserialize<MultipleOptionSentenceCompletionQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
-                    (totalCorrect, isAnswerMissing, isAnswered) = (default, false, true);
+                    totalCorrect = question.CorrectTotal;
+                    (isAnswerMissing, isAnswered) = (false, true);
                     break;
 
                 default:
@@ -233,7 +243,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static bool IsAnswerMissing(object? dataAnswer, object? dataQuestion, EnumQuestionType type, bool isSubmit = false, bool isMandatoryAnswer = false)
+        private bool IsAnswerMissing(object? dataAnswer, object? dataQuestion, EnumQuestionType type, bool isSubmit = false, bool isMandatoryAnswer = false)
         {
             if (!isMandatoryAnswer || !isSubmit)
             {
@@ -244,15 +254,15 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
-                    return (!CheckAnswerCount(dataAnswer, dataQuestion) || !IsNullOrEmptyDataValueBool(dataAnswer, "IsChecked"));
+                    return (!_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || !_linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(MultipleChoiceAnswers.IsChecked), false));
 
                 case EnumQuestionType.Listing:
-                    return IsNullOrEmptyData(dataAnswer);
+                    return _linQAnswerHelper.IsNullOrEmptyData(dataAnswer);
 
                 case EnumQuestionType.DragAndDropPicture:
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
-                    return (!CheckAnswerCount(dataAnswer, dataQuestion) || IsNullOrEmptyDataHasValue(dataAnswer, "ToId"));
+                    return (!_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(MatchingTypeAnswers.ToId)));
 
                 case EnumQuestionType.ShortAnswerWordBase:
                 case EnumQuestionType.ShortAnswerWordCount:
@@ -263,60 +273,63 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
                 case EnumQuestionType.DragAndDropSentenceOrder:
-                    return (!CheckAnswerCount(dataAnswer, dataQuestion) || IsNullOrEmptyData(dataAnswer, "Answer"));
+                    return (!_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(GapFillAnswers.Answer)));
+
+                case EnumQuestionType.DragAndDropListSentenceOrder:
+                    return !_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion);
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
-                    return IsNullOrEmptyDataHasValue(dataAnswer, nameof(MultipleOptionSentenceCompletionAnswers.AnswerId));
+                    return _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(MultipleOptionSentenceCompletionAnswers.AnswerId));
 
                 default:
                     return default;
             }
         }
 
-        private static (int, bool, bool) HandleCheckListAnswer(ref object? configAnswer, MultipleChoiceAnswer? dataOldAnswer, MultipleChoiceQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private (int, bool, bool) HandleCheckListAnswer(ref object? configAnswer, MultipleChoiceAnswer? dataOldAnswer, MultipleChoiceQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             int number = 0;
             var dataAnswer = configAnswer.Deserialize<MultipleChoiceAnswer>();
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Contents, EnumQuestionType.Multichoice, isSubmit, isMandatoryAnswer);
             if (dataQuestion?.Contents == null || dataAnswer?.Answers == null || (isMandatoryAnswer && isAnswerMissing))
             {
-                return (default, isAnswerMissing, IsNullOrEmptyDataValueBool(dataAnswer?.Answers, nameof(MultipleChoiceAnswers.IsChecked)));
+                return (default, isAnswerMissing, _linQAnswerHelper.IsNullOrEmptyData(dataAnswer?.Answers, nameof(MultipleChoiceAnswers.IsChecked), false));
             }
             foreach (var item in dataAnswer.Answers)
             {
-                if (item.IsChecked)
-                {
-                    item.IsExact = dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
-                    number = item.IsExact == true ? ++number : --number;
-                    if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
-                    {
-                        var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
-                        if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
-                        {
-                            item.IsFirstSubmit = false;
-                        }
-                    }
-                }
-                else
+                if (!item.IsChecked)
                 {
                     item.IsExact = default;
+                    continue;
+                }
+
+                item.IsExact = dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
+                number = item.IsExact == true ? ++number : --number;
+
+                if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
+                {
+                    var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.Id == item.Id);
+                    if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
+                    {
+                        item.IsFirstSubmit = false;
+                    }
                 }
             }
             configAnswer = dataAnswer;
-            return (number < 0 ? default : number, isAnswerMissing, IsNullOrEmptyDataValueBool(dataAnswer?.Answers, nameof(MultipleChoiceAnswers.IsChecked)));
+            return (number > 0 ? number : default, isAnswerMissing, _linQAnswerHelper.IsNullOrEmptyData(dataAnswer?.Answers, nameof(MultipleChoiceAnswers.IsChecked), false));
         }
 
-        private static (int, bool, bool) HandleListingAnswer(ref object? configAnswer, ListingAnswer? dataOldAnswer, ListingQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private (int, bool, bool) HandleListingAnswer(ref object? configAnswer, ListingAnswer? dataOldAnswer, ListingQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             int number = 0;
             var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, default, EnumQuestionType.Listing, isSubmit, isMandatoryAnswer);
             if (dataAnswer?.Answers == null || (isMandatoryAnswer && isAnswerMissing))
             {
-                return (default, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers));
+                return (default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers));
             }
 
-            if (dataAnswer.Answers.Where(x => !string.IsNullOrEmpty(x)).Count() >= dataQuestion?.ExactWordCount)
+            if (dataAnswer.Answers.Where(x => !string.IsNullOrEmpty(x.Trim())).Count() >= dataQuestion?.ExactWordCount)
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -330,17 +343,17 @@ namespace Fsel.Course.Infrastructure.Common
                 dataAnswer.IsFirstSubmit = false;
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers));
+            return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers));
         }
 
-        private static (int, bool, bool) HandleMaschingTypeAnswer(ref object? configAnswer, MatchingTypeAnswer? dataOldAnswer, MatchingTypeQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private (int, bool, bool) HandleMaschingTypeAnswer(ref object? configAnswer, MatchingTypeAnswer? dataOldAnswer, MatchingTypeQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<MatchingTypeAnswer>();
             int number = default;
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Link, EnumQuestionType.MatchingType1, isSubmit, isMandatoryAnswer);
             if (dataAnswer?.Answers == null || dataQuestion?.Link == null || (isMandatoryAnswer && isAnswerMissing))
             {
-                return (default, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(MatchingTypeAnswers.ToId)));
+                return (default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(MatchingTypeAnswers.ToId)));
             }
             foreach (var item in dataAnswer.Answers)
             {
@@ -363,10 +376,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(MatchingTypeAnswers.ToId)));
+            return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(MatchingTypeAnswers.ToId)));
         }
 
-        private static (int, bool, bool) HandleShortAnswerWordCount(ref object? configAnswer, ShortAnswerWordCountBaseAnswer? dataOldAnswer, ShortAnswerQuestionWordCountBaseQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private (int, bool, bool) HandleShortAnswerWordCount(ref object? configAnswer, ShortAnswerWordCountBaseAnswer? dataOldAnswer, ShortAnswerQuestionWordCountBaseQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
             int number = 0;
@@ -375,8 +388,8 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return (default, isAnswerMissing, string.IsNullOrEmpty(dataAnswer?.Answers));
             }
-            var answerStrs = dataAnswer.Answers.Trim().Split(new[] { " ", "\n", "\r", Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrEmpty(x));
-            if (answerStrs != null && answerStrs.Count() >= dataQuestion?.ExactWordCount)
+            var exactWordCount = Shared.Helpers.StringHelper.CountWords(dataAnswer.Answers);
+            if (exactWordCount >= dataQuestion?.ExactWordCount)
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -393,7 +406,7 @@ namespace Fsel.Course.Infrastructure.Common
             return (number, isAnswerMissing, !string.IsNullOrEmpty(dataAnswer?.Answers));
         }
 
-        private static (int, bool, bool) HandleShortAnswerWordBase(ref object? configAnswer, ShortAnswerWordBaseAnswer? dataOldAnswer, ShortAnswerQuestionWordBaseQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private (int, bool, bool) HandleShortAnswerWordBase(ref object? configAnswer, ShortAnswerWordBaseAnswer? dataOldAnswer, ShortAnswerQuestionWordBaseQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
             int number = 0;
@@ -402,7 +415,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return (default, isAnswerMissing, string.IsNullOrEmpty(dataAnswer?.Answers));
             }
-            if (dataQuestion.Content.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
+            if (dataQuestion.Content.Any(p => _linQAnswerHelper.IsShortAnswer(p, dataAnswer.Answers)))
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -419,21 +432,21 @@ namespace Fsel.Course.Infrastructure.Common
             return (number, isAnswerMissing, !string.IsNullOrEmpty(dataAnswer?.Answers));
         }
 
-        private static (int, bool, bool) HandleGapFillBySubAnswer(ref object? configAnswer, GapFillAnswer? dataOldAnswer, GapFillQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private (int, bool, bool) HandleGapFillBySubAnswer(ref object? configAnswer, GapFillAnswer? dataOldAnswer, GapFillQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             int number = 0;
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Contents, EnumQuestionType.GapFillScoreByQuestion, isSubmit, isMandatoryAnswer);
             if (dataAnswer?.Answers == null || dataQuestion?.Contents == null || (isMandatoryAnswer && isAnswerMissing))
             {
-                return (default, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
+                return (default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
             }
             foreach (var item in dataAnswer.Answers)
             {
                 var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
                 if (question?.Words != null && item.Answer?.Any() == true)
                 {
-                    item.IsExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
+                    item.IsExacts = item.Answer.Select((word, index) => _linQAnswerHelper.CheckAnswer(question.Words, word, index)).ToList();
                     if (item.IsExacts.Count(x => x == true) == item.IsExacts.Count)
                     {
                         number++;
@@ -444,9 +457,9 @@ namespace Fsel.Course.Infrastructure.Common
                         if (answer != null && answer.IsFirstSubmits != null && answer.IsExacts != null)
                         {
                             var isFirstSubmit = new List<bool>();
+                            var index = 0;
                             foreach (var data in answer.IsExacts)
                             {
-                                var index = answer.IsExacts.IndexOf(data);
                                 if (answer.IsFirstSubmits[index] && data.HasValue && !data.Value)
                                 {
                                     isFirstSubmit.Add(false);
@@ -455,6 +468,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 {
                                     isFirstSubmit.Add(answer.IsFirstSubmits[index]);
                                 }
+                                index++;
                             }
                             item.IsFirstSubmits = isFirstSubmit;
                         }
@@ -462,24 +476,24 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
+            return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
         }
 
-        private static (int, bool, bool) HandleGapFillGapAnswer(ref object? configAnswer, GapFillAnswer? dataOldAnswer, GapFillQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private (int, bool, bool) HandleGapFillGapAnswer(ref object? configAnswer, GapFillAnswer? dataOldAnswer, GapFillQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             int number = 0;
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Contents, EnumQuestionType.GapFillScoreByQuestion, isSubmit, isMandatoryAnswer);
             if (dataAnswer?.Answers == null || dataQuestion?.Contents == null || (isMandatoryAnswer && isAnswerMissing))
             {
-                return (default, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
+                return (default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
             }
             foreach (var item in dataAnswer.Answers)
             {
                 var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
                 if (question != null && question.Words != null && question.Words.Any() && item.Answer != null && item.Answer.Any())
                 {
-                    item.IsExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
+                    item.IsExacts = item.Answer.Select((word, index) => _linQAnswerHelper.CheckAnswer(question.Words, word, index)).ToList();
                     number += item.IsExacts.Count(x => x == true);
                     if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
                     {
@@ -487,9 +501,9 @@ namespace Fsel.Course.Infrastructure.Common
                         if (answer != null && answer.IsFirstSubmits != null && answer.IsExacts != null)
                         {
                             var isFirstSubmit = new List<bool>();
+                            var index = 0;
                             foreach (var data in answer.IsExacts)
                             {
-                                var index = answer.IsExacts.IndexOf(data);
                                 if (answer.IsFirstSubmits[index] && data.HasValue && !data.Value)
                                 {
                                     isFirstSubmit.Add(false);
@@ -498,6 +512,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 {
                                     isFirstSubmit.Add(answer.IsFirstSubmits[index]);
                                 }
+                                index++;
                             }
                             item.IsFirstSubmits = isFirstSubmit;
                         }
@@ -505,17 +520,17 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
+            return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
         }
 
-        private static (int, bool, bool) HandleDragDropOrderAnswer(ref object? configAnswer, DragAndDropSentenceOrderAnswer? dataOldAnswer, DragAndDropSentenceOrderQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private (int, bool, bool) HandleDragDropOrderAnswer(ref object? configAnswer, DragAndDropSentenceOrderAnswer? dataOldAnswer, DragAndDropSentenceOrderQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
             int number = 0;
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Contents, EnumQuestionType.DragAndDropSentenceOrder, isSubmit, isMandatoryAnswer);
             if (dataAnswer?.Answers == null || dataQuestion?.Contents == null || (isMandatoryAnswer && isAnswerMissing))
             {
-                return (default, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
+                return (default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(DragAndDropSentenceOrderAnswers.Answer)));
             }
             if (dataAnswer.Answers != null && (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing)))
             {
@@ -546,17 +561,53 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
+            return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(DragAndDropSentenceOrderAnswers.Answer)));
         }
 
-        private static (int, bool, bool) HandleMultipleOptionAnswer(ref object? configAnswer, MultipleOptionSentenceCompletionAnswer? dataOldAnswer, MultipleOptionSentenceCompletionQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        private (int, bool, bool) HandleAnswer(ref object? configAnswer, DragAndDropListSentenceOrderAnswer? dataOldAnswer, DragAndDropListSentenceOrderQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        {
+            var dataAnswer = configAnswer.Deserialize<DragAndDropListSentenceOrderAnswer>();
+            int number = 0;
+            bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Contents, EnumQuestionType.DragAndDropListSentenceOrder, isSubmit, isMandatoryAnswer);
+            if (dataAnswer?.Answers == null || dataQuestion?.Contents == null || (isMandatoryAnswer && isAnswerMissing))
+            {
+                return (default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers));
+            }
+            if (dataAnswer.Answers != null && (!isMandatoryAnswer || (isMandatoryAnswer && !isAnswerMissing)))
+            {
+                foreach (var item in dataAnswer.Answers)
+                {
+                    var indexAnswer = dataAnswer.Answers.IndexOf(item);
+                    var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
+                    if (question != null)
+                    {
+                        var indexQuestion = dataQuestion.Contents.IndexOf(question);
+                        item.IsExact = indexAnswer == indexQuestion;
+                    }
+
+                    if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
+                    {
+                        var answer = dataOldAnswer.Answers.FirstOrDefault(c => c.Id == item.Id);
+                        if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
+                        {
+                            item.IsFirstSubmit = false;
+                        }
+                    }
+                }
+                number = dataAnswer.Answers.All(x => x.IsExact == true) ? ++number : default;
+            }
+            configAnswer = dataAnswer;
+            return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers));
+        }
+
+        private (int, bool, bool) HandleMultipleOptionAnswer(ref object? configAnswer, MultipleOptionSentenceCompletionAnswer? dataOldAnswer, MultipleOptionSentenceCompletionQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
             int number = 0;
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Contents, EnumQuestionType.MultipleOptionSentenceCompletion, isSubmit, isMandatoryAnswer);
             if (dataAnswer?.Answers == null || dataQuestion?.Contents == null || (isMandatoryAnswer && isAnswerMissing))
             {
-                return (default, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
+                return (default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(GapFillAnswers.Answer)));
             }
             foreach (var item in dataAnswer.Answers)
             {
@@ -587,100 +638,50 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing, IsAnswerHaveData(dataAnswer?.Answers, nameof(MultipleOptionSentenceCompletionAnswers.AnswerId)));
+            return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(MultipleOptionSentenceCompletionAnswers.AnswerId)));
         }
 
-        private static bool IsShortAnswer(string? question, string? answer)
+        public object? GetConfigEmpty(EnumQuestionType type)
         {
-            string q = " " + question?.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
-            string a = " " + answer?.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
-            return a.Contains(q, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool IsAnswerHaveData(object? data, string? nameProperty = default)
-        {
-            if (data is IList list)
+            switch (type)
             {
-                var objects = list.Cast<object>().ToList();
-                if (objects != null && objects.Any())
-                {
-                    return objects.Any(x => !string.IsNullOrEmpty(nameProperty) ? IsAnswerHaveData(x.GetPropValue(nameProperty)) : IsAnswerHaveData(x));
-                }
-                return false;
-            }
-            return !string.IsNullOrEmpty(data?.ToString());
-        }
+                case EnumQuestionType.Multichoice:
+                case EnumQuestionType.Dropdown:
+                case EnumQuestionType.Checklist:
+                    return new MultipleChoiceAnswer();
 
-        private static bool IsNullOrEmptyData(object? data, string? nameProperty = default)
-        {
-            if (data is IList list)
-            {
-                var objects = list.Cast<object>().ToList();
-                if (objects != null && objects.Any())
-                {
-                    return objects.Any(x => string.IsNullOrEmpty(nameProperty) ? IsNullOrEmptyData(x) : IsNullOrEmptyData(x.GetPropValue(nameProperty)));
-                }
-                return true;
-            }
-            return string.IsNullOrEmpty(data?.ToString());
-        }
+                case EnumQuestionType.Listing:
+                    return new ListingAnswer();
 
-        private static bool IsNullOrEmptyDataHasValue(object? data, string? nameProperty)
-        {
-            if (data is IList list && !string.IsNullOrEmpty(nameProperty))
-            {
-                var objects = list.Cast<object>().ToList();
-                return objects.Any(x => IsNullOrEmptyDataHasValue(x.GetPropValue(nameProperty), nameProperty));
-            }
-            return string.IsNullOrEmpty(data?.ToString());
-        }
+                case EnumQuestionType.DragAndDropPicture:
+                case EnumQuestionType.MatchingType1:
+                case EnumQuestionType.MatchingType2:
+                    return new MatchingTypeAnswer();
 
-        public static bool CheckAnswerCount(object? answer, object? question)
-        {
-            if (answer is IList listAnswer && question is IList listQuestion)
-            {
-                return listAnswer.Count == listQuestion.Count;
-            }
-            return true;
-        }
+                case EnumQuestionType.ShortAnswerWordBase:
+                    return new ShortAnswerWordBaseAnswer();
 
-        private static bool IsNullOrEmptyDataValueBool(object? data, string? nameProperty)
-        {
-            if (data is IList list && !string.IsNullOrEmpty(nameProperty))
-            {
-                var objects = list.Cast<object>().ToList();
-                if (objects != null && objects.Any())
-                {
-                    return objects.Any(x => x.GetPropValue<bool>(nameProperty));
-                }
-            }
-            return string.IsNullOrEmpty(data?.ToString());
-        }
+                case EnumQuestionType.ShortAnswerWordCount:
+                    return new ShortAnswerWordCountBaseAnswer();
 
-        private static bool? CheckAnswer(IList<string> words, string word, int index)
-        {
-            if (words[index].IndexOf('|', StringComparison.Ordinal) != -1)
-            {
-                string[] questionWords = words[index].Split('|');
-                foreach (var item in questionWords)
-                {
-                    if (word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == item.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
-                    {
-                        return true;
-                    }
-                }
-            }
-            else if (words[index].Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
-            {
-                return true;
-            }
+                case EnumQuestionType.GapFillScoreByQuestion:
+                case EnumQuestionType.GapFillWordBankScoreByQuestion:
+                case EnumQuestionType.GapFillWordBankScoreByGap:
+                case EnumQuestionType.GapFillScoreByGap:
+                    return new GapFillAnswer();
 
-            return false;
-        }
+                case EnumQuestionType.DragAndDropSentenceOrder:
+                    return new DragAndDropSentenceOrderAnswer();
 
-        internal (object answerConfig, int correctCount, bool isAnswerMissing, bool isAnswered) GetTotalCorrectByAnswerType(object answer, object oldAnswer, object config, EnumQuestionType questionType, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
-        {
-            throw new NotImplementedException();
+                case EnumQuestionType.MultipleOptionSentenceCompletion:
+                    return new MultipleOptionSentenceCompletionAnswer();
+
+                case EnumQuestionType.ExercisePreparation:
+                    return default;
+
+                default:
+                    return default;
+            }
         }
     }
 }

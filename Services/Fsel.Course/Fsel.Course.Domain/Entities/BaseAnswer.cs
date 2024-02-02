@@ -25,20 +25,7 @@ namespace Fsel.Course.Domain.Entities
         }
 
         public EnumAnswerStatus Status { get; set; }
-
-        private bool? _isCorrect;
-
-        public bool? IsCorrect
-        {
-            get
-            {
-                return Status == EnumAnswerStatus.Done ? _isCorrect : null;
-            }
-            set
-            {
-                _isCorrect = value;
-            }
-        }
+        public bool? IsCorrect { get; set; }
 
         /// <summary>
         /// Số lượng câu trả lời đúng

@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class DragAndDropSentenceOrderAnswer
     {
-        public IList<DragAndDropSentenceOrderAnswers>? Answers { get; set; }
+        public IList<DragAndDropSentenceOrderAnswers> Answers { get; set; } = new List<DragAndDropSentenceOrderAnswers>();
     }
 
     public class DragAndDropSentenceOrderAnswers

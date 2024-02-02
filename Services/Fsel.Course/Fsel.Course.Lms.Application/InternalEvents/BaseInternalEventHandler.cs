@@ -242,7 +242,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return new SkillScores();
         }
 
-        private static SkillScores GetSkillScore(IGrouping<EnumCourseSkill, SkillScores>? x)
+        public static SkillScores GetSkillScore(IGrouping<EnumCourseSkill, SkillScores>? x)
         {
             SkillScores skillScores = new SkillScores();
             if (x != null)

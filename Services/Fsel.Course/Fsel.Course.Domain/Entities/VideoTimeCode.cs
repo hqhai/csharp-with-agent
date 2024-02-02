@@ -42,6 +42,12 @@ namespace Fsel.Course.Domain.Entities
             get { return TimeSpan.FromSeconds(ExecutionTime); }
         }
 
+        [NotMapped]
+        public double TotalCount
+        {
+            get { return TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(x => !x!.IsDeleted); }
+        }
+
         public ICollection<TimeCodeExercise> TimeCodeExercises { get; set; } = new List<TimeCodeExercise>();
         public ICollection<VideoTimeCodeResult> VideoTimeCodeResults { get; set; } = new List<VideoTimeCodeResult>();
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();

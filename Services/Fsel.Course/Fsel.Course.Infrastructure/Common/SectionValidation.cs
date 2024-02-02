@@ -16,7 +16,6 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return correctTotal == 10;
             }
-
             return false;
         }
     }

@@ -233,6 +233,73 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.UrBoxTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("RequestBodyStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResponseBodyStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UrBoxTransactions");
+                });
+
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.UserReferral", b =>
                 {
                     b.Property<Guid>("Id")

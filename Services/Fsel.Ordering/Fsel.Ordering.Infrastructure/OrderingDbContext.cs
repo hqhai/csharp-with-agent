@@ -28,6 +28,7 @@ namespace Fsel.Ordering.Infrastructure
             modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VoucherPackageEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UserVoucherEnityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UrBoxTransactionEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -42,6 +43,7 @@ namespace Fsel.Ordering.Infrastructure
         public DbSet<UserVoucher> UserVouchers { get; set; }
 
         public DbSet<UserReferral> UserReferrals { get; set; }
+        public DbSet<UrBoxTransaction> UrBoxTransactions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

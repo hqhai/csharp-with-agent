@@ -18,5 +18,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
             get { return _filePath.AddS3BaseUrl(); }
         }
         public bool IsActive { get; set; }
+        public bool IsOwned { get; set; }
     }
 }
