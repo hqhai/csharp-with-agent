@@ -154,7 +154,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             });
 
 
-            if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.FirstOrDefault() != null)
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.FirstOrDefault() != null && request.IsSubmit)
             {
                 var sectionGroupId = sectionGroup.Sections.FirstOrDefault()!.SectionGroupId;
                 foreach (var item in request.Answers!)
