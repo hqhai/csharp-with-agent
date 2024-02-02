@@ -19,6 +19,7 @@ namespace Fsel.Shared.Constants
         public const string SendStudentCompleteUnit = "Unit {0}_Thông báo kết quả học tập";
         public const string SendStudentCompleteCourse = "{0}_KẾT QUẢ HỌC TẬP CUỐI KHOÁ_{1}";
         public const string TitleWeekly1 = "[FSEL] CÙNG XEM KẾT QUẢ HỌC TẬP CỦA TUẦN ĐẦU TIÊN BẠN NHÉ!";
+        public const string TitleWeekly2 = "[FSEL] BÁO CÁO TIẾN TRÌNH HỌC TẬP TUẦN NÀY BẠN NHÉ!";
         public const string TitleWeekly4 = "[FSEL] BẠN ƠI! FSEL VẪN ĐANG ĐỢI BẠN TRÊN PLATFORM NHÉ!";
     }
 }
