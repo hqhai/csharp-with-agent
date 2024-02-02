@@ -35,5 +35,6 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? NextUnit { get; set; }
         public int? NextLesson { get; set; }
         public int? PercentLesson { get; set; }
+        public string? Weekly3Display { get; set; }
     }
 }
