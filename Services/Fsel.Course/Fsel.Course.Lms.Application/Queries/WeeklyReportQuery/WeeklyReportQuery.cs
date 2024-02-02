@@ -165,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 var previousSocial = ConvertSecondsToMinutes(previousFeatureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0);
                 var previousOther = ConvertSecondsToMinutes(previousFeatureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0);
 
-                weeklyReport.PreviousTotal = ConvertHour((previousLearn + previousSocial + previousOther) * 60);
+                weeklyReport.PreviousTotal = FormatTimeSpanAsClock((previousLearn + previousSocial + previousOther) * 60);
                 weeklyReport.PreviousLearn = FormatTimeSpanAsClock(previousLearn * 60);
                 weeklyReport.PreviousSocial = FormatTimeSpanAsClock(previousSocial * 60);
                 weeklyReport.PreviousOther = FormatTimeSpanAsClock(previousOther * 60);
@@ -175,7 +175,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 var totalSocial = ConvertSecondsToMinutes(featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0);
                 var totalOther = ConvertSecondsToMinutes(featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0);
 
-                weeklyReport.TotalHour = ConvertHour((totalLearn + totalSocial + totalOther) * 60);
+                weeklyReport.TotalHour = FormatTimeSpanAsClock((totalLearn + totalSocial + totalOther) * 60);
                 weeklyReport.TotalLearn = FormatTimeSpanAsClock(totalLearn * 60);
                 weeklyReport.TotalSocial = FormatTimeSpanAsClock(totalSocial * 60);
                 weeklyReport.TotalOther = FormatTimeSpanAsClock(totalOther * 60);
