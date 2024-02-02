@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System.Threading.Tasks;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -26,14 +27,16 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly IMockTestAISettingRepository _aiGradeSettingRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMediator _mediator;
-        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository)
+        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
             _submitAIResponsePublisher = submitAIResponsePublisher;
             _mediator = mediator;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _aiGradeSettingRepository = aiGradeSettingRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
+            _mockTestResultRepository = mockTestResultRepository;
         }
 
         public async Task<bool> Handle(SubmitMockTestAnswerAICommand request, CancellationToken cancellationToken)
@@ -88,10 +91,19 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             var lexicalResource = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.LexicalResource);
             var grammaticalRange = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.GrammaticalRange);
 
-            var sectionGroupResult = _sectionGroupResultRepository.Queryable.FirstOrDefault(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId);
+            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefault(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId);
+
+            var mockTestResult = _mockTestResultRepository.Queryable.Include(x => x.MockTest).FirstOrDefault(x => x.Id == request.MockTestResultId);
+
+            if (mockTestResult == null || mockTestResult.MockTest == null)
+            {
+                return true;
+            }
+
+            bool checkSkillMockTest = mockTestResult.MockTest!.MockTestType == EnumMockTestType.SkillMockTest;
 
 
-            double averageScore = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
+            (double averageScore, double totalScore) = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
 
             var skillScore = sectionGroupResult!.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
 
@@ -105,20 +117,25 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 skillScore = new SkillScores
                 {
-                    CorrectCount = averageScore,
+                    CorrectCount = totalScore,
                     TotalCount = 36,
                     Skill = EnumCourseSkill.Writing,
                     Scores = averageScore,
+                    TotalQuestion = 2,
+                    CountQuestion = 2
                 };
                 skillScores!.Add(skillScore);
             }
             else
             {
-                averageScore = CaculateAverageScoreWritingSection(skillScore!, averageScore);
-                skillScore!.CorrectCount = averageScore;
-                skillScore.TotalCount = 36;
-                skillScore.Skill = EnumCourseSkill.Writing;
+                averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
+                skillScore!.CorrectCount = CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore);
                 skillScore.Scores = averageScore;
+            }
+
+            if (checkSkillMockTest)
+            {
+                mockTestResult.SkillScores = skillScores;
             }
 
             sectionGroupResult.SkillScores = skillScores;
@@ -134,6 +151,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                 _sectionGroupResultRepository.Update(sectionGroupResult);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                if (checkSkillMockTest)
+                {
+                    _mockTestResultRepository.Update(mockTestResult);
+                    await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
 
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
@@ -167,7 +190,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
 
 
-        private static double CalculateOverallAverage(params List<MockTestAIGradingModel>[] bandScoreDescriptions)
+        private static (double average, double totalScore) CalculateOverallAverage(params List<MockTestAIGradingModel>[] bandScoreDescriptions)
         {
             double totalScore = 0;
 
@@ -178,13 +201,13 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             double average = totalScore / bandScoreDescriptions.Length;
 
-            return NumberHelper.RoundNumberDouble(average, true);
+            return (NumberHelper.RoundNumberDouble(average), totalScore);
         }
 
 
-        private static double CaculateAverageScoreWritingSection(SkillScores skillScore, double average)
+        private static double CaculateAverageScoreWritingSection(double firstScore, double average)
         {
-            return NumberHelper.RoundNumberDouble((skillScore.Scores + average * 2) / 3, true);
+            return NumberHelper.RoundNumberDouble((firstScore + average * 2) / 3);
         }
 
     }
