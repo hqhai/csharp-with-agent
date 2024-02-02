@@ -31,15 +31,15 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 
             if (request.StartDate.HasValue && request.EndDate.HasValue)
             {
-                featureAccessTime = featureAccessTime.Where(p => p.CreatedDate >= request.StartDate && p.CreatedDate <= request.EndDate).ToList();
+                featureAccessTime = featureAccessTime.Where(p => (p.UpdatedDate ?? p.CreatedDate) >= request.StartDate && (p.UpdatedDate ?? p.CreatedDate) <= request.EndDate).ToList();
             }
             if (request.StartDate.HasValue)
             {
-                featureAccessTime = featureAccessTime.Where(p => p.CreatedDate >= request.StartDate).ToList();
+                featureAccessTime = featureAccessTime.Where(p => (p.UpdatedDate ?? p.CreatedDate) >= request.StartDate).ToList();
             }
             if (request.EndDate.HasValue)
             {
-                featureAccessTime = featureAccessTime.Where(p => p.CreatedDate <= request.EndDate).ToList();
+                featureAccessTime = featureAccessTime.Where(p => (p.UpdatedDate ?? p.CreatedDate) <= request.EndDate).ToList();
             }
 
             var learn = featureAccessTime.Where(p => p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.MockTest || p.EnumFeature == EnumFeature.FinalTest).ToList();
