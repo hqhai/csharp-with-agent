@@ -178,17 +178,18 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             else if (numberUnit > 1 && previousCourseUnitMockTest != null)
                             {
                                 parameter.SenderTemplate = EnumSenderTemplate.Unit2AboveReport;
-                                var previousCourseUnitMockTestResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(p => p.UnitId == previousCourseUnitMockTest.UnitId && p.StudentId == studentId, cancellationToken); // thời gian kết thúc
 
-                                var lessonResult = await _lessonResultRepository.Queryable.Where(p => p.CourseId == courseId && p.UnitId == previousCourseUnitMockTest.UnitId && p.StudentId == studentId).ToListAsync(cancellationToken); // thời gian bắt đầu
+                                var previousUnitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(p => p.UnitId == previousCourseUnitMockTest.UnitId && p.StudentId == studentId, cancellationToken); // thời gian kết thúc
 
-                                var startDate = lessonResult.OrderBy(x => x.CreatedDate).FirstOrDefault();// thời gian bắt đầu
+                                var previousLessonResults = await _lessonResultRepository.Queryable.Where(p => p.CourseId == courseId && p.UnitId == previousCourseUnitMockTest.UnitId && p.StudentId == studentId).ToListAsync(cancellationToken); // thời gian bắt đầu
 
-                                var featureAccessTimePreviousResult = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel { UserId = userId, StartDate = previousCourseUnitMockTestResult?.UpdatedDate, EndDate = startDate?.CreatedDate });
+                                var startDate = previousLessonResults.OrderBy(x => x.CreatedDate).FirstOrDefault();// thời gian bắt đầu
+
+                                var featureAccessTimePreviousResult = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel { UserId = userId, StartDate = startDate?.CreatedDate, EndDate = previousUnitResult?.UpdatedDate });
 
                                 var featureAccessTimePrevious = featureAccessTimePreviousResult.Content?.Result;
 
-                                var (skillScoresPrevious, percentPrevious) = await GetUnitSkillScores(lessonResult.Select(p => p.Id).ToList(), course.CourseType);
+                                var (skillScoresPrevious, percentPrevious) = await GetUnitSkillScores(previousLessonResults.Select(p => p.Id).ToList(), course.CourseType);
 
                                 foreach (var item in skillScores)
                                 {
@@ -322,7 +323,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             int hours = timeSpan.Hours;
             int minutes = timeSpan.Minutes;
 
-            return $"{hours}H{minutes:D2}";
+            return $"{hours}h{minutes:D2}";
 
         }
 
