@@ -108,6 +108,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 skillTestHtml += html;
                             });
 
+
                             var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == course.Id && p.UnitId == unit.Id && p.StudentId == studentId, cancellationToken); // mocktest
                             var mockTestHtml = string.Empty;
                             mockTestResult?.SkillScores.ForEach(p =>
@@ -135,9 +136,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 SkillMockTest = mockTestHtml,
                                 SkillTest = skillTestHtml,
                                 UnitTest = unitTestHtml,
-                                CurrentLearn = ConvertHour(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Learn).Sum(p => p.AccessTime) ?? 0),
-                                CurrentSocial = ConvertHour(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Social).Sum(p => p.AccessTime) ?? 0),
-                                CurrentOther = ConvertHour(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? 0),
+                                CurrentLearn = FormatTimeSpanAsClock(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Learn).Sum(p => p.AccessTime) ?? 0),
+                                CurrentSocial = FormatTimeSpanAsClock(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Social).Sum(p => p.AccessTime) ?? 0),
+                                CurrentOther = FormatTimeSpanAsClock(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? 0),
+                                UnitDisplay = string.IsNullOrEmpty(unitTestHtml) ? HtmlSetting.Display : null,
+                                SkillDisplay = string.IsNullOrEmpty(skillTestHtml) ? HtmlSetting.Display : null
                             };
 
                             if (nextCourseUnitMockTest != null && nextCourseUnitMockTest.UnitId.HasValue)
@@ -253,9 +256,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 (parameter.ColorTotal, parameter.CompareTotal) = Compare((currentLearn + currentSocial + currentOther), (previousLearn + previousSocial + previousOther));
 
 
-                                parameter.PreviousLearn = ConvertHour(previousLearn * 60);
-                                parameter.PreviousSocial = ConvertHour(previousSocial * 60);
-                                parameter.PreviousOther = ConvertHour(previousOther * 60);
+                                parameter.PreviousLearn = FormatTimeSpanAsClock(previousLearn * 60);
+                                parameter.PreviousSocial = FormatTimeSpanAsClock(previousSocial * 60);
+                                parameter.PreviousOther = FormatTimeSpanAsClock(previousOther * 60);
 
                                 (parameter.ColorLearn,parameter.CompareLearn) = Compare(currentLearn, previousLearn);
 
@@ -323,7 +326,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             int hours = timeSpan.Hours;
             int minutes = timeSpan.Minutes;
 
-            return $"{hours}h{minutes:D2}";
+            return $"{hours}h{minutes:D2}ph";
 
         }
 
