@@ -14,5 +14,7 @@ namespace Fsel.Shared.Enums
         SendStudentCompleteCourseAcademic,
         Unit1Report,
         Unit2AboveReport,
+        WeeklyReport,
+        WeeklyReport4,
     }
 }
