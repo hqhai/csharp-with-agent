@@ -127,18 +127,20 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
             else
             {
+                int correcCount = (int)CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore);
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
-                skillScore!.CorrectCount = CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore);
+                skillScore!.CorrectCount = correcCount;
                 skillScore.Scores = averageScore;
-            }
+                sectionGroupResult.CorrectCount = correcCount;
 
-            if (checkSkillMockTest)
-            {
-                mockTestResult.SkillScores = skillScores;
+                if (checkSkillMockTest)
+                {
+                    mockTestResult.SkillScores = skillScores;
+                    mockTestResult.CorrectCount = correcCount;
+                }
             }
 
             sectionGroupResult.SkillScores = skillScores;
-
             string? gradingAiFeedBack = ConvertHelper.Serialize(gradingAiFeedBackResult);
 
             if (mockTestAnswer != null)
