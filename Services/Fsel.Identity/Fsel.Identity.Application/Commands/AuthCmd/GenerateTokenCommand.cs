@@ -100,6 +100,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
             var refreshToken = TokenHelper.GenerateRefreshToken();
+            var forwarded = _httpContextAccessor.HttpContext?.Request?.Headers["X-Forwarded-For"];
 
             await _userTokenRepository.AddAsync(new UserToken
             {
@@ -109,7 +110,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 LoginProvider = JwtBearerDefaults.AuthenticationScheme,
                 UserId = user.Id,
                 RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default),
-                IpAddress = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString()
+                IpAddress = forwarded?.ToString()
             });
 
             var tokenLogin = new TokenModel
