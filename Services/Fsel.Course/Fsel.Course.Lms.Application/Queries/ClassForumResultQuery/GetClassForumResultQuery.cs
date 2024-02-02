@@ -109,11 +109,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId);
             var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId);
             var course = classForumResult.LessonResult?.Course;
-
+            var currentUnitId = classForumResult.LessonResult?.UnitId;
             var classForumResultModel = new ClassForumResultModel
             {
                 Id = classForumResult.Id,
                 Content = classForumResult.Content,
+                LessonResultId = classForumResult.LessonResultId,
+                CurrentUnitId = currentUnitId ?? default,
                 WordContent = classForumResult.WordContent,
                 WordCount = classForumResult.WordCount,
                 TimeCount = classForumResult.TimeCount,

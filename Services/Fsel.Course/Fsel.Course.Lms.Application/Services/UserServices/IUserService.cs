@@ -57,5 +57,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/student-focus-time/check-super-fire")]
         Task<IApiResponse<MethodResult<bool>>> CheckSuperFireModeAsync();
+        [Get("/user/get-by-student-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
     }
 }
