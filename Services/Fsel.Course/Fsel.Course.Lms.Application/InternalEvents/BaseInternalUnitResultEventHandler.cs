@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             int numberUnit = course.CourseUnitMockTests.First(p => p.UnitId == unitId).Number;
 
                             var startUnit = lessonResults.OrderBy(p => p.CreatedDate).FirstOrDefault()?.CreatedDate; // thời gian bắt đầu unit
-                            var endUnit = DateTime.UtcNow.ConvertTimeFromUtc(EnumZoneRegion.Vietnam);// thời gian kết thúc unit
+                            var endUnit = DateTime.UtcNow;// thời gian kết thúc unit
 
                             var skillScoreHtml = string.Empty;
 
@@ -126,7 +126,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             {
                                 UnitName = unit.Name,
                                 StartDate = startUnit?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
-                                EndDate = endUnit.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
+                                EndDate = endUnit.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
                                 Percent = percent.ToString(CultureInfo.CurrentCulture),
                                 TotalHour = ConvertHour((currentLearn + currentSocial + currentOther) * 60),
                                 TotalLearn = FormatTimeSpanAsClock(currentLearn * 60),
@@ -378,14 +378,25 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
 
-            var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, PercentOccupyUnitTest);
-
-            var (skillTestSkillScores, percentSkillTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest, PercentOccupySkillTest);
+            var unitTestSkillScores = await GetVideoTestSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest);
+            var skillTestSkillScores = await GetVideoTestSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest);
 
             return (unitTestSkillScores, skillTestSkillScores);
 
         }
 
+        public async Task<List<SkillScores>> GetVideoTestSkillScores(IList<Guid>? lessonResultIds, EnumTimeCodeType type)
+        {
+            ArgumentNullException.ThrowIfNull(lessonResultIds);
+            List<SkillScores> skillScores = new List<SkillScores>();
+            var videoResults = await _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
+            if (videoResults != null && videoResults.Any())
+            {
+                skillScores = videoResults.SelectMany(x => x.VideoSkillScores!).Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
+                return skillScores;
+            }
+            return skillScores;
+        }
 
         private async Task<(List<SkillScores>, double)> GetUnitSkillScores(IList<Guid>? lessonResultIds, EnumCourseType courseType)
         {
