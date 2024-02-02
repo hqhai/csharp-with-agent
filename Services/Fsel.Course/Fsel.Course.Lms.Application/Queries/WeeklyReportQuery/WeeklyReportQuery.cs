@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
     using Fsel.Common.Models;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
@@ -178,6 +179,16 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 weeklyReport.TotalLearn = FormatTimeSpanAsClock(totalLearn * 60);
                 weeklyReport.TotalSocial = FormatTimeSpanAsClock(totalSocial * 60);
                 weeklyReport.TotalOther = FormatTimeSpanAsClock(totalOther * 60);
+
+                var totalHour = totalLearn + totalSocial + totalOther;
+                var totalHourPrevious = previousLearn + previousSocial + previousOther;
+
+
+                weeklyReport.ColorTotal = totalHour > totalHourPrevious ? "#53BF65" : (totalHour == totalHourPrevious ? "#FFAE46" : "#C0404C");
+                weeklyReport.ColorLearn = totalLearn > previousLearn ? "#53BF65" : (totalLearn == previousLearn ? "#FFAE46" : "#C0404C");
+                weeklyReport.ColorSocial = totalSocial > previousSocial ? "#53BF65" : (totalSocial == previousSocial ? "#FFAE46" : "#C0404C");
+                weeklyReport.ColorOther = totalOther > previousOther ? "#53BF65" : (totalOther == previousOther ? "#FFAE46" : "#C0404C");
+
 
                 var unitResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.UpdatedDate >= lastFridayAt13 && p.UpdatedDate <= currentDate && p.StudentId == item.Id).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
 
