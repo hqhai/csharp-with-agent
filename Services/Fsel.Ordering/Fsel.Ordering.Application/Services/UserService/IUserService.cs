@@ -19,5 +19,8 @@ namespace Fsel.Ordering.Application.Services.UserService
 
         [Put("/student/update-student-class")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByClassAsync([Body] UpdateStudentByClassIdModel command);
+
+        [Put("/student/update-student-token")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
     }
 }

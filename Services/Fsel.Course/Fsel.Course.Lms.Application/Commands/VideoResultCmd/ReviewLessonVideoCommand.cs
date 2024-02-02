@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
-            var videoTimeCodeResults = video.VideoTimeCodes.Select(x => x.VideoTimeCodeResults).ToList();
+            var videoTimeCodeResults = video.VideoTimeCodes.Where(x => x.VideoTimeCodeResults.Any()).Select(x => x.VideoTimeCodeResults).ToList();
             if (videoTimeCodeResults.Count != video.VideoTimeCodes.Count)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNotCompleted), nameof(videoTimeCodeResults));
@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             return videoResult;
         }
 
-        private static SkillScores GetSkillScore(IGrouping<EnumCourseSkill, SkillScores>? x)
+        private static SkillScores GetSkillScore(IGrouping<EnumCourseSkill, SkillScores> x)
         {
             SkillScores skillScores = new SkillScores();
             skillScores.Skill = x.Key;

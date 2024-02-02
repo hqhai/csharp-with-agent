@@ -119,7 +119,7 @@ namespace Fsel.Training.Api.Controllers
         /// <summary>
         /// Search Class Forum
         /// </summary>
-        [HttpGet("search-class")]
+        [HttpGet("search-class")] 
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchClass([FromQuery] Application.Queries.ClassQuery.Admin.SearchClassQuery query)
@@ -161,6 +161,18 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> GetListClassByStudentId([FromRoute] Guid studentId)
         {
             MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(new GetListClassByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Class Course by StudentId
+        /// </summary>
+        [HttpPost("classes-by-studentids/diffirent-course")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListClassByStudentIds([FromBody] GetListClassBySpecificStudentIdsQuery query)
+        {
+            MethodResult<IList<CompetitionClassStudentModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

@@ -7,7 +7,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class TestResultRankingModel : BaseScoreResultModel
     {
         public bool IsCurrentStudent { get; set; }
-        public int CorrectQuestion { get; set; }
         public double? WorkingTime { get; set; }
 
         private string? _avatarPath;
@@ -18,7 +17,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         }
 
         public string? FullName { get; set; }
-
         public double? Score { get; set; }
     }
 }

@@ -4,10 +4,10 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumCourseSkill
     {
-        Listening,
-        Speaking,
         Reading,
+        Listening,
         Writing,
+        Speaking,
         Vocabulary,
         Grammar
     }

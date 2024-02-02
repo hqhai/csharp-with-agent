@@ -11,16 +11,26 @@ namespace Fsel.Shared.Constants
         public const string GameCenterFileName = "Resources//GameCenterConfig.json";
         public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
         public const string PlatformFileName = "Resources//Platform.json";
+        public const string AcademicStudentsName = "Resources//AcademicStudents.json";
+        public const string AcademicStudentsTestName = "Resources//AcademicStudents.Testing.json";
+        public const string AcademicStudentsStagingName = "Resources//AcademicStudents.Staging.json";
         public const string RoleFileName = "Resources//Role.json";
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
 
         public const string ZMatter = "Resources//ZMatter.json";
         public const string SpaceShip = "Resources//SpaceShip.json";
+        public const string Character = "Resources//Character.json";
 
         public const string GameplayRuleConfig = "Resources//GameplayRuleConfig.json";
 
         public const string StudentTagName = "Resources//StudentTagName.json";
         public const string AvatarImage = "Resources//AvatarImage.json";
         public const string TokenConfig = "Resources//TokenConfig.json";
+        public const string PrivateKeyUrBox = "Resources//UrBox//private_key_rsa";
+        public const string I18NCredentialsFilePath = "Resources//file-i18n.json";
+
+        public const string BandScoreFileName = "Resources//BandScores.json";
+        public const string LeaderBoardPercentFileName = "Resources//LeaderBoardScorePercentage.json";
+        public const string Payoo = "Resources//Payoo.xml";
     }
 }

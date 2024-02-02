@@ -10,5 +10,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public DateTime DailyDate { get; set; }
         public bool IsGiftReceive { get; set; }
         public int LevelOfGift { get; set; }
+        public Guid StudentId { get; set; }
     }
 }

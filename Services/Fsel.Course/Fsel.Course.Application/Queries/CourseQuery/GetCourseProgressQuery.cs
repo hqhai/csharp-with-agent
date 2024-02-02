@@ -48,7 +48,6 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             var query = _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseResults).Where(x => x.CourseResults.Any() && x.CourseUnitMockTests.Any(x => !x.UnitId.HasValue && !x.MockTestId.HasValue && !x.FinalTestId.HasValue));
 
-
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower(CultureInfo.CurrentCulture).Trim().Contains(request.Keyword.ToLower(CultureInfo.CurrentCulture).Trim()));
@@ -56,7 +55,6 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             if (request.CourseLevel != null)
             {
                 query = query.Where(x => x.CourseLevel == request.CourseLevel);
-
             }
 
             var result = await _courseRepository.GetListByPageAsync<CourseModel>(query, request, cancellationToken);
@@ -76,7 +74,6 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             {
                 //Check điều kiện bản ghi hiện tại
                 bool conditionSetStatus = await CheckConditionToSetStatus(item);
-
                 if (string.IsNullOrEmpty(item.Type))
                 {
                     item.IsUsed = null;
@@ -84,7 +81,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                 else if (conditionSetStatus)
                 {
                     var courseUnitMockTestNext = courseUnitMockTests[courseUnitMockTests.IndexOf(item) + 1]; // Lấy bản ghi liền kề sau
-                    item.IsUsed = courseUnitMockTestNext != null && !await CheckConditionToSetStatus(courseUnitMockTestNext); // Check điều kiện bản ghi liền kề sau 
+                    item.IsUsed = courseUnitMockTestNext != null && !await CheckConditionToSetStatus(courseUnitMockTestNext); // Check điều kiện bản ghi liền kề sau
                 }
                 else
                 {
@@ -94,7 +91,6 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             return courseUnitMockTests;
         }
 
-      
         private async Task<bool> CheckConditionToSetStatus(CourseUnitMockTestModel courseUnitMockTest)
         {
             bool isValid = false;
@@ -103,7 +99,6 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             {
                 var finalTestResults = await _finalTestResultRepository.Queryable.AnyAsync(x => x.CourseId == courseUnitMockTest.CourseId && x.FinalTestId == courseUnitMockTest.FinalTestId && x.Status != EnumResultStatus.Unfinished);
                 isValid = finalTestResults;
-
             }
             else if (courseUnitMockTest?.MockTest != null)
             {
@@ -114,11 +109,9 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             {
                 var unitResults = await _unitResultRepository.Queryable.AnyAsync(x => x.CourseId == courseUnitMockTest.CourseId && x.UnitId == courseUnitMockTest.UnitId && x.Status != EnumResultStatus.Unfinished);
                 isValid = unitResults;
-
             }
 
             return isValid;
-
         }
     }
 }

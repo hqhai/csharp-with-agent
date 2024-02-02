@@ -24,13 +24,15 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     public class GetMockTestResultReportQueryHandler : IRequestHandler<GetMockTestResultReportQuery, MethodResult<MockTestResultReportModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMapper _mapper;
 
-        public GetMockTestResultReportQueryHandler(IMockTestResultRepository mockTestResultRepository, SectionGroupConverter sectionGroupConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMapper mapper)
+        public GetMockTestResultReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionGroupConverter sectionGroupConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
+            _mockTestRepository = mockTestRepository;
             _sectionGroupConverter = sectionGroupConverter;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mapper = mapper;
@@ -41,29 +43,36 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<MockTestResultReportModel>();
 
-            var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.Id == request.MockTestResultId)
-                                            .Include(x => x.MockTest)
-                                            .ThenInclude(x => x!.MockTestSections)
-                                            .ThenInclude(x => x.SectionGroup)
-                                            .ThenInclude(x => x!.MockTestScores.Where(x => x.MockTestResultId == request.MockTestResultId))
+            var mockTestResult = await _mockTestResultRepository.Queryable
+                                            .Include(x => x!.MockTestScores)
+                                            .Where(x => x.Id == request.MockTestResultId)
                                             .FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
-            methodResult.Result = await GetMockTestReport(mockTestResult);
+
+            var mockTest = await _mockTestRepository.Queryable.Where(x => x.Id == mockTestResult.MockTestId)
+                                            .Include(x => x!.MockTestSections)
+                                            .ThenInclude(x => x.SectionGroup)
+                                            .FirstOrDefaultAsync(cancellationToken);
+            if (mockTest == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
+                return methodResult;
+            }
+
+            methodResult.Result = GetMockTestReport(mockTestResult, mockTest);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<MockTestResultReportModel> GetMockTestReport(MockTestResult mockTestResult)
+        private MockTestResultReportModel GetMockTestReport(MockTestResult mockTestResult, MockTest mockTest)
         {
             var query = _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id);
             var mockTestResultDto = _mapper.Map<MockTestResultReportModel>(mockTestResult);
-            mockTestResultDto.CorrectQuestion = await query.Where(x => x.IsCorrect == true).CountAsync();
-            mockTestResultDto.TotalQuestion = await query.CountAsync();
-            mockTestResultDto.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult);
+            mockTestResultDto.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
             return mockTestResultDto;
         }
     }
