@@ -9,7 +9,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid VideoTimeCodeId { get; set; }
         public double RetryWorkingTime { get; set; }
         public double RemainingTime { get; set; }
-        public int? TokenQuestionReward { get; set; }
         public bool IsWorking { get; set; }
         public int? CorrectCountUngraded { get; set; }
         public int? CorrectTotalUngraded { get; set; }

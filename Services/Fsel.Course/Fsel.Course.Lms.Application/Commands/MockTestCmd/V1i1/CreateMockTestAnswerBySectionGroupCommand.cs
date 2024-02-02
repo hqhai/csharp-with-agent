@@ -22,7 +22,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -213,12 +212,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private async Task UpdateUserToken(MockTestResult mockTestResult)
         {
-            var tokens = new List<int?> { mockTestResult.TokenDone, mockTestResult.TokenHighestStreak, mockTestResult.TokenQuestionReward, mockTestResult.TokenSuperFire };
-            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-            {
-                NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
-                StudentId = mockTestResult.StudentId,
-            }).ConfigureAwait(false);
+            //var tokens = new List<int?> { mockTestResult.TokenDone, mockTestResult.TokenHighestStreak, mockTestResult.TokenQuestionReward, mockTestResult.TokenSuperFire };
+            //await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+            //{
+            //    NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
+            //    StudentId = mockTestResult.StudentId,
+            //}).ConfigureAwait(false);
         }
 
         private async Task<MockTestResult> GetMockTestResult(IList<SkillScores>? skillScores, MockTestResult mockTestResult, bool isSkillTest)
