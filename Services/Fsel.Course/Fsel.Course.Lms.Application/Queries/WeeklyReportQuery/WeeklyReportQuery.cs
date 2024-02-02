@@ -223,6 +223,28 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
 
                             foreach (var ls in lessonResultsDone[i].SkillScores!)
                             {
+                                //if (i > 0)
+                                //{
+                                //    var skillScore = lessonResultsDone[i - 1].SkillScores?.FirstOrDefault(p => p.Skill == ls.Skill);
+                                //    if (skillScore != null)
+                                //    {
+                                //        var (@class, skillName, icon) = ConvertEnum(skillScore.Skill);
+                                //        var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill2, icon, skillName, ls.Percent, 100 - ls.Percent, skillScore.Percent, ls.Percent > skillScore.Percent ? "#53BF65" : (ls.Percent == skillScore.Percent ? "#FFAE46" : "#C0404C"), ls.Percent);
+                                //        unitName += html;
+                                //    }
+                                //    else
+                                //    {
+                                //        var (@class, skillName, icon) = ConvertEnum(ls.Skill);
+                                //        var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
+                                //        unitName += html;
+                                //    }
+                                //}
+                                //else
+                                //{
+                                //    var (@class, skillName, icon) = ConvertEnum(ls.Skill);
+                                //    var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
+                                //    unitName += html;
+                                //}
                                 var (@class, skillName, icon) = ConvertEnum(ls.Skill);
                                 var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
                                 unitName += html;
