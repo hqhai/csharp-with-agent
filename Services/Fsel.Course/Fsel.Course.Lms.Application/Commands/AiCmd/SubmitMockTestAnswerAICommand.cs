@@ -6,10 +6,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -25,15 +25,15 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly IMockTestAISettingRepository _aiGradeSettingRepository;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IMediator _mediator;
-        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, IMockTestResultRepository mockTestResultRepository)
+        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository)
         {
             _submitAIResponsePublisher = submitAIResponsePublisher;
             _mediator = mediator;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _aiGradeSettingRepository = aiGradeSettingRepository;
-            _mockTestResultRepository = mockTestResultRepository;
+            _sectionGroupResultRepository = sectionGroupResultRepository;
         }
 
         public async Task<bool> Handle(SubmitMockTestAnswerAICommand request, CancellationToken cancellationToken)
@@ -87,29 +87,40 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             var lexicalResource = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.LexicalResource);
             var grammaticalRange = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.GrammaticalRange);
 
-            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
+            var sectionGroupResult = _sectionGroupResultRepository.Queryable.FirstOrDefault(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId);
 
-            if (mockTestResult == null)
-            {
-                return true;
-            }
-
-            var skillScores = mockTestResult.SkillScores?.Where(x => !(x.Skill == EnumCourseSkill.Writing)).ToList();
 
             double averageScore = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
 
-            var skillScore = mockTestResult.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
+            var skillScore = sectionGroupResult!.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
 
-            if (skillScore != null)
+            var skillScores = sectionGroupResult!.SkillScores?.ToList();
+
+            if (skillScores == null)
             {
-                skillScore.CorrectCount = averageScore;
+                skillScores = new List<SkillScores>();
+            }
+            if (skillScore == null)
+            {
+                skillScore = new SkillScores
+                {
+                    CorrectCount = averageScore,
+                    TotalCount = 36,
+                    Skill = EnumCourseSkill.Writing,
+                    Scores = averageScore,
+                };
+                skillScores!.Add(skillScore);
+            }
+            else
+            {
+                averageScore = CaculateAverageScoreWritingSection(skillScore!, averageScore);
+                skillScore!.CorrectCount = averageScore;
                 skillScore.TotalCount = 36;
                 skillScore.Skill = EnumCourseSkill.Writing;
                 skillScore.Scores = averageScore;
-                skillScores!.Add(skillScore);
             }
 
-            mockTestResult.SkillScores = skillScores;
+            sectionGroupResult.SkillScores = skillScores;
 
             string? gradingAiFeedBack = ConvertHelper.Serialize(gradingAiFeedBackResult);
 
@@ -120,8 +131,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 _mockTestAnswerRepository.Update(mockTestAnswer);
                 await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                _sectionGroupResultRepository.Update(sectionGroupResult);
+                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
@@ -167,6 +178,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             double average = totalScore / bandScoreDescriptions.Length;
 
             return NumberHelper.RoundNumberDouble(average, true);
+        }
+
+
+        private static double CaculateAverageScoreWritingSection(SkillScores skillScore, double average)
+        {
+            return NumberHelper.RoundNumberDouble((skillScore.Scores + average * 2) / 3, true);
         }
 
     }
