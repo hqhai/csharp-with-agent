@@ -84,11 +84,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             try
                             {
                                 previousCourseUnitMockTest = GetCourseUnitMockTest(course.CourseUnitMockTests.ToList(), unitId, "UnitId", -1);
-                                nextCourseUnitMockTest = GetCourseUnitMockTest(course.CourseUnitMockTests.ToList(), unitId, "UnitId", 1);
                             }
                             catch
                             {
                                 previousCourseUnitMockTest = null;
+                            }
+                            try
+                            {
+                                nextCourseUnitMockTest = GetCourseUnitMockTest(course.CourseUnitMockTests.ToList(), unitId, "UnitId", 1);
+                            }
+                            catch
+                            {
                                 nextCourseUnitMockTest = null;
                             }
 
