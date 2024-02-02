@@ -386,7 +386,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             int hours = timeSpan.Hours;
             int minutes = timeSpan.Minutes;
 
-            return $"{hours}H{minutes:D2}ph";
+            return $"{hours}h{minutes:D2}ph";
 
         }
         private static string ConvertHour(long milliseconds)
