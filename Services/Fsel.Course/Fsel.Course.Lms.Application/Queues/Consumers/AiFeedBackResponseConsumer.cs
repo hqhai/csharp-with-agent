@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 SectionId = data.SectionId,
                 WordContent = data.WordContent,
                 MockTestResultId = data.MockTestResultId,
-                SectionGroupId = data.SectionGroupId,
+                SectionGroupId = data.SectionGroupId
             }).ConfigureAwait(false);
         }
     }

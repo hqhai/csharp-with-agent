@@ -168,7 +168,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         SectionId = (Guid)item.SectionId,
                         SectionGroupId = sectionGroupId,
                         MockTestResultId = mockTestResult.Id,
-                        WordContent = item.Answer?.ToString() ?? string.Empty,
+                        WordContent = item.Answer?.ToString() ?? string.Empty
                     }, cancellationToken);
                 }
             }
