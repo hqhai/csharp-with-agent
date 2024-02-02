@@ -52,6 +52,9 @@
     <None Update="Resources\WeeklyReport2.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\WeeklyReport3.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\WeeklyReport4.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
