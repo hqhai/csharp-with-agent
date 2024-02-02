@@ -208,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 {
                     mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                     mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
-                    mockTestResult = await GetMockTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList(), mockTestResult, isSkillTest);
+                    mockTestResult = await GetMockTestResult(sectionGroupResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList(), mockTestResult, isSkillTest);
                     await UpdateUserToken(mockTestResult).ConfigureAwait(false);
                 }
             }
