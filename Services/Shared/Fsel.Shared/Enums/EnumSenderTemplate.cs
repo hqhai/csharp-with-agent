@@ -15,6 +15,7 @@ namespace Fsel.Shared.Enums
         Unit1Report,
         Unit2AboveReport,
         WeeklyReport,
+        WeeklyReport2,
         WeeklyReport4,
     }
 }

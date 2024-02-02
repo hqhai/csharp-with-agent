@@ -33,7 +33,8 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMediator _mediator;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
-        public WeeklyReportQueryHandler(IUserService userService, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, ICourseUnitMockTestRepository courseUnitMockTestRepository)
+        private readonly ICourseResultRepository _courseResultRepository;
+        public WeeklyReportQueryHandler(IUserService userService, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, ICourseUnitMockTestRepository courseUnitMockTestRepository, ICourseResultRepository courseResultRepository)
         {
             _userService = userService;
             _systemService = systemService;
@@ -41,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             _unitResultRepository = unitResultRepository;
             _mediator = mediator;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(WeeklyReportQuery request, CancellationToken cancellationToken)
@@ -70,6 +72,8 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             // Lấy ngày thứ 6 gần nhất lúc 13h
             DateTime lastFridayAt13 = currentDate.AddDays(-6);
 
+            DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
+
             // Lấy danh sách ngày từ thứ 7 tuần trước đến giờ
             var dates = GenerateDateList(lastFridayAt13, currentDate);
 
@@ -93,6 +97,22 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 } }
             });
 
+            var previousFeatureAccessTimeResults = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
+            {
+                Filters = new List<GenericFilterModel>() { new GenericFilterModel()
+                {
+                    Property = "CreatedDate",
+                    Operator = EnumFilterOperator.GreaterThan,
+                    Value = lastLastFridayAt13
+                },
+                new GenericFilterModel()
+                {
+                    Property = "CreatedDate",
+                    Operator = EnumFilterOperator.LessThan,
+                    Value = lastFridayAt13
+                }}
+            });
+
             foreach (var item in students)
             {
                 var studentDailyStreaks = studentDailyStreakResults.Content?.Result?.Where(p => p.StudentId == item.Id).Select(p => p.DailyDate.Date).Distinct().ToList();
@@ -104,18 +124,45 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                     EndDate = currentDate.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
                     TotalDay = studentDailyStreaks?.Count.ToString(CultureInfo.CurrentCulture),
                     ContinueLearn = "https://lms-testing.fsel.edu.vn/home/home-chart"
+                };
+
+                var dailyStreakResult = await _userService.GetDailyStreak(item.Id);
+                var dailyStreak = dailyStreakResult.Content?.Result;
+                if (dailyStreak != null && dailyStreak.IsDaysStreakIncrease)
+                {
+                    weeklyReport.NoDailyStreak = HtmlSetting.Display;
+                    weeklyReport.DailyStreak = null;
+                    weeklyReport.TotalDailyStreak = dailyStreak.NumberOfDaysStreak.ToString(CultureInfo.CurrentCulture);
                 }
-                ;
+                else
+                {
+                    weeklyReport.NoDailyStreak = null;
+                    weeklyReport.DailyStreak = HtmlSetting.Display;
+                }
 
                 CheckAndAssignStatus(weeklyReport, studentDailyStreaks, dates);
 
- 
                 var featureAccessTimes = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
-                if (featureAccessTimes?.Count == 0)
-                {
-                    await SendWeekly(item.Human?.Email, weeklyReport, EnumSenderTemplate.WeeklyReport4, cancellationToken);
-                    return methodResult;
-                }
+
+                var previousFeatureAccessTimes = previousFeatureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
+
+                //var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == featureAccessTimes.Select(x => x.CourseId).FirstOrDefault() && p.StudentId == item.Id, cancellationToken);
+
+                //CultureInfo ci = CultureInfo.CurrentCulture;
+
+                //int weekCourseResult = ci.Calendar.GetWeekOfYear(courseResult?.CreatedDate ?? default, CalendarWeekRule.FirstFullWeek, DayOfWeek.Saturday);
+
+                //int weekFeatureAccessTime = ci.Calendar.GetWeekOfYear(featureAccessTimes.OrderBy(x => x.CreatedDate).Select(x => x.CreatedDate).FirstOrDefault() ?? default, CalendarWeekRule.FirstFullWeek, DayOfWeek.Saturday);
+
+                var previousLearn = ConvertSecondsToMinutes(previousFeatureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest).Sum(p => p.AccessTime) ?? 0);
+                var previousSocial = ConvertSecondsToMinutes(previousFeatureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0);
+                var previousOther = ConvertSecondsToMinutes(previousFeatureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0);
+
+                weeklyReport.PreviousTotal = ConvertHour((previousLearn + previousSocial + previousOther) * 60);
+                weeklyReport.PreviousLearn = FormatTimeSpanAsClock(previousLearn * 60);
+                weeklyReport.PreviousSocial = FormatTimeSpanAsClock(previousSocial * 60);
+                weeklyReport.PreviousOther = FormatTimeSpanAsClock(previousOther * 60);
+
 
                 var totalLearn = ConvertSecondsToMinutes(featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest).Sum(p => p.AccessTime) ?? 0);
                 var totalSocial = ConvertSecondsToMinutes(featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0);
@@ -187,7 +234,30 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                     }
                 }
                 weeklyReport.SkillScores = unitName;
-                await SendWeekly(item.Human?.Email, weeklyReport,EnumSenderTemplate.WeeklyReport ,cancellationToken);
+
+
+                if (previousFeatureAccessTimes?.Count == 0 && featureAccessTimes?.Count == 0)
+                {
+                    weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport4;
+                }
+                else if (previousFeatureAccessTimes?.Count == 0)
+                {
+                    weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport;
+                    weeklyReport.NoDailyStreak = null;
+                    weeklyReport.DailyStreak = HtmlSetting.Display;
+
+                }
+                else
+                {
+                    var totalDailyStreak = dailyStreak?.NumberOfDaysStreak;
+
+                    weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport2;
+                    weeklyReport.NoDailyStreak = totalDailyStreak >= 7 ? HtmlSetting.Display : null;
+                    weeklyReport.DailyStreak = totalDailyStreak >= 7 ? null : HtmlSetting.Display;
+                    weeklyReport.TotalDailyStreak = dailyStreak?.NumberOfDaysStreak.ToString(CultureInfo.CurrentCulture);
+                }
+
+                await SendWeekly(item.Human?.Email, weeklyReport ,cancellationToken);
             }
             return methodResult;
         }
@@ -211,14 +281,14 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             }
         }
 
-        private async Task SendWeekly(string? email, WeeklyReportModel model, EnumSenderTemplate template, CancellationToken cancellationToken)
+        private async Task SendWeekly(string? email, WeeklyReportModel model, CancellationToken cancellationToken)
         {
             var sendResult = await _mediator.Send(new SenderCommand
             {
                 Email = email,
-                Subject = template == EnumSenderTemplate.WeeklyReport ? SenderSettings.TitleWeekly1 : SenderSettings.TitleWeekly4,
+                Subject = model.SenderTemplate == EnumSenderTemplate.WeeklyReport ? SenderSettings.TitleWeekly1 : (model.SenderTemplate == EnumSenderTemplate.WeeklyReport2 ? SenderSettings.TitleWeekly2 : SenderSettings.TitleWeekly4),
                 Params = model,
-                Template = template,
+                Template = model.SenderTemplate,
             }, cancellationToken).ConfigureAwait(false);
         }
         private static int ConvertSecondsToMinutes(long seconds)
