@@ -9,12 +9,12 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
     using Fsel.Common.Enums;
     using Fsel.Common.Models;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.SenderTemplates;
@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
 
     public class WeeklyReportQuery : IRequest<MethodResult<bool>>
     {
+        public ICollection<Guid>? StudentIds { get; set; }
     }
     public class WeeklyReportQueryHandler : IRequestHandler<WeeklyReportQuery, MethodResult<bool>>
     {
@@ -47,20 +48,27 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var studentResults = await _userService.ExecuteListQueryAsync(new BaseQueryModel { IncludePaths = new List<string>() { "Human" } });
+            var students = new List<StudentModel>();
 
+            if (request.StudentIds == null || request.StudentIds.Count == 0)
+            {
+                var studentResults = await _userService.ExecuteListQueryAsync(new BaseQueryModel { IncludePaths = new List<string>() { "Human" } });
+                students = studentResults.Content?.Result?.ToList();
 
-            var students = studentResults.Content?.Result;
+            }
+            else
+            {
+                var studentResults = await _userService.GetStudentsByStudentIdsAsync(request.StudentIds.ToList());
+                students = studentResults.Content?.Result?.ToList();
+            }
             if (students == null)
             {
                 return methodResult;
             }
-
             DateTime currentDate = DateTime.UtcNow;
 
             // Lấy ngày thứ 6 gần nhất lúc 13h
             DateTime lastFridayAt13 = currentDate.AddDays(-6);
-            
 
             // Lấy danh sách ngày từ thứ 7 tuần trước đến giờ
             var dates = GenerateDateList(lastFridayAt13, currentDate);

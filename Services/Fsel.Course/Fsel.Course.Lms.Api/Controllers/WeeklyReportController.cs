@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Refit;
 
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [ApiVersion(ApiSettings.APIVersion1)]
@@ -27,12 +28,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get video time code ranking
         /// </summary>
-        [HttpGet("weekly-report")]
+        [HttpPost("weekly-report")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetVideoTimeCodeResult()
+        public async Task<IActionResult> GetVideoTimeCodeResult([FromBody] WeeklyReportQuery query)
         {
-            var queryResult = await _mediator.Send(new WeeklyReportQuery()).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
