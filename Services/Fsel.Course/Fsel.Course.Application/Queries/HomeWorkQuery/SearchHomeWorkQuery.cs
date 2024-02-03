@@ -77,6 +77,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
             var lists = await homeWorkQuery
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
+                    .OrderByDescending(x => x.CreatedDate)
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
