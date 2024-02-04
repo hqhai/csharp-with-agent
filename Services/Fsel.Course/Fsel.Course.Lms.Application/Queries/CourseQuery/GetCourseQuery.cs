@@ -161,7 +161,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 CourseId = courseDto.Id
             };
             courseDto.CourseResult = _mapper.Map<CourseResultModel>(course.CourseResults.FirstOrDefault(x => x.StudentId == studentId));
-            courseDto.CourseTeachers = _mapper.Map<IList<CourseTeacherModel>>(course.CourseTeachers);
+            courseDto.CourseTeachers = _mapper.Map<IList<CourseTeacherModel>>(course.CourseTeachers.OrderBy(x => x.CreatedDate));
             courseDto.CourseUnitMockTests = await GetCourseUnitMockTestsAsync(course.CourseUnitMockTests.ToList(), course.CourseType, studentId);
             return courseDto;
         }
@@ -185,13 +185,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 var courseUnitMockTestDto = _mapper.Map<CourseUnitMockTestModel>(courseUnitMockTest);
                 if (courseUnitMockTestDto.UnitId.HasValue)
                 {
-                    var unit = units.FirstOrDefault(x => x.Id == courseUnitMockTestDto.UnitId.Value);
-                    courseUnitMockTestDto.Unit = unit;
+                    courseUnitMockTestDto.Unit = units.FirstOrDefault(x => x.Id == courseUnitMockTestDto.UnitId.Value);
                 }
                 else if (courseUnitMockTestDto.MockTestId.HasValue && mockTests.Any())
                 {
-                    var mockTest = mockTests.FirstOrDefault(x => x.Id == courseUnitMockTestDto.MockTestId.Value);
-                    courseUnitMockTestDto.MockTest = mockTest;
+                    courseUnitMockTestDto.MockTest = mockTests.FirstOrDefault(x => x.Id == courseUnitMockTestDto.MockTestId.Value);
                 }
                 else if (courseUnitMockTestDto.FinalTestId.HasValue)
                 {
