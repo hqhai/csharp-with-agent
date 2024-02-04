@@ -207,9 +207,17 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var units = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
                                                        .Include(x => x.UnitLessons)
                                                        .Where(x => unitIds.Contains(x.Id))
+                                                       .Select(x => new UnitModel
+                                                       {
+                                                           Id = x.Id,
+                                                           Name = x.Name,
+                                                           Code = x.Code,
+                                                           CourseLevel = x.CourseLevel,
+                                                           UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault()),
+                                                       })
                                                        .AsNoTracking()
                                                        .ToListAsync();
-            return _mapper.Map<IList<UnitModel>>(units);
+            return units;
         }
 
         private async Task<List<MockTestModel>> GetMockTests(IList<Guid> mockTestIds, Guid courseId, Guid? studentId)
@@ -218,88 +226,37 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                                                     .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
                                                                 .Include(x => x.MockTestSections)
                                                                 .Where(y => mockTestIds.Contains(y.Id))
+                                                                .Select(x => new MockTestModel
+                                                                {
+                                                                    Id = x.Id,
+                                                                    ExecutionTime = x.ExecutionTime,
+                                                                    MockTestType = x.MockTestType,
+                                                                    Name = x.Name,
+                                                                    MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault()),
+                                                                })
                                                                 .AsNoTracking()
                                                                 .ToListAsync();
-            return _mapper.Map<List<MockTestModel>>(mockTests);
+
+            return mockTests;
         }
 
-        private async Task<FinalTestModel> GetFinalTest(CourseUnitMockTest courseUnitMockTest, Guid? studentId)
+        private async Task<FinalTestModel?> GetFinalTest(CourseUnitMockTest courseUnitMockTest, Guid? studentId)
         {
             var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId))
                                                                     .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
                                                                 .Include(x => x.FinalTestSections)
                                                                 .Where(y => y.Id == courseUnitMockTest.FinalTestId)
+                                                                .Select(x => new FinalTestModel
+                                                                {
+                                                                    Id = x.Id,
+                                                                    ExecutionTime = x.ExecutionTime,
+                                                                    FinalTestLevel = x.FinalTestLevel,
+                                                                    Name = x.Name,
+                                                                    FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTestResults.FirstOrDefault()),
+                                                                })
                                                                 .AsNoTracking()
                                                                 .FirstOrDefaultAsync();
-            return _mapper.Map<FinalTestModel>(finalTest);
-        }
-
-        public async Task<CourseModel?> GetIncludeCourseResult(Guid id, Guid? studentId, string? classCode)
-        {
-            return await _courseRepository.Queryable.Where(x => x.Id == id)
-                         .AsNoTracking()
-                         .Select(x => new CourseModel
-                         {
-                             Id = x.Id,
-                             Code = x.Code,
-                             CourseLevel = x.CourseLevel,
-                             CourseType = x.CourseType,
-                             InstructionContent = x.InstructionContent,
-                             Name = x.Name,
-                             Status = x.Status,
-                             CourseResult = _mapper.Map<CourseResultModel>(x.CourseResults.FirstOrDefault(x => x.StudentId == studentId)),
-                             CourseTeachers = _mapper.Map<IList<CourseTeacherModel>>(x.CourseTeachers),
-                             CourseClass = new CourseClassModel
-                             {
-                                 Code = classCode,
-                                 CourseId = x.Id
-                             },
-                             CourseUnitMockTests = x.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder).ThenBy(x => x.CreatedDate).Select(x => new CourseUnitMockTestModel
-                             {
-                                 DisplayOrder = x.DisplayOrder,
-                                 CourseId = x.CourseId,
-                                 FinalTestId = x.FinalTestId,
-                                 MockTestId = x.MockTestId,
-                                 UnitId = x.UnitId,
-                                 FinalTest = x.FinalTest != null ? new FinalTestModel
-                                 {
-                                     Id = x.FinalTest.Id,
-                                     ExecutionTime = x.FinalTest.ExecutionTime,
-                                     FinalTestLevel = x.FinalTest.FinalTestLevel,
-                                     Name = x.FinalTest.Name,
-                                     FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTest.FinalTestResults.AsQueryable().Include(x => x.SectionGroupResults)
-                                                                 .Include(x => x.FinalTest)
-                                                                 .ThenInclude(x => x!.FinalTestSections)
-                                                                 .Where(y => y.StudentId == studentId && y.CourseId == x.CourseId)
-                                                                 .AsNoTracking().FirstOrDefault()),
-                                 } : null,
-                                 MockTest = x.MockTest != null ? new MockTestModel
-                                 {
-                                     Id = x.MockTest.Id,
-                                     ExecutionTime = x.MockTest.ExecutionTime,
-                                     MockTestType = x.MockTest.MockTestType,
-                                     Name = x.MockTest.Name,
-                                     MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTest.MockTestResults.AsQueryable().Include(x => x.SectionGroupResults)
-                                                                 .Include(x => x.MockTest)
-                                                                 .ThenInclude(x => x!.MockTestSections)
-                                                                 .Where(y => y.StudentId == studentId && y.CourseId == x.CourseId)
-                                                                 .AsNoTracking().FirstOrDefault()),
-                                 } : null,
-                                 Unit = x.Unit != null ? new UnitModel
-                                 {
-                                     Id = x.Unit.Id,
-                                     Name = x.Unit.Name,
-                                     Code = x.Unit.Code,
-                                     CourseLevel = x.Unit.CourseLevel,
-                                     UnitResult = _mapper.Map<UnitResultModel>(x.Unit.UnitResults.AsQueryable().Include(x => x.Unit).ThenInclude(x => x!.LessonResults.Where(x => x.StudentId == studentId))
-                                                                 .Include(x => x.Unit).ThenInclude(x => x!.UnitLessons)
-                                                                 .Where(y => y.StudentId == studentId && y.CourseId == x.CourseId)
-                                                                 .AsNoTracking().FirstOrDefault()),
-                                 } : null,
-                                 Type = x.FinalTest != null ? nameof(x.FinalTest) : x.MockTest != null ? nameof(x.MockTest) : x.Unit != null ? nameof(x.Unit) : null
-                             }).ToList()
-                         })
-                         .FirstOrDefaultAsync();
+            return finalTest;
         }
 
         public async Task UpdateCourse(Course? course, Guid? studentId, CancellationToken cancellationToken)
