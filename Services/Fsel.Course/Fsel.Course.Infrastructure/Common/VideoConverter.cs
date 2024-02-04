@@ -590,7 +590,7 @@ namespace Fsel.Course.Infrastructure.Common
                 _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
-            return updateVideoTimeCodeAnswers?.Count(x => x.IsCorrect == true) ?? default;
+            return updateVideoTimeCodeAnswers?.Where(x => x.Question != null && !x.Question.Ungraded && x.Question.QuestionType != EnumQuestionType.ExercisePreparation)?.Count(x => x.IsCorrect == true) ?? default;
         }
 
         private static EnumAnswerStatus GetAnswerStatus(EnumTimeCodeType? timeCodeType, bool isSubmit, int correctCount, int correctTotal)
