@@ -162,22 +162,21 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             };
             courseDto.CourseResult = _mapper.Map<CourseResultModel>(course.CourseResults.FirstOrDefault(x => x.StudentId == studentId));
             courseDto.CourseTeachers = _mapper.Map<IList<CourseTeacherModel>>(course.CourseTeachers.OrderBy(x => x.CreatedDate));
-            courseDto.CourseUnitMockTests = await GetCourseUnitMockTestsAsync(course.CourseUnitMockTests.ToList(), course.CourseType, studentId);
+            courseDto.CourseUnitMockTests = await GetCourseUnitMockTestsAsync(course.CourseUnitMockTests.ToList(), course, studentId);
             return courseDto;
         }
 
-        private async Task<IList<CourseUnitMockTestModel>> GetCourseUnitMockTestsAsync(IList<CourseUnitMockTest> courseUnitMockTests, EnumCourseType courseType, Guid? studentId)
+        private async Task<IList<CourseUnitMockTestModel>> GetCourseUnitMockTestsAsync(IList<CourseUnitMockTest> courseUnitMockTests, Course course, Guid? studentId)
         {
             var courseUnitMockTestDtos = new List<CourseUnitMockTestModel>();
-            var courseId = courseUnitMockTests.Select(x => x.CourseId).FirstOrDefault();
             var unitIds = courseUnitMockTests.Where(x => x.UnitId.HasValue).Select(x => x.UnitId!.Value).ToList();
-            var units = await GetUnits(unitIds, courseId, studentId);
+            var units = await GetUnits(unitIds, course.Id, studentId, course.CourseType);
             var mockTests = new List<MockTestModel>();
 
-            if (courseType == EnumCourseType.Ielts)
+            if (course.CourseType == EnumCourseType.Ielts)
             {
                 var mockTestIds = courseUnitMockTests.Where(x => x.MockTestId.HasValue).Select(x => x.MockTestId!.Value).ToList();
-                mockTests = await GetMockTests(mockTestIds, courseId, studentId);
+                mockTests = await GetMockTests(mockTestIds, course.Id, studentId);
             }
 
             foreach (var courseUnitMockTest in courseUnitMockTests)
@@ -200,22 +199,35 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             return courseUnitMockTestDtos.OrderBy(x => x.DisplayOrder).ToList();
         }
 
-        private async Task<IList<UnitModel>> GetUnits(IList<Guid> unitIds, Guid courseId, Guid? studentId)
+        private async Task<IList<UnitModel>> GetUnits(IList<Guid> unitIds, Guid courseId, Guid? studentId, EnumCourseType courseType)
         {
-            var units = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
-                                                       .Include(x => x.UnitLessons)
-                                                       .Where(x => unitIds.Contains(x.Id))
-                                                       .Select(x => new UnitModel
-                                                       {
-                                                           Id = x.Id,
-                                                           Name = x.Name,
-                                                           Code = x.Code,
-                                                           CourseLevel = x.CourseLevel,
-                                                           UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault()),
-                                                       })
-                                                       .AsNoTracking()
-                                                       .ToListAsync();
-            return units;
+            var query = _unitRepository.Queryable;
+            if (courseType == EnumCourseType.Ielts)
+            {
+                query = query.Include(x => x.UnitResults.Where(x => x.CourseId == courseId && x.StudentId == studentId))
+                            .Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
+                            .Include(x => x.UnitLessons)
+                            .Include(x => x.UnitSkillMockTests)
+                                .ThenInclude(x => x.MockTest)
+                                .ThenInclude(x => x!.MockTestResults.Where(x => x.StudentId == studentId && x.CourseId == courseId));
+            }
+            else
+            {
+                query = query.Include(x => x.UnitResults.Where(x => x.CourseId == courseId && x.StudentId == studentId))
+                            .Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
+                            .Include(x => x.UnitLessons);
+            }
+            var units = await query.Where(x => unitIds.Contains(x.Id))
+                             .AsNoTracking()
+                             .ToListAsync();
+            return units.Select(x => new UnitModel
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Code = x.Code,
+                CourseLevel = x.CourseLevel,
+                UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault()),
+            }).ToList();
         }
 
         private async Task<List<MockTestModel>> GetMockTests(IList<Guid> mockTestIds, Guid courseId, Guid? studentId)
@@ -224,37 +236,35 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                                                     .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
                                                                 .Include(x => x.MockTestSections)
                                                                 .Where(y => mockTestIds.Contains(y.Id))
-                                                                .Select(x => new MockTestModel
-                                                                {
-                                                                    Id = x.Id,
-                                                                    ExecutionTime = x.ExecutionTime,
-                                                                    MockTestType = x.MockTestType,
-                                                                    Name = x.Name,
-                                                                    MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault()),
-                                                                })
                                                                 .AsNoTracking()
                                                                 .ToListAsync();
 
-            return mockTests;
+            return mockTests.Select(x => new MockTestModel
+            {
+                Id = x.Id,
+                ExecutionTime = x.ExecutionTime,
+                MockTestType = x.MockTestType,
+                Name = x.Name,
+                MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault()),
+            }).ToList();
         }
 
         private async Task<FinalTestModel?> GetFinalTest(CourseUnitMockTest courseUnitMockTest, Guid? studentId)
         {
-            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId))
+            var finalTests = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId))
                                                                     .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
                                                                 .Include(x => x.FinalTestSections)
                                                                 .Where(y => y.Id == courseUnitMockTest.FinalTestId)
-                                                                .Select(x => new FinalTestModel
-                                                                {
-                                                                    Id = x.Id,
-                                                                    ExecutionTime = x.ExecutionTime,
-                                                                    FinalTestLevel = x.FinalTestLevel,
-                                                                    Name = x.Name,
-                                                                    FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTestResults.FirstOrDefault()),
-                                                                })
                                                                 .AsNoTracking()
-                                                                .FirstOrDefaultAsync();
-            return finalTest;
+                                                                .ToListAsync();
+            return finalTests.Select(x => new FinalTestModel
+            {
+                Id = x.Id,
+                ExecutionTime = x.ExecutionTime,
+                FinalTestLevel = x.FinalTestLevel,
+                Name = x.Name,
+                FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTestResults.FirstOrDefault()),
+            }).FirstOrDefault();
         }
 
         public async Task UpdateCourse(Course? course, Guid? studentId, CancellationToken cancellationToken)
