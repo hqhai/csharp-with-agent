@@ -2,7 +2,9 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class VideoTimeCodeResultModel : BaseLearnResultModel
+    using Fsel.Course.Domain.IEntities;
+
+    public class VideoTimeCodeResultModel : BaseLearnResultModel, ITokenResult
     {
         public Guid VideoResultId { get; set; }
         public Guid? CurrentVideoTimeCodeId { get; set; }
@@ -12,5 +14,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsWorking { get; set; }
         public int? CorrectCountUngraded { get; set; }
         public int? CorrectTotalUngraded { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
     }
 }
