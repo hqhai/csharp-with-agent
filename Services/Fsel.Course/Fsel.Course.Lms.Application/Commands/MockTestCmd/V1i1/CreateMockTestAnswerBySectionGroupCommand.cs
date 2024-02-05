@@ -148,26 +148,30 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                     sectionGroupResult = answerResult.Result;
 
-                    if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
-                    {
-                        foreach (var item in request.Answers)
-                        {
-                            if (item.SectionId == null || sectionGroupResult == null)
-                            {
-                                continue;
-                            }
-                            await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
-                            {
-                                SectionId = (Guid)item.SectionId,
-                                MockTestResultId = mockTestResult.Id,
-                                WordContent = item.Answer?.ToString() ?? string.Empty,
-                            }, cancellationToken);
-                        }
-                    }
                 }
                 sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
                 return methodResult;
             });
+
+
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.FirstOrDefault() != null && request.IsSubmit)
+            {
+                var sectionGroupId = sectionGroup.Sections.FirstOrDefault()!.SectionGroupId;
+                foreach (var item in request.Answers!)
+                {
+                    if (item.SectionId == null)
+                    {
+                        continue;
+                    }
+                    await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
+                    {
+                        SectionId = (Guid)item.SectionId,
+                        SectionGroupId = sectionGroupId,
+                        MockTestResultId = mockTestResult.Id,
+                        WordContent = item.Answer?.ToString() ?? string.Empty
+                    }, cancellationToken);
+                }
+            }
 
             await UpdateMockTestResultAsync(mockTestResult, cancellationToken);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
@@ -204,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 {
                     mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                     mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
-                    mockTestResult = await GetMockTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList(), mockTestResult, isSkillTest);
+                    mockTestResult = await GetMockTestResult(sectionGroupResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList(), mockTestResult, isSkillTest);
                     await UpdateUserToken(mockTestResult).ConfigureAwait(false);
                 }
             }
@@ -225,9 +229,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private async Task<MockTestResult> GetMockTestResult(IList<SkillScores>? skillScores, MockTestResult mockTestResult, bool isSkillTest)
         {
-            ArgumentNullException.ThrowIfNull(skillScores);
-            mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
-            mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+            if (skillScores != null && skillScores.Any())
+            {
+                mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+            }
             mockTestResult.Status = EnumResultStatus.Done;
             mockTestResult.SkillScores = skillScores;
             mockTestResult = await GetTokenMockTestResult(mockTestResult, isSkillTest);
