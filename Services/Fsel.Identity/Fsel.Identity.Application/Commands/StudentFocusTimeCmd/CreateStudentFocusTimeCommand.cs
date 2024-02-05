@@ -17,11 +17,11 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Shared.Helpers;
 
     public class CreateStudentFocusTimeCommand : CreateStudentFocusTimeCommandModel, IRequest<MethodResult<StudentFocusTimeModel>>
     {
@@ -106,12 +106,13 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                       studentFocusTime.IsEstablished
                     )
                     {
-                        //var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
-                        //{
-                        //    Feature = EnumTokenFeature.FocusMode,
-                        //    Mission = EnumTokenMission.FocusTime
-                        //});
-                        //var tokenConfigResult = tokenConfig.Content?.Result;
+                        var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+                        {
+                            Feature = EnumTokenFeature.FocusMode,
+                            Mission = EnumTokenMission.FocusMode,
+                            CourseType = student.CourseLevel.GetEnumCourseType()
+                        });
+                        var tokenConfigResult = tokenConfig.Content?.Result;
 
                         // làm nhiệm vụ
                         // await DoQuestBoard(student, request.ExecuteTime, studentFocusTime.TargetTime, cancellationToken);
@@ -119,13 +120,13 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                         var checkSuperFireMode = await _mediator.Send(new CheckSuperFireModeQuery());
                         var isSuperMode = checkSuperFireMode.Result;
 
-                        //var targetConfig = tokenConfigResult.GetTokenNumber<TokenFocusTime>(isSuperMode);
-                        //var targetNumber = targetConfig?.FocusTimes?.FirstOrDefault(x => x.FocusTimeId == systemConfigMap.Id)?.Number;
+                        var tokenConfigFocusModes = tokenConfigResult.GetTokenConfig<IList<TokenConfigFocusModes>>();
+                        var targetNumber = tokenConfigFocusModes?.Where(x => x.FocusTimeId == systemConfigMap.Id)?.Max(x => x.BaseValue);
 
-                        //if (targetNumber.HasValue)
-                        //{
-                        //    student.NumberOfToken += targetNumber.Value;
-                        //}
+                        if (targetNumber.HasValue)
+                        {
+                            student.NumberOfToken += targetNumber.Value;
+                        }
                         _studentRepository.Update(student);
                         await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -148,7 +149,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>();
             var categoryToElement = EnumQuestBoardCategory.ThirtyMinutesFocusMode;
-
             switch (targetTime)
             {
                 case (double)EnumQuestBoardFocusMode.FocusModeThirtyMinutes:
