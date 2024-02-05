@@ -182,7 +182,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                     parameter.AcademicDisplay = HtmlSetting.Display;
                                     parameter.IeltDisplay = null;
                                 }
-                                await SendStudentCompleteUnit(studentId, parameter, cancellationToken);
+                                await SendStudentCompleteUnit(studentId, parameter, courseType, cancellationToken);
                             }
                             else if (numberUnit > 1 && previousCourseUnitMockTest != null)
                             {
@@ -272,7 +272,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                                 (parameter.ColorSocial, parameter.CompareSocial) = Compare(currentSocial, previousSocial);
 
-                                await SendStudentCompleteUnit(studentId, parameter, cancellationToken);
+                                await SendStudentCompleteUnit(studentId, parameter, courseType, cancellationToken);
 
                             }
                         }
@@ -284,6 +284,26 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     _unitResultRepository.Update(unitResult);
                     await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
+            }
+        }
+
+        private static string Subject(EnumSenderTemplate senderTemplate, EnumCourseType courseType)
+        {
+            if(senderTemplate == EnumSenderTemplate.Unit1Report && courseType == EnumCourseType.Academic)
+            {
+                return SenderSettings.TitleUnit1;
+            }
+            else if (senderTemplate == EnumSenderTemplate.Unit2AboveReport && courseType == EnumCourseType.Academic)
+            {
+                return SenderSettings.TitleUnit2;
+            }
+            else if (senderTemplate == EnumSenderTemplate.Unit1Report && courseType == EnumCourseType.Ielts)
+            {
+                return SenderSettings.TitleIeltUnit1;
+            }
+            else
+            {
+                return SenderSettings.TitleIeltUnit2;
             }
         }
 
@@ -441,14 +461,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return (groupedSkillScores, (int)percents.Sum());
         }
 
-        private async Task SendStudentCompleteUnit(Guid studentId, SendStudentCompleteUnitModel model, CancellationToken cancellationToken)
+        private async Task SendStudentCompleteUnit(Guid studentId, SendStudentCompleteUnitModel model,EnumCourseType courseType, CancellationToken cancellationToken)
         {
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
             var student = studentResult.Content?.Result?.FirstOrDefault();
             var sendResult = await _mediator.Send(new SenderCommand
             {
                 Email = student?.Human?.Email,
-                Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteUnit, model.UnitName),
+                Subject = Subject(model.SenderTemplate, courseType),
                 Params = model,
                 Template = model.SenderTemplate,
             }, cancellationToken).ConfigureAwait(false);

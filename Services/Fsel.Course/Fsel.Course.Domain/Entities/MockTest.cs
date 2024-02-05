@@ -32,7 +32,7 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                return MockTestSections.Select(x => x.SectionGroup).Sum(x => x!.ExecutionTime);
+                return MockTestSections.Where(x => x.SectionGroup is not null).Sum(x => x!.SectionGroup!.ExecutionTime);
             }
         }
 
