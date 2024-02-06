@@ -10,7 +10,6 @@ namespace Fsel.System.Domain.Entities
     public class TokenConfig : Entity
     {
         public EnumTokenFeature Feature { get; set; }
-
         public EnumTokenMission Mission { get; set; }
         public EnumCourseType? CourseType { get; set; }
         public int DisplayOrder { get; set; }

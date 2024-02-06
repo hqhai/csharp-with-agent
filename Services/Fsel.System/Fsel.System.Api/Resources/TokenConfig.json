@@ -1,6 +1,6 @@
 [
   {
-    "id": "e5361e72-412e-4022-bc66-c813c56f1b10",
+    "id": "d29ad85c-2a46-4f36-9b5a-192aab0690b0",
     "createdDate": "2023-07-21",
     "feature": "Learn",
     "courseType": "Academic",
@@ -369,9 +369,9 @@
   {
     "id": "191471af-a9ab-4571-a868-74b33a77f125",
     "createdDate": "2023-07-21",
-    "feature": "Test",
+    "feature": "SkillMockTest",
     "courseType": "Ielts",
-    "mission": "SkillMockTestSpeaking",
+    "mission": "SkillMockTestReading",
     "displayOrder": 22,
     "config": {
       "baseValue": 3,
@@ -382,9 +382,9 @@
   {
     "id": "93ed1ded-3e21-4825-8b1e-2f0db7cefcbd",
     "createdDate": "2023-07-21",
-    "feature": "Test",
+    "feature": "SkillMockTest",
     "courseType": "Ielts",
-    "mission": "SkillMockTestSpeaking",
+    "mission": "SkillMockTestListening",
     "displayOrder": 23,
     "config": {
       "baseValue": 3,
@@ -395,23 +395,192 @@
   {
     "id": "ff3046a5-40e3-48ea-bf41-194739810496",
     "createdDate": "2023-07-21",
-    "feature": "Test",
+    "feature": "SkillMockTest",
     "courseType": "Ielts",
-    "mission": "SkillMockTestWriting",
+    "mission": "SkillMockTestSpeakingFC",
     "displayOrder": 24,
     "config": {
-      "baseValue": 3,
-      "description": "When users complete each question/sub question, they will receive coins for each correct question/sub question",
-      "totalActions": 4
+      "baseValue": 30,
+      "description": "[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "3fcbdc38-fae3-45a2-8f50-3a8ef71d38a1",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestSpeakingLR",
+    "displayOrder": 25,
+    "config": {
+      "baseValue": 30,
+      "description": "[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
     }
   },
   {
     "id": "45a943af-08d0-4886-9479-34eaa32500b1",
     "createdDate": "2023-07-21",
-    "feature": "Test",
+    "feature": "SkillMockTest",
     "courseType": "Ielts",
-    "mission": "SkillMockTestListening",
-    "displayOrder": 25,
+    "mission": "SkillMockTestSpeakingGRA",
+    "displayOrder": 26,
+    "config": {
+      "baseValue": 30,
+      "description": "[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "0b6208a1-28b8-4721-af0b-f8298e373e91",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestSpeakingPron",
+    "displayOrder": 27,
+    "config": {
+      "baseValue": 30,
+      "description": "[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "2a3b1f77-9716-4de5-939e-6cc9d6ab4c9a",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestWritingTask1Work150",
+    "displayOrder": 28,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "895e2af2-791a-44d2-b41c-8c9e43835990",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestWritingTask1TA",
+    "displayOrder": 29,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "c8dc8455-a5ac-45d1-9cc5-02931d0f7c60",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestWritingTask1CC",
+    "displayOrder": 30,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "f278b0fb-34f3-496a-b663-fbabbfd3df6b",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestWritingTask1LR",
+    "displayOrder": 31,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "5af076a8-7d30-403a-b139-c9e0c8dc050b",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestWritingTask1GRA",
+    "displayOrder": 32,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "0c0ac3b7-313f-4af9-821e-643a9a935686",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestWritingTask2Work250",
+    "displayOrder": 33,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "0f46898a-42e6-420f-bf72-4a0734f01a5e",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestWritingTask2TA",
+    "displayOrder": 34,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "60a15b41-7b62-43d0-b080-171b1751c975",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestWritingTask2CC",
+    "displayOrder": 35,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "6db2e137-d138-4fb2-a37f-1d0d63c8c1af",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestWritingTask2LR",
+    "displayOrder": 36,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "936206c1-02bd-48eb-89c8-f9d9bac7c4a0",
+    "createdDate": "2023-07-21",
+    "feature": "SkillMockTest",
+    "courseType": "Ielts",
+    "mission": "SkillMockTestWritingTask2GRA",
+    "displayOrder": 37,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "7d5289e6-00a7-4d59-807c-0c7671b7ff69",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestReading",
+    "displayOrder": 38,
     "config": {
       "baseValue": 3,
       "description": "When users complete each question/sub question, they will receive coins for each correct question/sub question",
@@ -419,16 +588,198 @@
     }
   },
   {
-    "id": "0b6208a1-28b8-4721-af0b-f8298e373e91",
+    "id": "d3b5b55b-8c07-4616-b6bd-f6836f5a0d38",
     "createdDate": "2023-07-21",
-    "feature": "Test",
+    "feature": "FullMockTest",
     "courseType": "Ielts",
-    "mission": "FullMockTest",
-    "displayOrder": 26,
+    "mission": "FullMockTestListening",
+    "displayOrder": 39,
     "config": {
       "baseValue": 3,
       "description": "When users complete each question/sub question, they will receive coins for each correct question/sub question",
-      "totalActions": 200
+      "totalActions": 80
+    }
+  },
+  {
+    "id": "c4e45f73-264c-45a2-a9ca-b1cf62a99b39",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestSpeakingFC",
+    "displayOrder": 40,
+    "config": {
+      "baseValue": 30,
+      "description": "[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "7aa7c550-0cf8-4dcc-a053-37ecf34ea0b4",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestSpeakingLR",
+    "displayOrder": 41,
+    "config": {
+      "baseValue": 30,
+      "description": "[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "5815631a-036b-427b-9b05-f1700eb49c3a",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestSpeakingGRA",
+    "displayOrder": 42,
+    "config": {
+      "baseValue": 30,
+      "description": "[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "1392b9c8-5c36-49b5-ba4e-46cf6b9266c1",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestSpeakingPron",
+    "displayOrder": 43,
+    "config": {
+      "baseValue": 30,
+      "description": "[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "9c590452-7db2-4701-80d1-a3f2ebc70576",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestWritingTask1Work150",
+    "displayOrder": 44,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "78beeb36-103d-4338-a69d-e5cbe60ead1b",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestWritingTask1TA",
+    "displayOrder": 45,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "87df1064-852a-4d74-859f-7f82f1811832",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestWritingTask1CC",
+    "displayOrder": 46,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "1e4dd9cc-ec2a-4144-9f5d-43a9217ccdfd",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestWritingTask1LR",
+    "displayOrder": 47,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "86d60e5a-55cf-443b-9e23-e4d2e5026ad9",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestWritingTask1GRA",
+    "displayOrder": 48,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "b3b93458-6d16-40be-a39a-b31e47757c8b",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestWritingTask2Work250",
+    "displayOrder": 49,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "7ddc4444-0be8-4411-9bb5-c8ecb66b4928",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestWritingTask2TA",
+    "displayOrder": 50,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "d55638cd-8de6-4402-8ed4-3b9ed3e43292",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestWritingTask2CC",
+    "displayOrder": 51,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "fdb2ef3e-384f-4113-b858-69b78c0b3cb4",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestWritingTask2LR",
+    "displayOrder": 52,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
+    }
+  },
+  {
+    "id": "21df4a7b-8549-4792-a675-7ffb9c98d644",
+    "createdDate": "2023-07-21",
+    "feature": "FullMockTest",
+    "courseType": "Ielts",
+    "mission": "FullMockTestWritingTask2GRA",
+    "displayOrder": 53,
+    "config": {
+      "baseValue": 15,
+      "description": "[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin",
+      "totalActions": 2
     }
   },
   {
@@ -437,7 +788,7 @@
     "feature": "Achievement",
     "courseType": "Academic",
     "mission": "QuestionCompleted",
-    "displayOrder": 27,
+    "displayOrder": 54,
     "config": {
       "baseValue": 2,
       "description": "Complete mission in Achievement question list",
@@ -450,7 +801,7 @@
     "feature": "Achievement",
     "courseType": "Academic",
     "mission": "PhaseI",
-    "displayOrder": 28,
+    "displayOrder": 55,
     "config": {
       "baseValue": 10,
       "description": "Complete one Phase in Achievement",
@@ -463,7 +814,7 @@
     "feature": "Achievement",
     "courseType": "Academic",
     "mission": "PhaseII",
-    "displayOrder": 29,
+    "displayOrder": 56,
     "config": {
       "baseValue": 20,
       "description": "Complete one Phase in Achievement",
@@ -476,7 +827,7 @@
     "feature": "Achievement",
     "courseType": "Academic",
     "mission": "PhaseIII",
-    "displayOrder": 30,
+    "displayOrder": 57,
     "config": {
       "baseValue": 30,
       "description": "Complete one Phase in Achievement",
@@ -489,7 +840,7 @@
     "feature": "Achievement",
     "courseType": "Academic",
     "mission": "PhaseIV",
-    "displayOrder": 31,
+    "displayOrder": 58,
     "config": {
       "baseValue": 40,
       "description": "Complete one Phase in Achievement",
@@ -502,7 +853,7 @@
     "feature": "Achievement",
     "courseType": "Academic",
     "mission": "PhaseV",
-    "displayOrder": 32,
+    "displayOrder": 59,
     "config": {
       "baseValue": 50,
       "description": "Complete one Phase in Achievement",
@@ -515,7 +866,7 @@
     "feature": "Achievement",
     "courseType": "Academic",
     "mission": "PhaseVI",
-    "displayOrder": 33,
+    "displayOrder": 60,
     "config": {
       "baseValue": 60,
       "description": "Complete one Phase in Achievement",
@@ -528,7 +879,7 @@
     "feature": "Achievement",
     "courseType": "Ielts",
     "mission": "QuestionCompleted",
-    "displayOrder": 34,
+    "displayOrder": 61,
     "config": {
       "baseValue": 2,
       "description": "Complete mission in Achievement question list",
@@ -541,7 +892,7 @@
     "feature": "Achievement",
     "courseType": "Ielts",
     "mission": "PhaseI",
-    "displayOrder": 35,
+    "displayOrder": 62,
     "config": {
       "baseValue": 10,
       "description": "Complete one Phase in Achievement",
@@ -554,7 +905,7 @@
     "feature": "Achievement",
     "courseType": "Ielts",
     "mission": "PhaseII",
-    "displayOrder": 36,
+    "displayOrder": 63,
     "config": {
       "baseValue": 20,
       "description": "Complete one Phase in Achievement",
@@ -567,7 +918,7 @@
     "feature": "Achievement",
     "courseType": "Ielts",
     "mission": "PhaseIII",
-    "displayOrder": 37,
+    "displayOrder": 64,
     "config": {
       "baseValue": 30,
       "description": "Complete one Phase in Achievement",
@@ -580,7 +931,7 @@
     "feature": "Achievement",
     "courseType": "Ielts",
     "mission": "PhaseIV",
-    "displayOrder": 38,
+    "displayOrder": 65,
     "config": {
       "baseValue": 40,
       "description": "Complete one Phase in Achievement",
@@ -593,7 +944,7 @@
     "feature": "Achievement",
     "courseType": "Ielts",
     "mission": "PhaseV",
-    "displayOrder": 39,
+    "displayOrder": 66,
     "config": {
       "baseValue": 50,
       "description": "Complete one Phase in Achievement",
@@ -606,7 +957,7 @@
     "feature": "Achievement",
     "courseType": "Ielts",
     "mission": "PhaseVI",
-    "displayOrder": 40,
+    "displayOrder": 67,
     "config": {
       "baseValue": 60,
       "description": "Complete one Phase in Achievement",

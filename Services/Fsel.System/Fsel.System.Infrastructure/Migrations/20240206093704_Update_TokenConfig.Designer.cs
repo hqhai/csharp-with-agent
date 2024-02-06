@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20240201072450_Update_TokenConfig")]
+    [Migration("20240206093704_Update_TokenConfig")]
     partial class Update_TokenConfig
     {
         /// <inheritdoc />
@@ -1798,7 +1798,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e5361e72-412e-4022-bc66-c813c56f1b10"),
+                            Id = new Guid("d29ad85c-2a46-4f36-9b5a-192aab0690b0"),
                             ConfigStr = "{\"baseValue\":2,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":2160}",
                             CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -2078,9 +2078,9 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 22,
-                            Feature = "Test",
+                            Feature = "SkillMockTest",
                             IsDeleted = false,
-                            Mission = "SkillMockTestSpeaking"
+                            Mission = "SkillMockTestReading"
                         },
                         new
                         {
@@ -2091,48 +2091,399 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 23,
-                            Feature = "Test",
-                            IsDeleted = false,
-                            Mission = "SkillMockTestSpeaking"
-                        },
-                        new
-                        {
-                            Id = new Guid("ff3046a5-40e3-48ea-bf41-194739810496"),
-                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":4}",
-                            CourseType = "Ielts",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 24,
-                            Feature = "Test",
-                            IsDeleted = false,
-                            Mission = "SkillMockTestWriting"
-                        },
-                        new
-                        {
-                            Id = new Guid("45a943af-08d0-4886-9479-34eaa32500b1"),
-                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}",
-                            CourseType = "Ielts",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 25,
-                            Feature = "Test",
+                            Feature = "SkillMockTest",
                             IsDeleted = false,
                             Mission = "SkillMockTestListening"
                         },
                         new
                         {
-                            Id = new Guid("0b6208a1-28b8-4721-af0b-f8298e373e91"),
-                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":200}",
+                            Id = new Guid("ff3046a5-40e3-48ea-bf41-194739810496"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 24,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestSpeakingFC"
+                        },
+                        new
+                        {
+                            Id = new Guid("3fcbdc38-fae3-45a2-8f50-3a8ef71d38a1"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 25,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestSpeakingLR"
+                        },
+                        new
+                        {
+                            Id = new Guid("45a943af-08d0-4886-9479-34eaa32500b1"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
                             CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 26,
-                            Feature = "Test",
+                            Feature = "SkillMockTest",
                             IsDeleted = false,
-                            Mission = "FullMockTest"
+                            Mission = "SkillMockTestSpeakingGRA"
+                        },
+                        new
+                        {
+                            Id = new Guid("0b6208a1-28b8-4721-af0b-f8298e373e91"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 27,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestSpeakingPron"
+                        },
+                        new
+                        {
+                            Id = new Guid("2a3b1f77-9716-4de5-939e-6cc9d6ab4c9a"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 28,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestWritingTask1Work150"
+                        },
+                        new
+                        {
+                            Id = new Guid("895e2af2-791a-44d2-b41c-8c9e43835990"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 29,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestWritingTask1TA"
+                        },
+                        new
+                        {
+                            Id = new Guid("c8dc8455-a5ac-45d1-9cc5-02931d0f7c60"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 30,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestWritingTask1CC"
+                        },
+                        new
+                        {
+                            Id = new Guid("f278b0fb-34f3-496a-b663-fbabbfd3df6b"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 31,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestWritingTask1LR"
+                        },
+                        new
+                        {
+                            Id = new Guid("5af076a8-7d30-403a-b139-c9e0c8dc050b"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 32,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestWritingTask1GRA"
+                        },
+                        new
+                        {
+                            Id = new Guid("0c0ac3b7-313f-4af9-821e-643a9a935686"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 33,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestWritingTask2Work250"
+                        },
+                        new
+                        {
+                            Id = new Guid("0f46898a-42e6-420f-bf72-4a0734f01a5e"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 34,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestWritingTask2TA"
+                        },
+                        new
+                        {
+                            Id = new Guid("60a15b41-7b62-43d0-b080-171b1751c975"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 35,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestWritingTask2CC"
+                        },
+                        new
+                        {
+                            Id = new Guid("6db2e137-d138-4fb2-a37f-1d0d63c8c1af"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 36,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestWritingTask2LR"
+                        },
+                        new
+                        {
+                            Id = new Guid("936206c1-02bd-48eb-89c8-f9d9bac7c4a0"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 37,
+                            Feature = "SkillMockTest",
+                            IsDeleted = false,
+                            Mission = "SkillMockTestWritingTask2GRA"
+                        },
+                        new
+                        {
+                            Id = new Guid("7d5289e6-00a7-4d59-807c-0c7671b7ff69"),
+                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 38,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestReading"
+                        },
+                        new
+                        {
+                            Id = new Guid("d3b5b55b-8c07-4616-b6bd-f6836f5a0d38"),
+                            ConfigStr = "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 39,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestListening"
+                        },
+                        new
+                        {
+                            Id = new Guid("c4e45f73-264c-45a2-a9ca-b1cf62a99b39"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 40,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestSpeakingFC"
+                        },
+                        new
+                        {
+                            Id = new Guid("7aa7c550-0cf8-4dcc-a053-37ecf34ea0b4"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 41,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestSpeakingLR"
+                        },
+                        new
+                        {
+                            Id = new Guid("5815631a-036b-427b-9b05-f1700eb49c3a"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 42,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestSpeakingGRA"
+                        },
+                        new
+                        {
+                            Id = new Guid("1392b9c8-5c36-49b5-ba4e-46cf6b9266c1"),
+                            ConfigStr = "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 43,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestSpeakingPron"
+                        },
+                        new
+                        {
+                            Id = new Guid("9c590452-7db2-4701-80d1-a3f2ebc70576"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 44,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestWritingTask1Work150"
+                        },
+                        new
+                        {
+                            Id = new Guid("78beeb36-103d-4338-a69d-e5cbe60ead1b"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 45,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestWritingTask1TA"
+                        },
+                        new
+                        {
+                            Id = new Guid("87df1064-852a-4d74-859f-7f82f1811832"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 46,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestWritingTask1CC"
+                        },
+                        new
+                        {
+                            Id = new Guid("1e4dd9cc-ec2a-4144-9f5d-43a9217ccdfd"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 47,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestWritingTask1LR"
+                        },
+                        new
+                        {
+                            Id = new Guid("86d60e5a-55cf-443b-9e23-e4d2e5026ad9"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 48,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestWritingTask1GRA"
+                        },
+                        new
+                        {
+                            Id = new Guid("b3b93458-6d16-40be-a39a-b31e47757c8b"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 49,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestWritingTask2Work250"
+                        },
+                        new
+                        {
+                            Id = new Guid("7ddc4444-0be8-4411-9bb5-c8ecb66b4928"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 50,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestWritingTask2TA"
+                        },
+                        new
+                        {
+                            Id = new Guid("d55638cd-8de6-4402-8ed4-3b9ed3e43292"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 51,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestWritingTask2CC"
+                        },
+                        new
+                        {
+                            Id = new Guid("fdb2ef3e-384f-4113-b858-69b78c0b3cb4"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 52,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestWritingTask2LR"
+                        },
+                        new
+                        {
+                            Id = new Guid("21df4a7b-8549-4792-a675-7ffb9c98d644"),
+                            ConfigStr = "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}",
+                            CourseType = "Ielts",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 53,
+                            Feature = "FullMockTest",
+                            IsDeleted = false,
+                            Mission = "FullMockTestWritingTask2GRA"
                         },
                         new
                         {
@@ -2142,7 +2493,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 27,
+                            DisplayOrder = 54,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "QuestionCompleted"
@@ -2155,7 +2506,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 28,
+                            DisplayOrder = 55,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseI"
@@ -2168,7 +2519,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 29,
+                            DisplayOrder = 56,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseII"
@@ -2181,7 +2532,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 30,
+                            DisplayOrder = 57,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseIII"
@@ -2194,7 +2545,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 31,
+                            DisplayOrder = 58,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseIV"
@@ -2207,7 +2558,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 32,
+                            DisplayOrder = 59,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseV"
@@ -2220,7 +2571,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 33,
+                            DisplayOrder = 60,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseVI"
@@ -2233,7 +2584,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 34,
+                            DisplayOrder = 61,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "QuestionCompleted"
@@ -2246,7 +2597,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 35,
+                            DisplayOrder = 62,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseI"
@@ -2259,7 +2610,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 36,
+                            DisplayOrder = 63,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseII"
@@ -2272,7 +2623,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 37,
+                            DisplayOrder = 64,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseIII"
@@ -2285,7 +2636,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 38,
+                            DisplayOrder = 65,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseIV"
@@ -2298,7 +2649,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 39,
+                            DisplayOrder = 66,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseV"
@@ -2311,7 +2662,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DisplayOrder = 40,
+                            DisplayOrder = 67,
                             Feature = "Achievement",
                             IsDeleted = false,
                             Mission = "PhaseVI"

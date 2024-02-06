@@ -71,6 +71,8 @@ namespace Fsel.System.Infrastructure.Common
                 case EnumTokenFeature.Learn:
                 case EnumTokenFeature.Test:
                 case EnumTokenFeature.Achievement:
+                case EnumTokenFeature.FullMockTest:
+                case EnumTokenFeature.SkillMockTest:
                     var configs = config.Deserialize<TokenCoinConfigs>();
                     validateData = Validate(configs);
 
