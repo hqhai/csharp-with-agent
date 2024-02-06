@@ -104,8 +104,12 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.DuplicateUnitId));
                 return methodResult;
             }
-
-            if (unitIds.Distinct().Count() > 8)
+            if (request.CourseLevel.GetEnumCourseType() == EnumCourseType.Academic && unitIds.Distinct().Count() > 12)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpTo12));
+                return methodResult;
+            }
+            else if (request.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts && unitIds.Distinct().Count() > 8)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToEight));
                 return methodResult;
@@ -248,7 +252,12 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            if (unitIds.Distinct().Count() > 8)
+            if (request.CourseLevel.GetEnumCourseType() == EnumCourseType.Academic && unitIds.Distinct().Count() > 12)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpTo12));
+                return methodResult;
+            }
+            else if (request.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts && unitIds.Distinct().Count() > 8)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToEight));
                 return methodResult;
@@ -343,7 +352,7 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     // - Vị trí thứ 13 bắt buộc là của Final nếu ko phải là Final thì báo lỗi
                     // - Final ở các vị trí khác thì báo lỗi
-                    if (request.CourseUnitMockTests.Any(i => (i.DisplayOrder != 12) && i.FinalTestId != null))
+                    if (request.CourseUnitMockTests.Any(i => i.DisplayOrder != 13 && i.FinalTestId.HasValue))
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIdMustBeAtTheEnd), nameof(finalTestIds));
                         return methodResult;
