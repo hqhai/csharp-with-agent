@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private const double HomeWork_Ratio = 14;
         private const double ClassForum_Ratio = 20;
         private const double FinalTest_Ratio = 15;
+        private const int TotalProcess = 217; // tổng số tiến trình hiện có
 
         public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
         {
@@ -100,6 +102,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
 
                     double progressPercentage = ((float)currentProgress / progress) * 100;
+                    // Update số lượng process do trên dữ liệu chưa nhập đủ
+                    if (courseResult.Course?.CourseType == EnumCourseType.Academic)
+                    {
+                        progressPercentage = ((float)currentProgress / TotalProcess) * 100;
+                    }
+
                     courseStudentProgress.ContentCompleted = Math.Round(progressPercentage, 2);
                     courseStudentProgress.CourseName = item.Code;
                     courseStudentProgress.CourseId = item.Id;
@@ -190,7 +198,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #region ClassForum
             var classForumResultCompetion = _classForumResultRepository.Queryable
                 .Include(x => x.ClassForum)
-                .Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading
+                .Where(x => (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded)
                             && studentIds.Contains(x.StudentId)
                             && x.ClassForum != null
                             && EF.Functions.DataLength(x.WordContent) >= x.ClassForum.TaggetWordLimit);
@@ -244,7 +252,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                                 .Select(itemF => new StudentCompetitionOverallModel
                                                 {
                                                     StudentId = result.StudentId,
-                                                    TotalScore = (CaculateNumerator(itemA) + CaculateNumerator(itemB) + CaculateNumerator(itemC) + CaculateNumerator(itemD) + CaculateNumerator(itemE) + CaculateNumerator(itemF))
+                                                    TotalScore = (CaculateDonomerator(itemA) + CaculateDonomerator(itemB) + CaculateDonomerator(itemC) + CaculateDonomerator(itemD) + CaculateDonomerator(itemE) + CaculateDonomerator(itemF)) != 0 ? ((CaculateNumerator(itemA) + CaculateNumerator(itemB) + CaculateNumerator(itemC) + CaculateNumerator(itemD) + CaculateNumerator(itemE) + CaculateNumerator(itemF)) * 100) / (CaculateDonomerator(itemA) + CaculateDonomerator(itemB) + CaculateDonomerator(itemC) + CaculateDonomerator(itemD) + CaculateDonomerator(itemE) + CaculateDonomerator(itemF)) : 0
                                                 })
                                             )
                                         )
@@ -266,7 +274,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                               CourseId = progress.CourseId,
                               CourseName = progress.CourseName,
                               ContentCompleted = progress.ContentCompleted,
-                              TotalScore = overall.TotalScore
+                              TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore)
                           }).ToList();
             #endregion
 
