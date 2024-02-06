@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -209,44 +209,71 @@ namespace Fsel.System.Infrastructure.Migrations
                 values: new object[,]
                 {
                     { new Guid("03a07cf2-6f6e-4971-9b52-d3a7330eec2f"), "{\"baseValue\":1,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":1280}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 9, "Learn", false, "TimeCodeSecondSubmit", null, null, null },
-                    { new Guid("0b6208a1-28b8-4721-af0b-f8298e373e91"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":200}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 26, "Test", false, "FullMockTest", null, null, null },
-                    { new Guid("191471af-a9ab-4571-a868-74b33a77f125"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 22, "Test", false, "SkillMockTestSpeaking", null, null, null },
+                    { new Guid("0b6208a1-28b8-4721-af0b-f8298e373e91"), "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 27, "SkillMockTest", false, "SkillMockTestSpeakingPron", null, null, null },
+                    { new Guid("0c0ac3b7-313f-4af9-821e-643a9a935686"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 33, "SkillMockTest", false, "SkillMockTestWritingTask2Work250", null, null, null },
+                    { new Guid("0f46898a-42e6-420f-bf72-4a0734f01a5e"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 34, "SkillMockTest", false, "SkillMockTestWritingTask2TA", null, null, null },
+                    { new Guid("1392b9c8-5c36-49b5-ba4e-46cf6b9266c1"), "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 43, "FullMockTest", false, "FullMockTestSpeakingPron", null, null, null },
+                    { new Guid("191471af-a9ab-4571-a868-74b33a77f125"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 22, "SkillMockTest", false, "SkillMockTestReading", null, null, null },
+                    { new Guid("1e4dd9cc-ec2a-4144-9f5d-43a9217ccdfd"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 47, "FullMockTest", false, "FullMockTestWritingTask1LR", null, null, null },
+                    { new Guid("21df4a7b-8549-4792-a675-7ffb9c98d644"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 53, "FullMockTest", false, "FullMockTestWritingTask2GRA", null, null, null },
                     { new Guid("24e0c9f4-f4f7-4592-bd04-7f03d33847f4"), "[{\"level\":1,\"baseValue\":10,\"description\":\"user checks in for 7 days in a row\",\"totalActions\":12},{\"level\":2,\"baseValue\":30,\"description\":\"user checks in for 14 days in a row\",\"totalActions\":12},{\"level\":3,\"baseValue\":100,\"description\":\"user checks in for 30 days in a row\",\"totalActions\":12}]", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 18, "DailyCheckin", false, "DailyCheckin", null, null, null },
+                    { new Guid("2a3b1f77-9716-4de5-939e-6cc9d6ab4c9a"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 28, "SkillMockTest", false, "SkillMockTestWritingTask1Work150", null, null, null },
+                    { new Guid("3fcbdc38-fae3-45a2-8f50-3a8ef71d38a1"), "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 25, "SkillMockTest", false, "SkillMockTestSpeakingLR", null, null, null },
                     { new Guid("41be49bc-d0f5-481c-9298-51cb9613262f"), "{\"baseValue\":2,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":1280}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 8, "Learn", false, "TimeCodeFirstSubmit", null, null, null },
-                    { new Guid("45a943af-08d0-4886-9479-34eaa32500b1"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 25, "Test", false, "SkillMockTestListening", null, null, null },
+                    { new Guid("45a943af-08d0-4886-9479-34eaa32500b1"), "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 26, "SkillMockTest", false, "SkillMockTestSpeakingGRA", null, null, null },
                     { new Guid("45ff5759-8c5d-4cc6-87f4-ef0a13577e3c"), "[{\"level\":1,\"baseValue\":10,\"description\":\"user checks in for 7 days in a row\",\"totalActions\":12},{\"level\":2,\"baseValue\":30,\"description\":\"user checks in for 14 days in a row\",\"totalActions\":12},{\"level\":3,\"baseValue\":100,\"description\":\"user checks in for 30 days in a row\",\"totalActions\":12}]", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 17, "DailyCheckin", false, "DailyCheckin", null, null, null },
                     { new Guid("464577de-eb10-4bd6-8a82-0a0101821675"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":600}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 20, "Test", false, "UnitTest", null, null, null },
                     { new Guid("48c53c52-fcf5-4715-8edf-35c343663708"), "{\"baseValue\":1,\"description\":\"When the user clicks submit homework, they immediately receive Coin when the HW Result Report screen appears, count by \",\"totalActions\":1080}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 7, "Learn", false, "HomeworkSecondSubmit", null, null, null },
                     { new Guid("4959d4a0-b063-40d9-90b2-983d11853e60"), "{\"baseValue\":2,\"description\":\"When the user clicks submit homework, they immediately receive Coin when the HW Result Report screen appears, count by \",\"totalActions\":1080}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 6, "Learn", false, "HomeworkFirstSubmit", null, null, null },
                     { new Guid("550d36c4-eeb5-4fed-95d0-0b12e7dc83d9"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":100}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 21, "Test", false, "FinalTest", null, null, null },
-                    { new Guid("579f2fab-75fb-422f-95c3-ff50577fcbb8"), "{\"baseValue\":40,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 38, "Achievement", false, "PhaseIV", null, null, null },
+                    { new Guid("579f2fab-75fb-422f-95c3-ff50577fcbb8"), "{\"baseValue\":40,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 65, "Achievement", false, "PhaseIV", null, null, null },
+                    { new Guid("5815631a-036b-427b-9b05-f1700eb49c3a"), "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 42, "FullMockTest", false, "FullMockTestSpeakingGRA", null, null, null },
                     { new Guid("5868a03a-8624-4ebc-b553-6d6b2034924b"), "{\"baseValue\":30,\"description\":\"When a user posts on the class forum, they will receive Coin, only the first attempt will be counted (Reposting/ second attempt will not be counted).\",\"totalActions\":36}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 5, "Learn", false, "ClassForumSpeakingVideo", null, null, null },
+                    { new Guid("5af076a8-7d30-403a-b139-c9e0c8dc050b"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 32, "SkillMockTest", false, "SkillMockTestWritingTask1GRA", null, null, null },
                     { new Guid("5e550e64-1acc-41f9-ba80-5a29e71d9e11"), "{\"baseValue\":20,\"description\":\"When a user posts on the class forum, they will receive Coin, only the first attempt will be counted (Reposting/ second attempt will not be counted).\",\"totalActions\":16}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 10, "Learn", false, "ClassForumWriting", null, null, null },
-                    { new Guid("5e5be781-893e-4f3c-8878-0ccada255a8e"), "{\"baseValue\":50,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 32, "Achievement", false, "PhaseV", null, null, null },
-                    { new Guid("5e802055-5c1e-4554-a772-bca241d486b4"), "{\"baseValue\":10,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 35, "Achievement", false, "PhaseI", null, null, null },
-                    { new Guid("62f66584-b41a-4d09-ad88-6cef530d6734"), "{\"baseValue\":20,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 29, "Achievement", false, "PhaseII", null, null, null },
-                    { new Guid("69dd58e2-b764-4ab3-b745-cbe0c44f20f5"), "{\"baseValue\":10,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 28, "Achievement", false, "PhaseI", null, null, null },
+                    { new Guid("5e5be781-893e-4f3c-8878-0ccada255a8e"), "{\"baseValue\":50,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 59, "Achievement", false, "PhaseV", null, null, null },
+                    { new Guid("5e802055-5c1e-4554-a772-bca241d486b4"), "{\"baseValue\":10,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 62, "Achievement", false, "PhaseI", null, null, null },
+                    { new Guid("60a15b41-7b62-43d0-b080-171b1751c975"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 35, "SkillMockTest", false, "SkillMockTestWritingTask2CC", null, null, null },
+                    { new Guid("62f66584-b41a-4d09-ad88-6cef530d6734"), "{\"baseValue\":20,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 56, "Achievement", false, "PhaseII", null, null, null },
+                    { new Guid("69dd58e2-b764-4ab3-b745-cbe0c44f20f5"), "{\"baseValue\":10,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 55, "Achievement", false, "PhaseI", null, null, null },
+                    { new Guid("6db2e137-d138-4fb2-a37f-1d0d63c8c1af"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 36, "SkillMockTest", false, "SkillMockTestWritingTask2LR", null, null, null },
                     { new Guid("74b95903-f5c1-4191-98b4-199e23b68c61"), "{\"baseValue\":2,\"description\":\"When the user clicks submit homework, they immediately receive Coin when the HW Result Report screen appears, count by \",\"totalActions\":1024}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 13, "Learn", false, "HomeworkFirstSubmit", null, null, null },
+                    { new Guid("78beeb36-103d-4338-a69d-e5cbe60ead1b"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 45, "FullMockTest", false, "FullMockTestWritingTask1TA", null, null, null },
                     { new Guid("7a0e28c0-520b-4148-b6d3-150c70c74b50"), "{\"baseValue\":1,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":2160}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 2, "Learn", false, "TimeCodeSecondSubmit", null, null, null },
-                    { new Guid("7e3ec81c-702b-4e22-915d-89b6775794d8"), "{\"baseValue\":40,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 31, "Achievement", false, "PhaseIV", null, null, null },
-                    { new Guid("88a385bd-d532-497a-bac9-2dd0a7d72fe9"), "{\"baseValue\":50,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 39, "Achievement", false, "PhaseV", null, null, null },
-                    { new Guid("9385bbac-01e8-4192-a244-f811bdcd6e8f"), "{\"baseValue\":2,\"description\":\"Complete mission in Achievement question list\",\"totalActions\":100}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 34, "Achievement", false, "QuestionCompleted", null, null, null },
-                    { new Guid("93ed1ded-3e21-4825-8b1e-2f0db7cefcbd"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":36}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 23, "Test", false, "SkillMockTestSpeaking", null, null, null },
+                    { new Guid("7aa7c550-0cf8-4dcc-a053-37ecf34ea0b4"), "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 41, "FullMockTest", false, "FullMockTestSpeakingLR", null, null, null },
+                    { new Guid("7d5289e6-00a7-4d59-807c-0c7671b7ff69"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 38, "FullMockTest", false, "FullMockTestReading", null, null, null },
+                    { new Guid("7ddc4444-0be8-4411-9bb5-c8ecb66b4928"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 50, "FullMockTest", false, "FullMockTestWritingTask2TA", null, null, null },
+                    { new Guid("7e3ec81c-702b-4e22-915d-89b6775794d8"), "{\"baseValue\":40,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 58, "Achievement", false, "PhaseIV", null, null, null },
+                    { new Guid("86d60e5a-55cf-443b-9e23-e4d2e5026ad9"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 48, "FullMockTest", false, "FullMockTestWritingTask1GRA", null, null, null },
+                    { new Guid("87df1064-852a-4d74-859f-7f82f1811832"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 46, "FullMockTest", false, "FullMockTestWritingTask1CC", null, null, null },
+                    { new Guid("88a385bd-d532-497a-bac9-2dd0a7d72fe9"), "{\"baseValue\":50,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 66, "Achievement", false, "PhaseV", null, null, null },
+                    { new Guid("895e2af2-791a-44d2-b41c-8c9e43835990"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 29, "SkillMockTest", false, "SkillMockTestWritingTask1TA", null, null, null },
+                    { new Guid("936206c1-02bd-48eb-89c8-f9d9bac7c4a0"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 37, "SkillMockTest", false, "SkillMockTestWritingTask2GRA", null, null, null },
+                    { new Guid("9385bbac-01e8-4192-a244-f811bdcd6e8f"), "{\"baseValue\":2,\"description\":\"Complete mission in Achievement question list\",\"totalActions\":100}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 61, "Achievement", false, "QuestionCompleted", null, null, null },
+                    { new Guid("93ed1ded-3e21-4825-8b1e-2f0db7cefcbd"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":36}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 23, "SkillMockTest", false, "SkillMockTestListening", null, null, null },
+                    { new Guid("9c590452-7db2-4701-80d1-a3f2ebc70576"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 44, "FullMockTest", false, "FullMockTestWritingTask1Work150", null, null, null },
                     { new Guid("9dd5bbbd-69c0-4705-81f4-388bb2fd59bc"), "{\"baseValue\":1,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":2160}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 4, "Learn", false, "ClassForumSpeakingAudio", null, null, null },
                     { new Guid("a1f9a0fb-97f8-415e-aed1-21128d6c3740"), "{\"baseValue\":20,\"description\":\"When a user posts on the class forum, they will receive Coin, only the first attempt will be counted (Reposting/ second attempt will not be counted).\",\"totalActions\":16}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 11, "Learn", false, "ClassForumSpeakingAudio", null, null, null },
                     { new Guid("a2f039ce-bf5d-4777-8aa9-cacb3c40cd0a"), "{\"baseValue\":1,\"description\":\"When the user clicks submit homework, they immediately receive Coin when the HW Result Report screen appears, count by \",\"totalActions\":1024}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 14, "Learn", false, "HomeworkFirstSubmit", null, null, null },
-                    { new Guid("b037baa5-ef10-4746-83b7-eeb3d1cc9a56"), "{\"baseValue\":20,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 36, "Achievement", false, "PhaseII", null, null, null },
+                    { new Guid("b037baa5-ef10-4746-83b7-eeb3d1cc9a56"), "{\"baseValue\":20,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 63, "Achievement", false, "PhaseII", null, null, null },
+                    { new Guid("b3b93458-6d16-40be-a39a-b31e47757c8b"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 49, "FullMockTest", false, "FullMockTestWritingTask2Work250", null, null, null },
                     { new Guid("b900f59e-f0cb-404d-b088-14b19162572a"), "{\"baseValue\":30,\"description\":\"When a user posts on the class forum, they will receive Coin, only the first attempt will be counted (Reposting/ second attempt will not be counted).\",\"totalActions\":16}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 12, "Learn", false, "ClassForumSpeakingVideo", null, null, null },
                     { new Guid("ba97013a-9ad2-44a7-8c4c-883ba04956d0"), "{\"baseValue\":20,\"description\":\"When a user posts on the class forum, they will receive Coin, only the first attempt will be counted (Reposting/ second attempt will not be counted).\",\"totalActions\":36}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 3, "Learn", false, "ClassForumWriting", null, null, null },
-                    { new Guid("bbecaf5f-b2a5-4036-b3d5-15a02a2ce35b"), "{\"baseValue\":60,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 40, "Achievement", false, "PhaseVI", null, null, null },
+                    { new Guid("bbecaf5f-b2a5-4036-b3d5-15a02a2ce35b"), "{\"baseValue\":60,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 67, "Achievement", false, "PhaseVI", null, null, null },
                     { new Guid("bc261be5-f658-415a-9498-8b813742708c"), "[{\"baseValue\":5,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\",\"totalActions\":720,\"description\":\"User is active in focus mode 15\\u0027 continues\",\"displayOrder\":1},{\"baseValue\":15,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\",\"description\":\"User is active in focus mode 30\\u0027 continues\",\"totalActions\":720,\"displayOrder\":2},{\"baseValue\":25,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\",\"description\":\"User is active in focus mode 45\\u0027 continues\",\"totalActions\":720,\"displayOrder\":3},{\"baseValue\":40,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\",\"description\":\"User is active in focus mode 60\\u0027 continues\",\"totalActions\":720,\"displayOrder\":4},{\"baseValue\":60,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\",\"description\":\"User is active in focus mode 90\\u0027 continues\",\"totalActions\":720,\"displayOrder\":5}]", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 15, "FocusMode", false, "FocusMode", null, null, null },
-                    { new Guid("d8020699-4aa7-45bd-8ccc-15aca3b23db5"), "{\"baseValue\":2,\"description\":\"Complete mission in Achievement question list\",\"totalActions\":100}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 27, "Achievement", false, "QuestionCompleted", null, null, null },
+                    { new Guid("c4e45f73-264c-45a2-a9ca-b1cf62a99b39"), "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 40, "FullMockTest", false, "FullMockTestSpeakingFC", null, null, null },
+                    { new Guid("c8dc8455-a5ac-45d1-9cc5-02931d0f7c60"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 30, "SkillMockTest", false, "SkillMockTestWritingTask1CC", null, null, null },
+                    { new Guid("d3b5b55b-8c07-4616-b6bd-f6836f5a0d38"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 39, "FullMockTest", false, "FullMockTestListening", null, null, null },
+                    { new Guid("d55638cd-8de6-4402-8ed4-3b9ed3e43292"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 51, "FullMockTest", false, "FullMockTestWritingTask2CC", null, null, null },
+                    { new Guid("d8020699-4aa7-45bd-8ccc-15aca3b23db5"), "{\"baseValue\":2,\"description\":\"Complete mission in Achievement question list\",\"totalActions\":100}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 54, "Achievement", false, "QuestionCompleted", null, null, null },
                     { new Guid("de3f2ec0-542c-4247-86e2-438f7ad0b389"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":360}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 19, "Test", false, "SkillTest", null, null, null },
-                    { new Guid("e9f76d4c-ab72-4184-8092-45c6f2fecbc7"), "{\"baseValue\":30,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 37, "Achievement", false, "PhaseIII", null, null, null },
-                    { new Guid("eb0cfb65-f451-4e66-a05f-e518e740d67e"), "{\"baseValue\":60,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 33, "Achievement", false, "PhaseVI", null, null, null },
-                    { new Guid("ee75a055-1a67-4222-a1de-b7265bc7edbb"), "{\"baseValue\":30,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 30, "Achievement", false, "PhaseIII", null, null, null },
+                    { new Guid("e9f76d4c-ab72-4184-8092-45c6f2fecbc7"), "{\"baseValue\":30,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 64, "Achievement", false, "PhaseIII", null, null, null },
+                    { new Guid("eb0cfb65-f451-4e66-a05f-e518e740d67e"), "{\"baseValue\":60,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 60, "Achievement", false, "PhaseVI", null, null, null },
+                    { new Guid("ee75a055-1a67-4222-a1de-b7265bc7edbb"), "{\"baseValue\":30,\"description\":\"Complete one Phase in Achievement\",\"totalActions\":1}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 57, "Achievement", false, "PhaseIII", null, null, null },
                     { new Guid("f08945d0-3b03-4299-ae22-e3ce2408b74b"), "[{\"baseValue\":5,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\",\"totalActions\":720,\"description\":\"User is active in focus mode 15\\u0027 continues\",\"displayOrder\":1},{\"baseValue\":15,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\",\"description\":\"User is active in focus mode 30\\u0027 continues\",\"totalActions\":720,\"displayOrder\":2},{\"baseValue\":25,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\",\"description\":\"User is active in focus mode 45\\u0027 continues\",\"totalActions\":720,\"displayOrder\":3},{\"baseValue\":40,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\",\"description\":\"User is active in focus mode 60\\u0027 continues\",\"totalActions\":720,\"displayOrder\":4},{\"baseValue\":60,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\",\"description\":\"User is active in focus mode 90\\u0027 continues\",\"totalActions\":720,\"displayOrder\":5}]", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 16, "FocusMode", false, "FocusMode", null, null, null },
-                    { new Guid("ff3046a5-40e3-48ea-bf41-194739810496"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":4}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 24, "Test", false, "SkillMockTestWriting", null, null, null }
+                    { new Guid("f278b0fb-34f3-496a-b663-fbabbfd3df6b"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 31, "SkillMockTest", false, "SkillMockTestWritingTask1LR", null, null, null },
+                    { new Guid("fdb2ef3e-384f-4113-b858-69b78c0b3cb4"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 52, "FullMockTest", false, "FullMockTestWritingTask2LR", null, null, null },
+                    { new Guid("ff3046a5-40e3-48ea-bf41-194739810496"), "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 24, "SkillMockTest", false, "SkillMockTestSpeakingFC", null, null, null }
                 });
         }
 
@@ -266,12 +293,47 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
+                keyValue: new Guid("0c0ac3b7-313f-4af9-821e-643a9a935686"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("0f46898a-42e6-420f-bf72-4a0734f01a5e"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("1392b9c8-5c36-49b5-ba4e-46cf6b9266c1"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
                 keyValue: new Guid("191471af-a9ab-4571-a868-74b33a77f125"));
 
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
+                keyValue: new Guid("1e4dd9cc-ec2a-4144-9f5d-43a9217ccdfd"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("21df4a7b-8549-4792-a675-7ffb9c98d644"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
                 keyValue: new Guid("24e0c9f4-f4f7-4592-bd04-7f03d33847f4"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("2a3b1f77-9716-4de5-939e-6cc9d6ab4c9a"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("3fcbdc38-fae3-45a2-8f50-3a8ef71d38a1"));
 
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
@@ -316,7 +378,17 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
+                keyValue: new Guid("5815631a-036b-427b-9b05-f1700eb49c3a"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
                 keyValue: new Guid("5868a03a-8624-4ebc-b553-6d6b2034924b"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("5af076a8-7d30-403a-b139-c9e0c8dc050b"));
 
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
@@ -336,6 +408,11 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
+                keyValue: new Guid("60a15b41-7b62-43d0-b080-171b1751c975"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
                 keyValue: new Guid("62f66584-b41a-4d09-ad88-6cef530d6734"));
 
             migrationBuilder.DeleteData(
@@ -346,7 +423,17 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
+                keyValue: new Guid("6db2e137-d138-4fb2-a37f-1d0d63c8c1af"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
                 keyValue: new Guid("74b95903-f5c1-4191-98b4-199e23b68c61"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("78beeb36-103d-4338-a69d-e5cbe60ead1b"));
 
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
@@ -356,12 +443,47 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
+                keyValue: new Guid("7aa7c550-0cf8-4dcc-a053-37ecf34ea0b4"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("7d5289e6-00a7-4d59-807c-0c7671b7ff69"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("7ddc4444-0be8-4411-9bb5-c8ecb66b4928"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
                 keyValue: new Guid("7e3ec81c-702b-4e22-915d-89b6775794d8"));
 
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
+                keyValue: new Guid("86d60e5a-55cf-443b-9e23-e4d2e5026ad9"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("87df1064-852a-4d74-859f-7f82f1811832"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
                 keyValue: new Guid("88a385bd-d532-497a-bac9-2dd0a7d72fe9"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("895e2af2-791a-44d2-b41c-8c9e43835990"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("936206c1-02bd-48eb-89c8-f9d9bac7c4a0"));
 
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
@@ -372,6 +494,11 @@ namespace Fsel.System.Infrastructure.Migrations
                 table: "TokenConfigs",
                 keyColumn: "Id",
                 keyValue: new Guid("93ed1ded-3e21-4825-8b1e-2f0db7cefcbd"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("9c590452-7db2-4701-80d1-a3f2ebc70576"));
 
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
@@ -396,6 +523,11 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
+                keyValue: new Guid("b3b93458-6d16-40be-a39a-b31e47757c8b"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
                 keyValue: new Guid("b900f59e-f0cb-404d-b088-14b19162572a"));
 
             migrationBuilder.DeleteData(
@@ -412,6 +544,26 @@ namespace Fsel.System.Infrastructure.Migrations
                 table: "TokenConfigs",
                 keyColumn: "Id",
                 keyValue: new Guid("bc261be5-f658-415a-9498-8b813742708c"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("c4e45f73-264c-45a2-a9ca-b1cf62a99b39"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("c8dc8455-a5ac-45d1-9cc5-02931d0f7c60"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("d3b5b55b-8c07-4616-b6bd-f6836f5a0d38"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("d55638cd-8de6-4402-8ed4-3b9ed3e43292"));
 
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
@@ -442,6 +594,16 @@ namespace Fsel.System.Infrastructure.Migrations
                 table: "TokenConfigs",
                 keyColumn: "Id",
                 keyValue: new Guid("f08945d0-3b03-4299-ae22-e3ce2408b74b"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("f278b0fb-34f3-496a-b663-fbabbfd3df6b"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
+                keyValue: new Guid("fdb2ef3e-384f-4113-b858-69b78c0b3cb4"));
 
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",

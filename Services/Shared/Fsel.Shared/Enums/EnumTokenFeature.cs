@@ -8,6 +8,8 @@ namespace Fsel.Shared.Enums
         FocusMode,
         DailyCheckin,
         Test,
+        FullMockTest,
+        SkillMockTest,
         Achievement
     }
 }
