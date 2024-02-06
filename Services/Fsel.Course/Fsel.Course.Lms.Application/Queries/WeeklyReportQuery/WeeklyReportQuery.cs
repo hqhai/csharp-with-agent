@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
     using Fsel.Common.Models;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
@@ -164,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 var previousSocial = ConvertSecondsToMinutes(previousFeatureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0);
                 var previousOther = ConvertSecondsToMinutes(previousFeatureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0);
 
-                weeklyReport.PreviousTotal = ConvertHour((previousLearn + previousSocial + previousOther) * 60);
+                weeklyReport.PreviousTotal = FormatTimeSpanAsClock((previousLearn + previousSocial + previousOther) * 60);
                 weeklyReport.PreviousLearn = FormatTimeSpanAsClock(previousLearn * 60);
                 weeklyReport.PreviousSocial = FormatTimeSpanAsClock(previousSocial * 60);
                 weeklyReport.PreviousOther = FormatTimeSpanAsClock(previousOther * 60);
@@ -174,10 +175,20 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 var totalSocial = ConvertSecondsToMinutes(featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0);
                 var totalOther = ConvertSecondsToMinutes(featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0);
 
-                weeklyReport.TotalHour = ConvertHour((totalLearn + totalSocial + totalOther) * 60);
+                weeklyReport.TotalHour = FormatTimeSpanAsClock((totalLearn + totalSocial + totalOther) * 60);
                 weeklyReport.TotalLearn = FormatTimeSpanAsClock(totalLearn * 60);
                 weeklyReport.TotalSocial = FormatTimeSpanAsClock(totalSocial * 60);
                 weeklyReport.TotalOther = FormatTimeSpanAsClock(totalOther * 60);
+
+                var totalHour = totalLearn + totalSocial + totalOther;
+                var totalHourPrevious = previousLearn + previousSocial + previousOther;
+
+
+                weeklyReport.ColorTotal = totalHour > totalHourPrevious ? "#53BF65" : (totalHour == totalHourPrevious ? "#FFAE46" : "#C0404C");
+                weeklyReport.ColorLearn = totalLearn > previousLearn ? "#53BF65" : (totalLearn == previousLearn ? "#FFAE46" : "#C0404C");
+                weeklyReport.ColorSocial = totalSocial > previousSocial ? "#53BF65" : (totalSocial == previousSocial ? "#FFAE46" : "#C0404C");
+                weeklyReport.ColorOther = totalOther > previousOther ? "#53BF65" : (totalOther == previousOther ? "#FFAE46" : "#C0404C");
+
 
                 var unitResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.UpdatedDate >= lastFridayAt13 && p.UpdatedDate <= currentDate && p.StudentId == item.Id).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
 
@@ -212,28 +223,31 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
 
                             foreach (var ls in lessonResultsDone[i].SkillScores!)
                             {
-                                if (i > 0)
-                                {
-                                    var skillScore = lessonResultsDone[i - 1].SkillScores?.FirstOrDefault(p => p.Skill == ls.Skill);
-                                    if (skillScore != null)
-                                    {
-                                        var (@class, skillName, icon) = ConvertEnum(skillScore.Skill);
-                                        var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill2, icon, skillName, ls.Percent, 100 - ls.Percent, skillScore.Percent, ls.Percent > skillScore.Percent ? "#53BF65" : (ls.Percent == skillScore.Percent ? "#FFAE46" : "#C0404C"), ls.Percent);
-                                        unitName += html;
-                                    }
-                                    else
-                                    {
-                                        var (@class, skillName, icon) = ConvertEnum(ls.Skill);
-                                        var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
-                                        unitName += html;
-                                    }
-                                }
-                                else
-                                {
-                                    var (@class, skillName, icon) = ConvertEnum(ls.Skill);
-                                    var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
-                                    unitName += html;
-                                }
+                                //if (i > 0)
+                                //{
+                                //    var skillScore = lessonResultsDone[i - 1].SkillScores?.FirstOrDefault(p => p.Skill == ls.Skill);
+                                //    if (skillScore != null)
+                                //    {
+                                //        var (@class, skillName, icon) = ConvertEnum(skillScore.Skill);
+                                //        var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill2, icon, skillName, ls.Percent, 100 - ls.Percent, skillScore.Percent, ls.Percent > skillScore.Percent ? "#53BF65" : (ls.Percent == skillScore.Percent ? "#FFAE46" : "#C0404C"), ls.Percent);
+                                //        unitName += html;
+                                //    }
+                                //    else
+                                //    {
+                                //        var (@class, skillName, icon) = ConvertEnum(ls.Skill);
+                                //        var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
+                                //        unitName += html;
+                                //    }
+                                //}
+                                //else
+                                //{
+                                //    var (@class, skillName, icon) = ConvertEnum(ls.Skill);
+                                //    var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
+                                //    unitName += html;
+                                //}
+                                var (@class, skillName, icon) = ConvertEnum(ls.Skill);
+                                var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
+                                unitName += html;
                             }
                             index++;
                         }
