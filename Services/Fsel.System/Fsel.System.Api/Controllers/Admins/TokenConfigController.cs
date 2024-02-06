@@ -17,7 +17,7 @@ namespace Fsel.System.Api.Controllers.Admins
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/token-config")]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+    //[Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     [ApiController]
     public class TokenConfigController : ControllerBase
     {

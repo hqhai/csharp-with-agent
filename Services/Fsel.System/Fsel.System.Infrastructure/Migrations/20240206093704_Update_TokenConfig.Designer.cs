@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20240206091936_Update_TokenConfig")]
+    [Migration("20240206093704_Update_TokenConfig")]
     partial class Update_TokenConfig
     {
         /// <inheritdoc />
@@ -1798,7 +1798,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e5361e72-412e-4022-bc66-c813c56f1b10"),
+                            Id = new Guid("d29ad85c-2a46-4f36-9b5a-192aab0690b0"),
                             ConfigStr = "{\"baseValue\":2,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":2160}",
                             CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),

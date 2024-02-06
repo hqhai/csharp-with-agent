@@ -126,6 +126,11 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
+                keyValue: new Guid("e5361e72-412e-4022-bc66-c813c56f1b10"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
                 keyValue: new Guid("e7bc1ee5-9151-453b-a369-aafffa8dac53"));
 
             migrationBuilder.DeleteData(
@@ -196,13 +201,6 @@ namespace Fsel.System.Infrastructure.Migrations
                 column: "TargetTime",
                 value: 10800.0);
 
-            migrationBuilder.UpdateData(
-                table: "TokenConfigs",
-                keyColumn: "Id",
-                keyValue: new Guid("e5361e72-412e-4022-bc66-c813c56f1b10"),
-                columns: new[] { "ConfigStr", "CourseType", "DisplayOrder", "Feature", "Mission" },
-                values: new object[] { "{\"baseValue\":2,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":2160}", "Academic", 1, "Learn", "TimeCodeFirstSubmit" });
-
             migrationBuilder.InsertData(
                 table: "TokenConfigs",
                 columns: new[] { "Id", "ConfigStr", "CourseType", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DisplayOrder", "Feature", "IsDeleted", "Mission", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
@@ -263,6 +261,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     { new Guid("bc261be5-f658-415a-9498-8b813742708c"), "[{\"baseValue\":5,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\",\"totalActions\":720,\"description\":\"User is active in focus mode 15\\u0027 continues\",\"displayOrder\":1},{\"baseValue\":15,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\",\"description\":\"User is active in focus mode 30\\u0027 continues\",\"totalActions\":720,\"displayOrder\":2},{\"baseValue\":25,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\",\"description\":\"User is active in focus mode 45\\u0027 continues\",\"totalActions\":720,\"displayOrder\":3},{\"baseValue\":40,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\",\"description\":\"User is active in focus mode 60\\u0027 continues\",\"totalActions\":720,\"displayOrder\":4},{\"baseValue\":60,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\",\"description\":\"User is active in focus mode 90\\u0027 continues\",\"totalActions\":720,\"displayOrder\":5}]", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 15, "FocusMode", false, "FocusMode", null, null, null },
                     { new Guid("c4e45f73-264c-45a2-a9ca-b1cf62a99b39"), "{\"baseValue\":30,\"description\":\"[Mock Test Speaking]Compared graded by teacher with 4 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 40, "FullMockTest", false, "FullMockTestSpeakingFC", null, null, null },
                     { new Guid("c8dc8455-a5ac-45d1-9cc5-02931d0f7c60"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 1]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 30, "SkillMockTest", false, "SkillMockTestWritingTask1CC", null, null, null },
+                    { new Guid("d29ad85c-2a46-4f36-9b5a-192aab0690b0"), "{\"baseValue\":2,\"description\":\"When users complete each question/sub question, they will receive coins for each question/sub question\",\"totalActions\":2160}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 1, "Learn", false, "TimeCodeFirstSubmit", null, null, null },
                     { new Guid("d3b5b55b-8c07-4616-b6bd-f6836f5a0d38"), "{\"baseValue\":3,\"description\":\"When users complete each question/sub question, they will receive coins for each correct question/sub question\",\"totalActions\":80}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 39, "FullMockTest", false, "FullMockTestListening", null, null, null },
                     { new Guid("d55638cd-8de6-4402-8ed4-3b9ed3e43292"), "{\"baseValue\":15,\"description\":\"[Mock Test Writing Task 2]Compare grade by AI with 5 criteria, if meet the criteria user can earn coin\",\"totalActions\":2}", "Ielts", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 51, "FullMockTest", false, "FullMockTestWritingTask2CC", null, null, null },
                     { new Guid("d8020699-4aa7-45bd-8ccc-15aca3b23db5"), "{\"baseValue\":2,\"description\":\"Complete mission in Achievement question list\",\"totalActions\":100}", "Academic", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, 54, "Achievement", false, "QuestionCompleted", null, null, null },
@@ -558,6 +557,11 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "TokenConfigs",
                 keyColumn: "Id",
+                keyValue: new Guid("d29ad85c-2a46-4f36-9b5a-192aab0690b0"));
+
+            migrationBuilder.DeleteData(
+                table: "TokenConfigs",
+                keyColumn: "Id",
                 keyValue: new Guid("d3b5b55b-8c07-4616-b6bd-f6836f5a0d38"));
 
             migrationBuilder.DeleteData(
@@ -659,13 +663,6 @@ namespace Fsel.System.Infrastructure.Migrations
                 column: "TargetTime",
                 value: 5400.0);
 
-            migrationBuilder.UpdateData(
-                table: "TokenConfigs",
-                keyColumn: "Id",
-                keyValue: new Guid("e5361e72-412e-4022-bc66-c813c56f1b10"),
-                columns: new[] { "ConfigStr", "Feature", "Mission", "SuperConfigStr" },
-                values: new object[] { "{\"number\":10}", "ReviewSystem", "ReviewPlatform", "null" });
-
             migrationBuilder.InsertData(
                 table: "TokenConfigs",
                 columns: new[] { "Id", "ConfigStr", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "Feature", "IsDeleted", "Mission", "SuperConfigStr", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
@@ -693,6 +690,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     { new Guid("d3340516-ab0b-471e-8117-2b6fd6ec1680"), "{\"number\":10}", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "QuestBoard", false, "MainQuest", "null", null, null, null },
                     { new Guid("d33de316-efe4-46d7-89e8-d27d49e8186a"), "{\"number\":10}", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "ReviewSystem", false, "ReviewCourse", "null", null, null, null },
                     { new Guid("e00c5780-7d72-4cfe-872e-5b8954cff205"), "{\"number\":10}", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "SkillMockTest", false, "TestDone", "{\"number\":15}", null, null, null },
+                    { new Guid("e5361e72-412e-4022-bc66-c813c56f1b10"), "{\"number\":10}", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "ReviewSystem", false, "ReviewPlatform", "null", null, null, null },
                     { new Guid("e7bc1ee5-9151-453b-a369-aafffa8dac53"), "{\"number\":10}", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "UnitTest", false, "TestDone", "{\"number\":15}", null, null, null },
                     { new Guid("ef5dce88-eb01-4d9f-98b5-ef709bc736f7"), "{\"number\":0}", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "UnitTest", false, "SuperFire", "{\"number\":4}", null, null, null },
                     { new Guid("f0f20824-1354-4267-bf44-812455aa85d0"), "{\"number\":40}", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "FinalTest", false, "TestDone", "{\"number\":60}", null, null, null },
