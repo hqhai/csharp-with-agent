@@ -7,13 +7,19 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -29,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IUserService _userService;
+        private readonly ISystemService _systemService;
         private readonly AuthContext _authContext;
         private static int Criteria = 4;
 
@@ -37,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             ISectionGroupRepository sectionGroupRepository,
             ISectionGroupResultRepository sectionGroupResultRepository,
             IUserService userService,
+            ISystemService systemService,
             AuthContext authContext)
         {
             _mapper = mapper;
@@ -44,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             _sectionGroupRepository = sectionGroupRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _userService = userService;
+            _systemService = systemService;
             _authContext = authContext;
         }
 
@@ -51,6 +60,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<List<MockTestScoreModel>> methodResult = new MethodResult<List<MockTestScoreModel>>();
+
+            #region Validate
 
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             if (!teacherResult.IsSuccessStatusCode)
@@ -71,8 +82,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(MockTestScore.Criteria));
                 return methodResult;
             }
-            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
-            if (mockTestResult == null)
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Include(x => x.MockTest).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
+            if (mockTestResult == null || mockTestResult.MockTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
@@ -96,6 +107,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResults));
                 return methodResult;
             }
+
+            #endregion Validate
+
+            var isSkillTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
+            var tokenConfigs = await GetTokenConfigsAsync(isSkillTest);
+
+            long numberOfToken = 0;
             IList<MockTestScore> mockTestScores = new List<MockTestScore>();
             foreach (var item in request.MockTestScores)
             {
@@ -107,6 +125,34 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                     });
                     return methodResult;
                 }
+                switch (item.Criteria)
+                {
+                    case EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy:
+                        var mission = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingGRA : EnumTokenMission.FullMockTestSpeakingGRA;
+                        var tokenConfig = tokenConfigs?.FirstOrDefault(x => x.Mission == mission);
+                        numberOfToken += tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+                        break;
+
+                    case EnumMockTestScoreCriteria.Pronunciation:
+                        var missionPon = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingPron : EnumTokenMission.FullMockTestSpeakingPron;
+                        var tokenConfigPon = tokenConfigs?.FirstOrDefault(x => x.Mission == missionPon);
+                        numberOfToken += tokenConfigPon.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+                        break;
+
+                    case EnumMockTestScoreCriteria.FluencyAndCoherence:
+                        var missionFC = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingFC : EnumTokenMission.FullMockTestSpeakingFC;
+                        var tokenConfigFC = tokenConfigs?.FirstOrDefault(x => x.Mission == missionFC);
+                        numberOfToken += tokenConfigFC.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+
+                        break;
+
+                    case EnumMockTestScoreCriteria.LexicalResource:
+                        var missionLR = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingLR : EnumTokenMission.FullMockTestSpeakingLR;
+                        var tokenConfigLR = tokenConfigs?.FirstOrDefault(x => x.Mission == missionLR);
+                        numberOfToken += tokenConfigLR.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+                        break;
+                }
+
                 MockTestScore mockTestScore = _mapper.Map<MockTestScore>(item);
                 if (!mockTestScore.IsValid())
                 {
@@ -126,6 +172,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 if (sectionGroupResult != null)
                 {
                     sectionGroupResult.CorrectCount = (int)sumScore;
+                    sectionGroupResult.TokenFirstTime = (int?)numberOfToken;
                     sectionGroupResult.SkillScores = sectionGroupResult.SkillScores?.Select(x =>
                     {
                         x.CorrectCount = (int)sumScore;
@@ -146,20 +193,46 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             mockTestResult.SkillScores = skillScores;
             mockTestResult.MockTestScores = mockTestScores;
             mockTestResult.GradingTeacherId = teacherId;
+            mockTestResult.TokenFirstTime += (int?)numberOfToken;
 
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
                 _sectionGroupResultRepository.UpdateList(sectionGroupResults);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
+                // Update Token To Student
+                await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+                {
+                    NumberOfToken = mockTestResult.TokenFirstTime ?? default,
+                    StudentId = mockTestResult.StudentId,
+                }).ConfigureAwait(false);
+
                 _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<List<MockTestScoreModel>>(mockTestResult.MockTestScores);
                 return methodResult;
             });
             return methodResult;
+        }
+
+        private async Task<IList<TokenConfigModel>?> GetTokenConfigsAsync(bool isSkillTest)
+        {
+            var missions = isSkillTest ? new List<string> { nameof(EnumTokenMission.SkillMockTestSpeakingFC), nameof(EnumTokenMission.SkillMockTestSpeakingGRA), nameof(EnumTokenMission.SkillMockTestSpeakingLR), nameof(EnumTokenMission.SkillMockTestSpeakingPron) }
+            : new List<string> { nameof(EnumTokenMission.FullMockTestSpeakingFC), nameof(EnumTokenMission.FullMockTestSpeakingGRA), nameof(EnumTokenMission.FullMockTestSpeakingLR), nameof(EnumTokenMission.FullMockTestSpeakingPron) };
+
+            var tokenConfigs = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+            {
+                Feature = isSkillTest ? EnumTokenFeature.SkillMockTest : EnumTokenFeature.FullMockTest,
+                CourseType = EnumCourseType.Ielts,
+                Missions = string.Join(",", missions),
+            });
+            if (!tokenConfigs.IsSuccessStatusCode)
+            {
+                return default;
+            }
+            return tokenConfigs.Content?.Result;
         }
     }
 }

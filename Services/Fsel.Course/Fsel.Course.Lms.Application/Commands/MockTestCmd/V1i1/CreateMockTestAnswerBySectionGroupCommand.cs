@@ -12,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
@@ -21,10 +20,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -98,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var studentId = student?.Id ?? request.StudentId ?? default;
             var mockTestAnswers = new List<MockTestAnswer>();
             var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).FirstOrDefaultAsync(x => x.Id == request.MockTestResultId, cancellationToken);
-            if (mockTestResult == null)
+            if (mockTestResult == null || mockTestResult.MockTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
@@ -133,6 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
             #endregion Validate
 
+            var isSkillTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 if (request.Answers != null && request.Answers.Any())
@@ -163,10 +165,15 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                 }
                 sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
+
+                if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
+                {
+                    sectionGroupResult = await UpdateSectionGroupResultAsync(sectionGroup, sectionGroupResult, isSkillTest);
+                }
                 return methodResult;
             });
 
-            await UpdateMockTestResultAsync(mockTestResult, cancellationToken);
+            await UpdateMockTestResultAsync(mockTestResult, isSkillTest, cancellationToken);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = mockTestResult.Status == EnumResultStatus.Done;
             methodResult.Result = sectionGroupResultDto;
@@ -174,88 +181,69 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, CancellationToken cancellationToken)
+        private async Task<SectionGroupResult?> UpdateSectionGroupResultAsync(SectionGroup sectionGroup, SectionGroupResult? sectionGroupResult, bool isSkillTest)
         {
-            var mockTest = mockTestResult.MockTest;
+            if (sectionGroupResult != null)
+            {
+                if (sectionGroup.CourseSkill == EnumCourseSkill.Reading)
+                {
+                    sectionGroupResult.TokenFirstTime = (int?)await GetTokenAsync(isSkillTest ? EnumTokenMission.SkillMockTestReading : EnumTokenMission.FullMockTestReading, isSkillTest);
+                }
+                else if (sectionGroup.CourseSkill == EnumCourseSkill.Listening)
+                {
+                    sectionGroupResult.TokenFirstTime = (int?)await GetTokenAsync(isSkillTest ? EnumTokenMission.SkillMockTestListening : EnumTokenMission.FullMockTestListening, isSkillTest);
+                }
+                _sectionGroupResultRepository.Update(sectionGroupResult);
+                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            }
+
+            return sectionGroupResult;
+        }
+
+        private async Task<long> GetTokenAsync(EnumTokenMission mission, bool isSkillTest)
+        {
+            var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+            {
+                Feature = isSkillTest ? EnumTokenFeature.SkillMockTest : EnumTokenFeature.FullMockTest,
+                Mission = mission,
+                CourseType = EnumCourseType.Ielts
+            });
+            if (!tokenConfigs.IsSuccessStatusCode)
+            {
+                return default;
+            }
+            var tokenConfig = tokenConfigs.Content?.Result;
+            return tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+        }
+
+        private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, bool isSkillTest, CancellationToken cancellationToken)
+        {
             var numberOfDone = 4;
-            if (mockTest == null || mockTestResult == null)
-            {
-                return;
-            }
-            var isSkillTest = mockTest.MockTestType == EnumMockTestType.SkillMockTest;
-            if (isSkillTest)
-            {
-                var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(s => s.MockTestResultId == mockTestResult.Id).FirstOrDefaultAsync(cancellationToken);
-                if (sectionGroupResult != null && sectionGroupResult.Status == EnumResultStatus.Done)
-                {
-                    mockTestResult.WorkingTime = sectionGroupResult.WorkingTime;
-                    mockTestResult.HighestStreak = sectionGroupResult.HighestStreak;
-                    mockTestResult = await GetMockTestResult(sectionGroupResult.SkillScores, mockTestResult, isSkillTest);
-                    await UpdateUserToken(mockTestResult).ConfigureAwait(false);
-                }
-            }
-            else
-            {
-                var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
-                if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
-                {
-                    mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
-                    mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
-                    mockTestResult = await GetMockTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList(), mockTestResult, isSkillTest);
-                    await UpdateUserToken(mockTestResult).ConfigureAwait(false);
-                }
-            }
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
 
-            _mockTestResultRepository.Update(mockTestResult);
-            await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            if (sectionGroupResults != null && (isSkillTest || sectionGroupResults.Count == numberOfDone) && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
+            {
+                mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
+                mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
+                mockTestResult = GetMockTestResult(sectionGroupResults, mockTestResult);
+                _mockTestResultRepository.Update(mockTestResult);
+                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
-        private async Task UpdateUserToken(MockTestResult mockTestResult)
+        private static MockTestResult GetMockTestResult(IList<SectionGroupResult>? sectionGroupResults, MockTestResult mockTestResult)
         {
-            //var tokens = new List<int?> { mockTestResult.TokenDone, mockTestResult.TokenHighestStreak, mockTestResult.TokenQuestionReward, mockTestResult.TokenSuperFire };
-            //await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-            //{
-            //    NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
-            //    StudentId = mockTestResult.StudentId,
-            //}).ConfigureAwait(false);
-        }
-
-        private async Task<MockTestResult> GetMockTestResult(IList<SkillScores>? skillScores, MockTestResult mockTestResult, bool isSkillTest)
-        {
-            ArgumentNullException.ThrowIfNull(skillScores);
-            mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
-            mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+            var skillScores = sectionGroupResults?.SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
+            if (skillScores != null)
+            {
+                mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                mockTestResult.TokenFirstTime = sectionGroupResults?.Sum(x => x.TokenFirstTime);
+            }
             mockTestResult.Status = EnumResultStatus.Done;
             mockTestResult.SkillScores = skillScores;
-            //mockTestResult = await GetTokenMockTestResult(mockTestResult, isSkillTest);
             return mockTestResult;
         }
-
-        //private async Task<MockTestResult> GetTokenMockTestResult(MockTestResult mockTestResult, bool isSkillTest)
-        //{
-        //    var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
-        //    var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
-        //    {
-        //        Feature = isSkillTest ? EnumTokenFeature.SkillMockTest : EnumTokenFeature.FullMockTest,
-        //        Missions = string.Join(",", misstions)
-        //    });
-        //    var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
-        //    if (!tokenConfigResults.IsSuccessStatusCode || !isSuperFireModeResult.IsSuccessStatusCode)
-        //    {
-        //        return mockTestResult;
-        //    }
-        //    var tokenConfigs = tokenConfigResults.Content?.Result;
-        //    var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
-
-        //    var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
-        //    var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
-        //    var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
-
-        //    mockTestResult.TokenDone = configDone?.Number;
-        //    mockTestResult.TokenHighestStreak = configHighestStreak?.Number * mockTestResult.HighestStreak;
-        //    mockTestResult.TokenSuperFire = configSuperFire?.Number;
-        //    return mockTestResult;
-        //}
 
         private async Task<MethodResult<SectionGroupResult>> SaveAnswerAsync(CreateMockTestAnswerBySectionGroupCommand request, SectionGroup sectionGroup, SectionGroupResult sectionGroupResult)
         {
