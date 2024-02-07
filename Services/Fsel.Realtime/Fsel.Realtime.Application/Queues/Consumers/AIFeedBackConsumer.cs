@@ -1,3 +1,4 @@
+using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;
@@ -10,10 +11,12 @@ namespace Fsel.Realtime.Application.Queues.Consumers
     public class AIFeedBackConsumer : IConsumer<SubmitAIResponseModel>
     {
         private readonly IHubContext<ClassForumAIFeedBackHub> _classForumFeedBackHubContext;
+        private readonly IQueueProvider _queueProvider;
 
-        public AIFeedBackConsumer(IHubContext<ClassForumAIFeedBackHub> classForumAIFeedBackHubContext)
+        public AIFeedBackConsumer(IHubContext<ClassForumAIFeedBackHub> classForumAIFeedBackHubContext, IQueueProvider queueProvider)
         {
             _classForumFeedBackHubContext = classForumAIFeedBackHubContext;
+            _queueProvider = queueProvider;
         }
 
         public async Task Consume(ConsumeContext<SubmitAIResponseModel> context)
@@ -22,6 +25,12 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             {
                 var classForumResultId = context.Message.ClassForumResultId.ToString();
                 await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, context.Message);
+
+                try
+                {
+                    _queueProvider.Publish(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, classForumResultId, context.Message);
+                }
+                catch { }
             }
         }
     }

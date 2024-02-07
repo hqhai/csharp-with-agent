@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var mockTestResultModel = GetMockTestResult(mockTestResult);
             if (mockTestResult.SkillScores != null)
             {
-                mockTestResultModel.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores), true);
+                mockTestResultModel.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores));
                 mockTestResultModel.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
             }
 

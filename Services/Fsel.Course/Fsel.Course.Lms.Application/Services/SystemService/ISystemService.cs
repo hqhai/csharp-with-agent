@@ -38,5 +38,11 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Get("/token-config/get-tokens")]
         Task<IApiResponse<MethodResult<IList<TokenConfigModel>>>> GetTokenConfigsAsync([Query] GetTokenConfigsQueryModel query);
+
+        [Get("/feature-access-time/get-feature-access-time-business")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeBusinessModel>>>> GetFeatureAccessTimeBusiness([FromQuery] GetFeatureAccessTimeBusinessQueryModel model);
+
+        [Get("/feature-access-time/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetListFeatureAccessTime([FromQuery] BaseQueryModel model);
     }
 }

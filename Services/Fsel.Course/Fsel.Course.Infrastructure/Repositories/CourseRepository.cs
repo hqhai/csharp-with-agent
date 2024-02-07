@@ -168,7 +168,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                                  .Where(y => y.StudentId == studentId && y.CourseId == x.CourseId)
                                                                  .AsNoTracking().FirstOrDefault()),
                                  } : null,
-                                 Type = x.FinalTest != null ? nameof(x.FinalTest) : x.MockTest != null ? nameof(x.MockTest) : x.Unit != null ? nameof(x.Unit) : null
                              }).ToList()
                          })
                          .FirstOrDefaultAsync();

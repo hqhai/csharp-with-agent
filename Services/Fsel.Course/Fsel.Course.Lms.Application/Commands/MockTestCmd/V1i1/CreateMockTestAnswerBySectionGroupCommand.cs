@@ -146,23 +146,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         return methodResult;
                     }
                     sectionGroupResult = answerResult.Result;
-
-                    if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
-                    {
-                        foreach (var item in request.Answers)
-                        {
-                            if (item.SectionId == null || sectionGroupResult == null)
-                            {
-                                continue;
-                            }
-                            await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
-                            {
-                                SectionId = (Guid)item.SectionId,
-                                MockTestResultId = mockTestResult.Id,
-                                WordContent = item.Answer?.ToString() ?? string.Empty,
-                            }, cancellationToken);
-                        }
-                    }
                 }
                 sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
 
@@ -172,6 +155,25 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 }
                 return methodResult;
             });
+
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.FirstOrDefault() != null && request.IsSubmit)
+            {
+                var sectionGroupId = sectionGroup.Sections.FirstOrDefault()!.SectionGroupId;
+                foreach (var item in request.Answers!)
+                {
+                    if (item.SectionId == null)
+                    {
+                        continue;
+                    }
+                    await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
+                    {
+                        SectionId = (Guid)item.SectionId,
+                        SectionGroupId = sectionGroupId,
+                        MockTestResultId = mockTestResult.Id,
+                        WordContent = item.Answer?.ToString() ?? string.Empty
+                    }, cancellationToken);
+                }
+            }
 
             await UpdateMockTestResultAsync(mockTestResult, isSkillTest, cancellationToken);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);

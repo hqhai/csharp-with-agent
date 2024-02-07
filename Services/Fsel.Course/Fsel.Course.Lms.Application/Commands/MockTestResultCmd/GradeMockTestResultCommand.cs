@@ -176,7 +176,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                     sectionGroupResult.SkillScores = sectionGroupResult.SkillScores?.Select(x =>
                     {
                         x.CorrectCount = (int)sumScore;
-                        x.Scores = NumberHelper.RoundNumberDouble((double)sumScore / Criteria, true);
+                        x.Scores = NumberHelper.RoundNumberDouble((double)sumScore / Criteria);
                         return x;
                     }).ToList();
                 }
@@ -185,7 +185,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                     skillScore.CorrectCount = sumScore;
                     skillScore.TotalCount = 36;
                     skillScore.Skill = item.CourseSkill;
-                    skillScore.Scores = NumberHelper.RoundNumberDouble((double)sumScore / Criteria, true);
+                    skillScore.Scores = NumberHelper.RoundNumberDouble((double)sumScore / Criteria);
                     skillScores!.Add(skillScore);
                 }
             }

@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Application.Queries.HomeWorkQuery
 {
-    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -11,7 +10,6 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.HomeWorks;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -68,6 +66,12 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
             {
                 homeWorkQuery = homeWorkQuery.Where(m => m.CourseSkill == request.CourseSkill);
             }
+
+            request.SortBy.Add(new Common.Models.GenericSortModel
+            {
+                Property = nameof(HomeWorkSearchModel.Code),
+                IsDesc = false
+            });
 
             int totalItem = await homeWorkQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await homeWorkQuery

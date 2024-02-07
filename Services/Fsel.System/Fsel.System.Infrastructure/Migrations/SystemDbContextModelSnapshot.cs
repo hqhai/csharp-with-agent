@@ -398,7 +398,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Bắt đầu nhẹ nhàng",
                             IsDeleted = false,
-                            TargetTime = 1800.0
+                            TargetTime = 900.0
                         },
                         new
                         {
@@ -408,7 +408,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Hình thành thói quen chưa?",
                             IsDeleted = false,
-                            TargetTime = 3600.0
+                            TargetTime = 1800.0
                         },
                         new
                         {
@@ -418,7 +418,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Tập trung hơn nữa nào",
                             IsDeleted = false,
-                            TargetTime = 5400.0
+                            TargetTime = 2700.0
                         },
                         new
                         {
@@ -428,7 +428,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Chăm chỉ phết",
                             IsDeleted = false,
-                            TargetTime = 7200.0
+                            TargetTime = 3600.0
                         },
                         new
                         {
@@ -438,7 +438,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Thách đấu FSEL",
                             IsDeleted = false,
-                            TargetTime = 10800.0
+                            TargetTime = 5400.0
                         });
                 });
 
