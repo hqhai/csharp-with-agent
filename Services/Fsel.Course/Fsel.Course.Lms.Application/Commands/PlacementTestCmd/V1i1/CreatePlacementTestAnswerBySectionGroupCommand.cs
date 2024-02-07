@@ -286,7 +286,7 @@ AppSetting appSetting)
 
         private async Task SendStudentPlacementTest(EnumCourseLevel courseLevel, StudentModel student, PlacementTestResult placementTestResult, CancellationToken cancellationToken)
         {
-            var pathSkillScores = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.SkillScores);
+            var pathSkillScores = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill);
             using StreamReader streamReaderSkillScore = new StreamReader(pathSkillScores);
             var skillScoresHtml = await streamReaderSkillScore.ReadToEndAsync(cancellationToken);
 

@@ -119,9 +119,17 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 }}
             });
 
-            var pathSkillScores = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.SkillScores);
+            var pathSkillScores = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill);
             using StreamReader streamReaderSkillScore = new StreamReader(pathSkillScores);
             var skillScoresHtml = await streamReaderSkillScore.ReadToEndAsync(cancellationToken);
+
+            var pathLessonName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.LessonName);
+            using StreamReader streamReaderLessonName = new StreamReader(pathLessonName);
+            var lessonNameHtml = await streamReaderLessonName.ReadToEndAsync(cancellationToken);
+
+            var pathUnitName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill);
+            using StreamReader streamReaderUnitName = new StreamReader(pathUnitName);
+            var unitNameHtml = await streamReaderUnitName.ReadToEndAsync(cancellationToken);
 
             foreach (var item in students)
             {
@@ -182,11 +190,11 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
 
                     if (lessonResultsDone.Count > 0)
                     {
-                        unitName += string.Format(CultureInfo.InvariantCulture, SendMailSetting.UnitName, unit.Unit?.Name);
+                        unitName += string.Format(CultureInfo.InvariantCulture, unitNameHtml, unit.Unit?.Name);
 
                         for (var i = 0; i < lessonResultsDone.Count; i++)
                         {
-                            unitName += string.Format(CultureInfo.InvariantCulture, SendMailSetting.LessonName, index, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
+                            unitName += string.Format(CultureInfo.InvariantCulture, lessonNameHtml, index, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
 
                             foreach (var ls in lessonResultsDone[i].SkillScores!)
                             {
