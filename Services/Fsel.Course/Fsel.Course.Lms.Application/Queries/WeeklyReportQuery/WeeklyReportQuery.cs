@@ -296,32 +296,32 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
 
         private static void AddTimeIntoTemplate(WeeklyReportModel weeklyReport, List<FeatureAccessTimeModel>? featureAccessTimes, List<FeatureAccessTimeModel>? previousFeatureAccessTimes)
         {
-            var totalLearn = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(featureAccessTimes, EnumFeatureBussinessType.Learn));
-            var totalSocial = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(featureAccessTimes, EnumFeatureBussinessType.Social));
-            var totalOther = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(featureAccessTimes, EnumFeatureBussinessType.Other));
+            var totalLearn = DateTimeHelper.ConvertSecondsToMinutes(GetFeatureAccessTimeByType(featureAccessTimes, EnumFeatureBussinessType.Learn));
+            var totalSocial = DateTimeHelper.ConvertSecondsToMinutes(GetFeatureAccessTimeByType(featureAccessTimes, EnumFeatureBussinessType.Social));
+            var totalOther = DateTimeHelper.ConvertSecondsToMinutes(GetFeatureAccessTimeByType(featureAccessTimes, EnumFeatureBussinessType.Other));
 
             var totalHour = totalLearn + totalSocial + totalOther;
 
-            weeklyReport.TotalHour = FormatTimeSpanAsClock(totalHour);
-            weeklyReport.TotalLearn = FormatTimeSpanAsClock(totalLearn);
-            weeklyReport.TotalSocial = FormatTimeSpanAsClock(totalSocial);
-            weeklyReport.TotalOther = FormatTimeSpanAsClock(totalOther);
+            weeklyReport.TotalHour = SendMailHelper.FormatTimeSpanAsClock(totalHour);
+            weeklyReport.TotalLearn = SendMailHelper.FormatTimeSpanAsClock(totalLearn);
+            weeklyReport.TotalSocial = SendMailHelper.FormatTimeSpanAsClock(totalSocial);
+            weeklyReport.TotalOther = SendMailHelper.FormatTimeSpanAsClock(totalOther);
 
-            var previousLearn = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(previousFeatureAccessTimes, EnumFeatureBussinessType.Learn));
-            var previousSocial = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(previousFeatureAccessTimes, EnumFeatureBussinessType.Social));
-            var previousOther = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(previousFeatureAccessTimes, EnumFeatureBussinessType.Other));
+            var previousLearn = DateTimeHelper.ConvertSecondsToMinutes(GetFeatureAccessTimeByType(previousFeatureAccessTimes, EnumFeatureBussinessType.Learn));
+            var previousSocial = DateTimeHelper.ConvertSecondsToMinutes(GetFeatureAccessTimeByType(previousFeatureAccessTimes, EnumFeatureBussinessType.Social));
+            var previousOther = DateTimeHelper.ConvertSecondsToMinutes(GetFeatureAccessTimeByType(previousFeatureAccessTimes, EnumFeatureBussinessType.Other));
 
             var totalHourPrevious = previousLearn + previousSocial + previousOther;
 
-            weeklyReport.PreviousTotal = FormatTimeSpanAsClock(totalHourPrevious);
-            weeklyReport.PreviousLearn = FormatTimeSpanAsClock(previousLearn);
-            weeklyReport.PreviousSocial = FormatTimeSpanAsClock(previousSocial);
-            weeklyReport.PreviousOther = FormatTimeSpanAsClock(previousOther);
+            weeklyReport.PreviousTotal = SendMailHelper.FormatTimeSpanAsClock(totalHourPrevious);
+            weeklyReport.PreviousLearn = SendMailHelper.FormatTimeSpanAsClock(previousLearn);
+            weeklyReport.PreviousSocial = SendMailHelper.FormatTimeSpanAsClock(previousSocial);
+            weeklyReport.PreviousOther = SendMailHelper.FormatTimeSpanAsClock(previousOther);
 
-            weeklyReport.ColorTotal = GetColorText(totalHour, totalHourPrevious);
-            weeklyReport.ColorLearn = GetColorText(totalLearn, previousLearn);
-            weeklyReport.ColorSocial = GetColorText(totalSocial, previousSocial);
-            weeklyReport.ColorOther = GetColorText(totalOther, previousOther);
+            weeklyReport.ColorTotal = SendMailHelper.GetColorText(totalHour, totalHourPrevious);
+            weeklyReport.ColorLearn = SendMailHelper.GetColorText(totalLearn, previousLearn);
+            weeklyReport.ColorSocial = SendMailHelper.GetColorText(totalSocial, previousSocial);
+            weeklyReport.ColorOther = SendMailHelper.GetColorText(totalOther, previousOther);
         }
 
         private static long GetFeatureAccessTimeByType(List<FeatureAccessTimeModel>? featureAccessTimes, EnumFeatureBussinessType businessType)
@@ -340,21 +340,6 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             }
         }
 
-        private static string GetColorText(long value1, long value2)
-        {
-            if (value1 > value2)
-            {
-                return "#53BF65";
-            }
-            else if (value1 == value2)
-            {
-                return "#FFAE46";
-            }
-            else
-            {
-                return "#C0404C";
-            }
-        }
 
         private async Task<int> GetLesson(Guid? lessonId, Guid? studentId)
         {
@@ -416,23 +401,6 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             {
                 return SenderSettings.TitleWeekly4;
             }
-        }
-
-        private static int ConvertSecondsToMinutes(long seconds)
-        {
-            long minutes = seconds / 60;
-            return (int)minutes;
-        }
-
-        private static string FormatTimeSpanAsClock(long totalMinutes)
-        {
-            TimeSpan timeSpan = TimeSpan.FromMinutes(totalMinutes);
-
-            int hours = timeSpan.Hours;
-            int minutes = timeSpan.Minutes;
-
-            return $"{hours}h{minutes:D2}ph";
-
         }
     }
 }

@@ -6,6 +6,23 @@ namespace Fsel.Shared.Helpers
 
     public static class SendMailHelper
     {
+
+        public static string GetColorText(long value1, long value2)
+        {
+            if (value1 > value2)
+            {
+                return "#53BF65";
+            }
+            else if (value1 == value2)
+            {
+                return "#FFAE46";
+            }
+            else
+            {
+                return "#C0404C";
+            }
+        }
+
         public static (string, string, string) ConvertEnum(EnumCourseSkill skill)
         {
             if (skill == EnumCourseSkill.Reading)
