@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20240202035033_Update_Result_TokenCoin")]
-    partial class Update_Result_TokenCoin
+    [Migration("20240207043034_Update_Result_Token")]
+    partial class Update_Result_Token
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3910,6 +3910,12 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("TokenFirstTime")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TokenLastTime")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")

@@ -1,11 +1,11 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Fsel.Course.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Update_Result_TokenCoin : Migration
+    public partial class Update_Result_Token : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -84,6 +84,18 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             migrationBuilder.AddColumn<int>(
                 name: "TokenFirstTime",
+                table: "SectionGroupResults",
+                type: "int",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "TokenLastTime",
+                table: "SectionGroupResults",
+                type: "int",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "TokenFirstTime",
                 table: "HomeWorkResults",
                 type: "int",
                 nullable: true);
@@ -110,6 +122,14 @@ namespace Fsel.Course.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "TokenFirstTime",
+                table: "SectionGroupResults");
+
+            migrationBuilder.DropColumn(
+                name: "TokenLastTime",
+                table: "SectionGroupResults");
+
             migrationBuilder.DropColumn(
                 name: "TokenFirstTime",
                 table: "HomeWorkResults");

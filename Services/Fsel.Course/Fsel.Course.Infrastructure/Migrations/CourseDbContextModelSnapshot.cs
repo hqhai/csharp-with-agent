@@ -3908,6 +3908,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("TokenFirstTime")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TokenLastTime")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
