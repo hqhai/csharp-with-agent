@@ -201,6 +201,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 Id = mockTestResult?.Id ?? null,
                 Percent = NumberHelper.ConvertPercentDouble(mockTestResult?.Status == EnumResultStatus.Done ? 1 : 0),
                 SkillScores = GetTestSkillScores(mockTestResult, mockTest),
+                Score = mockTestResult?.SkillScores?.Select(x => x.Scores).FirstOrDefault() ?? default,
                 Status = mockTestResult?.Status ?? EnumResultStatus.Unfinished,
             };
         }
