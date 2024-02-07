@@ -1,0 +1,97 @@
+[
+  {
+    "fullName": "Brandon Sinkovic",
+    "nationality": "Mỹ",
+    "degree": "Cử nhân Ngôn ngữ",
+    "certifications": "Chứng chỉ giảng dạy CELTA",
+    "experience": "7 Năm kinh nghiệm giảng dạy tiếng Anh tại Việt Nam",
+    "strength": "",
+    "avatarPath": null,
+    "teacherLevels": [
+      "B1",
+      "B1Plus"
+    ]
+  },
+  {
+    "fullName": "Calvin Moore",
+    "nationality": "Anh Quốc",
+    "degree": "Cử nhân Văn học Anh",
+    "certifications": "Chứng chỉ giảng dạy CELTA",
+    "experience": "7 Năm kinh nghiệm giảng dạy tiếng Anh tại Việt Nam",
+    "strength": "",
+    "avatarPath": null,
+    "teacherLevels": [
+      "A1",
+      "A2",
+      "B1",
+      "C1"
+    ]
+  },
+  {
+    "fullName": "Anya Le",
+    "nationality": "Nga",
+    "degree": "Cử nhân Quản trị Kinh doanh",
+    "certifications": "Chứng chỉ giảng dạy CELTA",
+    "experience": "7 Năm kinh nghiệm giảng dạy tiếng Anh tại Việt Nam",
+    "strength": "",
+    "avatarPath": null,
+    "teacherLevels": [
+      "A1",
+      "A2",
+      "B1Plus",
+      "B2"
+    ]
+  },
+  {
+    "fullName": "Thomas Brettell",
+    "nationality": "Anh Quốc",
+    "degree": "Cử nhân Văn học Anh",
+    "certifications": "Chứng chỉ PGCE",
+    "experience": "16 Năm kinh nghiệm giảng dạy tiếng Anh",
+    "strength": "",
+    "avatarPath": null,
+    "teacherLevels": [
+      "B2"
+    ]
+  },
+  {
+    "fullName": "Eliza Keyton",
+    "nationality": "Mỹ",
+    "degree": "Cử nhân Giảng dạy tiếng Anh, Thạc sỹ Quản lý Giáo dục",
+    "certifications": "Chứng chỉ giảng dạy CELTA, DELTA",
+    "experience": "14 Năm kinh nghiệm giảng dạy tiếng Anh",
+    "strength": "",
+    "avatarPath": null,
+    "teacherLevels": [
+      "C1"
+    ]
+  },
+  {
+    "fullName": "Marko Nikolic",
+    "nationality": "Serbia",
+    "degree": "Cử nhân Ngôn ngữ Pháp và Văn học, Thạc sỹ Giảng dạy tiếng Anh & tiếng Pháp như ngôn ngữ thử hai hoặc như một ngoại ngữ",
+    "certifications": "Chứng chỉ giảng dạy CELTA, DELTA",
+    "experience": "14 Năm kinh nghiệm giảng dạy tiếng Anh",
+    "strength": "",
+    "avatarPath": null,
+    "teacherLevels": [
+      "MS1",
+      "MS2",
+      "MS3"
+    ]
+  },
+  {
+    "fullName": "Cynthia Mann",
+    "nationality": "Úc",
+    "degree": "Cử nhân Giáo dục",
+    "certifications": "Chứng chỉ giảng dạy CELTA",
+    "experience": "14 Năm kinh nghiệm giảng dạy tại Việt Nam, Úc, Pháp & Vương Quốc Anh",
+    "strength": "",
+    "avatarPath": null,
+    "teacherLevels": [
+      "MS1",
+      "MS2",
+      "MS3"
+    ]
+  }
+]

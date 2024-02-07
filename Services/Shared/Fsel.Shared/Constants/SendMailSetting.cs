@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Constants
 {
-    public static class HtmlSetting
+    public static class SendMailSetting
     {
         public const string Skill = "<div style=\"width:100%\">\r\n                                    <div style=\"display:flex;margin-top:26px\">\r\n                                        <div style=\"display:flex;width:100%\">\r\n                                            \r\n                                            <div style=\"width:15%\">\r\n                                                <img src=\"{0}\"\r\n                                                     alt=\"\" class=\"CToWUd\" data-bit=\"iit\">\r\n                                            </div>\r\n                                            <div style=\"width: 45%;margin-right:5%\">\r\n                                                <div style=\"display:flex;color:#3a4b78;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-style:normal;font-weight:600;line-height:20px;margin-bottom:6px;width:100%\">\r\n                                                    {1}\r\n                                                </div>\r\n                                                <div style=\"display:flex;color:#3a4b78;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-style:normal;font-weight:600;line-height:20px;width:100%\">\r\n                                                    <div style=\"width:100%;display:flex\">\r\n                                                        <div style=\"width:{2}%;display:flex;height:10px;border-radius:100px 0 0 100px;background:#53bf65\">\r\n                                                        </div>\r\n                                                        <div style=\"display:flex;width:{3}%;height:10px;border-radius:0 100px 100px 0;background:#e2e4e9\">\r\n                                                        </div>\r\n                                                    </div>\r\n                                                </div>\r\n                                            </div>\r\n                                            <div style=\"display:flex;padding:14px 10px;border-radius:8px;border:1px solid #809fe5;color:#3a4b78;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-style:normal;font-weight:400;line-height:24px;width: 22%;\">\r\n                                                <div style=\"margin:0 11px;text-align: center;width: 100%;\">\r\n                                                    <span style=\"text-align:center;color:#3a4b78;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-style:normal;font-weight:400;line-height:35px\">\r\n                                                        {4}%\r\n                                                    </span>\r\n                                                </div>\r\n                                            </div>\r\n                                        </div>\r\n                                    </div>\r\n                                </div>";
 
@@ -38,5 +38,27 @@ namespace Fsel.Shared.Constants
 
         public const string Active = "https://s3-sgn10.fptcloud.com/fsel/Images/Function.png";
         public const string NoActive = "https://s3-sgn10.fptcloud.com/fsel/Images/Ellipse_925_1706799389.png";
+
+        public const string SkillScores = "Resources//SendMailPT//SkillScores.html";
+        public const string TeachersInFo = "Resources//SendMailPT//TeachersInfo.html";
+        public const string CourseA1 = "Resources//SendMailPT//CourseA1.html";
+        public const string CourseA2 = "Resources//SendMailPT//CourseA2.html";
+        public const string CourseB1 = "Resources//SendMailPT//CourseB1.html";
+        public const string CourseB1Plus = "Resources//SendMailPT//CourseB1Plus.html";
+        public const string CourseB2 = "Resources//SendMailPT//CourseB2.html";
+        public const string CourseC1 = "Resources//SendMailPT//CourseC1.html";
+        public const string Mindset1 = "Resources//SendMailPT//CourseMS1.html";
+        public const string Mindset2 = "Resources//SendMailPT//CourseMS2.html";
+        public const string Mindset3 = "Resources//SendMailPT//CourseMS3.html";
+
+        public const string TeacherBios = "Resources//TeacherBios.json";
+
+        public const string CourseA1Title = "là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của Khung tham chiếu chung Châu Âu (CEFR)";
+        public const string CourseA2Title = "là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của Khung tham chiếu chung Châu Âu (CEFR)";
+        public const string CourseB1Title = "là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của Khung tham chiếu chung Châu Âu (CEFR)";
+        public const string CourseB1PlusTitle = "là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của Khung tham chiếu chung Châu Âu (CEFR)";
+        public const string CourseB2Title = "là cấp độ tiếp theo sau của B1+ trong chương trình Academic Pathway tại FSEL.";
+        public const string CourseC1Title = "là cấp độ cao nhất trong chương trình Academic Pathway tại FSEL.";
+
     }
 }

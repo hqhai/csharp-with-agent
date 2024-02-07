@@ -3,9 +3,12 @@
 namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 {
     using System.Globalization;
+    using System.IO;
+    using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -15,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
@@ -45,7 +49,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
-
+        private readonly ICourseRepository _courseRepository;
+        private readonly AppSetting _appSetting;
         public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
             , AuthContext authContext
             , QuestionConverter questionConverter
@@ -57,7 +62,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             , ISectionGroupResultRepository sectionGroupResultRepository
             , ISectionGroupRepository sectionGroupRepository
             , IPlacementTestRepository placementTestRepository
-            , IMapper mapper)
+            , IMapper mapper,
+ICourseRepository courseRepository,
+AppSetting appSetting)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -71,6 +78,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             _sectionGroupRepository = sectionGroupRepository;
             _placementTestRepository = placementTestRepository;
             _mapper = mapper;
+            _courseRepository = courseRepository;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<PlacementTestResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -180,7 +189,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.PlacementTestResultId == placementTestResult.Id).ToListAsync(cancellationToken);
                 if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
                 {
-                    int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                    int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
                     placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
                     var (currentLevel, isLockPT) = placementTest.Level.GetLevelInScore(placementTestResult.Percent, age);
                     if (currentLevel.HasValue)
@@ -195,9 +204,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
                     if (isLockPT)
                     {
-                        #region Disable send PR result to email Student
-                        //await SendStudentPlacementTest(student, placementTestResult);
-                        #endregion
+                        await SendStudentPlacementTest(currentLevel ?? default, student, placementTestResult, cancellationToken);
                     }
                     return isLockPT;
                 }
@@ -205,20 +212,141 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             return default;
         }
 
-        private async Task SendStudentPlacementTest(StudentModel student, PlacementTestResult placementTestResult)
+        private static string GetCourseTitle(EnumCourseLevel courseLevel)
         {
-            var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id).ToListAsync();
+            if (courseLevel == EnumCourseLevel.A1)
+            {
+                return SendMailSetting.CourseA1Title;
+            }
+            else if (courseLevel == EnumCourseLevel.A2)
+            {
+                return SendMailSetting.CourseA2Title;
+            }
+            else if (courseLevel == EnumCourseLevel.B1)
+            {
+                return SendMailSetting.CourseB1Title;
+            }
+            else if (courseLevel == EnumCourseLevel.B1Plus)
+            {
+                return SendMailSetting.CourseB1PlusTitle;
+            }
+            else if (courseLevel == EnumCourseLevel.B2)
+            {
+                return SendMailSetting.CourseB2Title;
+            }
+            else if (courseLevel == EnumCourseLevel.C1)
+            {
+                return SendMailSetting.CourseC1Title;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        private static string GetCourseInfo(EnumCourseLevel courseLevel)
+        {
+            if (courseLevel == EnumCourseLevel.A1)
+            {
+                return SendMailSetting.CourseA1;
+            }
+            else if (courseLevel == EnumCourseLevel.A2)
+            {
+                return SendMailSetting.CourseA2;
+            }
+            else if (courseLevel == EnumCourseLevel.B1)
+            {
+                return SendMailSetting.CourseB1;
+            }
+            else if (courseLevel == EnumCourseLevel.B1Plus)
+            {
+                return SendMailSetting.CourseB1Plus;
+            }
+            else if (courseLevel == EnumCourseLevel.B2)
+            {
+                return SendMailSetting.CourseB2;
+            }
+            else if (courseLevel == EnumCourseLevel.C1)
+            {
+                return SendMailSetting.CourseC1;
+            }
+            else if (courseLevel == EnumCourseLevel.MS1)
+            {
+                return SendMailSetting.Mindset1;
+            }
+            else if (courseLevel == EnumCourseLevel.MS2)
+            {
+                return SendMailSetting.Mindset2;
+            }
+            else
+            {
+                return SendMailSetting.Mindset3;
+            }
+        }
+
+        private async Task SendStudentPlacementTest(EnumCourseLevel courseLevel, StudentModel student, PlacementTestResult placementTestResult, CancellationToken cancellationToken)
+        {
+            var pathSkillScores = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.SkillScores);
+            using StreamReader streamReaderSkillScore = new StreamReader(pathSkillScores);
+            var skillScoresHtml = await streamReaderSkillScore.ReadToEndAsync(cancellationToken);
+
+            var pathCourseInfo = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, GetCourseInfo(courseLevel));
+            using StreamReader streamReaderCourseInfo = new StreamReader(pathCourseInfo);
+            var courseInfoHtml = await streamReaderCourseInfo.ReadToEndAsync(cancellationToken);
+
+            var pathTeachers = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeachersInFo);
+            using StreamReader streamReaderTeachers = new StreamReader(pathTeachers);
+            var teachersHtml = await streamReaderTeachers.ReadToEndAsync(cancellationToken);
+
+            var pathTeachersBios = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeacherBios);
+            var listTeachersBios = ConvertHelper.DeserializeFromFilePath<IList<CourseTeacherModel>>(pathTeachersBios);
+
+            var teachers = listTeachersBios?.Where(p => p.TeacherLevels != null && p.TeacherLevels.Any(x => x == courseLevel)).ToList();
+            var teacherInfo = string.Empty;
+
+            for (int i = 0; i < teachers?.Count; i++)
+            {
+                var teacher = string.Empty;
+                if (i > 0)
+                {
+                    teacher = string.Format(CultureInfo.InvariantCulture, teachersHtml, null, teachers[i].AvatarPath, teachers[i].FullName, teachers[i].Nationality, teachers[i].Degree, teachers[i].Experience, teachers[i].Strength);
+                }
+                else
+                {
+                    teacher = string.Format(CultureInfo.InvariantCulture, teachersHtml, SendMailSetting.Display, teachers[i].AvatarPath, teachers[i].FullName, teachers[i].Nationality, teachers[i].Degree, teachers[i].Experience, teachers[i].Strength);
+                }
+                teacherInfo += teacher;
+            }
+
+            var skillsScore = string.Empty;
+            if (placementTestResult.SkillScores != null)
+            {
+                foreach (var item in placementTestResult.SkillScores)
+                {
+                    var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
+                    var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, item.Percent, item.Percent < 100 ? "100px 0px 0px 100px" : "100px 100px 100px 100px", color, 100 - item.Percent, item.Percent);
+                    skillsScore += html;
+                }
+            }
+
             var param = new SendStudentPTTemplateModel
             {
-                StudentName = student.Human?.FullName,
-                CourseLevel = placementTestResult.Level,
-                Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {Math.Round(x.Percent, MidpointRounding.AwayFromZero)} %")),
+                FullName = student.Human?.FullName,
+                CourseLevel = courseLevel.GetDescription(),
+                SkillScores = skillsScore,
+                CourseInfo = courseInfoHtml,
+                CourseTitle = GetCourseTitle(courseLevel),
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                TeachersInfo = teacherInfo
             };
+
+            param.CourseTitleDisplay = string.IsNullOrEmpty(param.CourseTitle) ? SendMailSetting.Display : null;
+
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
             var sendResult = new MethodResult<bool>();
             if (!string.IsNullOrEmpty(student.Human?.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentCompletePT }, cancellationToken).ConfigureAwait(false);
             }
         }
 

@@ -9,12 +9,12 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
     using Fsel.Common.Enums;
     using Fsel.Common.Models;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
@@ -37,9 +37,9 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMediator _mediator;
-        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
-        private readonly ICourseResultRepository _courseResultRepository;
-        public WeeklyReportQueryHandler(IUserService userService,IFinalTestResultRepository finalTestResultRepository,IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, ICourseUnitMockTestRepository courseUnitMockTestRepository, ICourseResultRepository courseResultRepository)
+        private readonly AppSetting _appSetting;
+
+        public WeeklyReportQueryHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting)
         {
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
@@ -48,8 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             _lessonResultRepository = lessonResultRepository;
             _unitResultRepository = unitResultRepository;
             _mediator = mediator;
-            _courseUnitMockTestRepository = courseUnitMockTestRepository;
-            _courseResultRepository = courseResultRepository;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<bool>> Handle(WeeklyReportQuery request, CancellationToken cancellationToken)
@@ -70,19 +69,19 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 var studentResults = await _userService.GetStudentsByStudentIdsAsync(request.StudentIds.ToList());
                 students = studentResults.Content?.Result?.ToList();
             }
-            if (students == null)
+
+            if (students?.Count == 0 || students == null)
             {
                 return methodResult;
             }
+
             DateTime currentDate = DateTime.UtcNow;
 
-            // Lấy ngày thứ 6 gần nhất lúc 13h
             DateTime lastFridayAt13 = currentDate.AddDays(-6);
 
             DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
 
-            // Lấy danh sách ngày từ thứ 7 tuần trước đến giờ
-            var dates = GenerateDateList(lastFridayAt13, currentDate);
+            var dates = DateTimeHelper.GenerateDateList(lastFridayAt13, currentDate);
 
             var studentDailyStreakResults = await _userService.GetAllDailyStreak(new BaseQueryModel()
             {
@@ -120,6 +119,10 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 }}
             });
 
+            var pathSkillScores = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.SkillScores);
+            using StreamReader streamReaderSkillScore = new StreamReader(pathSkillScores);
+            var skillScoresHtml = await streamReaderSkillScore.ReadToEndAsync(cancellationToken);
+
             foreach (var item in students)
             {
                 var studentDailyStreaks = studentDailyStreakResults.Content?.Result?.Where(p => p.StudentId == item.Id).Select(p => p.DailyDate.Date).Distinct().ToList();
@@ -130,70 +133,35 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                     StartDate = lastFridayAt13.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
                     EndDate = currentDate.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
                     TotalDay = studentDailyStreaks?.Count.ToString(CultureInfo.CurrentCulture),
-                    ContinueLearn = "https://lms-testing.fsel.edu.vn/home/home-chart"
+                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
                 };
 
                 var dailyStreakResult = await _userService.GetDailyStreak(item.Id);
                 var dailyStreak = dailyStreakResult.Content?.Result;
                 if (dailyStreak != null && dailyStreak.IsDaysStreakIncrease)
                 {
-                    weeklyReport.NoDailyStreak = HtmlSetting.Display;
+                    weeklyReport.NoDailyStreak = SendMailSetting.Display;
                     weeklyReport.DailyStreak = null;
                     weeklyReport.TotalDailyStreak = dailyStreak.NumberOfDaysStreak.ToString(CultureInfo.CurrentCulture);
                 }
                 else
                 {
                     weeklyReport.NoDailyStreak = null;
-                    weeklyReport.DailyStreak = HtmlSetting.Display;
+                    weeklyReport.DailyStreak = SendMailSetting.Display;
                 }
 
-                CheckAndAssignStatus(weeklyReport, studentDailyStreaks, dates);
+                CheckAndAssignStatusDate(weeklyReport, studentDailyStreaks, dates.ToList());
 
                 var featureAccessTimes = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
-
                 var previousFeatureAccessTimes = previousFeatureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
 
-                //var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == featureAccessTimes.Select(x => x.CourseId).FirstOrDefault() && p.StudentId == item.Id, cancellationToken);
+                AddTimeIntoTemplate(weeklyReport, featureAccessTimes, previousFeatureAccessTimes);
 
-                //CultureInfo ci = CultureInfo.CurrentCulture;
+                var unitsResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.StudentId == item.Id).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
 
-                //int weekCourseResult = ci.Calendar.GetWeekOfYear(courseResult?.CreatedDate ?? default, CalendarWeekRule.FirstFullWeek, DayOfWeek.Saturday);
+                var unitDoneCount = unitsResult.Where(p => p.Status == EnumResultStatus.Done).Count();
+                var courseType = unitsResult.FirstOrDefault()?.Course?.CourseType;
 
-                //int weekFeatureAccessTime = ci.Calendar.GetWeekOfYear(featureAccessTimes.OrderBy(x => x.CreatedDate).Select(x => x.CreatedDate).FirstOrDefault() ?? default, CalendarWeekRule.FirstFullWeek, DayOfWeek.Saturday);
-
-                var previousLearn = ConvertSecondsToMinutes(previousFeatureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest).Sum(p => p.AccessTime) ?? 0);
-                var previousSocial = ConvertSecondsToMinutes(previousFeatureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0);
-                var previousOther = ConvertSecondsToMinutes(previousFeatureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0);
-
-                weeklyReport.PreviousTotal = FormatTimeSpanAsClock((previousLearn + previousSocial + previousOther) * 60);
-                weeklyReport.PreviousLearn = FormatTimeSpanAsClock(previousLearn * 60);
-                weeklyReport.PreviousSocial = FormatTimeSpanAsClock(previousSocial * 60);
-                weeklyReport.PreviousOther = FormatTimeSpanAsClock(previousOther * 60);
-
-
-                var totalLearn = ConvertSecondsToMinutes(featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest).Sum(p => p.AccessTime) ?? 0);
-                var totalSocial = ConvertSecondsToMinutes(featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0);
-                var totalOther = ConvertSecondsToMinutes(featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0);
-
-                weeklyReport.TotalHour = FormatTimeSpanAsClock((totalLearn + totalSocial + totalOther) * 60);
-                weeklyReport.TotalLearn = FormatTimeSpanAsClock(totalLearn * 60);
-                weeklyReport.TotalSocial = FormatTimeSpanAsClock(totalSocial * 60);
-                weeklyReport.TotalOther = FormatTimeSpanAsClock(totalOther * 60);
-
-                var totalHour = totalLearn + totalSocial + totalOther;
-                var totalHourPrevious = previousLearn + previousSocial + previousOther;
-
-
-                weeklyReport.ColorTotal = totalHour > totalHourPrevious ? "#53BF65" : (totalHour == totalHourPrevious ? "#FFAE46" : "#C0404C");
-                weeklyReport.ColorLearn = totalLearn > previousLearn ? "#53BF65" : (totalLearn == previousLearn ? "#FFAE46" : "#C0404C");
-                weeklyReport.ColorSocial = totalSocial > previousSocial ? "#53BF65" : (totalSocial == previousSocial ? "#FFAE46" : "#C0404C");
-                weeklyReport.ColorOther = totalOther > previousOther ? "#53BF65" : (totalOther == previousOther ? "#FFAE46" : "#C0404C");
-
-
-                var unitResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.UpdatedDate >= lastFridayAt13 && p.UpdatedDate <= currentDate && p.StudentId == item.Id).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
-
-                var unitDoneCount = unitResult.Where(p => p.Status == EnumResultStatus.Done).Count();
-                var courseType = unitResult.FirstOrDefault()?.Course?.CourseType;
                 if (courseType == EnumCourseType.Academic)
                 {
                     int academicPercent = ((unitDoneCount * 100) / 12);
@@ -207,19 +175,18 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
 
                 string unitName = string.Empty;
 
-                foreach (var unit in unitResult)
+                foreach (var unit in unitsResult)
                 {
-
                     var lessonResultsDone = await _lessonResultRepository.Queryable.Include(p => p.VideoResult).Include(x => x.ClassForumResults).Where(p => p.StudentId == item.Id && p.Status == EnumResultStatus.Done && p.UnitId == unit.UnitId).Where(p => p.UpdatedDate >= lastFridayAt13 && p.UpdatedDate <= currentDate).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
                     int index = 1;
 
                     if (lessonResultsDone.Count > 0)
                     {
-                        unitName += string.Format(CultureInfo.InvariantCulture, HtmlSetting.UnitName, unit.Unit?.Name);
+                        unitName += string.Format(CultureInfo.InvariantCulture, SendMailSetting.UnitName, unit.Unit?.Name);
 
                         for (var i = 0; i < lessonResultsDone.Count; i++)
                         {
-                            unitName += string.Format(CultureInfo.InvariantCulture, HtmlSetting.LessonName, index, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
+                            unitName += string.Format(CultureInfo.InvariantCulture, SendMailSetting.LessonName, index, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
 
                             foreach (var ls in lessonResultsDone[i].SkillScores!)
                             {
@@ -245,8 +212,8 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                                 //    var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
                                 //    unitName += html;
                                 //}
-                                var (@class, skillName, icon) = ConvertEnum(ls.Skill);
-                                var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
+                                var (color, skillName, icon) = SendMailHelper.ConvertEnum(ls.Skill);
+                                var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, ls.Percent, ls.Percent < 100 ? "100px 0px 0px 100px" : "100px 100px 100px 100px", color, 100 - ls.Percent, ls.Percent);
                                 unitName += html;
                             }
                             index++;
@@ -263,7 +230,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 else if (featureAccessTimes?.Count == 0)
                 {
                     weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport3;
-                    var unitResultNext = await _unitResultRepository.Queryable.Include(un => un.Unit).Where(x=>x.StudentId == item.Id && (x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process)).OrderBy(x=>x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
+                    var unitResultNext = await _unitResultRepository.Queryable.Include(un => un.Unit).Where(x => x.StudentId == item.Id && (x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process)).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
                     if (unitResultNext != null)
                     {
                         weeklyReport.NextUnit = unitResultNext.Unit?.Name;
@@ -276,11 +243,11 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                         {
                             var currentLesson = await _lessonResultRepository.Queryable
                                 .Where(p => p.UnitId == unitResultNext.UnitId && p.StudentId == item.Id && p.Status == EnumResultStatus.Process)
-                                .Select(x=> new
+                                .Select(x => new
                                 {
                                     Lesson = x.Lesson,
                                     LessonResult = x,
-                                    DisplayOrder = x.Lesson!.UnitLessons.Where(x => x.UnitId == unitResultNext.UnitId).Max(x=>x.DisplayOrder)
+                                    DisplayOrder = x.Lesson!.UnitLessons.Where(x => x.UnitId == unitResultNext.UnitId).Max(x => x.DisplayOrder)
                                 }).FirstOrDefaultAsync(cancellationToken);
 
                             weeklyReport.NextLesson = currentLesson?.DisplayOrder;
@@ -291,23 +258,23 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                     }
                     else if (courseType == EnumCourseType.Academic)
                     {
-                        var finalTestResult = await _finalTestResultRepository.Queryable.Include(fn => fn.FinalTest).Where(x=>x.StudentId == item.Id && x.Status != EnumResultStatus.Done).OrderBy(x=>x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
+                        var finalTestResult = await _finalTestResultRepository.Queryable.Include(fn => fn.FinalTest).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
                         weeklyReport.NextUnit = finalTestResult?.FinalTest?.Name;
-                        weeklyReport.Weekly3Display = HtmlSetting.Display;
+                        weeklyReport.Weekly3Display = SendMailSetting.Display;
                     }
 
                     else if (courseType == EnumCourseType.Ielts)
                     {
                         var mockTestResult = await _mockTestResultRepository.Queryable.Include(mt => mt.MockTest).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
                         weeklyReport.NextUnit = mockTestResult?.MockTest?.Name;
-                        weeklyReport.Weekly3Display = HtmlSetting.Display;
+                        weeklyReport.Weekly3Display = SendMailSetting.Display;
                     }
                 }
                 else if (previousFeatureAccessTimes?.Count == 0)
                 {
                     weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport;
                     weeklyReport.NoDailyStreak = null;
-                    weeklyReport.DailyStreak = HtmlSetting.Display;
+                    weeklyReport.DailyStreak = SendMailSetting.Display;
 
                 }
                 else
@@ -315,14 +282,78 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                     var totalDailyStreak = dailyStreak?.NumberOfDaysStreak;
 
                     weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport2;
-                    weeklyReport.NoDailyStreak = totalDailyStreak >= 7 ? HtmlSetting.Display : null;
-                    weeklyReport.DailyStreak = totalDailyStreak >= 7 ? null : HtmlSetting.Display;
+                    weeklyReport.NoDailyStreak = totalDailyStreak >= 7 ? SendMailSetting.Display : null;
+                    weeklyReport.DailyStreak = totalDailyStreak >= 7 ? null : SendMailSetting.Display;
                     weeklyReport.TotalDailyStreak = dailyStreak?.NumberOfDaysStreak.ToString(CultureInfo.CurrentCulture);
                 }
-
-                await SendWeekly(item.Human?.Email, weeklyReport ,cancellationToken);
+                if (!string.IsNullOrEmpty(item.Human?.Email))
+                {
+                    await SendWeekly(item.Human?.Email, weeklyReport, cancellationToken);
+                }
             }
             return methodResult;
+        }
+
+        private static void AddTimeIntoTemplate(WeeklyReportModel weeklyReport, List<FeatureAccessTimeModel>? featureAccessTimes, List<FeatureAccessTimeModel>? previousFeatureAccessTimes)
+        {
+            var totalLearn = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(featureAccessTimes, EnumFeatureBussinessType.Learn));
+            var totalSocial = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(featureAccessTimes, EnumFeatureBussinessType.Social));
+            var totalOther = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(featureAccessTimes, EnumFeatureBussinessType.Other));
+
+            var totalHour = totalLearn + totalSocial + totalOther;
+
+            weeklyReport.TotalHour = FormatTimeSpanAsClock(totalHour);
+            weeklyReport.TotalLearn = FormatTimeSpanAsClock(totalLearn);
+            weeklyReport.TotalSocial = FormatTimeSpanAsClock(totalSocial);
+            weeklyReport.TotalOther = FormatTimeSpanAsClock(totalOther);
+
+            var previousLearn = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(previousFeatureAccessTimes, EnumFeatureBussinessType.Learn));
+            var previousSocial = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(previousFeatureAccessTimes, EnumFeatureBussinessType.Social));
+            var previousOther = ConvertSecondsToMinutes(GetFeatureAccessTimeByType(previousFeatureAccessTimes, EnumFeatureBussinessType.Other));
+
+            var totalHourPrevious = previousLearn + previousSocial + previousOther;
+
+            weeklyReport.PreviousTotal = FormatTimeSpanAsClock(totalHourPrevious);
+            weeklyReport.PreviousLearn = FormatTimeSpanAsClock(previousLearn);
+            weeklyReport.PreviousSocial = FormatTimeSpanAsClock(previousSocial);
+            weeklyReport.PreviousOther = FormatTimeSpanAsClock(previousOther);
+
+            weeklyReport.ColorTotal = GetColorText(totalHour, totalHourPrevious);
+            weeklyReport.ColorLearn = GetColorText(totalLearn, previousLearn);
+            weeklyReport.ColorSocial = GetColorText(totalSocial, previousSocial);
+            weeklyReport.ColorOther = GetColorText(totalOther, previousOther);
+        }
+
+        private static long GetFeatureAccessTimeByType(List<FeatureAccessTimeModel>? featureAccessTimes, EnumFeatureBussinessType businessType)
+        {
+            if (businessType == EnumFeatureBussinessType.Learn)
+            {
+                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest).Sum(p => p.AccessTime) ?? 0;
+            }
+            else if (businessType == EnumFeatureBussinessType.Social)
+            {
+                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0;
+            }
+            else
+            {
+                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0;
+            }
+        }
+
+        private static string GetColorText(long value1, long value2)
+        {
+            if (value1 > value2)
+            {
+                return "#53BF65";
+            }
+            else if (value1 == value2)
+            {
+                return "#FFAE46";
+            }
+            else
+            {
+                return "#C0404C";
+            }
         }
 
         private async Task<int> GetLesson(Guid? lessonId, Guid? studentId)
@@ -339,18 +370,15 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
         }
 
 
-
-        // Hàm kiểm tra và gắn giá trị cho các field trong WeeklyReportModel
-        static void CheckAndAssignStatus(WeeklyReportModel model, List<DateTime>? userLoginDates, List<DateTime> weekDays)
+        static void CheckAndAssignStatusDate(WeeklyReportModel model, List<DateTime>? userLoginDates, List<DateTime> weekDays)
         {
 
             foreach (DateTime day in weekDays)
             {
                 string dayOfWeek = day.DayOfWeek.ToString();
                 string isActivePropertyName = $"{dayOfWeek}IsActive";
-                string status = userLoginDates == null ? "NoActive" : (userLoginDates.Contains(day.Date) ? HtmlSetting.Active : HtmlSetting.NoActive);
+                string status = userLoginDates == null ? "NoActive" : (userLoginDates.Contains(day.Date) ? SendMailSetting.Active : SendMailSetting.NoActive);
 
-                // Sử dụng reflection để lấy và gán giá trị cho thuộc tính IsActive tương ứng
                 var propertyInfo = model.GetType().GetProperty(isActivePropertyName);
                 if (propertyInfo != null)
                 {
@@ -364,12 +392,13 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             var sendResult = await _mediator.Send(new SenderCommand
             {
                 Email = email,
-                Subject = Subject(model.SenderTemplate),
+                Subject = GetSubjectEmail(model.SenderTemplate),
                 Params = model,
                 Template = model.SenderTemplate,
             }, cancellationToken).ConfigureAwait(false);
         }
-        private static string Subject(EnumSenderTemplate template)
+
+        private static string GetSubjectEmail(EnumSenderTemplate template)
         {
             if (template == EnumSenderTemplate.WeeklyReport)
             {
@@ -388,74 +417,22 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 return SenderSettings.TitleWeekly4;
             }
         }
+
         private static int ConvertSecondsToMinutes(long seconds)
         {
             long minutes = seconds / 60;
             return (int)minutes;
         }
-        private static string FormatTimeSpanAsClock(long milliseconds)
+
+        private static string FormatTimeSpanAsClock(long totalMinutes)
         {
-            TimeSpan timeSpan = TimeSpan.FromSeconds(milliseconds);
+            TimeSpan timeSpan = TimeSpan.FromMinutes(totalMinutes);
 
             int hours = timeSpan.Hours;
             int minutes = timeSpan.Minutes;
 
             return $"{hours}h{minutes:D2}ph";
 
-        }
-        private static string ConvertHour(long milliseconds)
-        {
-            TimeSpan timeSpan = TimeSpan.FromSeconds(milliseconds);
-
-            int hours = timeSpan.Hours;
-            int minutes = timeSpan.Minutes;
-
-            string formattedTime = "";
-
-            if (hours > 0)
-            {
-                formattedTime += hours + " giờ ";
-            }
-
-            if (minutes > 0)
-            {
-                formattedTime += minutes + " phút";
-            }
-
-            if (string.IsNullOrEmpty(formattedTime))
-            {
-                formattedTime = "0 phút";
-            }
-
-            return formattedTime;
-        }
-        private static (string, string, string) ConvertEnum(EnumCourseSkill skill)
-        {
-            if (skill == EnumCourseSkill.Reading)
-                return ("reading", "Kĩ năng đọc", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillReading_1706698217.png");
-            else if (skill == EnumCourseSkill.Writing)
-                return ("writing", "Kĩ năng viết", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillWriting_1706698232.png");
-            else if (skill == EnumCourseSkill.Speaking)
-                return ("speaking", "Kĩ năng nói", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillSpeaking_1706698202.png");
-            else if (skill == EnumCourseSkill.Listening)
-                return ("listening", "Kĩ năng nghe", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillListening_1706698183.png");
-            else if (skill == EnumCourseSkill.Vocabulary)
-                return ("vocabulary", "Từ vựng", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillVocabulary_1706698261.png");
-            else
-                return ("grammar", "Ngữ pháp", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillGrammar_1706698247.png");
-        }
-
-        private static List<DateTime> GenerateDateList(DateTime startDate, DateTime endDate)
-        {
-            List<DateTime> dateList = new List<DateTime>();
-
-            while (startDate <= endDate)
-            {
-                dateList.Add(startDate);
-                startDate = startDate.AddDays(1);
-            }
-
-            return dateList;
         }
     }
 }
