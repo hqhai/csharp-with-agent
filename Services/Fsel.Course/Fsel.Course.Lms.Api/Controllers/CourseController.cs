@@ -87,6 +87,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Get Course studied
+        /// </summary>
+        [HttpGet("get-course-studied")]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetCourseStudied()
+        {
+            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseStudiedQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Start Course Result
         /// </summary>
         [HttpPost("start/{courseResultId}")]

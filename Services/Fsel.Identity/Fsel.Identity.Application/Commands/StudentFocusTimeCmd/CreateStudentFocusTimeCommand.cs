@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
     using Fsel.Identity.Application.Queues.Publishers;
+    using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Application.Services.TrainingService;
@@ -17,6 +18,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -31,6 +33,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     {
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
+        private readonly ILmsCourseService _lmsCourseService;
         private readonly IStudentFocusTimeRepository _studentFocusTimeRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly AuthContext _authContext;
@@ -38,11 +41,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
 
-        public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher,
+        public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, ILmsCourseService lmsCourseService, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher,
             ITrainingService trainingService)
         {
             _mediator = mediator;
             _mapper = mapper;
+            _lmsCourseService = lmsCourseService;
             _studentFocusTimeRepository = studentFocusTimeRepository;
             _studentRepository = studentRepository;
             _authContext = authContext;
@@ -106,11 +110,19 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                       studentFocusTime.IsEstablished
                     )
                     {
+                        var courseResult = await _lmsCourseService.GetCourseStudied();
+                        var course = courseResult.Content?.Result;
+
+                        if (!courseResult.IsSuccessStatusCode)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError));
+                            return methodResult;
+                        }
                         var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
                         {
                             Feature = EnumTokenFeature.FocusMode,
                             Mission = EnumTokenMission.FocusMode,
-                            CourseType = student.CourseLevel.GetEnumCourseType()
+                            CourseType = course?.CourseType
                         });
                         var tokenConfigResult = tokenConfig.Content?.Result;
 

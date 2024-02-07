@@ -25,10 +25,11 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
         [Get("/dashboard/leader-board")]
         Task<IApiResponse<MethodResult<LeaderBoardSearchModel>>> GetLeaderBoard();
 
-
         [Get("/admin/course/get-course-by-code/{code}")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByCode([FromRoute] string code);
 
+        [Get("/course/get-course-studied")]
+        Task<IApiResponse<MethodResult<CourseModel>>> GetCourseStudied();
 
         [Post("/progress/students-competition")]
         Task<IApiResponse<MethodResult<IList<CompetitionStudentProgressModel>>>> GetStudentProgress([FromQuery] StudentCompetitionStatQueryModel query);

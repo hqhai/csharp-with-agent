@@ -44,6 +44,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private readonly ISystemService _systemService;
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
+        private readonly ICourseRepository _courseRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly QuestionConverter _questionConverter;
@@ -59,6 +61,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             , ISystemService systemService
             , AuthContext authContext
             , IMediator mediator
+            , ICourseRepository courseRepository
+            , ILessonResultRepository lessonResultRepository
             , DateTimeConverter dateTimeConverter
             , IQuestionRepository questionRepository
             , QuestionConverter questionConverter)
@@ -73,6 +77,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _systemService = systemService;
             _authContext = authContext;
             _mediator = mediator;
+            _courseRepository = courseRepository;
+            _lessonResultRepository = lessonResultRepository;
             _dateTimeConverter = dateTimeConverter;
             _questionRepository = questionRepository;
             _questionConverter = questionConverter;
@@ -100,8 +106,20 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            var (videoResult, videoTimeCode, videoTimeCodeResult) = method.Result;
 
+            var (videoResult, videoTimeCode, videoTimeCodeResult) = method.Result;
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(videoResult.LessonResultId);
+            if (lessonResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
+                return methodResult;
+            }
+            var course = await _courseRepository.GetByIdAsync(lessonResult.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
                 if (videoTimeCodeResult.Status == EnumResultStatus.New && request.IsSubmit)
@@ -116,7 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     }
                 }
 
-                await UpdateVideoTimeCodeResult(videoTimeCode, videoTimeCodeResult, request.IsSubmit, student.CourseLevel.GetEnumCourseType(), cancellationToken).ConfigureAwait(false);
+                await UpdateVideoTimeCodeResult(videoTimeCode, videoTimeCodeResult, request.IsSubmit, course.CourseType, cancellationToken).ConfigureAwait(false);
                 _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;

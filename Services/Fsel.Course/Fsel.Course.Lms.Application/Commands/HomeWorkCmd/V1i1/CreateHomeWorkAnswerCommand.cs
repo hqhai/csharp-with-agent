@@ -42,6 +42,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly IMediator _mediator;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly ICourseRepository _courseRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ISystemService _systemService;
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly IQuestionRepository _questionRepository;
@@ -53,6 +55,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             IMediator mediator,
             IUserService userService,
             AuthContext authContext,
+            ICourseRepository courseRepository,
+            ILessonResultRepository lessonResultRepository,
             ISystemService systemService,
             FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
             IQuestionRepository questionRepository
@@ -65,6 +69,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _mediator = mediator;
             _userService = userService;
             _authContext = authContext;
+            _courseRepository = courseRepository;
+            _lessonResultRepository = lessonResultRepository;
             _systemService = systemService;
             _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
             _questionRepository = questionRepository;
@@ -114,7 +120,22 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 methodResult.AddErrorBadRequest(methodSave.ErrorMessages);
                 return methodResult;
             }
-            await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, student.CourseLevel.GetEnumCourseType(), cancellationToken);
+
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(homeWorkResult.LessonResultId);
+            if (lessonResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
+                return methodResult;
+            }
+
+            var course = await _courseRepository.GetByIdAsync(lessonResult.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
+
+            await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, course.CourseType, cancellationToken);
             methodResult = await _mediator.Send(new GetHomeWorkQuery { HomeWorkId = homeWorkResult.HomeWorkId, LessonResultId = homeWorkResult.LessonResultId, IsShowSubStatus = request.IsSubmit }, cancellationToken);
             return methodResult;
         }
