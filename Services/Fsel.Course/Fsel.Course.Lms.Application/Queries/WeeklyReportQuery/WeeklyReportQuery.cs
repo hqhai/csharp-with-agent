@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             // Lấy ngày thứ 6 gần nhất lúc 13h
             DateTime lastFridayAt13 = currentDate.AddDays(-7);
 
-            DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
+            DateTime lastLastFridayAt13 = currentDate.AddDays(-13);
 
             // Lấy danh sách ngày từ thứ 7 tuần trước đến giờ
             var dates = GenerateDateList(lastFridayAt13, currentDate);
