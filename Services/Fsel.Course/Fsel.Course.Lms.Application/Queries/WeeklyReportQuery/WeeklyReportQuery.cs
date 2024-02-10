@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             DateTime currentDate = DateTime.UtcNow;
 
             // Lấy ngày thứ 6 gần nhất lúc 13h
-            DateTime lastFridayAt13 = currentDate.AddDays(-6);
+            DateTime lastFridayAt13 = currentDate.AddDays(-7);
 
             DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
 
