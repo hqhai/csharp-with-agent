@@ -76,7 +76,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                             var skillScoreHtml = string.Empty;
 
-
                             var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel { UserId = userId, StartDate = startUnit, EndDate = endUnit });
                             var featureAccessTime = featureAccessTimeResult.Content?.Result;
                             CourseUnitMockTest? previousCourseUnitMockTest;
@@ -113,7 +112,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.Skill1, icon, skillName, p.Percent, 100 - p.Percent, p.Percent);
                                 skillTestHtml += html;
                             });
-
 
                             var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == course.Id && p.UnitId == unit.Id && p.StudentId == studentId, cancellationToken); // mocktest
                             var mockTestHtml = string.Empty;
@@ -168,7 +166,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 skillScores.ForEach(p =>
                                 {
                                     var (@class, skillName, icon) = ConvertEnum(p.Skill);
-                                    var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.Skill1, icon, skillName, p.Percent, 100 -p.Percent ,p.Percent);
+                                    var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.Skill1, icon, skillName, p.Percent, 100 - p.Percent, p.Percent);
                                     skillScoreHtml += html;
                                 });
                                 parameter.SkillScore = skillScoreHtml;
@@ -244,7 +242,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                         parameter.PreviousUnitTestScore = previousMockTestScore.ToString();
                                         parameter.CompareMockTest = currentMockTestScore > previousMockTestScore ? HtmlSetting.Bigger : HtmlSetting.Less;
                                         parameter.PreviousUnitName = mockTestResultPrevious.Unit?.Name;
-
                                     }
                                     else
                                     {
@@ -256,24 +253,21 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 var previousSocial = ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Social).Sum(p => p.AccessTime) ?? 0);
                                 var previousOther = ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? 0);
 
-
                                 parameter.TotalHourPrevious = ConvertHour((previousLearn + previousSocial + previousOther) * 60);
 
                                 (parameter.ColorTotal, parameter.CompareTotal) = Compare((currentLearn + currentSocial + currentOther), (previousLearn + previousSocial + previousOther));
-
 
                                 parameter.PreviousLearn = FormatTimeSpanAsClock(previousLearn * 60);
                                 parameter.PreviousSocial = FormatTimeSpanAsClock(previousSocial * 60);
                                 parameter.PreviousOther = FormatTimeSpanAsClock(previousOther * 60);
 
-                                (parameter.ColorLearn,parameter.CompareLearn) = Compare(currentLearn, previousLearn);
+                                (parameter.ColorLearn, parameter.CompareLearn) = Compare(currentLearn, previousLearn);
 
                                 (parameter.ColorOther, parameter.CompareOther) = Compare(currentOther, previousOther);
 
                                 (parameter.ColorSocial, parameter.CompareSocial) = Compare(currentSocial, previousSocial);
 
                                 await SendStudentCompleteUnit(studentId, parameter, courseType, cancellationToken);
-
                             }
                         }
                     }
@@ -289,7 +283,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         private static string Subject(EnumSenderTemplate senderTemplate, EnumCourseType courseType)
         {
-            if(senderTemplate == EnumSenderTemplate.Unit1Report && courseType == EnumCourseType.Academic)
+            if (senderTemplate == EnumSenderTemplate.Unit1Report && courseType == EnumCourseType.Academic)
             {
                 return SenderSettings.TitleUnit1;
             }
@@ -329,7 +323,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-
         private static (string, string, string) ConvertEnum(EnumCourseSkill skill)
         {
             if (skill == EnumCourseSkill.Reading)
@@ -345,6 +338,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             else
                 return ("grammar", "Ngữ pháp", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillGrammar_1706698247.png");
         }
+
         private static string FormatTimeSpanAsClock(long milliseconds)
         {
             TimeSpan timeSpan = TimeSpan.FromSeconds(milliseconds);
@@ -353,7 +347,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             int minutes = timeSpan.Minutes;
 
             return $"{hours}h{minutes:D2}ph";
-
         }
 
         private static string ConvertHour(long milliseconds)
@@ -383,7 +376,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return formattedTime;
         }
 
-        private static CourseUnitMockTest? GetCourseUnitMockTest(IList<CourseUnitMockTest>? courseUnitMockTests, Guid objectId, string? type , int indexNext)
+        private static CourseUnitMockTest? GetCourseUnitMockTest(IList<CourseUnitMockTest>? courseUnitMockTests, Guid objectId, string? type, int indexNext)
         {
             if (courseUnitMockTests != null && courseUnitMockTests.Any())
             {
@@ -391,6 +384,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 if (courseUnitMockTest != null)
                 {
                     var index = courseUnitMockTests.IndexOf(courseUnitMockTest) + indexNext;
+                    index = index > 0 ? index : default;
                     if (index < courseUnitMockTests.Count)
                     {
                         return courseUnitMockTests[index];
@@ -408,7 +402,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var skillTestSkillScores = await GetVideoTestSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest);
 
             return (unitTestSkillScores, skillTestSkillScores);
-
         }
 
         public async Task<List<SkillScores>> GetVideoTestSkillScores(IList<Guid>? lessonResultIds, EnumTimeCodeType type)
@@ -461,7 +454,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return (groupedSkillScores, (int)percents.Sum());
         }
 
-        private async Task SendStudentCompleteUnit(Guid studentId, SendStudentCompleteUnitModel model,EnumCourseType courseType, CancellationToken cancellationToken)
+        private async Task SendStudentCompleteUnit(Guid studentId, SendStudentCompleteUnitModel model, EnumCourseType courseType, CancellationToken cancellationToken)
         {
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
             var student = studentResult.Content?.Result?.FirstOrDefault();
@@ -473,7 +466,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Template = model.SenderTemplate,
             }, cancellationToken).ConfigureAwait(false);
         }
-
 
         public async Task DoQuestBoard(Guid userId, Guid unitId, Guid courseId, CancellationToken cancellationToken)
         {
