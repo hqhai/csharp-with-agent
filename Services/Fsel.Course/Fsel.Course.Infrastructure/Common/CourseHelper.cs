@@ -110,17 +110,6 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            if (unitIds.Count > 8 && request.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToEight));
-                return methodResult;
-            }
-            else if (unitIds.Count > 12 && request.CourseLevel.GetEnumCourseType() == EnumCourseType.Academic)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToTwelve));
-                return methodResult;
-            }
-
             var isCheck = units.All(x => unitIds.Contains(x.Id) && x.CourseLevel == request.CourseLevel);
             if (!isCheck)
             {
@@ -132,6 +121,12 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (request.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts)
             {
+                if (unitIds.Count > 8)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.InvalidUnitQuantity));
+                    return methodResult;
+                }
+
                 #region validate mockTest
 
                 var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).Distinct().ToList();
@@ -165,6 +160,12 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else
             {
+                if (unitIds.Count > 12)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.InvalidUnitQuantity));
+                    return methodResult;
+                }
+
                 #region validate finalTest
 
                 var finalTestIds = request.CourseUnitMockTests.Where(e => e.FinalTestId != null).Select(x => x.FinalTestId).Distinct().ToList();
@@ -257,17 +258,6 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            if (unitIds.Count > 8 && request.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToEight));
-                return methodResult;
-            }
-            else if (unitIds.Count > 12 && request.CourseLevel.GetEnumCourseType() == EnumCourseType.Academic)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToTwelve));
-                return methodResult;
-            }
-
             var isCheck = units.All(x => unitIds.Contains(x.Id) && x.CourseLevel == request.CourseLevel);
             if (!isCheck)
             {
@@ -286,6 +276,12 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (request.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts)
             {
+                if (unitIds.Count > 8)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.InvalidUnitQuantity));
+                    return methodResult;
+                }
+
                 #region validate mockTest
 
                 if (request.CourseUnitMockTests.Count != 10)
@@ -335,6 +331,12 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else
             {
+                if (unitIds.Count > 12)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.InvalidUnitQuantity));
+                    return methodResult;
+                }
+
                 #region validate finalTest
 
                 if (request.CourseUnitMockTests.Count < 13)
