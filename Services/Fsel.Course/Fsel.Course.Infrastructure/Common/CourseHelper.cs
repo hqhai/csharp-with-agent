@@ -104,16 +104,20 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.DuplicateUnitId));
                 return methodResult;
             }
+            if (units.Count != unitIds.Count)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
+                return methodResult;
+            }
 
-            if (unitIds.Distinct().Count() > 8)
+            if (unitIds.Count > 8 && request.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToEight));
                 return methodResult;
             }
-
-            if (units.Count != unitIds.Count)
+            else if (unitIds.Count > 12 && request.CourseLevel.GetEnumCourseType() == EnumCourseType.Academic)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToTwelve));
                 return methodResult;
             }
 
@@ -137,7 +141,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return methodResult;
                 }
 
-                if (mocktestIds.Count == 0)
+                if (mocktestIds == null || mocktestIds.Count == 0)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mocktestIds));
                     return methodResult;
@@ -149,7 +153,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return methodResult;
                 }
 
-                var mocktests = await _mockTestRepository.Queryable.Include(x => x.CourseUnitMockTests).Where(x => mocktestIds != null && mocktestIds.Contains(x.Id)).ToListAsync();
+                var mocktests = await _mockTestRepository.Queryable.Include(x => x.CourseUnitMockTests).Where(x => mocktestIds.Contains(x.Id)).ToListAsync();
                 var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.FullMockTest);
                 if (!checkMockTest)
                 {
@@ -170,7 +174,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return methodResult;
                 }
 
-                if (finalTestIds.Count == 0)
+                if (finalTestIds == null || finalTestIds.Count == 0)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestIds));
                     return methodResult;
@@ -247,16 +251,20 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.DuplicateUnitId));
                 return methodResult;
             }
+            if (units.Count != unitIds.Count)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
+                return methodResult;
+            }
 
-            if (unitIds.Distinct().Count() > 8)
+            if (unitIds.Count > 8 && request.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToEight));
                 return methodResult;
             }
-
-            if (units.Count != unitIds.Count)
+            else if (unitIds.Count > 12 && request.CourseLevel.GetEnumCourseType() == EnumCourseType.Academic)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToTwelve));
                 return methodResult;
             }
 
@@ -266,6 +274,7 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.AnotherLevelUnitExists));
                 return methodResult;
             }
+
             var unitResults = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.Id && unitUnFinished.Contains(x.UnitId)).ToListAsync();
             if (unitResults.Any() && unitResults.Any(x => x.Status != EnumResultStatus.Unfinished))
             {
