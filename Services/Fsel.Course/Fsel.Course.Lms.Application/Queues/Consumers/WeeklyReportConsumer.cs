@@ -4,7 +4,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
     using System.Threading.Tasks;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Lms.Application.Queries.WeeklyReportQuery;
+    using Fsel.Course.Lms.Application.Commands.WeeklyReportCommand;
     using MassTransit;
     using MediatR;
 
@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
 
         public async Task Consume(ConsumeContext<BaseQueueModel> context)
         {
-            await _mediator.Send(new WeeklyReportQuery()).ConfigureAwait(false);
+            await _mediator.Send(new WeeklyReportCommand()).ConfigureAwait(false);
         }
     }
 }

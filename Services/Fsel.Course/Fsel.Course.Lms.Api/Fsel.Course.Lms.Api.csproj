@@ -14,46 +14,46 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\SendMailPT\CourseA1.html">
+    <None Update="Resources\MailTemplates\CourseA1.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\CourseA2.html">
+    <None Update="Resources\MailTemplates\CourseA2.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\CourseB1.html">
+    <None Update="Resources\MailTemplates\CourseB1.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\CourseB1Plus.html">
+    <None Update="Resources\MailTemplates\CourseB1Plus.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\CourseB2.html">
+    <None Update="Resources\MailTemplates\CourseB2.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\CourseC1.html">
+    <None Update="Resources\MailTemplates\CourseC1.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\CourseMS1.html">
+    <None Update="Resources\MailTemplates\CourseMS1.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\CourseMS2.html">
+    <None Update="Resources\MailTemplates\CourseMS2.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\CourseMS3.html">
+    <None Update="Resources\MailTemplates\CourseMS3.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\CompareSkill.html">
+    <None Update="Resources\MailTemplates\CompareSkill.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\LessonName.html">
+    <None Update="Resources\MailTemplates\LessonName.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\Skill.html">
+    <None Update="Resources\MailTemplates\Skill.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\TeachersInfo.html">
+    <None Update="Resources\MailTemplates\TeachersInfo.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendMailPT\UnitName.html">
+    <None Update="Resources\MailTemplates\UnitName.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

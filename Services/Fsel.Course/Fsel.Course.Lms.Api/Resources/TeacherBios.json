@@ -2,7 +2,7 @@
   {
     "fullName": "Brandon Sinkovic",
     "nationality": "Mỹ",
-    "degree": "Cử nhân Ngôn ngữ",
+    "deggree": "Cử nhân Ngôn ngữ",
     "certifications": "Chứng chỉ giảng dạy CELTA",
     "experience": "7 Năm kinh nghiệm giảng dạy tiếng Anh tại Việt Nam",
     "strength": "",
@@ -15,7 +15,7 @@
   {
     "fullName": "Calvin Moore",
     "nationality": "Anh Quốc",
-    "degree": "Cử nhân Văn học Anh",
+    "deggree": "Cử nhân Văn học Anh",
     "certifications": "Chứng chỉ giảng dạy CELTA",
     "experience": "7 Năm kinh nghiệm giảng dạy tiếng Anh tại Việt Nam",
     "strength": "",
@@ -30,7 +30,7 @@
   {
     "fullName": "Anya Le",
     "nationality": "Nga",
-    "degree": "Cử nhân Quản trị Kinh doanh",
+    "deggree": "Cử nhân Quản trị Kinh doanh",
     "certifications": "Chứng chỉ giảng dạy CELTA",
     "experience": "7 Năm kinh nghiệm giảng dạy tiếng Anh tại Việt Nam",
     "strength": "",
@@ -45,7 +45,7 @@
   {
     "fullName": "Thomas Brettell",
     "nationality": "Anh Quốc",
-    "degree": "Cử nhân Văn học Anh",
+    "deggree": "Cử nhân Văn học Anh",
     "certifications": "Chứng chỉ PGCE",
     "experience": "16 Năm kinh nghiệm giảng dạy tiếng Anh",
     "strength": "",
@@ -57,7 +57,7 @@
   {
     "fullName": "Eliza Keyton",
     "nationality": "Mỹ",
-    "degree": "Cử nhân Giảng dạy tiếng Anh, Thạc sỹ Quản lý Giáo dục",
+    "deggree": "Cử nhân Giảng dạy tiếng Anh, Thạc sỹ Quản lý Giáo dục",
     "certifications": "Chứng chỉ giảng dạy CELTA, DELTA",
     "experience": "14 Năm kinh nghiệm giảng dạy tiếng Anh",
     "strength": "",
@@ -69,7 +69,7 @@
   {
     "fullName": "Marko Nikolic",
     "nationality": "Serbia",
-    "degree": "Cử nhân Ngôn ngữ Pháp và Văn học, Thạc sỹ Giảng dạy tiếng Anh & tiếng Pháp như ngôn ngữ thử hai hoặc như một ngoại ngữ",
+    "deggree": "Cử nhân Ngôn ngữ Pháp và Văn học, Thạc sỹ Giảng dạy tiếng Anh & tiếng Pháp như ngôn ngữ thử hai hoặc như một ngoại ngữ",
     "certifications": "Chứng chỉ giảng dạy CELTA, DELTA",
     "experience": "14 Năm kinh nghiệm giảng dạy tiếng Anh",
     "strength": "",
@@ -83,7 +83,7 @@
   {
     "fullName": "Cynthia Mann",
     "nationality": "Úc",
-    "degree": "Cử nhân Giáo dục",
+    "deggree": "Cử nhân Giáo dục",
     "certifications": "Chứng chỉ giảng dạy CELTA",
     "experience": "14 Năm kinh nghiệm giảng dạy tại Việt Nam, Úc, Pháp & Vương Quốc Anh",
     "strength": "",

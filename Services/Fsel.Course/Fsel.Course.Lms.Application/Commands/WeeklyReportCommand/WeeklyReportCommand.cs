@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
+namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 {
     using System.Globalization;
     using System.Threading;
@@ -24,11 +24,12 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class WeeklyReportQuery : IRequest<MethodResult<bool>>
+    public class WeeklyReportCommand : IRequest<MethodResult<bool>>
     {
         public ICollection<Guid>? StudentIds { get; set; }
     }
-    public class WeeklyReportQueryHandler : IRequestHandler<WeeklyReportQuery, MethodResult<bool>>
+
+    public class WeeklyReportCommandHandler : IRequestHandler<WeeklyReportCommand, MethodResult<bool>>
     {
         private readonly IUserService _userService;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
@@ -39,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
 
-        public WeeklyReportQueryHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting)
+        public WeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting)
         {
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
@@ -51,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             _appSetting = appSetting;
         }
 
-        public async Task<MethodResult<bool>> Handle(WeeklyReportQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(WeeklyReportCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
@@ -62,7 +63,6 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             {
                 var studentResults = await _userService.ExecuteListQueryAsync(new BaseQueryModel { IncludePaths = new List<string>() { "Human" } });
                 students = studentResults.Content?.Result?.ToList();
-
             }
             else
             {
@@ -75,11 +75,11 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 return methodResult;
             }
 
-            DateTime currentDate = DateTime.UtcNow;
+            var currentDate = DateTime.UtcNow;
 
-            DateTime lastFridayAt13 = currentDate.AddDays(-6);
+            var lastFridayAt13 = currentDate.AddDays(-6);
 
-            DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
+            var lastLastFridayAt13 = currentDate.AddDays(-14);
 
             var dates = DateTimeHelper.GenerateDateList(lastFridayAt13, currentDate);
 
@@ -119,17 +119,11 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 }}
             });
 
-            var pathSkillScores = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill);
-            using StreamReader streamReaderSkillScore = new StreamReader(pathSkillScores);
-            var skillScoresHtml = await streamReaderSkillScore.ReadToEndAsync(cancellationToken);
+            var skillScoresHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill, cancellationToken);
 
-            var pathLessonName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.LessonName);
-            using StreamReader streamReaderLessonName = new StreamReader(pathLessonName);
-            var lessonNameHtml = await streamReaderLessonName.ReadToEndAsync(cancellationToken);
+            var lessonNameHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.LessonName, cancellationToken);
 
-            var pathUnitName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill);
-            using StreamReader streamReaderUnitName = new StreamReader(pathUnitName);
-            var unitNameHtml = await streamReaderUnitName.ReadToEndAsync(cancellationToken);
+            var unitNameHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.UnitName, cancellationToken);
 
             foreach (var item in students)
             {
@@ -172,12 +166,12 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
 
                 if (courseType == EnumCourseType.Academic)
                 {
-                    int academicPercent = ((unitDoneCount * 100) / 12);
+                    int academicPercent = unitDoneCount * 100 / 12;
                     weeklyReport.CoursePercent = academicPercent.ToString(CultureInfo.CurrentCulture);
                 }
                 else
                 {
-                    int ieltPercent = ((unitDoneCount * 100) / 10);
+                    int ieltPercent = unitDoneCount * 100 / 10;
                     weeklyReport.CoursePercent = ieltPercent.ToString(CultureInfo.CurrentCulture);
                 }
 
@@ -230,7 +224,6 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 }
                 weeklyReport.SkillScores = unitName;
 
-
                 if (previousFeatureAccessTimes?.Count == 0 && featureAccessTimes?.Count == 0)
                 {
                     weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport4;
@@ -253,7 +246,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                                 .Where(p => p.UnitId == unitResultNext.UnitId && p.StudentId == item.Id && p.Status == EnumResultStatus.Process)
                                 .Select(x => new
                                 {
-                                    Lesson = x.Lesson,
+                                    x.Lesson,
                                     LessonResult = x,
                                     DisplayOrder = x.Lesson!.UnitLessons.Where(x => x.UnitId == unitResultNext.UnitId).Max(x => x.DisplayOrder)
                                 }).FirstOrDefaultAsync(cancellationToken);
@@ -270,7 +263,6 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                         weeklyReport.NextUnit = finalTestResult?.FinalTest?.Name;
                         weeklyReport.Weekly3Display = SendMailSetting.Display;
                     }
-
                     else if (courseType == EnumCourseType.Ielts)
                     {
                         var mockTestResult = await _mockTestResultRepository.Queryable.Include(mt => mt.MockTest).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
@@ -283,7 +275,6 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                     weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport;
                     weeklyReport.NoDailyStreak = null;
                     weeklyReport.DailyStreak = SendMailSetting.Display;
-
                 }
                 else
                 {
@@ -348,7 +339,6 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             }
         }
 
-
         private async Task<int> GetLesson(Guid? lessonId, Guid? studentId)
         {
             var counts = new List<int>();
@@ -362,15 +352,13 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             return (int)NumberHelper.ConvertPercentDouble(counts.Average());
         }
 
-
-        static void CheckAndAssignStatusDate(WeeklyReportModel model, List<DateTime>? userLoginDates, List<DateTime> weekDays)
+        private static void CheckAndAssignStatusDate(WeeklyReportModel model, List<DateTime>? userLoginDates, List<DateTime> weekDays)
         {
-
-            foreach (DateTime day in weekDays)
+            foreach (var day in weekDays)
             {
                 string dayOfWeek = day.DayOfWeek.ToString();
                 string isActivePropertyName = $"{dayOfWeek}IsActive";
-                string status = userLoginDates == null ? "NoActive" : (userLoginDates.Contains(day.Date) ? SendMailSetting.Active : SendMailSetting.NoActive);
+                string status = userLoginDates == null ? "NoActive" : userLoginDates.Contains(day.Date) ? SendMailSetting.Active : SendMailSetting.NoActive;
 
                 var propertyInfo = model.GetType().GetProperty(isActivePropertyName);
                 if (propertyInfo != null)

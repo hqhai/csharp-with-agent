@@ -51,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly IMapper _mapper;
         private readonly ICourseRepository _courseRepository;
         private readonly AppSetting _appSetting;
+
         public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
             , AuthContext authContext
             , QuestionConverter questionConverter
@@ -212,91 +213,13 @@ AppSetting appSetting)
             return default;
         }
 
-        private static string GetCourseTitle(EnumCourseLevel courseLevel)
-        {
-            if (courseLevel == EnumCourseLevel.A1)
-            {
-                return SendMailSetting.CourseA1Title;
-            }
-            else if (courseLevel == EnumCourseLevel.A2)
-            {
-                return SendMailSetting.CourseA2Title;
-            }
-            else if (courseLevel == EnumCourseLevel.B1)
-            {
-                return SendMailSetting.CourseB1Title;
-            }
-            else if (courseLevel == EnumCourseLevel.B1Plus)
-            {
-                return SendMailSetting.CourseB1PlusTitle;
-            }
-            else if (courseLevel == EnumCourseLevel.B2)
-            {
-                return SendMailSetting.CourseB2Title;
-            }
-            else if (courseLevel == EnumCourseLevel.C1)
-            {
-                return SendMailSetting.CourseC1Title;
-            }
-            else
-            {
-                return string.Empty;
-            }
-        }
-
-        private static string GetCourseInfo(EnumCourseLevel courseLevel)
-        {
-            if (courseLevel == EnumCourseLevel.A1)
-            {
-                return SendMailSetting.CourseA1;
-            }
-            else if (courseLevel == EnumCourseLevel.A2)
-            {
-                return SendMailSetting.CourseA2;
-            }
-            else if (courseLevel == EnumCourseLevel.B1)
-            {
-                return SendMailSetting.CourseB1;
-            }
-            else if (courseLevel == EnumCourseLevel.B1Plus)
-            {
-                return SendMailSetting.CourseB1Plus;
-            }
-            else if (courseLevel == EnumCourseLevel.B2)
-            {
-                return SendMailSetting.CourseB2;
-            }
-            else if (courseLevel == EnumCourseLevel.C1)
-            {
-                return SendMailSetting.CourseC1;
-            }
-            else if (courseLevel == EnumCourseLevel.MS1)
-            {
-                return SendMailSetting.Mindset1;
-            }
-            else if (courseLevel == EnumCourseLevel.MS2)
-            {
-                return SendMailSetting.Mindset2;
-            }
-            else
-            {
-                return SendMailSetting.Mindset3;
-            }
-        }
-
         private async Task SendStudentPlacementTest(EnumCourseLevel courseLevel, StudentModel student, PlacementTestResult placementTestResult, CancellationToken cancellationToken)
         {
-            var pathSkillScores = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill);
-            using StreamReader streamReaderSkillScore = new StreamReader(pathSkillScores);
-            var skillScoresHtml = await streamReaderSkillScore.ReadToEndAsync(cancellationToken);
+            var skillScoresHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill, cancellationToken);
 
-            var pathCourseInfo = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, GetCourseInfo(courseLevel));
-            using StreamReader streamReaderCourseInfo = new StreamReader(pathCourseInfo);
-            var courseInfoHtml = await streamReaderCourseInfo.ReadToEndAsync(cancellationToken);
+            var courseInfoHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(courseLevel), cancellationToken);
 
-            var pathTeachers = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeachersInFo);
-            using StreamReader streamReaderTeachers = new StreamReader(pathTeachers);
-            var teachersHtml = await streamReaderTeachers.ReadToEndAsync(cancellationToken);
+            var teachersHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeachersInFo, cancellationToken);
 
             var pathTeachersBios = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeacherBios);
             var listTeachersBios = ConvertHelper.DeserializeFromFilePath<IList<CourseTeacherModel>>(pathTeachersBios);
@@ -309,11 +232,11 @@ AppSetting appSetting)
                 var teacher = string.Empty;
                 if (i > 0)
                 {
-                    teacher = string.Format(CultureInfo.InvariantCulture, teachersHtml, null, teachers[i].AvatarPath, teachers[i].FullName, teachers[i].Nationality, teachers[i].Degree, teachers[i].Experience, teachers[i].Strength);
+                    teacher = string.Format(CultureInfo.InvariantCulture, teachersHtml, null, teachers[i].AvatarPath, teachers[i].FullName, teachers[i].Nationality, teachers[i].Deggree, teachers[i].Experience, teachers[i].Strength);
                 }
                 else
                 {
-                    teacher = string.Format(CultureInfo.InvariantCulture, teachersHtml, SendMailSetting.Display, teachers[i].AvatarPath, teachers[i].FullName, teachers[i].Nationality, teachers[i].Degree, teachers[i].Experience, teachers[i].Strength);
+                    teacher = string.Format(CultureInfo.InvariantCulture, teachersHtml, SendMailSetting.Display, teachers[i].AvatarPath, teachers[i].FullName, teachers[i].Nationality, teachers[i].Deggree, teachers[i].Experience, teachers[i].Strength);
                 }
                 teacherInfo += teacher;
             }
@@ -335,7 +258,7 @@ AppSetting appSetting)
                 CourseLevel = courseLevel.GetDescription(),
                 SkillScores = skillsScore,
                 CourseInfo = courseInfoHtml,
-                CourseTitle = GetCourseTitle(courseLevel),
+                CourseTitle = EnumCourseLevelHelper.GetCourseTitle(courseLevel),
                 ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
                 TeachersInfo = teacherInfo
             };
@@ -346,7 +269,7 @@ AppSetting appSetting)
             var sendResult = new MethodResult<bool>();
             if (!string.IsNullOrEmpty(student.Human?.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentCompletePT }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT }, cancellationToken).ConfigureAwait(false);
             }
         }
 

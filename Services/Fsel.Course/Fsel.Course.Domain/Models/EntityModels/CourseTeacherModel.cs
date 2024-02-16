@@ -14,6 +14,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? FullName { get; set; }
 
         private string? _avatarPath;
+
         public string? AvatarPath
         {
             set { _avatarPath = value; }
@@ -24,7 +25,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? Nationality { get; set; }
 
-        public string? Degree { get; set; }
+        public string? Deggree { get; set; }
 
         public string? Experience { get; set; }
 

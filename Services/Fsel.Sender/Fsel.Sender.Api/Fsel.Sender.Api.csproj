@@ -31,7 +31,7 @@
     <None Update="Resources\SendStudentCompleteCourseIetls.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\SendStudentCompletePT.html">
+    <None Update="Resources\StudentCompletePT.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\SendStudentCompleteUnitGood.html">

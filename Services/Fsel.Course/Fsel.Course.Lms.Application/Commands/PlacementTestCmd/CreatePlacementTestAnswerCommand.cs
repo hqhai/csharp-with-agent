@@ -226,6 +226,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             });
             if (isLockPT)
             {
+                #region
                 //var param = new SendStudentPTTemplateModel
                 //{
                 //    StudentName = student!.Human?.FullName,
@@ -238,6 +239,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 //{
                 //    sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
                 //}
+                #endregion
             }
             return methodResult;
         }

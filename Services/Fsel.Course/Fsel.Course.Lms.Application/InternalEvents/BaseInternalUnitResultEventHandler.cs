@@ -119,13 +119,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 nextCourseUnitMockTest = null;
             }
 
-            var pathSkill = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill);
-            using StreamReader streamReaderSkill = new StreamReader(pathSkill);
-            var skillHtml = await streamReaderSkill.ReadToEndAsync(cancellationToken);
+            var skillHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill, cancellationToken);
 
-            var pathCompareSkill = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CompareSkill);
-            using StreamReader streamReaderCompareSkill = new StreamReader(pathCompareSkill);
-            var compareSkillHtml = await streamReaderCompareSkill.ReadToEndAsync(cancellationToken);
+            var compareSkillHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CompareSkill, cancellationToken);
 
             var unitTestHtml = string.Empty;
             var skillTestHtml = string.Empty;
@@ -282,17 +278,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 parameter.TotalHourPrevious = SendMailHelper.FormatTimeSpanAsClock(previousLearn + previousSocial + previousOther);
 
-                (parameter.ColorTotal, parameter.CompareTotal) = Compare((currentLearn + currentSocial + currentOther), (previousLearn + previousSocial + previousOther));
+                (parameter.ColorTotal, parameter.CompareTotal) = SendMailHelper.Compare((currentLearn + currentSocial + currentOther), (previousLearn + previousSocial + previousOther));
 
                 parameter.PreviousLearn = SendMailHelper.FormatTimeSpanAsClock(previousLearn);
                 parameter.PreviousSocial = SendMailHelper.FormatTimeSpanAsClock(previousSocial);
                 parameter.PreviousOther = SendMailHelper.FormatTimeSpanAsClock(previousOther);
 
-                (parameter.ColorLearn, parameter.CompareLearn) = Compare(currentLearn, previousLearn);
+                (parameter.ColorLearn, parameter.CompareLearn) = SendMailHelper.Compare(currentLearn, previousLearn);
 
-                (parameter.ColorOther, parameter.CompareOther) = Compare(currentOther, previousOther);
+                (parameter.ColorOther, parameter.CompareOther) = SendMailHelper.Compare(currentOther, previousOther);
 
-                (parameter.ColorSocial, parameter.CompareSocial) = Compare(currentSocial, previousSocial);
+                (parameter.ColorSocial, parameter.CompareSocial) = SendMailHelper.Compare(currentSocial, previousSocial);
             }
             return parameter;
         }
@@ -318,22 +314,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             else
             {
                 return SenderSettings.TitleIeltUnit3;
-            }
-        }
-
-        private static (string, string) Compare(long value1, long value2)
-        {
-            if (value1 < value2)
-            {
-                return ("#C0404C", SendMailSetting.Reduced);
-            }
-            else if (value1 == value2)
-            {
-                return ("#FFAE46", SendMailSetting.Equal);
-            }
-            else
-            {
-                return ("#53BF65", SendMailSetting.Increase);
             }
         }
 
