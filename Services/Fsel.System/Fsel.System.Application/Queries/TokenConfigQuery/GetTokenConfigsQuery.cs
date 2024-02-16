@@ -14,7 +14,7 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
 
-    public class GetTokenConfigsQuery : IRequest<MethodResult<TokenConfigModel>>
+    public class GetTokenConfigsQuery : IRequest<MethodResult<IList<TokenConfigModel>>>
     {
         public EnumTokenFeature Feature { get; set; }
         public EnumCourseType CourseType { get; set; }
@@ -26,7 +26,7 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
         { get { return Missions?.Split(',').ToList<EnumTokenMission>(); } }
     }
 
-    public class GetTokenConfigsQueryHandler : IRequestHandler<GetTokenConfigsQuery, MethodResult<TokenConfigModel>>
+    public class GetTokenConfigsQueryHandler : IRequestHandler<GetTokenConfigsQuery, MethodResult<IList<TokenConfigModel>>>
     {
         private readonly ITokenConfigRepository _tokenConfigRepository;
         private readonly IMapper _mapper;
@@ -37,14 +37,14 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<TokenConfigModel>> Handle(GetTokenConfigsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TokenConfigModel>>> Handle(GetTokenConfigsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<TokenConfigModel>();
+            var methodResult = new MethodResult<IList<TokenConfigModel>>();
             if (request.ListMissions != null)
             {
-                var tokenConfig = await _tokenConfigRepository.Queryable.FirstOrDefaultAsync(x => x.Feature == request.Feature && request.ListMissions.Contains(x.Mission) && x.CourseType == request.CourseType, cancellationToken);
-                methodResult.Result = _mapper.Map<TokenConfigModel>(tokenConfig);
+                var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => x.Feature == request.Feature && request.ListMissions.Contains(x.Mission) && x.CourseType == request.CourseType).ToListAsync(cancellationToken);
+                methodResult.Result = _mapper.Map<IList<TokenConfigModel>>(tokenConfigs);
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

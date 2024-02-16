@@ -190,11 +190,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 if (sectionGroup.CourseSkill == EnumCourseSkill.Reading)
                 {
-                    sectionGroupResult.TokenFirstTime = (int?)await GetTokenAsync(isSkillTest ? EnumTokenMission.SkillMockTestReading : EnumTokenMission.FullMockTestReading, isSkillTest);
+                    sectionGroupResult.TokenFirstTime = (int?)await GetTokenAsync(isSkillTest ? EnumTokenMission.SkillMockTestReading : EnumTokenMission.FullMockTestReading, isSkillTest) * sectionGroupResult.CorrectCount;
                 }
                 else if (sectionGroup.CourseSkill == EnumCourseSkill.Listening)
                 {
-                    sectionGroupResult.TokenFirstTime = (int?)await GetTokenAsync(isSkillTest ? EnumTokenMission.SkillMockTestListening : EnumTokenMission.FullMockTestListening, isSkillTest);
+                    sectionGroupResult.TokenFirstTime = (int?)await GetTokenAsync(isSkillTest ? EnumTokenMission.SkillMockTestListening : EnumTokenMission.FullMockTestListening, isSkillTest) * sectionGroupResult.CorrectCount;
                 }
                 _sectionGroupResultRepository.Update(sectionGroupResult);
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
@@ -245,7 +245,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private static MockTestResult GetMockTestResult(IList<SectionGroupResult>? sectionGroupResults, MockTestResult mockTestResult)
         {
-            var skillScores = sectionGroupResults?.SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
+            var skillScores = sectionGroupResults?.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
             if (skillScores != null)
             {
                 mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
@@ -346,7 +346,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                     else
                     {
-                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, correctCount));
+                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, questionItem, isAnswered, correctCount));
                     }
                 }
             }
@@ -441,6 +441,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 Status = questionItem?.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
                 IsCorrect = isAnswered ? (questionItem == null || questionItem.CorrectTotal == correctCount) : null,
             };
+        }
+
+        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, Question questionItem, bool isAnswered, int correctCount = default)
+        {
+            mockTestAnswer = GetMockTestAnswer(mockTestAnswer, answer, correctCount);
+            mockTestAnswer.IsCorrect = isAnswered ? (questionItem == null || questionItem.CorrectTotal == correctCount) : null;
+            return mockTestAnswer;
         }
 
         private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, int correctCount = default)
