@@ -111,10 +111,15 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 return true;
             }
+            var section = await _sectionRepository.GetByIdAsync(request.SectionId);
+            if (section == null)
+            {
+                return true;
+            }
             bool checkSkillMockTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
 
             (double averageScore, double totalScore) = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
-            (bool isError, int token) = await GetTokenAsync(mockTestResult, request.SectionId, checkSkillMockTest, request.WordContent, resultDictionary);
+            (bool isError, int token) = await GetTokenAsync(mockTestResult, section, checkSkillMockTest, request.WordContent, resultDictionary);
 
             if (isError)
             {
@@ -122,11 +127,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
             var skillScore = sectionGroupResult!.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
 
-            var skillScores = sectionGroupResult!.SkillScores?.ToList();
-
-            if (skillScores == null)
+            var skillScores = sectionGroupResult!.SkillScores?.ToList() ?? new List<SkillScores>();
+            if (sectionGroupResult.TokenFirstTime.HasValue)
             {
-                skillScores = new List<SkillScores>();
+                sectionGroupResult.TokenFirstTime += token;
+            }
+            else
+            {
+                sectionGroupResult.TokenFirstTime = token;
             }
             if (skillScore == null)
             {
@@ -139,17 +147,15 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     TotalQuestion = 2,
                     CountQuestion = 2
                 };
-                skillScores!.Add(skillScore);
-                sectionGroupResult.TokenFirstTime += token;
+                skillScores.Add(skillScore);
             }
             else
             {
                 int correcCount = (int)CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore);
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
-                skillScore!.CorrectCount = correcCount;
-                skillScore.Scores = averageScore;
+                skillScores.Single().CorrectCount = correcCount;
+                skillScores.Single().Scores = averageScore;
                 sectionGroupResult.CorrectCount = correcCount;
-                sectionGroupResult.TokenFirstTime += token;
                 if (checkSkillMockTest)
                 {
                     mockTestResult.SkillScores = skillScores;
@@ -173,7 +179,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                 if (checkSkillMockTest)
                 {
-                    if (mockTestResult.TokenFirstTime.HasValue && mockTestResult.TokenFirstTime != default)
+                    if (mockTestResult.TokenFirstTime.HasValue && mockTestResult.TokenFirstTime != 0 && section.DisplayOrder != 1)
                     {
                         await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
                         {
@@ -195,16 +201,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             return true;
         }
 
-        private async Task<(bool, int)> GetTokenAsync(MockTestResult mockTestResult, Guid sectionId, bool checkSkillMockTest, string? wordContent, Dictionary<EnumMockTestAIType, string> resultDictionary)
+        private async Task<(bool, int)> GetTokenAsync(MockTestResult mockTestResult, Section section, bool checkSkillMockTest, string? wordContent, Dictionary<EnumMockTestAIType, string> resultDictionary)
         {
             var course = await _courseRepository.GetByIdAsync(mockTestResult.CourseId);
             if (course == null)
-            {
-                return (true, default);
-            }
-
-            var section = await _sectionRepository.GetByIdAsync(sectionId);
-            if (section == null)
             {
                 return (true, default);
             }

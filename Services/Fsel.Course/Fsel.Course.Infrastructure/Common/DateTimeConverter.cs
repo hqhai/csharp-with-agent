@@ -28,12 +28,12 @@ namespace Fsel.Course.Infrastructure.Common
 
         public double GetWorkingTime(DateTime inputDate, DateTime outputDate, double executionTime)
         {
+            var sectionBetweenDate = DateTimeHelper.GetSecondBetweenDate(inputDate, outputDate);
             if (executionTime != default)
             {
-                var sectionBetweenDate = DateTimeHelper.GetSecondBetweenDate(inputDate, outputDate);
                 return sectionBetweenDate <= executionTime ? sectionBetweenDate : executionTime;
             }
-            return default;
+            return sectionBetweenDate;
         }
 
         private static DateTime GetDateTimeEntity(Entity entity)

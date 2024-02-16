@@ -176,7 +176,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 }
             }
 
-            await UpdateMockTestResultAsync(mockTestResult, isSkillTest, cancellationToken);
+            await UpdateMockTestResultAsync(mockTestResult, sectionGroup, isSkillTest, cancellationToken);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = mockTestResult.Status == EnumResultStatus.Done;
             methodResult.Result = sectionGroupResultDto;
@@ -219,17 +219,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
         }
 
-        private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, bool isSkillTest, CancellationToken cancellationToken)
+        private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, SectionGroup sectionGroup, bool isSkillTest, CancellationToken cancellationToken)
         {
             var numberOfDone = 4;
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
-
             if (sectionGroupResults != null && (isSkillTest || sectionGroupResults.Count == numberOfDone) && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                 mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
                 mockTestResult = GetMockTestResult(sectionGroupResults, mockTestResult);
-                if (mockTestResult.TokenFirstTime.HasValue && mockTestResult.TokenFirstTime.Value != default)
+                if (isSkillTest && (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening) && mockTestResult.TokenFirstTime.HasValue)
                 {
                     await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
                     {

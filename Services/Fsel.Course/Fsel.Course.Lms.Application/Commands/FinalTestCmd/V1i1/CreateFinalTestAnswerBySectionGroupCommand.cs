@@ -183,7 +183,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
 
         private async Task<FinalTestResult> GetFinalTestResult(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult)
         {
-            var skillScores = sectionGroupResults.SelectMany(x => x.SkillScores!).ToList();
+            var skillScores = sectionGroupResults.SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
             finalTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
             finalTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
             finalTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);

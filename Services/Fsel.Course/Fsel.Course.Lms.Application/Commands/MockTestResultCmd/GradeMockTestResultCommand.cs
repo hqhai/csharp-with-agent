@@ -82,8 +82,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(MockTestScore.Criteria));
                 return methodResult;
             }
-            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Include(x => x.MockTest).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
-            if (mockTestResult == null || mockTestResult.MockTest == null)
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Include(x => x.MockTest).Include(x => x.Course).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
+            if (mockTestResult == null || (mockTestResult.MockTest == null || mockTestResult.Course == null))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
@@ -107,6 +107,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResults));
                 return methodResult;
             }
+            var level = mockTestResult.Course.CourseLevel;
 
             #endregion Validate
 
@@ -130,26 +131,26 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                     case EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy:
                         var mission = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingGRA : EnumTokenMission.FullMockTestSpeakingGRA;
                         var tokenConfig = tokenConfigs?.FirstOrDefault(x => x.Mission == mission);
-                        numberOfToken += tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+                        numberOfToken += GetBandScore(level, tokenConfig.GetTokenConfig<TokenCoinConfigs>(), item.Score);
                         break;
 
                     case EnumMockTestScoreCriteria.Pronunciation:
                         var missionPon = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingPron : EnumTokenMission.FullMockTestSpeakingPron;
                         var tokenConfigPon = tokenConfigs?.FirstOrDefault(x => x.Mission == missionPon);
-                        numberOfToken += tokenConfigPon.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+                        numberOfToken += GetBandScore(level, tokenConfigPon.GetTokenConfig<TokenCoinConfigs>(), item.Score);
                         break;
 
                     case EnumMockTestScoreCriteria.FluencyAndCoherence:
                         var missionFC = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingFC : EnumTokenMission.FullMockTestSpeakingFC;
                         var tokenConfigFC = tokenConfigs?.FirstOrDefault(x => x.Mission == missionFC);
-                        numberOfToken += tokenConfigFC.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+                        numberOfToken += GetBandScore(level, tokenConfigFC.GetTokenConfig<TokenCoinConfigs>(), item.Score);
 
                         break;
 
                     case EnumMockTestScoreCriteria.LexicalResource:
                         var missionLR = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingLR : EnumTokenMission.FullMockTestSpeakingLR;
                         var tokenConfigLR = tokenConfigs?.FirstOrDefault(x => x.Mission == missionLR);
-                        numberOfToken += tokenConfigLR.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+                        numberOfToken += GetBandScore(level, tokenConfigLR.GetTokenConfig<TokenCoinConfigs>(), item.Score);
                         break;
                 }
 
@@ -215,6 +216,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 return methodResult;
             });
             return methodResult;
+        }
+
+        private static long GetBandScore(EnumCourseLevel level, TokenCoinConfigs? configs, double score)
+        {
+            var bandScore = level.GetBandScore();
+            return score >= bandScore - 1 && configs != null ? configs.BaseValue : default;
         }
 
         private async Task<IList<TokenConfigModel>?> GetTokenConfigsAsync(bool isSkillTest)
