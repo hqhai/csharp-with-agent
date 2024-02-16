@@ -36,5 +36,9 @@ namespace Fsel.Shared.Models.SenderTemplates
         public int? NextLesson { get; set; }
         public int? PercentLesson { get; set; }
         public string? Weekly3Display { get; set; }
+        public string? ColorTotal { get; set; }
+        public string? ColorLearn { get; set; }
+        public string? ColorSocial { get; set; }
+        public string? ColorOther { get; set; }
     }
 }

@@ -14,6 +14,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Maps
         public GameHistoryProfile()
         {
             CreateMap<GameHistory, GameHistoryModel>().IgnoreAllNonExisting();
+            CreateMap<GameHistory, RankingGameModel>().IgnoreAllNonExisting();
             CreateMap<SaveGameHistoryCommandModel, GameHistory>().IgnoreAllNonExisting();
             CreateMap<AnswerTheQuestionCommandModel, GameAnswer>().IgnoreAllNonExisting();
         }
