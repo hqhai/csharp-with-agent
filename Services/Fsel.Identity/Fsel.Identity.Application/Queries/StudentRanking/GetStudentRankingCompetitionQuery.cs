@@ -91,7 +91,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                              UserId = studentFile.UserId
                          };
 
-            result = result.OrderByDescending(x => (Process_Ratio * x.Process + Overall_Ratio * x.TotalScore));
+            result = result.OrderByDescending(x => (Process_Ratio * x.Process + Overall_Ratio * x.OverallScore));
             int totalItem = result.Count();
             var lists = result.ApplyPaging(request).ToList();
             methodResult.Result = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);
