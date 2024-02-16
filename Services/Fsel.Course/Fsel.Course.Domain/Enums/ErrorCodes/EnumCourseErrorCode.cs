@@ -65,11 +65,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         FinalTestCannotBeDreaterThan1,
 
         /// <summary>
-        /// UnitTest is up to Eight
-        /// </summary>
-        UnitTestIsUpToEight,
-
-        /// <summary>
         /// FinalTestId must be at the end
         /// </summary>
         FinalTestIdMustBeAtTheEnd,
@@ -107,6 +102,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         ///  Unit Has Been Used
         /// </summary>
-        UnitHasBeenUsed
+        UnitHasBeenUsed,
+
+        /// <summary>
+        /// Invalid Unit Quantity
+        /// </summary>
+        InvalidUnitQuantity
     }
 }
