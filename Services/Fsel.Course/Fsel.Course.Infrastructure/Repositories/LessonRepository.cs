@@ -46,7 +46,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
             var listDones = lessons.Select(x => new
             {
-                CountDone = x.LessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x.Status == EnumResultStatus.Done).Count(),
+                CountDone = x.LessonResults.Where(x => x.UnitId == unitId && x.StudentId == studentId).SelectMany(x => x.HomeWorkResults).Where(x => x.Status == EnumResultStatus.Done).Count(),
                 TotalDone = x.LessonHomeWorks.Count
             }).ToList();
             return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
@@ -62,7 +62,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
             var listDones = lessons.Select(x => new
             {
-                CountDone = x.LessonResults.SelectMany(x => x.ClassForumResults).Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded).Count(),
+                CountDone = x.LessonResults.Where(x => x.UnitId == unitId && x.StudentId == studentId).SelectMany(x => x.ClassForumResults).Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded).Count(),
                 TotalDone = 1
             }).ToList();
             return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
@@ -76,7 +76,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
             var listDones = lessons.Select(x => new
             {
-                CountDone = x.LessonResults.Where(x => x.Status == EnumResultStatus.Done).Count(),
+                CountDone = x.LessonResults.Where(x => x.UnitId == unitId && x.StudentId == studentId).Where(x => x.Status == EnumResultStatus.Done).Count(),
                 TotalDone = 1
             }).ToList();
             return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
