@@ -65,8 +65,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
                 return methodResult;
             }
-            var videoIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x.VideoId).ToList();
-            var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && videoIds.Contains(x.VideoId)).Select(x => x.Id).ToListAsync(cancellationToken);
+            var videoDuplicateIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Where(x => !x.IsDeleted).GroupBy(x => x.VideoId)
+                .Select(x => new
+                {
+                    Id = x.Key,
+                    NumberOfDuplicate = x.Count()
+                }).ToList();
+            var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && videoDuplicateIds.Select(x => x.Id).Contains(x.VideoId)).Select(x => x.Id).ToListAsync(cancellationToken);
             var videos = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
                                                     .ThenInclude(x => x.TimeCodeExercises)
                                                     .ThenInclude(x => x.Exercise)
@@ -76,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                     .ThenInclude(x => x.TimeCodeExercises)
                                                     .ThenInclude(x => x.Exercise)
                                                     .ThenInclude(x => x!.VideoTimeCodeAnswers)
-                                                    .Where(x => videoIds.Contains(x.Id))
+                                                    .Where(x => videoDuplicateIds.Select(x => x.Id).Contains(x.Id))
                                                     .AsNoTracking()
                                                     .ToListAsync(cancellationToken);
             if (videos == null || videos.Count == 0)
@@ -90,13 +95,23 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x =>
             {
                 var videoResultAnswers = x.SelectMany(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId.HasValue && videoResultIds.Contains(x.VideoResultId.Value)));
+
+                double totalQuestion = 0, totalCount = 0;
+                foreach (var item in x.ToList())
+                {
+                    var videoId = item?.TimeCodeExercises.Select(x => x.VideoTimeCode!.VideoId).FirstOrDefault();
+                    var numberOfDuplicate = videoDuplicateIds.FirstOrDefault(vid => vid.Id == videoId)?.NumberOfDuplicate ?? default;
+                    totalQuestion += (item?.ExerciseQuestions.Select(x => x.Question).Count() ?? default) * numberOfDuplicate;
+                    totalCount += (item?.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal) ?? default) * numberOfDuplicate;
+                }
+
                 return new SkillScores
                 {
                     Skill = x.Key,
                     CountQuestion = videoResultAnswers.Count(),
-                    TotalQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
                     CorrectCount = videoResultAnswers.Sum(x => x.CorrectCount),
-                    TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                    TotalQuestion = totalQuestion,
+                    TotalCount = totalCount,
                 };
             }).ToList();
             overallScoreReport.SkillScores = skillScores;

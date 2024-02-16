@@ -18,5 +18,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Entities
         public Guid? MaxLevelSpaceShipId { get; set; }
 
         public SpaceShip? SpaceShip { get; set; }
+
+        public virtual ICollection<StudentGameInfo>? StudentGameInfos { get; set; } = new List<StudentGameInfo>();
     }
 }

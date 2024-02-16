@@ -345,6 +345,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 if (courseUnitMockTest != null)
                 {
                     var index = courseUnitMockTests.IndexOf(courseUnitMockTest) + indexNext;
+                    index = index > 0 ? index : default;
                     if (index < courseUnitMockTests.Count)
                     {
                         return courseUnitMockTests[index];
