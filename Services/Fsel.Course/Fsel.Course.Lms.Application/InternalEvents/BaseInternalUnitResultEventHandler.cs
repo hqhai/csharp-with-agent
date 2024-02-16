@@ -25,7 +25,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Nest;
 
     public class BaseInternalUnitResultEventHandler : BaseInternalEventHandler
     {
@@ -72,215 +71,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         var listClassForumResult = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
                         if (lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded))
                         {
-                            int numberUnit = course.CourseUnitMockTests.First(p => p.UnitId == unitId).Number;
-
-                            var startUnit = lessonResults.OrderBy(p => p.CreatedDate).FirstOrDefault()?.CreatedDate; // thời gian bắt đầu unit
-                            var endUnit = DateTime.UtcNow;
-
-                            var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel { UserId = userId, StartDate = startUnit, EndDate = endUnit });
-                            var featureAccessTime = featureAccessTimeResult.Content?.Result;
-
-                            CourseUnitMockTest? previousCourseUnitMockTest;
-                            CourseUnitMockTest? nextCourseUnitMockTest;
-                            try
-                            {
-                                previousCourseUnitMockTest = GetCourseUnitMockTest(course.CourseUnitMockTests.ToList(), unitId, "UnitId", -1);
-                            }
-                            catch
-                            {
-                                previousCourseUnitMockTest = null;
-                            }
-                            try
-                            {
-                                nextCourseUnitMockTest = GetCourseUnitMockTest(course.CourseUnitMockTests.ToList(), unitId, "UnitId", 1);
-                            }
-                            catch
-                            {
-                                nextCourseUnitMockTest = null;
-                            }
-
-                            var pathSkill = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill);
-                            using StreamReader streamReaderSkill = new StreamReader(pathSkill);
-                            var skillHtml = await streamReaderSkill.ReadToEndAsync(cancellationToken);
-
-                            var pathCompareSkill = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CompareSkill);
-                            using StreamReader streamReaderCompareSkill = new StreamReader(pathCompareSkill);
-                            var compareSkillHtml = await streamReaderCompareSkill.ReadToEndAsync(cancellationToken);
-
-                            var unitTestHtml = string.Empty;
-                            var skillTestHtml = string.Empty;
-                            var (unitTestResult, skillTestResult) = await GetUnitTestAndSkillTest(lessonResultIds);
-                            unitTestResult.ForEach(p =>
-                            {
-                                var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
-                                var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
-                                unitTestHtml += html;
-                            });
-                            skillTestResult.ForEach(p =>
-                            {
-                                var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
-                                var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
-                                skillTestHtml += html;
-                            });
-
-
-                            var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == course.Id && p.UnitId == unit.Id && p.StudentId == studentId, cancellationToken);
-                            var mockTestHtml = string.Empty;
-                            mockTestResult?.SkillScores.ForEach(p =>
-                            {
-                                var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
-                                var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
-                                mockTestHtml += html;
-                            });
-
-                            var currentLearn = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Learn).Sum(p => p.AccessTime) ?? 0);
-                            var currentSocial = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Social).Sum(p => p.AccessTime) ?? 0);
-                            var currentOther = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? 0);
-
-                            var parameter = new SendStudentCompleteUnitModel
-                            {
-                                UnitName = unit.Name,
-                                StartDate = startUnit?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
-                                EndDate = endUnit.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
-                                Percent = percent.ToString(CultureInfo.CurrentCulture),
-                                TotalHour = SendMailHelper.FormatTimeSpanAsClock(currentLearn + currentSocial + currentOther),
-                                TotalLearn = SendMailHelper.FormatTimeSpanAsClock(currentLearn),
-                                TotalSocial = SendMailHelper.FormatTimeSpanAsClock(currentSocial),
-                                TotalOther = SendMailHelper.FormatTimeSpanAsClock(currentOther),
-                                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
-                                SkillMockTest = mockTestHtml,
-                                SkillTest = skillTestHtml,
-                                UnitTest = unitTestHtml,
-                                UnitDisplay = string.IsNullOrEmpty(unitTestHtml) ? SendMailSetting.Display : null,
-                                SkillDisplay = string.IsNullOrEmpty(skillTestHtml) ? SendMailSetting.Display : null
-                            };
-
-                            if (nextCourseUnitMockTest != null && nextCourseUnitMockTest.UnitId.HasValue)
-                            {
-                                parameter.NextUnit = nextCourseUnitMockTest.Unit?.Name;
-                            }
-                            else if (nextCourseUnitMockTest != null && nextCourseUnitMockTest.MockTestId.HasValue)
-                            {
-                                parameter.NextUnit = nextCourseUnitMockTest.MockTest?.Name;
-                            }
-                            else if (nextCourseUnitMockTest != null && nextCourseUnitMockTest.FinalTestId.HasValue)
-                            {
-                                parameter.NextUnit = nextCourseUnitMockTest.FinalTest?.Name;
-                            }
-                            var skillScoreHtml = string.Empty;
-                            if (numberUnit == 1)
-                            {
-                                parameter.SenderTemplate = EnumSenderTemplate.Unit1Report;
-                                skillScores.ForEach(p =>
-                                {
-                                    var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
-                                    var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
-                                    skillScoreHtml += html;
-                                });
-                                parameter.SkillScore = skillScoreHtml;
-                                if (course.CourseType == EnumCourseType.Academic)
-                                {
-                                    parameter.AcademicDisplay = null;
-                                    parameter.IeltDisplay = SendMailSetting.Display;
-                                }
-                                else
-                                {
-                                    parameter.AcademicDisplay = SendMailSetting.Display;
-                                    parameter.IeltDisplay = null;
-                                }
-                                await SendStudentCompleteUnit(studentId, parameter, courseType, cancellationToken);
-                            }
-                            else if (numberUnit > 1 && previousCourseUnitMockTest != null)
-                            {
-                                parameter.SenderTemplate = EnumSenderTemplate.Unit2AboveReport;
-
-                                var previousUnitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(p => p.UnitId == previousCourseUnitMockTest.UnitId && p.StudentId == studentId, cancellationToken);
-
-                                var previousLessonResults = await _lessonResultRepository.Queryable.Where(p => p.CourseId == courseId && p.UnitId == previousCourseUnitMockTest.UnitId && p.StudentId == studentId).ToListAsync(cancellationToken); // thời gian bắt đầu
-
-                                var startDate = previousLessonResults.OrderBy(x => x.CreatedDate).FirstOrDefault();// thời gian bắt đầu
-
-                                var featureAccessTimePreviousResult = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel { UserId = userId, StartDate = startDate?.CreatedDate, EndDate = previousUnitResult?.UpdatedDate });
-
-                                var featureAccessTimePrevious = featureAccessTimePreviousResult.Content?.Result;
-
-                                var (skillScoresPrevious, percentPrevious) = await GetUnitSkillScores(previousLessonResults.Select(p => p.Id).ToList(), course.CourseType);
-
-                                foreach (var item in skillScores)
-                                {
-                                    if (skillScoresPrevious.Any(p => p.Skill == item.Skill))
-                                    {
-                                        var skillScore = skillScoresPrevious.FirstOrDefault(p => p.Skill == item.Skill);
-
-                                        var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
-                                        var html = string.Format(CultureInfo.InvariantCulture, compareSkillHtml, icon, skillName, item.Percent, item.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - item.Percent, skillScore?.Percent, SendMailHelper.GetColorText((long)item.Percent, (long)skillScore!.Percent), item.Percent);
-                                        skillScoreHtml += html;
-                                    }
-                                    else
-                                    {
-                                        var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
-                                        var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, item.Percent, item.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - item.Percent, item.Percent);
-                                        skillScoreHtml += html;
-                                    }
-                                }
-                                parameter.SkillScore = skillScoreHtml;
-                                if (course.CourseType == EnumCourseType.Academic)
-                                {
-                                    parameter.IeltDisplay = SendMailSetting.Display;
-                                    parameter.IeltDisplay2 = SendMailSetting.Display;
-                                }
-                                else
-                                {
-                                    parameter.AcademicDisplay = SendMailSetting.Display;
-
-                                    var mockTestResultsPrevious = await _mockTestResultRepository.Queryable.Include(x => x.Unit).Where(p => p.CourseId == course.Id && studentId == p.StudentId && p.UnitId.HasValue && p.Status == EnumResultStatus.Done && p.UnitId != unitId).OrderByDescending(n => n.CreatedDate).ToListAsync(cancellationToken);
-
-                                    var mockTestResultPrevious = mockTestResultsPrevious.FirstOrDefault(p => p.SkillScores != null && p.SkillScores.Any(x => x.Skill == mockTestResult?.SkillScores?.FirstOrDefault()?.Skill));
-
-                                    if (mockTestResultPrevious != null)
-                                    {
-                                        var currentMockTestScore = mockTestResult?.SkillScores?.FirstOrDefault()?.Scores;
-                                        var previousMockTestScore = mockTestResultPrevious.SkillScores?.FirstOrDefault()?.Scores;
-
-                                        var skillMockTestPrevious = mockTestResultPrevious.SkillScores!.FirstOrDefault();
-                                        parameter.IeltDisplay = SendMailSetting.Display;
-                                        var (@class, skillName, icon) = SendMailHelper.ConvertEnum(skillMockTestPrevious!.Skill);
-                                        parameter.Skill = skillName;
-                                        parameter.CurrentUnitTestScore = currentMockTestScore.ToString();
-                                        parameter.PreviousUnitTestScore = previousMockTestScore.ToString();
-                                        parameter.CompareMockTest = currentMockTestScore > previousMockTestScore ? SendMailSetting.Bigger : SendMailSetting.Less;
-                                        parameter.PreviousUnitName = mockTestResultPrevious.Unit?.Name;
-
-                                    }
-                                    else
-                                    {
-                                        parameter.IeltDisplay2 = SendMailSetting.Display;
-                                    }
-                                }
-
-                                var previousLearn = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Learn).Sum(p => p.AccessTime) ?? 0);
-                                var previousSocial = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Social).Sum(p => p.AccessTime) ?? 0);
-                                var previousOther = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? 0);
-
-
-                                parameter.TotalHourPrevious = SendMailHelper.FormatTimeSpanAsClock(previousLearn + previousSocial + previousOther);
-
-                                (parameter.ColorTotal, parameter.CompareTotal) = Compare((currentLearn + currentSocial + currentOther), (previousLearn + previousSocial + previousOther));
-
-
-                                parameter.PreviousLearn = SendMailHelper.FormatTimeSpanAsClock(previousLearn);
-                                parameter.PreviousSocial = SendMailHelper.FormatTimeSpanAsClock(previousSocial);
-                                parameter.PreviousOther = SendMailHelper.FormatTimeSpanAsClock(previousOther);
-
-                                (parameter.ColorLearn,parameter.CompareLearn) = Compare(currentLearn, previousLearn);
-
-                                (parameter.ColorOther, parameter.CompareOther) = Compare(currentOther, previousOther);
-
-                                (parameter.ColorSocial, parameter.CompareSocial) = Compare(currentSocial, previousSocial);
-
-                                await SendStudentCompleteUnit(studentId, parameter, courseType, cancellationToken);
-
-                            }
+                            var parameter = await GetParameter(skillScores, courseId, percent, userId, studentId, unit, lessonResultIds, lessonResults, course, unitId, cancellationToken);
+                            await SendStudentCompleteUnit(studentId, parameter, courseType, cancellationToken);
                         }
                     }
                     unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
@@ -293,9 +85,221 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        private static string GetSubjectEmail(EnumSenderTemplate senderTemplate, EnumCourseType courseType)
+        private async Task<SendStudentCompleteUnitModel> GetParameter(IList<SkillScores> skillScores, Guid courseId, double percent, Guid userId, Guid studentId, Domain.Entities.Unit unit, IList<Guid> lessonResultIds, IList<LessonResult> lessonResults, Course course, Guid unitId, CancellationToken cancellationToken)
         {
-            if(senderTemplate == EnumSenderTemplate.Unit1Report && courseType == EnumCourseType.Academic)
+            int numberUnit = course.CourseUnitMockTests.First(p => p.UnitId == unitId).Number;
+
+            var startUnit = lessonResults.OrderBy(p => p.CreatedDate).FirstOrDefault()?.CreatedDate;
+            var endUnit = DateTime.UtcNow;
+
+            var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel { UserId = userId, StartDate = startUnit, EndDate = endUnit });
+
+            var featureAccessTime = featureAccessTimeResult.Content?.Result;
+
+            CourseUnitMockTest? previousCourseUnitMockTest;
+            CourseUnitMockTest? nextCourseUnitMockTest;
+            try
+            {
+                previousCourseUnitMockTest = GetCourseUnitMockTest(course.CourseUnitMockTests.ToList(), unitId, "UnitId", -1);
+                if (previousCourseUnitMockTest != null && !previousCourseUnitMockTest.UnitId.HasValue)
+                {
+                    previousCourseUnitMockTest = GetCourseUnitMockTest(course.CourseUnitMockTests.ToList(), unitId, "UnitId", -2);
+                }
+            }
+            catch
+            {
+                previousCourseUnitMockTest = null;
+            }
+            try
+            {
+                nextCourseUnitMockTest = GetCourseUnitMockTest(course.CourseUnitMockTests.ToList(), unitId, "UnitId", 1);
+            }
+            catch
+            {
+                nextCourseUnitMockTest = null;
+            }
+
+            var pathSkill = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill);
+            using StreamReader streamReaderSkill = new StreamReader(pathSkill);
+            var skillHtml = await streamReaderSkill.ReadToEndAsync(cancellationToken);
+
+            var pathCompareSkill = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CompareSkill);
+            using StreamReader streamReaderCompareSkill = new StreamReader(pathCompareSkill);
+            var compareSkillHtml = await streamReaderCompareSkill.ReadToEndAsync(cancellationToken);
+
+            var unitTestHtml = string.Empty;
+            var skillTestHtml = string.Empty;
+            var (unitTestResult, skillTestResult) = await GetUnitTestAndSkillTest(lessonResultIds);
+            unitTestResult.ForEach(p =>
+            {
+                var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
+                var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
+                unitTestHtml += html;
+            });
+            skillTestResult.ForEach(p =>
+            {
+                var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
+                var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
+                skillTestHtml += html;
+            });
+
+            var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == course.Id && p.UnitId == unit.Id && p.StudentId == studentId, cancellationToken);
+            var mockTestHtml = string.Empty;
+
+            mockTestResult?.SkillScores.ForEach(p =>
+            {
+                var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
+                var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
+                mockTestHtml += html;
+            });
+
+            var currentLearn = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Learn).Sum(p => p.AccessTime) ?? 0);
+            var currentSocial = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Social).Sum(p => p.AccessTime) ?? 0);
+            var currentOther = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? 0);
+
+            var parameter = new SendStudentCompleteUnitModel
+            {
+                UnitName = unit.Name,
+                StartDate = startUnit?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
+                EndDate = endUnit.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
+                Percent = percent.ToString(CultureInfo.CurrentCulture),
+                TotalHour = SendMailHelper.FormatTimeSpanAsClock(currentLearn + currentSocial + currentOther),
+                TotalLearn = SendMailHelper.FormatTimeSpanAsClock(currentLearn),
+                TotalSocial = SendMailHelper.FormatTimeSpanAsClock(currentSocial),
+                TotalOther = SendMailHelper.FormatTimeSpanAsClock(currentOther),
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                SkillMockTest = mockTestHtml,
+                SkillTest = skillTestHtml,
+                UnitTest = unitTestHtml,
+                UnitDisplay = string.IsNullOrEmpty(unitTestHtml) ? SendMailSetting.Display : null,
+                SkillDisplay = string.IsNullOrEmpty(skillTestHtml) ? SendMailSetting.Display : null
+            };
+
+            if (nextCourseUnitMockTest != null && nextCourseUnitMockTest.UnitId.HasValue)
+            {
+                parameter.NextUnit = nextCourseUnitMockTest.Unit?.Name;
+            }
+            else if (nextCourseUnitMockTest != null && nextCourseUnitMockTest.MockTestId.HasValue)
+            {
+                parameter.NextUnit = nextCourseUnitMockTest.MockTest?.Name;
+            }
+            else if (nextCourseUnitMockTest != null && nextCourseUnitMockTest.FinalTestId.HasValue)
+            {
+                parameter.NextUnit = nextCourseUnitMockTest.FinalTest?.Name;
+            }
+            var skillScoreHtml = string.Empty;
+            if (numberUnit == 1)
+            {
+                parameter.SenderTemplate = EnumSenderTemplate.Unit1Report;
+                skillScores.ForEach(p =>
+                {
+                    var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
+                    var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
+                    skillScoreHtml += html;
+                });
+                parameter.SkillScore = skillScoreHtml;
+                if (course.CourseType == EnumCourseType.Academic)
+                {
+                    parameter.AcademicDisplay = null;
+                    parameter.IeltDisplay = SendMailSetting.Display;
+                }
+                else
+                {
+                    parameter.AcademicDisplay = SendMailSetting.Display;
+                    parameter.IeltDisplay = null;
+                }
+            }
+            else if (numberUnit > 1 && previousCourseUnitMockTest != null)
+            {
+                parameter.SenderTemplate = EnumSenderTemplate.Unit2AboveReport;
+
+                var previousUnitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(p => p.UnitId == previousCourseUnitMockTest.UnitId && p.StudentId == studentId, cancellationToken);
+
+                var previousLessonResults = await _lessonResultRepository.Queryable.Where(p => p.CourseId == courseId && p.UnitId == previousCourseUnitMockTest.UnitId && p.StudentId == studentId).ToListAsync(cancellationToken);
+
+                var startDate = previousLessonResults.OrderBy(x => x.CreatedDate).FirstOrDefault();
+
+                var featureAccessTimePreviousResult = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel { UserId = userId, StartDate = startDate?.CreatedDate, EndDate = previousUnitResult?.UpdatedDate });
+
+                var featureAccessTimePrevious = featureAccessTimePreviousResult.Content?.Result;
+
+                var (skillScoresPrevious, percentPrevious) = await GetUnitSkillScores(previousLessonResults.Select(p => p.Id).ToList(), course.CourseType);
+
+                foreach (var item in skillScores)
+                {
+                    if (skillScoresPrevious.Any(p => p.Skill == item.Skill))
+                    {
+                        var skillScore = skillScoresPrevious.FirstOrDefault(p => p.Skill == item.Skill);
+
+                        var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
+                        var html = string.Format(CultureInfo.InvariantCulture, compareSkillHtml, icon, skillName, item.Percent, item.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - item.Percent, skillScore?.Percent, SendMailHelper.GetColorText((long)item.Percent, (long)skillScore!.Percent), item.Percent);
+                        skillScoreHtml += html;
+                    }
+                    else
+                    {
+                        var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
+                        var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, item.Percent, item.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - item.Percent, item.Percent);
+                        skillScoreHtml += html;
+                    }
+                }
+                parameter.SkillScore = skillScoreHtml;
+                if (course.CourseType == EnumCourseType.Academic)
+                {
+                    parameter.IeltDisplay = SendMailSetting.Display;
+                    parameter.IeltDisplay2 = SendMailSetting.Display;
+                }
+                else
+                {
+                    parameter.AcademicDisplay = SendMailSetting.Display;
+
+                    var mockTestResultsPrevious = await _mockTestResultRepository.Queryable.Include(x => x.Unit).Where(p => p.CourseId == course.Id && studentId == p.StudentId && p.UnitId.HasValue && p.Status == EnumResultStatus.Done && p.UnitId != unitId).OrderByDescending(n => n.CreatedDate).ToListAsync(cancellationToken);
+
+                    var mockTestResultPrevious = mockTestResultsPrevious.FirstOrDefault(p => p.SkillScores != null && p.SkillScores.Any(x => x.Skill == mockTestResult?.SkillScores?.FirstOrDefault()?.Skill));
+
+                    if (mockTestResultPrevious != null)
+                    {
+                        var currentMockTestScore = mockTestResult?.SkillScores?.FirstOrDefault()?.Scores;
+                        var previousMockTestScore = mockTestResultPrevious.SkillScores?.FirstOrDefault()?.Scores;
+
+                        var skillMockTestPrevious = mockTestResultPrevious.SkillScores!.FirstOrDefault();
+                        parameter.IeltDisplay = SendMailSetting.Display;
+                        var (@class, skillName, icon) = SendMailHelper.ConvertEnum(skillMockTestPrevious!.Skill);
+                        parameter.Skill = skillName;
+                        parameter.CurrentUnitTestScore = currentMockTestScore.ToString();
+                        parameter.PreviousUnitTestScore = previousMockTestScore.ToString();
+                        parameter.CompareMockTest = currentMockTestScore > previousMockTestScore ? SendMailSetting.Less : (currentMockTestScore == previousMockTestScore ? SendMailSetting.Equal : SendMailSetting.Bigger);
+                        parameter.PreviousUnitName = mockTestResultPrevious.Unit?.Name;
+                    }
+                    else
+                    {
+                        parameter.IeltDisplay2 = SendMailSetting.Display;
+                    }
+                }
+
+                var previousLearn = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Learn).Sum(p => p.AccessTime) ?? 0);
+                var previousSocial = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Social).Sum(p => p.AccessTime) ?? 0);
+                var previousOther = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTimePrevious?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? 0);
+
+                parameter.TotalHourPrevious = SendMailHelper.FormatTimeSpanAsClock(previousLearn + previousSocial + previousOther);
+
+                (parameter.ColorTotal, parameter.CompareTotal) = Compare((currentLearn + currentSocial + currentOther), (previousLearn + previousSocial + previousOther));
+
+                parameter.PreviousLearn = SendMailHelper.FormatTimeSpanAsClock(previousLearn);
+                parameter.PreviousSocial = SendMailHelper.FormatTimeSpanAsClock(previousSocial);
+                parameter.PreviousOther = SendMailHelper.FormatTimeSpanAsClock(previousOther);
+
+                (parameter.ColorLearn, parameter.CompareLearn) = Compare(currentLearn, previousLearn);
+
+                (parameter.ColorOther, parameter.CompareOther) = Compare(currentOther, previousOther);
+
+                (parameter.ColorSocial, parameter.CompareSocial) = Compare(currentSocial, previousSocial);
+            }
+            return parameter;
+        }
+
+        private static string GetSubjectEmail(EnumSenderTemplate senderTemplate, EnumCourseType courseType, string? compareMockTest)
+        {
+            if (senderTemplate == EnumSenderTemplate.Unit1Report && courseType == EnumCourseType.Academic)
             {
                 return SenderSettings.TitleUnit1;
             }
@@ -303,13 +307,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 return SenderSettings.TitleUnit2;
             }
-            else if (senderTemplate == EnumSenderTemplate.Unit1Report && courseType == EnumCourseType.Ielts)
+            else if (senderTemplate == EnumSenderTemplate.Unit1Report && courseType == EnumCourseType.Ielts && string.IsNullOrEmpty(compareMockTest))
             {
                 return SenderSettings.TitleIeltUnit1;
             }
-            else
+            else if (senderTemplate == EnumSenderTemplate.Unit2AboveReport && courseType == EnumCourseType.Ielts && string.IsNullOrEmpty(compareMockTest))
             {
                 return SenderSettings.TitleIeltUnit2;
+            }
+            else
+            {
+                return SenderSettings.TitleIeltUnit3;
             }
         }
 
@@ -329,7 +337,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        private static CourseUnitMockTest? GetCourseUnitMockTest(IList<CourseUnitMockTest>? courseUnitMockTests, Guid objectId, string? type , int indexNext)
+        private static CourseUnitMockTest? GetCourseUnitMockTest(IList<CourseUnitMockTest>? courseUnitMockTests, Guid objectId, string? type, int indexNext)
         {
             if (courseUnitMockTests != null && courseUnitMockTests.Any())
             {
@@ -354,7 +362,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var skillTestSkillScores = await GetVideoTestSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest);
 
             return (unitTestSkillScores, skillTestSkillScores);
-
         }
 
         public async Task<List<SkillScores>> GetVideoTestSkillScores(IList<Guid>? lessonResultIds, EnumTimeCodeType type)
@@ -407,19 +414,18 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return (groupedSkillScores, (int)percents.Sum());
         }
 
-        private async Task SendStudentCompleteUnit(Guid studentId, SendStudentCompleteUnitModel model,EnumCourseType courseType, CancellationToken cancellationToken)
+        private async Task SendStudentCompleteUnit(Guid studentId, SendStudentCompleteUnitModel model, EnumCourseType courseType, CancellationToken cancellationToken)
         {
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
             var student = studentResult.Content?.Result?.FirstOrDefault();
             var sendResult = await _mediator.Send(new SenderCommand
             {
                 Email = student?.Human?.Email,
-                Subject = GetSubjectEmail(model.SenderTemplate, courseType),
+                Subject = GetSubjectEmail(model.SenderTemplate, courseType, model.CompareMockTest),
                 Params = model,
                 Template = model.SenderTemplate,
             }, cancellationToken).ConfigureAwait(false);
         }
-
 
         public async Task DoQuestBoard(Guid userId, Guid unitId, Guid courseId, CancellationToken cancellationToken)
         {
