@@ -4,6 +4,7 @@
 #For more information, please see https://aka.ms/containercompat
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+RUN apt update && apt install ffmpeg -y 
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
