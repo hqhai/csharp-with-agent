@@ -53,8 +53,9 @@ namespace Fsel.Shared.Helpers
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"MediaHelper.GetMediaDurationAsync: {ex}");
                 return null;
             }
         }
