@@ -73,6 +73,16 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                     data = data.Where(p => long.TryParse(p.Price, out long priceValue) && priceValue <= request.Max).ToList();
                 }
 
+                if (request.IsPopular.HasValue && request.IsPopular == true)
+                {
+                    data = data.OrderByDescending(x => long.TryParse(x.View, out long viewValue) ? viewValue : 0).ToList();
+                }
+
+                if (request.IsLatest.HasValue && request.IsLatest == true)
+                {
+                    data = data.OrderByDescending(x => long.TryParse(x.Id, out long id) ? id : 0).ToList();
+                }
+
                 int totalItem = data.Count;
                 var lists = data
                         .ApplySortAndPaging(request)
