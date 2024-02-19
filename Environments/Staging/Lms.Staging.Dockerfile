@@ -9,6 +9,7 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+RUN apt update && apt install ffmpeg -y 
 WORKDIR /src
 COPY ["Services/Fsel.Course/Fsel.Course.Lms.Api/Fsel.Course.Lms.Api.csproj", "Services/Fsel.Course/Fsel.Course.Lms.Api/"]
 COPY ["Services/Fsel.Course/Fsel.Course.Application/Fsel.Course.Application.csproj", "Services/Fsel.Course/Fsel.Course.Application/"]
