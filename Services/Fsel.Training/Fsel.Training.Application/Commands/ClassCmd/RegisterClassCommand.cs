@@ -16,6 +16,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Nest;
 
     public class RegisterClassCommand : RegisterClassCommandModel, IRequest<MethodResult<ClassModel>>
     {
@@ -51,14 +52,14 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                var classnew = await _classRepository.Queryable.Where(p => p.Status == EnumClassStatus.New).Include(x => x.ClassStudents).OrderBy(x => x.CreatedDate)
-                           .FirstOrDefaultAsync(x => x.CourseId == request.CourseId, cancellationToken);
+                var classnew = await _classRepository.Queryable.Where(p => p.Status == EnumClassStatus.New && p.CourseId == request.CourseId).Include(x => x.ClassStudents).OrderByDescending(x => x.CreatedDate)
+                           .FirstOrDefaultAsync(cancellationToken);
 
                 if (classnew == null)
                 {
                     classnew = await CreateClassAsync(code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
                 }
-                else if (classnew.ClassStudents.Count > 99 || classnew.Status == EnumClassStatus.Active)
+                else
                 {
                     var code = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
                     classnew = await CreateClassAsync(code.Result, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays).ConfigureAwait(false);
@@ -87,13 +88,16 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
         private async Task<Class> CreateClassAsync(string? code, Guid courseId, Guid packageId, Guid? liveTimeFrameId, IList<DayOfWeek>? liveDays)
         {
-            var newClass = new Class();
-            newClass.Code = code;
-            newClass.Name = code;
-            newClass.CourseId = courseId;
-            newClass.PackageId = packageId;
-            newClass.LiveTimeFrameId = liveTimeFrameId;
-            newClass.LiveDays = liveDays;
+            var newClass = new Class
+            {
+                Code = code,
+                Name = code,
+                CourseId = courseId,
+                Status = EnumClassStatus.Active,
+                PackageId = packageId,
+                LiveTimeFrameId = liveTimeFrameId,
+                LiveDays = liveDays,
+            };
             _classRepository.Add(newClass);
             await _classRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return newClass;

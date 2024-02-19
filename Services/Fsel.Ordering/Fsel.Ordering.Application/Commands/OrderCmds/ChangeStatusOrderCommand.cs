@@ -133,7 +133,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var orders = await _orderRepository.Queryable.Where(p => p.ClassId == order.ClassId && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
+                //var orders = await _orderRepository.Queryable.Where(p => p.ClassId == order.ClassId && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
                 //if (orders.Count == 12)
                 //{
                 //    var activeClassResult = await _trainingService.ActiveClass(order.ClassId);
@@ -146,15 +146,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
                 #region for pilot
 
-                if (orders.Count == 100)
-                {
-                    var activeClassResult = await _trainingService.ActiveClass(order.ClassId);
-                    if (!activeClassResult.IsSuccessStatusCode)
-                    {
-                        methodResult.AddError(activeClassResult.Error);
-                        return methodResult;
-                    }
-                }
+                //if (orders.Count == 100)
+                //{
+                //    var activeClassResult = await _trainingService.ActiveClass(order.ClassId);
+                //    if (!activeClassResult.IsSuccessStatusCode)
+                //    {
+                //        methodResult.AddError(activeClassResult.Error);
+                //        return methodResult;
+                //    }
+                //}
 
                 #endregion for pilot
 
