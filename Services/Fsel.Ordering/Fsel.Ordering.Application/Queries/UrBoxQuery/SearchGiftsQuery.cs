@@ -2,7 +2,6 @@
 
 namespace Fsel.Ordering.Application.Queries.UrBoxQuery
 {
-    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -73,12 +72,11 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                     data = data.Where(p => long.TryParse(p.Price, out long priceValue) && priceValue <= request.Max).ToList();
                 }
 
-                if (request.IsPopular.HasValue && request.IsPopular == true)
+                if (request.PopularOrLatest.HasValue && request.PopularOrLatest == true)
                 {
                     data = data.OrderByDescending(x => long.TryParse(x.View, out long viewValue) ? viewValue : 0).ToList();
                 }
-
-                if (request.IsLatest.HasValue && request.IsLatest == true)
+                else if (request.PopularOrLatest.HasValue && request.PopularOrLatest == false)
                 {
                     data = data.OrderByDescending(x => long.TryParse(x.Id, out long id) ? id : 0).ToList();
                 }

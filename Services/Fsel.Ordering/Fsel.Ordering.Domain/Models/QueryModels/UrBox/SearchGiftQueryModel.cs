@@ -9,7 +9,8 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.UrBox
         public int? CategoryId { get; set; }
         public long? Min { get; set; }
         public long? Max { get; set; }
-        public bool? IsPopular { get; set; }
-        public bool? IsLatest { get; set; }
+
+        // true là popular, false là latest
+        public bool? PopularOrLatest { get; set; }
     }
 }
