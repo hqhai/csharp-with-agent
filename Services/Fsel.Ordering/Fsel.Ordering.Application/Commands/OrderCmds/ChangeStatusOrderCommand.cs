@@ -19,7 +19,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class ChangeStatusOrderCommand : ChangeStatusOrderCommandModel, IRequest<MethodResult<bool>>
     {

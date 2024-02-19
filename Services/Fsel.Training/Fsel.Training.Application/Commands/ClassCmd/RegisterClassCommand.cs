@@ -16,7 +16,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Nest;
 
     public class RegisterClassCommand : RegisterClassCommandModel, IRequest<MethodResult<ClassModel>>
     {
@@ -52,18 +51,16 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                var classnew = await _classRepository.Queryable.Where(p => p.Status == EnumClassStatus.New && p.CourseId == request.CourseId).Include(x => x.ClassStudents).OrderByDescending(x => x.CreatedDate)
-                           .FirstOrDefaultAsync(cancellationToken);
-
-                if (classnew == null)
+                var classActive = await _classRepository.Queryable.Where(p => p.CourseId == request.CourseId).Include(x => x.ClassStudents).FirstOrDefaultAsync(cancellationToken);
+                if (classActive == null)
                 {
-                    classnew = await CreateClassAsync(code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
+                    classActive = await CreateClassAsync(code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
                 }
-                else
-                {
-                    var code = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
-                    classnew = await CreateClassAsync(code.Result, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays).ConfigureAwait(false);
-                }
+                //else
+                //{
+                //    var code = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
+                //    classActive = await CreateClassAsync(code.Result, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays).ConfigureAwait(false);
+                //}
                 var student = await _userService.GetStudentByUserIdAsync(request.UserId ?? default);
                 if (student == null)
                 {
@@ -72,14 +69,14 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 }
                 var studentId = student?.Content?.Result?.Id;
 
-                var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ClassId == classnew.Id, cancellationToken);
+                var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ClassId == classActive.Id, cancellationToken);
                 if (classStudent == null)
                 {
-                    await UpdateClassAsync(classnew, studentId ?? default);
+                    await UpdateClassAsync(classActive, studentId ?? default);
                 }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<ClassModel>(classnew);
+                methodResult.Result = _mapper.Map<ClassModel>(classActive);
                 return methodResult;
             });
 
