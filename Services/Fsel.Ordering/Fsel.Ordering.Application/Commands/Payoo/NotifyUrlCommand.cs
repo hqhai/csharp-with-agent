@@ -16,10 +16,12 @@ namespace Fsel.Ordering.Application.Commands.Payoo
     public class NotifyUrlCommand : NotifyUrlCommandModel, IRequest<MethodResult<NotifyUrlModel>>
     {
     }
+
     public class NotifyUrlCommandHandler : IRequestHandler<NotifyUrlCommand, MethodResult<NotifyUrlModel>>
     {
         private readonly AppSetting _appSetting;
         private readonly ILogger<NotifyUrlCommand> _logger;
+
         public NotifyUrlCommandHandler(AppSetting appSetting, ILogger<NotifyUrlCommand> logger)
         {
             _appSetting = appSetting;
@@ -35,11 +37,11 @@ namespace Fsel.Ordering.Application.Commands.Payoo
 
             if (secureHash != request.SecureHash)
             {
-                _logger.LogInformation($"ReturnCode: 1");
+                _logger.LogError($"ReturnCode: 1");
                 methodResult.Result = new NotifyUrlModel { ReturnCode = 1, Description = string.Empty };
                 return methodResult;
             }
-            _logger.LogInformation($"ReturnCode: 0");
+            _logger.LogError($"ReturnCode: 0");
             methodResult.Result = new NotifyUrlModel { ReturnCode = 0, Description = string.Empty };
             return methodResult;
         }
