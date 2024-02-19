@@ -274,10 +274,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 videoTimeCodeResult.SkillScores = skillScores;
                 videoTimeCodeResult.SkillScoreUngraded = skillScoreUngradeds;
             }
+            else if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+            {
+                videoTimeCodeResult.Status = EnumResultStatus.Process;
+            }
             if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
-                videoTimeCodeResult.Status = EnumResultStatus.Process;
             }
             else
             {
@@ -311,16 +314,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             var getTokenQuery = new GetTokenQueryModel
             {
-                Feature = EnumTokenFeature.Learn,
                 CourseType = courseType
             };
 
             if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
             {
+                getTokenQuery.Feature = EnumTokenFeature.Learn;
                 getTokenQuery.Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit;
             }
             else
             {
+                getTokenQuery.Feature = EnumTokenFeature.Test;
                 getTokenQuery.Mission = videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest ? EnumTokenMission.UnitTest : EnumTokenMission.SkillTest;
             }
             var tokenConfigResults = await _systemService.GetTokenConfigAsync(getTokenQuery);
