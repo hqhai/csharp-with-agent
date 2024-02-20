@@ -135,9 +135,10 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                         var tokenConfigFocusModes = tokenConfigResult.GetTokenConfig<IList<TokenConfigFocusModes>>();
                         var targetNumber = tokenConfigFocusModes?.Where(x => x.FocusTimeId == systemConfigMap.Id)?.Max(x => x.BaseValue);
 
-                        if (targetNumber.HasValue)
+                        if (targetNumber.HasValue && !studentFocusTime.IsReceivedToken)
                         {
                             student.NumberOfToken += targetNumber.Value;
+                            studentFocusTime.IsReceivedToken = true;
                         }
                         _studentRepository.Update(student);
                         await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
