@@ -156,11 +156,16 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 skillScores.Single().CorrectCount = correcCount;
                 skillScores.Single().Scores = averageScore;
                 sectionGroupResult.CorrectCount = correcCount;
+
+                mockTestResult.SkillScores = skillScores;
+                mockTestResult.CorrectCount = correcCount;
                 if (checkSkillMockTest)
                 {
-                    mockTestResult.SkillScores = skillScores;
-                    mockTestResult.CorrectCount = correcCount;
-                    mockTestResult.TokenFirstTime += token;
+                    mockTestResult.TokenFirstTime += sectionGroupResult.TokenFirstTime;
+                }
+                else
+                {
+                    mockTestResult.TokenFirstTime = sectionGroupResult.TokenFirstTime;
                 }
             }
 

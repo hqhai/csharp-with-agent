@@ -364,7 +364,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 return homeWorkAnswers.Count(x => x.IsCorrect == true);
             }
-            return homeWorkAnswers?.Count ?? default;
+            return homeWorkAnswers?.Sum(x => x.CorrectCount) ?? default;
         }
     }
 }

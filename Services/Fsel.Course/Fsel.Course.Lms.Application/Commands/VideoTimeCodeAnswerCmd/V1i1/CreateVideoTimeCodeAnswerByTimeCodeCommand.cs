@@ -258,8 +258,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
             if (isSubmit)
             {
-                var numberOfCorrect = await _videoConverter.UpdateVideoAnswers(videoTimeCode, videoTimeCodeResult, isDoneTimeCode);
-                videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode, courseType, numberOfCorrect);
+                var correctCount = await _videoConverter.UpdateVideoAnswers(videoTimeCode, videoTimeCodeResult, isDoneTimeCode);
+                videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode, courseType, correctCount);
 
                 var (skillScoreUngradeds, skillScores, isDone) = await GetSkillScoresAsync(videoTimeCodeResult, cancellationToken);
                 if (skillScoreUngradeds != null && skillScoreUngradeds.Any())
@@ -297,15 +297,15 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             return videoTimeCodeResult;
         }
 
-        private async Task<VideoTimeCodeResult> GetTokenVideoTimeCodeResult(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, EnumCourseType courseType, long numberOfCorrect)
+        private async Task<VideoTimeCodeResult> GetTokenVideoTimeCodeResult(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, EnumCourseType courseType, long correctCount)
         {
             if (videoTimeCodeResult.Status == EnumResultStatus.New)
             {
-                videoTimeCodeResult.TokenFirstTime = (int)(await GetTokenConfig(videoTimeCode, videoTimeCodeResult, courseType) * numberOfCorrect);
+                videoTimeCodeResult.TokenFirstTime = (int)(await GetTokenConfig(videoTimeCode, videoTimeCodeResult, courseType) * correctCount);
             }
             else
             {
-                videoTimeCodeResult.TokenLastTime = (int)(await GetTokenConfig(videoTimeCode, videoTimeCodeResult, courseType) * numberOfCorrect);
+                videoTimeCodeResult.TokenLastTime = (int)(await GetTokenConfig(videoTimeCode, videoTimeCodeResult, courseType) * correctCount);
             }
             return videoTimeCodeResult;
         }
