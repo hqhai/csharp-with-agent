@@ -78,11 +78,15 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             }
             if (videoResult.CurrentVideoTimeCodeId.HasValue && videoResult.CurrentVideoTimeCodeId != request.VideoTimeCodeId)
             {
-                var currentVideoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoTimeCodeId == videoResult.CurrentVideoTimeCodeId && x.VideoResultId == videoResult.Id, cancellationToken);
-                if (currentVideoTimeCodeResult == null || currentVideoTimeCodeResult.Status != EnumResultStatus.Done)
+                var videoTimeCodeResultNow = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoTimeCodeId == request.VideoTimeCodeId && x.VideoResultId == videoResult.Id, cancellationToken);
+                if (videoTimeCodeResultNow == null || videoTimeCodeResultNow.Status != EnumResultStatus.Done)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodePreviousNotDone), nameof(currentVideoTimeCodeResult));
-                    return methodResult;
+                    var currentVideoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoTimeCodeId == videoResult.CurrentVideoTimeCodeId && x.VideoResultId == videoResult.Id, cancellationToken);
+                    if (currentVideoTimeCodeResult == null || currentVideoTimeCodeResult.Status != EnumResultStatus.Done)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodePreviousNotDone), nameof(currentVideoTimeCodeResult));
+                        return methodResult;
+                    }
                 }
             }
 
