@@ -151,6 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
             else
             {
+                skillScore = skillScores.Single();
                 int correcCount = (int)CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore);
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
                 skillScores.Single().CorrectCount = correcCount;

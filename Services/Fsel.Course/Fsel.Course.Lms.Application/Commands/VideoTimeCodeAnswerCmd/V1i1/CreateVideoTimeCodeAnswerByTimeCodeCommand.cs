@@ -370,7 +370,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 return methodResult;
             }
 
-            videoResult.CurrentVideoTimeCodeId = videoTimeCode.Id;
             var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
             var questions = new List<Question>();
             if (questionIds.Any())
@@ -388,17 +387,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     return methodResult;
                 }
             }
-
-            #region Chặn Time Code Chưa Done
-
-            //var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.Id == videoResult.CurrentVideoTimeCodeId).FirstOrDefaultAsync(cancellationToken);
-            //if (videoTimeCode != null && videoTimeCode.Id != videoTimeCodeQuestion?.Id && videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Process))
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodePreviousNotDone));
-            //    return methodResult;
-            //}
-
-            #endregion Chặn Time Code Chưa Done
 
             methodResult.Result = (videoResult, videoTimeCode, videoTimeCodeResult, questions);
             return methodResult;
