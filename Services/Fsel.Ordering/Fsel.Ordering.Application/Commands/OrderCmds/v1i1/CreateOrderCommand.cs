@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -100,7 +101,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var course = courseResult.Content?.Result;
 
             Order order = _mapper.Map<Order>(request);
-            order.Country = "Việt Nam";
+            order.Country = EnumZoneRegion.Vietnam.ToString();
             order.Status = EnumOrderStatus.New;
             order.UserId = _authContext.CurrentUserId;
             order.Code = code;
