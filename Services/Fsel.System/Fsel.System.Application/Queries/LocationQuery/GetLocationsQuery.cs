@@ -3,19 +3,22 @@
 namespace Fsel.System.Application.Queries.LocationQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetLocationsQuery : IRequest<MethodResult<IList<LocationModel>>>
+    public class GetLocationsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<LocationModel>>>
     {
         public EnumLocationType LocationType { get; set; }
         public Guid? ParentId { get; set; }
     }
 
-    public class GetLocationsQueryHandler : IRequestHandler<GetLocationsQuery, MethodResult<IList<LocationModel>>>
+    public class GetLocationsQueryHandler : IRequestHandler<GetLocationsQuery, MethodResult<PagingItemsModel<LocationModel>>>
     {
         private readonly ILocationRepository _locationRepository;
 
@@ -24,22 +27,34 @@ namespace Fsel.System.Application.Queries.LocationQuery
             _locationRepository = locationRepository;
         }
 
-        public async Task<MethodResult<IList<LocationModel>>> Handle(GetLocationsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<LocationModel>>> Handle(GetLocationsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<LocationModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<LocationModel>>();
 
-            var locations = await _locationRepository.Queryable.Where(p => p.Type == request.LocationType).ToListAsync(cancellationToken);
-            if (request.ParentId.HasValue)
-            {
-                locations = locations.Where(p => p.ParentId == request.ParentId).ToList();
-            }
-            methodResult.Result = locations.Select(p => new LocationModel
+            var locations = _locationRepository.Queryable.Where(p => p.Type == request.LocationType).Select(p => new LocationModel()
             {
                 Id = p.Id,
                 Code = p.UrBoxId,
                 Name = p.Name,
-            }).ToList();
+                ParentId = p.ParentId,
+                CreatedDate = p.CreatedDate,
+            });
+
+            if (request.ParentId.HasValue)
+            {
+                locations = locations.Where(p => p.ParentId == request.ParentId);
+            }
+            int totalItem = await locations.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            var lists = await locations
+                    .ApplySortAndPaging(request)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+            methodResult.Result = new PagingItemsModel<LocationModel>(lists, request, totalItem);
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

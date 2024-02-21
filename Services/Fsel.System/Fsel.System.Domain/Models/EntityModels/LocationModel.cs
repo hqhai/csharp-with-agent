@@ -11,6 +11,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public int ProvinceCode { get; set; }
         public int DistrictCode { get; set; }
         public EnumLocationType? Type { get; set; }
+        public Guid? ParentId { get; set; }
         public string? Name { get; set; }
     }
 }
