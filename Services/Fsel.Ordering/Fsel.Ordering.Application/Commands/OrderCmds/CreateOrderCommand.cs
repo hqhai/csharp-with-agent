@@ -19,7 +19,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,12 +31,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
-        private readonly MediatR.IMediator _mediator;
+        private readonly IMediator _mediator;
         private readonly IUserService _userService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
-        private readonly AuthContext _authContext;
+        private const int NumberTrialDays = 14; // số ngày dùng thử chương trình là 14 ngày.
 
         public CreateOrderCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
@@ -55,7 +54,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _notificationMessagePublisher = notificationMessagePublisher;
             _trainingService = trainingService;
             _packageRepository = packageRepository;
-            _authContext = authContext;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -105,7 +103,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
+
             Order order = _mapper.Map<Order>(request);
+
+
+
             order.Status = EnumOrderStatus.New;
             order.UserId = request.UserId;
             order.Code = code;
@@ -114,7 +116,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             order.DiscountPercent = 5;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
-            order.ClassId = classnew.Content?.Result.Id ?? default;
+
+#if DEBUG
+            if (request.IsTrial || true)
+            {
+                DateTime expireTrialDate = DateTime.UtcNow.AddDays(NumberTrialDays);
+                order.ExpireDate = expireTrialDate;
+                order.Status = EnumOrderStatus.Payment;
+            }
+#endif
+
+            // order.ClassId = classnew.Content?.Result.Id ?? default;
             if (!order.IsValid())
             {
                 methodResult.AddErrorBadRequest(order.ErrorMessages);
@@ -125,15 +137,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             {
                 order = _orderRepository.Add(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
-                {
-                    Roles = new List<EnumRole> { EnumRole.Admin },
-                    ObjectId = order.Id,
-                    Type = EnumNotificationType.Text,
-                    Content = EnumNotificationContent.OrderCreate,
-                    SenderId = order.CreatedUserId,
-                    PlatformCode = EnumPlatformCode.LMSAdmin
-                }, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(order);
                 return methodResult;

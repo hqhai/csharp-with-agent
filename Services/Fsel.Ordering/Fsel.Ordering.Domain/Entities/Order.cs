@@ -68,6 +68,8 @@ namespace Fsel.Ordering.Domain.Entities
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public decimal TotalPrice { get; set; }
 
+        public DateTime? ExpireDate { get; set; }
+
         public Guid CourseId { get; set; }
         public Package? Package { get; set; }
         public Guid PackageId { get; set; }
