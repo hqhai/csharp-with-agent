@@ -21,6 +21,7 @@ namespace Fsel.System.Infrastructure.ValueSettings
     public class GoogleSheetConfig
     {
         public string? I18NSpreadSheetId { get; set; }
+        public string? LocationSpreadSheetId { get; set; }
     }
 
     public class Services : BaseServices
