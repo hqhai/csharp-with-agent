@@ -3,7 +3,6 @@
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Ordering.Domain.Enums;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Ordering.Domain.Entities
@@ -23,16 +22,36 @@ namespace Fsel.Ordering.Domain.Entities
         public string? FullName { get; set; }
 
         /// <summary>
+        /// Email Người dùng
+        /// </summary>
+        public string? Email { get; set; }
+
+        /// <summary>
+        /// SDT Người dùng
+        /// </summary>
+        public string? PhoneNumber { get; set; }
+
+        /// <summary>
         /// Quốc gia
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Country { get; set; }
 
         /// <summary>
-        /// Giá Khóa Học
+        /// Địa chỉ
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Address { get; set; }
+
+        /// <summary>
+        /// Id tỉnh, thành phố
+        /// </summary>
+        public Guid? ProvinceId { get; set; }
+
+        /// <summary>
+        /// Id quận, huyện
+        /// </summary>
+        public Guid? DistrictId { get; set; }
 
         /// <summary>
         /// Trạng thái Đơn hàng
@@ -67,6 +86,12 @@ namespace Fsel.Ordering.Domain.Entities
         /// </summary>
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public decimal TotalPrice { get; set; }
+
+        /// <summary>
+        /// Thời gian Học
+        /// </summary>
+        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int ExpireDate { get; set; }
 
         public Guid CourseId { get; set; }
         public Package? Package { get; set; }

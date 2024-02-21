@@ -3,15 +3,17 @@
 namespace Fsel.Ordering.Application.Commands.Payoo
 {
     using System.Globalization;
-    using System.Security.Cryptography;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Services.PayooService.Models;
+    using Fsel.Ordering.Application.Services.TrainingService;
+    using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.Extensions.Logging;
 
@@ -23,13 +25,17 @@ namespace Fsel.Ordering.Application.Commands.Payoo
     {
         private readonly AppSetting _appSetting;
         private readonly ILogger<NotifyUrlCommand> _logger;
-        private readonly IUrBoxTransactionRepository _urBoxTransactionRepository;
+        private readonly IOrderTransactionRepository _orderTransactionRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly ITrainingService _trainingService;
 
-        public NotifyUrlCommandHandler(AppSetting appSetting, ILogger<NotifyUrlCommand> logger, IUrBoxTransactionRepository urBoxTransactionRepository)
+        public NotifyUrlCommandHandler(AppSetting appSetting, ILogger<NotifyUrlCommand> logger, IOrderTransactionRepository orderTransactionRepository, IOrderRepository orderRepository, ITrainingService trainingService)
         {
             _appSetting = appSetting;
             _logger = logger;
-            _urBoxTransactionRepository = urBoxTransactionRepository;
+            _orderTransactionRepository = orderTransactionRepository;
+            _orderRepository = orderRepository;
+            _trainingService = trainingService;
         }
 
         public async Task<MethodResult<NotifyUrlModel>> Handle(NotifyUrlCommand request, CancellationToken cancellationToken)
@@ -37,50 +43,69 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<NotifyUrlModel>();
 
-            var secureHash = ValidateSecureHash(_appSetting.PayooConfig?.Key ?? string.Empty, request.ResponseData ?? string.Empty, _appSetting.PayooConfig?.PayooIP ?? string.Empty);
-            var response = await _urBoxTransactionRepository.GetByIdAsync(new Guid("ed24380c-407c-4790-a450-093edd5c1f57"));
-            if (response == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
+            var secureHash = EncodeHelper.SecureHash(_appSetting.PayooConfig?.Key + request.ResponseData + _appSetting.PayooConfig?.PayooIP);
 
-            response.ResponseBody = request;
-
-            if (secureHash != request.SecureHash)
+            if (secureHash.ToLower(CultureInfo.CurrentCulture) != request.SecureHash?.ToLower(CultureInfo.CurrentCulture))
             {
-                _logger.LogError($"ReturnCode: 1");
-                _urBoxTransactionRepository.Update(response);
-                await _urBoxTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.Result = new NotifyUrlModel { ReturnCode = 1, Description = string.Empty };
-                return methodResult;
             }
-            _urBoxTransactionRepository.Update(response);
-            await _urBoxTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            _logger.LogError($"ReturnCode: 0");
-            methodResult.Result = new NotifyUrlModel { ReturnCode = 0, Description = string.Empty };
-            return methodResult;
-        }
-
-        public string ValidateSecureHash(string checksumKey, string responseData, string payooIP)
-        {
-            try
+            else
             {
-                string stringToHash = checksumKey + responseData + payooIP;
-                byte[] dataBytes = Encoding.UTF8.GetBytes(stringToHash);
-                byte[] hashValue = SHA512.HashData(dataBytes);
-                StringBuilder builder = new StringBuilder();
-                foreach (byte b in hashValue)
+                var paymentInfo = request.ResponseData.Deserialize<PaymentInfoResponseModel>();
+
+                if (paymentInfo == null || string.IsNullOrEmpty(paymentInfo.OrderNo))
                 {
-                    builder.Append(b.ToString("x2", CultureInfo.InvariantCulture));
+                    _logger.LogError("Payment Info Null");
+                    return methodResult;
                 }
 
-                return builder.ToString();
+                Guid orderTransactionId;
+                try
+                {
+                    orderTransactionId = Guid.Parse(paymentInfo.OrderNo);
+                }
+                catch (FormatException)
+                {
+                    _logger.LogError($"OrderNo Malformed: {paymentInfo.OrderNo}");
+                    return methodResult;
+                }
+
+                var orderTransaction = await _orderTransactionRepository.GetByIdAsync(orderTransactionId);
+                if (orderTransaction == null)
+                {
+                    _logger.LogError($"OrderTransaction Null: {paymentInfo.OrderNo}");
+                    return methodResult;
+                }
+
+                orderTransaction.Status = paymentInfo.PaymentStatus != 1 ? EnumOrderTransactionStatus.Fail : EnumOrderTransactionStatus.Success;
+                orderTransaction.ResponseBody = paymentInfo;
+                _orderTransactionRepository.Update(orderTransaction);
+                await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                var order = await _orderRepository.GetByIdAsync(orderTransaction.OrderId ?? default);
+                if (order == null)
+                {
+                    _logger.LogError($"Order Null: {paymentInfo.OrderNo}");
+                    return methodResult;
+                }
+
+                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId });
+
+                if (!addStudentIntoClassResult.IsSuccessStatusCode)
+                {
+                    _logger.LogError($"Add Student into class error: {addStudentIntoClassResult.StatusCode}, OrderId: {order.Id}");
+                    return methodResult;
+                }
+
+                order.Status = EnumOrderStatus.Payment;
+                order.ClassId = addStudentIntoClassResult.Content?.Result ?? default;
+                _orderRepository.Update(order);
+                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.Result = new NotifyUrlModel { ReturnCode = 0, Description = string.Empty };
             }
-            catch
-            {
-                return string.Empty;
-            }
+
+            return methodResult;
         }
     }
 }

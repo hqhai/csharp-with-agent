@@ -24,5 +24,8 @@ namespace Fsel.Ordering.Application.Services.TrainingService
 
         [Put("/admin/class/update-student-status-in-class/{id}")]
         Task<IApiResponse<MethodResult<bool>>> UpdateStatusStudentInClass([FromRoute] Guid id);
+
+        [Post("/class/add-student-into-class")]
+        Task<IApiResponse<MethodResult<Guid>>> AddStudentIntoClass([Body] AddStudentIntoClassCommandModel command);
     }
 }

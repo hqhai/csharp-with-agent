@@ -1,21 +1,22 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Application.Commands.OrderCmds
+namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 {
-    using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Models;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
-    using Fsel.Ordering.Application.Services.TrainingService;
-    using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
-    using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
-    using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -32,96 +33,88 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
-        private readonly MediatR.IMediator _mediator;
-        private readonly IUserService _userService;
+        private readonly IMediator _mediator;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
-        private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
         private readonly AuthContext _authContext;
+        private readonly ILmsCourseService _courseService;
 
-        public CreateOrderCommandHandler(IMapper mapper,
-            IOrderRepository orderRepository,
-            IMediator mediator,
-            IUserService userService,
-            NotificationMessagePublisher notificationMessagePublisher,
-            ITrainingService trainingService,
-            IPackageRepository packageRepository,
-            AuthContext authContext)
+        public CreateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
             _mediator = mediator;
-            _userService = userService;
             _notificationMessagePublisher = notificationMessagePublisher;
-            _trainingService = trainingService;
             _packageRepository = packageRepository;
             _authContext = authContext;
+            _courseService = courseService;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<OrderModel> methodResult = new MethodResult<OrderModel>();
+            var methodResult = new MethodResult<OrderModel>();
 
-            //var package = await _packageRepository.GetByIdAsync(request.PackageId);
-
-            #region Pilot
-
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Code == EnumPackageCode.BASIC, cancellationToken);
-
-            #endregion Pilot
+            var package = await _packageRepository.GetByIdAsync(request.PackageId);
 
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
+
             var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
             var code = codeSend.Result?.Code;
 
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code || (x.Status == EnumOrderStatus.New && x.UserId == request.UserId), cancellationToken))
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code || (x.Status == EnumOrderStatus.New && x.UserId == _authContext.CurrentUserId), cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
                 return methodResult;
             }
 
-            //var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { Code = request.CodeClass, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = request.PackageId, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
-
-            #region Pilot
-
-            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { UserId = request.UserId, Code = request.CodeCourse, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = package.Id, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
-
-            #endregion Pilot
-
-            if (!classnew.IsSuccessStatusCode)
+            var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
             {
-                methodResult.AddError(classnew.Error);
+                Filters = new List<GenericFilterModel>()
+                {
+                    new GenericFilterModel()
+                    {
+                        Property = "Status",
+                        Operator = EnumFilterOperator.Equal,
+                        Value = "Active"
+                    },
+                    new GenericFilterModel()
+                    {
+                        Property = "CourseLevel",
+                        Operator = EnumFilterOperator.Equal,
+                        Value = request.CourseLevel.ToString()
+                    }
+                }
+            });
+
+            if (!courseResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(courseResult.Error);
                 return methodResult;
             }
 
-            if (classnew?.Content?.Result == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classnew));
-                return methodResult;
-            }
+            var course = courseResult.Content?.Result;
 
             Order order = _mapper.Map<Order>(request);
+            order.Country = "Việt Nam";
             order.Status = EnumOrderStatus.New;
-            order.UserId = request.UserId;
+            order.UserId = _authContext.CurrentUserId;
             order.Code = code;
-            order.PackageId = package.Id;
             order.Price = package.Price;
-            order.DiscountPercent = 5;
+            order.DiscountPercent = 0;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
-            order.ClassId = classnew.Content?.Result.Id ?? default;
             order.ExpireDate = package.MonthNumber;
+            order.CourseId = course!.Id;
             if (!order.IsValid())
             {
                 methodResult.AddErrorBadRequest(order.ErrorMessages);
                 return methodResult;
             }
-
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 order = _orderRepository.Add(order);

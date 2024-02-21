@@ -24,6 +24,12 @@ namespace Fsel.Ordering.Domain.Entities
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public decimal Price { get; set; }
 
+        /// <summary>
+        /// Thời gian Khóa Học
+        /// </summary>
+        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int MonthNumber { get; set; }
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? DescriptionStr { get; set; }
 
