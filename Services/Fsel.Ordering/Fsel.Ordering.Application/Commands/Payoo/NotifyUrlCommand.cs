@@ -43,67 +43,83 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<NotifyUrlModel>();
 
+            methodResult.Result = new NotifyUrlModel { ReturnCode = 1, Description = string.Empty };
+
             var secureHash = EncodeHelper.SecureHash(_appSetting.PayooConfig?.Key + request.ResponseData + _appSetting.PayooConfig?.PayooIP);
 
             if (secureHash.ToLower(CultureInfo.CurrentCulture) != request.SecureHash?.ToLower(CultureInfo.CurrentCulture))
             {
-                methodResult.Result = new NotifyUrlModel { ReturnCode = 1, Description = string.Empty };
+                _logger.LogError("SecureHash wrong");
             }
-            else
+
+            var paymentInfo = request.ResponseData.Deserialize<PaymentInfoResponseModel>();
+
+            if (paymentInfo == null || string.IsNullOrEmpty(paymentInfo.OrderNo))
             {
-                var paymentInfo = request.ResponseData.Deserialize<PaymentInfoResponseModel>();
-
-                if (paymentInfo == null || string.IsNullOrEmpty(paymentInfo.OrderNo))
-                {
-                    _logger.LogError("Payment Info Null");
-                    return methodResult;
-                }
-
-                Guid orderTransactionId;
-                try
-                {
-                    orderTransactionId = Guid.Parse(paymentInfo.OrderNo);
-                }
-                catch (FormatException)
-                {
-                    _logger.LogError($"OrderNo Malformed: {paymentInfo.OrderNo}");
-                    return methodResult;
-                }
-
-                var orderTransaction = await _orderTransactionRepository.GetByIdAsync(orderTransactionId);
-                if (orderTransaction == null)
-                {
-                    _logger.LogError($"OrderTransaction Null: {paymentInfo.OrderNo}");
-                    return methodResult;
-                }
-
-                orderTransaction.Status = paymentInfo.PaymentStatus != 1 ? EnumOrderTransactionStatus.Fail : EnumOrderTransactionStatus.Success;
-                orderTransaction.ResponseBody = paymentInfo;
-                _orderTransactionRepository.Update(orderTransaction);
-                await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                var order = await _orderRepository.GetByIdAsync(orderTransaction.OrderId ?? default);
-                if (order == null)
-                {
-                    _logger.LogError($"Order Null: {paymentInfo.OrderNo}");
-                    return methodResult;
-                }
-
-                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId });
-
-                if (!addStudentIntoClassResult.IsSuccessStatusCode)
-                {
-                    _logger.LogError($"Add Student into class error: {addStudentIntoClassResult.StatusCode}, OrderId: {order.Id}");
-                    return methodResult;
-                }
-
-                order.Status = EnumOrderStatus.Payment;
-                order.ClassId = addStudentIntoClassResult.Content?.Result ?? default;
-                _orderRepository.Update(order);
-                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.Result = new NotifyUrlModel { ReturnCode = 0, Description = string.Empty };
+                _logger.LogError("Payment Info Null");
             }
+
+            Guid orderTransactionId = default;
+            try
+            {
+                orderTransactionId = Guid.Parse(paymentInfo.OrderNo);
+            }
+            catch (FormatException)
+            {
+                _logger.LogError($"OrderNo Malformed: {paymentInfo.OrderNo}");
+            }
+
+            var orderTransaction = await _orderTransactionRepository.GetByIdAsync(orderTransactionId);
+            if (orderTransaction == null)
+            {
+                _logger.LogError($"OrderTransaction Null: {paymentInfo.OrderNo}");
+                return methodResult;
+            }
+
+            var order = await _orderRepository.GetByIdAsync(orderTransaction.OrderId ?? default);
+            if (order == null)
+            {
+                _logger.LogError($"Order Null: {paymentInfo.OrderNo}");
+                return methodResult;
+            }
+
+            orderTransaction.Status = paymentInfo.PaymentStatus != 1 ? EnumOrderTransactionStatus.Fail : EnumOrderTransactionStatus.Success;
+            orderTransaction.ResponseBody = paymentInfo;
+
+            try
+            {
+                _orderTransactionRepository.Update(orderTransaction);
+                await _orderTransactionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (FormatException)
+            {
+                _logger.LogError($"Update OrderTransaction Error: {orderTransaction.Id}");
+                return methodResult;
+            }
+
+            var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId });
+
+            if (!addStudentIntoClassResult.IsSuccessStatusCode)
+            {
+                _logger.LogError($"Add Student into class error: {addStudentIntoClassResult.StatusCode}, OrderId: {order.Id}");
+                return methodResult;
+            }
+
+            order.Status = EnumOrderStatus.Payment;
+            order.ClassId = addStudentIntoClassResult.Content?.Result ?? default;
+
+            try
+            {
+                _orderRepository.Update(order);
+                await _orderRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (FormatException)
+            {
+                _logger.LogError($"Update Order Error: {orderTransaction.Id}");
+                return methodResult;
+            }
+
+            methodResult.Result = new NotifyUrlModel { ReturnCode = 0, Description = string.Empty };
 
             return methodResult;
         }
