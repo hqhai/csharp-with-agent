@@ -32,9 +32,6 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? PreviousLearn { get; set; }
         public string? PreviousSocial { get; set; }
         public string? PreviousOther { get; set; }
-        public string? CurrentLearn { get; set; }
-        public string? CurrentSocial { get; set; }
-        public string? CurrentOther { get; set; }
         public string? CompareLearn { get; set; }
         public string? CompareTotal { get; set; }
         public string? CompareSocial { get; set; }

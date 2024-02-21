@@ -71,5 +71,25 @@ namespace Fsel.Shared.Helpers
                 return (firstDateDifference.Days <= 1 ? consecutiveDays : 0, firstDateDifference.Days <= 1);
             }
         }
+
+
+        public static ICollection<DateTime> GenerateDateList(DateTime startDate, DateTime endDate)
+        {
+            List<DateTime> dateList = new List<DateTime>();
+
+            while (startDate <= endDate)
+            {
+                dateList.Add(startDate);
+                startDate = startDate.AddDays(1);
+            }
+
+            return dateList;
+        }
+
+        public static int ConvertSecondsToMinutes(long seconds)
+        {
+            long minutes = seconds / 60;
+            return (int)minutes;
+        }
     }
 }
