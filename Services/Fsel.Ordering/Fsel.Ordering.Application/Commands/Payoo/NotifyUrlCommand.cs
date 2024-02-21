@@ -28,14 +28,16 @@ namespace Fsel.Ordering.Application.Commands.Payoo
         private readonly IOrderTransactionRepository _orderTransactionRepository;
         private readonly IOrderRepository _orderRepository;
         private readonly ITrainingService _trainingService;
+        private readonly IPackageRepository _packageRepository;
 
-        public NotifyUrlCommandHandler(AppSetting appSetting, ILogger<NotifyUrlCommand> logger, IOrderTransactionRepository orderTransactionRepository, IOrderRepository orderRepository, ITrainingService trainingService)
+        public NotifyUrlCommandHandler(AppSetting appSetting, ILogger<NotifyUrlCommand> logger, IOrderTransactionRepository orderTransactionRepository, IOrderRepository orderRepository, ITrainingService trainingService, IPackageRepository packageRepository)
         {
             _appSetting = appSetting;
             _logger = logger;
             _orderTransactionRepository = orderTransactionRepository;
             _orderRepository = orderRepository;
             _trainingService = trainingService;
+            _packageRepository = packageRepository;
         }
 
         public async Task<MethodResult<NotifyUrlModel>> Handle(NotifyUrlCommand request, CancellationToken cancellationToken)
@@ -105,7 +107,14 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                 return methodResult;
             }
 
+            var package = await _packageRepository.GetByIdAsync(order.PackageId);
+            if (package == null)
+            {
+                _logger.LogError($"Package not exist: OrderId: {order.Id}");
+                return methodResult;
+            }
             order.Status = EnumOrderStatus.Payment;
+            order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
             order.ClassId = addStudentIntoClassResult.Content?.Result ?? default;
 
             try

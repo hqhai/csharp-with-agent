@@ -33,12 +33,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 type: "nvarchar(max)",
                 nullable: true);
 
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<DateTime>(
                 name: "ExpireDate",
                 table: "Orders",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+                type: "datetime2",
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "PhoneNumber",

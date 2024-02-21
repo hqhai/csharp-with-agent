@@ -90,8 +90,7 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// Thời gian Học
         /// </summary>
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int ExpireDate { get; set; }
+        public DateTime? ExpireDate { get; set; }
 
         public Guid CourseId { get; set; }
         public Package? Package { get; set; }

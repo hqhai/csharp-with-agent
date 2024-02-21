@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingDbContext))]
-    [Migration("20240221082526_Update_OrderTable_And_OrderTransactionTable")]
+    [Migration("20240221125613_Update_OrderTable_And_OrderTransactionTable")]
     partial class Update_OrderTable_And_OrderTransactionTable
     {
         /// <inheritdoc />
@@ -89,8 +89,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ExpireDate")
-                        .HasColumnType("int");
+                    b.Property<DateTime?>("ExpireDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("FullName")
                         .IsRequired()

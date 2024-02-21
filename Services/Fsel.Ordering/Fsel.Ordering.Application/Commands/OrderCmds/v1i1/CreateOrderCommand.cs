@@ -109,7 +109,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             order.DiscountPercent = 0;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
-            order.ExpireDate = package.MonthNumber;
             order.CourseId = course!.Id;
             if (!order.IsValid())
             {
