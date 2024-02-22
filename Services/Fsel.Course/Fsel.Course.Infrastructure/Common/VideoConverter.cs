@@ -494,15 +494,17 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static EnumCorrectStatus? GetCorrectStatus(VideoTimeCodeAnswer? videoTimeCodeAnswer)
         {
-            if (videoTimeCodeAnswer != null)
+            EnumCorrectStatus? status = null;
+            if (videoTimeCodeAnswer != null && videoTimeCodeAnswer.IsCorrect.HasValue)
             {
-                if (videoTimeCodeAnswer.Status != EnumAnswerStatus.Done && videoTimeCodeAnswer.IsCorrect.HasValue)
+                status = EnumCorrectStatus.Process;
+                if (videoTimeCodeAnswer.Status == EnumAnswerStatus.Done)
                 {
-                    return EnumCorrectStatus.Process;
+                    status = videoTimeCodeAnswer.IsCorrect.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
                 }
-                return videoTimeCodeAnswer.IsCorrect.HasValue ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
             }
-            return null;
+
+            return status;
         }
 
         private static EnumResultStatus GetTimeCodeStatus(VideoTimeCode? videoTimeCode)
