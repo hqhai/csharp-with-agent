@@ -46,11 +46,12 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             var methodResult = new MethodResult<NotifyUrlModel>();
 
             methodResult.Result = new NotifyUrlModel { ReturnCode = 1, Description = string.Empty };
+            bool checkFlow = true;
 
             var secureHash = EncodeHelper.SecureHash(_appSetting.PayooConfig?.Key + request.ResponseData + _appSetting.PayooConfig?.PayooIP);
-
             if (secureHash.ToLower(CultureInfo.CurrentCulture) != request.SecureHash?.ToLower(CultureInfo.CurrentCulture))
             {
+                checkFlow = false;
                 _logger.LogError("SecureHash wrong");
             }
 
@@ -58,6 +59,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
 
             if (paymentInfo == null || string.IsNullOrEmpty(paymentInfo.OrderNo))
             {
+                checkFlow = false;
                 _logger.LogError("Payment Info Null");
             }
 
@@ -69,19 +71,13 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             catch (FormatException)
             {
                 _logger.LogError($"OrderNo Malformed: {paymentInfo.OrderNo}");
+                return methodResult;
             }
 
             var orderTransaction = await _orderTransactionRepository.GetByIdAsync(orderTransactionId);
             if (orderTransaction == null)
             {
                 _logger.LogError($"OrderTransaction Null: {paymentInfo.OrderNo}");
-                return methodResult;
-            }
-
-            var order = await _orderRepository.GetByIdAsync(orderTransaction.OrderId ?? default);
-            if (order == null)
-            {
-                _logger.LogError($"Order Null: {paymentInfo.OrderNo}");
                 return methodResult;
             }
 
@@ -95,27 +91,34 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             }
             catch (FormatException)
             {
+                checkFlow = false;
                 _logger.LogError($"Update OrderTransaction Error: {orderTransaction.Id}");
+            }
+
+            var order = await _orderRepository.GetByIdAsync(orderTransaction.OrderId ?? default);
+            if (order == null)
+            {
+                _logger.LogError($"Order Null: {paymentInfo.OrderNo}");
                 return methodResult;
             }
 
-            var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId });
-
+            var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default });
             if (!addStudentIntoClassResult.IsSuccessStatusCode)
             {
+                checkFlow = false;
                 _logger.LogError($"Add Student into class error: {addStudentIntoClassResult.StatusCode}, OrderId: {order.Id}");
-                return methodResult;
             }
 
-            var package = await _packageRepository.GetByIdAsync(order.PackageId);
+            var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
             if (package == null)
             {
+                checkFlow = false;
                 _logger.LogError($"Package not exist: OrderId: {order.Id}");
-                return methodResult;
             }
-            order.Status = EnumOrderStatus.Payment;
-            order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
-            order.ClassId = addStudentIntoClassResult.Content?.Result ?? default;
+
+            order.Status = checkFlow ? EnumOrderStatus.Payment : EnumOrderStatus.Fail;
+            order.ExpireDate = checkFlow ? DateTime.UtcNow.AddMonths(package!.MonthNumber) : null;
+            order.ClassId = checkFlow ? addStudentIntoClassResult.Content?.Result ?? default : default;
 
             try
             {
