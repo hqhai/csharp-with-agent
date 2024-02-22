@@ -11,11 +11,11 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<Lesson?> GetIncludeVideoByIdAsync(Guid id);
 
-        Task<double> GetPercentLesson(Guid unitId, Guid? studentId);
+        Task<double> GetPercentLesson(Guid courseId, Guid unitId, Guid? studentId);
 
-        Task<double> GetPercentClassForum(Guid unitId, Guid? studentId);
+        Task<double> GetPercentClassForum(Guid courseId, Guid unitId, Guid? studentId);
 
-        Task<double> GetPercentHomeWork(Guid unitId, Guid? studentId);
+        Task<double> GetPercentHomeWork(Guid courseId, Guid unitId, Guid? studentId);
 
         Task<Lesson?> GetIncludeByIdNoTrackingAsync(Guid id, int? siteId = null);
 
