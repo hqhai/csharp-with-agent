@@ -4,13 +4,14 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.CommandModels.StudentTrialRegistration;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class CreateStudentTrialRegistrationCommand : StudentTrialRegistrationCommandModel, IRequest<MethodResult<StudentTrialRegistration>>
+    public class CreateStudentTrialRegistrationCommand : IRequest<MethodResult<StudentTrialRegistration>>
     {
     }
 
@@ -18,11 +19,13 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
     {
         private readonly IMapper _mapper;
         private readonly IStudentTrialRegistrationRepository _studentTrialRegistrationRepository;
+        private readonly AuthContext _authContext;
 
-        public CreateStudentRegistrationCommandHandler(IMapper mapper, IStudentTrialRegistrationRepository studentTrialRegistrationRepository)
+        public CreateStudentRegistrationCommandHandler(IMapper mapper, IStudentTrialRegistrationRepository studentTrialRegistrationRepository, AuthContext authContext)
         {
             _mapper = mapper;
             _studentTrialRegistrationRepository = studentTrialRegistrationRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<StudentTrialRegistration>> Handle(CreateStudentTrialRegistrationCommand request, CancellationToken cancellationToken)
@@ -30,9 +33,11 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentTrialRegistration> methodResult = new MethodResult<StudentTrialRegistration>();
 
-            StudentTrialRegistration studentTrialRegistration = new StudentTrialRegistration();
-
-            studentTrialRegistration = _mapper.Map<StudentTrialRegistration>(request);
+            StudentTrialRegistration studentTrialRegistration = new StudentTrialRegistration()
+            {
+                UserId = _authContext.CurrentUserId,
+                Status = EnumTrialRegistrationStatus.Trial
+            };
 
 
             await _studentTrialRegistrationRepository.ExecuteTransactionAsync(async () =>
@@ -41,7 +46,7 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
                 await _studentTrialRegistrationRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<StudentTrialRegistration>(_studentTrialRegistrationRepository);
+                methodResult.Result = studentTrialRegistration;
                 return methodResult;
             });
 

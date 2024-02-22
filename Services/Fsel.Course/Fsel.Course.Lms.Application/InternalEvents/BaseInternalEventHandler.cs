@@ -371,10 +371,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 case var value when value == (courseUnitMockTest.UnitId == null):
                     var unitResultNext = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == courseUnitMockTest.UnitId, cancellationToken);
-                    var studentTrialRegistration = await _userService.GetStudentTrialRegistration(studentId);
+                    var studentTrialRegistration = await _userService.CheckStudentTrialRegistration();
                     var checkStudentTrialResult = studentTrialRegistration?.Content?.Result ?? default;
 
-                    if (unitResultNext != null && unitResultNext.Status == EnumResultStatus.Unfinished)
+                    if (unitResultNext != null && unitResultNext.Status == EnumResultStatus.Unfinished && !checkStudentTrialResult)
                     {
                         unitResultNext.Status = EnumResultStatus.New;
                         _unitResultRepository.Update(unitResultNext);

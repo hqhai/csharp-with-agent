@@ -32,9 +32,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<StudentTrialRegistration>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateStudentTrialRegistration([FromBody] CreateStudentTrialRegistrationCommand cmd)
+        public async Task<IActionResult> CreateStudentTrialRegistration()
         {
-            MethodResult<StudentTrialRegistration> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            MethodResult<StudentTrialRegistration> commandResult = await _mediator.Send(new CreateStudentTrialRegistrationCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -44,12 +44,26 @@ namespace Fsel.Identity.Api.Controllers
         /// </summary>
         /// <param name="studentId"></param>
         /// <returns></returns>
-        [HttpGet("check/{studentId}")]
+        [HttpGet("check")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckStudentRegistration()
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new CheckStudentTrialRegistrationQuery ()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check học sinh có đang học thử không
+        /// </summary>
+        /// <param name="studentId"></param>
+        /// <returns></returns>
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<StudentTrialRegistration>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetStudentRegistration([FromRoute] Guid studentId)
+        public async Task<IActionResult> GetStudentRegistration()
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new GetStudentTrialRegistrationQuery { StudentId = studentId }).ConfigureAwait(false);
+            MethodResult<StudentTrialRegistration> commandResult = await _mediator.Send(new GetStudentTrialRegistrationQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -57,14 +71,13 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Lưu thông tin đăng kí học thử
         /// </summary>
-        [HttpPost]
+        [HttpPut]
         [ProducesResponseType(typeof(MethodResult<StudentTrialRegistration>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateStudentTrialRegistration([FromBody] CreateStudentTrialRegistrationCommand cmd)
+        public async Task<IActionResult> UpdateStudentTrialRegistration([FromBody] UpdateStudentTrialRegistrationCommand cmd)
         {
             MethodResult<StudentTrialRegistration> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
     }
 }

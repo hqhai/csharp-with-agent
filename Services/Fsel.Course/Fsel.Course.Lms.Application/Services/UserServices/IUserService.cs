@@ -62,8 +62,12 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         Task<IApiResponse<MethodResult<IList<StudentConsecutiveDayModel>>>> GetAllDailyStreak([Query] BaseQueryModel baseQuery);
 
 
-        [Get("/student-trial-registration/check/{studentId}")]
-        Task<IApiResponse<MethodResult<bool>>> GetStudentTrialRegistration([FromRoute] Guid studentId);
+        [Get("/student-trial-registration")]
+        Task<IApiResponse<MethodResult<StudentTrialRegistrationModel>>> GetStudentTrialRegistration();
+
+
+        [Get("/student-trial-registration/check")]
+        Task<IApiResponse<MethodResult<bool>>> CheckStudentTrialRegistration();
 
 
     }

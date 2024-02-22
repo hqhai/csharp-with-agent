@@ -7,7 +7,7 @@ namespace Fsel.Identity.Domain.Entities
 
     public class StudentTrialRegistration : Entity
     {
-        public Guid StudentId { get; set; }
+        public Guid UserId { get; set; }
 
         public EnumTrialRegistrationStatus Status { get; set; }
 

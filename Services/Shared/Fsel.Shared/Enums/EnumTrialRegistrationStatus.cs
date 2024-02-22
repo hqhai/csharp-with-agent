@@ -2,9 +2,10 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumTrialRegistrationStatus{
+    public enum EnumTrialRegistrationStatus
+    {
         Trial,
-        TrialExpired,
+        Finished,
         Expired,
         Payment
     }

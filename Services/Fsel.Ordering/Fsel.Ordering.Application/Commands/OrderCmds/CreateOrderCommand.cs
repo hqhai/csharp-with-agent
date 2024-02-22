@@ -13,12 +13,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,12 +33,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
-        private readonly IMediator _mediator;
+        private readonly MediatR.IMediator _mediator;
         private readonly IUserService _userService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
-        private const int NumberTrialDays = 14; // số ngày dùng thử chương trình là 14 ngày.
+        private readonly AuthContext _authContext;
+        private const int AmountTrialDays = 14;
 
         public CreateOrderCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
@@ -54,6 +57,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _notificationMessagePublisher = notificationMessagePublisher;
             _trainingService = trainingService;
             _packageRepository = packageRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -103,11 +107,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-
             Order order = _mapper.Map<Order>(request);
-
-
-
             order.Status = EnumOrderStatus.New;
             order.UserId = request.UserId;
             order.Code = code;
@@ -116,17 +116,28 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             order.DiscountPercent = 5;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
+            order.ClassId = classnew.Content?.Result.Id ?? default;
 
-#if DEBUG
+            request.IsTrial = true;
             if (request.IsTrial || true)
             {
-                DateTime expireTrialDate = DateTime.UtcNow.AddDays(NumberTrialDays);
+                DateTime expireTrialDate = DateTime.UtcNow.AddDays(AmountTrialDays);
+                order.IsTrial = request.IsTrial;
                 order.ExpireDate = expireTrialDate;
                 order.Status = EnumOrderStatus.Payment;
+                await _userService.CreateStudentTrialRegistration();
             }
-#endif
 
-            // order.ClassId = classnew.Content?.Result.Id ?? default;
+            var checkUserTrialBefore = await _userService.GetStuentTrialRegistration();
+            var checkUserTrialBeforeResult = checkUserTrialBefore?.Content?.Result ?? default;
+
+
+            if (checkUserTrialBeforeResult && !request.IsTrial)
+            {
+                UpdateStudentTrialRegistrationModel command = new UpdateStudentTrialRegistrationModel { UserId = request.UserId, Status = EnumTrialRegistrationStatus.Payment };
+                await _userService.UpdateStudentTrialRegistration(command);
+            }
+
             if (!order.IsValid())
             {
                 methodResult.AddErrorBadRequest(order.ErrorMessages);
@@ -137,20 +148,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             {
                 order = _orderRepository.Add(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+                {
+                    Roles = new List<EnumRole> { EnumRole.Admin },
+                    ObjectId = order.Id,
+                    Type = EnumNotificationType.Text,
+                    Content = EnumNotificationContent.OrderCreate,
+                    SenderId = order.CreatedUserId,
+                    PlatformCode = EnumPlatformCode.LMSAdmin
+                }, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(order);
                 return methodResult;
             });
             return methodResult;
         }
-
-
-
-        public async Task SendNotificationForUserToExtend(CancellationToken cancellationToken)
-        {
-
-        }
     }
-
-
 }

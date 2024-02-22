@@ -6,7 +6,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.StudentTrialRegistration
 
     public class StudentTrialRegistrationCommandModel
     {
-        public Guid StudentId { get; set; }
+        public Guid UserId { get; set; }
 
         public EnumTrialRegistrationStatus Status { get; set; }
 
