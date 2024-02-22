@@ -21,6 +21,24 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: 0);
 
+            migrationBuilder.AlterColumn<string>(
+                name: "PaymentMethod",
+                table: "Orders",
+                type: "nvarchar(100)",
+                maxLength: 100,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(100)",
+                oldMaxLength: 100);
+
+            migrationBuilder.AlterColumn<Guid>(
+                name: "PackageId",
+                table: "Orders",
+                type: "uniqueidentifier",
+                nullable: true,
+                oldClrType: typeof(Guid),
+                oldType: "uniqueidentifier");
+
             migrationBuilder.AddColumn<Guid>(
                 name: "DistrictId",
                 table: "Orders",
@@ -31,7 +49,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 name: "Email",
                 table: "Orders",
                 type: "nvarchar(max)",
-                nullable: true);
+                nullable: false,
+                defaultValue: "");
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "ExpireDate",
@@ -39,11 +58,19 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 type: "datetime2",
                 nullable: true);
 
+            migrationBuilder.AddColumn<bool>(
+                name: "IsTrial",
+                table: "Orders",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.AddColumn<string>(
                 name: "PhoneNumber",
                 table: "Orders",
                 type: "nvarchar(max)",
-                nullable: true);
+                nullable: false,
+                defaultValue: "");
 
             migrationBuilder.AddColumn<Guid>(
                 name: "ProvinceId",
@@ -122,12 +149,38 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 table: "Orders");
 
             migrationBuilder.DropColumn(
+                name: "IsTrial",
+                table: "Orders");
+
+            migrationBuilder.DropColumn(
                 name: "PhoneNumber",
                 table: "Orders");
 
             migrationBuilder.DropColumn(
                 name: "ProvinceId",
                 table: "Orders");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "PaymentMethod",
+                table: "Orders",
+                type: "nvarchar(100)",
+                maxLength: 100,
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(100)",
+                oldMaxLength: 100,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<Guid>(
+                name: "PackageId",
+                table: "Orders",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
+                oldClrType: typeof(Guid),
+                oldType: "uniqueidentifier",
+                oldNullable: true);
 
             migrationBuilder.CreateTable(
                 name: "UrBoxTransactions",

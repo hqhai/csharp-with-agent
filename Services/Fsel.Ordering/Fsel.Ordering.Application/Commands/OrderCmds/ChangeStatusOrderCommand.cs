@@ -87,7 +87,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddError(courseResults.Error);
                 return methodResult;
             }
-            var package = await _packageRepository.GetByIdAsync(order.PackageId);
+            var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
             var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
             var course = courseResults.Content?.Result?.FirstOrDefault();
             await _orderRepository.ExecuteTransactionAsync(async () =>

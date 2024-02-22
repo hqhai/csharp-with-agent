@@ -29,8 +29,8 @@ namespace Fsel.Ordering.Infrastructure.Configs
             builder.Property(e => e.PaymentMethod)
                .HasMaxLength(100)
                .HasConversion(
-                   v => v.ToString(),
-                   v => v.EnumParse<EnumPaymentMethodStatus>());
+                   v => v == null ? null : v.ToString(),
+                   v => string.IsNullOrEmpty(v) ? null : v.EnumParse<EnumPaymentMethodStatus>());
         }
     }
 }

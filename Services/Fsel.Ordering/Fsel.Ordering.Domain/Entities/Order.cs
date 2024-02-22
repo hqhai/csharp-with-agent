@@ -24,11 +24,13 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// Email Người dùng
         /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Email { get; set; }
 
         /// <summary>
         /// SDT Người dùng
         /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? PhoneNumber { get; set; }
 
         /// <summary>
@@ -61,7 +63,7 @@ namespace Fsel.Ordering.Domain.Entities
         ///<summary>
         /// Phương thức thanh toán
         ///</summary>
-        public EnumPaymentMethodStatus PaymentMethod { get; set; }
+        public EnumPaymentMethodStatus? PaymentMethod { get; set; }
 
         /// <summary>
         /// Giá Khóa Học
@@ -92,9 +94,14 @@ namespace Fsel.Ordering.Domain.Entities
         /// </summary>
         public DateTime? ExpireDate { get; set; }
 
+        /// <summary>
+        /// Học thử
+        /// </summary>
+        public bool IsTrial { get; set; }
+
         public Guid CourseId { get; set; }
         public Package? Package { get; set; }
-        public Guid PackageId { get; set; }
+        public Guid? PackageId { get; set; }
         public Guid UserId { get; set; }
         public Guid ClassId { get; set; }
     }

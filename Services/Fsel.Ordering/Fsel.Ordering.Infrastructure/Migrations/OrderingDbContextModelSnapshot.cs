@@ -84,6 +84,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("ExpireDate")
@@ -97,15 +98,18 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid>("PackageId")
+                    b.Property<bool>("IsTrial")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("PackageId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PaymentMethod")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
@@ -619,8 +623,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.HasOne("Fsel.Ordering.Domain.Entities.Package", "Package")
                         .WithMany("Orders")
                         .HasForeignKey("PackageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Package");
                 });
