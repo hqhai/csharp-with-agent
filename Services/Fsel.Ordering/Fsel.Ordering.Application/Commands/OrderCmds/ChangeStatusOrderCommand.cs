@@ -19,7 +19,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class ChangeStatusOrderCommand : ChangeStatusOrderCommandModel, IRequest<MethodResult<bool>>
     {
@@ -88,7 +87,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddError(courseResults.Error);
                 return methodResult;
             }
-            var package = await _packageRepository.GetByIdAsync(order.PackageId);
+            var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
             var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
             var course = courseResults.Content?.Result?.FirstOrDefault();
             await _orderRepository.ExecuteTransactionAsync(async () =>
@@ -133,7 +132,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var orders = await _orderRepository.Queryable.Where(p => p.ClassId == order.ClassId && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
+                //var orders = await _orderRepository.Queryable.Where(p => p.ClassId == order.ClassId && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
                 //if (orders.Count == 12)
                 //{
                 //    var activeClassResult = await _trainingService.ActiveClass(order.ClassId);
@@ -146,15 +145,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
                 #region for pilot
 
-                if (orders.Count == 100)
-                {
-                    var activeClassResult = await _trainingService.ActiveClass(order.ClassId);
-                    if (!activeClassResult.IsSuccessStatusCode)
-                    {
-                        methodResult.AddError(activeClassResult.Error);
-                        return methodResult;
-                    }
-                }
+                //if (orders.Count == 100)
+                //{
+                //    var activeClassResult = await _trainingService.ActiveClass(order.ClassId);
+                //    if (!activeClassResult.IsSuccessStatusCode)
+                //    {
+                //        methodResult.AddError(activeClassResult.Error);
+                //        return methodResult;
+                //    }
+                //}
 
                 #endregion for pilot
 

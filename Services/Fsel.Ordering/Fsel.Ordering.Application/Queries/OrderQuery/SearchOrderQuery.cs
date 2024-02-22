@@ -52,7 +52,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 PackageName = x.Package!.Code.ToString(),
                 Status = x.Status,
                 PaymentMethod = x.PaymentMethod,
-                PackageId = x.PackageId,
+                PackageId = x.PackageId ?? default,
                 FullName = x.FullName,
             });
             if (request.Status.HasValue)

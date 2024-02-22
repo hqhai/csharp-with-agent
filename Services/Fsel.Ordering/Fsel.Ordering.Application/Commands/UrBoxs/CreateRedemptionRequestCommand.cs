@@ -35,16 +35,16 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
         private readonly IMediator _mediator;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private readonly IUrBoxTransactionRepository _urBoxTransactionRepository;
+        private readonly IOrderTransactionRepository _orderTransactionRepository;
 
-        public CreateRedemptionRequestCommandHandler(IUrBoxService urBoxService, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IUrBoxTransactionRepository urBoxTransactionRepository)
+        public CreateRedemptionRequestCommandHandler(IUrBoxService urBoxService, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IOrderTransactionRepository orderTransactionRepository)
         {
             _urBoxService = urBoxService;
             _appSetting = appSetting;
             _mediator = mediator;
             _authContext = authContext;
             _userService = userService;
-            _urBoxTransactionRepository = urBoxTransactionRepository;
+            _orderTransactionRepository = orderTransactionRepository;
         }
 
         public async Task<MethodResult<RedemptionResponseModel>> Handle(CreateRedemptionRequestCommand request, CancellationToken cancellationToken)
@@ -102,15 +102,15 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 return methodResult;
             }
 
-            await _urBoxTransactionRepository.ExecuteTransactionAsync(async () =>
+            await _orderTransactionRepository.ExecuteTransactionAsync(async () =>
             {
-                var urBoxTransaction = _urBoxTransactionRepository.Add(new UrBoxTransaction());
-                await _urBoxTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                var orderTransaction = _orderTransactionRepository.Add(new OrderTransaction() { Type = EnumOrderTransactionType.UrBox });
+                await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 var redemptionRequest = new CreateRedemptionRequestModel(_appSetting);
 
                 redemptionRequest.SiteUserId = _authContext.CurrentUserId.ToString();
-                redemptionRequest.TransactionId = urBoxTransaction.Id.ToString();
+                redemptionRequest.TransactionId = orderTransaction.Id.ToString();
                 redemptionRequest.PhoneNumber = request.PhoneNumber;
                 redemptionRequest.IsSendSms = 0;
                 redemptionRequest.DataBuy = request.DataBuy.Select(p => new DataBuy { PriceId = p.PriceId, Quantity = p.Quantity }).ToList();
@@ -166,12 +166,12 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                     methodResult.AddErrorBadRequest(createRedemptionRequest.Content?.Msg);
                 }
 
-                urBoxTransaction.RequestBody = redemptionRequest;
-                urBoxTransaction.ResponseBody = createRedemptionRequest.Content;
-                urBoxTransaction.Status = createRedemptionRequest.Content?.Status == 200 ? EnumUrBoxTransactionStatus.Success : EnumUrBoxTransactionStatus.Unsuccessful;
+                orderTransaction.RequestBody = redemptionRequest;
+                orderTransaction.ResponseBody = createRedemptionRequest.Content;
+                orderTransaction.Status = createRedemptionRequest.Content?.Status == 200 ? EnumOrderTransactionStatus.Success : EnumOrderTransactionStatus.Fail;
 
-                _urBoxTransactionRepository.Update(urBoxTransaction);
-                await _urBoxTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                _orderTransactionRepository.Update(orderTransaction);
+                await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 return methodResult;
             });
             return methodResult;

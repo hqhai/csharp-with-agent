@@ -2,8 +2,8 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumUrBoxTransactionStatus
+    public enum EnumOrderTransactionType
     {
-        Success, Unsuccessful
+        UrBox, Payoo
     }
 }

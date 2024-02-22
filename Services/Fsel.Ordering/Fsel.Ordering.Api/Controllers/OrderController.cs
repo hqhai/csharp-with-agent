@@ -2,7 +2,6 @@
 
 namespace Fsel.Ordering.Api.Controllers
 {
-    using System.Collections.Generic;
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
@@ -16,7 +15,6 @@ namespace Fsel.Ordering.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
     public class OrderController : ControllerBase

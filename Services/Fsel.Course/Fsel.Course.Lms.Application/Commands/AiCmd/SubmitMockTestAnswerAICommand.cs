@@ -29,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMediator _mediator;
+
         public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
             _submitAIResponsePublisher = submitAIResponsePublisher;
@@ -45,7 +46,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             var mockTestAnswer = _mockTestAnswerRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId && x.MockTestResultId == request.MockTestResultId);
 
             var aiConfig = _aiGradeSettingRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId);
-
 
             var resultDictionary = new Dictionary<EnumMockTestAIType, string>();
 
@@ -101,17 +101,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             bool checkSkillMockTest = mockTestResult.MockTest!.MockTestType == EnumMockTestType.SkillMockTest;
 
-
             (double averageScore, double totalScore) = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
 
             var skillScore = sectionGroupResult!.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
 
-            var skillScores = sectionGroupResult!.SkillScores?.ToList();
+            var skillScores = sectionGroupResult!.SkillScores?.ToList() ?? new List<SkillScores>();
 
-            if (skillScores == null)
-            {
-                skillScores = new List<SkillScores>();
-            }
             if (skillScore == null)
             {
                 skillScore = new SkillScores
@@ -123,10 +118,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     TotalQuestion = 2,
                     CountQuestion = 2
                 };
-                skillScores!.Add(skillScore);
+                skillScores.Add(skillScore);
             }
             else
             {
+                skillScore = skillScores.Single();
                 int correcCount = (int)CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore);
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
                 skillScore!.CorrectCount = correcCount;
@@ -189,8 +185,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             return bandScore;
         }
 
-
-
         private static (double average, double totalScore) CalculateOverallAverage(params List<MockTestAIGradingModel>[] bandScoreDescriptions)
         {
             double totalScore = 0;
@@ -205,11 +199,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             return (NumberHelper.RoundNumberDouble(average), totalScore);
         }
 
-
         private static double CaculateAverageScoreWritingSection(double firstScore, double average)
         {
             return NumberHelper.RoundNumberDouble((firstScore + average * 2) / 3);
         }
-
     }
 }

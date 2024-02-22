@@ -7,9 +7,9 @@ namespace Fsel.Ordering.Infrastructure.Repositories
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
 
-    public class UrBoxTransactionRepository : BaseRepository<UrBoxTransaction>, IUrBoxTransactionRepository
+    public class OrderTransactionRepository : BaseRepository<OrderTransaction>, IOrderTransactionRepository
     {
-        public UrBoxTransactionRepository(OrderingDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public OrderTransactionRepository(OrderingDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

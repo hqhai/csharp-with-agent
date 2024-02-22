@@ -374,7 +374,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var studentTrialRegistration = await _userService.GetStudentTrialRegistration(studentId);
                     var checkStudentTrialResult = studentTrialRegistration?.Content?.Result ?? default;
 
-                    if (unitResultNext != null && checkStudentTrialResult)
+                    if (unitResultNext != null && unitResultNext.Status == EnumResultStatus.Unfinished)
                     {
                         unitResultNext.Status = EnumResultStatus.New;
                         _unitResultRepository.Update(unitResultNext);
@@ -384,7 +384,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 case var value when value == (courseUnitMockTest.FinalTestId == null):
                     var finalTestResultNext = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.FinalTestId == courseUnitMockTest.FinalTestId, cancellationToken);
-                    if (finalTestResultNext != null)
+                    if (finalTestResultNext != null && finalTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
                         finalTestResultNext.Status = EnumResultStatus.New;
                         _finalTestResultRepository.Update(finalTestResultNext);
@@ -394,7 +394,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 case var value when value == (courseUnitMockTest.MockTestId == null):
                     var mockTestResultNext = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.MockTestId == courseUnitMockTest.MockTestId, cancellationToken);
-                    if (mockTestResultNext != null)
+                    if (mockTestResultNext != null && mockTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
                         mockTestResultNext.Status = EnumResultStatus.New;
                         _mockTestResultRepository.Update(mockTestResultNext);

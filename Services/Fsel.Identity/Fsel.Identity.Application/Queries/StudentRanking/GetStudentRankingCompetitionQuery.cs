@@ -85,13 +85,13 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                              Grade = studentFile.Grade,
                              Process = studentResult?.ContentCompleted ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
                              OverallScore = studentResult?.TotalScore ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
-                             CompetitionEndDate = new DateTime(2024, 2, 29),
+                             CompetitionEndDate = new DateTime(2024, 6, 15),
                              FullName = studentFile.FullName,
                              AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
                              UserId = studentFile.UserId
                          };
 
-            result = result.OrderByDescending(x => (Process_Ratio * x.Process + Overall_Ratio * x.TotalScore));
+            result = result.OrderByDescending(x => (Process_Ratio * x.Process + Overall_Ratio * x.OverallScore));
             int totalItem = result.Count();
             var lists = result.ApplyPaging(request).ToList();
             methodResult.Result = new PagingItemsModel<StudentRankingModel>(lists, request, totalItem);

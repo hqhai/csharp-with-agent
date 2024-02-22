@@ -226,18 +226,20 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             });
             if (isLockPT)
             {
-                var param = new SendStudentPTTemplateModel
-                {
-                    StudentName = student!.Human?.FullName,
-                    CourseLevel = placementTestResult.Level,
-                    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {Math.Round(x.Percent, MidpointRounding.AwayFromZero)} %")),
-                };
-                var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
-                var sendResult = new MethodResult<bool>();
-                if (!string.IsNullOrEmpty(student.Human?.Email))
-                {
-                    sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
-                }
+                #region
+                //var param = new SendStudentPTTemplateModel
+                //{
+                //    StudentName = student!.Human?.FullName,
+                //    CourseLevel = placementTestResult.Level,
+                //    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {Math.Round(x.Percent, MidpointRounding.AwayFromZero)} %")),
+                //};
+                //var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
+                //var sendResult = new MethodResult<bool>();
+                //if (!string.IsNullOrEmpty(student.Human?.Email))
+                //{
+                //    sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
+                //}
+                #endregion
             }
             return methodResult;
         }

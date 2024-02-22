@@ -82,6 +82,7 @@ namespace Fsel.Shared.Constants
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
                 public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
                 public const string MockTestAnwserResponse = $"{KeyQueue}_MockTestAnwserResponse";
+                public const string WeeklyReport = $"{KeyQueue}_WeeklyReport";
             }
         }
 
@@ -95,7 +96,6 @@ namespace Fsel.Shared.Constants
                 public const string SetCompleteApprovalPost = $"{KeyQueue}_SetCompleteApprovalPost";
                 public const string CompleteApprovalPostTimeOut = $"{KeyQueue}_CompleteApprovalPostTimeOut";
                 public const string SetCompleteApprovalPostTimeOut = $"{KeyQueue}_SetCompleteApprovalPostTimeOut";
-
             }
         }
 
