@@ -8,7 +8,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -97,19 +96,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 methodResult.AddError(courseResult.Error);
                 return methodResult;
             }
-
             var course = courseResult.Content?.Result;
 
             Order order = _mapper.Map<Order>(request);
-            order.Country = EnumZoneRegion.Vietnam.ToString();
-            order.Status = EnumOrderStatus.New;
-            order.UserId = _authContext.CurrentUserId;
-            order.Code = code;
-            order.Price = package.Price;
-            order.DiscountPercent = 0;
-            order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
-            order.TotalPrice = order.Price - order.DiscountPrice;
-            order.CourseId = course!.Id;
+
+            AddDataIntoOrder(order, code, package.Price, course!.Id);
+
             if (!order.IsValid())
             {
                 methodResult.AddErrorBadRequest(order.ErrorMessages);
@@ -119,20 +111,38 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 order = _orderRepository.Add(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
-                {
-                    Roles = new List<EnumRole> { EnumRole.Admin },
-                    ObjectId = order.Id,
-                    Type = EnumNotificationType.Text,
-                    Content = EnumNotificationContent.OrderCreate,
-                    SenderId = order.CreatedUserId,
-                    PlatformCode = EnumPlatformCode.LMSAdmin
-                }, cancellationToken);
+                SendNotify(order.Id, order.CreatedUserId, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(order);
                 return methodResult;
             });
             return methodResult;
+        }
+
+        private void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId)
+        {
+            order.Country = EnumZoneRegion.Vietnam.ToString();
+            order.Status = EnumOrderStatus.New;
+            order.UserId = _authContext.CurrentUserId;
+            order.Code = code;
+            order.Price = price;
+            order.DiscountPercent = 0;
+            order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
+            order.TotalPrice = order.Price - order.DiscountPrice;
+            order.CourseId = courseId;
+        }
+
+        private async void SendNotify(Guid orderId, Guid senderId, CancellationToken cancellationToken)
+        {
+            await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+            {
+                Roles = new List<EnumRole> { EnumRole.Admin },
+                ObjectId = orderId,
+                Type = EnumNotificationType.Text,
+                Content = EnumNotificationContent.OrderCreate,
+                SenderId = senderId,
+                PlatformCode = EnumPlatformCode.LMSAdmin
+            }, cancellationToken);
         }
     }
 }

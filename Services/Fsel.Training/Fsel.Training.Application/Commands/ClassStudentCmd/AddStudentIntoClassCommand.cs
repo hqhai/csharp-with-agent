@@ -59,52 +59,56 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
 
             var @class = await _classRepository.Queryable.Include(x => x.ClassStudents).FirstOrDefaultAsync(p => p.CourseId == request.CourseId, cancellationToken);
 
-            if (@class == null)
+            await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = course?.Code, CourseLevel = course?.CourseLevel }, cancellationToken).ConfigureAwait(false);
-                var code = codeResult.Result;
-                var newClass = new Class
+                if (@class == null)
                 {
-                    Code = code,
-                    Name = code,
-                    CourseId = request.CourseId,
-                    Status = EnumClassStatus.Active,
-                    PackageId = request.PackageId,
-                    ClassStudents = new List<ClassStudent>()
+                    var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = course?.Code, CourseLevel = course?.CourseLevel }, cancellationToken).ConfigureAwait(false);
+                    var code = codeResult.Result;
+                    var newClass = new Class
+                    {
+                        Code = code,
+                        Name = code,
+                        CourseId = request.CourseId,
+                        Status = EnumClassStatus.Active,
+                        PackageId = request.PackageId,
+                        ClassStudents = new List<ClassStudent>()
                     {
                         new ClassStudent() { StudentId = student!.Id, IsActive = true }
                     }
-                };
-                @class = _classRepository.Add(newClass);
-            }
-            else
-            {
-                if (@class.ClassStudents.Any(p => p.StudentId == student!.Id))
+                    };
+                    @class = _classRepository.Add(newClass);
+                }
+                else
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                    if (@class.ClassStudents.Any(p => p.StudentId == student!.Id))
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                        return methodResult;
+                    }
+
+                    @class.Status = EnumClassStatus.Active;
+                    @class.ClassStudents.Add(new ClassStudent() { StudentId = student!.Id, IsActive = true });
+                    _classRepository.Update(@class);
+                }
+
+                await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel()
+                {
+                    StudentId = student!.Id,
+                    ClassId = @class.Id,
+                    PackageId = @class.PackageId,
+                });
+                if (!updateStudentResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(updateStudentResult.Error);
                     return methodResult;
                 }
 
-                @class.Status = EnumClassStatus.Active;
-                @class.ClassStudents.Add(new ClassStudent() { StudentId = student!.Id, IsActive = true });
-                _classRepository.Update(@class);
-            }
-
-            await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel()
-            {
-                StudentId = student!.Id,
-                ClassId = @class.Id,
-                PackageId = @class.PackageId,
-            });
-            if (!updateStudentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(updateStudentResult.Error);
+                methodResult.Result = @class.Id;
                 return methodResult;
-            }
-
-            methodResult.Result = @class.Id;
+            });
             return methodResult;
         }
     }

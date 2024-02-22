@@ -3,7 +3,6 @@
 namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 {
     using System;
-    using System.Linq.Dynamic.Core;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -15,6 +14,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Services.CourseService;
+    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -100,16 +100,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 methodResult.AddError(courseResult.Error);
                 return methodResult;
             }
-
             var course = courseResult.Content?.Result;
 
-            order.Status = EnumOrderStatus.New;
-            order.Code = code;
-            order.Price = package.Price;
-            order.DiscountPercent = 0;
-            order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
-            order.TotalPrice = order.Price - order.DiscountPrice;
-            order.CourseId = course!.Id;
+            AddDataIntoOrder(order, code, package.Price, course!.Id);
+
             if (!order.IsValid())
             {
                 methodResult.AddErrorBadRequest(order.ErrorMessages);
@@ -124,6 +118,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             });
             return methodResult;
+        }
+
+        private static void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId)
+        {
+            order.Status = EnumOrderStatus.New;
+            order.Code = code;
+            order.Price = price;
+            order.DiscountPercent = 0;
+            order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
+            order.TotalPrice = order.Price - order.DiscountPrice;
+            order.CourseId = courseId;
         }
     }
 }
