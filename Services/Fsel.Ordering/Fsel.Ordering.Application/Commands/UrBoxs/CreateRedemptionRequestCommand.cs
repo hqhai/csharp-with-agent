@@ -96,7 +96,15 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 return methodResult;
             }
 
-            if (token < price)
+            if (!long.TryParse(request.DataBuy.FirstOrDefault()?.Quantity, out long quantity))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            var totalPrice = quantity * price;
+
+            if (token < totalPrice)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Min));
                 return methodResult;
@@ -153,7 +161,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
                 if (createRedemptionRequest.Content?.Status == 200)
                 {
-                    var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new Application.Services.UserService.Models.UpdateStudentByTokenModel { StudentId = studentResult.Content?.Result?.Id ?? default, NumberOfToken = -price });
+                    var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new Application.Services.UserService.Models.UpdateStudentByTokenModel { StudentId = studentResult.Content?.Result?.Id ?? default, NumberOfToken = -totalPrice });
                     if (!updateTokenResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(updateTokenResult.Error);

@@ -40,6 +40,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                 AppSecret = _appSetting.UrBoxConfig?.AppSecret,
                 AppId = _appSetting.UrBoxConfig?.AppId,
                 CatId = request.CategoryId,
+                Language = request.Language
             });
 
             var theGiftList = getAllGift.Content;
@@ -56,7 +57,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
 
                 if (!string.IsNullOrEmpty(request.Keyword))
                 {
-                    data = data.Where(p => !string.IsNullOrEmpty(p.Title) && p.Title.Contains(request.Keyword, StringComparison.CurrentCulture)).ToList();
+                    data = data.Where(p => !string.IsNullOrEmpty(p.Title) && p.Title.Contains(request.Keyword, StringComparison.OrdinalIgnoreCase)).ToList();
                 }
 
                 if (request.Min.HasValue && request.Max.HasValue)
