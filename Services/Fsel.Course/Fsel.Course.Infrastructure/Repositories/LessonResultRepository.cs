@@ -31,12 +31,13 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                      .ToListAsync();
         }
 
-        public async Task<LessonResult?> GetAsync(Guid? lessonId, Guid? studentId)
+        public async Task<LessonResult?> GetAsync(Guid? courseId, Guid? unitId, Guid? lessonId, Guid? studentId)
         {
             return await Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                     .Include(x => x.VideoResult)
                                     .Include(x => x.Lesson)
                                     .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
+                                    .Where(x => x.CourseId == courseId && x.UnitId == unitId)
                                     .FirstOrDefaultAsync(x => x.LessonId == lessonId && x.StudentId == studentId);
         }
 
