@@ -46,12 +46,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else if (lessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Any())
                 {
-                    var isUnitDone = false;
-                    var isSkillMockTestDone = await _mockTestResultRepository.Queryable.AnyAsync(x => x.Status == EnumResultStatus.Done && x.UnitId == unit.Id && x.CourseId == lessonResult.CourseId, cancellationToken);
-                    if (isSkillMockTestDone)
-                    {
-                        isUnitDone = true;
-                    }
+                    var isUnitDone = await _mockTestResultRepository.Queryable.AnyAsync(x => x.Status == EnumResultStatus.Done && x.UnitId == unit.Id && x.CourseId == lessonResult.CourseId, cancellationToken);
                     await UpdateTheNextLessonAsync(unit, lessonResult, cancellationToken).ConfigureAwait(false);
                     await UpdateUnitResultAsync(lessonResults, unit, lessonResult.CourseId, lessonResult.StudentId, isUnitDone, cancellationToken).ConfigureAwait(false);
                 }
