@@ -22,5 +22,14 @@ namespace Fsel.Ordering.Application.Services.UserService
 
         [Put("/student/update-student-token")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
+
+        [Post("/student-trial-registration")]
+        Task<IApiResponse<MethodResult<StudentRegistrationModel>>> CreateStudentTrialRegistration();
+
+        [Put("/student-trial-registration")]
+        Task<IApiResponse<MethodResult<StudentRegistrationModel>>> UpdateStudentTrialRegistration([Body] UpdateStudentTrialRegistrationModel command);
+
+        [Get("/student-trial-registration/check")]
+        Task<IApiResponse<MethodResult<bool>>> GetStuentTrialRegistration();
     }
 }

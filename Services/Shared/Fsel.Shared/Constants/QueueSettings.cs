@@ -117,6 +117,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
+                public const string FinishSubmission = $"{KeyQueue}_FinishSubmission";
             }
         }
 
