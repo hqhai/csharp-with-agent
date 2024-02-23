@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 Id = classForumResult.Id,
                 Content = classForumResult.Content,
                 WordContent = classForumResult.WordContent,
-                WordCount = classForumResult.WordCount,
+                WordCount = classForumResult.WordCount ?? default,
                 TimeCount = classForumResult.TimeCount,
                 Status = classForumResult.Status,
                 ClassForumId = classForumResult.ClassForumId,
