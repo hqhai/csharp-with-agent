@@ -18,5 +18,6 @@ namespace Fsel.Shared.Enums
         WeeklyReport2,
         WeeklyReport3,
         WeeklyReport4,
+        StudentCompletePT
     }
 }

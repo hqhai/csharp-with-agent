@@ -12,6 +12,7 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? StartDate { get; set; }
         public string? EndDate { get; set; }
         public string? TotalDay { get; set; }
+        #region không sửa, không xóa
         public string? SaturdayIsActive { get; set; }
         public string? SundayIsActive { get; set; }
         public string? MondayIsActive { get; set; }
@@ -19,6 +20,7 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? WednesdayIsActive { get; set; }
         public string? ThursdayIsActive { get; set; }
         public string? FridayIsActive { get; set; }
+        #endregion
         public string? TotalHour { get; set; }
         public string? TotalLearn { get; set; }
         public string? TotalSocial { get; set; }

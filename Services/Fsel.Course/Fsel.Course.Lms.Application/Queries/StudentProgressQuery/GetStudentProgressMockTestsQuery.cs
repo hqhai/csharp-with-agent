@@ -124,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         Scores = skillScore?.Scores ?? default,
                     };
 
-                    if (x.Skill == EnumCourseSkill.Speaking || x.Skill == EnumCourseSkill.Writing)
+                    if (x.Skill == EnumCourseSkill.Speaking)
                     {
                         if (x.MockTestScores.Any() && x.MockTestScores.All(x => x != null))
                         {
