@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                             };
 
                 var skillMockTest = await query.ToListAsync(cancellationToken);
-                mockTestProgress.SkillScores = skillMockTest.Select(x =>
+                mockTestProgress.SkillScores = skillMockTest.OrderBy(x => x.Skill).Select(x =>
                 {
                     var skillScore = x.MockTestResult?.SkillScores?.FirstOrDefault(z => z.Skill == x.Skill);
                     var skillScores = new TestSkillScores
@@ -124,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         Scores = skillScore?.Scores ?? default,
                     };
 
-                    if (x.Skill == EnumCourseSkill.Speaking || x.Skill == EnumCourseSkill.Writing)
+                    if (x.Skill == EnumCourseSkill.Speaking)
                     {
                         if (x.MockTestScores.Any() && x.MockTestScores.All(x => x != null))
                         {

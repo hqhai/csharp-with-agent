@@ -13,10 +13,12 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoRepository : BaseRepository<Video>, IVideoRepository
     {
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ILessonRepository _lessonRepository;
 
-        public VideoRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper, ILessonRepository lessonRepository) : base(dbContext, authContext, mapper)
+        public VideoRepository(CourseDbContext dbContext, AuthContext authContext, ILessonResultRepository lessonResultRepository, AutoMapper.IMapper mapper, ILessonRepository lessonRepository) : base(dbContext, authContext, mapper)
         {
+            _lessonResultRepository = lessonResultRepository;
             _lessonRepository = lessonRepository;
         }
 
@@ -45,17 +47,26 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<double> GetPercent(Guid unitId, Guid? studentId)
+        public async Task<double> GetPercent(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var videoIds = await _lessonRepository.Queryable.Include(x => x.LessonVideos).Include(x => x.UnitLessons).Where(x => x.UnitLessons.Any(x => x.UnitId == unitId)).SelectMany(x => x.LessonVideos).Select(x => x.VideoId).ToListAsync();
+            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResult).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+
+            var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
+            var videoResultIds = lessonResults.Where(x => x.VideoResult != null).Select(x => x.VideoResult!.Id).ToList();
+
+            var videoIds = await _lessonRepository.Queryable.Include(x => x.LessonVideos)
+                                                .Where(x => lessonIds.Contains(x.Id))
+                                                .SelectMany(x => x.LessonVideos)
+                                                .Select(x => x.VideoId)
+                                                .ToListAsync();
 
             var videos = await Queryable.Include(x => x.VideoTimeCodes)
-                                    .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.StudentId == studentId))
-                                 .Include(x => x.LessonVideos)
-                                 .Where(x => videoIds.Contains(x.Id))
-                                 .ToListAsync();
+                                    .ThenInclude(x => x.VideoTimeCodeResults.Where(x => videoResultIds.Contains(x.VideoResultId)))
+                                    .Where(x => videoIds.Contains(x.Id))
+                                    .ToListAsync();
+
             var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == EnumTimeCodeType.UnitTest).ToList();
-            var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
+            var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => videoResultIds.Contains(x.VideoResultId)).Where(x => x.Status == EnumResultStatus.Done).ToList();
             return NumberHelper.GetPercent(videoTimeCodeResults.Count, videoTimeCodes.Count);
         }
 
