@@ -29,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMediator _mediator;
+
         public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
             _submitAIResponsePublisher = submitAIResponsePublisher;
@@ -45,7 +46,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             var mockTestAnswer = _mockTestAnswerRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId && x.MockTestResultId == request.MockTestResultId);
 
             var aiConfig = _aiGradeSettingRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId);
-
 
             var resultDictionary = new Dictionary<EnumMockTestAIType, string>();
 
@@ -101,7 +101,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             bool checkSkillMockTest = mockTestResult.MockTest!.MockTestType == EnumMockTestType.SkillMockTest;
 
-
             (double averageScore, double totalScore) = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
 
             var skillScore = sectionGroupResult!.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
@@ -137,6 +136,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 {
                     mockTestResult.SkillScores = skillScores;
                     mockTestResult.CorrectCount = correcCount;
+                    mockTestResult.CorrectCount = 36;
                 }
             }
 
@@ -189,8 +189,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             return bandScore;
         }
 
-
-
         private static (double average, double totalScore) CalculateOverallAverage(params List<MockTestAIGradingModel>[] bandScoreDescriptions)
         {
             double totalScore = 0;
@@ -205,11 +203,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             return (NumberHelper.RoundNumberDouble(average), totalScore);
         }
 
-
         private static double CaculateAverageScoreWritingSection(double firstScore, double average)
         {
             return NumberHelper.RoundNumberDouble((firstScore + average * 2) / 3);
         }
-
     }
 }

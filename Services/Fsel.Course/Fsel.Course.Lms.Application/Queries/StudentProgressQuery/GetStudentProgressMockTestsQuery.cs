@@ -146,7 +146,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var isDone = item.Status == EnumResultStatus.Done;
                 mockTestProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
                 mockTestProgress.ProcessPercent = NumberHelper.ConvertPercentDouble(mockTestProgress.SkillScores.Average(x => x.CountQuestion / (x.TotalQuestion > 0 ? x.TotalQuestion : 1)));
-                mockTestProgress.Scores = Math.Round(mockTestProgress.SkillScores.Average(x => x.Scores), 1);
+                NumberHelper.RoundNumberDouble(mockTestProgress.SkillScores.Average(x => x.Scores));
                 mockTestProgress.Status = item.Status;
                 mockTestProgress.CorrectPercent = item.Percent;
                 var featureAccessTime = featureAccessTimeTest?.FirstOrDefault(x => x.ObjectId == item.Id);
