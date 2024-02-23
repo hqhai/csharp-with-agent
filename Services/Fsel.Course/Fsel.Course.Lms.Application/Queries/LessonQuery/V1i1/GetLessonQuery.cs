@@ -79,7 +79,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                 {
                     lessonDto.IsClassForumLock = false;
                 }
-
                 if (lessonResult.HomeWorkResults.Any(x => x.Status != EnumResultStatus.Unfinished) || (classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft))
                 {
                     lessonDto.IsHomeWorkLock = false;
