@@ -19,6 +19,8 @@ namespace Fsel.System.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumLocationType>());
             builder.HasOne(l => l.Parent).WithMany(l => l.Children).HasForeignKey(l => l.ParentId).OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(e => e.IsActive).HasDefaultValue(true);
         }
     }
 }
