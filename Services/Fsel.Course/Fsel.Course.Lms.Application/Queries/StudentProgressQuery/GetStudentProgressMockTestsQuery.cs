@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                             };
 
                 var skillMockTest = await query.ToListAsync(cancellationToken);
-                mockTestProgress.SkillScores = skillMockTest.Select(x =>
+                mockTestProgress.SkillScores = skillMockTest.OrderBy(x => x.Skill).Select(x =>
                 {
                     var skillScore = x.MockTestResult?.SkillScores?.FirstOrDefault(z => z.Skill == x.Skill);
                     var skillScores = new TestSkillScores
