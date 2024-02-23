@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Refit;
 
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [ApiVersion(ApiSettings.APIVersion1)]
