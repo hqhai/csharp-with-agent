@@ -14,7 +14,7 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<VideoModel?> GetIncludeAllAsync(Guid? id);
 
-        Task<double> GetPercent(Guid unitId, Guid? studentId);
+        Task<double> GetPercent(Guid courseId, Guid unitId, Guid? studentId);
 
         IQueryable<VideoSearchModel> SearchAsync(EnumTimeCodeType? codeType, Guid? teacherId, EnumCourseLevel? courseLevel);
     }
