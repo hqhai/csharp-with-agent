@@ -6,7 +6,6 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Shared.Enums;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -31,7 +30,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
-            var classes = await _classRepository.Queryable.Include(cs => cs.ClassStudents).FirstOrDefaultAsync(p => p.Status == EnumClassStatus.New && p.ClassStudents.Any(p => p.StudentId == request.StudentId), cancellationToken);
+            var classes = await _classRepository.Queryable.Include(cs => cs.ClassStudents).FirstOrDefaultAsync(p => p.ClassStudents.Any(p => p.StudentId == request.StudentId), cancellationToken);
             if (classes == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
