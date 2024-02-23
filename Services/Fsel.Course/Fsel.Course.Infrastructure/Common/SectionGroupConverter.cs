@@ -613,13 +613,19 @@ namespace Fsel.Course.Infrastructure.Common
             return questionDto;
         }
 
-        public bool IsTeacherGraded(MockTestResult mockTestResult, IList<EnumCourseSkill>? courseSkills)
+        public async Task<bool> IsTeacherGraded(MockTestResult mockTestResult, IList<EnumCourseSkill>? courseSkills)
         {
             ArgumentNullException.ThrowIfNull(mockTestResult);
-            var isTeacherGradedSkill = courseSkills?.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
+            var isTeacherGradedSkill = courseSkills?.Any(x => x == EnumCourseSkill.Speaking);
+            var isAIGraded = courseSkills?.Any(x => x == EnumCourseSkill.Writing);
             if (isTeacherGradedSkill.HasValue && isTeacherGradedSkill.Value)
             {
                 return mockTestResult.MockTestScores.Any();
+            }
+            if (isAIGraded.HasValue && isAIGraded.Value)
+            {
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id).ToListAsync();
+                return mockTestAnswers.All(x => !string.IsNullOrEmpty(x.GradingAlFeedback));
             }
             return true;
         }
