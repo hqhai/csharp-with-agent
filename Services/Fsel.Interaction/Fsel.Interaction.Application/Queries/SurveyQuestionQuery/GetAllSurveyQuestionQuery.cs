@@ -32,7 +32,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
             var methodResult = new MethodResult<IList<SurveyQuestionModel>>();
 
             var surveyQuestionquery = await _surveyQuestionRepository.Queryable
-                .Where(x => x.IsPilot == request.IsPilot && x.DisplayLevel == request.DisplayLevel)
+                .Where(x => x.DisplayLevel == request.DisplayLevel)
                 .OrderBy(x => x.DisplayOrder)
                 .Select(x => new SurveyQuestionModel
                 {
@@ -43,7 +43,6 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
                     Icon = x.Icon,
                     Question = x.Question,
                     Answers = x.Answers,
-                    IsPilot = x.IsPilot,
                     DisplayLevel = x.DisplayLevel,
                 }).ToListAsync(cancellationToken: cancellationToken);
 
