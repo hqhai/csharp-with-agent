@@ -159,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             var lessonMockTestResult = _mapper.Map<LessonMockTestResultModel>(mockTestResult);
             var courseSkills = mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList();
             lessonMockTestResult.CourseSkill = courseSkills.FirstOrDefault();
-            lessonMockTestResult.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult, courseSkills);
+            lessonMockTestResult.IsTeacherGraded = await _sectionGroupConverter.IsTeacherGraded(mockTestResult, courseSkills);
             (lessonMockTestResult.IsCheckScoreColor, lessonMockTestResult.TargetBandScore) = course.CourseLevel.CheckScoreColor(scores);
             return lessonMockTestResult;
         }

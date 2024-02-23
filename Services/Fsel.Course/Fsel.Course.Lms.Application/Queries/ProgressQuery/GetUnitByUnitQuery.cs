@@ -88,19 +88,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     switch (request.Type)
                     {
                         case EnumLearnProcessType.LessonVideo:
-                            percent = await _lessonRepository.GetPercentLesson(unit.Id, studentId);
+                            percent = await _lessonRepository.GetPercentLesson(request.CourseId, unit.Id, studentId);
                             break;
 
                         case EnumLearnProcessType.HomeWork:
-                            percent = await _lessonRepository.GetPercentHomeWork(unit.Id, studentId);
+                            percent = await _lessonRepository.GetPercentHomeWork(request.CourseId, unit.Id, studentId);
                             break;
 
                         case EnumLearnProcessType.ClassForum:
-                            percent = await _lessonRepository.GetPercentClassForum(unit.Id, studentId);
+                            percent = await _lessonRepository.GetPercentClassForum(request.CourseId, unit.Id, studentId);
                             break;
 
                         case EnumLearnProcessType.UnitTest:
-                            percent = await _videoRepository.GetPercent(unit.Id, studentId);
+                            percent = await _videoRepository.GetPercent(request.CourseId, unit.Id, studentId);
                             break;
 
                         default:
