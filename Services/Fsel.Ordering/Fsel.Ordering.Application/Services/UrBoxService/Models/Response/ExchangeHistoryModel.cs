@@ -4,7 +4,7 @@ namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Response
 {
     public class ExchangeHistoryModel
     {
-        public IList<DetailGiftExchangeHistory>? UnUsed { get; set; }
-        public IList<DetailGiftExchangeHistory>? Used { get; set; }
+        public IList<CodeLinkGift>? UnUsed { get; set; }
+        public IList<CodeLinkGift>? Used { get; set; }
     }
 }
