@@ -152,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 if (checkSkillMockTest)
                 {
                     _mockTestResultRepository.Update(mockTestResult);
-                    await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
 
