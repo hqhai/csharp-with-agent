@@ -28,6 +28,7 @@ builder.Services.AddScoped<SyncStudentShieldEveryDayPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<CompleteTestWhenTimeOutPublisher>();
 builder.Services.AddScoped<WeeklyReportPublisher>();
+builder.Services.AddScoped<UpdateStatusTrialStudentPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {

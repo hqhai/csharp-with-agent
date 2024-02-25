@@ -22,6 +22,7 @@ namespace Fsel.Shared.Constants
                 public const string SyncStudentShieldEveryDay = $"{KeyQueue}_SyncStudentShieldEveryDay";
                 public const string UpdateStudentsDailyStreak = $"{KeyQueue}_UpdateStudentsDailyStreak";
                 public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
+                public const string UpdateStatusTrialStudent = $"{KeyQueue}_UpdateStatusTrialStudent";
             }
         }
 
