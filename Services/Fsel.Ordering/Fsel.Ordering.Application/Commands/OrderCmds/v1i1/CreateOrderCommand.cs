@@ -14,10 +14,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
+    using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -38,8 +40,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private readonly IPackageRepository _packageRepository;
         private readonly AuthContext _authContext;
         private readonly ILmsCourseService _courseService;
+        private readonly IUserService _userService;
 
-        public CreateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService)
+        public CreateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService, IUserService userService)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
@@ -48,6 +51,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             _packageRepository = packageRepository;
             _authContext = authContext;
             _courseService = courseService;
+            _userService = userService;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -134,6 +138,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
                 return methodResult;
+            }
+
+            if (request.IsTrial)
+            {
+                DateTime expireTrialDate = DateTime.UtcNow.AddDays(ValueSettings.AmountTrialDays);
+                newOrder.IsTrial = request.IsTrial;
+                newOrder.ExpireDate = expireTrialDate;
+                newOrder.Status = EnumOrderStatus.Payment;
+                await _userService.CreateStudentTrialRegistration();
             }
 
             await _orderRepository.ExecuteTransactionAsync(async () =>
