@@ -105,12 +105,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             var skillScore = sectionGroupResult!.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
 
-            var skillScores = sectionGroupResult!.SkillScores?.ToList();
+            var skillScores = sectionGroupResult!.SkillScores?.ToList() ?? new List<SkillScores>();
 
-            if (skillScores == null)
-            {
-                skillScores = new List<SkillScores>();
-            }
             if (skillScore == null)
             {
                 skillScore = new SkillScores
@@ -122,10 +118,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     TotalQuestion = 2,
                     CountQuestion = 2
                 };
-                skillScores!.Add(skillScore);
+                skillScores.Add(skillScore);
             }
             else
             {
+                skillScore = skillScores.Single();
                 int correcCount = (int)CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore);
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
                 skillScore!.CorrectCount = correcCount;
@@ -156,7 +153,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 if (checkSkillMockTest)
                 {
                     _mockTestResultRepository.Update(mockTestResult);
-                    await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
 

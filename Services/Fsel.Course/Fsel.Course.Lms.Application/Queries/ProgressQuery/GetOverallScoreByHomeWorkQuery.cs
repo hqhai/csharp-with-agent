@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -67,58 +66,56 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
                 return methodResult;
             }
-            var lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).ToList();
-
-            var lessonHomeWorks = await _lessonHomeWorkRepository.Queryable.Include(x => x.HomeWork).Where(x => lessonIds.Contains(x.LessonId)).ToListAsync(cancellationToken);
-            if (lessonHomeWorks == null || lessonHomeWorks.Count == 0)
+            var lessonDuplicateIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).GroupBy(x => x)
+                 .Select(x => new
+                 {
+                     Id = x.Key,
+                     NumberOfDuplicate = x.Count(),
+                 })
+                .ToList();
+            var lessonHomeWorks = await _lessonHomeWorkRepository.Queryable.Where(x => lessonDuplicateIds.Select(x => x.Id).Contains(x.LessonId)).ToListAsync(cancellationToken);
+            var homeWorkIds = lessonHomeWorks.Select(x => new
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonHomeWorks));
+                Id = x.HomeWorkId,
+                NumberOfDuplicate = lessonDuplicateIds.Where(y => y.Id == x.LessonId).Max(x => x.NumberOfDuplicate),
+            }).ToList();
+
+            if (homeWorkIds == null || homeWorkIds.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkIds));
                 return methodResult;
             }
-            var homeWorkLessons = lessonHomeWorks.Select(x => x.HomeWork ?? new HomeWork()).ToList();
-            var homeWorkIds = homeWorkLessons.Select(x => x.Id).ToList();
+            var listHomeWorkId = homeWorkIds.Select(x => x.Id).ToList();
             var homeWorks = await _homeWorkRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
-                                                                .ThenInclude(x => x.HomeWorkAnswers)
-                                                                .Include(x => x.HomeWorkQuestions)
-                                                                .ThenInclude(x => x.Question)
-                                                                .Where(x => homeWorkIds.Contains(x.Id))
-                                                                .ToListAsync(cancellationToken);
+                                                                    .ThenInclude(x => x.HomeWorkAnswers)
+                                                               .Include(x => x.HomeWorkQuestions)
+                                                               .ThenInclude(x => x.Question)
+                                                               .Where(x => listHomeWorkId.Contains(x.Id))
+                                                               .ToListAsync(cancellationToken);
             if (homeWorks == null || homeWorks.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorks));
                 return methodResult;
             }
-            foreach (var item in homeWorkLessons)
+            var skillScores = homeWorks.GroupBy(x => x.CourseSkill).Select(x =>
             {
-                if (item != null)
+                double totalQuestion = 0, totalCount = 0;
+                foreach (var item in x.ToList())
                 {
-                    var homeWork = homeWorks.FirstOrDefault(x => x.Id == item.Id);
-                    if (homeWork != null)
-                    {
-                        item.HomeWorkQuestions = homeWork.HomeWorkQuestions;
-                        item.HomeWorkResults = homeWork.HomeWorkResults;
-                    }
+                    var numberOfDuplicate = homeWorkIds.FirstOrDefault(vid => vid.Id == item.Id)?.NumberOfDuplicate ?? default;
+                    totalQuestion += (item?.HomeWorkQuestions.Select(x => x.Question).Count() ?? default) * numberOfDuplicate;
+                    totalCount += (item?.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal) ?? default) * numberOfDuplicate;
                 }
-            }
-
-            var skillScores = homeWorkLessons.GroupBy(x => x.CourseSkill).Select(x =>
-            {
-                var homeWorkResults = x.SelectMany(x => x.HomeWorkResults).Distinct().ToList();
-                var questions = x.SelectMany(x => x.HomeWorkQuestions).Select(x => x.Question!).ToList();
-
-                var countQuestion = homeWorkResults.SelectMany(x => x.HomeWorkAnswers).Count();
-                var totalQuestion = questions.Count;
-                var correctCount = homeWorkResults.SelectMany(x => x.HomeWorkAnswers).Sum(x => x.CorrectCount);
-                var totalCount = questions.Sum(x => x!.CorrectTotal);
                 return new SkillScores
                 {
                     Skill = x.Key,
-                    CountQuestion = countQuestion,
+                    CountQuestion = x.SelectMany(x => x.HomeWorkResults).SelectMany(x => x.HomeWorkAnswers).Count(),
                     TotalQuestion = totalQuestion,
-                    CorrectCount = correctCount,
+                    CorrectCount = x.SelectMany(x => x.HomeWorkResults).Sum(x => x.CorrectCount),
                     TotalCount = totalCount,
                 };
             }).ToList();
+
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CountQuestion = overallScoreReport.SkillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = overallScoreReport.SkillScores.Sum(x => x.TotalQuestion);
