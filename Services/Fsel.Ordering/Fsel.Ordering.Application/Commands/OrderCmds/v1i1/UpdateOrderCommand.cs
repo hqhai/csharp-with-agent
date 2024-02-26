@@ -24,7 +24,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdateOrderCommand : CreateOrderCommandModel, IRequest<MethodResult<OrderModel>>
+    public class UpdateOrderCommand : UpdateOrderCommandModel, IRequest<MethodResult<OrderModel>>
     {
     }
 
@@ -52,8 +52,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
 
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId, cancellationToken);
-            if (order == null)
+            if (request.Order == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
@@ -102,19 +101,19 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
             var course = courseResult.Content?.Result;
 
-            AddDataIntoOrder(order, code, package.Price, course!.Id);
+            AddDataIntoOrder(request.Order, code, package.Price, course!.Id);
 
-            if (!order.IsValid())
+            if (!request.Order.IsValid())
             {
-                methodResult.AddErrorBadRequest(order.ErrorMessages);
+                methodResult.AddErrorBadRequest(request.Order.ErrorMessages);
                 return methodResult;
             }
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
-                order = _orderRepository.Update(order);
+                request.Order = _orderRepository.Update(request.Order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<OrderModel>(order);
+                methodResult.Result = _mapper.Map<OrderModel>(request.Order);
                 return methodResult;
             });
             return methodResult;

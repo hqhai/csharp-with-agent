@@ -22,7 +22,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public Guid CourseId { get; set; }
 
         public Guid PackageId { get; set; }
-        public EnumPackageCode? PackageCode { get; set; }
+        public string? PackageCode { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
 
         public IList<DayOfWeek>? LiveDays { get; set; }

@@ -39,7 +39,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             var methodResult = new MethodResult<IList<ClassModel>>();
 
             var packagesResult = await _orderService.GetPackages();
-            var idPackagePremium = packagesResult.Content?.Result?.FirstOrDefault(p => p.Code == EnumPackageCode.PREMIUM)?.Id;
+            var idPackagePremium = packagesResult.Content?.Result?.FirstOrDefault(p => p.Code == EnumPackageCode.PREMIUM.ToString())?.Id;
 
             var classes = await _classRepository.Queryable.Where(p => p.Status == EnumClassStatus.Active && p.PackageId == idPackagePremium && p.CsoId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
 

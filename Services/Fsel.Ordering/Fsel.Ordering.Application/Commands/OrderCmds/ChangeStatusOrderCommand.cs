@@ -33,6 +33,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly ILmsCourseService _lmsCourseService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly AuthContext _authContext;
+        private readonly ILmsCourseService _courseService;
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -40,7 +41,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , IPackageRepository packageRepository
             , ILmsCourseService lmsCourseService
             , NotificationMessagePublisher notificationMessagePublisher
-            , AuthContext authContext)
+            , AuthContext authContext,
+ILmsCourseService courseService)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -49,6 +51,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _lmsCourseService = lmsCourseService;
             _notificationMessagePublisher = notificationMessagePublisher;
             _authContext = authContext;
+            _courseService = courseService;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -88,7 +91,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
             var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
-            var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
+            var numberOfShield = 1;
+            //NOTE: var numberOfShield = (package != null && !string.IsNullOrEmpty(package.Code)) ? (int)package.Code.Value : default;
             var course = courseResults.Content?.Result?.FirstOrDefault();
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
@@ -116,7 +120,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         methodResult.AddError(updateStudentStatusInClass.Error);
                         return methodResult;
                     }
-
+                    var updateNextUnitResult = await _courseService.UpdateNextUnit();
+                    if (!updateNextUnitResult.IsSuccessStatusCode)
+                    {
+                        methodResult.AddError(updateNextUnitResult.Error);
+                        return methodResult;
+                    }
                     await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
                         UserIds = new List<Guid>() { order.UserId },

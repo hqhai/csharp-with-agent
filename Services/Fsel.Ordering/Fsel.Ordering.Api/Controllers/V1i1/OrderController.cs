@@ -50,17 +50,5 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
             var commandResult = await _mediator.Send(new GetOrderByUserQuery() { }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Update Order
-        /// </summary>
-        [HttpPut]
-        [ProducesResponseType(typeof(MethodResult<OrderModel?>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromBody] UpdateOrderCommand command)
-        {
-            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
     }
 }

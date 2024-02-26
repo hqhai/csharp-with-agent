@@ -59,7 +59,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 return methodResult;
             }
             List<Class> classes = new List<Class>();
-            if (package.Code == EnumPackageCode.PREMIUM)
+            if (package.Code == EnumPackageCode.PREMIUM.ToString())
             {
                 var liveDaysStr = ConvertHelper.Serialize(request.LiveDays);
                 classes = await _classRepository.Queryable.Include(i => i.ClassStudents).Where(e => e.Status == EnumClassStatus.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId && e.ClassStudents.Count < 12 && e.LiveTimeFrameId == request.LiveTimeFrameId && liveDaysStr == e.LiveDaysStr).ToListAsync(cancellationToken: cancellationToken);

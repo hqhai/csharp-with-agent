@@ -69,7 +69,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             #region Pilot
 
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Code == EnumPackageCode.BASIC, cancellationToken);
+            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Code == EnumPackageCode.BASIC.ToString(), cancellationToken);
 
             #endregion Pilot
 
@@ -130,7 +130,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             var checkUserTrialBefore = await _userService.GetStuentTrialRegistration();
             var checkUserTrialBeforeResult = checkUserTrialBefore?.Content?.Result ?? default;
-
 
             if (checkUserTrialBeforeResult && !request.IsTrial)
             {

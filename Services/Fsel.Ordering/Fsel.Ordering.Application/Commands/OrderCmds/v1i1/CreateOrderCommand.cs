@@ -55,6 +55,34 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
 
+            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && (p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Fail), cancellationToken);
+            if (order != null)
+            {
+                var updateOrderResult = await _mediator.Send(new UpdateOrderCommand()
+                {
+                    Order = order,
+                    CourseLevel = request.CourseLevel,
+                    FullName = request.FullName,
+                    PhoneNumber = request.PhoneNumber,
+                    Email = request.Email,
+                    Country = request.Country,
+                    Address = request.Address,
+                    PaymentMethod = request.PaymentMethod,
+                    PackageId = request.PackageId,
+                    ProvinceId = request.ProvinceId,
+                    DistrictId = request.DistrictId,
+                }, cancellationToken).ConfigureAwait(false);
+
+                if (!updateOrderResult.IsOK)
+                {
+                    methodResult.AddError(updateOrderResult.ErrorMessages);
+                    return methodResult;
+                }
+
+                methodResult.Result = updateOrderResult.Result;
+                return methodResult;
+            }
+
             var package = await _packageRepository.GetByIdAsync(request.PackageId);
 
             if (package == null)
@@ -98,22 +126,23 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
             var course = courseResult.Content?.Result;
 
-            Order order = _mapper.Map<Order>(request);
+            Order newOrder = _mapper.Map<Order>(request);
 
-            AddDataIntoOrder(order, code, package.Price, course!.Id);
+            AddDataIntoOrder(newOrder, code, package.Price, course!.Id);
 
-            if (!order.IsValid())
+            if (!newOrder.IsValid())
             {
-                methodResult.AddErrorBadRequest(order.ErrorMessages);
+                methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
                 return methodResult;
             }
+
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
-                order = _orderRepository.Add(order);
+                newOrder = _orderRepository.Add(newOrder);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                SendNotify(order.Id, order.CreatedUserId, cancellationToken);
+                SendNotify(newOrder.Id, newOrder.CreatedUserId, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<OrderModel>(order);
+                methodResult.Result = _mapper.Map<OrderModel>(newOrder);
                 return methodResult;
             });
             return methodResult;
