@@ -69,7 +69,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
             var code = codeSend.Result?.Code;
 
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code || (x.Status == EnumOrderStatus.New && x.UserId == _authContext.CurrentUserId), cancellationToken))
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
                 return methodResult;
@@ -101,7 +101,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
             var course = courseResult.Content?.Result;
 
-            AddDataIntoOrder(request.Order, code, package.Price, course!.Id);
+            AddDataIntoOrder(request.Order, code, package.Price, course!.Id, request);
 
             if (!request.Order.IsValid())
             {
@@ -119,9 +119,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             return methodResult;
         }
 
-        private static void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId)
+        private static void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId, UpdateOrderCommandModel request)
         {
             order.Status = EnumOrderStatus.New;
+            order.FullName = request.FullName;
+            order.PhoneNumber = request.PhoneNumber;
+            order.Email = request.Email;
+            order.Address = request.Address;
             order.Code = code;
             order.Price = price;
             order.DiscountPercent = 0;
