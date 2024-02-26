@@ -40,7 +40,6 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
 
             if (studentRegistrationResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
