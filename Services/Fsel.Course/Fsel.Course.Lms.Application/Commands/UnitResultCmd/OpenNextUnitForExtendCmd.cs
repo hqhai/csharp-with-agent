@@ -13,7 +13,7 @@ using MediatR;
 
 namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
 {
-    public class OpenNextUnitForExtendCmd : OpenNextUnitForExtendUserCommandModel, IRequest<MethodResult<bool>>
+    public class OpenNextUnitForExtendCmd : IRequest<MethodResult<bool>>
     {
     }
 
@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
             var unitResult = _unitResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done);
             if (unitResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.UnitId), request.StudentId, nameof(request.CourseId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentId));
                 return methodResult;
             }
 
