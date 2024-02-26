@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var mockTestResult = notification.Data;
-            var mockTest = await _mockTestRepository.Queryable.Where(x => x.Id == mockTestResult.MockTestId).FirstOrDefaultAsync(cancellationToken);
+            var mockTest = await _mockTestRepository.GetByIdAsync(mockTestResult.MockTestId);
 
             if (mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && mockTestResult.Status == EnumResultStatus.Done)
             {

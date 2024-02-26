@@ -83,11 +83,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
                 TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
             }).ToList();
-
+            skillScores = skillScores.Where(x => x.TotalCount != 0).ToList();
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CountQuestion = skillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = skillScores.Sum(x => x.TotalQuestion);
-            overallScoreReport.CourseSkills = exercises.Select(x => x!.CourseSkill).Distinct().ToList();
+            overallScoreReport.CourseSkills = skillScores.Select(x => x!.Skill).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreReport;
             return methodResult;

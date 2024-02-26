@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Queries.HomeWorkQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
@@ -79,14 +80,18 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return methodResult;
             }
             var (questions, homeWorkResult) = method.Result;
-            var methodSave = await SaveAnswer(homeWorkResult, questions, request, cancellationToken);
-            if (!methodSave.IsOK)
+            await _homeWorkResultRepository.ExecuteTransactionAsync(async () =>
             {
-                methodResult.AddErrorBadRequest(methodSave.ErrorMessages);
+                var methodSave = await SaveAnswer(homeWorkResult, questions, request, cancellationToken);
+                if (!methodSave.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(methodSave.ErrorMessages);
+                    return methodResult;
+                }
+                await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, cancellationToken);
+                methodResult = await _mediator.Send(new GetHomeWorkQuery { HomeWorkId = homeWorkResult.HomeWorkId, LessonResultId = homeWorkResult.LessonResultId, IsShowSubStatus = request.IsSubmit }, cancellationToken);
                 return methodResult;
-            }
-            await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, cancellationToken);
-            methodResult = await _mediator.Send(new GetHomeWorkQuery { HomeWorkId = homeWorkResult.HomeWorkId, LessonResultId = homeWorkResult.LessonResultId, IsShowSubStatus = request.IsSubmit }, cancellationToken);
+            });
             return methodResult;
         }
 
