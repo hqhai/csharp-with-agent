@@ -88,6 +88,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private async Task<(List<SkillScores>, double)> GetCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
         {
             ArgumentNullException.ThrowIfNull(unitIds);
+            Thread.Sleep(2000);
             var units = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.StudentId == studentId)).Where(x => unitIds.Contains(x.Id)).ToListAsync();
             var lessonResults = units.SelectMany(x => x.LessonResults).Where(x => x.StudentId == studentId).ToList();
             var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResults.Select(x => x.Id).ToList(), EnumTimeCodeType.Standalone, default, type);
