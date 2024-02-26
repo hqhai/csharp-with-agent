@@ -54,7 +54,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Check học sinh có đang học thử không
+        /// Lấy thông tin học sinh học thử
         /// </summary>
         /// <param name="studentId"></param>
         /// <returns></returns>
@@ -76,7 +76,7 @@ namespace Fsel.Identity.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateStudentTrialRegistration([FromBody] UpdateStudentTrialRegistrationCommand cmd)
         {
-            MethodResult<StudentTrialRegistration> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

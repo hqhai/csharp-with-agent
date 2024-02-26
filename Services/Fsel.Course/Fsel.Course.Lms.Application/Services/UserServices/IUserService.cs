@@ -69,6 +69,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/student-trial-registration/check")]
         Task<IApiResponse<MethodResult<bool>>> CheckStudentTrialRegistration();
 
+        [Put("/student-trial-registration")]
+        Task<IApiResponse<MethodResult<StudentTrialRegistrationModel>>> UpdateTrialRegistrationStatusAsync([Body] StudentTrialRegistrationModel cmd);
+
 
     }
 }

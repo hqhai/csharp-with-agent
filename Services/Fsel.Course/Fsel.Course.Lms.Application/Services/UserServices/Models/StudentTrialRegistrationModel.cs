@@ -6,7 +6,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 
     public class StudentTrialRegistrationModel
     {
-        public Guid StudentId { get; set; }
+        public Guid UserId { get; set; }
 
         public EnumTrialRegistrationStatus Status { get; set; }
     }

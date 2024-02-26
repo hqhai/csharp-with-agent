@@ -118,8 +118,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.ClassId = classnew.Content?.Result.Id ?? default;
 
-            request.IsTrial = true;
-            if (request.IsTrial || true)
+            if (request.IsTrial)
             {
                 DateTime expireTrialDate = DateTime.UtcNow.AddDays(AmountTrialDays);
                 order.IsTrial = request.IsTrial;
@@ -136,6 +135,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 UpdateStudentTrialRegistrationModel command = new UpdateStudentTrialRegistrationModel { UserId = request.UserId, Status = EnumTrialRegistrationStatus.Payment };
                 await _userService.UpdateStudentTrialRegistration(command);
             }
+
+
+
+
 
             if (!order.IsValid())
             {

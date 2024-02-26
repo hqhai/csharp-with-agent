@@ -16,5 +16,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
         public Guid PackageId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
+
+        public bool IsTrial { get; set; }
     }
 }

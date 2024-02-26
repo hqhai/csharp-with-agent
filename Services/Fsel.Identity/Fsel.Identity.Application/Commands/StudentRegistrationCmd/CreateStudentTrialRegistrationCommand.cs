@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
@@ -38,6 +39,13 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
                 UserId = _authContext.CurrentUserId,
                 Status = EnumTrialRegistrationStatus.Trial
             };
+
+            var checkExistTrial = _studentTrialRegistrationRepository.Queryable.Any(x => x.UserId == _authContext.CurrentUserId);
+            if (checkExistTrial)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                return methodResult;
+            }
 
 
             await _studentTrialRegistrationRepository.ExecuteTransactionAsync(async () =>

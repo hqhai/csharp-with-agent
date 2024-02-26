@@ -7,46 +7,48 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.CommandModels.StudentTrialRegistration;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
-    public class UpdateStudentTrialRegistrationCommand : StudentTrialRegistrationCommandModel, IRequest<MethodResult<bool>>
+    public class UpdateExpireTrialStudentCommand : IRequest<MethodResult<bool>>
     {
     }
 
-    public class UpdateStudentTrialRegistrationCommandHandler : IRequestHandler<UpdateStudentTrialRegistrationCommand, MethodResult<bool>>
+    public class UpdateExpireTrialStudentCommandHandler : IRequestHandler<UpdateExpireTrialStudentCommand, MethodResult<bool>>
     {
         private readonly IMapper _mapper;
         private readonly IStudentTrialRegistrationRepository _studentTrialRegistrationRepository;
+        private const int CompareDate = -14;
 
-        public UpdateStudentTrialRegistrationCommandHandler(IMapper mapper, IStudentTrialRegistrationRepository studentTrialRegistrationRepository)
+        public UpdateExpireTrialStudentCommandHandler(IMapper mapper, IStudentTrialRegistrationRepository studentTrialRegistrationRepository)
         {
             _mapper = mapper;
             _studentTrialRegistrationRepository = studentTrialRegistrationRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(UpdateStudentTrialRegistrationCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(UpdateExpireTrialStudentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
+            DateTime compareWithCreateDate = DateTime.UtcNow.AddDays(CompareDate);
+            var studentTrialRegistrationResults = _studentTrialRegistrationRepository.Queryable.Where(x => x.Status == EnumTrialRegistrationStatus.Trial && x.CreatedDate.Date <= compareWithCreateDate.Date && x.CreatedDate.Month <= compareWithCreateDate.Month && x.CreatedDate.Year <= compareWithCreateDate.Year);
 
-            var studentTrialRegistrationResult = await _studentTrialRegistrationRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
-
-            if (studentTrialRegistrationResult == null)
+            if (studentTrialRegistrationResults == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
-            _mapper.Map(request, studentTrialRegistrationResult);
-
+            foreach (var item in studentTrialRegistrationResults)
+            {
+                item.Status = EnumTrialRegistrationStatus.Expired;
+            }
 
             await _studentTrialRegistrationRepository.ExecuteTransactionAsync(async () =>
             {
-                _studentTrialRegistrationRepository.Update(studentTrialRegistrationResult);
+                _studentTrialRegistrationRepository.UpdateList(studentTrialRegistrationResults);
                 await _studentTrialRegistrationRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
