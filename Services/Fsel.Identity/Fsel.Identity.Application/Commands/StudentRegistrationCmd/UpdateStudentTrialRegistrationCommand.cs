@@ -12,11 +12,11 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdateStudentTrialRegistrationCommand : StudentTrialRegistrationCommandModel, IRequest<MethodResult<StudentTrialRegistration>>
+    public class UpdateStudentTrialRegistrationCommand : StudentTrialRegistrationCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class UpdateStudentTrialRegistrationCommandHandler : IRequestHandler<UpdateStudentTrialRegistrationCommand, MethodResult<StudentTrialRegistration>>
+    public class UpdateStudentTrialRegistrationCommandHandler : IRequestHandler<UpdateStudentTrialRegistrationCommand, MethodResult<bool>>
     {
         private readonly IMapper _mapper;
         private readonly IStudentTrialRegistrationRepository _studentTrialRegistrationRepository;
@@ -27,10 +27,10 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
             _studentTrialRegistrationRepository = studentTrialRegistrationRepository;
         }
 
-        public async Task<MethodResult<StudentTrialRegistration>> Handle(UpdateStudentTrialRegistrationCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(UpdateStudentTrialRegistrationCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<StudentTrialRegistration> methodResult = new MethodResult<StudentTrialRegistration>();
+            MethodResult<bool> methodResult = new MethodResult<bool>();
 
 
             var studentTrialRegistrationResult = await _studentTrialRegistrationRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
@@ -49,8 +49,8 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
                 _studentTrialRegistrationRepository.Update(studentTrialRegistrationResult);
                 await _studentTrialRegistrationRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = studentTrialRegistrationResult;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = true;
                 return methodResult;
             });
 

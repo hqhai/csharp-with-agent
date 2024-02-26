@@ -24,13 +24,11 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// Email Người dùng
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Email { get; set; }
 
         /// <summary>
         /// SDT Người dùng
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? PhoneNumber { get; set; }
 
         /// <summary>
