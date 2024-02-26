@@ -13,63 +13,63 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
     public interface IUserService
     {
-        [Get("/student/execute-list-query")]
+        [Get("/v1/student/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> ExecuteListQueryAsync([Query] BaseQueryModel query);
 
-        [Put("/student/update-student-token")]
+        [Put("/v1/student/update-student-token")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
 
-        [Post("/student/execute-query")]
+        [Post("/v1/student/execute-query")]
         Task<IApiResponse<MethodResult<StudentModel>>> ExecuteQueryAsync([Body] BaseQueryModel query);
 
-        [Get("/student/get-by-user-id/{id}")]
+        [Get("/v1/student/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 
-        [Get("/student/get-student-by-class-id/{id}")]
+        [Get("/v1/student/get-student-by-class-id/{id}")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByClassIdAsync([Body] Guid id);
 
-        [Get("/student/get-class-has-too-many-students/{id}")]
+        [Get("/v1/student/get-class-has-too-many-students/{id}")]
         Task<IApiResponse<MethodResult<bool>>> GetStudentByClassIdCheckAsync([FromRoute] Guid id);
 
-        [Post("/teacher/get-by-ids")]
+        [Post("/v1/teacher/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeacherByIdsAsync([Body] GetTeacherByIdsQueryModel command);
 
-        [Get("/teacher/get-by-id/{id}")]
+        [Get("/v1/teacher/get-by-id/{id}")]
         Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([Body] Guid id);
 
-        [Get("/teacher/get-by-user-id/{id}")]
+        [Get("/v1/teacher/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByUserIdAsync([FromRoute] Guid id);
 
-        [Put("/student/update-student-level")]
+        [Put("/v1/student/update-student-level")]
         Task<IApiResponse<MethodResult<bool>>> UpdateStudentByLevelAsync([Body] UpdateStudentByLevelModel command);
 
-        [Post("/student/get-by-student-ids")]
+        [Post("/v1/student/get-by-student-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid>? studentIds);
 
-        [Get("/cso/get-by-user-id/{id}")]
+        [Get("/v1/cso/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCSOByUserId([FromRoute] Guid id);
 
-        [Get("/cso/get-by-id/{id}")]
+        [Get("/v1/cso/get-by-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCSOById([FromRoute] Guid id);
 
-        [Get("/student-daily-streak/get-daily-streak/{id}")]
+        [Get("/v1/student-daily-streak/get-daily-streak/{id}")]
         Task<IApiResponse<MethodResult<DailyStreakModel>>> GetDailyStreak([FromRoute] Guid id);
 
-        [Get("/student-focus-time/check-super-fire")]
+        [Get("/v1/student-focus-time/check-super-fire")]
         Task<IApiResponse<MethodResult<bool>>> CheckSuperFireModeAsync();
 
-        [Get("/student-daily-streak/execute-list-query")]
+        [Get("/v1/student-daily-streak/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<StudentConsecutiveDayModel>>>> GetAllDailyStreak([Query] BaseQueryModel baseQuery);
 
 
-        [Get("/student-trial-registration")]
+        [Get("/v1/student-trial-registration")]
         Task<IApiResponse<MethodResult<StudentTrialRegistrationModel>>> GetStudentTrialRegistration();
 
 
-        [Get("/student-trial-registration/check")]
+        [Get("/v1/student-trial-registration/check")]
         Task<IApiResponse<MethodResult<bool>>> CheckStudentTrialRegistration();
 
-        [Put("/student-trial-registration")]
+        [Put("/v1/student-trial-registration")]
         Task<IApiResponse<MethodResult<StudentTrialRegistrationModel>>> UpdateTrialRegistrationStatusAsync([Body] StudentTrialRegistrationModel cmd);
 
 

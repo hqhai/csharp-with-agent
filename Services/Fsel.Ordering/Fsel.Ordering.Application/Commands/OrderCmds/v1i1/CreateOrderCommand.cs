@@ -14,6 +14,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
+    using Fsel.Ordering.Application.Services.TrainingService;
+    using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
@@ -41,8 +43,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private readonly AuthContext _authContext;
         private readonly ILmsCourseService _courseService;
         private readonly IUserService _userService;
+        private readonly ITrainingService _trainingService;
 
-        public CreateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService, IUserService userService)
+        public CreateOrderCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService, IUserService userService, ITrainingService trainingService)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
@@ -52,6 +55,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             _authContext = authContext;
             _courseService = courseService;
             _userService = userService;
+            _trainingService = trainingService;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -88,17 +92,21 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
 
             var package = await _packageRepository.GetByIdAsync(request.PackageId);
+            request.IsTrial = true;
 
-            if (package == null)
+            if (package == null && !request.IsTrial)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
+            string code = "Trial";
+            if (!request.IsTrial)
+            {
+                var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
+                code = codeSend.Result?.Code ?? string.Empty;
+            }
 
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
-            var code = codeSend.Result?.Code;
-
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code || (x.Status == EnumOrderStatus.New && x.UserId == _authContext.CurrentUserId), cancellationToken))
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code && !request.IsTrial || (x.Status == EnumOrderStatus.New && x.UserId == _authContext.CurrentUserId), cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
                 return methodResult;
@@ -132,7 +140,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             Order newOrder = _mapper.Map<Order>(request);
 
-            AddDataIntoOrder(newOrder, code, package.Price, course!.Id);
+            AddDataIntoOrder(newOrder, code, package?.Price, course!.Id);
 
             if (!newOrder.IsValid())
             {
@@ -142,6 +150,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             if (request.IsTrial)
             {
+                var packageDefault = await _packageRepository.Queryable.FirstOrDefaultAsync(cancellationToken);
+
                 DateTime expireTrialDate = DateTime.UtcNow.AddDays(ValueSettings.AmountTrialDays);
                 newOrder.IsTrial = request.IsTrial;
                 newOrder.ExpireDate = expireTrialDate;
@@ -150,7 +160,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 newOrder.Email = string.Empty;
                 newOrder.FullName = string.Empty;
                 newOrder.Address = string.Empty;
+                newOrder.PackageId = packageDefault?.Id;
                 await _userService.CreateStudentTrialRegistration();
+
+                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = _authContext.CurrentUserId, CourseId = newOrder.CourseId, PackageId = (Guid)newOrder.PackageId! });
+                if (!addStudentIntoClassResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(addStudentIntoClassResult.Error);
+                    return methodResult;
+                }
             }
 
             await _orderRepository.ExecuteTransactionAsync(async () =>
@@ -165,13 +183,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             return methodResult;
         }
 
-        private void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId)
+        private void AddDataIntoOrder(Order order, string? code, decimal? price, Guid courseId)
         {
             order.Country = EnumZoneRegion.Vietnam.ToString();
             order.Status = EnumOrderStatus.New;
             order.UserId = _authContext.CurrentUserId;
             order.Code = code;
-            order.Price = price;
+            order.Price = price ?? 0;
             order.DiscountPercent = 0;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;

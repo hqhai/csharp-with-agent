@@ -11,25 +11,25 @@ namespace Fsel.Ordering.Application.Services.UserService
 
     public interface IUserService
     {
-        [Get("/student/get-by-user-id/{id}")]
+        [Get("/v1/student/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 
-        [Post("/student/get-by-user-ids")]
+        [Post("/v1/student/get-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByIdsAsync([FromBody] IList<string> ids);
 
-        [Put("/student/update-student-class")]
+        [Put("/v1/student/update-student-class")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByClassAsync([Body] UpdateStudentByClassIdModel command);
 
-        [Put("/student/update-student-token")]
+        [Put("/v1/student/update-student-token")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
 
-        [Post("/student-trial-registration")]
+        [Post("/v1/student-trial-registration")]
         Task<IApiResponse<MethodResult<StudentRegistrationModel>>> CreateStudentTrialRegistration();
 
-        [Put("/student-trial-registration")]
+        [Put("/v1/student-trial-registration")]
         Task<IApiResponse<MethodResult<StudentRegistrationModel>>> UpdateStudentTrialRegistration([Body] UpdateStudentTrialRegistrationModel command);
 
-        [Get("/student-trial-registration/check")]
+        [Get("/v1/student-trial-registration/check")]
         Task<IApiResponse<MethodResult<bool>>> GetStuentTrialRegistration();
     }
 }

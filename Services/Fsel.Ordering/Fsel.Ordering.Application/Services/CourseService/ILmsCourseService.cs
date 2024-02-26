@@ -10,13 +10,13 @@ namespace Fsel.Ordering.Application.Services.CourseService
 
     public interface ILmsCourseService
     {
-        [Post("/admin/course")]
+        [Post("/v1/admin/course")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByIdsAsync([FromBody] IList<Guid> courseIds);
 
-        [Get("/course/execute-query")]
+        [Get("/v1/course/execute-query")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByLevel([FromQuery] BaseQueryModel baseQuery);
 
-        [Put("/unit-result/open-next-unit")]
+        [Put("/v1/unit-result/open-next-unit")]
         Task<IApiResponse<MethodResult<bool>>> UpdateNextUnit();
     }
 }

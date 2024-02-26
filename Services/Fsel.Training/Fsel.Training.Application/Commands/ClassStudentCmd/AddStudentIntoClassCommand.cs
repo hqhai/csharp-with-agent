@@ -81,6 +81,10 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 }
                 else
                 {
+                    if(!@class.ClassStudents.Any(p => p.StudentId == student!.Id))
+                    {
+                        @class.ClassStudents.Add(new ClassStudent() { StudentId = student!.Id, IsActive = true });
+                    }
                     @class.Status = EnumClassStatus.Active;
                     _classRepository.Update(@class);
                 }
