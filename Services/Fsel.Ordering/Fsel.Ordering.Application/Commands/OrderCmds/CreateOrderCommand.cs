@@ -10,10 +10,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
-    using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
@@ -38,6 +38,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
+        private readonly AuthContext _authContext;
         private const int AmountTrialDays = 14;
 
         public CreateOrderCommandHandler(IMapper mapper,
@@ -46,7 +47,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             IUserService userService,
             NotificationMessagePublisher notificationMessagePublisher,
             ITrainingService trainingService,
-            IPackageRepository packageRepository)
+            IPackageRepository packageRepository,
+            AuthContext authContext)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
@@ -55,6 +57,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _notificationMessagePublisher = notificationMessagePublisher;
             _trainingService = trainingService;
             _packageRepository = packageRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -66,7 +69,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             #region Pilot
 
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Code == EnumPackageCode.BASIC, cancellationToken);
+            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Code == EnumPackageCode.BASIC.ToString(), cancellationToken);
 
             #endregion Pilot
 
@@ -114,8 +117,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.ClassId = classnew.Content?.Result.Id ?? default;
-            order.Email = "hanh@gmail.com";
-            order.PhoneNumber = "0283765342";
 
             request.IsTrial = true;
             if (request.IsTrial || true)
@@ -126,6 +127,19 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 order.Status = EnumOrderStatus.Payment;
                 await _userService.CreateStudentTrialRegistration();
             }
+
+            var checkUserTrialBefore = await _userService.GetStuentTrialRegistration();
+            var checkUserTrialBeforeResult = checkUserTrialBefore?.Content?.Result ?? default;
+
+            if (checkUserTrialBeforeResult && !request.IsTrial)
+            {
+                UpdateStudentTrialRegistrationModel command = new UpdateStudentTrialRegistrationModel { UserId = request.UserId, Status = EnumTrialRegistrationStatus.Payment };
+                await _userService.UpdateStudentTrialRegistration(command);
+            }
+
+
+
+
 
             if (!order.IsValid())
             {

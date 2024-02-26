@@ -14,11 +14,6 @@ namespace Fsel.Ordering.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<Package> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Property(e => e.Code)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumPackageCode>());
         }
     }
 }

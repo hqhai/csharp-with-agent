@@ -3,11 +3,12 @@
 namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
 {
     using System;
+    using Fsel.Ordering.Domain.Entities;
     using Fsel.Shared.Enums;
 
     public class UpdateOrderCommandModel
     {
-        public Guid Id { get; set; }
+        public Order? Order { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }

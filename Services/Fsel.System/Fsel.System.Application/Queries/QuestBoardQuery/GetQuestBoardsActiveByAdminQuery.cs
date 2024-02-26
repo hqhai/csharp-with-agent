@@ -50,7 +50,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
                 return methodResult;
             }
             var packages = packageResults?.Content?.Result;
-            var packageId = packages?.FirstOrDefault(x => x.Code == EnumPackageCode.STANDARD)?.Id;
+            var packageId = packages?.FirstOrDefault(x => x.Code == EnumPackageCode.STANDARD.ToString())?.Id;
             var questBoards = await _questBoardRepository.Queryable.Where(x => x.Type == request.QuestBoardType && x.IsActive && x.DependentId == null).ToListAsync(cancellationToken);
             questBoards = questBoards.Where(x => x.PackageIds != null && x.PackageIds!.Any(x => x == packageId)).ToList();
             if (questBoards == null || questBoards.Count == 0)

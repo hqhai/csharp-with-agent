@@ -8,7 +8,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Common.Models;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -56,6 +55,34 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
 
+            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && (p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Fail), cancellationToken);
+            if (order != null)
+            {
+                var updateOrderResult = await _mediator.Send(new UpdateOrderCommand()
+                {
+                    Order = order,
+                    CourseLevel = request.CourseLevel,
+                    FullName = request.FullName,
+                    PhoneNumber = request.PhoneNumber,
+                    Email = request.Email,
+                    Country = request.Country,
+                    Address = request.Address,
+                    PaymentMethod = request.PaymentMethod,
+                    PackageId = request.PackageId,
+                    ProvinceId = request.ProvinceId,
+                    DistrictId = request.DistrictId,
+                }, cancellationToken).ConfigureAwait(false);
+
+                if (!updateOrderResult.IsOK)
+                {
+                    methodResult.AddError(updateOrderResult.ErrorMessages);
+                    return methodResult;
+                }
+
+                methodResult.Result = updateOrderResult.Result;
+                return methodResult;
+            }
+
             var package = await _packageRepository.GetByIdAsync(request.PackageId);
 
             if (package == null)
@@ -97,42 +124,54 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 methodResult.AddError(courseResult.Error);
                 return methodResult;
             }
-
             var course = courseResult.Content?.Result;
 
-            Order order = _mapper.Map<Order>(request);
+            Order newOrder = _mapper.Map<Order>(request);
+
+            AddDataIntoOrder(newOrder, code, package.Price, course!.Id);
+
+            if (!newOrder.IsValid())
+            {
+                methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
+                return methodResult;
+            }
+
+            await _orderRepository.ExecuteTransactionAsync(async () =>
+            {
+                newOrder = _orderRepository.Add(newOrder);
+                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                SendNotify(newOrder.Id, newOrder.CreatedUserId, cancellationToken);
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<OrderModel>(newOrder);
+                return methodResult;
+            });
+            return methodResult;
+        }
+
+        private void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId)
+        {
             order.Country = EnumZoneRegion.Vietnam.ToString();
             order.Status = EnumOrderStatus.New;
             order.UserId = _authContext.CurrentUserId;
             order.Code = code;
-            order.Price = package.Price;
+            order.Price = price;
             order.DiscountPercent = 0;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
-            order.CourseId = course!.Id;
-            if (!order.IsValid())
+            order.CourseId = courseId;
+        }
+
+        private async void SendNotify(Guid orderId, Guid senderId, CancellationToken cancellationToken)
+        {
+            await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
             {
-                methodResult.AddErrorBadRequest(order.ErrorMessages);
-                return methodResult;
-            }
-            await _orderRepository.ExecuteTransactionAsync(async () =>
-            {
-                order = _orderRepository.Add(order);
-                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
-                {
-                    Roles = new List<EnumRole> { EnumRole.Admin },
-                    ObjectId = order.Id,
-                    Type = EnumNotificationType.Text,
-                    Content = EnumNotificationContent.OrderCreate,
-                    SenderId = order.CreatedUserId,
-                    PlatformCode = EnumPlatformCode.LMSAdmin
-                }, cancellationToken);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<OrderModel>(order);
-                return methodResult;
-            });
-            return methodResult;
+                Roles = new List<EnumRole> { EnumRole.Admin },
+                ObjectId = orderId,
+                Type = EnumNotificationType.Text,
+                Content = EnumNotificationContent.OrderCreate,
+                SenderId = senderId,
+                PlatformCode = EnumPlatformCode.LMSAdmin
+            }, cancellationToken);
         }
     }
 }

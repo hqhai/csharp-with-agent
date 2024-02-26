@@ -3,7 +3,6 @@
 namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 {
     using System;
-    using System.Linq.Dynamic.Core;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -15,6 +14,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Services.CourseService;
+    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -24,7 +24,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdateOrderCommand : CreateOrderCommandModel, IRequest<MethodResult<OrderModel>>
+    public class UpdateOrderCommand : UpdateOrderCommandModel, IRequest<MethodResult<OrderModel>>
     {
     }
 
@@ -52,8 +52,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
 
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId, cancellationToken);
-            if (order == null)
+            if (request.Order == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
@@ -100,30 +99,35 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 methodResult.AddError(courseResult.Error);
                 return methodResult;
             }
-
             var course = courseResult.Content?.Result;
 
-            order.Status = EnumOrderStatus.New;
-            order.Code = code;
-            order.Price = package.Price;
-            order.DiscountPercent = 0;
-            order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
-            order.TotalPrice = order.Price - order.DiscountPrice;
-            order.CourseId = course!.Id;
-            if (!order.IsValid())
+            AddDataIntoOrder(request.Order, code, package.Price, course!.Id);
+
+            if (!request.Order.IsValid())
             {
-                methodResult.AddErrorBadRequest(order.ErrorMessages);
+                methodResult.AddErrorBadRequest(request.Order.ErrorMessages);
                 return methodResult;
             }
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
-                order = _orderRepository.Update(order);
+                request.Order = _orderRepository.Update(request.Order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<OrderModel>(order);
+                methodResult.Result = _mapper.Map<OrderModel>(request.Order);
                 return methodResult;
             });
             return methodResult;
+        }
+
+        private static void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId)
+        {
+            order.Status = EnumOrderStatus.New;
+            order.Code = code;
+            order.Price = price;
+            order.DiscountPercent = 0;
+            order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
+            order.TotalPrice = order.Price - order.DiscountPrice;
+            order.CourseId = courseId;
         }
     }
 }

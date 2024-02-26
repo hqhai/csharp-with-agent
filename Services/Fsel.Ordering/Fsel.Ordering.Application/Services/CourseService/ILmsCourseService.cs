@@ -15,5 +15,8 @@ namespace Fsel.Ordering.Application.Services.CourseService
 
         [Get("/course/execute-query")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByLevel([FromQuery] BaseQueryModel baseQuery);
+
+        [Put("/unit-result/open-next-unit")]
+        Task<IApiResponse<MethodResult<bool>>> UpdateNextUnit();
     }
 }

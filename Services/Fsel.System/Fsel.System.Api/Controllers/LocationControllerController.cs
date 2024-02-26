@@ -28,18 +28,6 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// Create locations
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create()
-        {
-            var queryResult = await _mediator.Send(new CreateLocationCommand() { }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Get locations
         /// </summary>
         [HttpGet]

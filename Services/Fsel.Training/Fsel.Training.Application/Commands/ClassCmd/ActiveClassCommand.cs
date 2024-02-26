@@ -58,7 +58,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             var packagesResult = await _orderService.GetPackages();
             var packages = packagesResult.Content?.Result;
             var package = packages?.FirstOrDefault(p => p.Id == classes.PackageId);
-            if (package?.Code == EnumPackageCode.PREMIUM && (!classes.LiveTimeFrameId.HasValue || classes.LiveDays == null))
+            if (package?.Code == EnumPackageCode.PREMIUM.ToString() && (!classes.LiveTimeFrameId.HasValue || classes.LiveDays == null))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.LiveTimeFrameNullOrLiveDaysNull));
                 return methodResult;
@@ -85,7 +85,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             classes.EndDate = dateNow.AddMonths(endTime.DurationMonth);
             classes.Status = EnumClassStatus.Active;
 
-            if (package?.Code == EnumPackageCode.PREMIUM)
+            if (package?.Code == EnumPackageCode.PREMIUM.ToString())
             {
                 if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
                 {

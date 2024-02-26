@@ -16,7 +16,8 @@ namespace Fsel.Ordering.Domain.Entities
         /// Code
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public EnumPackageCode? Code { get; set; }
+        [MaxLength(100)]
+        public string? Code { get; set; }
 
         /// <summary>
         /// Giá Khóa Học

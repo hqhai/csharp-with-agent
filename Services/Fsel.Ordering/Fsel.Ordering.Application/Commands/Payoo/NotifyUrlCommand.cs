@@ -7,6 +7,8 @@ namespace Fsel.Ordering.Application.Commands.Payoo
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Ordering.Application.Services.CourseService;
+    using Fsel.Ordering.Application.Services.CourseService.Model;
     using Fsel.Ordering.Application.Services.PayooService.Models;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
@@ -29,8 +31,9 @@ namespace Fsel.Ordering.Application.Commands.Payoo
         private readonly IOrderRepository _orderRepository;
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
+        private readonly ILmsCourseService _courseService;
 
-        public NotifyUrlCommandHandler(AppSetting appSetting, ILogger<NotifyUrlCommand> logger, IOrderTransactionRepository orderTransactionRepository, IOrderRepository orderRepository, ITrainingService trainingService, IPackageRepository packageRepository)
+        public NotifyUrlCommandHandler(AppSetting appSetting, ILogger<NotifyUrlCommand> logger, IOrderTransactionRepository orderTransactionRepository, IOrderRepository orderRepository, ITrainingService trainingService, IPackageRepository packageRepository, ILmsCourseService courseService)
         {
             _appSetting = appSetting;
             _logger = logger;
@@ -38,6 +41,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             _orderRepository = orderRepository;
             _trainingService = trainingService;
             _packageRepository = packageRepository;
+            _courseService = courseService;
         }
 
         public async Task<MethodResult<NotifyUrlModel>> Handle(NotifyUrlCommand request, CancellationToken cancellationToken)
@@ -114,6 +118,12 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             {
                 checkFlow = false;
                 _logger.LogError($"Package not exist: OrderId: {order.Id}");
+            }
+            var updateNextUnitResult = await _courseService.UpdateNextUnit();
+            if (!updateNextUnitResult.IsSuccessStatusCode)
+            {
+                checkFlow = false;
+                _logger.LogError($"Update Next Unit Error: OrderId: {order.Id}");
             }
 
             order.Status = checkFlow ? EnumOrderStatus.Payment : EnumOrderStatus.Fail;
