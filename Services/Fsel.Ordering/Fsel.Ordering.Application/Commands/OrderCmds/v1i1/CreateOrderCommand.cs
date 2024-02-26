@@ -146,6 +146,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 newOrder.IsTrial = request.IsTrial;
                 newOrder.ExpireDate = expireTrialDate;
                 newOrder.Status = EnumOrderStatus.Payment;
+                newOrder.PhoneNumber = string.Empty;
+                newOrder.Email = string.Empty;
+                newOrder.FullName = string.Empty;
+                newOrder.Address = string.Empty;
                 await _userService.CreateStudentTrialRegistration();
             }
 
