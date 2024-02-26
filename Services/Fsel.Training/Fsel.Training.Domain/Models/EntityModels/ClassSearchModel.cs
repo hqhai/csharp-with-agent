@@ -17,7 +17,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public string? TeacherName { get; set; }
         public EnumClassStatus Status { get; set; }
         public EnumTeacherApprovalStatus TeacherApprovalStatus { get; set; }
-        public string? PackageCode { get; set; }
+        public EnumPackageCode? PackageCode { get; set; }
         public Guid PackageId { get; set; }
         public Guid CourseId { get; set; }
         public IList<Guid>? StudentIds { get; set; }

@@ -69,7 +69,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             #region Pilot
 
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Code == EnumPackageCode.BASIC.ToString(), cancellationToken);
+            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Code == EnumPackageCode.BASIC, cancellationToken);
 
             #endregion Pilot
 

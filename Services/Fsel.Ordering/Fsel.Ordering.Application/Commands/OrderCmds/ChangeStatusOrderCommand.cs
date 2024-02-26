@@ -91,8 +91,7 @@ ILmsCourseService courseService)
                 return methodResult;
             }
             var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
-            var numberOfShield = 1;
-            //NOTE: var numberOfShield = (package != null && !string.IsNullOrEmpty(package.Code)) ? (int)package.Code.Value : default;
+            var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
             var course = courseResults.Content?.Result?.FirstOrDefault();
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
