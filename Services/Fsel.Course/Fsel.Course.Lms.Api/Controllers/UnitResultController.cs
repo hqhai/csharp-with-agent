@@ -71,9 +71,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPut("open-next-unit")]
         [ProducesResponseType(typeof(MethodResult<StudentCourseUnitModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> OpenNextUnitForTrial([FromBody] OpenNextUnitForExtendCmd cmd)
+        public async Task<IActionResult> OpenNextUnitForTrial()
         {
-            MethodResult<bool> queryResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            MethodResult<bool> queryResult = await _mediator.Send(new OpenNextUnitForExtendCmd()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
