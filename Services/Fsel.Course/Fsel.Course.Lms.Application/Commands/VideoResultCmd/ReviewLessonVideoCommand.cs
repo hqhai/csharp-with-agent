@@ -100,6 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                                                 .SelectMany(x => x.SkillScores!)
                                                 .GroupBy(x => x.Skill)
                                                 .Select(x => GetSkillScore(x))
+                                                .Where(x => x.TotalCount > 0)
                                                 .ToList()
                 }).ToList();
             var skillScores = videoSkillScores.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;
