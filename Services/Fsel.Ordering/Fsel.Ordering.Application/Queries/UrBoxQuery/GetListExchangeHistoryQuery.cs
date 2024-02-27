@@ -98,7 +98,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                 var a = new GiftHistoryModel
                 {
                     Id = gift.CartDetailId,
-                    GiftId = gift.GiftId,
+                    GiftId = gift.PriceId,
                     GiftName = giftDetail?.Data?.Title,
                     Price = "" + gift.Price,
                     Content = giftDetail?.Data?.Content,
