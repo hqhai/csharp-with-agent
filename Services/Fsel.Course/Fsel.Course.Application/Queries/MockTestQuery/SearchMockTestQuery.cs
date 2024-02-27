@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Application.Queries.MockTestQuery
 {
-    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -71,6 +70,10 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+            lists.ForEach(x =>
+            {
+                x.Skills = x.Skills?.OrderBy(x => x).ToList();
+            });
             methodResult.Result = new PagingItemsModel<MockTestSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
