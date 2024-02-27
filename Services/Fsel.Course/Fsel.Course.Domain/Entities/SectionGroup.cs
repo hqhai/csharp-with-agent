@@ -22,6 +22,7 @@ namespace Fsel.Course.Domain.Entities
             get { return TimeSpan.FromSeconds(ExecutionTime); }
         }
 
+        public string? AudioPath { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
 
         public ICollection<Section> Sections { get; set; } = new List<Section>();
