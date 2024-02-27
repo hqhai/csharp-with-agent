@@ -13,7 +13,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Application.Services.UserService;
-    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
@@ -39,7 +38,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
         private readonly AuthContext _authContext;
-        private const int AmountTrialDays = 14;
 
         public CreateOrderCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
@@ -117,29 +115,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.ClassId = classnew.Content?.Result.Id ?? default;
-
-            if (request.IsTrial)
-            {
-                DateTime expireTrialDate = DateTime.UtcNow.AddDays(AmountTrialDays);
-                order.IsTrial = request.IsTrial;
-                order.ExpireDate = expireTrialDate;
-                order.Status = EnumOrderStatus.Payment;
-                await _userService.CreateStudentTrialRegistration();
-            }
-
-            var checkUserTrialBefore = await _userService.GetStuentTrialRegistration();
-            var checkUserTrialBeforeResult = checkUserTrialBefore?.Content?.Result ?? default;
-
-            if (checkUserTrialBeforeResult && !request.IsTrial)
-            {
-                UpdateStudentTrialRegistrationModel command = new UpdateStudentTrialRegistrationModel { UserId = request.UserId, Status = EnumTrialRegistrationStatus.Payment };
-                await _userService.UpdateStudentTrialRegistration(command);
-            }
-
-
-
-
-
+            order.PhoneNumber = string.Empty;
+            order.Email = string.Empty;
+            order.FullName = string.Empty;
+            order.Address = string.Empty;
             if (!order.IsValid())
             {
                 methodResult.AddErrorBadRequest(order.ErrorMessages);
