@@ -49,7 +49,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
                 return methodResult;
             }
-            request.SectionGroups = request.SectionGroups.OrderBy(obj => obj.CourseSkill).ToList();
+            request.SectionGroups = request.SectionGroups.Where(x => x != null).OrderBy(obj => obj.CourseSkill).ToList();
             MockTest mockTest = _mapper.Map<MockTest>(request);
             if (!mockTest.IsValid())
             {

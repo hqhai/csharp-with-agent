@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Sections;
 using MediatR;
@@ -34,15 +33,10 @@ namespace Fsel.Course.Application.Queries.MockTestAiSettingQuery
 
             var mockTestAiSetting = await _mockTestAISettingRepository.Queryable.FirstOrDefaultAsync(x => x.SectionId == request.Id, cancellationToken);
 
-            if (mockTestAiSetting == null)
+            if (mockTestAiSetting != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestAiSetting));
-                return methodResult;
+                methodResult.Result = _mapper.Map<MockTestAISettingModel>(mockTestAiSetting);
             }
-
-            MockTestAISettingModel mockTestAiSettingModel = _mapper.Map<MockTestAISettingModel>(mockTestAiSetting);
-
-            methodResult.Result = mockTestAiSettingModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
