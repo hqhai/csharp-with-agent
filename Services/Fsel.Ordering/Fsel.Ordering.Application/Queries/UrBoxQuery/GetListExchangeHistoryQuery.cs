@@ -21,7 +21,6 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     {
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public string? Language { get; set; }
     }
 
     public class GetListExchangeHistoryQueryHandler : IRequestHandler<GetListExchangeHistoryQuery, MethodResult<ExchangeHistoryModel>>
@@ -31,14 +30,16 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
         private readonly AuthContext _authContext;
         private readonly IUrBoxTransactionRepository _urBoxTransactionRepository;
         private readonly IMapper _mapper;
+        private readonly LanguageContext _languageContext;
 
-        public GetListExchangeHistoryQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, AuthContext authContext, IUrBoxTransactionRepository urBoxTransactionRepository, IMapper mapper)
+        public GetListExchangeHistoryQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, AuthContext authContext, IUrBoxTransactionRepository urBoxTransactionRepository, IMapper mapper, LanguageContext languageContext)
         {
             _urBoxService = urBoxService;
             _appSetting = appSetting;
             _authContext = authContext;
             _urBoxTransactionRepository = urBoxTransactionRepository;
             _mapper = mapper;
+            _languageContext = languageContext;
         }
 
         public async Task<MethodResult<ExchangeHistoryModel>> Handle(GetListExchangeHistoryQuery request, CancellationToken cancellationToken)
@@ -65,7 +66,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
 
             foreach (var item in giftIds)
             {
-                taskGifts.Add(GetDetailGift(item, request.Language));
+                taskGifts.Add(GetDetailGift(item, _languageContext.CurrentCountryInfo?.CultureCode?.Substring(0, 2)));
             }
 
             await Task.WhenAll(tasks);

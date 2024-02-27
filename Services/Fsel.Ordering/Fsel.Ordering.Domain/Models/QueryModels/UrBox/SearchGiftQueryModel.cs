@@ -12,7 +12,5 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.UrBox
 
         // true là popular, false là latest
         public bool? PopularOrLatest { get; set; }
-
-        public string? Language { get; set; }
     }
 }
