@@ -8,15 +8,15 @@ namespace Fsel.System.Application.Queries.SchoolQuery
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels;
     using global::System;
-    using global::System.Collections.Generic;
+    using global::System.Globalization;
     using global::System.Linq;
-    using global::System.Text;
     using global::System.Threading.Tasks;
     using MediatR;
 
     public class SearchSchoolQuery : SearchSchoolQueryModel, IRequest<MethodResult<PagingItemsModel<SchoolModel>>>
     {
     }
+
     public class SearchSchoolQueryHandler : IRequestHandler<SearchSchoolQuery, MethodResult<PagingItemsModel<SchoolModel>>>
     {
         private readonly ISchoolRepository _schoolRepository;
@@ -33,8 +33,13 @@ namespace Fsel.System.Application.Queries.SchoolQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower(CultureInfo.CurrentCulture).Trim().Contains(request.Keyword.ToLower(CultureInfo.CurrentCulture).Trim()));
             }
+            if (request.LocationId != null)
+            {
+                query = query.Where(m => m.LocationId == request.LocationId);
+            }
+
             var methodResult = await _schoolRepository.GetListByPageResultAsync<SchoolModel>(query, request, cancellationToken);
             return methodResult;
         }

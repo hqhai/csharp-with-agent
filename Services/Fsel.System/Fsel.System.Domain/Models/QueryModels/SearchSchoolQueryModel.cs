@@ -6,5 +6,6 @@ namespace Fsel.System.Domain.Models.QueryModels
 
     public class SearchSchoolQueryModel : BaseQueryModel
     {
+        public Guid? LocationId { get; set; }
     }
 }
