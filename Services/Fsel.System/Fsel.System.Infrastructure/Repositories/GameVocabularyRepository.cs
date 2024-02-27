@@ -12,7 +12,7 @@ namespace Fsel.System.Infrastructure.Repositories
         public GameVocabularyRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
-        public override async Task<GameVocabulary?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<GameVocabulary?> GetIncludeByIdAsync(Guid id)
         {
             return await Queryable.Include(x => x.GameVocabularyTypes).Include(p => p.GameVocabularyPlatforms).Include(t => t.GameTopic).FirstOrDefaultAsync(x => x.Id == id);
         }

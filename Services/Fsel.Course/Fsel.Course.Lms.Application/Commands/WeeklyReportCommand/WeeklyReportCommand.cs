@@ -252,7 +252,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                 }).FirstOrDefaultAsync(cancellationToken);
 
                             weeklyReport.NextLesson = currentLesson?.DisplayOrder;
-                            var percentLesson = await GetLesson(currentLesson?.Lesson?.Id, item.Id);
+                            var percentLesson = await GetLesson(currentLesson?.LessonResult?.CourseId, currentLesson?.LessonResult?.UnitId, currentLesson?.Lesson?.Id, item.Id);
                             weeklyReport.PercentLesson = percentLesson;
                             weeklyReport.Weekly3Display = null;
                         }
@@ -339,10 +339,10 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             }
         }
 
-        private async Task<int> GetLesson(Guid? lessonId, Guid? studentId)
+        private async Task<int> GetLesson(Guid? courseId, Guid? unitId, Guid? lessonId, Guid? studentId)
         {
             var counts = new List<int>();
-            var lessonResult = await _lessonResultRepository.GetAsync(lessonId, studentId);
+            var lessonResult = await _lessonResultRepository.GetAsync(courseId, unitId, lessonId, studentId);
             if (lessonResult != null)
             {
                 counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);

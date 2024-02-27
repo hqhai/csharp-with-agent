@@ -13,11 +13,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public class FinalResultInputThenUpdateCourseResultHandler : BaseInternalEventHandler,
         INotificationHandler<EntityChangedEvent<FinalTestResult>>
     {
-        public FinalResultInputThenUpdateCourseResultHandler(ISystemService systemService, AppSetting appSetting,  ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
+        public FinalResultInputThenUpdateCourseResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
         {
         }
 
@@ -25,9 +26,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var finalTestResult = notification.Data;
+            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseResults.Where(x => x.StudentId == finalTestResult.StudentId))
+                                .FirstOrDefaultAsync(x => x.Id == finalTestResult.CourseId, cancellationToken);
             if (finalTestResult != null && finalTestResult.Status == EnumResultStatus.Done)
             {
-                await UpdateCourseResult(finalTestResult.CourseId, finalTestResult.StudentId, cancellationToken).ConfigureAwait(false);
+                await UpdateCourseResult(course, finalTestResult.StudentId, cancellationToken).ConfigureAwait(false);
             }
         }
     }

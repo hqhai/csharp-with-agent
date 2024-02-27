@@ -147,12 +147,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         return methodResult;
                     }
                     sectionGroupResult = answerResult.Result;
-
                 }
                 sectionGroupResult = await _sectionGroupConverter.UpdateSectionGroupToIsSubmit(sectionGroup, sectionGroupResult, request.IsSubmit);
                 return methodResult;
             });
-
 
             if (sectionGroup.CourseSkill == EnumCourseSkill.Writing && sectionGroup.Sections.FirstOrDefault() != null && request.IsSubmit)
             {
@@ -214,7 +212,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             }
 
             _mockTestResultRepository.Update(mockTestResult);
-            await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            if (mockTestResult.Status == EnumResultStatus.Done)
+            {
+                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
         private async Task UpdateUserToken(MockTestResult mockTestResult)

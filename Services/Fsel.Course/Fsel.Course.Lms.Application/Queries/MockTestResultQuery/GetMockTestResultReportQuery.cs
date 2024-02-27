@@ -63,16 +63,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 return methodResult;
             }
 
-            methodResult.Result = GetMockTestReport(mockTestResult, mockTest);
+            methodResult.Result = await GetMockTestReport(mockTestResult, mockTest);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private MockTestResultReportModel GetMockTestReport(MockTestResult mockTestResult, MockTest mockTest)
+        private async Task<MockTestResultReportModel> GetMockTestReport(MockTestResult mockTestResult, MockTest mockTest)
         {
             var query = _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id);
             var mockTestResultDto = _mapper.Map<MockTestResultReportModel>(mockTestResult);
-            mockTestResultDto.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
+            mockTestResultDto.IsTeacherGraded = await _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
             return mockTestResultDto;
         }
     }
