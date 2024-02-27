@@ -15,13 +15,13 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     public class GetGiftQuery : IRequest<MethodResult<GiftDetailModel>>
     {
         public string? Id { get; set; }
-        public string? Language { get; set; }
     }
 
     public class GetTheGiftQueryHandler : IRequestHandler<GetGiftQuery, MethodResult<GiftDetailModel>>
     {
         private readonly IUrBoxService _urBoxService;
         private readonly AppSetting _appSetting;
+        //private readonly Fsel.Core.Base.LanguageContext _appSetting;
 
         public GetTheGiftQueryHandler(IUrBoxService urBoxService, AppSetting appSetting)
         {
@@ -39,7 +39,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                 AppSecret = _appSetting.UrBoxConfig?.AppSecret,
                 AppId = _appSetting.UrBoxConfig?.AppId,
                 Id = request.Id,
-                Language = request.Language,
+                //Language = request.Language,
             });
 
             var theGift = theGiftResult.Content;

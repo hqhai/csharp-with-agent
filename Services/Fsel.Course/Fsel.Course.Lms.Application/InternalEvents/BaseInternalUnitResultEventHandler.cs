@@ -186,7 +186,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 UnitName = unit.Name,
                 StartDate = startUnit?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
-                EndDate = endUnit.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
+                EndDate = endUnit.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
                 Percent = percent.ToString(CultureInfo.CurrentCulture),
                 TotalHour = SendMailHelper.FormatTimeSpanAsClock(currentLearn + currentSocial + currentOther),
                 TotalLearn = SendMailHelper.FormatTimeSpanAsClock(currentLearn),

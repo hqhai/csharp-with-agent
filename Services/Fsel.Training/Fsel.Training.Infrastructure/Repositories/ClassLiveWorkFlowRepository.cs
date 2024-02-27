@@ -13,7 +13,7 @@ namespace Fsel.Training.Infrastructure.Repositories
         {
         }
 
-        public override async Task<ClassLiveWorkFlow?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<ClassLiveWorkFlow?> GetIncludeByIdAsync(Guid id)
         {
             return await Queryable.Include(x => x.ClassLiveCalendar)
                                     .ThenInclude(p => p!.Class)
