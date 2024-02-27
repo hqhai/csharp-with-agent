@@ -5,6 +5,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.UrBoxService;
@@ -23,11 +24,13 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     {
         private readonly IUrBoxService _urBoxService;
         private readonly AppSetting _appSetting;
+        private readonly LanguageContext _languageContext;
 
-        public SearchGiftsQueryHandler(IUrBoxService urBoxService, AppSetting appSetting)
+        public SearchGiftsQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, LanguageContext languageContext)
         {
             _urBoxService = urBoxService;
             _appSetting = appSetting;
+            _languageContext = languageContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<GiftModel>>> Handle(SearchGiftsQuery request, CancellationToken cancellationToken)
@@ -40,6 +43,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                 AppSecret = _appSetting.UrBoxConfig?.AppSecret,
                 AppId = _appSetting.UrBoxConfig?.AppId,
                 CatId = request.CategoryId,
+                Language = _languageContext.CurrentCountryInfo?.CultureCode?.Substring(0, 2)
             });
 
             var theGiftList = getAllGift.Content;
@@ -56,7 +60,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
 
                 if (!string.IsNullOrEmpty(request.Keyword))
                 {
-                    data = data.Where(p => !string.IsNullOrEmpty(p.Title) && p.Title.Contains(request.Keyword, StringComparison.CurrentCulture)).ToList();
+                    data = data.Where(p => !string.IsNullOrEmpty(p.Title) && p.Title.Contains(request.Keyword, StringComparison.OrdinalIgnoreCase)).ToList();
                 }
 
                 if (request.Min.HasValue && request.Max.HasValue)

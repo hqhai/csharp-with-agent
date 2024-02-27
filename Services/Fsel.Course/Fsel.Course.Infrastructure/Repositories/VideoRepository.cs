@@ -29,7 +29,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                  .AnyAsync(x => x.Id == id && x.LessonVideos.Count > 0);
         }
 
-        public override async Task<Video?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<Video?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
