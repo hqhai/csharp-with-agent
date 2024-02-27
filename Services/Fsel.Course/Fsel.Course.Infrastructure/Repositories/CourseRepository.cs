@@ -38,7 +38,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .AnyAsync(x => x.Id == id && x.CourseUnitMockTests.Count > 0);
         }
 
-        public override async Task<EntityCourse?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<EntityCourse?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
