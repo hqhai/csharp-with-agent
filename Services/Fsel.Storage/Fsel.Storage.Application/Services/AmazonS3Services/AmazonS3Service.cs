@@ -202,7 +202,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             GC.SuppressFinalize(this);
         }
 
-        public async Task<MethodResult<IList<string>>> UploadFilesAsync(IList<IFormFile> files, EnumFolderType folderType, bool isResize = false)
+        public async Task<MethodResult<IList<string>>> UploadFilesAsync(IList<IFormFile> files, EnumBucketType bucketType, EnumFolderType folderType, bool isResize = false)
         {
             MethodResult<IList<string>> results = new MethodResult<IList<string>>();
             results.Result = new List<string>();
@@ -257,7 +257,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return await UploadFileAsync(stream, key);
         }
 
-        public async Task<MethodResult<string?>> UploadFileAsync(IFormFile? file, EnumFolderType folderType, bool isResize = false)
+        public async Task<MethodResult<string?>> UploadFileAsync(IFormFile? file, EnumBucketType bucketType, EnumFolderType folderType, bool isResize = false)
         {
             MethodResult<string?> result = IsValidFile(file, folderType);
             if (file == null || !result.IsOK)
