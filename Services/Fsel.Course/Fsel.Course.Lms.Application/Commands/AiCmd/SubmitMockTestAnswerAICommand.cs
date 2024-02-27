@@ -29,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMediator _mediator;
+        private static int CorrecTotalWriting = 36;
 
         public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
@@ -133,6 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 {
                     mockTestResult.SkillScores = skillScores;
                     mockTestResult.CorrectCount = correcCount;
+                    mockTestResult.CorrectTotal = CorrecTotalWriting;
                 }
             }
 
@@ -152,7 +154,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 if (checkSkillMockTest)
                 {
                     _mockTestResultRepository.Update(mockTestResult);
-                    await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
 

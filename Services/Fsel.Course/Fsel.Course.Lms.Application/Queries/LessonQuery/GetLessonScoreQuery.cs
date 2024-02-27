@@ -126,6 +126,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                              from questionQJ in questionQ_jointable.DefaultIfEmpty()
                              join answerQ in answerStandaloneQuery on skill equals answerQ.Skill into answerQ_jointable
                              from answerQJ in answerQ_jointable.DefaultIfEmpty()
+                             where questionQJ.TotalCount != 0
                              select new SkillScores
                              {
                                  Skill = skill,
@@ -142,7 +143,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                         from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
                                                         join answerTimeCodeQ in answerTimeCodeQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
                                                         from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
-                                                        where questionTimeCodeQJ != null && answerTimeCodeQJ != null && questionTimeCodeQJ.Type == type && answerTimeCodeQJ.Type == type
+                                                        where questionTimeCodeQJ != null && questionTimeCodeQJ.TotalCount != 0 && answerTimeCodeQJ != null && questionTimeCodeQJ.Type == type && answerTimeCodeQJ.Type == type
                                                         select new SkillScores
                                                         {
                                                             Skill = skill,

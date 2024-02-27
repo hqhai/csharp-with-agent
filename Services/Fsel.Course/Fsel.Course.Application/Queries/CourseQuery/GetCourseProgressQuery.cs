@@ -46,11 +46,13 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<CourseModel>> methodResult = new MethodResult<PagingItemsModel<CourseModel>>();
 
-            var query = _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseResults).Where(x => x.CourseResults.Any() && x.CourseUnitMockTests.Any(x => !x.UnitId.HasValue && !x.MockTestId.HasValue && !x.FinalTestId.HasValue));
+            var query = _courseRepository.Queryable.Include(x => x.CourseUnitMockTests)
+                                                   .Include(x => x.CourseResults)
+                                                   .Where(x => x.CourseResults.Any() && x.CourseUnitMockTests.Any(x => !x.UnitId.HasValue && !x.MockTestId.HasValue && !x.FinalTestId.HasValue));
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower(CultureInfo.CurrentCulture).Trim().Contains(request.Keyword.ToLower(CultureInfo.CurrentCulture).Trim()));
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.CourseLevel != null)
             {

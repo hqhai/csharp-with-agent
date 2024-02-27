@@ -123,7 +123,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     }).FirstOrDefaultAsync();
         }
 
-        public override async Task<ExtraPractice?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<ExtraPractice?> GetIncludeByIdAsync(Guid id)
         {
             try
             {

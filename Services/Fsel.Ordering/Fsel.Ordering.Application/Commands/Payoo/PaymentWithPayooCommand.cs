@@ -65,7 +65,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             }
             var student = studentResult.Content?.Result;
 
-            var validityTime = DateTime.UtcNow.AddMinutes(30).ConvertTimeFromUtc(EnumZoneRegion.Vietnam).ToString("yyyyMMddHHmmss", CultureInfo.CurrentCulture);
+            var validityTime = DateTime.UtcNow.AddMinutes(30).ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("yyyyMMddHHmmss", CultureInfo.CurrentCulture);
 
             await _orderTransactionRepository.ExecuteTransactionAsync(async () =>
             {
