@@ -97,5 +97,19 @@ namespace Fsel.Ordering.Api.Controllers
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+
+        /// <summary>
+        /// Check Current Status Of User
+        /// </summary>
+        [HttpGet("get-current-status")]
+        [ProducesResponseType(typeof(MethodResult<EnumTrialRegistrationStatus?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCurrentStatus()
+        {
+            MethodResult<EnumTrialRegistrationStatus?> commandResult = await _mediator.Send(new GetCurrentStatusQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
     }
 }

@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.IsLockPT = isLock;
                 settingStudentModel.StartPTLevel = placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault() == null ? student.CourseLevel : placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault()?.Level.GetCourseLevelByPlacementTestLevel();
 
-                var status = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel());
+                var status = await _orderService.GetCurrentStatusAsync();
                 if (!status.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
@@ -94,35 +94,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                     methodResult.Result = settingStudentModel;
                     return methodResult;
                 }
-
-                status = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = _authContext.CurrentUserId });
-                if (!status.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
-                    return methodResult;
-                }
-
-                settingStudentModel.TrialStatus = await CheckStudentTrialRegistration(status?.Content?.Result);
-                settingStudentModel.Status = status?.Content?.Result ?? default;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = settingStudentModel;
             return methodResult;
-        }
-
-        public async Task<EnumTrialRegistrationStatus> CheckStudentTrialRegistration(EnumOrderStatus? status)
-        {
-            var checkStudentTrial = await _userService.CheckStudentTrialRegistration();
-            var checkStudentTrialResult = checkStudentTrial?.Content?.Result ?? default;
-
-            var result = EnumTrialRegistrationStatus.Trial;
-            if (!checkStudentTrialResult && status != null)
-            {
-                result = EnumTrialRegistrationStatus.Payment;
-            }
-
-            return result;
         }
     }
 }
