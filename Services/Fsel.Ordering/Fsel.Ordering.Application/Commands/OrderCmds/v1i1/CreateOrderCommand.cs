@@ -93,7 +93,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
 
             var package = await _packageRepository.GetByIdAsync(request.PackageId);
-            request.IsTrial = true;
 
             if (package == null && !request.IsTrial)
             {
