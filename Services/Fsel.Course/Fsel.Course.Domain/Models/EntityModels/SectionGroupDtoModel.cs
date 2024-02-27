@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public double ExecutionTime { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
+        public string? AudioPath { get; set; }
         public long TotalQuestion { get; set; }
         public IList<SectionDtoModel>? Sections { get; set; }
         public SectionGroupResultModel? SectionGroupResult { get; set; }
