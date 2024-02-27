@@ -38,7 +38,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .AnyAsync(x => x.Id == id && x.UnitSkillMockTests.Count > 0);
         }
 
-        public override async Task<MockTest?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<MockTest?> GetIncludeByIdAsync(Guid id)
         {
             try
             {

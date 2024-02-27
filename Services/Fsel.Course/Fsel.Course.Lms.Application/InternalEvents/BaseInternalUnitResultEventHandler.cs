@@ -48,7 +48,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         {
             ArgumentNullException.ThrowIfNull(unit);
-            var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder)).ThenInclude(p => p.Unit).Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder)).ThenInclude(p => p.FinalTest).Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder)).ThenInclude(p => p.MockTest).FirstOrDefaultAsync(x => x.Id == courseId, cancellationToken);
+            var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
+                                                            .ThenInclude(p => p.Unit)
+                                                            .Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
+                                                            .ThenInclude(p => p.FinalTest)
+                                                            .Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
+                                                            .ThenInclude(p => p.MockTest)
+                                                            .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
+                                                            .FirstOrDefaultAsync(x => x.Id == courseId, cancellationToken);
             if (course != null)
             {
                 var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unit.Id && x.StudentId == studentId && x.CourseId == courseId, cancellationToken);
@@ -186,7 +193,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 UnitName = unit.Name,
                 StartDate = startUnit?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
-                EndDate = endUnit.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
+                EndDate = endUnit.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
                 Percent = percent.ToString(CultureInfo.CurrentCulture),
                 TotalHour = SendMailHelper.FormatTimeSpanAsClock(currentLearn + currentSocial + currentOther),
                 TotalLearn = SendMailHelper.FormatTimeSpanAsClock(currentLearn),

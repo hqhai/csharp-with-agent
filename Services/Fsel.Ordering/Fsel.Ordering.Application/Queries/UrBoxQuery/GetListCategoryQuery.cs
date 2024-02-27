@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Services.UrBoxService;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
@@ -22,11 +23,13 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     {
         private readonly IUrBoxService _urBoxService;
         private readonly AppSetting _appSetting;
+        private readonly LanguageContext _languageContext;
 
-        public GetListCategoryQueryHandler(IUrBoxService urBoxService, AppSetting appSetting)
+        public GetListCategoryQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, LanguageContext languageContext)
         {
             _urBoxService = urBoxService;
             _appSetting = appSetting;
+            _languageContext = languageContext;
         }
 
         public async Task<MethodResult<IList<CategoryModel>>> Handle(GetListCategoryQuery request, CancellationToken cancellationToken)
@@ -37,6 +40,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             var categoriesResult = await _urBoxService.GetListCategory(new GetListCategoryQueryModel(_appSetting)
             {
                 ParentId = request.ParentId,
+                Language = _languageContext.CurrentCountryInfo?.CultureCode?.Substring(0, 2),
             });
 
             var categories = categoriesResult.Content?.Data;

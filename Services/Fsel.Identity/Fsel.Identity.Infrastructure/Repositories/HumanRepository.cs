@@ -13,7 +13,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
         {
         }
 
-        public override async Task<Human?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<Human?> GetIncludeByIdAsync(Guid id)
         {
             try
             {

@@ -19,13 +19,16 @@ namespace Fsel.Ordering.Application.Commands.Payoo
     using Fsel.Shared.Constants;
     using Fsel.Shared.Helpers;
     using MediatR;
+
     using Fsel.Common.Helpers;
+
     using Fsel.Common.Enums;
 
     public class PaymentWithPayooCommand : IRequest<MethodResult<PayooModel>>
     {
         public Guid OrderId { get; set; }
     }
+
     public class PaymentWithPayooCommandHandler : IRequestHandler<PaymentWithPayooCommand, MethodResult<PayooModel>>
     {
         private readonly IPayooService _payooService;
@@ -33,6 +36,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
         private readonly IOrderRepository _orderRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+
         public PaymentWithPayooCommandHandler(IPayooService payooService, AppSetting appSetting, IOrderRepository orderRepository, IUserService userService, AuthContext authContext)
         {
             _payooService = payooService;
@@ -64,7 +68,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
 
             var orderNo = NumberHelper.GenerateCode(32);
 
-            var validityTime = DateTime.UtcNow.AddMinutes(30).ConvertTimeFromUtc(EnumZoneRegion.Vietnam).ToString("yyyyMMddHHmmss", CultureInfo.CurrentCulture);
+            var validityTime = DateTime.UtcNow.AddMinutes(30).ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("yyyyMMddHHmmss", CultureInfo.CurrentCulture);
 
             var param = new
             {
@@ -109,6 +113,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             methodResult.Result = payooResult.Content;
             return methodResult;
         }
+
         public string RemoveWhitespace(string input)
         {
             StringBuilder sb = new StringBuilder();
@@ -123,7 +128,6 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             }
             return sb.ToString();
         }
-
 
         public string GenerateChecksum(string checksumKey, string data)
         {
