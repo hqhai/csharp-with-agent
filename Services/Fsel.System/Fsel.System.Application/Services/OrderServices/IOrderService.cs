@@ -8,7 +8,7 @@ namespace Fsel.System.Application.Services.OrderServices
 
     public interface IOrderService
     {
-        [Get("/package")]
+        [Get("/v1/package")]
         Task<IApiResponse<MethodResult<IList<PackageModel>>>> GetPackages();
     }
 }

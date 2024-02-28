@@ -37,6 +37,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new GameVocabularyPlatformEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ApprovalTimeEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new TokenConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LocationEntityTypeConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -57,6 +58,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<GameVocabularyPlatform> GameVocabularyPlatforms { get; set; }
         public DbSet<ApprovalTimeConfig> ApprovalTimeConfigs { get; set; }
         public DbSet<TokenConfig> TokenConfigs { get; set; }
+        public DbSet<Location> Locations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

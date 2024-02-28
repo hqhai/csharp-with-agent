@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Course.Lms.Application.Commands.UnitResultCmd;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -64,6 +65,15 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetCourseAndUnit([FromRoute] Guid id)
         {
             MethodResult<StudentCourseUnitModel> queryResult = await _mediator.Send(new GetCourseAndUnitByUserIdQuery { UserId = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpPut("open-next-unit")]
+        [ProducesResponseType(typeof(MethodResult<StudentCourseUnitModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> OpenNextUnitForTrial()
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(new OpenNextUnitForExtendCmd()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

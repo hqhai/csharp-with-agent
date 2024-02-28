@@ -12,13 +12,13 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
 
     public interface IInteractionService
     {
-        [Post("/interaction-action/actions")]
+        [Post("/v1/interaction-action/actions")]
         Task<IApiResponse<MethodResult<IList<InteractionActionModel>>>> GetsActionAsync([Body] InteractionActionCommandModel command);
 
-        [Get("/review/student-reviews")]
+        [Get("/v1/review/student-reviews")]
         Task<IApiResponse<MethodResult<IList<StudentReviewModel>>>> GetStudentReviewsAsync([Query] EnumReviewType reviewType);
 
-        [Post("/interaction-action/execute-list-query")]
+        [Post("/v1/interaction-action/execute-list-query")]
         Task<IApiResponse<MethodResult<InteractionActionModel>>> ExecuteListActionQueryAsync([Body] BaseQueryModel query);
 
     }
