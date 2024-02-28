@@ -14,6 +14,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public new Services? Services { get; set; }
         public UrBoxConfig? UrBoxConfig { get; set; }
         public ResourceContent? ResourceContent { get; set; }
+        public PurchaseValidationSettings? PurchaseValidationSettings { get; set; }
     }
 
     public class ResourceContent
@@ -21,7 +22,6 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public string? LmsWebsiteUrl { get; set; }
         public string? HotLine { get; set; }
         public string? Email { get; set; }
-        public PurchaseValidationSettings? PurchaseValidationSettings { get; set; }
     }
 
     public class PurchaseValidationSettings

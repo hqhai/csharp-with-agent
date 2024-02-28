@@ -22,14 +22,12 @@ namespace Fsel.Ordering.Application.Services.InAppPurchaseService
         private readonly AppSetting _appSetting;
         private readonly IOrderRepository _orderRepository;
         private readonly IMediator _mediator;
-        private readonly IUrBoxTransactionRepository _transactionRepository;
 
-        public InAppPurchaseService(AppSetting appSetting, IOrderRepository orderRepository, IMediator mediator, IUrBoxTransactionRepository transactionRepository)
+        public InAppPurchaseService(AppSetting appSetting, IOrderRepository orderRepository, IMediator mediator)
         {
             _appSetting = appSetting;
             _orderRepository = orderRepository;
             _mediator = mediator;
-            _transactionRepository = transactionRepository;
         }
 
         public async Task<bool> ValidatePurchase(PurchaseDetails purchaseDetails, string? uid, CancellationToken cancellationToken)
@@ -135,8 +133,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchaseService
             var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId.ToString() == uid && p.Id.ToString() == purchaseDetails.ProductID && p.Status == EnumOrderStatus.New, cancellationToken);
             if (order != null)
             {
-                var orderTransaction = await _transactionRepository.Queryable.FirstOrDefaultAsync(p => p.CreatedUserId.ToString() == uid, cancellationToken);
-                var changeStatusOrderResult = await _mediator.Send(new ChangeStatusOrderCommand() { OrderId = order.Id, OrderStatus = EnumOrderStatus.Payment, PackageId = order.PackageId }, cancellationToken).ConfigureAwait(false);
+                var changeStatusOrderResult = await _mediator.Send(new ChangeStatusOrderCommand() { OrderId = order.Id, OrderStatus = EnumOrderStatus.Payment, Receipt = receipt }, cancellationToken).ConfigureAwait(false);
                 if (changeStatusOrderResult.IsOK)
                 {
                     return true;
