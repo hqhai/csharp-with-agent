@@ -298,6 +298,47 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Packages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
+                            Code = "BASIC",
+                            CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DescriptionStr = "",
+                            IsDeleted = false,
+                            MonthNumber = 3,
+                            Name = "Fsel_3_Months",
+                            Price = 1000000m
+                        },
+                        new
+                        {
+                            Id = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
+                            Code = "BASIC",
+                            CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DescriptionStr = "",
+                            IsDeleted = false,
+                            MonthNumber = 6,
+                            Name = "Fsel_6_Months",
+                            Price = 3000000m
+                        },
+                        new
+                        {
+                            Id = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
+                            Code = "BASIC",
+                            CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DescriptionStr = "",
+                            IsDeleted = false,
+                            MonthNumber = 12,
+                            Name = "Fsel_12_Months",
+                            Price = 10000000m
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.UserReferral", b =>
