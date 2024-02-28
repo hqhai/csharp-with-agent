@@ -9,9 +9,9 @@ namespace Fsel.Ordering.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class UrBoxTransactionEntityTypeConfiguration : IEntityTypeConfiguration<UrBoxTransaction>
+    public class OrderTransactionEntityTypeConfiguration : IEntityTypeConfiguration<OrderTransaction>
     {
-        public void Configure(EntityTypeBuilder<UrBoxTransaction> builder)
+        public void Configure(EntityTypeBuilder<OrderTransaction> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
 
@@ -19,7 +19,12 @@ namespace Fsel.Ordering.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumUrBoxTransactionStatus>());
+                    v => v.EnumParse<EnumOrderTransactionStatus>());
+            builder.Property(e => e.Type)
+               .HasMaxLength(100)
+               .HasConversion(
+                   v => v.ToString(),
+                   v => v.EnumParse<EnumOrderTransactionType>());
         }
     }
 }

@@ -32,7 +32,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
-builder.Services.AddScoped<IUrBoxTransactionRepository, UrBoxTransactionRepository>();
+builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<VnPayLibrary>();
 

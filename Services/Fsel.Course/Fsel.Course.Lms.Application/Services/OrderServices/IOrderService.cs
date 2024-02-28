@@ -10,13 +10,16 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
 
     public interface IOrderService
     {
-        [Get("/package")]
+        [Get("/v1/package")]
         Task<IApiResponse<MethodResult<IList<PackageModel>>>> GetPackages();
 
-        [Get("/order/get-status")]
+        [Get("/v1/order/get-status")]
         Task<IApiResponse<MethodResult<EnumOrderStatus?>>> GetStatusAsync([Query] GetStatusByUserCommandModel command);
 
-        [Post("/order")]
+        [Get("/v1/order/get-current-status")]
+        Task<IApiResponse<MethodResult<EnumTrialRegistrationStatus?>>> GetCurrentStatusAsync();
+
+        [Post("/v1.1/order")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
     }
 }

@@ -10,10 +10,10 @@ namespace Fsel.Interaction.Application.Services.SenderServices
 
     public interface ISenderService
     {
-        [Post("/send-email")]
+        [Post("/v1/send-email")]
         Task<IApiResponse<MethodResult<bool>>> SendEmailAsync([Body] SendEmailCommandModel command);
 
-        [Post("/send-email/send-by-template")]
+        [Post("/v1/send-email/send-by-template")]
         Task<IApiResponse<MethodResult<bool>>> SendEmailAsync([Body] SendEmailByTemplateCommandModel command);
     }
 
