@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
         [Get("/v1/order/get-current-status")]
         Task<IApiResponse<MethodResult<EnumTrialRegistrationStatus?>>> GetCurrentStatusAsync();
 
-        [Post("/v1.1/order")]
+        [Post("/v1/order")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
     }
 }
