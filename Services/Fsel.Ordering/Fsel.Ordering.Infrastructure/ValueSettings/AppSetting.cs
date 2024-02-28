@@ -13,6 +13,14 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public PayooConfig? PayooConfig { get; set; }
         public new Services? Services { get; set; }
         public UrBoxConfig? UrBoxConfig { get; set; }
+        public ResourceContent? ResourceContent { get; set; }
+    }
+
+    public class ResourceContent
+    {
+        public string? LmsWebsiteUrl { get; set; }
+        public string? HotLine { get; set; }
+        public string? Email { get; set; }
         public PurchaseValidationSettings? PurchaseValidationSettings { get; set; }
     }
 

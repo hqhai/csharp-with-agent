@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -56,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             }
             var student = studentResult?.Content?.Result;
             int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
+
             if (student != null)
             {
                 var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
@@ -71,7 +73,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
                 settingStudentModel.IsLockPT = isLock;
                 settingStudentModel.StartPTLevel = placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault() == null ? student.CourseLevel : placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault()?.Level.GetCourseLevelByPlacementTestLevel();
-                var status = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel());
+
+                var status = await _orderService.GetCurrentStatusAsync();
                 if (!status.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
@@ -91,14 +94,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                     methodResult.Result = settingStudentModel;
                     return methodResult;
                 }
-
-                status = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = _authContext.CurrentUserId });
-                if (!status.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
-                    return methodResult;
-                }
-                settingStudentModel.Status = status?.Content?.Result ?? default;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

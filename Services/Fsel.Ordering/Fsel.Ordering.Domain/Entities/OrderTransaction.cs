@@ -7,10 +7,11 @@ namespace Fsel.Ordering.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
 
-    public class UrBoxTransaction : Entity
+    public class OrderTransaction : Entity
     {
-        public EnumUrBoxTransactionStatus Status { get; set; }
-
+        public EnumOrderTransactionStatus Status { get; set; }
+        public EnumOrderTransactionType Type { get; set; }
+        public Guid? OrderId { get; set; }
         public string? RequestBodyStr { get; set; }
 
         [NotMapped]

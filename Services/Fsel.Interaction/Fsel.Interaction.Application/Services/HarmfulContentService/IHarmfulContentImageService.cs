@@ -8,7 +8,7 @@ namespace Fsel.Interaction.Application.Services.HarmfulContentService
 
     public interface IHarmfulContentImageService
     {
-        [Post("/Evaluate")]
+        [Post("/v1/Evaluate")]
         Task<IApiResponse<HarmfulContentImageModel>> CheckHarmfulContentImage([Body] CheckHarmfulContentImagesModel model, [AliasAs("CacheImage")] bool cacheImage);
     }
 }
