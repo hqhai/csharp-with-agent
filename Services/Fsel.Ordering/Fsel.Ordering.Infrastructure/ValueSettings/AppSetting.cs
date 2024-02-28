@@ -13,6 +13,23 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public PayooConfig? PayooConfig { get; set; }
         public new Services? Services { get; set; }
         public UrBoxConfig? UrBoxConfig { get; set; }
+        public PurchaseValidationSettings? PurchaseValidationSettings { get; set; }
+    }
+
+    public class PurchaseValidationSettings
+    {
+        public AppStore? AppStore { get; set; }
+        public GooglePlay? GooglePlay { get; set; }
+    }
+
+    public class AppStore
+    {
+        public string? SharedSecret { get; set; }
+    }
+
+    public class GooglePlay
+    {
+        public string? BundleId { get; set; }
     }
 
     public class ConstantUrl
