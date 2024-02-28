@@ -54,7 +54,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             _logger = logger;
         }
 
-        private async Task<string> UploadFileAsync(Stream? stream, string? key)
+        private async Task<string> UploadFileAsync(EnumBucketType? bucketType, Stream? stream, string? key)
         {
             if (stream == null || string.IsNullOrEmpty(key))
             {
@@ -63,9 +63,11 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
             var parts = new List<UploadPartResponse>();
 
+            var bucketName = bucketType.HasValue ? bucketType.Value.GetDescription() : _appSetting.StorageConfig!.BucketName;
+
             var initiateRequest = new InitiateMultipartUploadRequest
             {
-                BucketName = _appSetting.StorageConfig!.BucketName,
+                BucketName = bucketName,
                 Key = key,
             };
             var initiateResponse = await _amazonS3Client.InitiateMultipartUploadAsync(initiateRequest);
@@ -85,7 +87,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
                     var uploadPartRequest = new UploadPartRequest
                     {
-                        BucketName = _appSetting.StorageConfig!.BucketName,
+                        BucketName = bucketName,
                         Key = key,
                         UploadId = initiateResponse.UploadId,
                         PartNumber = partNumber,
@@ -107,7 +109,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 // Complete the upload process
                 var completeMultipartUploadRequest = new CompleteMultipartUploadRequest
                 {
-                    BucketName = _appSetting.StorageConfig!.BucketName,
+                    BucketName = bucketName,
                     Key = key,
                     UploadId = initiateResponse.UploadId,
                     PartETags = parts.Select(p => new PartETag { PartNumber = p.PartNumber, ETag = p.ETag }).ToList()
@@ -119,7 +121,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                     return string.Empty;
                 }
 
-                return GenerateAwsFileUrl(_appSetting.StorageConfig.AwsS3BaseUrl, _appSetting.StorageConfig.BucketName, key) ?? string.Empty;
+                return GenerateAwsFileUrl(_appSetting.StorageConfig?.AwsS3BaseUrl, bucketName, key) ?? string.Empty;
             }
         }
 
@@ -202,7 +204,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             GC.SuppressFinalize(this);
         }
 
-        public async Task<MethodResult<IList<string>>> UploadFilesAsync(IList<IFormFile> files, EnumBucketType bucketType, EnumFolderType folderType, bool isResize = false)
+        public async Task<MethodResult<IList<string>>> UploadFilesAsync(EnumBucketType? bucketType, IList<IFormFile> files, EnumFolderType folderType, bool isResize = false)
         {
             MethodResult<IList<string>> results = new MethodResult<IList<string>>();
             results.Result = new List<string>();
@@ -211,7 +213,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             {
                 foreach (var file in files)
                 {
-                    var uploadFile = UploadFileAsync(file, folderType, isResize);
+                    var uploadFile = UploadFileAsync(bucketType, file, folderType, isResize);
                     var result = await uploadFile.WaitAsync(cancellationToken: CancellationToken.None).ConfigureAwait(true);
                     if (!string.IsNullOrEmpty(result.Result))
                     {
@@ -223,7 +225,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return results;
         }
 
-        public async Task<string> UploadFileAsync(string? file, string? folderName)
+        public async Task<string> UploadFileAsync(EnumBucketType? bucketType, string? file, string? folderName)
         {
             if (string.IsNullOrEmpty(file))
             {
@@ -233,10 +235,10 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             var key = PathHelper.Combine(folderName, Path.GetFileName(file));
             using Stream stream = new FileStream(file, FileMode.Open);
 
-            return await UploadFileAsync(stream, key);
+            return await UploadFileAsync(bucketType, stream, key);
         }
 
-        public async Task<string?> UploadFileAsync(IFormFile? file, string? folder, bool isResize = false)
+        public async Task<string?> UploadFileAsync(EnumBucketType? bucketType, IFormFile? file, string? folder, bool isResize = false)
         {
             if (file == null)
             {
@@ -254,10 +256,10 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 stream = file.OpenReadStream();
             }
 
-            return await UploadFileAsync(stream, key);
+            return await UploadFileAsync(bucketType, stream, key);
         }
 
-        public async Task<MethodResult<string?>> UploadFileAsync(IFormFile? file, EnumBucketType bucketType, EnumFolderType folderType, bool isResize = false)
+        public async Task<MethodResult<string?>> UploadFileAsync(EnumBucketType? bucketType, IFormFile? file, EnumFolderType folderType, bool isResize = false)
         {
             MethodResult<string?> result = IsValidFile(file, folderType);
             if (file == null || !result.IsOK)
@@ -265,7 +267,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 return result;
             }
 
-            var filePath = await UploadFileAsync(file, folderType.ToString(), isResize);
+            var filePath = await UploadFileAsync(bucketType, file, folderType.ToString(), isResize);
             if (string.IsNullOrEmpty(filePath))
             {
                 result.AddErrorServer();
@@ -276,7 +278,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return result;
         }
 
-        public async Task<IList<string>> UploadFilesAsync(IList<IFormFile> files, string? folder, bool isResize = false)
+        public async Task<IList<string>> UploadFilesAsync(EnumBucketType? bucketType, IList<IFormFile> files, string? folder, bool isResize = false)
         {
             var results = new List<string>();
 
@@ -284,7 +286,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             {
                 foreach (var file in files)
                 {
-                    var uploadFile = UploadFileAsync(file, folder, isResize);
+                    var uploadFile = UploadFileAsync(bucketType, file, folder, isResize);
                     var result = await uploadFile.WaitAsync(cancellationToken: CancellationToken.None).ConfigureAwait(true);
                     if (!string.IsNullOrEmpty(result))
                     {
@@ -296,7 +298,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return results;
         }
 
-        public async Task<string> UploadFolderAsync(string? folderPath, string? folderName)
+        public async Task<string> UploadFolderAsync(EnumBucketType? bucketType, string? folderPath, string? folderName)
         {
             var results = new List<string>();
 
@@ -310,7 +312,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             {
                 foreach (var file in files)
                 {
-                    var uploadFile = await UploadFileAsync(file, folderName);
+                    var uploadFile = await UploadFileAsync(bucketType, file, folderName);
                     if (!string.IsNullOrEmpty(uploadFile))
                     {
                         results.Add(uploadFile);
@@ -318,10 +320,11 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 }
             }
 
-            return GenerateAwsFileUrl(_appSetting.StorageConfig!.AwsS3BaseUrl, _appSetting.StorageConfig!.BucketName, folderName) ?? string.Empty;
+            var bucketName = bucketType.HasValue ? bucketType.Value.GetDescription() : _appSetting.StorageConfig!.BucketName;
+            return GenerateAwsFileUrl(_appSetting.StorageConfig!.AwsS3BaseUrl, bucketName, folderName) ?? string.Empty;
         }
 
-        private async Task<MethodResult<string>> StartResolutions(string? inputPath)
+        private async Task<MethodResult<string>> StartResolutions(EnumBucketType? bucketType, string? inputPath)
         {
             _logger.LogInformation($"Start resolution 1");
 
@@ -370,7 +373,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             _logger.LogInformation($"Start resolution 4");
 
             var folderPath = PathHelper.Combine(EnumFolderType.Videos.ToString(), videoName);
-            var folderRemoteUrl = await UploadFolderAsync(rootFolderPath, folderPath);
+            var folderRemoteUrl = await UploadFolderAsync(bucketType, rootFolderPath, folderPath);
 
             _logger.LogInformation($"Start resolution 5");
 
@@ -389,7 +392,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return result;
         }
 
-        public async Task<MethodResult<string>> UploadResolutions(string? url)
+        public async Task<MethodResult<string>> UploadResolutions(EnumBucketType? bucketType, string? url)
         {
             var result = new MethodResult<string>();
             if (string.IsNullOrEmpty(url))
@@ -398,11 +401,11 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             }
 
             var inputPath = await _systemFileProvider.SaveFileFromUrl(url);
-            result = await StartResolutions(inputPath);
+            result = await StartResolutions(bucketType, inputPath);
             return result;
         }
 
-        public async Task<MethodResult<string>> UploadResolutions(IFormFile? file)
+        public async Task<MethodResult<string>> UploadResolutions(EnumBucketType? bucketType, IFormFile? file)
         {
             var result = new MethodResult<string>();
             if (file == null)
@@ -419,7 +422,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
             _logger.LogInformation($"Start resolutions");
 
-            result = await StartResolutions(inputPath);
+            result = await StartResolutions(bucketType, inputPath);
 
             _logger.LogInformation($"End resolutions");
             return result;
