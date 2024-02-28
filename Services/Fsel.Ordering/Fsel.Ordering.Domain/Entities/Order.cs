@@ -104,5 +104,6 @@ namespace Fsel.Ordering.Domain.Entities
         public Guid? PackageId { get; set; }
         public Guid UserId { get; set; }
         public Guid ClassId { get; set; }
+        public ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
     }
 }

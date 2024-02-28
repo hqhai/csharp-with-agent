@@ -5,7 +5,6 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Services.CourseServices;
@@ -81,7 +80,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 }
                 else
                 {
-                    if(!@class.ClassStudents.Any(p => p.StudentId == student!.Id))
+                    if (!@class.ClassStudents.Any(p => p.StudentId == student!.Id))
                     {
                         @class.ClassStudents.Add(new ClassStudent() { StudentId = student!.Id, IsActive = true });
                     }
@@ -96,6 +95,8 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                     StudentId = student!.Id,
                     ClassId = @class.Id,
                     PackageId = @class.PackageId,
+                    CourseLevel = course!.CourseLevel,
+                    NumberOfShield = request.NumberOfShield,
                 });
                 if (!updateStudentResult.IsSuccessStatusCode)
                 {

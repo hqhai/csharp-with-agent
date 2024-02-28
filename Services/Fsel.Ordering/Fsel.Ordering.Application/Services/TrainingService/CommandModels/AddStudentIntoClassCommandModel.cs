@@ -9,5 +9,6 @@ namespace Fsel.Ordering.Application.Services.TrainingService.CommandModels
         public Guid UserId { get; set; }
         public Guid CourseId { get; set; }
         public Guid PackageId { get; set; }
+        public int NumberOfShield { get; set; }
     }
 }

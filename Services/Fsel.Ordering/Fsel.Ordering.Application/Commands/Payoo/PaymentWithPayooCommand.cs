@@ -69,7 +69,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
 
             await _orderTransactionRepository.ExecuteTransactionAsync(async () =>
             {
-                var orderTransaction = new OrderTransaction() { Type = EnumOrderTransactionType.Payoo, Status = EnumOrderTransactionStatus.Fail };
+                var orderTransaction = new OrderTransaction() { Type = EnumOrderTransactionType.Payoo, Status = EnumOrderTransactionStatus.Fail, OrderId = order.Id };
                 orderTransaction = _orderTransactionRepository.Add(orderTransaction);
                 await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

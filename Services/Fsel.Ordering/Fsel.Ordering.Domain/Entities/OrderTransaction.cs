@@ -29,5 +29,7 @@ namespace Fsel.Ordering.Domain.Entities
             get { return ResponseBodyStr.Deserialize<object>(); }
             set { ResponseBodyStr = value.Serialize(); }
         }
+
+        public Order? Order { get; set; }
     }
 }
