@@ -9,7 +9,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Services.LmsCourseServices
 
     public interface ICourseService
     {
-        [Get("/unit-result/get-course-unit-by-user-id/{id}")]
+        [Get("/v1/unit-result/get-course-unit-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<StudentCourseUnitModel>>> GetCourseUnitByUserId([FromRoute] Guid id);
     }
 }

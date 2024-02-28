@@ -7,7 +7,7 @@ namespace Fsel.Interaction.Application.Services.HarmfulContentService
 
     public interface IHarmfulContentWordsService
     {
-        [Post("/text:analyze")]
+        [Post("/v1/text:analyze")]
         Task<IApiResponse<HarmfulContentWordsModel>> CheckHarmfulContentWords([Body] CheckHarmfulContentWordsModel model, [AliasAs("api-version")] string? version);
     }
 }

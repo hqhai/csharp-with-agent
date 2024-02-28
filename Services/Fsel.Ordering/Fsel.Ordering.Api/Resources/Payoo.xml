@@ -5,7 +5,7 @@
         <shop_title>[ShopTitle]</shop_title>
         <shop_domain>[ShopDomain]</shop_domain>
         <shop_back_url>[ShopBackUrl]</shop_back_url>
-        <order_no>[OrderNo]</order_no>
+        <order_no>[OrderTransactionId]</order_no>
         <order_cash_amount>[OrderCashAmount]</order_cash_amount>
         <order_description>[OrderDescription]</order_description>
         <notify_url>[NotifyUrl]</notify_url>
@@ -16,9 +16,9 @@
             <address>[CustomerAddress]</address>
             <email>[CustomerEmail]</email>
         </customer>
-        <MDD1>Email: fsel@atlantic.edu.vn</MDD1>
-        <MDD2>Hotline: 19000033</MDD2>
-        <customer_identifier>[OrderId]</customer_identifier>
+        <MDD1>[Email]</MDD1>
+        <MDD2>[Hotline]</MDD2>
+        <customer_identifier>[StudentCode]</customer_identifier>
         <JsonResponse>True</JsonResponse>
         <count_down>1</count_down>
         <direct_return_time>10</direct_return_time>

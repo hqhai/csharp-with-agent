@@ -30,6 +30,7 @@ builder.Services.AddScoped<CompleteTestWhenTimeOutPublisher>();
 builder.Services.AddScoped<ReviewFselPublisher>();
 builder.Services.AddScoped<NoticeAccessTimePublisher>();
 builder.Services.AddScoped<WeeklyReportPublisher>();
+builder.Services.AddScoped<UpdateStatusTrialStudentPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {

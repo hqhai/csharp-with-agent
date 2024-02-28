@@ -10,7 +10,7 @@ namespace Fsel.Course.Lms.Application.Services.NotificationServices
 
     public interface INotificationService
     {
-        [Post("/notifications/remind-by-status")]
+        [Post("/v1/notifications/remind-by-status")]
         Task<IApiResponse<MethodResult<IList<NotificationRemindModel>>>> GetListNotificationRemind([Body] GetListNotificationRemindQuery query);
     }
 }
