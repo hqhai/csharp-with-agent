@@ -9,6 +9,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -27,7 +28,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
 
-
         public CreateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
             , SectionGroupManagerConverter sectionGroupManagerConverter
@@ -45,11 +45,22 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             #region Validation
 
-            if (request.SectionGroups == null || !request.SectionGroups.Any())
+            if (request.SectionGroups == null || (!request.SectionGroups.Any() || request.SectionGroups.Any(x => x == null)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
                 return methodResult;
             }
+            if (request.MockTestType == EnumMockTestType.SkillMockTest && request.SectionGroups.Count != 1)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SectionGroups));
+                return methodResult;
+            }
+            else if (request.MockTestType == EnumMockTestType.FullMockTest && request.SectionGroups.Count != 4)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SectionGroups));
+                return methodResult;
+            }
+
             request.SectionGroups = request.SectionGroups.OrderBy(obj => obj.CourseSkill).ToList();
             MockTest mockTest = _mapper.Map<MockTest>(request);
             if (!mockTest.IsValid())
@@ -97,6 +108,5 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             return methodResult;
         }
-
     }
 }
