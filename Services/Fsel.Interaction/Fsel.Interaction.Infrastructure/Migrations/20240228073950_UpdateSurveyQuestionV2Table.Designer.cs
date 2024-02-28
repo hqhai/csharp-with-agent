@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Interaction.Infrastructure.Migrations
 {
     [DbContext(typeof(InteractionDbContext))]
-    [Migration("20240227073958_UpdateSurveyQuestionV2Table")]
+    [Migration("20240228073950_UpdateSurveyQuestionV2Table")]
     partial class UpdateSurveyQuestionV2Table
     {
         /// <inheritdoc />
@@ -991,6 +991,21 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5"),
+                            AnswerStr = "null",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayLevel = 1,
+                            DisplayOrder = 4f,
+                            Icon = "wideword.png",
+                            IsDeleted = false,
+                            Question = "Trường học của bạn",
+                            Type = "Location"
+                        },
+                        new
+                        {
                             Id = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23"),
                             AnswerStr = "{\"birthday\":null,\"ageGenderQuestions\":[{\"id\":1,\"content\":\"Male\"},{\"id\":2,\"content\":\"Female\"},{\"id\":3,\"content\":\"Other\"}]}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -998,7 +1013,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
-                            DisplayOrder = 4f,
+                            DisplayOrder = 5f,
                             Icon = "time.png",
                             IsDeleted = false,
                             Question = "Xác định độ tuổi và giới tính",

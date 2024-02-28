@@ -110,30 +110,41 @@
     }
   },
   {
-    "id": "2BE9A620-143D-41F6-815B-2038C21A7B23",
+    "id": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
     "createdDate": "2023-07-21",
-    "question": "Xác định độ tuổi và giới tính",
+    "question": "Trường học của bạn",
     "description": "addd",
-    "icon": "time.png",
+    "icon": "wideword.png",
     "displayOrder": 4,
-    "type": "AgeGender",
     "displayLevel": 1,
-    "answers": {
-      "birthday": null,
-      "ageGenderQuestions": [
-        {
-          "id": 1,
-          "content": "Male"
-        },
-        {
-          "id": 2,
-          "content": "Female"
-        },
-        {
-          "id": 3,
-          "content": "Other"
-        }
-      ]
+    "type": "Location",
+    "answers": null
+    },
+    {
+      "id": "2BE9A620-143D-41F6-815B-2038C21A7B23",
+      "createdDate": "2023-07-21",
+      "question": "Xác định độ tuổi và giới tính",
+      "description": "addd",
+      "icon": "time.png",
+      "displayOrder": 5,
+      "type": "AgeGender",
+      "displayLevel": 1,
+      "answers": {
+        "birthday": null,
+        "ageGenderQuestions": [
+          {
+            "id": 1,
+            "content": "Male"
+          },
+          {
+            "id": 2,
+            "content": "Female"
+          },
+          {
+            "id": 3,
+            "content": "Other"
+          }
+        ]
+      }
     }
-  }
 ]

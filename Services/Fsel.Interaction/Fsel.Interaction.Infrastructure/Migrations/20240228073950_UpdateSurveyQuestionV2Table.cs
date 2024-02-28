@@ -115,13 +115,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
             migrationBuilder.UpdateData(
                 table: "SurveyQuestions",
                 keyColumn: "Id",
-                keyValue: new Guid("2be9a620-143d-41f6-815b-2038c21a7b23"),
-                column: "DisplayOrder",
-                value: 4f);
-
-            migrationBuilder.UpdateData(
-                table: "SurveyQuestions",
-                keyColumn: "Id",
                 keyValue: new Guid("713d8bb9-cdbe-42e7-aa16-35a1915c3532"),
                 column: "DisplayOrder",
                 value: 3f);
@@ -132,11 +125,21 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                 keyValue: new Guid("721d8bb9-cdbe-42e7-aa16-35a1915c1123"),
                 column: "DisplayOrder",
                 value: 2f);
+
+            migrationBuilder.InsertData(
+                table: "SurveyQuestions",
+                columns: new[] { "Id", "AnswerStr", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "Description", "DisplayLevel", "DisplayOrder", "Icon", "IsDeleted", "Question", "Type", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
+                values: new object[] { new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5"), "null", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "addd", 1, 4f, "wideword.png", false, "Trường học của bạn", "Location", null, null, null });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DeleteData(
+                table: "SurveyQuestions",
+                keyColumn: "Id",
+                keyValue: new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5"));
+
             migrationBuilder.AddColumn<bool>(
                 name: "IsPilot",
                 table: "SurveyQuestions",
@@ -148,8 +151,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                 table: "SurveyQuestions",
                 keyColumn: "Id",
                 keyValue: new Guid("2be9a620-143d-41f6-815b-2038c21a7b23"),
-                columns: new[] { "DisplayOrder", "IsPilot" },
-                values: new object[] { 5f, false });
+                column: "IsPilot",
+                value: false);
 
             migrationBuilder.UpdateData(
                 table: "SurveyQuestions",
