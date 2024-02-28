@@ -16,7 +16,7 @@ namespace Fsel.Shared.Constants
         public const string AcademicStudentsStagingName = "Resources//AcademicStudents.Staging.json";
         public const string RoleFileName = "Resources//Role.json";
 
-        public const string PackageFileName = "Resources//Package.json";
+        public const string PackageFileName = "Resources//Packages.json";
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
 
         public const string ZMatter = "Resources//ZMatter.json";
