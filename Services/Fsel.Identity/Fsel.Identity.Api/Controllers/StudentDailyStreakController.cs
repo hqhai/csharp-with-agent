@@ -12,18 +12,36 @@ namespace Fsel.Identity.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Core.Base;
 
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student-daily-streak")]
     [ApiController]
-    public class StudentDailyStreakController : ControllerBase
+    public class StudentDailyStreakController : BaseController
     {
         private readonly IMediator _mediator;
-
-        public StudentDailyStreakController(IMediator mediator)
+        private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
+        public StudentDailyStreakController(IMediator mediator, IStudentDailyStreakRepository studentDailyStreakRepository)
         {
             _mediator = mediator;
+            _studentDailyStreakRepository = studentDailyStreakRepository;
         }
+
+        /// <summary>
+        /// execute list query
+        /// </summary>
+        [HttpGet("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReceiveToken([FromQuery] BaseQueryModel query)
+        {
+            SetQuery(query);
+            var commandResult = await _studentDailyStreakRepository.GetListResultAsync<StudentConsecutiveDayModel>(query);
+            return commandResult.GetActionResult();
+        }
+
 
         /// <summary>
         /// Receive Token Student

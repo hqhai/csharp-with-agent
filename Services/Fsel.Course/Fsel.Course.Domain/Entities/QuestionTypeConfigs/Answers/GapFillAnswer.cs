@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class GapFillAnswer
     {
-        public IList<GapFillAnswers>? Answers { get; set; }
+        public IList<GapFillAnswers> Answers { get; set; } = new List<GapFillAnswers>();
     }
 
     public class GapFillAnswers
@@ -17,13 +17,13 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
         public IList<string>? Answer { get; set; }
         public IList<bool?>? IsExacts { get; set; }
 
-        public IList<EnumSubAnswerStatus>? Statuses
+        public IList<EnumCorrectStatus>? Statuses
         {
             get
             {
                 return IsExacts?.Select(x =>
                 {
-                    return x.HasValue ? x.Value ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail : EnumSubAnswerStatus.Process;
+                    return x.HasValue ? x.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail : EnumCorrectStatus.Process;
                 }).ToList();
             }
         }

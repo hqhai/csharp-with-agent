@@ -23,15 +23,15 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     public class DeleteFinalTestCommandHandler : IRequestHandler<DeleteFinalTestCommand, MethodResult<bool>>
     {
         private readonly IFinalTestRepository _finalTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public DeleteFinalTestCommandHandler(IFinalTestRepository finalTestRepository
-            , SectionConverter sectionConverter,
-ICourseUnitMockTestRepository courseUnitMockTestRepository)
+            , SectionGroupManagerConverter sectionGroupManagerConverter
+            , ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _finalTestRepository = finalTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupManagerConverter = sectionGroupManagerConverter;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
@@ -57,7 +57,7 @@ ICourseUnitMockTestRepository courseUnitMockTestRepository)
 
             await _finalTestRepository.ExecuteTransactionAsync(async () =>
             {
-                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
+                await _sectionGroupManagerConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
 
                 var result = await _finalTestRepository.DeleteAsync(finalTest);
                 await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

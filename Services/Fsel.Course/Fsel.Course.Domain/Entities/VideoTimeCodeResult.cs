@@ -3,8 +3,12 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IEntities;
+    using Fsel.Shared.Helpers;
 
     public class VideoTimeCodeResult : BaseLearnResult, ITokenResult
     {
@@ -27,6 +31,40 @@ namespace Fsel.Course.Domain.Entities
         /// Đang làm việc
         /// </summary>
         public bool IsWorking { get; set; }
+
+        /// <summary>
+        /// Tổng điểm đạt được của câu hỏi không tính điểm
+        /// </summary>
+        public int? CorrectCountUngraded { get; set; }
+
+        /// <summary>
+        /// Tổng điểm của câu hỏi không tính điểm đúng
+        /// </summary>
+        public int? CorrectTotalUngraded { get; set; }
+
+        public string? SkillScoreUngradedStr { get; set; }
+
+        [NotMapped]
+        public IList<SkillScores>? SkillScoreUngraded
+        {
+            get
+            {
+                return ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoreUngradedStr);
+            }
+            set { SkillScoreUngradedStr = ConvertHelper.Serialize(value); }
+        }
+
+        private double _percentUngraded;
+
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public override double Percent
+        {
+            get
+            {
+                return CorrectTotal + (CorrectTotalUngraded ?? default) > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : _percentUngraded;
+            }
+            set { _percentUngraded = CorrectTotal + (CorrectTotalUngraded ?? default) > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : value; }
+        }
 
         public int? TokenDone { get; set; }
         public int? TokenHighestStreak { get; set; }

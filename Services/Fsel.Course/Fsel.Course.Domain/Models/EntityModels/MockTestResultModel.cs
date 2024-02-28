@@ -14,9 +14,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public DateTime? GradingStartDate { get; set; }
         public Guid? GradingTeacherId { get; set; }
         public bool? IsTeacherGraded { get; set; }
+        public bool? IsCheckScoreColor { get; set; }
+        public double? TargetBandScore { get; set; }
         public double Scores { get; set; }
         public object? MockTestScores { get; set; }
         public int? UnitDisplayOrder { get; set; }
         public string? CourseCode { get; set; }
+        public double? ProgressPercent { get; set; }
     }
 }

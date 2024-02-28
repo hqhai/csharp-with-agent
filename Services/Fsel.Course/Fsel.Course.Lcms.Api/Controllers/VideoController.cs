@@ -18,7 +18,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/videos")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
+    //[Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class VideoController : ControllerBase
     {
         private readonly IMediator _mediator;

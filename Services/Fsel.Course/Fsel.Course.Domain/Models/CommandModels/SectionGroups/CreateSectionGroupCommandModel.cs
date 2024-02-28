@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.SectionGroups
     public class CreateSectionGroupCommandModel
     {
         public double ExecutionTime { get; set; }
+        public string? AudioPath { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
         public IList<CreateSectionCommandModel>? Sections { get; set; }
     }

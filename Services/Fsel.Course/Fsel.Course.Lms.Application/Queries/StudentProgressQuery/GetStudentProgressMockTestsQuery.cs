@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var studentId = student?.Id;
             var userId = student?.Human?.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
-            if (course == null)
+            if (course == null || course.CourseType == EnumCourseType.Academic)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
@@ -77,14 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-
-            if (course.CourseType == EnumCourseType.Academic)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
             var mockTestIds = courseUnitMockTests.Where(x => x.MockTestId != null).Select(x => x.MockTestId ?? default).ToList();
-
             var mockTestResults = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).Where(x => mockTestIds.Contains(x.MockTestId) && x.CourseId == request.CourseId && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
             var featureAccessTimes = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
@@ -118,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                             };
 
                 var skillMockTest = await query.ToListAsync(cancellationToken);
-                mockTestProgress.SkillScores = skillMockTest.Select(x =>
+                mockTestProgress.SkillScores = skillMockTest.OrderBy(x => x.Skill).Select(x =>
                 {
                     var skillScore = x.MockTestResult?.SkillScores?.FirstOrDefault(z => z.Skill == x.Skill);
                     var skillScores = new TestSkillScores
@@ -131,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         Scores = skillScore?.Scores ?? default,
                     };
 
-                    if (x.Skill == EnumCourseSkill.Speaking || x.Skill == EnumCourseSkill.Writing)
+                    if (x.Skill == EnumCourseSkill.Speaking)
                     {
                         if (x.MockTestScores.Any() && x.MockTestScores.All(x => x != null))
                         {
@@ -153,7 +146,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var isDone = item.Status == EnumResultStatus.Done;
                 mockTestProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
                 mockTestProgress.ProcessPercent = NumberHelper.ConvertPercentDouble(mockTestProgress.SkillScores.Average(x => x.CountQuestion / (x.TotalQuestion > 0 ? x.TotalQuestion : 1)));
-                mockTestProgress.Scores = Math.Round(mockTestProgress.SkillScores.Average(x => x.Scores), 1);
+                NumberHelper.RoundNumberDouble(mockTestProgress.SkillScores.Average(x => x.Scores));
                 mockTestProgress.Status = item.Status;
                 mockTestProgress.CorrectPercent = item.Percent;
                 var featureAccessTime = featureAccessTimeTest?.FirstOrDefault(x => x.ObjectId == item.Id);

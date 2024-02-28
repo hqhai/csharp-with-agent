@@ -2,13 +2,19 @@
 
 namespace Fsel.Cms.PlanetDefender.Domain.Models.EntityModels
 {
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
     public class AccountModel : BaseModel
     {
         public string? Name { get; set; }
-        public string? AvatarPath { get; set; }
+        private string? _avatarPath;
+        public string? AvatarPath
+        {
+            set { _avatarPath = value; }
+            get { return _avatarPath.AddS3BaseUrl(); }
+        }
         public string? Code { get; set; }
         public string? UserName { get; set; }
         public string? AccountType { get; set; }

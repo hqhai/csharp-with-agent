@@ -23,6 +23,7 @@ namespace Fsel.Shared.Enums
         TeacherRole,
         QuestBoardType,
         RepeatType,
-        EnumFeature
+        EnumFeature,
+        MockTestScoreCriteria
     }
 }

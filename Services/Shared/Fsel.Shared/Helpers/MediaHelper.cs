@@ -16,45 +16,46 @@ namespace Fsel.Shared.Helpers
 
             try
             {
-                string command = $"-i \"{mediaUrl}\"";
-
-                var processStartInfo = new ProcessStartInfo
+                ProcessStartInfo psi = new ProcessStartInfo
                 {
                     FileName = "ffmpeg",
-                    Arguments = command,
-                    RedirectStandardOutput = true,
+                    Arguments = $"-i \"{mediaUrl}\"",
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
 
-                using (var process = new Process { StartInfo = processStartInfo })
+                using (Process process = new Process { StartInfo = psi })
                 {
                     process.Start();
+
                     string output = process.StandardError.ReadToEnd();
-                    process.WaitForExit();
 
-                    string? durationLine = output.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
-                                                 .FirstOrDefault(line => line.Contains("Duration", StringComparison.CurrentCulture))
-                                           ?? null;
-
-                    if (!string.IsNullOrEmpty(durationLine))
+                    if (output.Contains("N/A", StringComparison.CurrentCulture))
                     {
-                        int start = durationLine.IndexOf("Duration: ", StringComparison.CurrentCulture) + "Duration: ".Length;
-                        int end = durationLine.IndexOf(",", StringComparison.CurrentCulture);
-                        string duration = durationLine.Substring(start, end - start).Trim();
-
-                        TimeSpan timeSpan = TimeSpan.Parse(duration, CultureInfo.CurrentCulture);
-                        return (int)timeSpan.TotalSeconds;
+                        return null;
                     }
-                    else
+
+                    string durationTag = "Duration: ";
+                    int start = output.IndexOf(durationTag, StringComparison.CurrentCulture) + durationTag.Length;
+                    int end = output.IndexOf(",", start, StringComparison.CurrentCulture);
+                    string durationString = output.Substring(start, end - start);
+                    try
                     {
+                        TimeSpan duration = TimeSpan.Parse(durationString, CultureInfo.CurrentCulture);
+                        process.WaitForExit();
+                        return (int)duration.TotalSeconds;
+                    }
+                    catch
+                    {
+                        process.WaitForExit();
                         return null;
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"MediaHelper.GetMediaDurationAsync: {ex}");
                 return null;
             }
         }

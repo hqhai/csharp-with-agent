@@ -19,6 +19,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     public class GetFeatureAccessTimeChartQuery : IRequest<MethodResult<IList<FeatureAcessTimeChartModel>>>
     {
         public EnumFeatureTimeType? Type { get; set; }
+        public int? Year { get; set; }
     }
 
     public class GetFeatureAccessTimeChartQueryHandler : IRequestHandler<GetFeatureAccessTimeChartQuery, MethodResult<IList<FeatureAcessTimeChartModel>>>
@@ -44,6 +45,11 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 .OrderByDescending(x => x.LastVisited)
                 .ToListAsync(cancellationToken);
 
+            var featureAccessTimesByMonth = await _featureAccessTimeRepository.Queryable
+                .Where(x => x.CreatedUserId == _authContext.CurrentUserId && x.LastVisited!.Value.Year == request.Year)
+                .OrderByDescending(x => x.LastVisited)
+                .ToListAsync(cancellationToken);
+
             List<FeatureAcessTimeChartModel> chartData = new List<FeatureAcessTimeChartModel>();
             var socialFeatures = new[] { EnumFeature.ClassForum, EnumFeature.DiscussionBoard };
             var learnFeatures = Enum.GetValues(typeof(EnumFeature)).Cast<EnumFeature>().Except(socialFeatures).Except(new[] { EnumFeature.Other }).ToArray();
@@ -59,6 +65,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                             CreateFeatureAccessTimeADay(featureAccessTimes.AsReadOnly(), learnFeatures, EnumFeatureBussinessType.Learn)
                         };
                     break;
+
                 case EnumFeatureTimeType.Week:
                     chartData = new List<FeatureAcessTimeChartModel>
                         {
@@ -68,6 +75,14 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                         };
                     break;
 
+                case EnumFeatureTimeType.Month:
+                    chartData = new List<FeatureAcessTimeChartModel>
+                        {
+                            CreateFeatureAccessTimeAMonth(featureAccessTimesByMonth.AsReadOnly(), socialFeatures, EnumFeatureBussinessType.Social),
+                            CreateFeatureAccessTimeAMonth(featureAccessTimesByMonth.AsReadOnly(), new[] { EnumFeature.Other }, EnumFeatureBussinessType.Other),
+                            CreateFeatureAccessTimeAMonth(featureAccessTimesByMonth.AsReadOnly(), learnFeatures, EnumFeatureBussinessType.Learn)
+                        };
+                    break;
             }
 
             methodResult.Result = chartData;
@@ -77,26 +92,26 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 
         private static FeatureAcessTimeChartModel CreateFeatureAccessTimeADay(ReadOnlyCollection<FeatureAccessTime> featureAccessTimes, EnumFeature[] features, EnumFeatureBussinessType type)
         {
-            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Date;
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
 
             var featureGroup = featureAccessTimes
-                .Where(f => f.LastVisited.HasValue && f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Date == currentDate && features.Contains(f.EnumFeature)).ToList();
+                .Where(f => f.LastVisited.HasValue && f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date == currentDate && features.Contains(f.EnumFeature)).ToList();
 
             var featureAccessTimeResult = new List<FeatureAccessTimeByTypeModel>();
 
             for (var i = 0; i < MAX_HOUR; i++)
             {
                 var totalAccessTime = featureGroup
-                                     .Where(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour == i)
+                                     .Where(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Hour == i)
                                      .Sum(x => x.AccessTime);
 
                 var firstMatchingFeature = featureGroup
-                    .FirstOrDefault(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour == i);
+                    .FirstOrDefault(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Hour == i);
 
                 featureAccessTimeResult.Add(new FeatureAccessTimeByTypeModel
                 {
                     AccessTime = totalAccessTime,
-                    HourActive = firstMatchingFeature?.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour ?? i,
+                    HourActive = firstMatchingFeature?.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Hour ?? i,
                     DayActive = firstMatchingFeature?.LastVisited!.Value.DayOfWeek ?? DateTime.UtcNow.DayOfWeek
                 });
             }
@@ -108,22 +123,28 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             };
 
             return result;
-
         }
 
         private static FeatureAcessTimeChartModel CreateFeatureAccessTimeAWeek(ReadOnlyCollection<FeatureAccessTime> featureAccessTimes, EnumFeature[] features, EnumFeatureBussinessType type)
         {
-            var currentDayOfWeek = DateTime.UtcNow.ConvertTimeFromUtc(EnumZoneRegion.Vietnam);
+            var currentDayOfWeek = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            var startOfWeek = currentDayOfWeek.AddDays(-(int)currentDayOfWeek.DayOfWeek + (int)DayOfWeek.Monday).Date;
-            var endOfWeek = startOfWeek.AddDays(RANGE_WEEK_DAY).Date;
+            // Tính ngày bắt đầu của tuần (ngày thứ hai)
+            DateTime startOfWeek = currentDayOfWeek.AddDays(-(int)currentDayOfWeek.DayOfWeek + (int)DayOfWeek.Monday);
+            if (currentDayOfWeek.DayOfWeek == DayOfWeek.Sunday)
+            {
+                startOfWeek = startOfWeek.AddDays(-RANGE_WEEK_DAY);
+            }
+            startOfWeek = startOfWeek.Date;
+
+            DateTime endOfWeek = startOfWeek.AddDays(RANGE_WEEK_DAY);
 
             var featureGroup = featureAccessTimes
                                  .Where(f => f.LastVisited.HasValue &&
-                                             f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam) >= startOfWeek &&
-                                             f.LastVisited.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam) < endOfWeek &&
+                                             f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) >= startOfWeek &&
+                                             f.LastVisited.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) < endOfWeek &&
                                              features.Contains(f.EnumFeature))
-                                 .GroupBy(f => f.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Date)
+                                 .GroupBy(f => f.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date)
                                  .Select(group => new FeatureAccessTime
                                  {
                                      LastVisited = group.Key, // Date
@@ -138,12 +159,12 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 
             for (var i = 0; i < daysOfWeek!.Count; i++)
             {
-                var featureGroupHour = featureGroup.FirstOrDefault(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).DayOfWeek == daysOfWeek[i]);
+                var featureGroupHour = featureGroup.FirstOrDefault(x => x.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).DayOfWeek == daysOfWeek[i]);
                 var featureAccessTime = new FeatureAccessTimeByTypeModel();
 
                 featureAccessTime.AccessTime = featureGroupHour?.AccessTime ?? 0;
-                featureAccessTime.HourActive = featureGroupHour?.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).Hour ?? 0;
-                featureAccessTime.DayActive = featureGroupHour?.LastVisited!.Value.ConvertTimeFromUtc(EnumZoneRegion.Vietnam).DayOfWeek ?? daysOfWeek[i];
+                featureAccessTime.HourActive = featureGroupHour?.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Hour ?? 0;
+                featureAccessTime.DayActive = featureGroupHour?.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).DayOfWeek ?? daysOfWeek[i];
                 featureAccessTimeResult.Add(featureAccessTime);
             }
 
@@ -156,5 +177,30 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             return result;
         }
 
+        private static FeatureAcessTimeChartModel CreateFeatureAccessTimeAMonth(ReadOnlyCollection<FeatureAccessTime> featureAccessTimesByMonth, EnumFeature[] features, EnumFeatureBussinessType type)
+        {
+            var featureAccessTimeByTypeMonthResult = new List<FeatureAccessTimeByTypeModel>();
+            for (int i = 1; i <= 12; i++)
+            {
+                var featureAccessTime = new FeatureAccessTimeByTypeModel();
+
+                featureAccessTime.TotalHourActive = featureAccessTimesByMonth
+                     .Where(f => f.LastVisited.HasValue &&
+                                 f.LastVisited.Value.Month == i &&
+                                 features.Contains(f.EnumFeature))
+                     .Sum(f => f.AccessTime);
+                featureAccessTime.MonthActive = i;
+
+                featureAccessTimeByTypeMonthResult.Add(featureAccessTime);
+            }
+
+            var result = new FeatureAcessTimeChartModel
+            {
+                FeatureBussinessType = type,
+                FeatureAccessTimes = featureAccessTimeByTypeMonthResult
+            };
+
+            return result;
+        }
     }
 }

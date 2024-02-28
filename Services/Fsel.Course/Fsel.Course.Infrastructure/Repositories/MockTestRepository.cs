@@ -15,12 +15,12 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class MockTestRepository : BaseRepository<MockTest>, IMockTestRepository
     {
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IMapper _mapper;
 
-        public MockTestRepository(CourseDbContext dbContext, AuthContext authContext, SectionConverter sectionConverter, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public MockTestRepository(CourseDbContext dbContext, SectionGroupConverter sectionGroupConverter, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
         {
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _mapper = mapper;
         }
 
@@ -38,7 +38,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .AnyAsync(x => x.Id == id && x.UnitSkillMockTests.Count > 0);
         }
 
-        public override async Task<MockTest?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<MockTest?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                            MockTestType = x.MockTestType,
                                            SectionGroups = x.MockTestSections.Where(x => x.SectionGroup != null)
                                              .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
-                                             .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList(),
+                                             .Select(x => _sectionGroupConverter.GetSectionGroupModel(x, false)).ToList(),
                                        }).FirstOrDefaultAsync();
             }
             catch (Exception)

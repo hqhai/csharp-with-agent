@@ -139,19 +139,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return methodResult;
         }
 
-        private async Task<LessonOverview> HandleUnit(Domain.Entities.Unit unit, LessonResult? lessonResult, LessonOverview lessonOverview)
-        {
-            if (unit.LessonResults.Any() && lessonResult != null && lessonResult.UnitId == unit.Id)
-            {
-                lessonOverview = await HandleLessonResult(unit, lessonResult, lessonOverview);
-            }
-            else
-            {
-                (lessonOverview.Type, lessonOverview.ObjectId, lessonOverview.Status) = (nameof(Domain.Entities.Unit), lessonResult?.UnitId, EnumLessonOverviewStatus.Next);
-            }
-            return lessonOverview;
-        }
-
         private async Task<LessonOverview> GetUnitId(LessonResult? lessonResult, CourseResult courseResult, Course course)
         {
             var lessonOverview = new LessonOverview();
@@ -164,10 +151,23 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 courseUnitMockTest = await GetCourseUnitMockTestFollow(courseUnitMockTests, unitId, courseResult.StudentId);
                 unitId = courseUnitMockTest?.UnitId ?? unitId;
             }
-            (lessonOverview.UnitId, lessonOverview.ObjectId, lessonOverview.Type, lessonOverview.Status, lessonOverview.IsUnitFirst) = (unitId, GetObjectId(courseUnitMockTest), GetObjectType(courseUnitMockTest), await GetStatusLessonOverview(courseUnitMockTest, courseResult.StudentId), unitId == unitFirstId);
+            (lessonOverview.UnitId, lessonOverview.ObjectId, lessonOverview.Type, lessonOverview.Status, lessonOverview.IsUnitFirst) = (unitId, GetObjectId(courseUnitMockTest), GetObjectType(courseUnitMockTest), await GetStatusLessonOverview(courseUnitMockTest, courseResult.StudentId, !(courseUnitMockTest != null && courseUnitMockTest.UnitId.HasValue)), unitId == unitFirstId);
             if (courseResult.Status != EnumResultStatus.Process)
             {
-                (lessonOverview.ObjectId, lessonOverview.Type, lessonOverview.Status) = (course.Id, nameof(Course), GetStatusOverview(courseResult.Status, true));
+                (lessonOverview.ObjectId, lessonOverview.Type, lessonOverview.Status) = (course.Id, nameof(Course), GetStatusOverview(courseResult.Status));
+            }
+            return lessonOverview;
+        }
+
+        private async Task<LessonOverview> HandleUnit(Domain.Entities.Unit unit, LessonResult? lessonResult, LessonOverview lessonOverview)
+        {
+            if (unit.LessonResults.Any() && lessonResult != null && lessonResult.UnitId == unit.Id)
+            {
+                lessonOverview = await HandleLessonResult(unit, lessonResult, lessonOverview);
+            }
+            else
+            {
+                (lessonOverview.Type, lessonOverview.ObjectId, lessonOverview.Status) = (nameof(Domain.Entities.Unit), lessonResult?.UnitId, EnumLessonOverviewStatus.StartNow);
             }
             return lessonOverview;
         }
@@ -182,7 +182,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 lessonOverview.LessonId = lessonResult?.LessonId ?? lessonFirstId;
                 if (lessonOverview.Type == nameof(Domain.Entities.Unit))
                 {
-                    if (lessonResult != null && lessonOverview.Status != EnumLessonOverviewStatus.Next)
+                    if (lessonResult != null && lessonOverview.Status != EnumLessonOverviewStatus.StartNow)
                     {
                         lessonOverview = await HandleUnit(unit, lessonResult, lessonOverview);
                     }
@@ -215,7 +215,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                         lessonOverview.Type = videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest ? nameof(EnumTimeCodeType.UnitTest) : nameof(EnumTimeCodeType.SkillTest);
                     }
                 }
-                else
+                if (lessonOverview.Type == nameof(Domain.Entities.Unit))
                 {
                     var lessonResultNew = unit.LessonResults.FirstOrDefault(x => x.Status == EnumResultStatus.New);
                     lessonOverview.Type = nameof(Lesson);
@@ -230,15 +230,15 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return courseUnitMockTests.Skip(currentIndex + 1).FirstOrDefault();
         }
 
-        private async Task<EnumLessonOverviewStatus> GetStatusLessonOverview(CourseUnitMockTest? courseUnitMockTest, Guid? studentId)
+        private async Task<EnumLessonOverviewStatus> GetStatusLessonOverview(CourseUnitMockTest? courseUnitMockTest, Guid? studentId, bool isStart = false)
         {
             var status = await GetStatus(courseUnitMockTest, studentId);
             return GetStatusOverview(status);
         }
 
-        private static EnumLessonOverviewStatus GetStatusOverview(EnumResultStatus? status, bool isStart = false)
+        private static EnumLessonOverviewStatus GetStatusOverview(EnumResultStatus? status)
         {
-            return status == EnumResultStatus.New ? isStart ? EnumLessonOverviewStatus.StartNow : EnumLessonOverviewStatus.Next : status == EnumResultStatus.Process ? EnumLessonOverviewStatus.Continue : EnumLessonOverviewStatus.Done;
+            return status == EnumResultStatus.New ? EnumLessonOverviewStatus.StartNow : status == EnumResultStatus.Process ? EnumLessonOverviewStatus.Continue : EnumLessonOverviewStatus.Done;
         }
 
         private async Task<CourseUnitMockTest?> GetCourseUnitMockTestFollow(IList<CourseUnitMockTest>? courseUnitMockTests, Guid? unitId, Guid? studentId)
@@ -353,16 +353,9 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
         private static (EnumResultStatus, double) GetStatus(ClassForumResult? classForumResult, EnumResultStatus status)
         {
-            if (classForumResult != null)
+            if (classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft)
             {
-                if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
-                {
-                    return (EnumResultStatus.Done, PercentClassForum);
-                }
-                else if (classForumResult.Status == EnumClassForumResultStatus.Pending)
-                {
-                    return (EnumResultStatus.Process, default);
-                }
+                return (EnumResultStatus.Done, PercentClassForum);
             }
             return (status == EnumResultStatus.Done ? EnumResultStatus.New : EnumResultStatus.Unfinished, default);
         }

@@ -78,7 +78,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<IList<UnitModel>?> GetListAsync(GetUnitByUnitQuery request, Guid? studentId)
         {
-            var units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId)).Include(x => x.CourseUnitMockTests).Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId)).ToListAsync();
+            var units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId))
+                                                       .Include(x => x.CourseUnitMockTests.Where(x => !x.IsDeleted && x.CourseId == request.CourseId))
+                                                       .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
+                                                       .ToListAsync();
+
             if (units.Any())
             {
                 var listUnit = new List<UnitModel>();
@@ -88,19 +92,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     switch (request.Type)
                     {
                         case EnumLearnProcessType.LessonVideo:
-                            percent = await _lessonRepository.GetPercentLesson(unit.Id, studentId);
+                            percent = await _lessonRepository.GetPercentLesson(request.CourseId, unit.Id, studentId);
                             break;
 
                         case EnumLearnProcessType.HomeWork:
-                            percent = await _lessonRepository.GetPercentHomeWork(unit.Id, studentId);
+                            percent = await _lessonRepository.GetPercentHomeWork(request.CourseId, unit.Id, studentId);
                             break;
 
                         case EnumLearnProcessType.ClassForum:
-                            percent = await _lessonRepository.GetPercentClassForum(unit.Id, studentId);
+                            percent = await _lessonRepository.GetPercentClassForum(request.CourseId, unit.Id, studentId);
                             break;
 
                         case EnumLearnProcessType.UnitTest:
-                            percent = await _videoRepository.GetPercent(unit.Id, studentId);
+                            percent = await _videoRepository.GetPercent(request.CourseId, unit.Id, studentId);
                             break;
 
                         default:

@@ -4,6 +4,7 @@ namespace Fsel.Shared.Helpers
 {
     using System.Linq;
     using Fsel.Common.Helpers;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
 
     public static class EnumCourseLevelHelper
@@ -171,6 +172,80 @@ namespace Fsel.Shared.Helpers
             {
                 var courseLevelIELSTs = s_levelMapping.Where(x => levels.Contains(x.Key)).Select(x => x.Value).ToList();
                 return courseLevelIELSTs.Any(x => x == courseLevelSelected);
+            }
+        }
+
+        public static EnumCourseLevel GetEnumNextCourseLevel(this EnumCourseType? courseType, EnumCourseLevel courseLevel)
+        {
+            if (courseType == EnumCourseType.Academic && courseLevel != EnumCourseLevel.C1)
+            {
+                courseLevel += 1;
+            }
+            if (courseType == EnumCourseType.Ielts && courseLevel != EnumCourseLevel.MS3)
+            {
+                courseLevel += 1;
+            }
+
+            return courseLevel;
+        }
+
+        public static string GetCourseTitle(EnumCourseLevel courseLevel)
+        {
+            switch (courseLevel)
+            {
+                case EnumCourseLevel.A1:
+                    return SendMailSetting.CourseA1Title;
+
+                case EnumCourseLevel.A2:
+                    return SendMailSetting.CourseA2Title;
+
+                case EnumCourseLevel.B1:
+                    return SendMailSetting.CourseB1Title;
+
+                case EnumCourseLevel.B1Plus:
+                    return SendMailSetting.CourseB1PlusTitle;
+
+                case EnumCourseLevel.B2:
+                    return SendMailSetting.CourseB2Title;
+
+                case EnumCourseLevel.C1:
+                    return SendMailSetting.CourseC1Title;
+
+                default:
+                    return string.Empty;
+            }
+        }
+
+        public static string GetCourseInfo(EnumCourseLevel courseLevel)
+        {
+            switch (courseLevel)
+            {
+                case EnumCourseLevel.A1:
+                    return SendMailSetting.CourseA1;
+
+                case EnumCourseLevel.A2:
+                    return SendMailSetting.CourseA2;
+
+                case EnumCourseLevel.B1:
+                    return SendMailSetting.CourseB1;
+
+                case EnumCourseLevel.B1Plus:
+                    return SendMailSetting.CourseB1Plus;
+
+                case EnumCourseLevel.B2:
+                    return SendMailSetting.CourseB2;
+
+                case EnumCourseLevel.C1:
+                    return SendMailSetting.CourseC1;
+
+                case EnumCourseLevel.MS1:
+                    return SendMailSetting.Mindset1;
+
+                case EnumCourseLevel.MS2:
+                    return SendMailSetting.Mindset2;
+
+                default:
+                    return SendMailSetting.Mindset3;
             }
         }
     }

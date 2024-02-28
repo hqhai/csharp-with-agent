@@ -150,6 +150,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                         return methodResult;
                     }
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()!.Id;
                     var finalAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestResultId == finalTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
 
@@ -189,9 +190,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 finalTestResult.Percent = NumberHelper.GetPercent(finalTestResult.CorrectCount, finalTestResult.CorrectTotal);
                 var courseId = finalTestResult.CourseId;
 
-
                 // làm nhiệm vụ
-                await DoQuestBoard(courseId, cancellationToken);
+               // await DoQuestBoard(courseId, cancellationToken);
 
                 finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -203,7 +203,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
             return methodResult;
         }
-
 
         private async Task DoQuestBoard(Guid courseId, CancellationToken cancellationToken)
         {

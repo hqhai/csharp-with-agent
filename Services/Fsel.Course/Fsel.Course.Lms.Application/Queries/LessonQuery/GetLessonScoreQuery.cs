@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -32,7 +31,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IExerciseRepository _exerciseRepository;
-        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IUserService _userService;
@@ -47,7 +45,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             IVideoResultRepository videoResultRepository,
             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
             IExerciseRepository exerciseRepository,
-            IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
             IExerciseQuestionRepository exerciseQuestionRepository,
             IQuestionRepository questionRepository,
             IUserService userService)
@@ -60,7 +57,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _exerciseRepository = exerciseRepository;
-            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _questionRepository = questionRepository;
             _userService = userService;
@@ -89,9 +85,11 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             var answerQuery = from baseQ in baseQuery
                               join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join q in _questionRepository.Queryable on vtca.QuestionId equals q.Id
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
+                              where q.Ungraded == false
                               group new { vt, vtca } by new { vt.TimeCodeType, e.CourseSkill } into g
                               select new
                               {
@@ -122,13 +120,13 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var questions = await questionQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).ToListAsync(cancellationToken);
             var questionTimeCodes = await questionQuery.Where(x => x.Type != EnumTimeCodeType.Standalone).ToListAsync(cancellationToken);
 
-            var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
             var types = Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>().Where(x => x != EnumTimeCodeType.Standalone);
-            var scoreQuery = from skill in skills
+            var scoreQuery = from skill in questions.Select(x => x.Skill).Distinct().OrderBy(x => x).ToList()
                              join questionQ in questions on skill equals questionQ.Skill into questionQ_jointable
                              from questionQJ in questionQ_jointable.DefaultIfEmpty()
                              join answerQ in answerStandaloneQuery on skill equals answerQ.Skill into answerQ_jointable
                              from answerQJ in answerQ_jointable.DefaultIfEmpty()
+                             where questionQJ.TotalCount != 0
                              select new SkillScores
                              {
                                  Skill = skill,
@@ -140,12 +138,12 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                      select new TimeCodeScoreModel
                                      {
                                          Type = type,
-                                         SkillScores = (from skill in skills
+                                         SkillScores = (from skill in questionTimeCodes.Where(x => x.Type == type).Select(x => x.Skill).Distinct().OrderBy(x => x).ToList()
                                                         join questionTimeCodeQ in questionTimeCodes on skill equals questionTimeCodeQ.Skill into questionTimeCodeQ_jointable
                                                         from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
                                                         join answerTimeCodeQ in answerTimeCodeQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
                                                         from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
-                                                        where questionTimeCodeQJ != null && answerTimeCodeQJ != null && questionTimeCodeQJ.Type == type && answerTimeCodeQJ.Type == type
+                                                        where questionTimeCodeQJ != null && questionTimeCodeQJ.TotalCount != 0 && answerTimeCodeQJ != null && questionTimeCodeQJ.Type == type && answerTimeCodeQJ.Type == type
                                                         select new SkillScores
                                                         {
                                                             Skill = skill,

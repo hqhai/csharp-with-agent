@@ -2,7 +2,9 @@
 
 namespace Fsel.Course.Infrastructure.Configs
 {
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -35,6 +37,12 @@ namespace Fsel.Course.Infrastructure.Configs
                   .WithMany(b => b.MockTestAnswers)
                   .HasForeignKey(b => b.SectionGroupResultId)
                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Property(e => e.Status)
+                  .HasMaxLength(100)
+                  .HasConversion(
+                      v => v.ToString(),
+                      v => v.EnumParse<EnumAnswerStatus>());
         }
     }
 }

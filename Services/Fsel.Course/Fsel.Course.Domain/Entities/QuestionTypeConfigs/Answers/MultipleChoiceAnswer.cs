@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class MultipleChoiceAnswer
     {
-        public IList<MultipleChoiceAnswers>? Answers { get; set; }
+        public IList<MultipleChoiceAnswers> Answers { get; set; } = new List<MultipleChoiceAnswers>();
     }
 
     public class MultipleChoiceAnswers
@@ -16,11 +16,11 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
         public bool IsChecked { get; set; }
         public bool? IsExact { get; set; }
 
-        public EnumSubAnswerStatus Status
+        public EnumCorrectStatus Status
         {
             get
             {
-                return IsExact.HasValue ? IsExact.Value ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail : EnumSubAnswerStatus.Process;
+                return IsExact.HasValue ? IsExact.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail : EnumCorrectStatus.Process;
             }
         }
 

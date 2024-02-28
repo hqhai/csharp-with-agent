@@ -91,11 +91,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
             var homeWorks = await _homeWorkRepository.Queryable
-                                      .Include(x => x!.LessonHomeWorks)
-                                      .Include(x => x!.HomeWorkQuestions)
-                                      .ThenInclude(x => x.Question)
-                                      .Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == lessonResult.Id))
-                                      .ThenInclude(x => x.HomeWorkAnswers)
                                       .Where(x => x.LessonHomeWorks.Any(x => x.LessonId == lessonResult.LessonId))
                                       .AsNoTracking()
                                       .Select(h => new LessonHomeWorkResultModel
@@ -107,8 +102,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                           CourseSkill = h.CourseSkill,
                                           CourseLevel = h.CourseLevel,
                                           QuestionTotal = h.HomeWorkQuestions.Select(x => x.Question).Count(),
-                                          QuestionCompleted = h.HomeWorkResults.Where(x => x.HomeWorkId == h.Id).SelectMany(x => x.HomeWorkAnswers).Where(x => x.IsCorrect.HasValue).Count(),
-                                          HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id))
+                                          QuestionCompleted = h.HomeWorkResults.Where(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id).SelectMany(x => x.HomeWorkAnswers).Where(x => x.IsCorrect.HasValue).Count(),
+                                          HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id))
                                       }).OrderBy(x => x.CreatedDate)
                                       .ToListAsync(cancellationToken);
             homeWorkStudentProgress.Status = GetStatusHomeWorks(homeWorks.Select(x => x.HomeWorkResult ?? new HomeWorkResultModel()).ToList());

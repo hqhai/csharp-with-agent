@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
+namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 {
     using System.Threading;
     using AutoMapper;
@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
                 {
                     lessonDto.IsClassForumLock = false;
                 }
-                if (classForumResult != null && (classForumResult.Status != EnumClassForumResultStatus.Draft))
+                if (lessonResult.HomeWorkResults.Any(x => x.Status != EnumResultStatus.Unfinished) || (classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft))
                 {
                     lessonDto.IsHomeWorkLock = false;
                 }
@@ -90,8 +90,8 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
         private async Task<LessonResult?> GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
         {
             return await _lessonResultRepository.Queryable.Include(x => x.VideoResult)
-                                                        .Include(x => x.HomeWorkResults.Where(x => x.StudentId == lessonResult.StudentId))
-                                                        .Include(x => x.ClassForumResults.Where(x => x.StudentId == lessonResult.StudentId))
+                                                        .Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == lessonResult.Id))
+                                                        .Include(x => x.ClassForumResults.Where(x => x.LessonResultId == lessonResult.Id))
                                                         .Where(x => x.Id == lessonResult.Id)
                                                         .AsNoTracking()
                                                         .FirstOrDefaultAsync(cancellationToken);

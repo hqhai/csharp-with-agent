@@ -20,11 +20,10 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumGameCourseLevel>());
 
-            builder.Property(e => e.Gender)
-               .HasMaxLength(100)
-               .HasConversion(
-                   v => v.ToString(),
-                   v => v.EnumParse<EnumGender>());
+            builder.HasOne(x => x.StudentTagName)
+                .WithMany(b => b.StudentGameInfos)
+                  .HasForeignKey(b => b.TagNameId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Property(b => b.Level).HasDefaultValue(1);
         }

@@ -82,6 +82,8 @@ namespace Fsel.Shared.Constants
                 public const string SetTimeToCompleteTest = $"{KeyQueue}_SetTimeToCompleteTest";
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
                 public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
+                public const string MockTestAnwserResponse = $"{KeyQueue}_MockTestAnwserResponse";
+                public const string WeeklyReport = $"{KeyQueue}_WeeklyReport";
             }
         }
 

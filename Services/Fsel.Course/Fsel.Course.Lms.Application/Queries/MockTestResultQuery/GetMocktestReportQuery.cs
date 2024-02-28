@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -32,6 +33,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMockTestRepository _mockTestRepository;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
@@ -39,10 +41,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private float Default_Achieved_Point = 1;
         private const double Standard_Ratio = 1; // tỉ lệ xem đánh giá 100/100
 
-        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, AuthContext authContext, IUserService userService, IMapper mapper, QuestBoardPublisher questBoardPublisher)
+        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionGroupConverter sectionGroupConverter, AuthContext authContext, IUserService userService, IMapper mapper, QuestBoardPublisher questBoardPublisher)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
+            _sectionGroupConverter = sectionGroupConverter;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
@@ -54,44 +57,43 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<MockTestResultModel> methodResult = new MethodResult<MockTestResultModel>();
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
-            var studentId = student?.Content?.Result?.Id;
-
             var mockTestResult = await _mockTestResultRepository.Queryable
                                     .Include(x => x.MockTestScores)
-                                        .ThenInclude(x => x.SectionGroup)
-                                    .Where(x => x.Id == request.MockTestResultId && x.StudentId == studentId)
-                                    .AsNoTracking()
+                                    .ThenInclude(x => x.SectionGroup)
+                                    .Where(x => x.Id == request.MockTestResultId)
                                     .FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
+            var mockTest = await _mockTestRepository.Queryable
+                                        .Include(x => x!.MockTestSections)
+                                        .ThenInclude(x => x.SectionGroup)
+                                    .FirstOrDefaultAsync(cancellationToken);
+            if (mockTest == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
+                return methodResult;
+            }
 
             if (mockTestResult.MockTestScores != null)
             {
                 mockTestResult.IsViewed = true;
-
                 _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             var mockTestResultModel = GetMockTestResult(mockTestResult);
             if (mockTestResult.SkillScores != null)
             {
-                mockTestResultModel.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores), true);
-                mockTestResultModel.IsTeacherGraded = await IsTeacherGraded(mockTestResult);
+                mockTestResultModel.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores));
+                mockTestResultModel.IsTeacherGraded = await _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
             }
 
-            await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken);
-            await DoQuestBoardAllReviewsAndFeedback(request.MockTestResultId, mockTestResult.CourseId, cancellationToken);
-                              
+            //await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
+            //await DoQuestBoardAllReviewsAndFeedback(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
+
             methodResult.Result = mockTestResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -112,30 +114,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         .Select(n => new
                                         {
                                             Skill = n.Key,
-                                            MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).ToList())
-                                        });
+                                            MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).OrderBy(x => x.CreatedDate).ToList())
+                                        }).ToList();
 
             return mockTestResult;
-        }
-
-        private async Task<bool> IsTeacherGraded(MockTestResult data)
-        {
-            var mockTest = await _mockTestRepository.Queryable
-                .Include(x => x.MockTestSections)
-                .ThenInclude(x => x.SectionGroup)
-                .Where(x => x.Id == data.MockTestId).FirstOrDefaultAsync();
-
-            var skills = mockTest?.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList();
-            if (skills != null && skills.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing))
-            {
-                if (data.MockTestScores != null && data.MockTestScores.Any())
-                {
-                    var skillScores = data.MockTestScores.Select(x => x.SectionGroup!.CourseSkill).ToList();
-                    return skillScores.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
-                }
-                return false;
-            }
-            return true;
         }
 
         public async Task DoQuestBoard(Guid mockTestResultId, Guid courseId, CancellationToken cancellationToken)

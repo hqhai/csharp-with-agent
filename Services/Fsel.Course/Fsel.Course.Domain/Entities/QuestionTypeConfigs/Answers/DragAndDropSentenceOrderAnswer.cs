@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class DragAndDropSentenceOrderAnswer
     {
-        public IList<DragAndDropSentenceOrderAnswers>? Answers { get; set; }
+        public IList<DragAndDropSentenceOrderAnswers> Answers { get; set; } = new List<DragAndDropSentenceOrderAnswers>();
     }
 
     public class DragAndDropSentenceOrderAnswers
@@ -16,11 +16,11 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
         public IList<string>? Answer { get; set; }
         public bool? IsExact { get; set; }
 
-        public EnumSubAnswerStatus Status
+        public EnumCorrectStatus Status
         {
             get
             {
-                return IsExact.HasValue ? IsExact.Value ? EnumSubAnswerStatus.Correct : EnumSubAnswerStatus.Fail : EnumSubAnswerStatus.Process;
+                return IsExact.HasValue ? IsExact.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail : EnumCorrectStatus.Process;
             }
         }
 

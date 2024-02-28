@@ -5,11 +5,11 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
-    using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class MockTestScore : Entity
     {
-        public EnumClassForumScoreCriteria Criteria { get; set; }
+        public EnumMockTestScoreCriteria Criteria { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FeedBack { get; set; }

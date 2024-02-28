@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using System;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -20,11 +21,27 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public int CurrentPosition { get; set; }
 
-        public string? AvatarPath { get; set; }
+        private string? _avatarPath;
+        public string? AvatarPath
+        {
+            set { _avatarPath = value; }
+            get { return _avatarPath.AddS3BaseUrl(); }
+        }
 
         public string? FullName { get; set; }
 
         public EnumCourseLevel Level { get; set; }
+
+        //Tham gia cuộc thi
+        public string? SchoolName { get; set; }
+
+        public double? Grade { get; set; }
+
+        public double? Process { get; set; }
+
+        public double? OverallScore { get; set; }
+
+        public DateTime? CompetitionEndDate { get; set; }
 
     }
 }

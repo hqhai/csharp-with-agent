@@ -24,15 +24,15 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     {
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
 
         public UpdatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
             IMapper mapper,
-            SectionConverter sectionConverter)
+            SectionGroupManagerConverter sectionGroupManagerConverter)
         {
             _placementTestRepository = placementTestRepository;
             _mapper = mapper;
-            _sectionConverter = sectionConverter;
+            _sectionGroupManagerConverter = sectionGroupManagerConverter;
         }
 
         public async Task<MethodResult<PlacementTestModel>> Handle(UpdatePlacementTestCommand request, CancellationToken cancellationToken)
@@ -79,9 +79,14 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 sectionQuestions = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionQuestions).ToList();
                 questions = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionQuestions).Select(x => x.Question ?? new Question()).ToList();
             }
+            placementTest.PlacementTestSections.Clear();
 
             _mapper.Map(request, placementTest);
-            placementTest.PlacementTestSections.Clear();
+            if (!placementTest.IsValid())
+            {
+                methodResult.AddErrorBadRequest(placementTest.ErrorMessages);
+                return methodResult;
+            }
 
             foreach (var sectionGroup in request.SectionGroups)
             {
@@ -91,32 +96,25 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     return methodResult;
                 }
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
-                if (!method.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                }
-                placementTest.PlacementTestSections.Add(new PlacementTestSection { SectionGroup = newSectionGroup });
                 if (!newSectionGroup.IsValid())
                 {
                     methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                    return methodResult;
                 }
-            }
-            if (!placementTest.IsValid())
-            {
-                methodResult.AddErrorBadRequest(placementTest.ErrorMessages);
-                return methodResult;
-            }
-            else if (!methodResult.IsOK)
-            {
-                return methodResult;
+                var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
+                if (!method.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
+                }
+                placementTest.PlacementTestSections.Add(new PlacementTestSection { SectionGroup = newSectionGroup });
             }
 
             #endregion Validation
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
-                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
+                await _sectionGroupManagerConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
                 placementTest = _placementTestRepository.Update(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

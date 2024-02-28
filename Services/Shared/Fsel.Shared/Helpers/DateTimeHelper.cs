@@ -52,7 +52,7 @@ namespace Fsel.Shared.Helpers
 
                 foreach (var date in sortedDates)
                 {
-                    var numberOfDays = DateTime.UtcNow.Date - date;
+                    var numberOfDays = DateTime.UtcNow.Date - date.Date;
                     if (numberOfDays.Days == consecutiveDays + 1)
                     {
                         consecutiveDays++;
@@ -70,6 +70,26 @@ namespace Fsel.Shared.Helpers
                 var firstDateDifference = DateTime.UtcNow.Date - sortedDates[0].Date;
                 return (firstDateDifference.Days <= 1 ? consecutiveDays : 0, firstDateDifference.Days <= 1);
             }
+        }
+
+
+        public static ICollection<DateTime> GenerateDateList(DateTime startDate, DateTime endDate)
+        {
+            List<DateTime> dateList = new List<DateTime>();
+
+            while (startDate <= endDate)
+            {
+                dateList.Add(startDate);
+                startDate = startDate.AddDays(1);
+            }
+
+            return dateList;
+        }
+
+        public static int ConvertSecondsToMinutes(long seconds)
+        {
+            long minutes = seconds / 60;
+            return (int)minutes;
         }
     }
 }

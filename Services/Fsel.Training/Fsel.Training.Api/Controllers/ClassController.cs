@@ -4,9 +4,11 @@ namespace Fsel.Training.Api.Controllers
 {
     using System.Collections.Generic;
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Constants;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Commands.ClassLiveCmd;
     using Fsel.Training.Application.Commands.ClassStudentCmd;
@@ -17,10 +19,9 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/class")]
     [ApiController]
     public class ClassController : ControllerBase
@@ -76,7 +77,7 @@ namespace Fsel.Training.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RegisterClass([FromBody] RegisterClassCommand command)
         {
-            MethodResult<ClassModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -161,6 +162,18 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> GetListClassByStudentId([FromRoute] Guid studentId)
         {
             MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(new GetListClassByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Class Course by StudentId
+        /// </summary>
+        [HttpPost("classes-by-studentids/diffirent-course")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListClassByStudentIds([FromBody] GetListClassBySpecificStudentIdsQuery query)
+        {
+            MethodResult<IList<CompetitionClassStudentModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

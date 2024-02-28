@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -78,13 +79,17 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 return default;
             }
             var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions)
-                                        .ThenInclude(x => x.MockTestAnswers.Where(x => mockTestResult != null && x.MockTestResultId == mockTestResult.Id))
-                                        .Where(x => request.ListQuestionIds.Contains(x.Id)).ToListAsync();
+                                            .ThenInclude(x => x.MockTestAnswers.Where(x => mockTestResult != null && x.MockTestResultId == mockTestResult.Id))
+                                        .Include(x => x.SectionQuestions)
+                                            .ThenInclude(x => x.SectionPart)
+                                        .Where(x => request.ListQuestionIds.Contains(x.Id))
+                                        .OrderBy(x => x.CreatedDate)
+                                        .ToListAsync();
             if (questions == null || !questions.Any())
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, mockTestResult.Status, mockTestResult.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.MockTestAnswers).FirstOrDefault())).ToList();
+            return questions.Select(x => GetQuestion(x, mockTestResult.Status, x.SectionQuestions.SelectMany(n => n.MockTestAnswers).FirstOrDefault())).ToList();
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByExtraPratice(GetQuestionByIdsQuery request)
@@ -96,12 +101,12 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 return default;
             }
             var questions = await _questionRepository.Queryable.Include(x => x.ExtraPracticeAnswers.Where(x => extraPracticeResult != null && x.ExtraPracticeResultId == extraPracticeResult.Id))
-                                                              .Where(x => request.ListQuestionIds.Contains(x.Id)).ToListAsync();
+                                                              .Where(x => request.ListQuestionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync();
             if (questions == null || !questions.Any())
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, extraPracticeResult.Status, extraPracticeResult.Status == EnumResultStatus.Done, x.ExtraPracticeAnswers.FirstOrDefault())).ToList();
+            return questions.Select(x => GetQuestion(x, extraPracticeResult.Status, x.ExtraPracticeAnswers.FirstOrDefault())).ToList();
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByFinalTest(GetQuestionByIdsQuery request)
@@ -112,15 +117,15 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.Section)
+            var questions = await _questionRepository.Queryable
                                 .Include(x => x.SectionQuestions)
                                 .ThenInclude(x => x.FinalTestAnswers.Where(x => finalTestResult != null && x.FinalTestResultId == finalTestResult.Id))
-                                .Where(x => request.ListQuestionIds.Contains(x.Id)).ToListAsync();
+                                .Where(x => request.ListQuestionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync();
             if (questions == null || !questions.Any())
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, finalTestResult.Status, finalTestResult.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.FinalTestAnswers).FirstOrDefault())).ToList();
+            return questions.Select(x => GetQuestion(x, finalTestResult.Status, x.SectionQuestions.SelectMany(n => n.FinalTestAnswers).FirstOrDefault())).ToList();
         }
 
         private async Task<IList<QuestionModel>?> GetQuestionByPlacementTest(GetQuestionByIdsQuery request)
@@ -131,29 +136,52 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.Section)
+            var questions = await _questionRepository.Queryable
                                 .Include(x => x.SectionQuestions)
                                 .ThenInclude(x => x.PlacementTestAnswers.Where(x => placementTestResult != null && x.PlacementTestResultId == placementTestResult.Id))
-                                .Where(x => request.ListQuestionIds.Contains(x.Id)).ToListAsync();
+                                .Where(x => request.ListQuestionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync();
             if (questions == null || !questions.Any())
             {
                 return default;
             }
-            return questions.Select(x => GetQuestion(x, placementTestResult.Status, placementTestResult.Status == EnumResultStatus.Done, x.SectionQuestions.SelectMany(n => n.PlacementTestAnswers).FirstOrDefault())).ToList();
+            return questions.Select(x => GetQuestion(x, placementTestResult.Status, x.SectionQuestions.SelectMany(n => n.PlacementTestAnswers).FirstOrDefault())).ToList();
         }
 
-        private QuestionModel GetQuestion(Question question, EnumResultStatus status, bool isShowAnswer = false, object? answer = null)
+        private QuestionModel GetQuestion(Question question, EnumResultStatus status, object? answer = null)
         {
             var questionModel = _mapper.Map<QuestionModel>(question);
+            var isShowAnswer = status == EnumResultStatus.Done;
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
+            questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer));
             questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.SectionId ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
             if (answer != null)
             {
                 var answerDto = _mapper.Map<AnswerModel>(answer);
                 answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, status, isShowAnswer);
+                if (!isShowAnswer)
+                {
+                    answerDto.Status = EnumAnswerStatus.Process;
+                    answerDto.CorrectCount = default;
+                    answerDto.IsCorrect = null;
+                }
                 questionModel.ResultAnswer = answerDto;
             }
             return questionModel;
+        }
+
+        private static EnumCorrectStatus? GetCorrectStatus(BaseAnswer? answer)
+        {
+            EnumCorrectStatus? status = null;
+            if (answer != null && answer.IsCorrect.HasValue)
+            {
+                status = EnumCorrectStatus.Process;
+                if (answer.Status == EnumAnswerStatus.Done)
+                {
+                    status = answer.IsCorrect.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
+                }
+            }
+
+            return status;
         }
     }
 }

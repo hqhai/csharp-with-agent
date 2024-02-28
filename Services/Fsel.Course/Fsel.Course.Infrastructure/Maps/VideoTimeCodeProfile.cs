@@ -12,10 +12,9 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public VideoTimeCodeProfile()
         {
-            CreateMap<VideoTimeCode, VideoTimeCodeModel>().IgnoreAllNonExisting();
+            CreateMap<VideoTimeCode, VideoTimeCodeModel>()
+            .ForMember(x => x.CourseSkills, p => p.MapFrom(o => o.TimeCodeExercises != null && o.TimeCodeExercises.Any() ? o.TimeCodeExercises.Select(x => x.Exercise!.CourseSkill).Distinct().ToList() : null));
             CreateMap<CreateVideoTimeCodeCommandModel, VideoTimeCode>().IgnoreAllNonExisting();
-            CreateMap<VideoTimeCodeResult, VideoTimeCodeResultModel>()
-            .ForMember(x => x.CurrentVideoTimeCodeId, p => p.MapFrom(o => o.VideoResult != null ? o.VideoResult.CurrentVideoTimeCodeId : null));
         }
     }
 }

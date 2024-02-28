@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using System;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -12,13 +13,34 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
         public IList<EnumCourseType>? LiveCourseTypes { get; set; }
         public int NumberClass { get; set; }
-        public string? PassportPath { get; set; }
 
-        public string? UniversityDegreePath { get; set; }
+        private string? _passportPath;
+        public string? PassportPath
+        {
+            set { _passportPath = value; }
+            get { return _passportPath.AddS3BaseUrl(); }
+        }
 
-        public string? CertificationPath { get; set; }
+        private string? _universityDegreePath;
+        public string? UniversityDegreePath
+        {
+            set { _universityDegreePath = value; }
+            get { return _universityDegreePath.AddS3BaseUrl(); }
+        }
 
-        public string? PoliceClearancePath { get; set; }
+        private string? _certificationPath;
+        public string? CertificationPath
+        {
+            set { _certificationPath = value; }
+            get { return _certificationPath.AddS3BaseUrl(); }
+        }
+
+        private string? _policeClearancePath;
+        public string? PoliceClearancePath
+        {
+            set { _policeClearancePath = value; }
+            get { return _policeClearancePath.AddS3BaseUrl(); }
+        }
 
         public Guid HumanId { get; set; }
 

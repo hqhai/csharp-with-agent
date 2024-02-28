@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
@@ -17,6 +18,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double DisplayTime { get; set; }
         public double ExecutionTime { get; set; }
         public IList<ExerciseModel>? Exercises { get; set; }
+        public IList<EnumCourseSkill>? CourseSkills { get; set; }
         public VideoTimeCodeResultModel? VideoTimeCodeResult { get; set; }
     }
 }

@@ -2,34 +2,21 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
 
     public class QuestionConverter
     {
-        private readonly IMapper _mapper;
-        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly AnswerTypeConverter _answerTypeConverter;
+        private readonly QuestionTypeConverter _questionTypeConverter;
 
-        public QuestionConverter(IMapper mapper, QuestionTypeConverter questionTypeConverter, AnswerTypeConverter answerTypeConverter)
+        public QuestionConverter(AnswerTypeConverter answerTypeConverter, QuestionTypeConverter questionTypeConverter)
         {
-            _mapper = mapper;
-            _questionTypeConverter = questionTypeConverter;
             _answerTypeConverter = answerTypeConverter;
-        }
-
-        public QuestionModel GetQuestion(Question question, object? answer = null, bool isShowAnswer = false)
-        {
-            ArgumentNullException.ThrowIfNull(question);
-            var questionModel = _mapper.Map<QuestionModel>(question);
-            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
-            questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
-            questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.Section?.Id ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
-            return questionModel;
+            _questionTypeConverter = questionTypeConverter;
         }
 
         public MethodResult<(Question, object?, int, bool)> HandleQuestionAnswer(Question? question, object? answer, bool isSubmit, object? oldAnswer = default, bool isTryAgain = false, bool isMandatoryAnswer = false)
@@ -52,6 +39,26 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
             methodResult.Result = (question, answerConfig, correctCount, isAnswered);
+            return methodResult;
+        }
+
+        public MethodResult<Question> HandleQuestion(Question? question, bool isUseTypeExercisePreparation = false)
+        {
+            ArgumentNullException.ThrowIfNull(question);
+            var methodResult = new MethodResult<Question>();
+            var isShowCorrectTotal = (isUseTypeExercisePreparation || question.QuestionType != EnumQuestionType.ExercisePreparation);
+            (question.Config, question.CorrectTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal);
+            if (question.Config == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
+                return methodResult;
+            }
+            if (!question.IsValid())
+            {
+                methodResult.AddErrorBadRequest(question.ErrorMessages);
+                return methodResult;
+            }
+            methodResult.Result = question;
             return methodResult;
         }
     }

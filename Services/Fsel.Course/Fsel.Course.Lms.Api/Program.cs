@@ -2,6 +2,7 @@
 
 using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
@@ -18,7 +19,6 @@ using Fsel.Course.Lms.Application.Services.SystemService;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Shared.Constants;
-using Fsel.Shared.Models.ShareModels;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -98,23 +98,26 @@ builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository
 builder.Services.AddScoped<IMockTestScoreRepository, MockTestScoreRepository>();
 builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRandomRepository>();
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
-builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
 
+builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
-builder.Services.AddScoped<SectionConverter>();
 builder.Services.AddScoped<VideoConverter>();
 builder.Services.AddScoped<CourseHelper>();
 builder.Services.AddScoped<UnitHelper>();
 builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
+builder.Services.AddScoped<SectionGroupManagerConverter>();
 
 // Helper
 builder.Services.AddScoped<LinQHelper>();
+builder.Services.AddScoped<LinQAnswerHelper>();
 
 // Publisher
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();
@@ -129,6 +132,7 @@ builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<GetTimeToCompleteTestPublisher>();
 builder.Services.AddScoped<SubmitAIResponsePublisher>();
 builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
+builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -154,7 +158,9 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.CompleteTestWhenTimeOut, typeof(CompleteTestWhenTimeOutConsumer) },
     { QueueSettings.LmsQueue.NameQueue.UpdateTeacherGradingInClassForumAndMockTest, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DeleteClassForumByFlag, typeof(DeleteClassForumByFlagConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.ClassForumAIResponse, typeof(RealTimeAIResponseConsumer) }
+    { QueueSettings.LmsQueue.NameQueue.ClassForumAIResponse, typeof(RealTimeAIResponseConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.MockTestAnwserResponse, typeof(AiFeedBackResponseConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.WeeklyReport, typeof(WeeklyReportConsumer) },
 });
 
 var app = builder.Build();

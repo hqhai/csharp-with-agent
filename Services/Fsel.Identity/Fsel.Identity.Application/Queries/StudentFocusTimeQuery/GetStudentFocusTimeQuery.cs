@@ -63,10 +63,24 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
                 studentFocusTime.StudentId = student.Id;
                 studentFocusTime.IsWeekStreak = hasContinuousData.Result;
             }
+            else
+            {
+                studentFocusTime = new StudentFocusTimeModel();
+                studentFocusTime.IsFirstTimeInDay = true;
+            }
 
+            studentFocusTime.NearestTargetTime = GetNearestConfigTime(student.Id);
             methodResult.Result = studentFocusTime;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+
+        private double GetNearestConfigTime(Guid? studentId)
+        {
+            var nearestConfigTargetTime = _studentFocusTimeRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date && x.TargetTime != 0)?.TargetTime ?? 0;
+
+            return nearestConfigTargetTime;
         }
     }
 }

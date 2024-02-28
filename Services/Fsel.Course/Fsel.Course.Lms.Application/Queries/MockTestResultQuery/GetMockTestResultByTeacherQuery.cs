@@ -27,16 +27,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionGroupConverter sectionGroupConverter, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
@@ -88,28 +88,21 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                               .ThenInclude(x => x.SectionGroup)
                                               .ThenInclude(x => x!.Sections)
                                               .ThenInclude(x => x.SectionTimeCodes)
-                                              .ThenInclude(x => x.MockTestAnswers.Where(x => x.MockTestResultId == mockTestResult.Id))
-                                          .Include(x => x!.MockTestSections)
-                                              .ThenInclude(x => x.SectionGroup)
-                                              .ThenInclude(x => x!.Sections)
-                                              .ThenInclude(x => x.MockTestAnswers.Where(x => x.MockTestResultId == mockTestResult.Id))
-                                          .Include(x => x!.MockTestSections)
-                                              .ThenInclude(x => x.SectionGroup)
-                                              .ThenInclude(x => x!.MockTestScores.Where(x => x.MockTestResultId == mockTestResult.Id));
+                                              .ThenInclude(x => x.MockTestAnswers.Where(x => x.MockTestResultId == mockTestResult.Id));
 
                 if (mockTest.MockTestType == EnumMockTestType.SkillMockTest)
                 {
-                    mockTest = await query.Include(x => x.CourseUnitMockTests)
+                    mockTest = await query.Include(x => x.UnitSkillMockTests)
+                                              .ThenInclude(x => x.Unit)
+                                              .ThenInclude(x => x!.CourseUnitMockTests)
                                               .ThenInclude(x => x.Course)
-                                          .Where(x => x.Id == mockTestResult.MockTestId)
+                                           .Where(x => x.Id == mockTestResult.MockTestId)
                                           .AsNoTracking()
                                           .FirstOrDefaultAsync();
                 }
                 else
                 {
-                    mockTest = await query.Include(x => x.UnitSkillMockTests)
-                                              .ThenInclude(x => x.Unit)
-                                              .ThenInclude(x => x!.CourseUnitMockTests)
+                    mockTest = await query.Include(x => x!.CourseUnitMockTests)
                                               .ThenInclude(x => x.Course)
                                            .Where(x => x.Id == mockTestResult.MockTestId)
                                           .AsNoTracking()
@@ -137,10 +130,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             mockTestDto.IsActive = mockTest.UnitSkillMockTests.Any() || mockTest.CourseUnitMockTests.Any();
             mockTestDto.SectionGroups = mockTest.MockTestSections.Where(x => x.SectionGroup != null)
                     .Select(x => x.SectionGroup)
-                    .Where(x => !isCheckFull || (x!.CourseSkill != EnumCourseSkill.Reading || x.CourseSkill != EnumCourseSkill.Listening))
-                    .Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing)
+                    .Where(x => !isCheckFull || x!.CourseSkill == EnumCourseSkill.Speaking)
                     .OrderBy(x => x!.CreatedDate)
-                    .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList();
+                    .Select(x => _sectionGroupConverter.GetSectionGroupModel(x, false)).ToList();
             mockTestDto.MockTestResult = GetMockTestResult(mockTestResult, mockTest, isCheckFull);
 
             if (mockTestDto.MockTestType == EnumMockTestType.SkillMockTest)

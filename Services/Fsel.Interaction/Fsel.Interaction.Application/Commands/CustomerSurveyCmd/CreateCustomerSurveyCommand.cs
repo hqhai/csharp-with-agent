@@ -93,20 +93,24 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 await _customerSurveyRepository.AddList(customerSurveys);
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var student = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
-                var studentName = student.Content?.Result?.Human?.FullName;
+                var parentName = request.Answers.Where(x => x.Id == Guid.Parse("ee0e74f5-83ae-44dd-a7d0-0f7b650884f8")).FirstOrDefault();
+
                 var paramSurvey = new SendSurveyTemplateModel
                 {
-                    UserName = studentName
+                    UserName = parentName?.Answer?.ToString()
                 };
 
-                var subjectSurvey = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendSurveyResultSubject);
-                var sendSurveyResult = new MethodResult<bool>();
+                #region Send email Survey Pilot
 
-                if (!string.IsNullOrEmpty(request.Email))
-                {
-                    sendSurveyResult = await _mediator.Send(new SenderCommand { Email = request.Email, Subject = subjectSurvey, Params = paramSurvey, Template = EnumSenderTemplate.SendSurveyToParentStudent }, cancellationToken).ConfigureAwait(false);
-                }
+                //var subjectSurvey = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendSurveyResultSubject);
+                //var sendSurveyResult = new MethodResult<bool>();
+
+                //if (!string.IsNullOrEmpty(request.Email))
+                //{
+                //    sendSurveyResult = await _mediator.Send(new SenderCommand { Email = request.Email, Subject = subjectSurvey, Params = paramSurvey, Template = EnumSenderTemplate.SendSurveyToParentStudent }, cancellationToken).ConfigureAwait(false);
+                //}
+
+                #endregion
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<IList<CustomerSurveyModel>>(customerSurveys);

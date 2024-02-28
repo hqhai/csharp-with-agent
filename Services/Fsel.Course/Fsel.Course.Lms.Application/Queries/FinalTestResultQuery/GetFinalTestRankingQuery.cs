@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
@@ -27,15 +28,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMapper _mapper;
-        private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
 
-        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IFinalTestAnswerRepository finalTestAnswerRepository, IUserService userService, ITrainingService trainingService)
+        public GetFinalTestRankingQueryHandler(IFinalTestResultRepository finalTestResultRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
         {
             _finalTestResultRepository = finalTestResultRepository;
             _mapper = mapper;
-            _finalTestAnswerRepository = finalTestAnswerRepository;
             _userService = userService;
             _trainingService = trainingService;
         }
@@ -57,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
 
             var finalTestResults = await _finalTestResultRepository.Queryable
-                            .Where(x => x.FinalTestId == finalTestResult.FinalTestId && classStudentIds!.Contains(x.StudentId))
+                            .Where(x => x.FinalTestId == finalTestResult.FinalTestId && classStudentIds!.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
                             .ToListAsync(cancellationToken);
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
@@ -69,12 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 {
                     var finalTestResultStudent = finalTestResults.FirstOrDefault(x => x.StudentId == item.Id);
                     var finalTestResultDto = _mapper.Map<TestResultRankingModel>(finalTestResultStudent);
-                    if (finalTestResultStudent != null)
-                    {
-                        var correctQuestion = await _finalTestAnswerRepository.Queryable.Where(x => x.FinalTestResultId == finalTestResultStudent.Id && x.IsCorrect == true).CountAsync(cancellationToken);
-                        finalTestResultDto.CorrectQuestion = correctQuestion;
-                    }
-                    else
+                    if (finalTestResultStudent == null)
                     {
                         finalTestResultDto = new TestResultRankingModel();
                     }
@@ -85,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 }
             }
 
-            methodResult.Result = testResultRankings.OrderByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
+            methodResult.Result = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

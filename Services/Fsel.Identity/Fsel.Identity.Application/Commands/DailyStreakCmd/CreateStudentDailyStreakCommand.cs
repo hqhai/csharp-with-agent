@@ -64,16 +64,16 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 DailyDate = date,
                 IsUseShield = request.IsUseShield,
             };
-            var endDay = DateTime.DaysInMonth(date.Year, date.Month);
+            var endDay = date.Month != 2 ? 30 : DateTime.DaysInMonth(date.Year, date.Month);
             student.StudentDailyStreaks.Add(studentDailyStreak);
             var countStudentDaily = student.StudentDailyStreaks.Where(x => x.DailyDate.Month == date.Month && x.DailyDate.Year == date.Year).Count();
             if (student.StudentDailyStreaks.Any())
             {
-                if (countStudentDaily == 3)
+                if (countStudentDaily == 7)
                 {
                     studentDailyStreak.LevelOfGift = 1;
                 }
-                else if (countStudentDaily == 15)
+                else if (countStudentDaily == 14)
                 {
                     studentDailyStreak.LevelOfGift = 2;
                 }

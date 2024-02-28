@@ -40,12 +40,12 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         }
 
         /// <summary>
-        /// Create a Forbidden Word
+        /// choose character
         /// </summary>
-        [HttpPost("choose-gender")]
+        [HttpPost("choose-character")]
         [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] ChooseStudentGenderCommand command)
+        public async Task<IActionResult> ChooseCharacter([FromBody] ChooseCharacterCommand command)
         {
             MethodResult<StudentGameInfoModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

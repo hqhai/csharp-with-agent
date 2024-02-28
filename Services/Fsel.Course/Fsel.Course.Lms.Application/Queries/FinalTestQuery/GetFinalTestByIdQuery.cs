@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -26,15 +27,15 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     public class GetFinalTestByIdQueryHandler : IRequestHandler<GetFinalTestByIdQuery, MethodResult<FinalTestModel>>
     {
         private readonly IFinalTestRepository _finalTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetFinalTestByIdQueryHandler(IFinalTestRepository finalTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetFinalTestByIdQueryHandler(IFinalTestRepository finalTestRepository, SectionGroupConverter sectionGroupConverter, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _finalTestRepository = finalTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupConverter = sectionGroupConverter;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
@@ -79,9 +80,10 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
         {
             var finalTestDetail = _mapper.Map<FinalTestModel>(finalTest);
             var sectionGroups = finalTest.FinalTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
-            finalTestDetail.TotalQuestion = _sectionConverter.GetTotalQuestion(sectionGroups);
+            finalTestDetail.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(sectionGroups);
             finalTestDetail.FinalTestResult = _mapper.Map<FinalTestResultModel>(finalTestResult);
-            finalTestDetail.SectionGroups = _sectionConverter.GetSectionGroups(sectionGroups, finalTestDetail.FinalTestResult.Id, "FinalTestResultId");
+            finalTestDetail.FinalTestResult.ProgressPercent = NumberHelper.GetPercent(sectionGroups.SelectMany(x => x.SectionGroupResults).Count(x => x.Status == EnumResultStatus.Done), sectionGroups.Count);
+            finalTestDetail.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, finalTestDetail.FinalTestResult.Id, nameof(SectionGroupResult.FinalTestResultId));
             return finalTestDetail;
         }
     }

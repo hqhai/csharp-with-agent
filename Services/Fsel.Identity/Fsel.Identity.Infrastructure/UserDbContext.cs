@@ -3,17 +3,17 @@
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
+using Fsel.Core.Entities;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.Configs;
 using Fsel.Shared.Constants;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, IdentityUserClaim<Guid>, IdentityRoleClaim<Guid>, UserToken>
+    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserToken>
     {
         public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -22,6 +22,10 @@ namespace Fsel.Identity.Infrastructure
         protected override void OnModelCreating(ModelBuilder builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
+            builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
 
             SeedPlatforms(builder);
             SeedRoles(builder);
@@ -61,7 +65,6 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserPlatform> UserPlatforms { get; set; }
         public DbSet<StudentRanking> StudentRankings { get; set; }
         public DbSet<StudentFocusTime> StudentFocusTimes { get; set; }
-
 
         #endregion Db Set
 

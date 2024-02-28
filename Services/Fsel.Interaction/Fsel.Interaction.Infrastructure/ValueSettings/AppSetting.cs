@@ -8,12 +8,26 @@ namespace Fsel.Interaction.Infrastructure.ValueSettings
     {
         public Smtp? Smtp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
+        public HarmfulContentConfigs? HarmfulContentConfigs { get; set; }
         public new Services? Services { get; set; }
     }
 
     public class ConstantUrl
     {
         public string? ConfirmOtpUrl { get; set; }
+    }
+
+    public class HarmfulContentConfigs
+    {
+        public HarmfulContentConfig? HarmfulContentWordsConfig { get; set; }
+        public HarmfulContentConfig? HarmfulContentImageConfig { get; set; }
+    }
+
+    public class HarmfulContentConfig
+    {
+        public string? HarmfulContentApiUrl { get; set; }
+        public string? SubscriptionKey { get; set; }
+        public string? Version { get; set; }
     }
 
     public class Services : BaseServices

@@ -13,7 +13,6 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTests;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,13 +25,13 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IFinalTestRepository _finalTestRepository;
-        private readonly SectionConverter _sectionConverter;
+        private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
 
-        public CreateFinalTestCommandHandler(IMapper mapper, IFinalTestRepository finalTestRepository, SectionConverter sectionConverter)
+        public CreateFinalTestCommandHandler(IMapper mapper, IFinalTestRepository finalTestRepository, SectionGroupManagerConverter sectionGroupManagerConverter)
         {
             _mapper = mapper;
             _finalTestRepository = finalTestRepository;
-            _sectionConverter = sectionConverter;
+            _sectionGroupManagerConverter = sectionGroupManagerConverter;
         }
 
         public async Task<MethodResult<FinalTestModel>> Handle(CreateFinalTestCommand request, CancellationToken cancellationToken)
@@ -50,52 +49,45 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 return methodResult;
             }
             FinalTest finalTest = _mapper.Map<FinalTest>(request);
-
-            foreach (var sectionGroup in request.SectionGroups)
-            {
-                //if (sectionGroup == null)
-                //{
-                //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
-                //    return methodResult;
-                //}
-                if (sectionGroup != null)
-                {
-                    //if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
-                    //{
-                    //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
-                    //    return methodResult;
-                    //}
-
-                    SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
-                    if (!method.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(method.ErrorMessages);
-                    }
-                    finalTest.FinalTestSections.Add(new FinalTestSection
-                    {
-                        SectionGroup = newSectionGroup
-                    });
-                    if (!newSectionGroup.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-            }
             if (!finalTest.IsValid())
             {
                 methodResult.AddErrorBadRequest(finalTest.ErrorMessages);
                 return methodResult;
             }
-            else if (!methodResult.IsOK)
+            foreach (var sectionGroup in request.SectionGroups)
             {
-                return methodResult;
+                if (sectionGroup == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                    return methodResult;
+                }
+                if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
+                    return methodResult;
+                }
+
+                SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                if (!newSectionGroup.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                    return methodResult;
+                }
+                var method = _sectionGroupManagerConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections);
+                if (!method.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
+                }
+                finalTest.FinalTestSections.Add(new FinalTestSection
+                {
+                    SectionGroup = newSectionGroup
+                });
             }
+
             await _finalTestRepository.ExecuteTransactionAsync(async () =>
             {
                 finalTest = _finalTestRepository.Add(finalTest);
-
                 await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

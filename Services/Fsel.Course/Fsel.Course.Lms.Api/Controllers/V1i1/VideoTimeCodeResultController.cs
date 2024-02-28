@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.VideoTimeCodeResultCmd;
     using Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -45,6 +46,30 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         [ProducesResponseType(typeof(MethodResult<IList<TestResultRankingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetVideoTimeCodeRankingQuery command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get video time code ranking
+        /// </summary>
+        [HttpGet("video-time-code-test")]
+        [ProducesResponseType(typeof(MethodResult<IList<VideoTimeCodeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetVideoTimeCodeTest([FromQuery] GetVideoTimeCodeTestQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Action Video Time Code
+        /// </summary>
+        [HttpPost("action-time-code")]
+        [ProducesResponseType(typeof(MethodResult<VideoResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ActionTimeCode([FromBody] ActionVideoTimeCodeCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

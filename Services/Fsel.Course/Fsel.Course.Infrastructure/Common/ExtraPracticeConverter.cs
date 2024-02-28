@@ -20,7 +20,6 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly VideoConverter _videoConverter;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IVideoRepository _videoRepository;
-        private readonly SectionConverter _sectionConverter;
         private readonly IExtraPracticeExerciseRepository _extraPracticeExerciseRepository;
         private readonly IExerciseRepository _exerciseRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
@@ -31,7 +30,6 @@ namespace Fsel.Course.Infrastructure.Common
             , VideoConverter videoConverter
             , IMockTestRepository mockTestRepository
             , IVideoRepository videoRepository
-            , SectionConverter sectionConverter
             , IExtraPracticeExerciseRepository extraPracticeExerciseRepository
             , IExerciseRepository exerciseRepository
             , IExtraPracticeResultRepository extraPracticeResultRepository
@@ -43,7 +41,6 @@ namespace Fsel.Course.Infrastructure.Common
             _mapper = mapper;
             _videoConverter = videoConverter;
             _mockTestRepository = mockTestRepository;
-            _sectionConverter = sectionConverter;
             _videoRepository = videoRepository;
             _extraPracticeExerciseRepository = extraPracticeExerciseRepository;
             _exerciseRepository = exerciseRepository;
