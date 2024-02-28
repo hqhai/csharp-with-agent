@@ -12,7 +12,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Application.Services.UserService;
-    using Fsel.Ordering.Application.Services.UserService.Models;
+    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
@@ -20,6 +20,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class ChangeStatusOrderCommand : ChangeStatusOrderCommandModel, IRequest<MethodResult<bool>>
     {
@@ -60,7 +61,7 @@ ILmsCourseService courseService)
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var order = await _orderRepository.GetByIdAsync(request.OrderId);
+            var order = await _orderRepository.Queryable.Include(ot => ot.OrderTransactions).FirstOrDefaultAsync(p => p.Id == request.OrderId, cancellationToken);
             if (order == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(order));
@@ -101,17 +102,10 @@ ILmsCourseService courseService)
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
-                    var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default });
+                    var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
                     if (!addStudentIntoClassResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(addStudentIntoClassResult.Error);
-                        return methodResult;
-                    }
-
-                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = addStudentIntoClassResult.Content?.Result, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId, NumberOfShield = numberOfShield, CourseLevel = course?.CourseLevel });
-                    if (!updateStudentByClass.IsSuccessStatusCode)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
                         return methodResult;
                     }
 
@@ -132,6 +126,13 @@ ILmsCourseService courseService)
                         PlatformCode = EnumPlatformCode.LMS
                     }, cancellationToken);
                 }
+                order.OrderTransactions.Add(new OrderTransaction()
+                {
+                    Status = request.OrderStatus == EnumOrderStatus.Payment ? EnumOrderTransactionStatus.Success : EnumOrderTransactionStatus.Fail,
+                    ResponseBody = request.Receipt,
+                    Type = request.Type == EnumOrderTransactionType.AppStore ? EnumOrderTransactionType.AppStore : (request.Type == EnumOrderTransactionType.GooglePlay ? EnumOrderTransactionType.GooglePlay : EnumOrderTransactionType.BankTransfer)
+                });
+                ;
                 order.Status = request.OrderStatus;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

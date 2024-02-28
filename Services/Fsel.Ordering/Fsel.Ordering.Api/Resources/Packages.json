@@ -3,7 +3,7 @@
     "id": "42d7ddb2-9f36-4f86-badc-67dc16bb722b",
     "code": "BASIC",
     "name": "Fsel_3_Months",
-    "price": 1000000,
+    "price": 3000000,
     "monthNumber": 3,
     "descriptionStr": "",
     "createdDate": "2023-07-24"
@@ -12,7 +12,7 @@
     "id": "daa6fc87-6461-49d4-b3a5-c9e4cc30bc59",
     "code": "BASIC",
     "name": "Fsel_6_Months",
-    "price": 3000000,
+    "price": 5000000,
     "monthNumber": 6,
     "descriptionStr": "",
     "createdDate": "2023-07-24"
@@ -21,7 +21,7 @@
     "id": "d13ee4ab-785a-425c-bd70-b74b61df42eb",
     "code": "BASIC",
     "name": "Fsel_12_Months",
-    "price": 10000000,
+    "price": 8000000,
     "monthNumber": 12,
     "descriptionStr": "",
     "createdDate": "2023-07-24"

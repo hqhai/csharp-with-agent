@@ -7,5 +7,6 @@ namespace Fsel.Training.Domain.Models.CommandModels.Classes
         public Guid UserId { get; set; }
         public Guid PackageId { get; set; }
         public Guid CourseId { get; set; }
+        public int NumberOfShield { get; set; }
     }
 }
