@@ -51,12 +51,12 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             #region Old logic
 
-            var count = await _surveyQuestionRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
-            if (request.Answers.Count < count)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCustomerSurveyErrorCode.NotEnoughQuestions));
-                return methodResult;
-            }
+            //var count = await _surveyQuestionRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
+            //if (request.Answers.Count < count)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumCustomerSurveyErrorCode.NotEnoughQuestions));
+            //    return methodResult;
+            //}
 
             #endregion Old logic
 
@@ -95,14 +95,14 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 await _customerSurveyRepository.AddList(customerSurveys);
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var parentName = request.Answers.Where(x => x.Id == Guid.Parse("ee0e74f5-83ae-44dd-a7d0-0f7b650884f8")).FirstOrDefault();
-
-                var paramSurvey = new SendSurveyTemplateModel
-                {
-                    UserName = parentName?.Answer?.ToString()
-                };
-
                 #region Send email Survey Pilot
+
+                //var parentName = request.Answers.Where(x => x.Id == Guid.Parse("ee0e74f5-83ae-44dd-a7d0-0f7b650884f8")).FirstOrDefault();
+
+                //var paramSurvey = new SendSurveyTemplateModel
+                //{
+                //    UserName = parentName?.Answer?.ToString()
+                //};
 
                 //var subjectSurvey = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendSurveyResultSubject);
                 //var sendSurveyResult = new MethodResult<bool>();
