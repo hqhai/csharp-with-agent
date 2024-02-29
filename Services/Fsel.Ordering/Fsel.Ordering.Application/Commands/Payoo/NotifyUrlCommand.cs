@@ -106,19 +106,21 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                 return methodResult;
             }
 
-            var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default });
-            if (!addStudentIntoClassResult.IsSuccessStatusCode)
-            {
-                checkFlow = false;
-                _logger.LogError($"Add Student into class error: {addStudentIntoClassResult.StatusCode}, OrderId: {order.Id}");
-            }
-
             var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
             if (package == null)
             {
                 checkFlow = false;
                 _logger.LogError($"Package not exist: OrderId: {order.Id}");
             }
+            var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
+
+            var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
+            if (!addStudentIntoClassResult.IsSuccessStatusCode)
+            {
+                checkFlow = false;
+                _logger.LogError($"Add Student into class error: {addStudentIntoClassResult.StatusCode}, OrderId: {order.Id}");
+            }
+
             var updateNextUnitResult = await _courseService.UpdateNextUnit();
             if (!updateNextUnitResult.IsSuccessStatusCode)
             {
