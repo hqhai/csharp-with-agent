@@ -421,7 +421,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionId = sectionId ?? null,
                 SectionGroupResultId = sectionGroupResult.Id,
-                IsCorrect = true,
+                IsCorrect = null,
                 Status = EnumAnswerStatus.Process,
             };
         }
@@ -433,7 +433,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionTimeCodeId = sectionTimeCodeId ?? null,
                 SectionGroupResultId = sectionGroupResult.Id,
-                IsCorrect = true,
+                IsCorrect = null,
                 Status = EnumAnswerStatus.Process,
             };
         }
