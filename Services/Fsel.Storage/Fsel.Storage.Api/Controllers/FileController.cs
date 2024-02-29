@@ -32,10 +32,10 @@ namespace Fsel.Storage.Api.Controllers
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [HttpPost("{type}")]
-        public async Task<IActionResult> Upload([FromRoute] EnumFolderType type, IFormFile file, [FromQuery] bool isResize = false)
+        [HttpPost("{folderType}")]
+        public async Task<IActionResult> Upload([FromRoute] EnumFolderType folderType, [FromQuery] EnumBucketType? bucketType, IFormFile file, [FromQuery] bool isResize = false)
         {
-            var commandResult = await _amazonS3Service.UploadFileAsync(file, type, isResize);
+            var commandResult = await _amazonS3Service.UploadFileAsync(bucketType, file, folderType, isResize);
             return commandResult.GetActionResult();
         }
 
@@ -47,10 +47,10 @@ namespace Fsel.Storage.Api.Controllers
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [HttpPost("multiple/{type}")]
-        public async Task<IActionResult> Uploads([FromRoute] EnumFolderType type, IList<IFormFile> files, [FromQuery] bool isResize = false)
+        [HttpPost("multiple/{folderType}")]
+        public async Task<IActionResult> Uploads([FromRoute] EnumFolderType folderType, [FromQuery] EnumBucketType? bucketType, IList<IFormFile> files, [FromQuery] bool isResize = false)
         {
-            var commandResult = await _amazonS3Service.UploadFilesAsync(files, type, isResize);
+            var commandResult = await _amazonS3Service.UploadFilesAsync(bucketType, files, folderType, isResize);
             return commandResult.GetActionResult();
         }
     }
