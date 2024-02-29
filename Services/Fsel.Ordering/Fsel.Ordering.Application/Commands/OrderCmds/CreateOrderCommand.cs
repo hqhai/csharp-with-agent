@@ -115,6 +115,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.ClassId = classnew.Content?.Result.Id ?? default;
+            order.PhoneNumber = nameof(order.PhoneNumber);
+            order.Email = nameof(order.Email);
+            order.FullName = nameof(order.FullName);
+            order.Address = nameof(order.Address);
             if (!order.IsValid())
             {
                 methodResult.AddErrorBadRequest(order.ErrorMessages);

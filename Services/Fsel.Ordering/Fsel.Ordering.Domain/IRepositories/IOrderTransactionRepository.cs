@@ -5,7 +5,7 @@ namespace Fsel.Ordering.Domain.IRepositories
     using Fsel.Core.Base.Interfaces;
     using Fsel.Ordering.Domain.Entities;
 
-    public interface IUrBoxTransactionRepository : IRepository<UrBoxTransaction>
+    public interface IOrderTransactionRepository : IRepository<OrderTransaction>
     {
     }
 }

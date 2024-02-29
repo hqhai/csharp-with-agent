@@ -38,6 +38,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new ApprovalTimeEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new TokenConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LocationEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new LocationEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new SchoolEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
@@ -61,6 +62,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<TokenConfig> TokenConfigs { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<School> Schools { get; set; }
+        public DbSet<Location> Locations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

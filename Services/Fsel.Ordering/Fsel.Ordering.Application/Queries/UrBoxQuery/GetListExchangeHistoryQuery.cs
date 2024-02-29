@@ -28,16 +28,16 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
         private readonly IUrBoxService _urBoxService;
         private readonly AppSetting _appSetting;
         private readonly AuthContext _authContext;
-        private readonly IUrBoxTransactionRepository _urBoxTransactionRepository;
+        private readonly IOrderTransactionRepository _orderTransactionRepository;
         private readonly IMapper _mapper;
         private readonly LanguageContext _languageContext;
 
-        public GetListExchangeHistoryQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, AuthContext authContext, IUrBoxTransactionRepository urBoxTransactionRepository, IMapper mapper, LanguageContext languageContext)
+        public GetListExchangeHistoryQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, AuthContext authContext, IOrderTransactionRepository orderTransactionRepository, IMapper mapper, LanguageContext languageContext)
         {
             _urBoxService = urBoxService;
             _appSetting = appSetting;
             _authContext = authContext;
-            _urBoxTransactionRepository = urBoxTransactionRepository;
+            _orderTransactionRepository = orderTransactionRepository;
             _mapper = mapper;
             _languageContext = languageContext;
         }
@@ -47,7 +47,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExchangeHistoryModel>();
 
-            var orderTransactions = await _urBoxTransactionRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.Status == EnumUrBoxTransactionStatus.Success).ToListAsync(cancellationToken);
+            var orderTransactions = await _orderTransactionRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.Status == EnumOrderTransactionStatus.Success).ToListAsync(cancellationToken);
 
             var responses = orderTransactions.Select(p => p?.ResponseBody).Deserialize<List<RedemptionResponseModel>>();
 
@@ -98,7 +98,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                 var a = new GiftHistoryModel
                 {
                     Id = gift.CartDetailId,
-                    GiftId = gift.GiftId,
+                    GiftId = gift.PriceId,
                     GiftName = giftDetail?.Data?.Title,
                     Price = "" + gift.Price,
                     Content = giftDetail?.Data?.Content,

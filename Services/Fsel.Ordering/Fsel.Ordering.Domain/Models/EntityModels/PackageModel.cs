@@ -9,7 +9,9 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
     {
         public Guid Id { get; set; }
         public EnumPackageCode? Code { get; set; }
+        public string? Name { get; set; }
         public double Price { get; set; }
+        public int MonthNumber { get; set; }
         public IList<PackageConfig>? Description { get; set; }
     }
 }

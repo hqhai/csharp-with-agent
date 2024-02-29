@@ -4,9 +4,6 @@ namespace Fsel.System.Domain.Entities
 {
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
-    using Fsel.System.Domain.Enums;
-    using global::System;
-    using global::System.Collections.Generic;
     using global::System.ComponentModel;
     using global::System.ComponentModel.DataAnnotations;
 

@@ -3,6 +3,7 @@
 namespace Fsel.System.Infrastructure.Configs
 {
     using Fsel.Common.Helpers;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums;
     using global::System;

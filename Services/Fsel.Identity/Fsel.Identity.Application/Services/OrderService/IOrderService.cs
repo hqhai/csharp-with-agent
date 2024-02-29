@@ -10,19 +10,19 @@ namespace Fsel.Identity.Application.Services.OrderService
 
     public interface IOrderService
     {
-        [Get("/package")]
+        [Get("/v1/package")]
         Task<IApiResponse<MethodResult<List<PackageModel>>>> GetPackages();
 
-        [Post("/user-referral")]
+        [Post("/v1/user-referral")]
         Task<IApiResponse<MethodResult<bool>>> CreateUserReferralAsync([Body] CreateUserReferralCommandModel command);
 
-        [Get("/order/get-status")]
+        [Get("/v1/order/get-status")]
         Task<IApiResponse<MethodResult<EnumOrderStatus?>>> GetStatusAsync([FromQuery] GetStatusByUserCommandModel query);
 
-        [Post("/order")]
+        [Post("/v1/order")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
 
-        [Put("/admin/order/change-status-order")]
+        [Put("/v1/admin/order/change-status-order")]
         Task<IApiResponse<MethodResult<bool>>> ChangeStatusOrder([Body] ChangeStatusOrderCommandModel command);
     }
 }

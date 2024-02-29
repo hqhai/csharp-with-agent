@@ -21,5 +21,9 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
 
         public string? CodeCourse { get; set; }
         public Guid UserId { get; set; }
+
+        public bool IsTrial { get; set; }
+
+        public DateTime? ExpireDate { get; set; }
     }
 }

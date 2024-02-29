@@ -26,6 +26,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     {
         public Guid? UserId { get; set; }
     }
+
     public class GetListOrderQueryHandler : IRequestHandler<GetListOrderQuery, MethodResult<Guid>>
     {
         private readonly IOrderRepository _orderRepository;
@@ -37,14 +38,13 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
         public async Task<MethodResult<Guid>> Handle(GetListOrderQuery request, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(request); 
-           var methodResult = new MethodResult<Guid>();
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == request.UserId);
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<Guid>();
+            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
 
-            methodResult.Result =order.PackageId;
+            methodResult.Result = order?.PackageId ?? default;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-
         }
     }
 }
