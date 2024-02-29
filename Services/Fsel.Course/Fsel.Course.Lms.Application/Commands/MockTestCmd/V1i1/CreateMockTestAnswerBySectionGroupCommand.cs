@@ -355,12 +355,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionQuestionId == sectionQuestionId);
                     if (mockTestAnswer == null)
                     {
-                        mockTestAnswer = GetMockTestAnswer(sectionGroupResult, correctCount, isAnswered, questionItem);
-                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, correctCount));
+                        mockTestAnswer = GetMockTestAnswer(sectionGroupResult, questionItem);
+                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal));
                     }
                     else
                     {
-                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, correctCount));
+                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal));
                     }
                 }
             }
@@ -428,8 +428,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionId = sectionId ?? null,
                 SectionGroupResultId = sectionGroupResult.Id,
-                IsCorrect = null,
-                Status = EnumAnswerStatus.Done
+                IsCorrect = true,
+                Status = EnumAnswerStatus.Process,
             };
         }
 
@@ -440,27 +440,30 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionTimeCodeId = sectionTimeCodeId ?? null,
                 SectionGroupResultId = sectionGroupResult.Id,
-                IsCorrect = null,
-                Status = EnumAnswerStatus.Done
+                IsCorrect = true,
+                Status = EnumAnswerStatus.Process,
             };
         }
 
-        private static MockTestAnswer GetMockTestAnswer(SectionGroupResult sectionGroupResult, int correctCount, bool isAnswered, Question questionItem)
+        private static MockTestAnswer GetMockTestAnswer(SectionGroupResult sectionGroupResult, Question questionItem)
         {
             return new MockTestAnswer
             {
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionQuestionId = questionItem?.SectionQuestions.FirstOrDefault()?.Id,
                 SectionGroupResultId = sectionGroupResult.Id,
-                Status = questionItem?.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process,
-                IsCorrect = isAnswered ? (questionItem == null || questionItem.CorrectTotal == correctCount) : null,
+                Status = EnumAnswerStatus.Process,
             };
         }
 
-        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, int correctCount = default)
+        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, bool isAnswered = default, int correctCount = default, int? correctTotal = default)
         {
             mockTestAnswer.Answer = answer;
-            mockTestAnswer.CorrectCount = correctCount;
+            if (correctTotal.HasValue && correctTotal.Value != 0)
+            {
+                mockTestAnswer.CorrectCount = correctCount;
+                mockTestAnswer.IsCorrect = isAnswered ? (correctTotal == correctCount) : null;
+            }
             return mockTestAnswer;
         }
     }
