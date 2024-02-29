@@ -14,6 +14,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
     public class GetAllSurveyQuestionQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
     {
         public int? DisplayLevel { get; set; } = 1;
+        public bool IsPilot { get; set; }
     }
 
     public class GetAllSurveyQuestionQueryHandler : IRequestHandler<GetAllSurveyQuestionQuery, MethodResult<IList<SurveyQuestionModel>>>
@@ -31,6 +32,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
             var surveyQuestionquery = await _surveyQuestionRepository.Queryable
                 .Where(x => x.DisplayLevel == request.DisplayLevel)
+                .Where(x => x.IsPilot == request.IsPilot)
                 .OrderBy(x => x.DisplayOrder)
                 .Select(x => new SurveyQuestionModel
                 {

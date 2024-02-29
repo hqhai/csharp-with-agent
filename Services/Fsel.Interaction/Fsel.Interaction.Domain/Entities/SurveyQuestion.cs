@@ -23,6 +23,8 @@ namespace Fsel.Interaction.Domain.Entities
 
         public float DisplayOrder { get; set; }
 
+        public bool? IsPilot { get; set; }
+
         public int DisplayLevel { get; set; }
 
         public EnumSurveyQuestion Type { get; set; }
