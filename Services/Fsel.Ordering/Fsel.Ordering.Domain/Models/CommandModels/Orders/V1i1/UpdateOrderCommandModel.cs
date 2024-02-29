@@ -9,14 +9,14 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
     public class UpdateOrderCommandModel
     {
         public Order? Order { get; set; }
-        public EnumCourseLevel CourseLevel { get; set; }
+        public Package? Package { get; set; }
+        public Guid CourseId { get; set; }
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
-        public string? Country { get; set; }
         public string? Address { get; set; }
+        public string? Code { get; set; }
         public EnumPaymentMethodStatus PaymentMethod { get; set; }
-        public Guid PackageId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
     }
