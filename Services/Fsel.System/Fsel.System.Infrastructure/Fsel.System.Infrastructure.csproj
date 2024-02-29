@@ -7,14 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SqlScripts\Location\Init_Table.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="SqlScripts\Location\Init_Table.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Fsel.System.Domain\Fsel.System.Domain.csproj" />
   </ItemGroup>
 

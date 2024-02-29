@@ -1,3 +1,5 @@
+USE [env-dev.system-service]
+GO
 /****** Object:  Table [dbo].[Schools]    Script Date: 2/29/2024 6:32:25 PM ******/
 SET ANSI_NULLS ON
 GO
