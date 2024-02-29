@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Entities
 
     public class MockTestAnswer : BaseAnswer
     {
+        private const string answerStr = "{\"answers\":";
         public SectionQuestion? SectionQuestion { get; set; }
         public Guid? SectionQuestionId { get; set; }
         public SectionTimeCode? SectionTimeCode { get; set; }
@@ -28,8 +29,14 @@ namespace Fsel.Course.Domain.Entities
             set
             {
                 _answerStr = value;
-                TimeCount = MediaHelper.GetMediaDurationAsync(value);
-                WordCount = StringHelper.CountWords(value);
+                if (!string.IsNullOrEmpty(value) && !value.Contains(answerStr, StringComparison.InvariantCulture))
+                {
+                    TimeCount = MediaHelper.GetMediaDurationAsync(value);
+                    if (TimeCount == null)
+                    {
+                        WordCount = StringHelper.CountWords(value);
+                    }
+                }
             }
         }
 
@@ -37,7 +44,7 @@ namespace Fsel.Course.Domain.Entities
 
         public int? TimeCount
         {
-            get { return _timeCount == null ? MediaHelper.GetMediaDurationAsync(AnswerStr) : _timeCount; }
+            get { return _timeCount == null && !string.IsNullOrEmpty(AnswerStr) && !AnswerStr.Contains(answerStr, StringComparison.InvariantCulture) ? MediaHelper.GetMediaDurationAsync(AnswerStr) : _timeCount; }
             set { _timeCount = value; }
         }
 
@@ -45,9 +52,10 @@ namespace Fsel.Course.Domain.Entities
 
         public int? WordCount
         {
-            get { return _wordCount == null ? StringHelper.CountWords(AnswerStr) : _wordCount; }
+            get { return _wordCount == null && _timeCount == null && !string.IsNullOrEmpty(AnswerStr) && !AnswerStr.Contains(answerStr, StringComparison.InvariantCulture) ? StringHelper.CountWords(AnswerStr) : _wordCount; }
             set { _wordCount = value; }
         }
+
         public MockTestResult? MockTestResult { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
