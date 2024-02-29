@@ -2,24 +2,32 @@
 
 namespace Fsel.System.Domain.Entities
 {
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.System.Domain.Enums;
     using global::System;
     using global::System.Collections.Generic;
     using global::System.ComponentModel;
+    using global::System.ComponentModel.DataAnnotations;
 
     public class Location : Entity
     {
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
         public int Level { get; set; }
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
         public EnumLocationType Type { get; set; }
         public Guid? ParentId { get; set; }
         public Location? Parent { get; set; }
         public int UrBoxId { get; set; }
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? IdPath { get; set; }
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? LocationName { get; set; }
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? LongPath { get; set; }
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? ShortPath { get; set; }
 
         [DefaultValue(true)]

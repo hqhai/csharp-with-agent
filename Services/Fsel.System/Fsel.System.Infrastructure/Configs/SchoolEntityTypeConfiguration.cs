@@ -30,6 +30,8 @@ namespace Fsel.System.Infrastructure.Configs
                    .WithMany(b => b.Schools)
                    .HasForeignKey(b => b.LocationId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(e => e.IsActive).HasDefaultValue(true);
         }
     }
 }
