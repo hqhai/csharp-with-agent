@@ -348,7 +348,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, questionItem);
-                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal));
+                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, answerConfig, questionItem, isAnswered, correctCount));
                     }
                     else
                     {
@@ -447,11 +447,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, int correctCount = default)
         {
             mockTestAnswer.Answer = answer;
-            if (correctTotal.HasValue && correctTotal.Value != 0)
-            {
-                mockTestAnswer.CorrectCount = correctCount;
-                mockTestAnswer.IsCorrect = isAnswered ? (correctTotal == correctCount) : null;
-            }
+            mockTestAnswer.CorrectCount = correctCount;
             return mockTestAnswer;
         }
     }

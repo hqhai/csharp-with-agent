@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             }
             if (mockTest.MockTestSections.Any())
             {
-                mockTestResultModel.IsTeacherGraded = _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
+                mockTestResultModel.IsTeacherGraded = await _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
             }
 
             //await DoQuestBoard(request.MockTestResultId, mockTestResult.CourseId, cancellationToken).ConfigureAwait(false);
