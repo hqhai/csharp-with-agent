@@ -23,6 +23,8 @@ namespace Fsel.Interaction.Domain.Entities
 
         public float DisplayOrder { get; set; }
 
+        public bool? IsPilot { get; set; }
+
         public int DisplayLevel { get; set; }
 
         public EnumSurveyQuestion Type { get; set; }
@@ -36,8 +38,6 @@ namespace Fsel.Interaction.Domain.Entities
             get { return ConvertHelper.Deserialize<object>(AnswerStr); }
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
-
-        public bool IsPilot { get; set; }
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();
     }
 }

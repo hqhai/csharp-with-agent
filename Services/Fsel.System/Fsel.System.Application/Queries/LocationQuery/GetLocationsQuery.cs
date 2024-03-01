@@ -41,10 +41,16 @@ namespace Fsel.System.Application.Queries.LocationQuery
                 CreatedDate = p.CreatedDate,
             });
 
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                locations = locations.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+            }
+
             if (request.ParentId.HasValue)
             {
                 locations = locations.Where(p => p.ParentId == request.ParentId);
             }
+
             int totalItem = await locations.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var lists = await locations
