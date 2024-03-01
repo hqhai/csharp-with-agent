@@ -200,20 +200,23 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                                 foreach (var item in skillScores)
                                 {
-                                    if (skillScoresPrevious.Any(p => p.Skill == item.Skill))
-                                    {
-                                        var skillScore = skillScoresPrevious.FirstOrDefault(p => p.Skill == item.Skill);
+                                    //if (skillScoresPrevious.Any(p => p.Skill == item.Skill))
+                                    //{
+                                    //    var skillScore = skillScoresPrevious.FirstOrDefault(p => p.Skill == item.Skill);
 
-                                        var (@class, skillName, icon) = ConvertEnum(item.Skill);
-                                        var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill2, icon, skillName, item.Percent, 100 - item.Percent, skillScore?.Percent, item.Percent > skillScore?.Percent ? "#53BF65" : (item.Percent == skillScore?.Percent ? "#FFAE46" : "#C0404C"), item.Percent);
-                                        skillScoreHtml += html;
-                                    }
-                                    else
-                                    {
-                                        var (@class, skillName, icon) = ConvertEnum(item.Skill);
-                                        var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, item.Percent, 100 - item.Percent, item.Percent);
-                                        skillScoreHtml += html;
-                                    }
+                                    //    var (@class, skillName, icon) = ConvertEnum(item.Skill);
+                                    //    var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill2, icon, skillName, item.Percent, 100 - item.Percent, skillScore?.Percent, item.Percent > skillScore?.Percent ? "#53BF65" : (item.Percent == skillScore?.Percent ? "#FFAE46" : "#C0404C"), item.Percent);
+                                    //    skillScoreHtml += html;
+                                    //}
+                                    //else
+                                    //{
+                                    //    var (@class, skillName, icon) = ConvertEnum(item.Skill);
+                                    //    var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, item.Percent, 100 - item.Percent, item.Percent);
+                                    //    skillScoreHtml += html;
+                                    //}
+                                    var (@class, skillName, icon) = ConvertEnum(item.Skill);
+                                    var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, item.Percent, 100 - item.Percent, item.Percent);
+                                    skillScoreHtml += html;
                                 }
                                 parameter.SkillScore = skillScoreHtml;
                                 if (course.CourseType == EnumCourseType.Academic)
