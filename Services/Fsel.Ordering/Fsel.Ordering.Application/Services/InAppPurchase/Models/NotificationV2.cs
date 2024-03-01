@@ -13,12 +13,12 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
         public NotificationSubtype Subtype { get; set; }
 
         [JsonProperty("notificationUUID")]
-        public string NotificationUUID { get; set; }
+        public string? NotificationUUID { get; set; }
 
         [JsonProperty("notificationVersion")]
-        public string NotificationVersion { get; set; }
+        public string? NotificationVersion { get; set; }
 
         [JsonProperty("data")]
-        public NotificationV2Data Data { get; set; }
+        public NotificationV2Data? Data { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
 
         public void Process(AppleNotification notification)
         {
-            var v2Notification = GetVerifiedDecodedData<NotificationV2>(notification.SignedPayload);
+            var v2Notification = GetVerifiedDecodedData<NotificationV2>(notification?.SignedPayload);
             if (v2Notification?.DecodedPayload?.Data == null || !v2Notification.IsValid)
             {
                 throw new ArgumentNullException($"{nameof(v2Notification.DecodedPayload.Data)} is null or is not valid");
@@ -32,19 +32,23 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
             {
                 var renewalInfoV2Verified = GetVerifiedDecodedData<RenewalInfoV2>(v2Notification.DecodedPayload.Data.SignedRenewalInfo);
                 if (renewalInfoV2Verified.IsValid)
+                {
                     renewalInfo = renewalInfoV2Verified.DecodedPayload;
+                }
             }
 
             var transactionInfoResponse = GetVerifiedDecodedData<TransactionInfoV2>(v2Notification.DecodedPayload.Data.SignedTransactionInfo);
             TransactionInfoV2? transactionInfo = null;
             if (transactionInfoResponse.IsValid)
+            {
                 transactionInfo = transactionInfoResponse.DecodedPayload;
+            }
 
             // Update Internal subscription
             _subscriptionService.Update(v2Notification.DecodedPayload, renewalInfo, transactionInfo);
         }
 
-        private VerifiedDecodedDataModel<TNotificationData> GetVerifiedDecodedData<TNotificationData>(string signedPayload)
+        private static VerifiedDecodedDataModel<TNotificationData> GetVerifiedDecodedData<TNotificationData>(string? signedPayload)
         {
             if (string.IsNullOrEmpty(signedPayload))
             {
@@ -96,25 +100,24 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
                 var handler = new JwtSecurityTokenHandler();
                 var jwtSecurityToken = handler.ReadJwtToken(token);
 
-                var x5cTry = jwtSecurityToken.Header.TryGetValue("x5c", out object x5cCerteficates);
-                if (!x5cTry || x5cCerteficates == null)
+                var x5cTry = jwtSecurityToken.Header.TryGetValue("x5c", out object? x5cCertificates);
+                if (!x5cTry || x5cCertificates == null)
                 {
                     throw new KeyNotFoundException("Token Header does not contain x5c");
                 }
 
-                var certeficatesItems = JsonConvert.DeserializeObject<IEnumerable<string>>(x5cCerteficates.ToString());
-                if (certeficatesItems == null || !certeficatesItems.Any())
+                var certificatesItems = JsonConvert.DeserializeObject<IEnumerable<string>>(x5cCertificates.ToString());
+                if (certificatesItems == null || !certificatesItems.Any())
                 {
                     throw new ArgumentNullException("Certeficates are null");
                 }
 
-                var securityToken = Validate(handler, token, certeficatesItems.First());
+                var securityToken = Validate(handler, token, certificatesItems.First());
 
                 return securityToken != null;
             }
-            catch (Exception ex)
+            catch
             {
-                // log it
                 return false;
             }
         }
@@ -122,23 +125,25 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
         private static SecurityToken? Validate(JwtSecurityTokenHandler tokenHandler, string jwtToken, string publicKey)
         {
             var certificateBytes = Base64UrlEncoder.DecodeBytes(publicKey);
-            var certificate = new X509Certificate2(certificateBytes);
-            var eCDsa = certificate.GetECDsaPublicKey();
-
-            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
+            using (var certificate = new X509Certificate2(certificateBytes))
             {
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                ValidateIssuer = false,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new ECDsaSecurityKey(eCDsa),
-            };
+                var eCDsa = certificate.GetECDsaPublicKey();
 
-            tokenHandler.ValidateToken(jwtToken, tokenValidationParameters, out var securityToken);
-            return securityToken;
+                TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuer = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new ECDsaSecurityKey(eCDsa),
+                };
+
+                tokenHandler.ValidateToken(jwtToken, tokenValidationParameters, out var securityToken);
+                return securityToken;
+            }
         }
 
-        private static TObj DecodeFromBase64<TObj>(string encodedString)
+        private static TObj? DecodeFromBase64<TObj>(string encodedString)
         {
             var data = Base64UrlTextEncoder.Decode(encodedString);
             string decodedString = Encoding.UTF8.GetString(data);
