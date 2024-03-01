@@ -117,6 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             #endregion
 
+
             #region Video
             var videoResultCompetition = _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && studentIds.Contains(x.StudentId));
             int countVideoResultDistinct = videoResultCompetition.Select(x => x.StudentId).Distinct().Count();
@@ -148,7 +149,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     return new StudentCompetitionAverageScore
                     {
                         StudentId = group.Key,
-                        LearnRatio = countUnitTestsResultDistinct == 0 ? 0 : UnitTests_Ratio / group.Count(),
+                        LearnRatio = countUnitTestsResultDistinct == 0 ? 0 : UnitTests_Ratio / CountComfort(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.UnitTest),
                         TotalRecords = denominator,
                         AverageScoreByType = CountOverralUnitSkillTest(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.UnitTest),
                         LearnType = EnumLearnType.UnitTests
@@ -167,7 +168,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     return new StudentCompetitionAverageScore
                     {
                         StudentId = group.Key,
-                        LearnRatio = countSkillTestsResultDistinct == 0 ? 0 : SkillsTests_Ratio / group.Count(),
+                        LearnRatio = countSkillTestsResultDistinct == 0 ? 0 : SkillsTests_Ratio / CountComfort(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.SkillTest),
                         TotalRecords = denominator,
                         AverageScoreByType = CountOverralUnitSkillTest(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.SkillTest),
                         LearnType = EnumLearnType.SkillsTests
@@ -211,7 +212,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                      StudentId = group.Key,
                      LearnRatio = countClassForumDistinct == 0 ? 0 : ClassForum_Ratio / group.Count(),
                      TotalRecords = group.Count(),
-                     AverageScoreByType = 1,
+                     AverageScoreByType = classForumResultCompetion.Count(),
                      LearnType = EnumLearnType.ClassForum
                  }).ToList();
             ;
@@ -301,11 +302,29 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
                         overallScore += overallPercent;
                     }
+                }
+            }
+            return overallScore;
+        }
+
+
+        private static double CountComfort(List<string>? listStr, EnumTimeCodeType timCodeType)
+        {
+            int countComfortableType = 0;
+            if (listStr != null && listStr.Count > 0)
+            {
+                foreach (var item in listStr)
+                {
+                    var tempList = ConvertHelper.Deserialize<IList<VideoSkillScores>>(item);
+                    if (tempList != null && tempList.Any(x => x.Type == timCodeType))
+                    {
+                        countComfortableType += 1;
+                    }
 
 
                 }
             }
-            return overallScore;
+            return countComfortableType;
         }
 
 
