@@ -380,7 +380,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionId == section.Id);
                     if (mockTestAnswer == null)
                     {
-                        mockTestAnswer = GetMockTestAnswerWriting(sectionGroupResult, section.Id);
+                        mockTestAnswer = GetMockTestAnswer(sectionGroupResult, section.Id);
                         createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item.Answer));
                     }
                     else
@@ -402,7 +402,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionTimeCodeId == sectionTimeCode.Id);
             if (mockTestAnswer == null)
             {
-                mockTestAnswer = GetMockTestAnswerSpeaking(sectionGroupResult, sectionTimeCode.Id);
+                mockTestAnswer = GetMockTestAnswer(sectionGroupResult, null, sectionTimeCode.Id);
                 createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, request.Answers.Select(x => x.Answer).FirstOrDefault()));
             }
             else
@@ -414,26 +414,15 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private static MockTestAnswer GetMockTestAnswerWriting(SectionGroupResult sectionGroupResult, Guid? sectionId = null)
-        {
-            return new MockTestAnswer
-            {
-                MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
-                SectionId = sectionId ?? null,
-                SectionGroupResultId = sectionGroupResult.Id,
-                IsCorrect = true,
-                Status = EnumAnswerStatus.Process,
-            };
-        }
-
-        private static MockTestAnswer GetMockTestAnswerSpeaking(SectionGroupResult sectionGroupResult, Guid? sectionTimeCodeId = null)
+        private static MockTestAnswer GetMockTestAnswer(SectionGroupResult sectionGroupResult, Guid? sectionId = null, Guid? sectionTimeCodeId = null)
         {
             return new MockTestAnswer
             {
                 MockTestResultId = sectionGroupResult.MockTestResultId ?? default,
                 SectionTimeCodeId = sectionTimeCodeId ?? null,
+                SectionId = sectionId ?? null,
                 SectionGroupResultId = sectionGroupResult.Id,
-                IsCorrect = true,
+                IsCorrect = null,
                 Status = EnumAnswerStatus.Process,
             };
         }
