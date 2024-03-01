@@ -269,7 +269,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                         else
                         {
                             var currentLesson = await _lessonResultRepository.Queryable
-                                .Where(p => p.UnitId == unitResultNext.UnitId && p.StudentId == item.Id && p.Status == EnumResultStatus.Process)
+                                .Where(p => p.UnitId == unitResultNext.UnitId && p.StudentId == item.Id && (p.Status == EnumResultStatus.Process || p.Status == EnumResultStatus.New))
                                 .Select(x => new
                                 {
                                     Lesson = x.Lesson,
