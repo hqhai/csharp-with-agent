@@ -2,13 +2,11 @@
 
 namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using Newtonsoft.Json;
 
     public class AppleNotification
     {
+        [JsonProperty("signedPayload")]
+        public string SignedPayload { get; set; } = string.Empty;
     }
 }

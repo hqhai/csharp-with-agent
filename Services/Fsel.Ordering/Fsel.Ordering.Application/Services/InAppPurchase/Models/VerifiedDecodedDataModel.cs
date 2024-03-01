@@ -2,13 +2,10 @@
 
 namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
-    public class VerifiedDecodedDataModel
+    public class VerifiedDecodedDataModel<TDataModel>
     {
+        public TDataModel? DecodedPayload { get; set; }
+
+        public bool IsValid { get; set; }
     }
 }

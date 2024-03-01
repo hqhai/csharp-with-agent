@@ -4,8 +4,8 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
 {
     using Fsel.Ordering.Application.Services.InAppPurchase.Models;
 
-    public interface INotificationProcessor
+    public interface ISubscriptionService
     {
-        void Process(AppleNotification notification);
+        void Update(NotificationV2 decodedPayload, RenewalInfoV2? renewalInfo, TransactionInfoV2? transactionInfo);
     }
 }
