@@ -21,7 +21,7 @@ namespace Fsel.Shared.Helpers
 
             if (today >= birthday?.AddYears(age))
             {
-                age++;
+                age;
             }
 
             #endregion Bỏ check tuổi theo ngày chỉ tính năm sinh
