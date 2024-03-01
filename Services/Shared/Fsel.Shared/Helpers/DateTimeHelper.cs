@@ -19,10 +19,10 @@ namespace Fsel.Shared.Helpers
 
             #region Bỏ check tuổi theo ngày chỉ tính năm sinh
 
-            //if (today > birthday?.AddYears(age))
-            //{
-            //    age--;
-            //}
+            if (today >= birthday?.AddYears(age))
+            {
+                age++;
+            }
 
             #endregion Bỏ check tuổi theo ngày chỉ tính năm sinh
 
