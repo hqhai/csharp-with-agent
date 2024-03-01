@@ -25,7 +25,7 @@ namespace Fsel.Course.Domain.Entities
 
         [NotMapped]
         public int? TimeCount
-        { get { return ClassForumResultFiles.Select(p => p.TimeCount).Sum(); } }
+        { get { return ClassForumResultFiles.Where(x => x.IsRetry == false).Select(p => p.TimeCount).Sum(); } }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }

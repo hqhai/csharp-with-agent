@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -37,14 +38,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly IOrderService _orderService;
 
-        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher)
+        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher, IOrderService orderService)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
             _questBoardPublisher = questBoardPublisher;
+            _orderService = orderService;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveClassForumPenddingCommand request, CancellationToken cancellationToken)
@@ -66,6 +69,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
 
+            var studentResult = await _userService.GetStudentByUserIdAsync(classForumResult.CreatedUserId);
+            var studentPackageId = studentResult.Content?.Result?.PackageId;
+
+            var packageResults = await _orderService.GetPackages();
+            var packageBasic = packageResults.Content?.Result?.FirstOrDefault(x => x.Code == EnumPackageCode.BASIC);
+
             if (classForumResult.Status != EnumClassForumResultStatus.Pending)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotPendding));
@@ -80,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 if (request.IsApprove)
                 {
-                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot)
+                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot || (studentPackageId == packageBasic?.Id && classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.TeacherGrading))
                     {
                         long score = 0;
                         if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= classForumResult.WordCount) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= classForumResult.TimeCount))

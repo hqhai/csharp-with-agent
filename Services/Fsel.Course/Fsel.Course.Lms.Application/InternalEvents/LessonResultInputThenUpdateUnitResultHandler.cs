@@ -18,10 +18,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     public class LessonResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<LessonResult>>
     {
+        private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
 
         public LessonResultInputThenUpdateUnitResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, ITrainingService trainingService, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, trainingService, questBoardPublisher, lessonResultRepository)
         {
+            _mockTestResultRepository = mockTestResultRepository;
             _lessonResultRepository = lessonResultRepository;
         }
 
@@ -44,8 +46,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else if (lessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Any())
                 {
-                    await UpdateUnitResultAsync(lessonResults, unit, lessonResult.CourseId, lessonResult.StudentId, false, cancellationToken).ConfigureAwait(false);
+                    var isUnitDone = await _mockTestResultRepository.Queryable.AnyAsync(x => x.Status == EnumResultStatus.Done && x.UnitId == unit.Id && x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId, cancellationToken);
                     await UpdateTheNextLessonAsync(unit, lessonResult, cancellationToken).ConfigureAwait(false);
+                    await UpdateUnitResultAsync(lessonResults, unit, lessonResult.CourseId, lessonResult.StudentId, isUnitDone, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {

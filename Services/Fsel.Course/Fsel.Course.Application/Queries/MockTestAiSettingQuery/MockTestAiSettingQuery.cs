@@ -40,9 +40,7 @@ namespace Fsel.Course.Application.Queries.MockTestAiSettingQuery
                 return methodResult;
             }
 
-            MockTestAISettingModel mockTestAiSettingModel = _mapper.Map<MockTestAISettingModel>(mockTestAiSetting);
-
-            methodResult.Result = mockTestAiSettingModel;
+            methodResult.Result = _mapper.Map<MockTestAISettingModel>(mockTestAiSetting);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -6,6 +6,7 @@ namespace Fsel.Shared.Enums
     {
         Card,
         Wallet,
-        BankTransfer
+        BankTransfer,
+        Payoo
     }
 }

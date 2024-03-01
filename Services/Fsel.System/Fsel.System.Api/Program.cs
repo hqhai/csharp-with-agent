@@ -41,6 +41,8 @@ builder.Services.AddScoped<IGameVocabularyPlatformRepository, GameVocabularyPlat
 builder.Services.AddScoped<ITokenConfigRepository, TokenConfigRepository>();
 builder.Services.AddScoped<IApprovalTimeConfigRepository, ApprovalTimeConfigRepository>();
 builder.Services.AddScoped<IApprovalLogRepository, ApprovalLogRepository>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
 

@@ -9,7 +9,7 @@ namespace Fsel.Interaction.Application.Services.NotificationService
 
     public interface INotificationService
     {
-        [Post("/notifications/remind-by-status")]
+        [Post("/v1/notifications/remind-by-status")]
         Task<IApiResponse<MethodResult<IList<NotificationRemindModel>>>> GetListNotificationRemind([Body] GetListNotificationRemindQueryModel cmd);
     }
 }

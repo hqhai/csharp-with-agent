@@ -913,7 +913,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<bool>("IsPilot")
+                    b.Property<bool?>("IsPilot")
                         .HasColumnType("bit");
 
                     b.Property<string>("Question")
@@ -972,7 +972,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 2f,
                             Icon = "addd",
                             IsDeleted = false,
-                            IsPilot = false,
                             Question = "Chọn hướng đi của bạn",
                             Type = "YourDirection"
                         },
@@ -985,7 +984,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
-                            DisplayOrder = 3f,
+                            DisplayOrder = 2f,
                             Icon = "fluent_target-arrow-16-filled.png",
                             IsDeleted = false,
                             IsPilot = false,
@@ -1001,12 +1000,27 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayLevel = 1,
+                            DisplayOrder = 3f,
+                            Icon = "wideword.png",
+                            IsDeleted = false,
+                            Question = "Vị trí của bạn",
+                            Type = "YourPlace"
+                        },
+                        new
+                        {
+                            Id = new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5"),
+                            AnswerStr = "null",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayLevel = 1,
                             DisplayOrder = 4f,
                             Icon = "wideword.png",
                             IsDeleted = false,
                             IsPilot = false,
-                            Question = "Vị trí của bạn",
-                            Type = "YourPlace"
+                            Question = "Trường học của bạn",
+                            Type = "Location"
                         },
                         new
                         {

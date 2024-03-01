@@ -4,20 +4,24 @@
     "type": "Content",
     "code": "LCMS",
     "name": "Learning Content Management System",
-    "description": ""
+    "description": "",
+    "createdDate": "2023-07-21"
+
   },
   {
     "id": "856818e6-9e20-43d8-964f-5dab2ba1a355",
     "type": "Learn",
     "code": "LMS",
     "name": "Learning Management System",
-    "description": ""
+    "description": "",
+    "createdDate": "2023-07-21"
   },
   {
     "id": "f144a094-3f49-4ca8-8f1e-7234289dd1a5",
     "type": "Game",
     "code": "PlanetDefender",
     "name": "Planet Defender",
-    "description": ""
+    "description": "",
+    "createdDate": "2023-07-21"
   }
 ]

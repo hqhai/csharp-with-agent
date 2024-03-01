@@ -8,7 +8,7 @@ namespace Fsel.Ordering.Application.Services.SystemService
 
     public interface ISystemService
     {
-        [Get("/referral-discount-config")]
+        [Get("/v1/referral-discount-config")]
         Task<IApiResponse<MethodResult<IList<ReferralDiscountConfigModel>>>> GetReferralDiscountConfigAsync();
     }
 }

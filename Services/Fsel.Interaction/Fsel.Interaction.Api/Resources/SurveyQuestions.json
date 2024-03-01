@@ -61,7 +61,7 @@
     "displayOrder": 2,
     "displayLevel": 1,
     "type": "YourDirection",
-    "isPilot": false,
+    "isPilot": null,
     "answers": [
       {
         "id": 1,
@@ -79,7 +79,7 @@
     "question": "Tại sao bạn học ngoại ngữ",
     "description": "addd",
     "icon": "fluent_target-arrow-16-filled.png",
-    "displayOrder": 3,
+    "displayOrder": 2,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
     "isPilot": false,
@@ -122,16 +122,28 @@
     "question": "Vị trí của bạn",
     "description": "addd",
     "icon": "wideword.png",
-    "displayOrder": 4,
+    "displayOrder": 3,
     "displayLevel": 1,
     "type": "YourPlace",
-    "isPilot": false,
+    "isPilot": null,
     "answers": {
       "countryCode": 123,
       "countryName": "Việt Nam",
       "provinceCode": 29,
       "provinceName": "Hà Nội"
     }
+  },
+  {
+    "id": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5",
+    "createdDate": "2023-07-21",
+    "question": "Trường học của bạn",
+    "description": "addd",
+    "icon": "wideword.png",
+    "displayOrder": 4,
+    "displayLevel": 1,
+    "type": "Location",
+    "isPilot": false,
+    "answers": null
   },
   {
     "id": "2BE9A620-143D-41F6-815B-2038C21A7B23",
@@ -141,8 +153,8 @@
     "icon": "time.png",
     "displayOrder": 5,
     "type": "AgeGender",
-    "isPilot": false,
     "displayLevel": 1,
+    "isPilot": false,
     "answers": {
       "birthday": null,
       "ageGenderQuestions": [

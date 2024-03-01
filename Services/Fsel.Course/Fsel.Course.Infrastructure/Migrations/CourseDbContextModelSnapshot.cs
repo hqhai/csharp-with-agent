@@ -3772,6 +3772,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<string>("AudioPath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CourseSkill")
                         .IsRequired()
                         .HasMaxLength(100)

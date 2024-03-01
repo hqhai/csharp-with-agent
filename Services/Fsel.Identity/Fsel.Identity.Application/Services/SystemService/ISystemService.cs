@@ -9,10 +9,10 @@ namespace Fsel.Identity.Application.Services.SystemService
 
     public interface ISystemService
     {
-        [Get("/focus-time-config")]
+        [Get("/v1/focus-time-config")]
         Task<IApiResponse<MethodResult<IList<FocusTimeConfigModel>>>> GetFocusTimeConfig();
 
-        [Get("/token-config/get-token")]
+        [Get("/v1/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
     }
 }

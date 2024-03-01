@@ -48,11 +48,12 @@ namespace Fsel.Course.Infrastructure.Common
             _mockTestAnswerRepository = mockTestAnswerRepository;
         }
 
-        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult)
+        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
         {
+            ArgumentNullException.ThrowIfNull(sectionGroup);
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             var isHighestStreaks = new List<bool>();
-            if (sectionGroupResult.MockTestResultId.HasValue)
+            if (sectionGroupResult.MockTestResultId.HasValue && sectionGroup.CourseSkill != EnumCourseSkill.Writing && sectionGroup.CourseSkill != EnumCourseSkill.Speaking)
             {
                 isHighestStreaks = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                     .Include(x => x.SectionQuestion)
@@ -77,7 +78,7 @@ namespace Fsel.Course.Infrastructure.Common
             sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
             sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
             sectionGroupResult.Status = EnumResultStatus.Done;
-            sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult);
+            sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult, sectionGroup);
             sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.CreatedDate, DateTime.UtcNow, sectionGroup.ExecutionTime);
             if (sectionGroup.CourseSkill != EnumCourseSkill.Writing)
             {
@@ -614,13 +615,19 @@ namespace Fsel.Course.Infrastructure.Common
             return questionDto;
         }
 
-        public bool IsTeacherGraded(MockTestResult mockTestResult, IList<EnumCourseSkill>? courseSkills)
+        public async Task<bool> IsTeacherGraded(MockTestResult mockTestResult, IList<EnumCourseSkill>? courseSkills)
         {
             ArgumentNullException.ThrowIfNull(mockTestResult);
-            var isTeacherGradedSkill = courseSkills?.Any(x => x == EnumCourseSkill.Speaking || x == EnumCourseSkill.Writing);
+            var isTeacherGradedSkill = courseSkills?.Any(x => x == EnumCourseSkill.Speaking);
+            var isAIGraded = courseSkills?.Any(x => x == EnumCourseSkill.Writing);
             if (isTeacherGradedSkill.HasValue && isTeacherGradedSkill.Value)
             {
                 return mockTestResult.MockTestScores.Any();
+            }
+            if (isAIGraded.HasValue && isAIGraded.Value)
+            {
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id).ToListAsync();
+                return mockTestAnswers.All(x => !string.IsNullOrEmpty(x.GradingAlFeedback));
             }
             return true;
         }

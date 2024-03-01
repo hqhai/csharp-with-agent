@@ -17,7 +17,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             _mapper = mapper;
         }
 
-        public override async Task<Unit?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<Unit?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
