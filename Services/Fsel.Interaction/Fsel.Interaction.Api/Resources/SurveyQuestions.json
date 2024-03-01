@@ -125,7 +125,7 @@
     "displayOrder": 3,
     "displayLevel": 1,
     "type": "YourPlace",
-    "isPilot": false,
+    "isPilot": null,
     "answers": {
       "countryCode": 123,
       "countryName": "Việt Nam",
