@@ -40,7 +40,7 @@ namespace Fsel.System.Application.Queries.GoogleSheets
             var i18n = new I18NModel();
             try
             {
-                IList<IList<object>> dataVN = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, "vn");
+                IList<IList<object>> dataVN = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, _appSetting.GoogleSheetConfig?.I18NSheetVN ?? string.Empty);
 
                 foreach (var dataItem in dataVN)
                 {
@@ -60,13 +60,15 @@ namespace Fsel.System.Application.Queries.GoogleSheets
 
             try
             {
-                IList<IList<object>> dataEN = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, "en");
+                IList<IList<object>> dataEN = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, _appSetting.GoogleSheetConfig?.I18NSheetEN ?? string.Empty);
 
                 foreach (var dataItem in dataEN)
                 {
-                    if (!string.IsNullOrEmpty(dataItem[0].ToString()) && !string.IsNullOrEmpty(dataItem[1].ToString()))
+                    var firstValue = dataItem.FirstOrDefault()?.ToString();
+                    var lastValue = dataItem.LastOrDefault()?.ToString();
+                    if (!string.IsNullOrEmpty(firstValue) && !string.IsNullOrEmpty(lastValue))
                     {
-                        i18n.AddLanguage("en", dataItem[0].ToString()!, dataItem[1].ToString()!);
+                        i18n.AddLanguage("en", firstValue, lastValue);
                     }
                 }
             }
