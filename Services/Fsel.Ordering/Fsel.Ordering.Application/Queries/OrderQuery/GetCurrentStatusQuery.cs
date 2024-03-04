@@ -28,7 +28,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<EnumTrialRegistrationStatus?> methodResult = new MethodResult<EnumTrialRegistrationStatus?>();
-            var currentStatus = EnumTrialRegistrationStatus.Trial;
+            var currentStatus = EnumTrialRegistrationStatus.New;
 
             var query = _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => (x.UserId == _authContext.CurrentUserId));
 
@@ -54,6 +54,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             {
                 currentStatus = EnumTrialRegistrationStatus.Payment;
             }
+
             methodResult.Result = currentStatus;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
