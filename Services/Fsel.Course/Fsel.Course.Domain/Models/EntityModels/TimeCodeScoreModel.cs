@@ -3,12 +3,9 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
-    using Fsel.Course.Domain.Enums;
 
-    public class TimeCodeScoreModel
+    public class TimeCodeScoreModel : VideoSkillScores
     {
-        public EnumTimeCodeType Type { get; set; }
         public double Percent { get; set; }
-        public IList<SkillScores>? SkillScores { get; set; }
     }
 }

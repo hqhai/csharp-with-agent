@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -77,9 +78,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                     .ThenInclude(x => x.Exercise)
                                                     .ThenInclude(x => x!.ExerciseQuestions)
                                                     .ThenInclude(x => x.Question)
-                                                    .Include(x => x.VideoTimeCodes)
-                                                    .ThenInclude(x => x.TimeCodeExercises)
-                                                    .ThenInclude(x => x.Exercise)
                                                     .ThenInclude(x => x!.VideoTimeCodeAnswers)
                                                     .Where(x => videoDuplicateIds.Select(x => x.Id).Contains(x.Id))
                                                     .AsNoTracking()
@@ -94,15 +92,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x =>
             {
-                var videoResultAnswers = x.SelectMany(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId.HasValue && videoResultIds.Contains(x.VideoResultId.Value)));
+                var videoResultAnswers = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question)
+                .Where(x => !x!.Ungraded && x.QuestionType != EnumQuestionType.ExercisePreparation)
+                .SelectMany(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId.HasValue && videoResultIds.Contains(x.VideoResultId.Value)));
 
                 double totalQuestion = 0, totalCount = 0;
                 foreach (var item in x.ToList())
                 {
+                    var questions = item?.ExerciseQuestions.Select(x => x.Question!).Where(x => !x!.Ungraded && x.QuestionType != EnumQuestionType.ExercisePreparation).ToList();
+
                     var videoId = item?.TimeCodeExercises.Select(x => x.VideoTimeCode!.VideoId).FirstOrDefault();
                     var numberOfDuplicate = videoDuplicateIds.FirstOrDefault(vid => vid.Id == videoId)?.NumberOfDuplicate ?? default;
-                    totalQuestion += (item?.ExerciseQuestions.Select(x => x.Question).Count() ?? default) * numberOfDuplicate;
-                    totalCount += (item?.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal) ?? default) * numberOfDuplicate;
+                    totalQuestion += (questions?.Count ?? default) * numberOfDuplicate;
+                    totalCount += (questions?.Sum(x => x!.CorrectTotal) ?? default) * numberOfDuplicate;
                 }
 
                 return new SkillScores

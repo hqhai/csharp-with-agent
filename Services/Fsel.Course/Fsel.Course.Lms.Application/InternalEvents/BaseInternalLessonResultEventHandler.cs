@@ -93,7 +93,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 skillScores = skillScores.Union(skillScoreClassForums).ToList();
             }
-            List<SkillScores> groupedSkillScores = skillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
+            List<SkillScores> groupedSkillScores = skillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).OrderBy(x => x.Skill).ToList();
             var correctCounts = new List<double> { correctVideo, correctHomeWork, correctClassForum };
             var correctTotals = new List<double> { totalVideo, totalHomeWork, totalClassForum };
             var percents = new List<double> { percentVideo * PercentOccupyVideo, percentHomeWork * PercentOccupyHomeWork, percentClassForum * PercentOccupyClassForum };
