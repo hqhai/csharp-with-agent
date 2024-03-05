@@ -90,9 +90,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                     .ThenInclude(x => x.Exercise)
                                                     .ThenInclude(x => x!.ExerciseQuestions)
                                                     .ThenInclude(x => x.Question)
-                                                    .Include(x => x.VideoTimeCodes)
-                                                    .ThenInclude(x => x.TimeCodeExercises)
-                                                    .ThenInclude(x => x.Exercise)
                                                     .ThenInclude(x => x!.VideoTimeCodeAnswers)
                                                     .Where(x => videoIds.Contains(x.Id))
                                                     .AsNoTracking()
@@ -107,16 +104,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x =>
             {
-                var videoResultAnswers = x.SelectMany(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId.HasValue && videoResultIds.Contains(x.VideoResultId.Value)));
+                var questions = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Where(x => !x!.Ungraded && x.QuestionType != EnumQuestionType.ExercisePreparation);
+
+                var videoResultAnswers = questions.SelectMany(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId.HasValue && videoResultIds.Contains(x.VideoResultId.Value)));
                 return new SkillScores
                 {
                     Skill = x.Key,
                     CountQuestion = videoResultAnswers.Count(),
-                    TotalQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
+                    TotalQuestion = questions.Count(),
                     CorrectCount = videoResultAnswers.Sum(x => x.CorrectCount),
-                    TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                    TotalCount = questions.Sum(x => x!.CorrectTotal),
                 };
             }).ToList();
+
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CountQuestion = overallScoreReport.SkillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = overallScoreReport.SkillScores.Sum(x => x.TotalQuestion);
