@@ -25,6 +25,10 @@ namespace Fsel.Ordering.Infrastructure.Configs
                .HasConversion(
                    v => v.ToString(),
                    v => v.EnumParse<EnumOrderTransactionType>());
+            builder.HasOne(a => a.Order)
+                  .WithMany(b => b.OrderTransactions)
+                  .HasForeignKey(b => b.OrderId)
+                  .OnDelete(DeleteBehavior.ClientCascade);
         }
     }
 }

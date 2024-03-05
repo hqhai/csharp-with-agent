@@ -4,6 +4,6 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumOrderTransactionType
     {
-        UrBox, Payoo
+        UrBox, Payoo, AppStore, GooglePlay, BankTransfer
     }
 }

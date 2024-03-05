@@ -211,8 +211,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     {
                         OrderId = createOrderResult.Content!.Result!.Id,
                         OrderStatus = EnumOrderStatus.Payment,
-                        PackageId = package.Id,
                     });
+
                     if (!updateStatusOrderResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(updateStatusOrderResult.Error);

@@ -11,6 +11,7 @@ namespace Fsel.Storage.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
     using Fsel.Storage.Domain.Models.CommandModels;
+    using Fsel.Storage.Domain.Enums;
 
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/video")]
@@ -30,9 +31,9 @@ namespace Fsel.Storage.Api.Controllers
         [HttpPost("url-resolutions")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UploadResolutions([FromBody] UrlRequestModel request)
+        public async Task<IActionResult> UploadResolutions([FromBody] UrlResolutionRequestModel request)
         {
-            var result = await _amazonS3Service.UploadResolutions(request?.Url ?? string.Empty);
+            var result = await _amazonS3Service.UploadResolutions(request?.BucketType, request?.Url ?? string.Empty);
             return result.GetActionResult();
         }
 
@@ -45,9 +46,9 @@ namespace Fsel.Storage.Api.Controllers
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UploadResolutions(IFormFile file)
+        public async Task<IActionResult> UploadResolutions([FromQuery] EnumBucketType? bucketType, IFormFile file)
         {
-            var result = await _amazonS3Service.UploadResolutions(file);
+            var result = await _amazonS3Service.UploadResolutions(bucketType, file);
             return result.GetActionResult();
         }
     }

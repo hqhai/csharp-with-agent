@@ -30,7 +30,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ClassId")
@@ -41,7 +40,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Country")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("CourseId")
@@ -109,7 +107,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
@@ -221,6 +218,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OrderId");
+
                     b.ToTable("OrderTransactions");
                 });
 
@@ -298,6 +297,47 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Packages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
+                            Code = "BASIC",
+                            CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DescriptionStr = "",
+                            IsDeleted = false,
+                            MonthNumber = 3,
+                            Name = "Fsel_3_Months",
+                            Price = 3000000m
+                        },
+                        new
+                        {
+                            Id = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
+                            Code = "BASIC",
+                            CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DescriptionStr = "",
+                            IsDeleted = false,
+                            MonthNumber = 6,
+                            Name = "Fsel_6_Months",
+                            Price = 5000000m
+                        },
+                        new
+                        {
+                            Id = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
+                            Code = "BASIC",
+                            CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DescriptionStr = "",
+                            IsDeleted = false,
+                            MonthNumber = 12,
+                            Name = "Fsel_12_Months",
+                            Price = 8000000m
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.UserReferral", b =>
@@ -595,6 +635,16 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Navigation("Package");
                 });
 
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.OrderTransaction", b =>
+                {
+                    b.HasOne("Fsel.Ordering.Domain.Entities.Order", "Order")
+                        .WithMany("OrderTransactions")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.ClientCascade);
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.UserVoucher", b =>
                 {
                     b.HasOne("Fsel.Ordering.Domain.Entities.Voucher", "Voucher")
@@ -623,6 +673,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Navigation("Package");
 
                     b.Navigation("Voucher");
+                });
+
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.Order", b =>
+                {
+                    b.Navigation("OrderTransactions");
                 });
 
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.Package", b =>

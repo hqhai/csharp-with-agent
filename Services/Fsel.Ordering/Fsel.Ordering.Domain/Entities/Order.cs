@@ -30,19 +30,16 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// SDT Người dùng
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? PhoneNumber { get; set; }
 
         /// <summary>
         /// Quốc gia
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Country { get; set; }
 
         /// <summary>
         /// Địa chỉ
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Address { get; set; }
 
         /// <summary>
@@ -104,5 +101,6 @@ namespace Fsel.Ordering.Domain.Entities
         public Guid? PackageId { get; set; }
         public Guid UserId { get; set; }
         public Guid ClassId { get; set; }
+        public ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
     }
 }

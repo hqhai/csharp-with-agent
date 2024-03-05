@@ -8,7 +8,7 @@ namespace Fsel.Course.Lms.Application.Services.AiService
 
     public interface IOpenAIService
     {
-        [Post("/v1/chat/completions")]
+        [Post("/chat/completions")]
         Task<IApiResponse<AIResponseModel>> SubmitAICompletionsAsync([Body] RequestAIModel command);
     }
 }
