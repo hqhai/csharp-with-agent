@@ -194,7 +194,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                         for (var i = 0; i < lessonResultsDone.Count; i++)
                         {
-                            unitName += string.Format(CultureInfo.InvariantCulture, HtmlSetting.LessonName, lessonResultsDone[i].Lesson?.UnitLessons.FirstOrDefault(x => x.UnitId == unit.UnitId)?.DisplayOrder, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
+                            unitName += string.Format(CultureInfo.InvariantCulture, lessonNameHtml, lessonResultsDone[i].Lesson?.UnitLessons.FirstOrDefault(x => x.UnitId == unit.UnitId)?.DisplayOrder, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
 
                             foreach (var ls in lessonResultsDone[i].SkillScores!.OrderBy(x => x.Skill))
                             {
