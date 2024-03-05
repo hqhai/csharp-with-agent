@@ -20,12 +20,14 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     public class GetPostDetailQueryQueryHandler : IRequestHandler<GetPostDetailQuery, MethodResult<PostModel>>
     {
         private readonly IPostRepository _postRepository;
+        private readonly ICommentRepository _commentRepository;
         private readonly IMapper _mapper;
 
-        public GetPostDetailQueryQueryHandler(IMapper mapper, IPostRepository postRepository)
+        public GetPostDetailQueryQueryHandler(IMapper mapper, IPostRepository postRepository, ICommentRepository commentRepository)
         {
             _mapper = mapper;
             _postRepository = postRepository;
+            _commentRepository = commentRepository;
         }
 
         public async Task<MethodResult<PostModel>> Handle(GetPostDetailQuery request, CancellationToken cancellationToken)
@@ -35,13 +37,18 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
 
             var posts = await _postRepository.GetIncludeByIdAsync(request.PostId);
 
+            var comments = _commentRepository.Queryable.Where(x => x.ObjectId == request.PostId);
+
+            var postResult = _mapper.Map<PostModel>(posts);
+            postResult.Comments = _mapper.Map<List<CommentModel>>(comments);
+
             if (posts == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(posts));
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<PostModel>(posts);
+            methodResult.Result = postResult;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
