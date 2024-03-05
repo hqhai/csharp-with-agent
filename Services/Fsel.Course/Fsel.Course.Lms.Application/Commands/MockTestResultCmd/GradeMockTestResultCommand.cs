@@ -72,13 +72,15 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.MockTestScores));
                 return methodResult;
             }
+
             request.MockTestScores = request.MockTestScores.OrderBy(x => x.Criteria).ToList();
             if (request.MockTestScores.GroupBy(x => x.Criteria).Any(x => x.Count() > 1))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(MockTestScore.Criteria));
                 return methodResult;
             }
-            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Include(x => x.MockTest).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
+
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
@@ -159,6 +161,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 _sectionGroupResultRepository.UpdateList(sectionGroupResults);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
+                await SendNotification(mockTestResult, cancellationToken);
                 _mockTestResultRepository.Update(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
@@ -174,17 +177,47 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
         {
             if (mockTestResult != null)
             {
+                bool isSkillMockTest = mockTestResult.MockTest!.MockTestType == EnumMockTestType.SkillMockTest;
                 NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
                 {
                     ObjectId = mockTestResult!.Id,
                     UserIds = new List<Guid> { mockTestResult.StudentId },
                     Type = EnumNotificationType.LinkPage,
-                    Content = EnumNotificationContent.MockTest,
+                    Content = isSkillMockTest ? EnumNotificationContent.MockTest : EnumNotificationContent.FullMockTest,
                     PlatformCode = EnumPlatformCode.LMS,
                     ParamsMessage = new List<object> { mockTestResult.MockTest!.Name ?? string.Empty },
+                    ParamsLink = BuildParamOfMockTestType(mockTestResult, isSkillMockTest),
                 };
                 await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
             }
+        }
+
+        private static List<object> BuildParamOfMockTestType(MockTestResult mockTestResult, bool isSkillMockTest)
+        {
+            var result = new List<object>();
+            string sectionGroupId = mockTestResult?.SectionGroupResults.Select(x => x.SectionGroupId).Single().ToString() ?? string.Empty;
+            string mockTestResulId = mockTestResult?.Id.ToString() ?? string.Empty;
+            string mockTestId = mockTestResult?.MockTest?.Id.ToString() ?? string.Empty;
+            string courseId = mockTestResult?.CourseId.ToString() ?? string.Empty;
+            string unitId = mockTestResult?.UnitId.ToString() ?? string.Empty;
+
+            if (isSkillMockTest)
+            {
+                result.AddRange(new object[] {
+                        sectionGroupId,
+                        mockTestResulId,
+                        courseId,
+                        unitId
+                });
+            }
+            {
+                result.AddRange(new object[] {
+                        mockTestId,
+                        courseId
+                });
+            }
+
+            return result;
         }
     }
 }

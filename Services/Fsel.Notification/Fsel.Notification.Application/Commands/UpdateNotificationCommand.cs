@@ -51,7 +51,17 @@ namespace Fsel.Notification.Application.Commands
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<NotificationMessageModel> methodResult = new MethodResult<NotificationMessageModel>();
-            NotificationMessage notificationNew = _mapper.Map<NotificationMessage>(request);
+            var isExistsNotification = _notificationsRepository.Queryable.Any(x => x.ObjectId == request.ObjectId);
+            NotificationMessage notificationNew = new NotificationMessage();
+            if (isExistsNotification)
+            {
+                var notificationQuery = _notificationsRepository.Queryable.FirstOrDefault(x => x.ObjectId == request.ObjectId)!;
+                notificationNew = _mapper.Map(request, notificationQuery);
+            }
+            else
+            {
+                notificationNew = _mapper.Map<NotificationMessage>(request);
+            }
 
             #region Validation
             // check null data
@@ -64,8 +74,6 @@ namespace Fsel.Notification.Application.Commands
             #endregion Validation
 
             //list user 
-            List<Guid> userIds = await FilterListUser(request, cancellationToken);
-            List<NotificationMessage> listNotificationMessage = new List<NotificationMessage>();
             string avatarPath = string.Empty;
 
             if (request.SenderId.HasValue)
@@ -74,31 +82,26 @@ namespace Fsel.Notification.Application.Commands
                 avatarPath = senderInfo?.Content?.Result?.AvatarPath ?? string.Empty;
             }
 
-            var listNotificationUpdate = _notificationsRepository.Queryable.Where(x => userIds.Contains(x.UserId!.Value)).ToList();
-            if (userIds.Count > 0)
-            {
-                foreach (var item in listNotificationUpdate)
-                {
-                    item.Message = request.Message;
-                    listNotificationMessage.Add(item);
-                }
-            }
 
             #region Handler
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
-                //Save into Database
-                if (listNotificationMessage.Count > 0)
+                if (!isExistsNotification)
                 {
-                    _notificationsRepository.UpdateList(listNotificationMessage);
+                    _notificationsRepository.Add(notificationNew);
+                }
+                else
+                {
+                    _notificationsRepository.Update(notificationNew);
                 }
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                List<Guid> listUserReceive = new List<Guid>() { request.UserId };
                 //Push notification to onesignal
-                await PushToOneSignal(notificationType, notificationNew, userIds, avatarPath, cancellationToken);
+                await PushToOneSignal(notificationType, notificationNew, listUserReceive, avatarPath, cancellationToken);
 
                 //Push notification to websocket
-                await PushToWebSocket(notificationNew, userIds, avatarPath, cancellationToken);
+                await PushToWebSocket(notificationNew, listUserReceive, avatarPath, cancellationToken);
 
                 //Return Value
                 methodResult.Result = _mapper.Map<NotificationMessageModel>(notificationNew);
@@ -112,21 +115,7 @@ namespace Fsel.Notification.Application.Commands
         }
 
 
-        /// <summary>
-        /// Filter List User nhận thông báo
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        private async Task<List<Guid>> FilterListUser(UpdateNotificationCommand request, CancellationToken cancellationToken)
-        {
-            var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId).ToListAsync(cancellationToken);
 
-            GetUsersByRoleQueryModel roleQuery = new GetUsersByRoleQueryModel();
-            List<Guid> listUserIds = request.UserIds?.ToList() ?? new List<Guid>();
-
-            return listUserIds = listUserIds.Except(listUserOffNotification).ToList();
-        }
 
 
         /// <summary>

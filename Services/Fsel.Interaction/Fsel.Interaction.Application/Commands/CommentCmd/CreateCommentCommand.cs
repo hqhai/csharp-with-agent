@@ -161,7 +161,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         var commentOwner = await _commentRepository.GetByIdAsync(request.ObjectId).ConfigureAwait(false);
 
                         //Không thông báo khi trả lời bình luận của chính mình
-                        if (commentOwner == null && commentOwner?.CreatedUserId == _authContext.CurrentUserId)
+                        if (commentOwner == null || commentOwner?.CreatedUserId == _authContext.CurrentUserId)
                         {
                             break;
                         }

@@ -21,7 +21,7 @@ namespace Fsel.Identity.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, new NotificationSendingQueueModel
+            await _queueProvider.Publish(QueueSettings.UserQueue.NameQueue.SendNotification, new NotificationSendingQueueModel
             {
                 UserIds = model.UserIds,
                 Type = model.Type,

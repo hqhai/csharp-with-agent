@@ -43,7 +43,8 @@ namespace Fsel.Notification.Application.Queues.Consumers
                         Message = message,
                         Link = link,
                         Roles = dataReceipt.Roles,
-                        NotificationTypeId = notificationType?.Id ?? default
+                        NotificationTypeId = notificationType?.Id ?? default,
+                        SenderId = dataReceipt.SenderId ?? default,
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
                 }
@@ -51,11 +52,12 @@ namespace Fsel.Notification.Application.Queues.Consumers
                 {
                     UpdateNotificationCommand model = new UpdateNotificationCommand()
                     {
-                        UserIds = dataReceipt.UserIds ?? default,
+                        UserId = dataReceipt.UserIds!.Single(),
                         ObjectId = dataReceipt.ObjectId,
                         Message = message,
                         Link = link,
-                        NotificationTypeId = notificationType?.Id ?? default
+                        NotificationTypeId = notificationType?.Id ?? default,
+                        SenderId = dataReceipt.SenderId ?? default
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
                 }

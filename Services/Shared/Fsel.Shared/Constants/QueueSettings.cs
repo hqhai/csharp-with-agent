@@ -24,6 +24,7 @@ namespace Fsel.Shared.Constants
                 public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
                 public const string UpdateStatusTrialStudent = $"{KeyQueue}_UpdateStatusTrialStudent";
                 public const string SetTimeToSendReviewFsel = $"{KeyQueue}_SetTimeToSendReviewFsel";
+                public const string SendNotification = $"{KeyQueue}_SendNotification";
             }
         }
 

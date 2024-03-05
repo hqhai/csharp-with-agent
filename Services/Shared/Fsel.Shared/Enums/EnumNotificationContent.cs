@@ -18,10 +18,12 @@ namespace Fsel.Shared.Enums
         AIFeedBack,
         ChangeClassLiveTeacher,
         MockTest,
+        FullMockTest,
         ReviewFsel,
         DiscussionBoardInActive,
         LeaderBoard,
         ApprovePostClassForum,
-        RejectApprovalPostClassForum
+        RejectApprovalPostClassForum,
+        NoticePayment
     }
 }
