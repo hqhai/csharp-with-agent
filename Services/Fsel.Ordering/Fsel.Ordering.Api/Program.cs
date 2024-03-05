@@ -3,6 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Ordering.Application.Queues.Publishers;
 using Fsel.Ordering.Application.Services.CourseService;
+using Fsel.Ordering.Application.Services.InAppPurchase;
 using Fsel.Ordering.Application.Services.PayooService;
 using Fsel.Ordering.Application.Services.SystemService;
 using Fsel.Ordering.Application.Services.TrainingService;
@@ -33,6 +34,8 @@ builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
 builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<VnPayLibrary>();
 
