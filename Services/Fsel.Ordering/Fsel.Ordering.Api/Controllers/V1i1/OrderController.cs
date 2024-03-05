@@ -61,12 +61,11 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [HttpPost("app-store")]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> AppStore([FromBody] AppleNotification appleNotification)
+        public IActionResult AppStore([FromBody] AppleNotification appleNotification)
         {
             try
             {
                 _notificationProcessor.Process(appleNotification);
-
                 return Ok();
             }
             catch
