@@ -9,6 +9,20 @@ namespace Fsel.Shared.Helpers
 
     public static class StringHelper
     {
+        public static string RemoveWhitespace(string input)
+        {
+            StringBuilder sb = new StringBuilder();
+            using (StringReader sr = new StringReader(input))
+            {
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    sb.Append(line.Trim());
+                }
+            }
+            return sb.ToString();
+        }
+
         public static string RemoveHTMLTags(string html)
         {
             return Regex.Replace(html, "<.*?>", string.Empty);

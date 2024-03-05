@@ -3,17 +3,17 @@
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
+using Fsel.Core.Entities;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.Configs;
 using Fsel.Shared.Constants;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, IdentityUserClaim<Guid>, IdentityRoleClaim<Guid>, UserToken>
+    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserToken>
     {
         public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -44,6 +44,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserPlatformEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudenrRankingEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentFocusTimeEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentTrialRegistrationEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
@@ -65,7 +66,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserPlatform> UserPlatforms { get; set; }
         public DbSet<StudentRanking> StudentRankings { get; set; }
         public DbSet<StudentFocusTime> StudentFocusTimes { get; set; }
-
+        public DbSet<StudentTrialRegistration> StudentTrialRegistrations { get; set; }
 
         #endregion Db Set
 

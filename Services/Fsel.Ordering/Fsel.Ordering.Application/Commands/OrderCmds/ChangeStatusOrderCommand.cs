@@ -10,8 +10,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.TrainingService;
+    using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Application.Services.UserService;
-    using Fsel.Ordering.Application.Services.UserService.Models;
+    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
@@ -19,6 +20,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class ChangeStatusOrderCommand : ChangeStatusOrderCommandModel, IRequest<MethodResult<bool>>
     {
@@ -33,6 +35,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly ILmsCourseService _lmsCourseService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly AuthContext _authContext;
+        private readonly ILmsCourseService _courseService;
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -40,7 +43,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , IPackageRepository packageRepository
             , ILmsCourseService lmsCourseService
             , NotificationMessagePublisher notificationMessagePublisher
-            , AuthContext authContext)
+            , AuthContext authContext,
+ILmsCourseService courseService)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -49,6 +53,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _lmsCourseService = lmsCourseService;
             _notificationMessagePublisher = notificationMessagePublisher;
             _authContext = authContext;
+            _courseService = courseService;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -56,7 +61,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var order = await _orderRepository.GetByIdAsync(request.OrderId);
+            var order = await _orderRepository.Queryable.Include(ot => ot.OrderTransactions).FirstOrDefaultAsync(p => p.Id == request.OrderId, cancellationToken);
             if (order == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(order));
@@ -67,17 +72,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.OrderStatusIsNotNew));
                 return methodResult;
             }
+
             var student = await _userService.GetStudentByUserIdAsync(order.UserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
-
-            var classes = await _trainingService.GetNewClassByStudentId(student.Content!.Result!.Id);
-            if (!classes.IsSuccessStatusCode)
-            {
-                methodResult.AddError(classes.Error);
                 return methodResult;
             }
 
@@ -87,7 +86,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddError(courseResults.Error);
                 return methodResult;
             }
-            var package = await _packageRepository.GetByIdAsync(order.PackageId);
+            var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
             var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
             var course = courseResults.Content?.Result?.FirstOrDefault();
             await _orderRepository.ExecuteTransactionAsync(async () =>
@@ -103,20 +102,19 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
-                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId, NumberOfShield = numberOfShield, CourseLevel = course?.CourseLevel });
-                    if (!updateStudentByClass.IsSuccessStatusCode)
+                    var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
+                    if (!addStudentIntoClassResult.IsSuccessStatusCode)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
+                        methodResult.AddError(addStudentIntoClassResult.Error);
                         return methodResult;
                     }
 
-                    var updateStudentStatusInClass = await _trainingService.UpdateStatusStudentInClass(student.Content!.Result!.Id);
-                    if (!updateStudentStatusInClass.IsSuccessStatusCode)
+                    var updateNextUnitResult = await _courseService.UpdateNextUnit();
+                    if (!updateNextUnitResult.IsSuccessStatusCode)
                     {
-                        methodResult.AddError(updateStudentStatusInClass.Error);
+                        methodResult.AddError(updateNextUnitResult.Error);
                         return methodResult;
                     }
-
                     await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
                         UserIds = new List<Guid>() { order.UserId },
@@ -128,6 +126,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         PlatformCode = EnumPlatformCode.LMS
                     }, cancellationToken);
                 }
+                order.OrderTransactions.Add(new OrderTransaction()
+                {
+                    Status = request.OrderStatus == EnumOrderStatus.Payment ? EnumOrderTransactionStatus.Success : EnumOrderTransactionStatus.Fail,
+                    ResponseBody = request.Receipt,
+                    Type = request.Type == EnumOrderTransactionType.AppStore ? EnumOrderTransactionType.AppStore : (request.Type == EnumOrderTransactionType.GooglePlay ? EnumOrderTransactionType.GooglePlay : EnumOrderTransactionType.BankTransfer)
+                });
+                ;
                 order.Status = request.OrderStatus;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

@@ -15,7 +15,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public int DisplayLevel { get; set; }
         public EnumSurveyQuestion Type { get; set; }
         public object? Answers { get; set; }
-        public bool IsPilot { get; set; }
         public IList<CustomerSurvey>? CustomerSurveys { get; set; }
     }
 }

@@ -29,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMediator _mediator;
+        private static int CorrecTotalWriting = 36;
 
         public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
@@ -105,12 +106,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             var skillScore = sectionGroupResult!.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
 
-            var skillScores = sectionGroupResult!.SkillScores?.ToList();
+            var skillScores = sectionGroupResult!.SkillScores?.ToList() ?? new List<SkillScores>();
 
-            if (skillScores == null)
-            {
-                skillScores = new List<SkillScores>();
-            }
             if (skillScore == null)
             {
                 skillScore = new SkillScores
@@ -122,10 +119,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     TotalQuestion = 2,
                     CountQuestion = 2
                 };
-                skillScores!.Add(skillScore);
+                skillScores.Add(skillScore);
             }
             else
             {
+                skillScore = skillScores.Single();
                 int correcCount = (int)CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore);
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
                 skillScore!.CorrectCount = correcCount;
@@ -136,7 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 {
                     mockTestResult.SkillScores = skillScores;
                     mockTestResult.CorrectCount = correcCount;
-                    mockTestResult.CorrectCount = 36;
+                    mockTestResult.CorrectTotal = CorrecTotalWriting;
                 }
             }
 
@@ -156,7 +154,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 if (checkSkillMockTest)
                 {
                     _mockTestResultRepository.Update(mockTestResult);
-                    await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
 
