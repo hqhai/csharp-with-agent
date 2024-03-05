@@ -31,7 +31,7 @@ namespace Fsel.Storage.Api.Controllers
         [HttpPost("url-resolutions")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UploadResolutions([FromBody] UrlRequestModel request)
+        public async Task<IActionResult> UploadResolutions([FromBody] UrlResolutionRequestModel request)
         {
             var result = await _amazonS3Service.UploadResolutions(request?.BucketType, request?.Url ?? string.Empty);
             return result.GetActionResult();
