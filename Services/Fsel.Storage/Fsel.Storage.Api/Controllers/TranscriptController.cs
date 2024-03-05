@@ -7,7 +7,6 @@ using Fsel.Core.Base.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Asp.Versioning;
 using Fsel.Shared.Constants;
-using Fsel.Storage.Domain.Models.CommandModels;
 
 namespace Fsel.Storage.Api.Controllers
 {
@@ -31,10 +30,10 @@ namespace Fsel.Storage.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Post([FromBody] UrlRequestModel request)
+        public async Task<IActionResult> Post(string url)
         {
             MethodResult<string> result = new MethodResult<string>();
-            result.Result = await _deepgramProvider.GetTranscriptionAsync(request?.Url ?? string.Empty);
+            result.Result = await _deepgramProvider.GetTranscriptionAsync(url ?? string.Empty);
             return result.GetActionResult();
         }
 
@@ -44,10 +43,10 @@ namespace Fsel.Storage.Api.Controllers
         [HttpPost("speech")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> PostSpeech([FromBody] UrlRequestModel request)
+        public async Task<IActionResult> PostSpeech(string url)
         {
             MethodResult<string> result = new MethodResult<string>();
-            result.Result = await _cognitiveProvider.GetTranscriptionAsync(request?.Url ?? string.Empty);
+            result.Result = await _cognitiveProvider.GetTranscriptionAsync(url ?? string.Empty);
             return result.GetActionResult();
         }
     }
