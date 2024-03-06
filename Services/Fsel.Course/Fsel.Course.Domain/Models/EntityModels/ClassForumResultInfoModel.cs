@@ -9,7 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? Content { get; set; }
         public string? WordContent { get; set; }
-        public int WordCount { get; set; }
+        public int? WordCount { get; set; }
         public string? GradingAlFeedback { get; set; }
         public Guid? GradingTeacherId { get; set; }
         public EnumClassForumResultStatus Status { get; set; }
