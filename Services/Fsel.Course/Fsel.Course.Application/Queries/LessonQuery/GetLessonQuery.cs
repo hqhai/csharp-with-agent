@@ -49,7 +49,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             lessonModel.ExtraPracticeIds = lesson.LessonExtraPractices.OrderBy(x => x!.CreatedDate).Select(x => x.ExtracPraticeId).ToList();
             lessonModel.ClassForum = _mapper.Map<ClassForumModel>(lesson.ClassForum);
             lessonModel.IsActive = lesson.UnitLessons.Any();
-            lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(homeWorks.OrderBy(x => x.LessonHomeWorks.Select(x => x.CreatedDate).FirstOrDefault()));
+            lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(homeWorks.OrderBy(x => x.LessonHomeWorks.OrderBy(x => x.CreatedDate).ThenByDescending(x => x.UpdatedDate).FirstOrDefault()));
             methodResult.Result = lessonModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
