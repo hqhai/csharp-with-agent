@@ -181,12 +181,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                     LessonId = lesson.Id,
                     HomeWorkId = x
                 }).ToList();
-
-                if (lessonHomeWorks != null && lessonHomeWorks.Any())
-                {
-                    await _lessonHomeWorkRepository.DeleteListAsync(lessonHomeWorks);
-                    await _lessonHomeWorkRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
             }
             else if (lessonHomeWorks.Any())
             {
@@ -201,6 +195,12 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (videoIds != null && videoIds.Any())
             {
                 var lessonVideoRemotes = lessonVideos.Where(x => !videoIds.Contains(x.VideoId)).ToList();
+
+                if (lessonVideoRemotes != null && lessonVideoRemotes.Any())
+                {
+                    await _lessonVideoRepository.DeleteListAsync(lessonVideoRemotes);
+                    await _lessonVideoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
                 lessonVideos.AddRange(videoIds.Where(x => !lessonVideos.Any(y => y.VideoId == x)).Select(x => new LessonVideo
                 {
                     LessonId = lesson.Id,
@@ -208,12 +208,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 }).ToList());
 
                 lesson.LessonVideos = lessonVideos;
-
-                if (lessonVideoRemotes != null && lessonVideoRemotes.Any())
-                {
-                    await _lessonVideoRepository.DeleteListAsync(lessonVideoRemotes);
-                    await _lessonVideoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
             }
             else if (lessonVideos.Any())
             {
@@ -230,20 +224,17 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 if (lessonInstructions != null && lessonInstructions.Any())
                 {
-                    foreach (var lessonInstruction in lessonInstructions)
+                    foreach (var lessonInstruction in lessonInstructions.Distinct())
                     {
-                        var request = requestLessonInstructions.FirstOrDefault(x => x.CourseSkill == lessonInstruction.CourseSkill);
+                        var request = requestLessonInstructions.FirstOrDefault(x => x.Id == lessonInstruction.Id);
                         _mapper.Map(request, lessonInstruction);
                     }
-                    lessonInstructions = lessonInstructions.OrderBy(x => x.CourseSkill).ToList();
-                    _lessonInstructionRepository.UpdateList(lessonInstructions);
+                    lesson.LessonInstructions = lessonInstructions.OrderBy(x => x.CourseSkill).ToList();
                 }
                 else
                 {
-                    lessonInstructions = _mapper.Map<List<LessonInstruction>>(requestLessonInstructions.OrderBy(x => x.CourseSkill).ToList());
-                    await _lessonInstructionRepository.AddList(lessonInstructions);
+                    lesson.LessonInstructions = _mapper.Map<List<LessonInstruction>>(requestLessonInstructions.OrderBy(x => x.CourseSkill).ToList());
                 }
-                await _lessonInstructionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }
