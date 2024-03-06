@@ -136,7 +136,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             finalStudentProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
             if (skillScores.Any())
             {
-                finalStudentProgress.CorrectPercent = NumberHelper.ConvertRound(skillScores.Average(x => x.Percent));
+                finalStudentProgress.CorrectPercent = NumberHelper.ConvertPercentDouble(skillScores.Sum(x => x.CorrectCount) / skillScores.Sum(x => x.TotalCount));
                 finalStudentProgress.ProcessPercent = NumberHelper.ConvertPercentDouble((double)skillScores.Average(x => x.CountQuestion / x.TotalQuestion));
             }
             finalStudentProgress.TotalSkill = totalSkill;

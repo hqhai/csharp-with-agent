@@ -34,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+        private const int TotalSkillFullMockTest = 4;
 
         public GetOverallScoreByMockTestQueryHandler(AuthContext authContext
             , ICourseRepository courseRepository
@@ -62,9 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var studentId = studentResult?.Content?.Result?.Id;
-            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests)
-                                                            .ThenInclude(x => x.MockTest)
-                                                            .ThenInclude(x => x!.MockTestResults.Where(x => x.StudentId == studentId && !x.UnitId.HasValue))
+            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
                                                             .Where(x => x.Id == request.CourseId)
                                                             .AsNoTracking()
                                                             .FirstOrDefaultAsync(cancellationToken);
@@ -78,6 +77,15 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotTypeIElts));
                 return methodResult;
             }
+            var mockTestIds = course.CourseUnitMockTests.Where(x => x.MockTestId.HasValue).Select(x => x.MockTestId!.Value).ToList();
+
+            var mockTests = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.CourseId == course.Id && x.StudentId == studentId))
+                                                                    .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
+                                                               .Include(x => x.MockTestResults.Where(x => x.CourseId == course.Id && x.StudentId == studentId))
+                                                                    .ThenInclude(x => x.MockTestScores)
+                                                               .Where(x => mockTestIds.Contains(x.Id))
+                                                               .ToListAsync(cancellationToken);
+
             var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
             var units = await GetUnitsAsync(courseUnitMockTests);
             var courseMockTests = courseUnitMockTests.Where(x => x.MockTestId.HasValue).ToList();
@@ -85,9 +93,10 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             foreach (var item in courseMockTests)
             {
                 mockTestOverallScores.Add(await GetOverallScoreMockTestByUnit(item, courseUnitMockTests, units, studentId));
-                if (item.MockTest != null)
+                if (item.MockTestId.HasValue)
                 {
-                    mockTestOverallScores.Add(GetOverallScoreReport(item.MockTest));
+                    var mockTest = mockTests.FirstOrDefault(x => x.Id == item.MockTestId.Value);
+                    mockTestOverallScores.Add(GetOverallScoreReport(mockTest));
                 }
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -95,9 +104,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return methodResult;
         }
 
-        private OverallScoreReportByMockTestModel GetOverallScoreReport(MockTest mockTest)
+        private OverallScoreReportByMockTestModel GetOverallScoreReport(MockTest? mockTest)
         {
-            return new OverallScoreReportByMockTestModel
+            if (mockTest == null)
+            {
+                return new OverallScoreReportByMockTestModel();
+            }
+            var mockTestDto = new OverallScoreReportByMockTestModel
             {
                 Id = mockTest.Id,
                 Name = mockTest.Name,
@@ -106,11 +119,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 {
                     Id = x.Id,
                     Percent = x.Percent,
+                    Score = NumberHelper.RoundNumberDouble(x.SkillScores?.Average(x => x.Scores) ?? default),
                     SkillScores = GetTestSkillScores(x, mockTest),
                     Status = x.Status
                 }).ToList(),
-                Percent = mockTest.MockTestResults.FirstOrDefault()?.Percent ?? default,
+                Percent = NumberHelper.GetPercent(mockTest.MockTestResults.SelectMany(x => x.SectionGroupResults).Count(x => x.Status == EnumResultStatus.Done), TotalSkillFullMockTest),
             };
+            return mockTestDto;
         }
 
         private async Task<IList<Domain.Entities.Unit>> GetUnitsAsync(IList<CourseUnitMockTest>? courseUnitMockTests)
@@ -123,8 +138,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private static (IList<Guid>, IList<CourseUnitMockTest>) GetMockTestIds(CourseUnitMockTest? courseUnitMockTest, IList<CourseUnitMockTest> courseUnitMockTests, IList<Domain.Entities.Unit> units)
         {
             ArgumentNullException.ThrowIfNull(courseUnitMockTest);
-            var displayOrder = courseUnitMockTests[courseUnitMockTests.IndexOf(courseUnitMockTest)].DisplayOrder;
-            var courseUnits = courseUnitMockTests.Where(x => x.DisplayOrder < displayOrder && x.UnitId.HasValue).ToList();
+            var courseMockTests = courseUnitMockTests.Where(x => x.MockTestId.HasValue).OrderBy(x => x.DisplayOrder).ToList();
+
+            var displayOrder = courseUnitMockTests[courseUnitMockTests.IndexOf(courseUnitMockTest)]?.DisplayOrder;
+
+            var displayOrderPrevious = courseMockTests.IndexOf(courseUnitMockTest) > 0 ? courseMockTests[courseMockTests.IndexOf(courseUnitMockTest) - 1].DisplayOrder : default;
+
+            var courseUnits = courseUnitMockTests.Where(x => x.DisplayOrder < displayOrder && x.UnitId.HasValue && (displayOrderPrevious == 0 || x.DisplayOrder > displayOrderPrevious)).ToList();
             var unitIds = courseUnits.OrderBy(x => x.DisplayOrder).Select(x => x.UnitId!.Value).ToList();
             var unitMockTests = units.Where(x => unitIds.Contains(x.Id)).OrderBy(x => unitIds.IndexOf(x.Id)).ToList();
             return (unitMockTests.SelectMany(x => x.UnitSkillMockTests).Select(x => x.MockTestId).ToList(), courseUnits);
@@ -138,15 +158,16 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 Name = GetName(courseUnits)
             };
+            var unitIds = courseUnits.Where(x => x.UnitId.HasValue).Select(x => x.UnitId!.Value).ToList();
             if (mockTestIds.Any())
             {
                 var mockTests = await _mockTestRepository.Queryable.Include(x => x.MockTestSections)
                                                                     .ThenInclude(x => x.SectionGroup)
-                                                                    .Include(x => x.MockTestResults.Where(x => x.StudentId == studentId && x.CourseId == courseUnitMockTest.CourseId && x.UnitId.HasValue))
+                                                                    .Include(x => x.MockTestResults.Where(x => x.StudentId == studentId && x.CourseId == courseUnitMockTest.CourseId && x.UnitId.HasValue && unitIds.Contains(x.UnitId.Value)))
                                                                     .ThenInclude(x => x.MockTestScores)
                                                                     .Where(x => mockTestIds.Contains(x.Id)).ToListAsync();
                 mockTests = mockTests.OrderBy(x => mockTestIds.IndexOf(x.Id)).ToList();
-                var overallScoreReportSkills = mockTests.Select(x => GetOverallScoreReportSkill(x, studentId)).ToList();
+                var overallScoreReportSkills = mockTests.Select(x => GetOverallScoreReportSkill(x, unitIds, studentId)).ToList();
                 overallScoreReportByMockTest.Percent = NumberHelper.GetPercent(overallScoreReportSkills.Count(x => x.Status == EnumResultStatus.Done), overallScoreReportSkills.Count);
                 overallScoreReportByMockTest.OverallScoreReportSkills = overallScoreReportSkills;
                 overallScoreReportByMockTest.Status = GetStatus(overallScoreReportSkills);
@@ -171,17 +192,33 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return status;
         }
 
-        private OverallScoreReportSkillModel GetOverallScoreReportSkill(MockTest? mockTest, Guid? studentId)
+        private OverallScoreReportSkillModel GetOverallScoreReportSkill(MockTest? mockTest, IList<Guid>? unitIds, Guid? studentId)
         {
             ArgumentNullException.ThrowIfNull(mockTest);
-            var mockTestResult = mockTest.MockTestResults.FirstOrDefault(x => x.StudentId == studentId);
+            var mockTestResult = mockTest.MockTestResults.FirstOrDefault(x => unitIds != null && x.UnitId.HasValue && x.StudentId == studentId && unitIds.Contains(x.UnitId.Value));
             return new OverallScoreReportSkillModel
             {
                 Id = mockTestResult?.Id ?? null,
                 Percent = NumberHelper.ConvertPercentDouble(mockTestResult?.Status == EnumResultStatus.Done ? 1 : 0),
                 SkillScores = GetTestSkillScores(mockTestResult, mockTest),
+                Score = mockTestResult?.SkillScores?.Select(x => x.Scores).FirstOrDefault() ?? default,
                 Status = mockTestResult?.Status ?? EnumResultStatus.Unfinished,
             };
+        }
+
+        public TestSkillScores GetTestSkillScore(SkillScores? skillScores, MockTestResult? mockTestResult)
+        {
+            if (skillScores != null && mockTestResult != null)
+            {
+                var testSkillScore = _mapper.Map<TestSkillScores>(skillScores);
+                testSkillScore.Status = mockTestResult.Status;
+                if (skillScores.Skill == EnumCourseSkill.Speaking && mockTestResult.Status != EnumResultStatus.Unfinished)
+                {
+                    testSkillScore.Status = mockTestResult.MockTestScores.Any() ? EnumResultStatus.Done : EnumResultStatus.Process;
+                }
+                return testSkillScore;
+            }
+            return new TestSkillScores();
         }
 
         private IList<TestSkillScores>? GetTestSkillScores(MockTestResult? mockTestResult, MockTest mockTest)
@@ -197,21 +234,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private static TestSkillScores GetTestSkillScore(MockTest mockTest, MockTestResult? mockTestResult)
         {
             return new TestSkillScores { Skill = mockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault(), Status = mockTestResult?.Status ?? EnumResultStatus.Unfinished };
-        }
-
-        public TestSkillScores GetTestSkillScore(SkillScores? skillScores, MockTestResult? mockTestResult)
-        {
-            if (skillScores != null && mockTestResult != null)
-            {
-                var testSkillScore = _mapper.Map<TestSkillScores>(skillScores);
-                testSkillScore.Status = mockTestResult.Status;
-                if ((skillScores.Skill == EnumCourseSkill.Speaking || skillScores.Skill == EnumCourseSkill.Writing) && mockTestResult.Status != EnumResultStatus.Unfinished)
-                {
-                    testSkillScore.Status = mockTestResult.MockTestScores.Any() ? EnumResultStatus.Done : EnumResultStatus.Process;
-                }
-                return testSkillScore;
-            }
-            return new TestSkillScores();
         }
 
         private static string GetName(IList<CourseUnitMockTest> courseUnits)
