@@ -58,6 +58,10 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
                 Url = x.Url,
             });
 
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.StudentFeedBack ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+            }
             if (request.TypeOfError != null)
             {
                 query = query.Where(m => m.TypeOfError == request.TypeOfError);
