@@ -18,6 +18,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public Guid? Id { get; set; }
         public double Percent { get; set; }
+        public double Score { get; set; }
         public EnumResultStatus Status { get; set; }
         public IList<TestSkillScores>? SkillScores { get; set; }
     }
