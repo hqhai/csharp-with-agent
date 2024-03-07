@@ -2,15 +2,20 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
+    using System.Collections.Generic;
+    using System.Linq.Dynamic.Core;
+    using System.Reflection.Metadata;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -20,6 +25,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentsProgressCoursesQuery : IRequest<MethodResult<IList<CompetitionStudentProgressModel>>>
     {
         public IList<Guid>? StudentIds { get; set; }
+
+        public EnumCourseType CourseType { get; set; }
     }
 
     public class GetStudentsProgressCoursesQueryHandler : IRequestHandler<GetStudentsProgressCoursesQuery, MethodResult<IList<CompetitionStudentProgressModel>>>
@@ -31,12 +38,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
-        private const double Video_Ratio = 9;
-        private const double UnitTests_Ratio = 24;
-        private const double SkillsTests_Ratio = 18;
-        private const double HomeWork_Ratio = 14;
-        private const double ClassForum_Ratio = 20;
-        private const double FinalTest_Ratio = 15;
         private const int TotalProcess = 217; // tổng số tiến trình hiện có
 
         public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
@@ -56,6 +57,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             MethodResult<IList<CompetitionStudentProgressModel>> methodResult = new MethodResult<IList<CompetitionStudentProgressModel>>();
             IList<CompetitionStudentProgressModel> courseProgress = new List<CompetitionStudentProgressModel>();
 
+            double videoLessonRatio = request.CourseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.VideoRatio : ValueSettings.IeltsStudentResultRatio.VideoRatio;
+            double homeWorkRatio = request.CourseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.HomeWorkRatio : ValueSettings.IeltsStudentResultRatio.HomeWorkRatio;
+            double classForumRatio = request.CourseType == EnumCourseType.Academic ? ValueSettings.AcademicStudentResultRatio.ClassForumRatio : ValueSettings.IeltsStudentResultRatio.ClassForumRatio;
+
             var studentIds = request.StudentIds;
 
             #region validate
@@ -65,7 +70,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             #endregion
-
 
             #region Progress
             var classStudentResults = await _trainingService.GetListClassBySpecificStudentIdsAsync(new GetClassListBySpecificStudentIdsModel { StudentIds = request.StudentIds });
@@ -117,39 +121,24 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             #endregion
 
-
             #region Video
-            var videoResultCompetition = _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && studentIds.Contains(x.StudentId));
-            int countVideoResultDistinct = videoResultCompetition.Select(x => x.StudentId).Distinct().Count();
-
-            var videoResultGroupByStudentId = videoResultCompetition
-                        .GroupBy(vr => vr.StudentId)
-                        .Select(group =>
-                        new StudentCompetitionAverageScore
-                        {
-                            StudentId = group.Key,
-                            LearnRatio = countVideoResultDistinct == 0 ? 0 : Video_Ratio / group.Count(),
-                            TotalRecords = group.Count(),
-                            AverageScoreByType = group.Sum(vr => vr.CorrectTotal == 0 ? 0 : (double)vr.CorrectCount / vr.CorrectTotal),
-                            LearnType = EnumLearnType.Video
-                        }).ToList();
-            ;
+            var videoResults = await VideoResults(videoLessonRatio, studentIds, EnumLearnType.Video, cancellationToken);
             #endregion
 
-            #region SkillsTest
-            int countUnitTestsResultDistinct = videoResultCompetition.Select(x => x.StudentId).Distinct().Count();
+            #region UnitsTest
+            var videoResultCompetition = _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && studentIds.Contains(x.StudentId));
             var unitTestGroupByStudentId = videoResultCompetition
                 .GroupBy(vr => vr.StudentId)
                 .AsEnumerable()
                 .Select(group =>
                 {
                     var denominator = CountExitsResult(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.UnitTest);
-
+                    double countUnitTestResultValid = CountComfort(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.UnitTest);
 
                     return new StudentCompetitionAverageScore
                     {
                         StudentId = group.Key,
-                        LearnRatio = countUnitTestsResultDistinct == 0 ? 0 : UnitTests_Ratio / CountComfort(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.UnitTest),
+                        LearnRatio = countUnitTestResultValid == 0 ? 0 : ValueSettings.AcademicStudentResultRatio.UnitTestsRatio / countUnitTestResultValid,
                         TotalRecords = denominator,
                         AverageScoreByType = CountOverralUnitSkillTest(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.UnitTest),
                         LearnType = EnumLearnType.UnitTests
@@ -158,42 +147,28 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #endregion
 
             #region SkillsTest
-            int countSkillTestsResultDistinct = videoResultCompetition.Select(x => x.StudentId).Distinct().Count();
             var skillTestGroupByStudentId = videoResultCompetition
                 .GroupBy(vr => vr.StudentId)
                 .AsEnumerable()
                 .Select(group =>
                 {
                     var denominator = CountExitsResult(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.SkillTest);
+
+                    double countSkillTestResultValid = CountComfort(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.SkillTest);
                     return new StudentCompetitionAverageScore
                     {
                         StudentId = group.Key,
-                        LearnRatio = countSkillTestsResultDistinct == 0 ? 0 : SkillsTests_Ratio / CountComfort(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.SkillTest),
+                        LearnRatio = countSkillTestResultValid == 0 ? 0 : ValueSettings.AcademicStudentResultRatio.SkillsTestsRatio / countSkillTestResultValid,
                         TotalRecords = denominator,
                         AverageScoreByType = CountOverralUnitSkillTest(group.Select(vr => vr.VideoSkillScoresStr ?? string.Empty).ToList(), EnumTimeCodeType.SkillTest),
                         LearnType = EnumLearnType.SkillsTests
                     };
                 }).ToList();
-            ;
 
             #endregion
 
             #region HomeWork
-
-            var homeWorkCompetition = _homeWorkResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && studentIds.Contains(x.StudentId));
-            int countHomeWorkResultDistinc = homeWorkCompetition.Select(x => x.StudentId).Distinct().Count();
-            var homeWorkResultGroupByStudentId = homeWorkCompetition
-                        .GroupBy(vr => vr.StudentId)
-                        .Select(group =>
-                        new StudentCompetitionAverageScore
-                        {
-                            StudentId = group.Key,
-                            LearnRatio = countHomeWorkResultDistinc == 0 ? 0 : HomeWork_Ratio / group.Count(),
-                            TotalRecords = group.Count(),
-                            AverageScoreByType = group.Sum(vr => vr.CorrectTotal == 0 ? 0 : (double)vr.CorrectCount / vr.CorrectTotal),
-                            LearnType = EnumLearnType.HomeWork
-                        }).ToList();
-            ;
+            var homeWorkResults = await HomeWorkResults(homeWorkRatio, studentIds, EnumLearnType.HomeWork, cancellationToken);
             #endregion
 
             #region ClassForum
@@ -210,9 +185,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                  new StudentCompetitionAverageScore
                  {
                      StudentId = group.Key,
-                     LearnRatio = countClassForumDistinct == 0 ? 0 : ClassForum_Ratio / group.Count(),
+                     LearnRatio = countClassForumDistinct == 0 ? 0 : classForumRatio / group.Count(),
                      TotalRecords = group.Count(),
-                     AverageScoreByType = classForumResultCompetion.Count(),
+                     AverageScoreByType = group.Count(),
                      LearnType = EnumLearnType.ClassForum
                  }).ToList();
             ;
@@ -221,52 +196,31 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #endregion
 
             #region FinalTest
-            var finalTestCompetition = _finalTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && studentIds.Contains(x.StudentId));
-            int countFinalTestDistinct = finalTestCompetition.Select(x => x.StudentId).Distinct().Count();
-            var finalTestResultGroupByStudentId = finalTestCompetition
-                        .GroupBy(vr => vr.StudentId)
-                        .AsEnumerable()
-                        .Select(group =>
-                        new StudentCompetitionAverageScore
-                        {
-                            StudentId = group.Key,
-                            LearnRatio = countFinalTestDistinct == 0 ? 0 : FinalTest_Ratio / group.Count(),
-                            TotalRecords = group.Count(),
-                            AverageScoreByType = group.Sum(vr => vr.CorrectTotal == 0 ? 0 : (double)vr.CorrectCount / vr.CorrectTotal),
-                            LearnType = EnumLearnType.FinalTest
-                        }).ToList();
-            ;
+            var finalResults = await FinalResults(ValueSettings.AcademicStudentResultRatio.FinalTestRatio, studentIds, EnumLearnType.FinalTest, cancellationToken);
 
-            var joinedList = studentIds
-                            .GroupJoin(videoResultGroupByStudentId, studentId => studentId, itemA => itemA.StudentId, (studentId, itemsA) => new { StudentId = studentId, ItemsA = itemsA.DefaultIfEmpty() })
-                            .GroupJoin(skillTestGroupByStudentId, studentId => studentId.StudentId, itemB => itemB.StudentId, (result, itemsB) => new { result.StudentId, result.ItemsA, ItemsB = itemsB.DefaultIfEmpty() })
-                            .GroupJoin(unitTestGroupByStudentId, studentId => studentId.StudentId, itemC => itemC.StudentId, (result, itemsC) => new { result.StudentId, result.ItemsA, result.ItemsB, ItemsC = itemsC.DefaultIfEmpty() })
-                            .GroupJoin(classForumnResultGroupByStudentId, studentId => studentId.StudentId, itemD => itemD.StudentId, (result, itemsD) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, ItemsD = itemsD.DefaultIfEmpty() })
-                            .GroupJoin(finalTestResultGroupByStudentId, studentId => studentId.StudentId, itemE => itemE.StudentId, (result, itemsE) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, result.ItemsD, ItemsE = itemsE.DefaultIfEmpty() })
-                            .GroupJoin(homeWorkResultGroupByStudentId, studentId => studentId.StudentId, itemF => itemF.StudentId, (result, itemsF) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, result.ItemsD, result.ItemsE, ItemsF = itemsF.DefaultIfEmpty() })
-                            .SelectMany(result => result.ItemsA
-                                .SelectMany(itemA => result.ItemsB
-                                    .SelectMany(itemB => result.ItemsC
-                                        .SelectMany(itemC => result.ItemsD
-                                         .SelectMany(itemD => result.ItemsE
-                                            .SelectMany(itemE => result.ItemsF
-                                                .Select(itemF => new StudentCompetitionOverallModel
-                                                {
-                                                    StudentId = result.StudentId,
-                                                    TotalScore = (CaculateDonomerator(itemA) + CaculateDonomerator(itemB) + CaculateDonomerator(itemC) + CaculateDonomerator(itemD) + CaculateDonomerator(itemE) + CaculateDonomerator(itemF)) != 0 ? ((CaculateNumerator(itemA) + CaculateNumerator(itemB) + CaculateNumerator(itemC) + CaculateNumerator(itemD) + CaculateNumerator(itemE) + CaculateNumerator(itemF)) * 100) / (CaculateDonomerator(itemA) + CaculateDonomerator(itemB) + CaculateDonomerator(itemC) + CaculateDonomerator(itemD) + CaculateDonomerator(itemE) + CaculateDonomerator(itemF)) : 0
-                                                })
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                         ).ToList();
+            List<List<StudentCompetitionAverageScore>> allResults = new List<List<StudentCompetitionAverageScore>>
+                {
+                    videoResults,
+                    skillTestGroupByStudentId,
+                    unitTestGroupByStudentId,
+                    classForumnResultGroupByStudentId,
+                    finalResults,
+                    homeWorkResults
+                };
+
+            List<StudentCompetitionOverallModel> overallResults = new List<StudentCompetitionOverallModel>();
+
+
+            if (request.CourseType == EnumCourseType.Academic)
+            {
+                overallResults = CalculateOverallOfAcademicStudent(studentIds, allResults);
+            }
             #endregion
 
             #region Result
 
             var result = (from progress in courseProgress
-                          join overall in joinedList
+                          join overall in overallResults
                           on progress.StudentId equals overall.StudentId into gj
                           from overall in gj.DefaultIfEmpty(new StudentCompetitionOverallModel())
                           select new CompetitionStudentProgressModel
@@ -282,6 +236,38 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static List<StudentCompetitionOverallModel> CalculateOverallOfAcademicStudent(IList<Guid>? studentIds, List<List<StudentCompetitionAverageScore>> allResults)
+        {
+            // Thực hiện tính toán trên tất cả các kết quả ở đây
+
+            List<StudentCompetitionOverallModel> joinedList = studentIds!
+                           .GroupJoin(allResults[0], studentId => studentId, itemA => itemA.StudentId, (studentId, itemsA) => new { StudentId = studentId, ItemsA = itemsA.DefaultIfEmpty() })
+                           .GroupJoin(allResults[1], studentId => studentId.StudentId, itemB => itemB.StudentId, (result, itemsB) => new { result.StudentId, result.ItemsA, ItemsB = itemsB.DefaultIfEmpty() })
+                           .GroupJoin(allResults[2], studentId => studentId.StudentId, itemC => itemC.StudentId, (result, itemsC) => new { result.StudentId, result.ItemsA, result.ItemsB, ItemsC = itemsC.DefaultIfEmpty() })
+                           .GroupJoin(allResults[3], studentId => studentId.StudentId, itemD => itemD.StudentId, (result, itemsD) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, ItemsD = itemsD.DefaultIfEmpty() })
+                           .GroupJoin(allResults[4], studentId => studentId.StudentId, itemE => itemE.StudentId, (result, itemsE) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, result.ItemsD, ItemsE = itemsE.DefaultIfEmpty() })
+                           .GroupJoin(allResults[5], studentId => studentId.StudentId, itemF => itemF.StudentId, (result, itemsF) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, result.ItemsD, result.ItemsE, ItemsF = itemsF.DefaultIfEmpty() })
+                           .SelectMany(result => result.ItemsA
+                               .SelectMany(itemA => result.ItemsB
+                                   .SelectMany(itemB => result.ItemsC
+                                       .SelectMany(itemC => result.ItemsD
+                                        .SelectMany(itemD => result.ItemsE
+                                           .SelectMany(itemE => result.ItemsF
+                                               .Select(itemF => new StudentCompetitionOverallModel
+                                               {
+                                                   StudentId = result.StudentId,
+                                                   TotalScore = (CaculateDonomerator(itemA) + CaculateDonomerator(itemB) + CaculateDonomerator(itemC) + CaculateDonomerator(itemD) + CaculateDonomerator(itemE) + CaculateDonomerator(itemF)) != 0 ? ((CaculateNumerator(itemA) + CaculateNumerator(itemB) + CaculateNumerator(itemC) + CaculateNumerator(itemD) + CaculateNumerator(itemE) + CaculateNumerator(itemF)) * 100) / (CaculateDonomerator(itemA) + CaculateDonomerator(itemB) + CaculateDonomerator(itemC) + CaculateDonomerator(itemD) + CaculateDonomerator(itemE) + CaculateDonomerator(itemF)) : 0
+                                               })
+                                           )
+                                       )
+                                   )
+                               )
+                           )
+                        ).ToList();
+
+            return joinedList;
         }
 
 
@@ -307,7 +293,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return overallScore;
         }
 
-
         private static double CountComfort(List<string>? listStr, EnumTimeCodeType timCodeType)
         {
             int countComfortableType = 0;
@@ -326,7 +311,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             return countComfortableType;
         }
-
 
         private static int CountExitsResult(List<string>? listStr, EnumTimeCodeType timCodeType)
         {
@@ -348,7 +332,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return quantity;
         }
 
-
         private static double CaculateNumerator(StudentCompetitionAverageScore? item)
         {
             if (item == null)
@@ -369,5 +352,76 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return result;
         }
         #endregion
+
+
+        #region QueryResult
+        private async Task<List<StudentCompetitionAverageScore>> HomeWorkResults(double ratioResult, IList<Guid>? studentIds, EnumLearnType learnType, CancellationToken cancellationToken)
+        {
+            var repository = _homeWorkResultRepository;
+            var resultCompetition = GetResultCommon(repository.Queryable, EnumResultStatus.Done, studentIds!);
+            int numberOfRecordValid = resultCompetition.Select(x => x.StudentId).Distinct().Count();
+            List<StudentCompetitionAverageScore> result = await resultCompetition
+                        .GroupBy(vr => vr.StudentId)
+                        .Select(group =>
+                        new StudentCompetitionAverageScore
+                        {
+                            StudentId = group.Key,
+                            LearnRatio = numberOfRecordValid == 0 ? 0 : ratioResult / group.Count(),
+                            TotalRecords = group.Count(),
+                            AverageScoreByType = group.Sum(vr => vr.CorrectTotal == 0 ? 0 : (double)vr.CorrectCount / vr.CorrectTotal),
+                            LearnType = learnType
+                        }).ToListAsync(cancellationToken);
+
+            return result;
+        }
+
+        private async Task<List<StudentCompetitionAverageScore>> VideoResults(double ratioResult, IList<Guid>? studentIds, EnumLearnType learnType, CancellationToken cancellationToken)
+        {
+            var repository = _videoResultRepository;
+            var resultCompetition = GetResultCommon(repository.Queryable, EnumResultStatus.Done, studentIds!);
+            int numberOfRecordValid = resultCompetition.Select(x => x.StudentId).Distinct().Count();
+            List<StudentCompetitionAverageScore> result = await resultCompetition
+                        .GroupBy(vr => vr.StudentId)
+                        .Select(group =>
+                        new StudentCompetitionAverageScore
+                        {
+                            StudentId = group.Key,
+                            LearnRatio = numberOfRecordValid == 0 ? 0 : ratioResult / group.Count(),
+                            TotalRecords = group.Count(),
+                            AverageScoreByType = group.Sum(vr => vr.CorrectTotal == 0 ? 0 : (double)vr.CorrectCount / vr.CorrectTotal),
+                            LearnType = learnType
+                        }).ToListAsync(cancellationToken);
+
+            return result;
+        }
+
+        private async Task<List<StudentCompetitionAverageScore>> FinalResults(double ratioResult, IList<Guid>? studentIds, EnumLearnType learnType, CancellationToken cancellationToken)
+        {
+            var repository = _finalTestResultRepository;
+            var resultCompetition = GetResultCommon(repository.Queryable, EnumResultStatus.Done, studentIds!);
+            int numberOfRecordValid = resultCompetition.Select(x => x.StudentId).Distinct().Count();
+            List<StudentCompetitionAverageScore> result = await resultCompetition
+                        .GroupBy(vr => vr.StudentId)
+                        .Select(group =>
+                        new StudentCompetitionAverageScore
+                        {
+                            StudentId = group.Key,
+                            LearnRatio = numberOfRecordValid == 0 ? 0 : ratioResult / group.Count(),
+                            TotalRecords = group.Count(),
+                            AverageScoreByType = group.Sum(vr => vr.CorrectTotal == 0 ? 0 : (double)vr.CorrectCount / vr.CorrectTotal),
+                            LearnType = learnType
+                        }).ToListAsync(cancellationToken);
+
+            return result;
+        }
+
+
+        private static IQueryable<T> GetResultCommon<T>(IQueryable<T>? repositoryQueryable, EnumResultStatus status, IList<Guid> studentIds) where T : BaseResult
+        {
+            return repositoryQueryable!.Where(x => x.Status == status && studentIds.Contains(x.StudentId));
+        }
+        #endregion
     }
+
 }
+
