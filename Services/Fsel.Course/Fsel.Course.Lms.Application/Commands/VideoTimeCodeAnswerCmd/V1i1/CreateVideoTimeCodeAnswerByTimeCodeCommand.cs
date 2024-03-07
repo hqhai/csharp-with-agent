@@ -122,9 +122,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             }
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
-                if (videoTimeCodeResult.Status == EnumResultStatus.New && request.IsSubmit)
+                if (request.IsSubmit)
                 {
-                    if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+                    if (videoTimeCodeResult.Status == EnumResultStatus.New && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
                     {
                         videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
                     }
@@ -299,7 +299,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private async Task<VideoTimeCodeResult> GetTokenVideoTimeCodeResult(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, EnumCourseType courseType, long correctCount)
         {
-            if (videoTimeCodeResult.Status == EnumResultStatus.New)
+            if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || videoTimeCodeResult.Status == EnumResultStatus.New)
             {
                 videoTimeCodeResult.TokenFirstTime = (int)(await GetTokenConfig(videoTimeCode, videoTimeCodeResult, courseType) * correctCount);
             }
