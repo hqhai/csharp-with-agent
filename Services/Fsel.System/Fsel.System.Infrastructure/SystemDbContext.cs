@@ -3,6 +3,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Shared.Constants;
 using Fsel.System.Domain.Entities;
+using Fsel.System.Domain.Entities.Chatbots;
 using Fsel.System.Domain.Entities.Configs;
 using Fsel.System.Infrastructure.Configs;
 using MediatR;
@@ -39,6 +40,8 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new TokenConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LocationEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new SchoolEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ChatbotConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ChatbotSkillConfigEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -61,6 +64,8 @@ namespace Fsel.System.Infrastructure
         public DbSet<TokenConfig> TokenConfigs { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<School> Schools { get; set; }
+        public DbSet<ChatbotConfig> ChatbotConfigs { get; set; }
+        public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
