@@ -82,11 +82,11 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [HttpPost("get-notification")]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public IActionResult GetNotification()
+        public async Task<IActionResult> GetNotification()
         {
             try
             {
-                var status = _inAppPurchaseService.GetNotification();
+                var status = await _inAppPurchaseService.GetNotification();
                 return Ok(status);
             }
             catch
