@@ -45,6 +45,7 @@ builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApi
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUrBoxService), appSetting?.Services?.UrBoxApiUrl);
 builder.AddRefitClients(typeof(IPayooService), appSetting?.Services?.PayooApiUrl);
+builder.AddRefitClients(typeof(IInAppPurchaseService), appSetting?.Services?.AppStoreServerApiUrl);
 builder.AddMassTransit(appSetting);
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>
