@@ -8,7 +8,7 @@ namespace Fsel.System.Domain.Models.CommandModels.ErrorReports
 
     public class CreateErrorReportCommandModel
     {
-        public EnumTypeOfError TypeOfError { get; set; }
+        public EnumTypeOfError Type { get; set; }
 
         public Guid? CourseId { get; set; }
 
@@ -18,12 +18,12 @@ namespace Fsel.System.Domain.Models.CommandModels.ErrorReports
 
         public string? Url { get; set; }
 
-        public EnumPlatFormDetail? PlatFormDetail { get; set; }
+        public EnumFeaturePlatForm? FeaturePlatform { get; set; }
 
-        public EnumLessonDetail? LessonDetail { get; set; }
+        public EnumFeatureLearn? FeatureLearn { get; set; }
 
-        public IList<string>? ImageLinks { get; set; }
+        public IList<string>? ImagePaths { get; set; }
 
-        public string? StudentFeedBack { get; set; }
+        public string? Content { get; set; }
     }
 }

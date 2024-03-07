@@ -44,15 +44,15 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
                 CourseId = x.CourseId,
                 CreatedFullName = x.CreatedFullName,
                 CreatedUserId = x.CreatedUserId,
-                FselFeedBack = x.FselFeedBack,
-                ImageLinks = x.ImageLinks,
-                LessonDetail = x.LessonDetail,
+                FeedBack = x.FeedBack,
+                ImagePaths = x.ImagePaths,
+                FeatureLearn = x.FeatureLearn,
                 LessonId = x.LessonId,
-                PlatFormDetail = x.PlatFormDetail,
+                FeaturePlatform = x.FeaturePlatform,
                 Priority = x.Priority ?? default,
-                ReportStatus = x.ReportStatus,
-                StudentFeedBack = x.StudentFeedBack,
-                TypeOfError = x.TypeOfError,
+                Status = x.Status,
+                Content = x.Content,
+                Type = x.Type,
                 UnitId = x.UnitId,
                 UpdatedDate = x.UpdatedDate,
                 Url = x.Url,
@@ -60,11 +60,11 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.StudentFeedBack ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Content ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
-            if (request.TypeOfError != null)
+            if (request.Type != null)
             {
-                query = query.Where(m => m.TypeOfError == request.TypeOfError);
+                query = query.Where(m => m.Type == request.Type);
             }
 
             if (request.CourseId != null)
@@ -87,9 +87,9 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
                 query = query.Where(m => m.Priority == request.Priority);
             }
 
-            if (request.ReportStatus != null)
+            if (request.Status != null)
             {
-                query = query.Where(m => m.ReportStatus == request.ReportStatus);
+                query = query.Where(m => m.Status == request.Status);
             }
 
             if (request.StartDate != null || request.EndDate != null)
@@ -124,7 +124,7 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
 
             foreach (var item in lists)
             {
-                if (item.LessonDetail != null)
+                if (item.FeatureLearn != null)
                 {
                     var course = courses?.FirstOrDefault(x => x.Id == item.CourseId);
                     var unit = units?.FirstOrDefault(x => x.Id == item.UnitId);

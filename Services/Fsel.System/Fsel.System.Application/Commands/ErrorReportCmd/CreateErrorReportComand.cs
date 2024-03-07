@@ -37,14 +37,14 @@ namespace Fsel.System.Application.Commands.ErrorReportCmd
             await _errorReportRepository.ExecuteTransactionAsync(async () =>
             {
                 errorReport.Priority = null;
-                errorReport.ReportStatus = EnumErrorReportStatus.NotYetProcessed;
-                if (errorReport.LessonDetail != null && errorReport.PlatFormDetail == null)
+                errorReport.Status = EnumErrorReportStatus.New;
+                if (errorReport.FeatureLearn != null && errorReport.FeaturePlatform == null)
                 {
                     errorReport.UnitId = request.UnitId;
                     errorReport.CourseId = request.CourseId;
                     errorReport.LessonId = request.LessonId;
                 }
-                else if (errorReport.PlatFormDetail != null && errorReport.LessonDetail == null)
+                else if (errorReport.FeaturePlatform != null && errorReport.FeatureLearn == null)
                 {
                     errorReport.UnitId = null;
                     errorReport.CourseId = null;

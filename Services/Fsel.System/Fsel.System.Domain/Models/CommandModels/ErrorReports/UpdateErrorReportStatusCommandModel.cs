@@ -7,6 +7,6 @@ namespace Fsel.System.Domain.Models.CommandModels.ErrorReports
 
     public class UpdateErrorReportStatusCommandModel : BaseCommandModel
     {
-        public EnumErrorReportStatus ReportStatus { get; set; }
+        public EnumErrorReportStatus Status { get; set; }
     }
 }

@@ -11,7 +11,7 @@ namespace Fsel.System.Domain.Entities
 
     public class ErrorReport : Entity
     {
-        public EnumTypeOfError TypeOfError { get; set; }
+        public EnumTypeOfError Type { get; set; }
 
         public Guid? CourseId { get; set; }
 
@@ -21,26 +21,26 @@ namespace Fsel.System.Domain.Entities
 
         public EnumPriority? Priority { get; set; }
 
-        public EnumErrorReportStatus ReportStatus { get; set; }
+        public EnumErrorReportStatus Status { get; set; }
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Url { get; set; }
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? FselFeedBack { get; set; }
+        public string? FeedBack { get; set; }
 
-        public EnumPlatFormDetail? PlatFormDetail { get; set; }
+        public EnumFeaturePlatForm? FeaturePlatform { get; set; }
 
-        public EnumLessonDetail? LessonDetail { get; set; }
+        public EnumFeatureLearn? FeatureLearn { get; set; }
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? ImageLinksStr { get; set; }
+        public string? ImagePathsStr { get; set; }
 
         [NotMapped]
-        public IList<string>? ImageLinks
+        public IList<string>? ImagePaths
         {
-            get { return ConvertHelper.Deserialize<IList<string>>(ImageLinksStr); }
-            set { ImageLinksStr = ConvertHelper.Serialize(value); }
+            get { return ConvertHelper.Deserialize<IList<string>>(ImagePathsStr); }
+            set { ImagePathsStr = ConvertHelper.Serialize(value); }
         }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? StudentFeedBack { get; set; }
+        public string? Content { get; set; }
     }
 }

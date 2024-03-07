@@ -26,18 +26,18 @@ namespace Fsel.System.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    TypeOfError = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     LessonId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Priority = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    ReportStatus = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Url = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    FselFeedBack = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    PlatFormDetail = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    LessonDetail = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    ImageLinksStr = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    StudentFeedBack = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
+                    FeedBack = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    FeaturePlatform = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    FeatureLearn = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ImagePathsStr = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Content = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {

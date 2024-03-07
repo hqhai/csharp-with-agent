@@ -8,7 +8,7 @@ namespace Fsel.System.Domain.Models.QueryModels
 
     public class SearchErrorReportQueryModel : BaseQueryModel
     {
-        public EnumTypeOfError? TypeOfError { get; set; }
+        public EnumTypeOfError? Type { get; set; }
 
         public Guid? CourseId { get; set; }
 
@@ -18,7 +18,7 @@ namespace Fsel.System.Domain.Models.QueryModels
 
         public EnumPriority? Priority { get; set; }
 
-        public EnumErrorReportStatus? ReportStatus { get; set; }
+        public EnumErrorReportStatus? Status { get; set; }
 
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }

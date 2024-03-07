@@ -7,12 +7,12 @@ namespace Fsel.System.Domain.Enums
     public enum EnumErrorReportStatus
     {
         [Description("Chưa xử lý")]
-        NotYetProcessed,
+        New,
 
         [Description("Đã xử lý")]
-        Processed,
+        Done,
 
         [Description("Đang xử lý")]
-        Processing
+        Processe
     }
 }

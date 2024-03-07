@@ -15,7 +15,7 @@ namespace Fsel.System.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.Property(e => e.TypeOfError)
+            builder.Property(e => e.Type)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
@@ -27,19 +27,19 @@ namespace Fsel.System.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumPriority>());
 
-            builder.Property(e => e.PlatFormDetail)
+            builder.Property(e => e.FeaturePlatform)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumPlatFormDetail>());
+                    v => v.EnumParse<EnumFeaturePlatForm>());
 
-            builder.Property(e => e.LessonDetail)
+            builder.Property(e => e.FeatureLearn)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumLessonDetail>());
+                    v => v.EnumParse<EnumFeatureLearn>());
 
-            builder.Property(e => e.ReportStatus)
+            builder.Property(e => e.Status)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),

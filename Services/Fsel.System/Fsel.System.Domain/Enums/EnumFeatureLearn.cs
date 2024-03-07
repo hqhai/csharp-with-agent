@@ -2,7 +2,7 @@
 
 namespace Fsel.System.Domain.Enums
 {
-    public enum EnumLessonDetail
+    public enum EnumFeatureLearn
     {
         ClassForum,
         HomeWork,

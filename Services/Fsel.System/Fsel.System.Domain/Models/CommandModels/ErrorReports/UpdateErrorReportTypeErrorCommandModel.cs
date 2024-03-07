@@ -7,6 +7,6 @@ namespace Fsel.System.Domain.Models.CommandModels.ErrorReports
 
     public class UpdateErrorReportTypeErrorCommandModel : BaseCommandModel
     {
-        public EnumTypeOfError TypeOfError { get; set; }
+        public EnumTypeOfError Type { get; set; }
     }
 }

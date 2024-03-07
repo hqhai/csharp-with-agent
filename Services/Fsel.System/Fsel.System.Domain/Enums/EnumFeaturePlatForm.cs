@@ -2,7 +2,7 @@
 
 namespace Fsel.System.Domain.Enums
 {
-    public enum EnumPlatFormDetail
+    public enum EnumFeaturePlatForm
     {
         DiscussionBoard,
         MarketPlace,
