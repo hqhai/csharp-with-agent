@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Commands.VideoResultCmd;
     using Fsel.Course.Lms.Application.Queries.VideoQuery;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
@@ -78,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VideoTimeCodeModel>();
-            var method = await CreateAnswer(request, cancellationToken);
+            var method = await HandleAnswerAsync(request, cancellationToken);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -99,12 +100,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     }
                 }
 
-                await UpdateVideoTimeCodeResult(videoTimeCode, videoTimeCodeResult, request.IsSubmit, cancellationToken).ConfigureAwait(false);
+                await UpdateVideoTimeCodeResult(videoTimeCode, videoTimeCodeResult, request.IsSubmit, cancellationToken);
                 _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
+
+            if (videoTimeCodeResult.Status == EnumResultStatus.Done)
+            {
+                await UpdateVideoResultAsync(videoResult, cancellationToken);
+            }
             var videoTimeCodeMethod = await _mediator.Send(new GetTimeCodeDetailQuery
             {
                 VideoTimeCodeId = request.VideoTimeCodeId,
@@ -117,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             return methodResult;
         }
 
-        private async Task<MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult)>> CreateAnswer(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
+        private async Task<MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult)>> HandleAnswerAsync(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<(VideoResult, VideoTimeCode, VideoTimeCodeResult)>();
             var method = await Validate(request, cancellationToken);
@@ -194,6 +200,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             return methodResult;
+        }
+
+        private async Task UpdateVideoResultAsync(VideoResult videoResult, CancellationToken cancellationToken)
+        {
+            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.VideoId == videoResult.VideoId).ToListAsync(cancellationToken);
+
+            var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done).ToList();
+            if (videoTimeCodes.Count == videoTimeCodeResults.Count)
+            {
+                await _mediator.Send(new ReviewLessonVideoCommand { LessonResultId = videoResult.LessonResultId }, cancellationToken);
+            }
         }
 
         private static VideoTimeCodeAnswer GetVideoTimeCodeAnswer(VideoTimeCodeAnswer answer, Question question, int correctCount, object? answerConfig, bool isSubmit, bool isFirstSubmit, bool isAnswered)
