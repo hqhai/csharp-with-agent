@@ -20,7 +20,6 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class OrderController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -40,6 +39,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Create([FromBody] CreateOrderCommand command)
         {
             MethodResult<OrderModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -52,6 +52,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<OrderModel?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Get()
         {
             var commandResult = await _mediator.Send(new GetOrderByUserQuery() { }).ConfigureAwait(false);
@@ -81,6 +82,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         /// <summary>
         /// Get Notification from App Store
         /// </summary>
+        [AllowAnonymous]
         [HttpPost("get-notification")]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
