@@ -11,7 +11,8 @@ using Fsel.Storage.Domain.Models.CommandModels;
 
 namespace Fsel.Storage.Api.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/transcript")]
     [ApiController]
     public class TranscriptController : ControllerBase
