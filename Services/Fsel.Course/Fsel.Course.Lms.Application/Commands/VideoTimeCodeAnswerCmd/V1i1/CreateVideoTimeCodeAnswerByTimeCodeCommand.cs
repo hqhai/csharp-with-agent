@@ -209,7 +209,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done).ToList();
             if (videoTimeCodes.Count == videoTimeCodeResults.Count)
             {
-                await _mediator.Send(new ReviewLessonVideoCommand { LessonResultId = videoResult.LessonResultId, NumberOfStars = 5 }, cancellationToken);
+                await _mediator.Send(new ReviewLessonVideoCommand { LessonResultId = videoResult.LessonResultId }, cancellationToken);
             }
         }
 
