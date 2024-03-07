@@ -13,6 +13,6 @@ namespace Fsel.System.Domain.Enums
         Done,
 
         [Description("Đang xử lý")]
-        Processe
+        Process
     }
 }
