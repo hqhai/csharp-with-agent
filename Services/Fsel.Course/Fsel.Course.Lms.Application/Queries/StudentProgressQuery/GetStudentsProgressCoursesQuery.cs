@@ -112,6 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             #endregion
 
+
             #region Video
             var videoResultCompetition = _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && studentIds.Contains(x.StudentId));
             int countVideoResultDistinct = videoResultCompetition.Select(x => x.StudentId).Distinct().Count();
@@ -315,8 +316,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     }
 
 
-
                 }
+            }
             return countComfortableType;
         }
 
