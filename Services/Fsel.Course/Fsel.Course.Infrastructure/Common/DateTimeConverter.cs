@@ -26,6 +26,23 @@ namespace Fsel.Course.Infrastructure.Common
             return workingTime;
         }
 
+        public double GetWorkingTime(double workingTime, double executionTime, DateTime inputDate)
+        {
+            if (executionTime != default)
+            {
+                workingTime += GetWorkingTime(inputDate, DateTime.UtcNow, executionTime);
+                if (workingTime >= executionTime)
+                {
+                    workingTime = executionTime;
+                }
+            }
+            else
+            {
+                workingTime += DateTimeHelper.GetSecondBetweenDate(inputDate, DateTime.UtcNow);
+            }
+            return workingTime;
+        }
+
         public double GetWorkingTime(DateTime inputDate, DateTime outputDate, double executionTime)
         {
             var sectionBetweenDate = DateTimeHelper.GetSecondBetweenDate(inputDate, outputDate);
