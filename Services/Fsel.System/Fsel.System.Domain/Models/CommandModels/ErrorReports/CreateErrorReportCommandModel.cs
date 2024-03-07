@@ -18,7 +18,7 @@ namespace Fsel.System.Domain.Models.CommandModels.ErrorReports
 
         public string? Url { get; set; }
 
-        public EnumFeaturePlatForm? FeaturePlatform { get; set; }
+        public EnumFeaturePlatform? FeaturePlatform { get; set; }
 
         public EnumFeatureLearn? FeatureLearn { get; set; }
 

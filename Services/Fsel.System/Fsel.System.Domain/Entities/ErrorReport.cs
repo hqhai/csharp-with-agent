@@ -27,7 +27,7 @@ namespace Fsel.System.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FeedBack { get; set; }
 
-        public EnumFeaturePlatForm? FeaturePlatform { get; set; }
+        public EnumFeaturePlatform? FeaturePlatform { get; set; }
 
         public EnumFeatureLearn? FeatureLearn { get; set; }
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

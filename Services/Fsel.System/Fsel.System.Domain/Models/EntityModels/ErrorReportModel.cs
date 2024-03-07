@@ -26,7 +26,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public string? FeedBack { get; set; }
 
-        public EnumFeaturePlatForm? FeaturePlatform { get; set; }
+        public EnumFeaturePlatform? FeaturePlatform { get; set; }
 
         public EnumFeatureLearn? FeatureLearn { get; set; }
 
