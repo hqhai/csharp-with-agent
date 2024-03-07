@@ -54,12 +54,16 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             }
             var studentId = student?.Content?.Result?.Id;
             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).Where(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId && x.LessonId == request.LessonId && x.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
-            if (lessonResult == null || lessonResult.VideoResult == null)
+            if (lessonResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-
+            if (lessonResult.VideoResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult.VideoResult));
+                return methodResult;
+            }
             var timeCodeScoreResult = await _videoConverter.GetVideoSkillScores(lessonResult.VideoResult, cancellationToken);
 
             var timeCodeScores = new List<TimeCodeScoreModel>();
