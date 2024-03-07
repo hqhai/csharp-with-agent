@@ -14,6 +14,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -60,6 +61,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         /// <summary>
         /// App Store
         /// </summary>
+        [AllowAnonymous]
         [HttpPost("app-store")]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
