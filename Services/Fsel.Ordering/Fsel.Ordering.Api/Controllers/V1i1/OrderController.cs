@@ -24,11 +24,13 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
     {
         private readonly IMediator _mediator;
         private readonly INotificationProcessor _notificationProcessor;
+        private readonly IInAppPurchaseService _inAppPurchaseService;
 
-        public OrderController(IMediator mediator, INotificationProcessor notificationProcessor)
+        public OrderController(IMediator mediator, INotificationProcessor notificationProcessor, IInAppPurchaseService inAppPurchaseService)
         {
             _mediator = mediator;
             _notificationProcessor = notificationProcessor;
+            _inAppPurchaseService = inAppPurchaseService;
         }
 
         /// <summary>
@@ -67,6 +69,25 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
             {
                 _notificationProcessor.Process(appleNotification);
                 return Ok();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+        }
+
+        /// <summary>
+        /// Get Notification from App Store
+        /// </summary>
+        [HttpPost("get-notification")]
+        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public IActionResult GetNotification()
+        {
+            try
+            {
+                var status = _inAppPurchaseService.GetNotification();
+                return Ok(status);
             }
             catch
             {
