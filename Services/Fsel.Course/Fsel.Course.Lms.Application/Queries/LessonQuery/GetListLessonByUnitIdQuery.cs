@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                             {
                                 Id = x.Id,
                                 CreatedDate = x.CreatedDate,
+                                Name = x.Name,
                                 DisplayOrder = x.UnitLessons.Select(x => x.DisplayOrder).FirstOrDefault(),
                             }).ApplySort(request).ToListAsync(cancellationToken);
 

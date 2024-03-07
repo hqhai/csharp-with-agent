@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Queries.LessonQuery;
     using Fsel.Course.Lms.Application.Queries.UnitQuery;
     using Fsel.Shared.Constants;
     using MediatR;
@@ -35,6 +34,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         public async Task<IActionResult> GetUnitsByIds([FromBody] IList<Guid> unitIds)
         {
             MethodResult<IList<UnitModel>> queryResult = await _mediator.Send(new GetUnitsByIdsQuery { UnitIds = unitIds }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get course
+        /// </summary>
+        [HttpGet("unit-display-order")]
+        [ProducesResponseType(typeof(MethodResult<IList<UnitModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListUnitByCourse([FromQuery] GetListUnitByCourseIdQuery query)
+        {
+            MethodResult<IList<UnitModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
