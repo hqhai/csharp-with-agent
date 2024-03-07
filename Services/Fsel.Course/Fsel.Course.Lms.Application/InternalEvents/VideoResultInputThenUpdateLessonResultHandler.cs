@@ -29,8 +29,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         public async Task Handle(EntityChangedEvent<VideoResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
+            Thread.Sleep(1000);
             var videoResult = notification.Data;
-            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == videoResult.LessonResultId, cancellationToken);
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(videoResult.LessonResultId);
             if (lessonResult != null && videoResult.Status == EnumResultStatus.Done)
             {
                 var skillScores = videoResult.VideoSkillScores?.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;

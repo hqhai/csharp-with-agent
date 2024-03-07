@@ -18,6 +18,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Type { get; set; }
         public Guid? ObjectId { get; set; }
         public Guid UnitId { get; set; }
+        public Guid? VideoId { get; set; }
         public IList<LessonInstructionModel>? LessonInstructions { get; set; }
         public EnumResultStatus StatusClassForum { get; set; } = EnumResultStatus.Unfinished;
         public EnumResultStatus StatusVideo { get; set; } = EnumResultStatus.Unfinished;

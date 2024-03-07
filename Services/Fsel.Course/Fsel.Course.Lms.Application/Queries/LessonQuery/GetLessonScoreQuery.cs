@@ -151,6 +151,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                         }).ToList()
                                      };
             var timeCodeScores = scoreTimeCodeQuery.ToList();
+            var skillScores = scoreQuery.ToList();
+
             foreach (var item in timeCodeScores)
             {
                 if (item.SkillScores != null && item.SkillScores.Count > 0)
@@ -163,8 +165,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     }
                 }
             }
-            var correctCount = scoreQuery.Select(x => x.CorrectCount).Sum();
-            var totalCount = scoreQuery.Select(x => x.TotalCount).Sum();
+            var correctCount = skillScores.Select(x => x.CorrectCount).Sum();
+            var totalCount = skillScores.Select(x => x.TotalCount).Sum();
             if (totalCount != 0)
             {
                 lessonScore.Percent = NumberHelper.GetPercent(correctCount, totalCount);
@@ -172,7 +174,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 lessonScore.CorrectCount = correctCount;
             }
 
-            lessonScore.SkillScores = scoreQuery.ToList();
+            lessonScore.SkillScores = skillScores;
             lessonScore.TimeCodeScores = timeCodeScores;
             methodResult.Result = lessonScore;
             methodResult.StatusCode = StatusCodes.Status200OK;
