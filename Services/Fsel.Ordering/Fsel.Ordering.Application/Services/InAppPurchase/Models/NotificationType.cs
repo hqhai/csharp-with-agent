@@ -33,5 +33,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 
         [Obsolete("Use 'DID_RECOVER' instead")]
         [EnumMember(Value = "RENEWAL")] RENEWAL,
+
+        TEST
     }
 }
