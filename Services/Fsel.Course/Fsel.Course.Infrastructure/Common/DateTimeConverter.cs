@@ -30,7 +30,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (executionTime != default)
             {
-                workingTime += GetWorkingTime(inputDate, DateTime.UtcNow, executionTime);
+                workingTime = GetWorkingTime(inputDate, DateTime.UtcNow, executionTime);
                 if (workingTime >= executionTime)
                 {
                     workingTime = executionTime;
@@ -38,7 +38,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else
             {
-                workingTime += DateTimeHelper.GetSecondBetweenDate(inputDate, DateTime.UtcNow);
+                workingTime = DateTimeHelper.GetSecondBetweenDate(inputDate, DateTime.UtcNow);
             }
             return workingTime;
         }
