@@ -7,6 +7,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// You didn't do enough questions
         /// </summary>
-        NotEnoughQuestions
+        NotEnoughQuestions,
+
+        /// <summary>
+        /// VideoTimeCode Is Not Completed
+        /// </summary>
+        VideoTimeCodeNotCompleted,
+
+        /// <summary>
+        /// Select Video TimeCode first
+        /// </summary>
+        VideoTimeCodeNotFirst
     }
 }
