@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             var validateMethod = await Validate(request, videoResult, cancellationToken);
             if (!validateMethod.IsOK)
             {
-                methodResult.AddError(validateMethod.ErrorMessages);
+                methodResult.AddErrorBadRequest(validateMethod.ErrorMessages);
                 return methodResult;
             }
             var videoTimeCode = await _videoTimeCodeRepository.Queryable
@@ -116,19 +116,17 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
             var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.VideoId == request.VideoId).OrderBy(x => x.DisplayTime).ToListAsync(cancellationToken);
 
-            if (videoResult.CurrentVideoTimeCodeId.HasValue && videoResult.CurrentVideoTimeCodeId != request.VideoTimeCodeId)
+            var videoTimeCodeRequest = videoTimeCodes.FirstOrDefault(x => x.Id == request.VideoTimeCodeId);
+            if (videoTimeCodeRequest == null)
             {
-                var videoTimeCodeRequest = videoTimeCodes.FirstOrDefault(x => x.Id == request.VideoTimeCodeId);
-                if (videoTimeCodeRequest == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeRequest));
-                    return methodResult;
-                }
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeRequest));
+                return methodResult;
+            }
 
-                var (isErrorCode, displayTimeCodes) = GetVideoTimeCode(videoTimeCodes, videoTimeCodeRequest);
-                if (isErrorCode)
-                {
-                    methodResult.AddErrorBadRequest(new List<ErrorResult>
+            var (isErrorCode, displayTimeCodes) = GetVideoTimeCode(videoTimeCodes, videoTimeCodeRequest);
+            if (isErrorCode)
+            {
+                methodResult.AddErrorBadRequest(new List<ErrorResult>
                     {
                         new ErrorResult
                           {
@@ -147,18 +145,9 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                             }
                           }
                     });
-                    return methodResult;
-                }
+                return methodResult;
             }
-            else if (!videoResult.CurrentVideoTimeCodeId.HasValue)
-            {
-                var videoTimeCode = videoTimeCodes.FirstOrDefault();
-                if (videoTimeCode != null && videoTimeCode.Id != request.VideoTimeCodeId)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoTimeCodeNotFirst), nameof(videoTimeCode));
-                    return methodResult;
-                }
-            }
+
             return methodResult;
         }
 

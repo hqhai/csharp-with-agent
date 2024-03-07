@@ -14,21 +14,23 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class OrderController : ControllerBase
     {
         private readonly IMediator _mediator;
         private readonly INotificationProcessor _notificationProcessor;
+        private readonly IInAppPurchaseService _inAppPurchaseService;
 
-        public OrderController(IMediator mediator, INotificationProcessor notificationProcessor)
+        public OrderController(IMediator mediator, INotificationProcessor notificationProcessor, IInAppPurchaseService inAppPurchaseService)
         {
             _mediator = mediator;
             _notificationProcessor = notificationProcessor;
+            _inAppPurchaseService = inAppPurchaseService;
         }
 
         /// <summary>
@@ -37,6 +39,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Create([FromBody] CreateOrderCommand command)
         {
             MethodResult<OrderModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -49,6 +52,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<OrderModel?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Get()
         {
             var commandResult = await _mediator.Send(new GetOrderByUserQuery() { }).ConfigureAwait(false);
@@ -58,6 +62,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         /// <summary>
         /// App Store
         /// </summary>
+        [AllowAnonymous]
         [HttpPost("app-store")]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -67,6 +72,26 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
             {
                 _notificationProcessor.Process(appleNotification);
                 return Ok();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+        }
+
+        /// <summary>
+        /// Get Notification from App Store
+        /// </summary>
+        [AllowAnonymous]
+        [HttpPost("get-notification")]
+        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetNotification()
+        {
+            try
+            {
+                var status = await _inAppPurchaseService.GetNotification();
+                return Ok(status);
             }
             catch
             {
