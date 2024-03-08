@@ -24,5 +24,11 @@ namespace Fsel.Shared.Constants
             public const double FinalTestRatio = 15;
         }
 
+        public static class IeltsStudentResultRatio
+        {
+            public const double VideoRatio = 20;
+            public const double HomeWorkRatio = 48;
+            public const double ClassForumRatio = 32;
+        }
     }
 }
