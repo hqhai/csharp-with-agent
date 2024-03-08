@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private const int TotalProcess = 217; // tổng số tiến trình hiện có
+        private const int TotalProcessIelsts = 106; // tổng số tiến trình hiện có của Ielts
 
         public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
         {
@@ -107,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     };
                     var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
 
-                    double progressPercentage = ((float)currentProgress / progress) * 100;
+                    double progressPercentage = ((float)currentProgress / TotalProcessIelsts) * 100;
                     // Update số lượng process do trên dữ liệu chưa nhập đủ
                     if (courseResult.Course?.CourseType == EnumCourseType.Academic)
                     {
