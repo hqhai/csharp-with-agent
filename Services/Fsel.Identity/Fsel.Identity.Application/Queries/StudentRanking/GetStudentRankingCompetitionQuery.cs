@@ -45,14 +45,23 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<StudentRankingModel>> methodResult = new MethodResult<PagingItemsModel<StudentRankingModel>>();
 
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsTestName);
-            if (_environment.IsProduction())
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IeltsStudentsName);
+            if (_environment.IsProduction() && request.CourseType == EnumCourseType.Academic)
             {
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
             }
-            else if (_environment.IsStaging())
+            else if (_environment.IsStaging() && request.CourseType == EnumCourseType.Academic)
             {
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsStagingName);
+
+            }
+            else if (_environment.IsProduction() && request.CourseType == EnumCourseType.Ielts)
+            {
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IeltsStudentsName);
+            }
+            else if (_environment.IsStaging() && request.CourseType == EnumCourseType.Ielts)
+            {
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IeltsStudentsStagingName);
 
             }
 
@@ -61,7 +70,11 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             var listStudentCompetion = listStudentCompetition!.ToList();
 
 
-            var studentProgressAndOverall = await _lmsCourseService.GetStudentProgress(new StudentCompetitionStatQueryModel { StudentIds = competitionStudentIds });
+            var studentProgressAndOverall = await _lmsCourseService.GetStudentProgress(new StudentCompetitionStatQueryModel
+            {
+                StudentIds = competitionStudentIds,
+                CourseType = request.CourseType,
+            });
             var studentResults = studentProgressAndOverall?.Content?.Result;
 
             if (studentResults == null)
