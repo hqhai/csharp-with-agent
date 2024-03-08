@@ -2,13 +2,65 @@
 
 namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using System.Text.Json.Serialization;
 
     public class TransactionInfoV2
     {
+        [JsonPropertyName("appAccountToken")]
+        public string? AppAccountToken { get; set; }
+
+        [JsonPropertyName("bundleId")]
+        public string? BundleId { get; set; }
+
+        [JsonPropertyName("expiresDate")]
+        public long ExpiresDate { get; set; }
+
+        [JsonPropertyName("inAppOwnershipType")]
+        public OwnershipType InAppOwnershipType { get; set; }
+
+        [JsonPropertyName("isUpgraded")]
+        public bool IsUpgraded { get; set; }
+
+        [JsonPropertyName("offerIdentifier")]
+        public string? OfferIdentifier { get; set; }
+
+        [JsonPropertyName("offerType")]
+        public OfferType OfferType { get; set; }
+
+        [JsonPropertyName("originalPurchaseDate")]
+        public long OriginalPurchaseDate { get; set; }
+
+        [JsonPropertyName("originalTransactionId")]
+        public long OriginalTransactionId { get; set; }
+
+        [JsonPropertyName("productId")]
+        public string? ProductId { get; set; }
+
+        [JsonPropertyName("purchaseDate")]
+        public long PurchaseDate { get; set; }
+
+        [JsonPropertyName("quantity")]
+        public int Quantity { get; set; }
+
+        [JsonPropertyName("revocationDate")]
+        public long RevocationDate { get; set; }
+
+        [JsonPropertyName("revocationReason")]
+        public CancellationReason RevocationReason { get; set; }
+
+        [JsonPropertyName("subscriptionGroupIdentifier")]
+        public string? SubscriptionGroupIdentifier { get; set; }
+
+        [JsonPropertyName("transactionId")]
+        public string? TransactionId { get; set; }
+
+        [JsonPropertyName("type")]
+        public PurchaseType Type { get; set; }
+
+        [JsonPropertyName("webOrderLineItemId")]
+        public string? WebOrderLineItemId { get; set; }
+
+        [JsonPropertyName("signedDate")]
+        public long SignatureDate { get; set; }
     }
 }
