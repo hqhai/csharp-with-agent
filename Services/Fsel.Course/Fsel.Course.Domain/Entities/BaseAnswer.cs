@@ -15,7 +15,7 @@ namespace Fsel.Course.Domain.Entities
         /// Câu trả lời
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? AnswerStr { get; set; }
+        public virtual string? AnswerStr { get; set; }
 
         [NotMapped]
         public object? Answer

@@ -288,10 +288,14 @@ namespace Fsel.Course.Infrastructure.Common
             var answerQuery = from baseQ in _videoResultRepository.Queryable
                               join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
                               join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
-                              join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
+
+                              join q in _questionRepository.Queryable on vtca.QuestionId equals q.Id
+                              join eq in _exerciseQuestionRepository.Queryable on q.Id equals eq.QuestionId
+
+                              join e in _exerciseRepository.Queryable on eq.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
-                              where baseQ.Id == videoResult.Id
+                              where baseQ.Id == videoResult.Id && !q.Ungraded && q.QuestionType != EnumQuestionType.ExercisePreparation
                               group new { vt, vtca } by new { vt.TimeCodeType, e.CourseSkill } into g
                               select new
                               {
@@ -308,7 +312,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
                                 join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
                                 join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                                where baseQ.Id == videoResult.Id
+                                where baseQ.Id == videoResult.Id && !q.Ungraded && q.QuestionType != EnumQuestionType.ExercisePreparation
                                 group new { vt, q } by new { vt.TimeCodeType, e.CourseSkill } into g
                                 select new
                                 {

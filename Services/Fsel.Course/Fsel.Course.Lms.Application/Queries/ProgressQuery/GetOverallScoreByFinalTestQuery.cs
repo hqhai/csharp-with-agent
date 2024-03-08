@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                                              .ToListAsync(cancellationToken);
             if (!finalTestResults.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestResults));
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 

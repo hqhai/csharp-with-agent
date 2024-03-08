@@ -94,6 +94,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
+            var existsOrder = await _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && x.Status == EnumOrderStatus.Payment, cancellationToken);
+
+
             var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
             {
                 Filters = new List<GenericFilterModel>()
@@ -120,16 +123,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
             var course = courseResult.Content?.Result;
 
+            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && (p.Status == EnumOrderStatus.New), cancellationToken);
+
             var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
+
             string code = codeSend.Result?.Code ?? string.Empty;
 
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken) && order != null && order.Code != code)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
                 return methodResult;
             }
-
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && (p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Fail), cancellationToken);
 
             if (order != null)
             {
@@ -137,7 +141,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 {
                     Order = order,
                     Package = package,
-                    CourseId = course!.Id,
+                    CourseId = existsOrder?.CourseId ?? course!.Id,
                     Code = code,
                     FullName = student?.Human?.FullName,
                     PhoneNumber = request.PhoneNumber,
@@ -160,7 +164,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             Order newOrder = _mapper.Map<Order>(request);
 
-            AddDataIntoOrder(newOrder, code, package.Price, course!.Id, student);
+            AddDataIntoOrder(newOrder, code, package.Price, existsOrder?.CourseId ?? course!.Id, student);
 
             if (!newOrder.IsValid())
             {

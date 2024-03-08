@@ -424,7 +424,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, default, courseType);
                 var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, default, courseType);
                 List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).ToList();
-                groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
+                groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).OrderBy(x => x.Skill).ToList();
                 percents = new List<double> { percentClassForum, percentHomeWork, percentVideo };
             }
 

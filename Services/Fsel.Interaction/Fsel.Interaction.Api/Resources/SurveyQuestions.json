@@ -12,7 +12,7 @@
     "answers": [
       {
         "id": 1,
-        "content": "Tìm kiếm Google",
+        "content": "Google",
         "image": "gmail-icon.svg"
       },
       {
@@ -32,12 +32,12 @@
       },
       {
         "id": 5,
-        "content": "Bạn bè/Gia đình",
+        "content": "Bạn bè/gia đình",
         "image": "friends_family-icon.svg"
       },
       {
         "id": 6,
-        "content": "Tin tức/Báo chí/Blog",
+        "content": "Tin tức/báo chí",
         "image": "blog-icon.svg"
       },
       {
@@ -96,7 +96,7 @@
       },
       {
         "id": 3,
-        "content": "Kết bạn và chia sẻ",
+        "content": "Kết bạn",
         "image": "friendship 1.png"
       },
       {

@@ -43,6 +43,7 @@ builder.Services.AddScoped<IApprovalTimeConfigRepository, ApprovalTimeConfigRepo
 builder.Services.AddScoped<IApprovalLogRepository, ApprovalLogRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
+builder.Services.AddScoped<IErrorReportRepository, ErrorReportRepository>();
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
 

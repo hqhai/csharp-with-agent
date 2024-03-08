@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Shared.Models.ShareModels;
     using Refit;
@@ -14,5 +15,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Get("/v1/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
+
+        [Post("/v1/school/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> ExecuteListSchoolQueryAsync([Body] BaseQueryModel query);
     }
 }

@@ -179,7 +179,13 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 foreach (var unit in unitsResult)
                 {
-                    var lessonResultsDone = await _lessonResultRepository.Queryable.Include(p => p.VideoResult).Include(x => x.ClassForumResults).Where(p => p.StudentId == item.Id && p.Status == EnumResultStatus.Done && p.UnitId == unit.UnitId).Where(p => p.UpdatedDate >= lastFridayAt13 && p.UpdatedDate <= currentDate).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
+                    var lessonResultsDone = await _lessonResultRepository.Queryable.Include(p => p.VideoResult).Include(x => x.ClassForumResults)
+                        .Include(x => x.Lesson)
+                        .ThenInclude(x => x.UnitLessons.Where(x => x.UnitId == unit.UnitId))
+                        .Where(p => p.StudentId == item.Id && p.Status == EnumResultStatus.Done && p.UnitId == unit.UnitId)
+                        .Where(p => p.UpdatedDate >= lastFridayAt13 && p.UpdatedDate <= currentDate)
+                        .Where(x => x.ClassForumResults.Any(x => x.Status == EnumClassForumResultStatus.Graded))
+                        .OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
                     int index = 1;
 
                     if (lessonResultsDone.Count > 0)
@@ -188,9 +194,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                         for (var i = 0; i < lessonResultsDone.Count; i++)
                         {
-                            unitName += string.Format(CultureInfo.InvariantCulture, lessonNameHtml, index, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
+                            unitName += string.Format(CultureInfo.InvariantCulture, lessonNameHtml, lessonResultsDone[i].Lesson?.UnitLessons.FirstOrDefault(x => x.UnitId == unit.UnitId)?.DisplayOrder, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
 
-                            foreach (var ls in lessonResultsDone[i].SkillScores!)
+                            foreach (var ls in lessonResultsDone[i].SkillScores!.OrderBy(x => x.Skill))
                             {
                                 //if (i > 0)
                                 //{

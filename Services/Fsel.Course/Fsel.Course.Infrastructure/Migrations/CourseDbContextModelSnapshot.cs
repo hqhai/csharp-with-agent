@@ -305,6 +305,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<string>("WordContent")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("WordCount")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClassForumId");
@@ -361,6 +364,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<bool>("IsRetry")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("TimeCount")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -2935,6 +2941,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("TimeCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -2947,6 +2956,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
+
+                    b.Property<int?>("WordCount")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

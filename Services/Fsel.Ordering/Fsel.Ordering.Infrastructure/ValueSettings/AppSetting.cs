@@ -65,6 +65,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public string? SystemApiUrl { get; set; }
         public string? UrBoxApiUrl { get; set; }
         public string? PayooApiUrl { get; set; }
+        public string? AppStoreServerApiUrl { get; set; }
     }
 
     public class Otp
