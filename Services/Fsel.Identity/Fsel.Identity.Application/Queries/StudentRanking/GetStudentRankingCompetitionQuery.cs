@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<StudentRankingModel>> methodResult = new MethodResult<PagingItemsModel<StudentRankingModel>>();
 
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IeltsStudentsName);
             if (_environment.IsProduction() && request.CourseType == EnumCourseType.Academic)
             {
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);

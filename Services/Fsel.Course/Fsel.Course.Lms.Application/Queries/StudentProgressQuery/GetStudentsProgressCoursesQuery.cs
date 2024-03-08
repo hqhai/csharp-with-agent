@@ -4,10 +4,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using System.Collections.Generic;
     using System.Linq.Dynamic.Core;
+    using System.Linq.Expressions;
     using System.Reflection.Metadata;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -122,12 +124,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #endregion
 
             #region Video
-            var videoResults = await VideoResults(videoLessonRatio, studentIds, EnumLearnType.Video, cancellationToken);
+            var videoResults = CompetitionAverageScores(_videoResultRepository, videoLessonRatio, studentIds, EnumLearnType.Video);
             #endregion
 
             #region UnitsTest
             var videoResultCompetition = _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && studentIds.Contains(x.StudentId));
-            var unitTestGroupByStudentId = videoResultCompetition
+            var unitTestGroupByStudentId = request.CourseType == EnumCourseType.Ielts ? new List<StudentCompetitionAverageScore>() : videoResultCompetition
                 .GroupBy(vr => vr.StudentId)
                 .AsEnumerable()
                 .Select(group =>
@@ -147,7 +149,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #endregion
 
             #region SkillsTest
-            var skillTestGroupByStudentId = videoResultCompetition
+            var skillTestGroupByStudentId = request.CourseType == EnumCourseType.Ielts ? new List<StudentCompetitionAverageScore>() : videoResultCompetition
                 .GroupBy(vr => vr.StudentId)
                 .AsEnumerable()
                 .Select(group =>
@@ -168,7 +170,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #endregion
 
             #region HomeWork
-            var homeWorkResults = await HomeWorkResults(homeWorkRatio, studentIds, EnumLearnType.HomeWork, cancellationToken);
+            var homeWorkResults = CompetitionAverageScores(_homeWorkResultRepository, homeWorkRatio, studentIds, EnumLearnType.HomeWork);
             #endregion
 
             #region ClassForum
@@ -179,6 +181,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                             && x.ClassForum != null
                             && EF.Functions.DataLength(x.WordContent) >= x.ClassForum.TaggetWordLimit);
             int countClassForumDistinct = classForumResultCompetion.Select(x => x.StudentId).Distinct().Count();
+
             var classForumnResultGroupByStudentId = classForumResultCompetion
                 .GroupBy(vr => vr.StudentId)
                 .Select(group =>
@@ -196,7 +199,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #endregion
 
             #region FinalTest
-            var finalResults = await FinalResults(ValueSettings.AcademicStudentResultRatio.FinalTestRatio, studentIds, EnumLearnType.FinalTest, cancellationToken);
+            var finalResults = request.CourseType == EnumCourseType.Ielts ? new List<StudentCompetitionAverageScore>() : CompetitionAverageScores(_finalTestResultRepository, ValueSettings.AcademicStudentResultRatio.FinalTestRatio, studentIds, EnumLearnType.FinalTest);
 
             List<List<StudentCompetitionAverageScore>> allResults = new List<List<StudentCompetitionAverageScore>>
                 {
@@ -210,11 +213,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             List<StudentCompetitionOverallModel> overallResults = new List<StudentCompetitionOverallModel>();
 
-
-            if (request.CourseType == EnumCourseType.Academic)
-            {
-                overallResults = CalculateOverallOfAcademicStudent(studentIds, allResults);
-            }
+            overallResults = CalculateOverallOfAcademicStudent(studentIds, allResults);
             #endregion
 
             #region Result
@@ -238,37 +237,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return methodResult;
         }
 
-        private static List<StudentCompetitionOverallModel> CalculateOverallOfAcademicStudent(IList<Guid>? studentIds, List<List<StudentCompetitionAverageScore>> allResults)
-        {
-            // Thực hiện tính toán trên tất cả các kết quả ở đây
-
-            List<StudentCompetitionOverallModel> joinedList = studentIds!
-                           .GroupJoin(allResults[0], studentId => studentId, itemA => itemA.StudentId, (studentId, itemsA) => new { StudentId = studentId, ItemsA = itemsA.DefaultIfEmpty() })
-                           .GroupJoin(allResults[1], studentId => studentId.StudentId, itemB => itemB.StudentId, (result, itemsB) => new { result.StudentId, result.ItemsA, ItemsB = itemsB.DefaultIfEmpty() })
-                           .GroupJoin(allResults[2], studentId => studentId.StudentId, itemC => itemC.StudentId, (result, itemsC) => new { result.StudentId, result.ItemsA, result.ItemsB, ItemsC = itemsC.DefaultIfEmpty() })
-                           .GroupJoin(allResults[3], studentId => studentId.StudentId, itemD => itemD.StudentId, (result, itemsD) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, ItemsD = itemsD.DefaultIfEmpty() })
-                           .GroupJoin(allResults[4], studentId => studentId.StudentId, itemE => itemE.StudentId, (result, itemsE) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, result.ItemsD, ItemsE = itemsE.DefaultIfEmpty() })
-                           .GroupJoin(allResults[5], studentId => studentId.StudentId, itemF => itemF.StudentId, (result, itemsF) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, result.ItemsD, result.ItemsE, ItemsF = itemsF.DefaultIfEmpty() })
-                           .SelectMany(result => result.ItemsA
-                               .SelectMany(itemA => result.ItemsB
-                                   .SelectMany(itemB => result.ItemsC
-                                       .SelectMany(itemC => result.ItemsD
-                                        .SelectMany(itemD => result.ItemsE
-                                           .SelectMany(itemE => result.ItemsF
-                                               .Select(itemF => new StudentCompetitionOverallModel
-                                               {
-                                                   StudentId = result.StudentId,
-                                                   TotalScore = (CaculateDonomerator(itemA) + CaculateDonomerator(itemB) + CaculateDonomerator(itemC) + CaculateDonomerator(itemD) + CaculateDonomerator(itemE) + CaculateDonomerator(itemF)) != 0 ? ((CaculateNumerator(itemA) + CaculateNumerator(itemB) + CaculateNumerator(itemC) + CaculateNumerator(itemD) + CaculateNumerator(itemE) + CaculateNumerator(itemF)) * 100) / (CaculateDonomerator(itemA) + CaculateDonomerator(itemB) + CaculateDonomerator(itemC) + CaculateDonomerator(itemD) + CaculateDonomerator(itemE) + CaculateDonomerator(itemF)) : 0
-                                               })
-                                           )
-                                       )
-                                   )
-                               )
-                           )
-                        ).ToList();
-
-            return joinedList;
-        }
 
 
         #region Caculatator
@@ -351,75 +319,85 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             double result = item.TotalRecords * item.LearnRatio;
             return result;
         }
+
+        private static List<StudentCompetitionOverallModel> CalculateOverallOfAcademicStudent(IList<Guid>? studentIds, List<List<StudentCompetitionAverageScore>> allResults)
+        {
+            // Thực hiện tính toán trên tất cả các kết quả ở đây
+
+            List<StudentCompetitionOverallModel> joinedList = studentIds!
+                           .GroupJoin(allResults[0], studentId => studentId, itemA => itemA.StudentId, (studentId, itemsA) => new { StudentId = studentId, ItemsA = itemsA.DefaultIfEmpty() })
+                           .GroupJoin(allResults[1], studentId => studentId.StudentId, itemB => itemB.StudentId, (result, itemsB) => new { result.StudentId, result.ItemsA, ItemsB = itemsB.DefaultIfEmpty() })
+                           .GroupJoin(allResults[2], studentId => studentId.StudentId, itemC => itemC.StudentId, (result, itemsC) => new { result.StudentId, result.ItemsA, result.ItemsB, ItemsC = itemsC.DefaultIfEmpty() })
+                           .GroupJoin(allResults[3], studentId => studentId.StudentId, itemD => itemD.StudentId, (result, itemsD) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, ItemsD = itemsD.DefaultIfEmpty() })
+                           .GroupJoin(allResults[4], studentId => studentId.StudentId, itemE => itemE.StudentId, (result, itemsE) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, result.ItemsD, ItemsE = itemsE.DefaultIfEmpty() })
+                           .GroupJoin(allResults[5], studentId => studentId.StudentId, itemF => itemF.StudentId, (result, itemsF) => new { result.StudentId, result.ItemsA, result.ItemsB, result.ItemsC, result.ItemsD, result.ItemsE, ItemsF = itemsF.DefaultIfEmpty() })
+                           .SelectMany(result => result.ItemsA
+                               .SelectMany(itemA => result.ItemsB
+                                   .SelectMany(itemB => result.ItemsC
+                                       .SelectMany(itemC => result.ItemsD
+                                        .SelectMany(itemD => result.ItemsE
+                                           .SelectMany(itemE => result.ItemsF
+                                               .Select(itemF => new StudentCompetitionOverallModel
+                                               {
+                                                   StudentId = result.StudentId,
+                                                   TotalScore = (CaculateDonomerator(itemA) + CaculateDonomerator(itemB) + CaculateDonomerator(itemC) + CaculateDonomerator(itemD) + CaculateDonomerator(itemE) + CaculateDonomerator(itemF)) != 0 ? ((CaculateNumerator(itemA) + CaculateNumerator(itemB) + CaculateNumerator(itemC) + CaculateNumerator(itemD) + CaculateNumerator(itemE) + CaculateNumerator(itemF)) * 100) / (CaculateDonomerator(itemA) + CaculateDonomerator(itemB) + CaculateDonomerator(itemC) + CaculateDonomerator(itemD) + CaculateDonomerator(itemE) + CaculateDonomerator(itemF)) : 0
+                                               })
+                                           )
+                                       )
+                                   )
+                               )
+                           )
+                        ).ToList();
+
+            return joinedList;
+        }
+
         #endregion
 
 
         #region QueryResult
-        private async Task<List<StudentCompetitionAverageScore>> HomeWorkResults(double ratioResult, IList<Guid>? studentIds, EnumLearnType learnType, CancellationToken cancellationToken)
+        private static List<StudentCompetitionAverageScore> CompetitionAverageScores<T>(IRepository<T> repository, double ratioResult, IList<Guid>? studentIds, EnumLearnType learnType)
+            where T : BaseResult
         {
-            var repository = _homeWorkResultRepository;
-            var resultCompetition = GetResultCommon(repository.Queryable, EnumResultStatus.Done, studentIds!);
+            List<Func<T, bool>> additionalConditions = new List<Func<T, bool>>
+                {
+                    x => x.Status == EnumResultStatus.Done
+                };
+
+            var resultCompetition = GetResultCommon(repository.Queryable, studentIds!, additionalConditions);
             int numberOfRecordValid = resultCompetition.Select(x => x.StudentId).Distinct().Count();
-            List<StudentCompetitionAverageScore> result = await resultCompetition
+            List<StudentCompetitionAverageScore> result = resultCompetition
                         .GroupBy(vr => vr.StudentId)
+                        .AsEnumerable()
                         .Select(group =>
-                        new StudentCompetitionAverageScore
                         {
-                            StudentId = group.Key,
-                            LearnRatio = numberOfRecordValid == 0 ? 0 : ratioResult / group.Count(),
-                            TotalRecords = group.Count(),
-                            AverageScoreByType = group.Sum(vr => vr.CorrectTotal == 0 ? 0 : (double)vr.CorrectCount / vr.CorrectTotal),
-                            LearnType = learnType
-                        }).ToListAsync(cancellationToken);
+                            return new StudentCompetitionAverageScore
+                            {
+                                StudentId = group.Key,
+                                LearnRatio = numberOfRecordValid == 0 ? 0 : ratioResult / group.Count(),
+                                TotalRecords = group.Count(),
+                                AverageScoreByType = group.Sum(vr => vr.CorrectTotal == 0 ? 0 : (double)vr.CorrectCount / vr.CorrectTotal),
+                                LearnType = learnType
+                            };
+                        }).ToList();
 
             return result;
         }
 
-        private async Task<List<StudentCompetitionAverageScore>> VideoResults(double ratioResult, IList<Guid>? studentIds, EnumLearnType learnType, CancellationToken cancellationToken)
+        private static IQueryable<T> GetResultCommon<T>(IQueryable<T>? repositoryQueryable, IList<Guid> studentIds, List<Func<T, bool>> additionalConditions) where T : BaseResult
         {
-            var repository = _videoResultRepository;
-            var resultCompetition = GetResultCommon(repository.Queryable, EnumResultStatus.Done, studentIds!);
-            int numberOfRecordValid = resultCompetition.Select(x => x.StudentId).Distinct().Count();
-            List<StudentCompetitionAverageScore> result = await resultCompetition
-                        .GroupBy(vr => vr.StudentId)
-                        .Select(group =>
-                        new StudentCompetitionAverageScore
-                        {
-                            StudentId = group.Key,
-                            LearnRatio = numberOfRecordValid == 0 ? 0 : ratioResult / group.Count(),
-                            TotalRecords = group.Count(),
-                            AverageScoreByType = group.Sum(vr => vr.CorrectTotal == 0 ? 0 : (double)vr.CorrectCount / vr.CorrectTotal),
-                            LearnType = learnType
-                        }).ToListAsync(cancellationToken);
+            var query = repositoryQueryable!.Where(x => studentIds.Contains(x.StudentId));
 
-            return result;
-        }
+            foreach (var condition in additionalConditions)
+            {
+                query = query.Where(condition).AsQueryable();
+            }
 
-        private async Task<List<StudentCompetitionAverageScore>> FinalResults(double ratioResult, IList<Guid>? studentIds, EnumLearnType learnType, CancellationToken cancellationToken)
-        {
-            var repository = _finalTestResultRepository;
-            var resultCompetition = GetResultCommon(repository.Queryable, EnumResultStatus.Done, studentIds!);
-            int numberOfRecordValid = resultCompetition.Select(x => x.StudentId).Distinct().Count();
-            List<StudentCompetitionAverageScore> result = await resultCompetition
-                        .GroupBy(vr => vr.StudentId)
-                        .Select(group =>
-                        new StudentCompetitionAverageScore
-                        {
-                            StudentId = group.Key,
-                            LearnRatio = numberOfRecordValid == 0 ? 0 : ratioResult / group.Count(),
-                            TotalRecords = group.Count(),
-                            AverageScoreByType = group.Sum(vr => vr.CorrectTotal == 0 ? 0 : (double)vr.CorrectCount / vr.CorrectTotal),
-                            LearnType = learnType
-                        }).ToListAsync(cancellationToken);
-
-            return result;
+            return query;
         }
 
 
-        private static IQueryable<T> GetResultCommon<T>(IQueryable<T>? repositoryQueryable, EnumResultStatus status, IList<Guid> studentIds) where T : BaseResult
-        {
-            return repositoryQueryable!.Where(x => x.Status == status && studentIds.Contains(x.StudentId));
-        }
+
         #endregion
     }
 
