@@ -87,22 +87,38 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
 
             var studentDailyStreakResults = await _userService.GetAllDailyStreak(new BaseQueryModel()
             {
-                Filters = new List<GenericFilterModel>() { new GenericFilterModel()
-                {
-                    Property = "DailyDate",
-                    Operator = EnumFilterOperator.GreaterThan,
-                    Value = lastFridayAt13
-                } }
+                Filters = new List<GenericFilterModel>() {
+                    new GenericFilterModel()
+                    {
+                        Property = "DailyDate",
+                        Operator = EnumFilterOperator.GreaterThanOrEqual,
+                        Value = lastFridayAt13
+                    },
+                    new GenericFilterModel()
+                    {
+                        Property = "DailyDate",
+                        Operator = EnumFilterOperator.LessThanOrEqual,
+                        Value = currentDate
+                    }
+                }
             });
 
             var featureAccessTimeResults = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
             {
-                Filters = new List<GenericFilterModel>() { new GenericFilterModel()
-                {
-                    Property = "CreatedDate",
-                    Operator = EnumFilterOperator.GreaterThan,
-                    Value = lastFridayAt13
-                } }
+                Filters = new List<GenericFilterModel>() {
+                    new GenericFilterModel()
+                    {
+                        Property = "CreatedDate",
+                        Operator = EnumFilterOperator.GreaterThanOrEqual,
+                        Value = lastFridayAt13
+                    },
+                    new GenericFilterModel()
+                    {
+                        Property = "CreatedDate",
+                        Operator = EnumFilterOperator.LessThanOrEqual,
+                        Value = currentDate
+                    }
+                }
             });
 
             var previousFeatureAccessTimeResults = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
