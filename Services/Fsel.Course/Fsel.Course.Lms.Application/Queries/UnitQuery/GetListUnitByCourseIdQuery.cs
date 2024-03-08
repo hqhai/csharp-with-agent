@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                             .Select(x => new UnitModel
                             {
                                 Id = x.Id,
+                                Name = x.Name,
                                 CreatedDate = x.CreatedDate,
                                 DisplayOrder = x.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
                             }).ApplySort(request).ToListAsync(cancellationToken);
