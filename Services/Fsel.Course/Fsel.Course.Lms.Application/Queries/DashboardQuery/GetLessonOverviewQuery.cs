@@ -209,9 +209,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 {
                     var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id)).FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId.Value);
                     var videoTimeCodeResult = videoTimeCode?.VideoTimeCodeResults.FirstOrDefault();
-                    if (videoTimeCode != null && videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone && videoTimeCodeResult != null && videoTimeCodeResult.Status != EnumResultStatus.Done)
+                    if (videoTimeCode != null && videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone && (videoTimeCodeResult == null || videoTimeCodeResult.Status != EnumResultStatus.Done))
                     {
-                        (lessonOverview.ObjectId, lessonOverview.Status) = (videoTimeCode.Id, GetStatusOverview(videoTimeCodeResult.Status));
+                        (lessonOverview.ObjectId, lessonOverview.Status) = (videoTimeCode.Id, GetStatusOverview(videoTimeCodeResult?.Status ?? EnumResultStatus.New));
+                        (lessonOverview.ObjectId, lessonOverview.VideoId, lessonOverview.Status) = (videoTimeCode.Id, videoTimeCode.VideoId, GetStatusOverview(videoTimeCodeResult?.Status ?? EnumResultStatus.New));
                         lessonOverview.Type = videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest ? nameof(EnumTimeCodeType.UnitTest) : nameof(EnumTimeCodeType.SkillTest);
                     }
                 }
@@ -274,7 +275,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             lessonDashBoard.LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(lesson?.LessonInstructions.OrderBy(x => x.CreatedDate).ToList());
             lessonDashBoard.LessonResult = _mapper.Map<LessonResultModel>(lessonResult);
             lessonDashBoard.UnitId = lesson?.UnitLessons.FirstOrDefault()?.UnitId ?? (lessonResult?.UnitId ?? default);
-            (lessonDashBoard.ObjectId, lessonDashBoard.Type, lessonDashBoard.Status, lessonDashBoard.SkillScores) = (lessonOverview.ObjectId, lessonOverview.Type, lessonOverview.Status, skillScores);
+            (lessonDashBoard.ObjectId, lessonDashBoard.Type, lessonDashBoard.Status, lessonDashBoard.VideoId, lessonDashBoard.SkillScores) = (lessonOverview.ObjectId, lessonOverview.Type, lessonOverview.Status, lessonOverview.VideoId, skillScores);
             if (lessonResult != null)
             {
                 (lessonDashBoard.StatusVideo, lessonDashBoard.StatusClassForum, lessonDashBoard.StatusHomeWork, lessonDashBoard.PercentProgress) = await GetStatus(lessonResult);
@@ -364,6 +365,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         {
             public Guid? LessonId { get; set; }
             public Guid? UnitId { get; set; }
+            public Guid? VideoId { get; set; }
             public Guid? ObjectId { get; set; }
             public EnumLessonOverviewStatus? Status { get; set; }
             public bool IsUnitFirst { get; set; }

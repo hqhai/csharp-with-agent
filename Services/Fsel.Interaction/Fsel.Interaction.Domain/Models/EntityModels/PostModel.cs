@@ -5,6 +5,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
     using System;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Shared.Enums;
 
     public class PostModel : BaseModel
@@ -33,5 +34,8 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public IList<TopicTagModel>? TopicTags { get; set; }
 
         public IList<CommentModel>? Comments { get; set; }
+
+        public IList<InteractionActionModel>? ActionLikes { get; set; }
+
     }
 }
