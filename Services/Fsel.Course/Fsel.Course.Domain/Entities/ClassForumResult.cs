@@ -16,15 +16,25 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
 
-        public string? WordContent { get; set; }
+        private string? _wordContent;
 
-        [NotMapped]
-        public int WordCount
-        { get { return StringHelper.CountWords(WordContent); } }
+        public string? WordContent
+        {
+            get { return _wordContent; }
+            set { _wordContent = value; WordCount = StringHelper.CountWords(value); }
+        }
+
+        private int? _wordCount;
+        public int? WordCount
+        {
+            get { return _wordCount == null ? StringHelper.CountWords(WordContent) : _wordCount; }
+            set { _wordCount = value; }
+        }
+
 
         [NotMapped]
         public int? TimeCount
-        { get { return ClassForumResultFiles.Select(p => p.TimeCount).Sum(); } }
+        { get { return ClassForumResultFiles.Where(x => x.IsRetry == false).Select(p => p.TimeCount).Sum(); } }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
