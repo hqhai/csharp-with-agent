@@ -12,11 +12,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Jose;
     using MediatR;
 
-    public class GenerateTokenPaymentAppStoreCommand : IRequest<MethodResult<object>>
+    public class GenerateTokenPaymentAppStoreCommand : IRequest<MethodResult<string>>
     {
     }
 
-    public class GenerateTokenPaymentAppStoreCommandHandler : IRequestHandler<GenerateTokenPaymentAppStoreCommand, MethodResult<object>>
+    public class GenerateTokenPaymentAppStoreCommandHandler : IRequestHandler<GenerateTokenPaymentAppStoreCommand, MethodResult<string>>
     {
         private readonly AppSetting appSetting;
         private readonly IInAppPurchaseService _inAppPurchaseService;
@@ -29,10 +29,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             _mediator = mediator;
         }
 
-        public async Task<MethodResult<object>> Handle(GenerateTokenPaymentAppStoreCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<string>> Handle(GenerateTokenPaymentAppStoreCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<object>();
+            var methodResult = new MethodResult<string>();
             var iss = "e578fe49-b5c1-4f5b-988f-456e0cbba8c8";
             var bid = "com.fsel.lmsapp.uat";
             var kid = "MD59H6MRVY";
@@ -65,7 +65,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             string token = JWT.Encode(payload, key, JwsAlgorithm.ES256, header);
 
             var getToken = await _inAppPurchaseService.GetNotification(token);
+            await Task.Delay(1000);
             var statusToken = await _inAppPurchaseService.GetStatusNotification(getToken.Content?.TestNotificationToken, token);
+            methodResult.Result = statusToken.Content?.SignedPayload;
             return methodResult;
         }
 
