@@ -308,7 +308,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var courseId = unitResult != null ? unitResult.CourseId : default;
             if (courseId != default && unitResult != null)
             {
-                var course = await _courseRepository.GetIncludeCourseUnitMockTestByIdAsync(courseId, unitResult.StudentId);
+                var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == courseId, cancellationToken);
                 if (course != null)
                 {
                     var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate).ToList();
@@ -343,13 +343,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var courseId = mockTestResult != null ? mockTestResult.CourseId : default;
             if (courseId != default && mockTestResult != null)
             {
-                var course = await _courseRepository.GetIncludeCourseUnitMockTestByIdAsync(courseId, mockTestResult.StudentId);
+                var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == courseId, cancellationToken);
                 if (course != null)
                 {
                     var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate).ToList();
                     var courseUnitMockTest = GetCourseUnitMockTest(courseUnitMockTests, mockTestResult.MockTestId, nameof(mockTestResult.MockTestId));
-                    var isCheckUnitResults = course.UnitResults.Where(x => x.StudentId == mockTestResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
-                    var isCheckDone = isCheckUnitResults && course.MockTestResults.Where(x => x.StudentId == mockTestResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
+                    var isCheckUnitResults = await _unitResultRepository.Queryable.AllAsync(x => x.StudentId == mockTestResult.StudentId && x.Status == EnumResultStatus.Done, cancellationToken);
+                    var isCheckDone = isCheckUnitResults && await _mockTestResultRepository.Queryable.AllAsync(x => x.StudentId == mockTestResult.StudentId && x.Status == EnumResultStatus.Done, cancellationToken);
                     if (!isCheckDone && courseUnitMockTest != null)
                     {
                         await UpdateStatusProcess(courseUnitMockTest, mockTestResult.StudentId, cancellationToken);

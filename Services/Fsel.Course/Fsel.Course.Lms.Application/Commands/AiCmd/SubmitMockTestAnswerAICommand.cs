@@ -187,17 +187,21 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                 if (checkSkillMockTest)
                 {
-                    if (mockTestResult.TokenFirstTime.HasValue && mockTestResult.TokenFirstTime != 0 && section.DisplayOrder != 1)
+                    _mockTestResultRepository.Update(mockTestResult);
+                    if (mockTestResult.TokenFirstTime.HasValue && mockTestResult.TokenFirstTime != 0)
                     {
                         await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
                         {
                             NumberOfToken = mockTestResult.TokenFirstTime.Value,
                             StudentId = mockTestResult.StudentId,
                         }).ConfigureAwait(false);
-                    }
 
-                    _mockTestResultRepository.Update(mockTestResult);
-                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                        await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    }
                 }
             }
 
