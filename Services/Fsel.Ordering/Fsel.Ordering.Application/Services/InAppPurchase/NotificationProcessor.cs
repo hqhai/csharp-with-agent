@@ -24,55 +24,38 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
 
         public void Process(AppleNotification notification)
         {
-            _logger.LogError(notification.SignedPayload);
-            var v2Notification = GetVerifiedDecodedData<NotificationV2>(notification?.SignedPayload);
+            var v2Notification = GetVerifiedDecodedData<NotificationV2>(notification.SignedPayload);
             if (v2Notification?.DecodedPayload?.Data == null || !v2Notification.IsValid)
             {
-                _logger.LogError("Data is null or is not valid");
-                return;
+                throw new ArgumentNullException($"{nameof(v2Notification.DecodedPayload.Data)} is null or is not valid");
             }
 
             RenewalInfoV2? renewalInfo = null;
             if (!string.IsNullOrEmpty(v2Notification.DecodedPayload.Data.SignedRenewalInfo))
             {
                 var renewalInfoV2Verified = GetVerifiedDecodedData<RenewalInfoV2>(v2Notification.DecodedPayload.Data.SignedRenewalInfo);
-                if (renewalInfoV2Verified != null && renewalInfoV2Verified.IsValid)
-                {
+                if (renewalInfoV2Verified.IsValid)
                     renewalInfo = renewalInfoV2Verified.DecodedPayload;
-                }
             }
 
             var transactionInfoResponse = GetVerifiedDecodedData<TransactionInfoV2>(v2Notification.DecodedPayload.Data.SignedTransactionInfo);
             TransactionInfoV2? transactionInfo = null;
-            if (transactionInfoResponse != null && transactionInfoResponse.IsValid)
-            {
+            if (transactionInfoResponse.IsValid)
                 transactionInfo = transactionInfoResponse.DecodedPayload;
-            }
-            _logger.LogError("Done");
-            _subscriptionService.Update(v2Notification.DecodedPayload, renewalInfo, transactionInfo);
         }
 
-        private VerifiedDecodedDataModel<TNotificationData>? GetVerifiedDecodedData<TNotificationData>(string? signedPayload)
+        private VerifiedDecodedDataModel<TNotificationData> GetVerifiedDecodedData<TNotificationData>(string signedPayload)
         {
             if (string.IsNullOrEmpty(signedPayload))
             {
-                _logger.LogError("Signed Payload is null");
-                return null;
+                throw new ArgumentNullException("Signed Payload is null");
             }
 
-            var splitParts = signedPayload.Split('.'); // JWS header, payload, and signature representations
+            var splitParts = signedPayload.Split('.');
 
-            var ensurePartElements = EnsurePartElements(splitParts);
-            if (!ensurePartElements)
-            {
-                return null;
-            }
+            EnsurePartElements(splitParts);
 
             var valid = VerifyToken(signedPayload);
-            if (!valid)
-            {
-                return null;
-            }
 
             var payload = splitParts[1];
 
@@ -83,94 +66,79 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
             };
         }
 
-        private bool EnsurePartElements(string[] split)
+        private static void EnsurePartElements(string[] split)
         {
             if (split.Length != 3)
             {
-                _logger.LogError("Invalid signedPayload");
-                return false;
+                throw new ArgumentException("Invalid signedPayload");
             }
 
             if (string.IsNullOrEmpty(split[0]))
             {
-                _logger.LogError("Invalid jws_header part");
-                return false;
+                throw new ArgumentException("Invalid jws_header part");
             }
 
             if (string.IsNullOrEmpty(split[1]))
             {
-                _logger.LogError("Invalid jws_payload part");
-                return false;
+                throw new ArgumentException("Invalid jws_payload part");
             }
 
             if (string.IsNullOrEmpty(split[2]))
             {
-                _logger.LogError("Invalid jws_signature part");
-                return false;
+                throw new ArgumentException("Invalid jws_signature part");
             }
-            return true;
         }
 
-        private bool VerifyToken(string token)
+        private static bool VerifyToken(string token)
         {
             try
             {
                 var handler = new JwtSecurityTokenHandler();
                 var jwtSecurityToken = handler.ReadJwtToken(token);
 
-                var x5cTry = jwtSecurityToken.Header.TryGetValue("x5c", out object? x5cCertificates);
-                if (!x5cTry || x5cCertificates == null)
+                var x5cTry = jwtSecurityToken.Header.TryGetValue("x5c", out object x5cCerteficates);
+                if (!x5cTry || x5cCerteficates == null)
                 {
-                    _logger.LogError("Token Header does not contain x5c");
-                    return false;
+                    throw new KeyNotFoundException("Token Header does not contain x5c");
                 }
 
-                var certificatesItems = JsonConvert.DeserializeObject<IEnumerable<string>>(x5cCertificates.ToString());
-                if (certificatesItems == null || !certificatesItems.Any())
+                var certeficatesItems = JsonConvert.DeserializeObject<IEnumerable<string>>(x5cCerteficates.ToString());
+                if (certeficatesItems == null || !certeficatesItems.Any())
                 {
-                    _logger.LogError("Certeficates are null");
-                    return false;
+                    throw new ArgumentNullException("Certeficates are null");
                 }
 
-                var securityToken = Validate(handler, token, certificatesItems.First());
+                var securityToken = Validate(handler, token, certeficatesItems.First());
 
                 return securityToken != null;
             }
             catch
             {
+                // log it
                 return false;
             }
         }
 
         private static SecurityToken? Validate(JwtSecurityTokenHandler tokenHandler, string jwtToken, string publicKey)
         {
-            try
-            {
-                var certificateBytes = Base64UrlEncoder.DecodeBytes(publicKey);
-                using (var certificate = new X509Certificate2(certificateBytes))
-                {
-                    var eCDsa = certificate.GetECDsaPublicKey();
+            var certificateBytes = Base64UrlEncoder.DecodeBytes(publicKey);
+            var certificate = new X509Certificate2(certificateBytes);
+            var eCDsa = certificate.GetECDsaPublicKey();
 
-                    TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuer = true,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new ECDsaSecurityKey(eCDsa),
-                    };
-
-                    tokenHandler.ValidateToken(jwtToken, tokenValidationParameters, out var securityToken);
-                    return securityToken;
-                }
-            }
-            catch
+            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
             {
-                return null;
-            }
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new ECDsaSecurityKey(eCDsa),
+            };
+
+            tokenHandler.ValidateToken(jwtToken, tokenValidationParameters, out var securityToken);
+            return securityToken;
         }
 
-        private static TObj? DecodeFromBase64<TObj>(string encodedString)
+        private static TObj DecodeFromBase64<TObj>(string encodedString)
         {
             var data = Base64UrlTextEncoder.Decode(encodedString);
             string decodedString = Encoding.UTF8.GetString(data);

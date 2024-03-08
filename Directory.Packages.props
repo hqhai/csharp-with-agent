@@ -8,8 +8,7 @@
     <PackageReference Include="AWSSDK.S3" Version="3.7.103.51" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.5" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.0.2" />
-    <PackageReference Include="Google.Apis.AndroidPublisher.v3" Version="1.67.0.3339" />
-    <PackageReference Include="Google.Apis.Auth" Version="1.67.0" />
+    <PackageReference Include="jose-jwt" Version="4.1.0" />
     <PackageReference Include="Fsel.Core" Version="1.2.32-rc.1" />
   </ItemGroup>
   <!-- Tests -->

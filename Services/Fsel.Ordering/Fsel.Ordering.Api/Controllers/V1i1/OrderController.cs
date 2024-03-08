@@ -78,18 +78,5 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
                 return StatusCode(500);
             }
         }
-
-        /// <summary>
-        /// Get Notification from App Store
-        /// </summary>
-        [AllowAnonymous]
-        [HttpPost("get-notification")]
-        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetNotification()
-        {
-            var commandResult = await _mediator.Send(new GenerateTokenPaymentAppStoreCommand() { }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
     }
 }
