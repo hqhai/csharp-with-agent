@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 mergedSkillScores = mergedSkillScores.Concat(skillSkillScores).Concat(unitSkillScores).Concat(finalTestSkillScores).ToList();
                 percents.AddRange(new List<double> { percentUnitSkill, percentSkill, percentFinalTest });
             }
-            List<SkillScores> groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
+            List<SkillScores> groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).OrderBy(x => x.Skill).ToList();
             return (groupedSkillScores, percents.Sum());
         }
 
