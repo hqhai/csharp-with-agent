@@ -25,6 +25,8 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
     public class WeeklyReportQuery : IRequest<MethodResult<bool>>
     {
         public ICollection<Guid>? StudentIds { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 
     public class WeeklyReportQueryHandler : IRequestHandler<WeeklyReportQuery, MethodResult<bool>>
@@ -73,10 +75,10 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             {
                 return methodResult;
             }
-            DateTime currentDate = DateTime.UtcNow;
+            DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value : DateTime.UtcNow;
 
             // Lấy ngày thứ 6 gần nhất lúc 13h
-            DateTime lastFridayAt13 = currentDate.AddDays(-6);
+            DateTime lastFridayAt13 = request.StartDate.HasValue ? request.StartDate.Value : currentDate.AddDays(-6);
 
             DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
 
