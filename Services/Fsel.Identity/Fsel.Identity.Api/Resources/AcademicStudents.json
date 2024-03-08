@@ -439,5 +439,13 @@
     "Grade": 5,
     "StudentId": "D320B930-E5C0-4C2A-90DF-DC00C8369D95",
     "UserId": "5D02093A-ABBD-4536-67EA-08DC176BAE33"
+  },
+  {
+    "SchoolName": "THCS Nguyễn Du - Nam Từ Liêm",
+    "FullName": "Phan Bảo Phúc",
+    "Email": "kejiv79636@telvetto.com",
+    "Grade": 7,
+    "StudentId": "E963435E-5293-4DDF-8451-955BE0623440",
+    "UserId": "BFE091EB-D077-4D2B-F255-08DC1358A8B5"
   }
 ]
