@@ -204,7 +204,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 weeklyReport.ColorSocial = totalSocial > previousSocial ? "#53BF65" : (totalSocial == previousSocial ? "#FFAE46" : "#C0404C");
                 weeklyReport.ColorOther = totalOther > previousOther ? "#53BF65" : (totalOther == previousOther ? "#FFAE46" : "#C0404C");
 
-                var unitResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.UpdatedDate >= lastFridayAt13 && p.UpdatedDate <= currentDate && p.StudentId == item.Id).OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
+                var unitResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.UpdatedDate >= lastFridayAt13 && p.StudentId == item.Id).OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
 
                 var unitDoneCount = unitResult.Where(p => p.Status == EnumResultStatus.Done).Count();
                 var courseType = unitResult.FirstOrDefault()?.Course?.CourseType;
