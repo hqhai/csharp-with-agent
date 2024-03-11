@@ -23,7 +23,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var unitResult = notification.Data;
-            await UpdateCourse(unitResult.Course, unitResult.StudentId, cancellationToken).ConfigureAwait(false);
+            await UpdateCourse(unitResult.Course, unitResult.StudentId, cancellationToken);
+            Thread.Sleep(2000);
             if (unitResult.Status == EnumResultStatus.Done)
             {
                 await UpdateProcessUnit(unitResult, cancellationToken);

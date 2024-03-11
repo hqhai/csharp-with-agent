@@ -13,7 +13,8 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/unit")]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     [ApiController]

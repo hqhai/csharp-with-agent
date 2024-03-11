@@ -2,7 +2,9 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class MockTestResultReportModel : TestResultReportModel
+    using Fsel.Course.Domain.IEntities;
+
+    public class MockTestResultReportModel : TestResultReportModel, ITokenResult
     {
         public bool IsTeacherGraded { get; set; }
     }

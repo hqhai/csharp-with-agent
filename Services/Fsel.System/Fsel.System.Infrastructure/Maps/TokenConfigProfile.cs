@@ -14,6 +14,10 @@ namespace Fsel.System.Infrastructure.Maps
         {
             CreateMap<TokenConfig, TokenConfigModel>().IgnoreAllNonExisting();
             CreateMap<UpdateTokenConfigCommandModel, TokenConfig>().IgnoreAllNonExisting();
+
+            CreateMap<TokenCoinConfigs, TokenConfigDailyCheckIns>();
+            CreateMap<TokenCoinConfigs, TokenConfigs>();
+            CreateMap<TokenCoinConfigs, TokenConfigFocusModes>();
         }
     }
 }

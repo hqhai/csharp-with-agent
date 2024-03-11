@@ -919,6 +919,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<bool>("IsEstablished")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsReceivedToken")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
