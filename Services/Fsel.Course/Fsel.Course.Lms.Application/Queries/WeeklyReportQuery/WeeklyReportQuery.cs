@@ -85,23 +85,23 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             // Lấy danh sách ngày từ thứ 7 tuần trước đến giờ
             var dates = GenerateDateList(lastFridayAt13, currentDate);
 
-            var studentDailyStreakResults = await _userService.GetAllDailyStreak(new BaseQueryModel()
-            {
-                Filters = new List<GenericFilterModel>() {
-                    new GenericFilterModel()
-                    {
-                        Property = "DailyDate",
-                        Operator = EnumFilterOperator.GreaterThanOrEqual,
-                        Value = lastFridayAt13
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "DailyDate",
-                        Operator = EnumFilterOperator.LessThanOrEqual,
-                        Value = currentDate
-                    }
-                }
-            });
+            //var studentDailyStreakResults = await _userService.GetAllDailyStreak(new BaseQueryModel()
+            //{
+            //    Filters = new List<GenericFilterModel>() {
+            //        new GenericFilterModel()
+            //        {
+            //            Property = "DailyDate",
+            //            Operator = EnumFilterOperator.GreaterThanOrEqual,
+            //            Value = lastFridayAt13
+            //        },
+            //        new GenericFilterModel()
+            //        {
+            //            Property = "DailyDate",
+            //            Operator = EnumFilterOperator.LessThanOrEqual,
+            //            Value = currentDate
+            //        }
+            //    }
+            //});
 
             var featureAccessTimeResults = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
             {
@@ -150,19 +150,22 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                     ContinueLearn = "https://lms-testing.fsel.edu.vn/home/home-chart"
                 };
 
-                var dailyStreakResult = await _userService.GetDailyStreak(item.Id);
-                var dailyStreak = dailyStreakResult.Content?.Result;
-                if (dailyStreak != null && dailyStreak.IsDaysStreakIncrease)
-                {
-                    weeklyReport.NoDailyStreak = HtmlSetting.Display;
-                    weeklyReport.DailyStreak = null;
-                    weeklyReport.TotalDailyStreak = dailyStreak.NumberOfDaysStreak.ToString(CultureInfo.CurrentCulture);
-                }
-                else
-                {
-                    weeklyReport.NoDailyStreak = null;
-                    weeklyReport.DailyStreak = HtmlSetting.Display;
-                }
+                weeklyReport.NoDailyStreak = null;
+                weeklyReport.DailyStreak = HtmlSetting.Display;
+
+                //var dailyStreakResult = await _userService.GetDailyStreak(item.Id);
+                //var dailyStreak = dailyStreakResult.Content?.Result;
+                //if (dailyStreak != null && dailyStreak.IsDaysStreakIncrease)
+                //{
+                //    weeklyReport.NoDailyStreak = HtmlSetting.Display;
+                //    weeklyReport.DailyStreak = null;
+                //    weeklyReport.TotalDailyStreak = dailyStreak.NumberOfDaysStreak.ToString(CultureInfo.CurrentCulture);
+                //}
+                //else
+                //{
+                //    weeklyReport.NoDailyStreak = null;
+                //    weeklyReport.DailyStreak = HtmlSetting.Display;
+                //}
 
                 CheckAndAssignStatus(weeklyReport, studentDailyStreaks, dates);
 
@@ -329,12 +332,12 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 }
                 else
                 {
-                    var totalDailyStreak = dailyStreak?.NumberOfDaysStreak;
+                    //var totalDailyStreak = dailyStreak?.NumberOfDaysStreak;
 
                     weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport2;
-                    weeklyReport.NoDailyStreak = totalDailyStreak >= 7 ? HtmlSetting.Display : null;
-                    weeklyReport.DailyStreak = totalDailyStreak >= 7 ? null : HtmlSetting.Display;
-                    weeklyReport.TotalDailyStreak = dailyStreak?.NumberOfDaysStreak.ToString(CultureInfo.CurrentCulture);
+                    //weeklyReport.NoDailyStreak = totalDailyStreak >= 7 ? HtmlSetting.Display : null;
+                    //weeklyReport.DailyStreak = totalDailyStreak >= 7 ? null : HtmlSetting.Display;
+                    //weeklyReport.TotalDailyStreak = dailyStreak?.NumberOfDaysStreak.ToString(CultureInfo.CurrentCulture);
                 }
 
                 await SendWeekly(item.Human?.Email, weeklyReport, cancellationToken);
