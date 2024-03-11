@@ -99,10 +99,6 @@ builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRa
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
 builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
 
-builder.Services.AddScoped<QuestBoardPublisher>();
-builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
-builder.Services.AddScoped<TokenHistoryPublisher>();
-
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();
@@ -133,6 +129,7 @@ builder.Services.AddScoped<GetTimeToCompleteTestPublisher>();
 builder.Services.AddScoped<SubmitAIResponsePublisher>();
 builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

@@ -47,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly ISystemService _systemService;
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly IQuestionRepository _questionRepository;
+        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             QuestionConverter questionConverter,
@@ -59,7 +60,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             ILessonResultRepository lessonResultRepository,
             ISystemService systemService,
             FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
-            IQuestionRepository questionRepository
+            IQuestionRepository questionRepository,
+            CreateTokenHistoryPublisher createTokenHistoryPublisher
             )
         {
             _homeWorkResultRepository = homeWorkResultRepository;
@@ -74,6 +76,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _systemService = systemService;
             _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
             _questionRepository = questionRepository;
+            _createTokenHistoryPublisher = createTokenHistoryPublisher;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
@@ -135,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return methodResult;
             }
 
-            await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, course.CourseType, cancellationToken);
+            await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, course.CourseType, student.NumberOfToken, cancellationToken);
             methodResult = await _mediator.Send(new GetHomeWorkQuery { HomeWorkId = homeWorkResult.HomeWorkId, LessonResultId = homeWorkResult.LessonResultId, IsShowSubStatus = request.IsSubmit }, cancellationToken);
             return methodResult;
         }
@@ -191,7 +194,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return methodResult;
         }
 
-        private async Task<long> GetToken(EnumSubmissionCount submissionCount, EnumCourseType courseType)
+        private async Task<(Guid, long)> GetToken(EnumSubmissionCount submissionCount, EnumCourseType courseType)
         {
             var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
             {
@@ -204,7 +207,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return default;
             }
             var tokenConfig = tokenConfigs.Content?.Result;
-            return tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+            return (tokenConfig?.Id ?? default, tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
         }
 
         private static HomeWorkAnswer GetHomeWorkAnswer(HomeWorkAnswer homeWorkAnswer, object? answerConfig, bool isAnswered, int correctCount, int correctCTotal)
@@ -216,7 +219,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return homeWorkAnswer;
         }
 
-        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, bool isSubmit, EnumCourseType courseType, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, bool isSubmit, EnumCourseType courseType, double numberOfToken, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(homeWorkResult);
             var methodResult = new MethodResult<bool>();
@@ -235,7 +238,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 homeWorkResult.Status = EnumResultStatus.Process;
                 if (isSubmit)
                 {
-                    var token = await GetToken(homeWorkResult.SubmissionCount, courseType);
+                    var (tokenConfigId, token) = await GetToken(homeWorkResult.SubmissionCount, courseType);
 
                     var isHomeWorkDone = homeWorkQuestionCount.CorrectCount == homeWorkQuestionCount.CorrectTotal || homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
                     if (homeWorkQuestionCount.TotalAnswer != homeWorkQuestionCount.TotalQuestion)
@@ -246,6 +249,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 
                     var tokensAchieved = await UpdateHomeWorkAnswers(homeWorkResult, isHomeWorkDone) * token;
                     homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
+                    await _createTokenHistoryPublisher.Publish(new TokenHistoryQueueModel
+                    {
+                        ObjectId = homeWorkResult.Id,
+                        InitialToken = numberOfToken,
+                        RemainToken = tokensAchieved,
+                        VolatileToken = numberOfToken + tokensAchieved,
+                        TokenConfigId = tokenConfigId,
+                        Type = EnumTokenHistoryType.Earn,
+                        UserId = _authContext.CurrentUserId,
+                    }, cancellationToken);
                 }
                 _homeWorkResultRepository.Update(homeWorkResult);
                 await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -254,17 +267,17 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return methodResult;
         }
 
-        private async Task<HomeWorkResult> GetHomeWorkResult(HomeWorkResult homeWorkResult, dynamic homeWorkQuestionCount, bool isHomeWorkDone, int tokenNumber)
+        private async Task<HomeWorkResult> GetHomeWorkResult(HomeWorkResult homeWorkResult, dynamic homeWorkQuestionCount, bool isHomeWorkDone, int tokensAchieved)
         {
             homeWorkResult.CorrectCount = homeWorkQuestionCount.CorrectCount;
             homeWorkResult.CorrectTotal = homeWorkQuestionCount.CorrectTotal;
             if (homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
             {
-                homeWorkResult.TokenFirstTime = tokenNumber;
+                homeWorkResult.TokenFirstTime = tokensAchieved;
             }
             else
             {
-                homeWorkResult.TokenLastTime = tokenNumber;
+                homeWorkResult.TokenLastTime = tokensAchieved;
             }
             if (isHomeWorkDone)
             {
@@ -283,16 +296,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 CountQuestion = homeWorkQuestionCount.TotalAnswer,
                 TotalQuestion = homeWorkQuestionCount.TotalQuestion,
             };
-            await UpdateTokenByStudent(homeWorkResult, tokenNumber);
+            await UpdateTokenByStudent(homeWorkResult, tokensAchieved);
             homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
             return homeWorkResult;
         }
 
-        private async Task UpdateTokenByStudent(HomeWorkResult homeWorkResult, long token)
+        private async Task UpdateTokenByStudent(HomeWorkResult homeWorkResult, long tokensAchieved)
         {
             await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
             {
-                NumberOfToken = token,
+                NumberOfToken = tokensAchieved,
                 StudentId = homeWorkResult.StudentId,
             }).ConfigureAwait(false);
         }

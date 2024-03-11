@@ -7,11 +7,11 @@ namespace Fsel.System.Application.Queues.Consumers
     using MassTransit;
     using MediatR;
 
-    public class TokenHistoryConsumer : IConsumer<TokenHistoryQueueModel>
+    public class CreateTokenHistoryConsumer : IConsumer<TokenHistoryQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public TokenHistoryConsumer(IMediator mediator)
+        public CreateTokenHistoryConsumer(IMediator mediator)
         {
             _mediator = mediator;
         }

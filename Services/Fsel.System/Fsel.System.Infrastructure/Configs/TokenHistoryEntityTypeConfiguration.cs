@@ -23,7 +23,6 @@ namespace Fsel.System.Infrastructure.Configs
                    .WithMany(b => b.TokenHistories)
                    .HasForeignKey(b => b.TokenConfigId)
                    .OnDelete(DeleteBehavior.Cascade);
-
         }
     }
 }

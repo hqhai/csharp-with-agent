@@ -21,5 +21,7 @@ namespace Fsel.System.Domain.Entities
             get { return ConvertHelper.Deserialize<object>(ConfigStr); }
             set { ConfigStr = ConvertHelper.Serialize(value); }
         }
+
+        public ICollection<TokenHistory> TokenHistories { get; set; } = new List<TokenHistory>();
     }
 }

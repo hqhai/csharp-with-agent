@@ -7,11 +7,11 @@ namespace Fsel.Identity.Application.Queues.Publishers
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
 
-    public class TokenHistoryPublisher
+    public class CreateTokenHistoryPublisher
     {
         private readonly IQueueProvider _queueProvider;
 
-        public TokenHistoryPublisher(IQueueProvider queueProvider)
+        public CreateTokenHistoryPublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;
         }
