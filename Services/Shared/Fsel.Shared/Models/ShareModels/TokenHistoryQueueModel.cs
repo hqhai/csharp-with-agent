@@ -1,11 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Entities
+namespace Fsel.Shared.Models.ShareModels
 {
-    using Fsel.Core.Entities;
+    using System;
     using Fsel.Shared.Enums;
 
-    public class TokenHistory : Entity
+    public class TokenHistoryQueueModel
     {
         public Guid TokenConfigId { get; set; }
 
@@ -20,7 +20,5 @@ namespace Fsel.System.Domain.Entities
         public Guid ObjectId { get; set; }
 
         public EnumTokenHistoryType Type { get; set; }
-
-        public TokenConfig? TokenConfig { get; set; }
     }
 }

@@ -56,7 +56,8 @@ queues: new Dictionary<string, Type>
 {
     { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardFinishConsumer) },
     { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(QuestBoardConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.CompleteApprovalPostTimeOut, typeof(CompleteApprovalConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.CompleteApprovalPostTimeOut, typeof(CompleteApprovalConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.CreateTokenHistory, typeof(TokenHistoryConsumer) }
 });
 
 var app = builder.Build();
