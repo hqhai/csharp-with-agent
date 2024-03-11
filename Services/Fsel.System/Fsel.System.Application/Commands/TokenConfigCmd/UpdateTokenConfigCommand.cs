@@ -45,7 +45,7 @@ namespace Fsel.System.Application.Commands.TokenConfigCmd
                 return methodResult;
             }
             var tokenConfigIds = request.TokenConfigs.Select(x => x.Id).ToList();
-            var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => request.TokenConfigs.Select(x => x.Id).Contains(x.Id)).ToListAsync(cancellationToken);
+            var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => tokenConfigIds.Contains(x.Id)).ToListAsync(cancellationToken);
 
             if (tokenConfigs == null || !tokenConfigs.Any() || tokenConfigs.Count != tokenConfigIds.Count)
             {
