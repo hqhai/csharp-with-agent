@@ -40,5 +40,6 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? ColorLearn { get; set; }
         public string? ColorSocial { get; set; }
         public string? ColorOther { get; set; }
+        public string? IsLessonDone { get; set; }
     }
 }

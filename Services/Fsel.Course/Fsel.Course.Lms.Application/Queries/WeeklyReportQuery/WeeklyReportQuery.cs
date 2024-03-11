@@ -139,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
 
             foreach (var item in students)
             {
-                var studentDailyStreaks = studentDailyStreakResults.Content?.Result?.Where(p => p.StudentId == item.Id).Select(p => p.DailyDate.Date).Distinct().ToList();
+                var studentDailyStreaks = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
 
                 var weeklyReport = new WeeklyReportModel()
                 {
@@ -270,6 +270,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                             }
                             index++;
                         }
+                        weeklyReport.IsLessonDone = HtmlSetting.Display;
                     }
                 }
                 weeklyReport.SkillScores = unitName;
