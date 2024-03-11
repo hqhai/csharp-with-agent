@@ -75,15 +75,15 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             {
                 return methodResult;
             }
+
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
-            // Lấy ngày thứ 6 gần nhất lúc 13h
             DateTime lastFridayAt13 = request.StartDate.HasValue ? request.StartDate.Value : currentDate.AddDays(-7);
 
             DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
 
-            // Lấy danh sách ngày từ thứ 7 tuần trước đến giờ
-            var dates = GenerateDateList(lastFridayAt13, currentDate);
+            // Lấy danh sách ngày từ thứ 2 tuần trước đến CN tuần trước
+            var dates = GenerateDateList(lastFridayAt13, currentDate.AddDays(-1));
 
             //var studentDailyStreakResults = await _userService.GetAllDailyStreak(new BaseQueryModel()
             //{
