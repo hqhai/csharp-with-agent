@@ -102,6 +102,15 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
                     && m.CreatedDate.Value.Month <= request.EndDate.Value.Month
                     && m.CreatedDate.Value.Year <= request.EndDate.Value.Year));
             }
+            if (request.FeatureLearn != null)
+            {
+                query = query.Where(m => m.FeatureLearn == request.FeatureLearn);
+            }
+
+            if (request.FeaturePlatform != null)
+            {
+                query = query.Where(m => m.FeaturePlatform == request.FeaturePlatform);
+            }
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
