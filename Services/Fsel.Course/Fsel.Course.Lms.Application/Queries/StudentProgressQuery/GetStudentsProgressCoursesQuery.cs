@@ -297,7 +297,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     {
                         double totalCorrectCount = tempList.FirstOrDefault(x => x.Type == timCodeType)?.SkillScores?.Sum(score => score.CorrectCount) ?? 0;
                         double totalTotalCount = tempList.FirstOrDefault(x => x.Type == timCodeType)?.SkillScores?.Sum(score => score.TotalCount) ?? 0;
-                        double overallPercent = Math.Round((double)totalCorrectCount / totalTotalCount, 2);
+                        double overallPercent = totalTotalCount == 0 ? 0 : Math.Round((double)totalCorrectCount / totalTotalCount, 2);
 
                         overallScore += overallPercent;
                     }
