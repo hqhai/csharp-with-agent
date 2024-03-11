@@ -75,10 +75,10 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             {
                 return methodResult;
             }
-            DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1) : DateTime.UtcNow;
+            DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
             // Lấy ngày thứ 6 gần nhất lúc 13h
-            DateTime lastFridayAt13 = request.StartDate.HasValue ? request.StartDate.Value : currentDate.AddDays(-6);
+            DateTime lastFridayAt13 = request.StartDate.HasValue ? request.StartDate.Value : currentDate.AddDays(-7);
 
             DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
 
@@ -145,7 +145,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 {
                     FullName = item.Human?.FullName,
                     StartDate = lastFridayAt13.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
-                    EndDate = currentDate.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
+                    EndDate = currentDate.AddDays(-1).ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
                     TotalDay = studentDailyStreaks?.Count.ToString(CultureInfo.CurrentCulture),
                     ContinueLearn = "https://lms-testing.fsel.edu.vn/home/home-chart"
                 };
