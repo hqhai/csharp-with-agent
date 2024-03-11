@@ -258,7 +258,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                         TokenConfigId = tokenConfigId,
                         Type = EnumTokenHistoryType.Earn,
                         UserId = _authContext.CurrentUserId,
-                    }, cancellationToken);
+                    }, cancellationToken).ConfigureAwait(false);
                 }
                 _homeWorkResultRepository.Update(homeWorkResult);
                 await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

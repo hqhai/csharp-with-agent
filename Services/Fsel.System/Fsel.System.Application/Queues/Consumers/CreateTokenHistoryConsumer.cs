@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Queues.Consumers
 {
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.System.Application.Commands.TokenHistoryCmd;
     using global::System.Threading.Tasks;
     using MassTransit;
     using MediatR;
@@ -18,18 +19,19 @@ namespace Fsel.System.Application.Queues.Consumers
 
         public async Task Consume(ConsumeContext<TokenHistoryQueueModel> context)
         {
-            if (context != null)
+            var data = context?.Message;
+            if (data != null)
             {
-                await _mediator.Send(new TokenHistoryQueueModel
+                await _mediator.Send(new CreateTokenHistoryCommand
                 {
-                    ObjectId = context.Message.ObjectId,
-                    InitialToken = context.Message.InitialToken,
-                    TokenConfigId = context.Message.TokenConfigId,
-                    RemainToken = context.Message.RemainToken,
-                    VolatileToken = context.Message.VolatileToken,
-                    Type = context.Message.Type,
-                    UserId = context.Message.UserId
-                }).ConfigureAwait(false);
+                    ObjectId = data.ObjectId,
+                    InitialToken = data.InitialToken,
+                    TokenConfigId = data.TokenConfigId,
+                    RemainToken = data.RemainToken,
+                    VolatileToken = data.VolatileToken,
+                    Type = data.Type,
+                    UserId = data.UserId
+                });
             }
         }
     }

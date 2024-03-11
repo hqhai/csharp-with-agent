@@ -13,7 +13,7 @@ namespace Fsel.System.Infrastructure.Maps
         public TokenHistoryProfile()
         {
             CreateMap<TokenHistory, TokenHistoryModel>().IgnoreAllNonExisting();
-            CreateMap<CreateTokenHistoryCommandModel, TokenHistoryModel>().IgnoreAllNonExisting();
+            CreateMap<CreateTokenHistoryCommandModel, TokenHistory>().IgnoreAllNonExisting();
         }
     }
 }
