@@ -24,5 +24,7 @@ namespace Fsel.System.Domain.Models.QueryModels
         public DateTime? EndDate { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public EnumCourseType? CourseType { get; set; }
+        public EnumFeaturePlatform? FeaturePlatform { get; set; }
+        public EnumFeatureLearn? FeatureLearn { get; set; }
     }
 }
