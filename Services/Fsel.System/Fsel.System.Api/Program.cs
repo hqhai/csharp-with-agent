@@ -43,6 +43,7 @@ builder.Services.AddScoped<IApprovalLogRepository, ApprovalLogRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
 builder.Services.AddScoped<IErrorReportRepository, ErrorReportRepository>();
+builder.Services.AddScoped<ITokenHistoryRepository, TokenHistoryRepository>();
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

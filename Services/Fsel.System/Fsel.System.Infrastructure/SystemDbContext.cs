@@ -40,6 +40,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new LocationEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new SchoolEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ErrorReportEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TokenHistoryEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -63,6 +64,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<Location> Locations { get; set; }
         public DbSet<School> Schools { get; set; }
         public DbSet<ErrorReport> ErrorReports { get; set; }
+        public DbSet<TokenHistory> TokenHistories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

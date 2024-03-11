@@ -30,5 +30,7 @@ namespace Fsel.System.Domain.Entities
             get { return ConvertHelper.Deserialize<object>(SuperConfigStr); }
             set { SuperConfigStr = ConvertHelper.Serialize(value); }
         }
+
+        public ICollection<TokenHistory> TokenHistories { get; set; } = new List<TokenHistory>();
     }
 }
