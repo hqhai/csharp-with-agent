@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
         {
             var method = await _videoConverter.GetVideoSkillScores(videoResult, cancellationToken);
             var skillScores = method.Item1.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;
-            var token = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id).GroupBy(x => x.VideoResultId).Select(x => new
+            var token = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode).Where(x => x.VideoTimeCode != null && x.VideoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone && x.VideoResultId == videoResult.Id).GroupBy(x => x.VideoResultId).Select(x => new
             {
                 TokenFirst = x.Where(x => x.TokenFirstTime.HasValue).Sum(x => x.TokenFirstTime),
                 TokenLast = x.Where(x => x.TokenLastTime.HasValue).Sum(x => x.TokenLastTime),
