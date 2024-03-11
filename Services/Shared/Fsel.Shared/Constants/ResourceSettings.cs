@@ -14,6 +14,9 @@ namespace Fsel.Shared.Constants
         public const string AcademicStudentsName = "Resources//AcademicStudents.json";
         public const string AcademicStudentsTestName = "Resources//AcademicStudents.Testing.json";
         public const string AcademicStudentsStagingName = "Resources//AcademicStudents.Staging.json";
+        public const string IeltsStudentsName = "Resources//IeltsStudents.json";
+        public const string IeltsStudentsNameTestName = "Resources//IeltsStudents.Testing.json";
+        public const string IeltsStudentsStagingName = "Resources//IeltsStudents.Staging.json";
         public const string RoleFileName = "Resources//Role.json";
 
         public const string PackageFileName = "Resources//Packages.json";
@@ -34,5 +37,6 @@ namespace Fsel.Shared.Constants
         public const string BandScoreFileName = "Resources//BandScores.json";
         public const string LeaderBoardPercentFileName = "Resources//LeaderBoardScorePercentage.json";
         public const string Payoo = "Resources//Payoo.xml";
+        public const string AppStore = "Resources//AppStore//AuthKey_MD59H6MRVY.p8";
     }
 }

@@ -88,15 +88,8 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetNotification()
         {
-            try
-            {
-                var status = await _inAppPurchaseService.GetNotification();
-                return Ok(status);
-            }
-            catch
-            {
-                return StatusCode(500);
-            }
+            var commandResult = await _mediator.Send(new GenerateTokenPaymentAppStoreCommand() { }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
