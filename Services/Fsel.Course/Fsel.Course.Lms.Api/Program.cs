@@ -101,6 +101,7 @@ builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingReposi
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
+builder.Services.AddScoped<TokenHistoryPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
