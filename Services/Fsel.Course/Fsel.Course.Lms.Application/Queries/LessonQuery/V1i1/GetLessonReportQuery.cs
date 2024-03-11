@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 {
+    using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
@@ -63,12 +64,13 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
-            methodResult.Result = GetLessonReport(video, videoResult);
+            methodResult.Result = await GetLessonReport(video, videoResult);
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private static LessonReportModel GetLessonReport(Video video, VideoResult videoResult)
+        private async Task<LessonReportModel> GetLessonReport(Video video, VideoResult videoResult)
         {
             var lessonReport = new LessonReportModel();
             var videoTimeCodes = video.VideoTimeCodes.Where(x => x.TimeCodeType == EnumTimeCodeType.Standalone);
@@ -78,7 +80,20 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             lessonReport.CorrectTotal = questions.Where(x => !x!.Ungraded).Sum(x => x!.CorrectTotal);
             lessonReport.Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal);
             lessonReport.HighestStreak = videoResult.HighestStreak;
+            if (videoResult.Status != EnumResultStatus.Done)
+            {
+                lessonReport.TokenNew = videoResult.TokenFirstTime;
+                await ResetTokenFirst(videoResult);
+            }
+
             return lessonReport;
+        }
+
+        private async Task ResetTokenFirst(VideoResult videoResult)
+        {
+            videoResult.TokenFirstTime = null;
+            _videoResultRepository.Update(videoResult);
+            await _videoResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
