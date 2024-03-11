@@ -29,6 +29,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
         [Get("/v1/admin/course/get-course-by-code/{code}")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByCode([FromRoute] string code);
 
+        [Get("/course/get-course-studied")]
+        Task<IApiResponse<MethodResult<CourseModel>>> GetCourseStudied();
 
         [Post("/v1/progress/students-competition")]
         Task<IApiResponse<MethodResult<IList<CompetitionStudentProgressModel>>>> GetStudentProgress([FromQuery] StudentCompetitionStatQueryModel query);

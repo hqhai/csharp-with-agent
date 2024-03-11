@@ -49,14 +49,8 @@ namespace Fsel.Course.Domain.Entities
 
         public int? HighestStreak { get; set; }
 
-        /// <summary>
-        /// Token Question Reward
-        /// </summary>
-        public int? TokenDone { get; set; }
-
-        public int? TokenHighestStreak { get; set; }
-        public int? TokenSuperFire { get; set; }
-        public int? TokenQuestionReward { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
         public ICollection<VideoTimeCodeResult> VideoTimeCodeResults { get; set; } = new List<VideoTimeCodeResult>();
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }

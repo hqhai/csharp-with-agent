@@ -102,23 +102,23 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
 
                 var studentReviewDetails = _mapper.Map<List<StudentReviewDetail>>(request.StudentReviewDetails);
 
-                var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
-                {
-                    Feature = EnumTokenFeature.ReviewSystem,
-                    Mission = request.ReviewType != EnumReviewType.Course ? EnumTokenMission.ReviewPlatform : EnumTokenMission.ReviewCourse
-                });
-                var tokenConfigResult = tokenConfig.Content?.Result;
+                //var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+                //{
+                //    Feature = EnumTokenFeature.ReviewSystem,
+                //    Mission = request.ReviewType != EnumReviewType.Course ? EnumTokenMission.ReviewPlatform : EnumTokenMission.ReviewCourse
+                //});
+                //var tokenConfigResult = tokenConfig.Content?.Result;
 
-                var targetConfig = tokenConfigResult.GetTokenNumber<TokenNumber>();
-                var targetNumber = targetConfig?.Number;
-                if (targetNumber.HasValue)
-                {
-                    var userToken = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-                    {
-                        StudentId = studentId ?? default,
-                        NumberOfToken = targetNumber.Value,
-                    });
-                }
+                //var targetConfig = tokenConfigResult.GetTokenNumber<TokenNumber>();
+                //var targetNumber = targetConfig?.Number;
+                //if (targetNumber.HasValue)
+                //{
+                //    var userToken = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+                //    {
+                //        StudentId = studentId ?? default,
+                //        NumberOfToken = targetNumber.Value,
+                //    });
+                //}
 
                 foreach (var studentReviewDetail in studentReviewDetails)
                 {
