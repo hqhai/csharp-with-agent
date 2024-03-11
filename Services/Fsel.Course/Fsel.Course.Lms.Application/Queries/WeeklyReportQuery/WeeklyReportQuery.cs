@@ -75,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             {
                 return methodResult;
             }
-            DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value : DateTime.UtcNow;
+            DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1) : DateTime.UtcNow;
 
             // Lấy ngày thứ 6 gần nhất lúc 13h
             DateTime lastFridayAt13 = request.StartDate.HasValue ? request.StartDate.Value : currentDate.AddDays(-6);
@@ -204,7 +204,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 weeklyReport.ColorSocial = totalSocial > previousSocial ? "#53BF65" : (totalSocial == previousSocial ? "#FFAE46" : "#C0404C");
                 weeklyReport.ColorOther = totalOther > previousOther ? "#53BF65" : (totalOther == previousOther ? "#FFAE46" : "#C0404C");
 
-                var unitResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.UpdatedDate >= lastFridayAt13 && p.StudentId == item.Id).OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
+                var unitResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.StudentId == item.Id).OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
 
                 var unitDoneCount = unitResult.Where(p => p.Status == EnumResultStatus.Done).Count();
                 var courseType = unitResult.FirstOrDefault()?.Course?.CourseType;
@@ -227,7 +227,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                         .Include(x => x.Lesson)
                         .ThenInclude(x => x.UnitLessons.Where(x => x.UnitId == unit.UnitId))
                         .Where(p => p.StudentId == item.Id && p.Status == EnumResultStatus.Done && p.UnitId == unit.UnitId)
-                        .Where(p => p.UpdatedDate >= lastFridayAt13 && p.UpdatedDate <= currentDate)
+                        .Where(p => p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.UpdatedDate.Value.Date < currentDate.Date)
                         .Where(x => x.ClassForumResults.Any(x => x.Status == EnumClassForumResultStatus.Graded))
                         .OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
                     int index = 1;
