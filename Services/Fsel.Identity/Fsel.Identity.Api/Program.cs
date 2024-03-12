@@ -48,7 +48,7 @@ builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeReposito
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
-builder.Services.AddScoped<TokenHistoryPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);

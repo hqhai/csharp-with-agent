@@ -12,34 +12,58 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
     using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class CreateTokenHistoryCommand : CreateTokenHistoryCommandModel, IRequest<MethodResult<TokenHistoryModel>>
+    public class CreateTokenHistoryCommand : CreateTokenHistoryCommandModel, IRequest<MethodResult<IList<TokenHistoryModel>>>
     {
     }
 
-    public class CreateTokenHistoryCommandHandler : IRequestHandler<CreateTokenHistoryCommand, MethodResult<TokenHistoryModel>>
+    public class CreateTokenHistoryCommandHandler : IRequestHandler<CreateTokenHistoryCommand, MethodResult<IList<TokenHistoryModel>>>
     {
         private readonly IMapper _mapper;
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
+        private readonly ITokenConfigRepository _tokenConfigRepository;
 
-        public CreateTokenHistoryCommandHandler(IMapper mapper, ITokenHistoryRepository tokenHistoryRepository)
+        public CreateTokenHistoryCommandHandler(IMapper mapper, ITokenHistoryRepository tokenHistoryRepository, ITokenConfigRepository tokenConfigRepository)
         {
             _mapper = mapper;
             _tokenHistoryRepository = tokenHistoryRepository;
+            _tokenConfigRepository = tokenConfigRepository;
         }
 
-        public async Task<MethodResult<TokenHistoryModel>> Handle(CreateTokenHistoryCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TokenHistoryModel>>> Handle(CreateTokenHistoryCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<TokenHistoryModel> methodResult = new MethodResult<TokenHistoryModel>();
-            TokenHistory tokenHistory = _mapper.Map<TokenHistory>(request);
+            MethodResult<IList<TokenHistoryModel>> methodResult = new MethodResult<IList<TokenHistoryModel>>();
+            if (request.TokenHistorys == null || request.TokenHistorys.Count == 0)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+            var tokenHistorys = new List<TokenHistory>();
+            var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => request.TokenHistorys.Select(x => x.Feature).Contains(x.Feature) && request.TokenHistorys.Select(x => x.Mission).Contains(x.Mission)).ToListAsync(cancellationToken);
+            foreach (var item in request.TokenHistorys)
+            {
+                var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Feature == item.Feature && x.Mission == item.Mission);
+                if (tokenConfig != null)
+                {
+                    TokenHistory tokenHistory = _mapper.Map<TokenHistory>(request);
+                    if (!tokenHistory.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(tokenHistory.ErrorMessages);
+                        return methodResult;
+                    }
+                    tokenHistorys.Add(tokenHistory);
+                }
+            }
             await _tokenHistoryRepository.ExecuteTransactionAsync(async () =>
             {
-                tokenHistory = _tokenHistoryRepository.Add(tokenHistory);
+                await _tokenHistoryRepository.AddList(tokenHistorys);
                 await _tokenHistoryRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<TokenHistoryModel>(tokenHistory);
+                methodResult.Result = _mapper.Map<IList<TokenHistoryModel>>(tokenHistorys);
                 return methodResult;
             });
 
