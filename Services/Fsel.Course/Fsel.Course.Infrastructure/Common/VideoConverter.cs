@@ -286,8 +286,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoResult);
             var answerQuery = from baseQ in _videoResultRepository.Queryable
-                              join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
 
                               join q in _questionRepository.Queryable on vtca.QuestionId equals q.Id
                               join eq in _exerciseQuestionRepository.Queryable on q.Id equals eq.QuestionId
