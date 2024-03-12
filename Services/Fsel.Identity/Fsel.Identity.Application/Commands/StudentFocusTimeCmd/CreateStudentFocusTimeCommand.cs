@@ -33,6 +33,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     {
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
+        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IStudentFocusTimeRepository _studentFocusTimeRepository;
         private readonly IStudentRepository _studentRepository;
@@ -41,11 +42,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
 
-        public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, ILmsCourseService lmsCourseService, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher,
+        public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILmsCourseService lmsCourseService, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher,
             ITrainingService trainingService)
         {
             _mediator = mediator;
             _mapper = mapper;
+            _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _lmsCourseService = lmsCourseService;
             _studentFocusTimeRepository = studentFocusTimeRepository;
             _studentRepository = studentRepository;
@@ -135,8 +137,19 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                         var tokenConfigFocusModes = tokenConfigResult.GetTokenConfig<IList<TokenConfigFocusModes>>();
                         var targetNumber = tokenConfigFocusModes?.Where(x => x.FocusTimeId == systemConfigMap.Id)?.Max(x => x.BaseValue);
 
-                        if (targetNumber.HasValue && !studentFocusTime.IsReceivedToken)
+                        if (targetNumber.HasValue && !studentFocusTime.IsReceivedToken && tokenConfigResult != null)
                         {
+                            await _createTokenHistoryPublisher.Publish(new TokenHistoryQueueModel
+                            {
+                                ObjectId = studentFocusTime.Id,
+                                InitialToken = student.NumberOfToken,
+                                RemainToken = targetNumber.Value,
+                                VolatileToken = student.NumberOfToken + targetNumber.Value,
+                                TokenConfigId = tokenConfigResult.Id,
+                                Type = EnumTokenHistoryType.Earn,
+                                UserId = _authContext.CurrentUserId,
+                            }, cancellationToken).ConfigureAwait(false);
+
                             student.NumberOfToken += targetNumber.Value;
                             studentFocusTime.IsReceivedToken = true;
                         }
@@ -157,6 +170,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
         public async Task DoQuestBoard(Student student, double executeTime, double targetTime, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(student);
             var classModel = await _trainingService.GetClassByStudentId(student.Id);
             var courseId = classModel.Content!.Result!.CourseId;
 

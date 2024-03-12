@@ -219,8 +219,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
 
         private async Task<(FinalTestResult, Guid)> GetFinalTestResult(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult)
         {
-            var skillScores = sectionGroupResults.SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
-
+            var skillScores = sectionGroupResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
             var (tokenConfigId, token) = await GetTokenConfig();
 
             finalTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);

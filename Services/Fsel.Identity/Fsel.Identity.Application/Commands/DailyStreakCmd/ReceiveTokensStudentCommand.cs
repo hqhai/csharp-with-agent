@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
@@ -24,14 +25,16 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     public class ReceiveTokensStudentCommandHandler : IRequestHandler<ReceiveTokensStudentCommand, MethodResult<bool>>
     {
         private readonly IStudentRepository _studentRepository;
+        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly AuthContext _authContext;
         private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
         private readonly ISystemService _systemService;
 
-        public ReceiveTokensStudentCommandHandler(IStudentRepository studentRepository, ILmsCourseService lmsCourseService, AuthContext authContext, IStudentDailyStreakRepository studentDailyStreakRepository, ISystemService systemService)
+        public ReceiveTokensStudentCommandHandler(IStudentRepository studentRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILmsCourseService lmsCourseService, AuthContext authContext, IStudentDailyStreakRepository studentDailyStreakRepository, ISystemService systemService)
         {
             _studentRepository = studentRepository;
+            _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _lmsCourseService = lmsCourseService;
             _authContext = authContext;
             _studentDailyStreakRepository = studentDailyStreakRepository;
@@ -77,9 +80,20 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             var tokenConfigResult = tokenConfig.Content?.Result;
 
             var tokenConfigDailyCheckIns = tokenConfigResult.GetTokenConfig<List<TokenConfigDailyCheckIns>>();
-            if (tokenConfigDailyCheckIns != null)
+            if (tokenConfigResult != null && tokenConfigDailyCheckIns != null)
             {
                 var targetNumber = tokenConfigDailyCheckIns.Where(x => x.Level == studentDailyStreak.LevelOfGift).Max(x => x.BaseValue);
+                await _createTokenHistoryPublisher.Publish(new TokenHistoryQueueModel
+                {
+                    ObjectId = studentDailyStreak.Id,
+                    InitialToken = student.NumberOfToken,
+                    RemainToken = targetNumber,
+                    VolatileToken = student.NumberOfToken + targetNumber,
+                    TokenConfigId = tokenConfigResult.Id,
+                    Type = EnumTokenHistoryType.Earn,
+                    UserId = _authContext.CurrentUserId,
+                }, cancellationToken).ConfigureAwait(false);
+
                 student.NumberOfToken += targetNumber;
             }
 
