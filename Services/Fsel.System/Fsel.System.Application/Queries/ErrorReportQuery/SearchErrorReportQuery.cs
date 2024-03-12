@@ -52,7 +52,7 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
                 Priority = x.Priority ?? default,
                 Status = x.Status,
                 Content = x.Content,
-                Type = x.Type,
+                Type = x.Type ?? default,
                 UnitId = x.UnitId,
                 UpdatedDate = x.UpdatedDate,
                 Url = x.Url,
