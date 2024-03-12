@@ -93,12 +93,12 @@ ILmsCourseService courseService)
             {
                 if (request.OrderStatus == EnumOrderStatus.Reject)
                 {
-                    var classStudent = await _trainingService.DeleteStudentFromClass(order.UserId);
-                    if (!classStudent.IsSuccessStatusCode)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
-                        return methodResult;
-                    }
+                    //var classStudent = await _trainingService.DeleteStudentFromClass(order.UserId);
+                    //if (!classStudent.IsSuccessStatusCode)
+                    //{
+                    //    methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
+                    //    return methodResult;
+                    //}
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
@@ -132,7 +132,7 @@ ILmsCourseService courseService)
                     ResponseBody = request.Receipt,
                     Type = request.Type == EnumOrderTransactionType.AppStore ? EnumOrderTransactionType.AppStore : (request.Type == EnumOrderTransactionType.GooglePlay ? EnumOrderTransactionType.GooglePlay : EnumOrderTransactionType.BankTransfer)
                 });
-                ;
+
                 order.Status = request.OrderStatus;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
