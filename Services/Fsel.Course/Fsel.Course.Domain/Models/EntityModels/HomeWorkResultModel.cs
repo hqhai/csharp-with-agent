@@ -12,14 +12,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid LessonResultId { get; set; }
         public EnumSubmissionCount SubmissionCount { get; set; }
         public int? TokenFirstTime { get; set; }
-
-        public int? TokenLastTime
-        {
-            get
-            {
-                return _tokenLastTime.HasValue ? _tokenLastTime.Value : default;
-            }
-            set { _tokenLastTime = value; }
-        }
+        public int? TokenLastTime { get; set; }
     }
 }

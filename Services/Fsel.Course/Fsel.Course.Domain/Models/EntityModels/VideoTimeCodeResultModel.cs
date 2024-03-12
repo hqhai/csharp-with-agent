@@ -16,11 +16,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? CorrectCountUngraded { get; set; }
         public int? CorrectTotalUngraded { get; set; }
         public int? TokenFirstTime { get; set; }
-
-        public int? TokenLastTime
-        {
-            get { return _tokenLastTime.HasValue ? _tokenLastTime.Value : default; }
-            set { _tokenLastTime = value; }
-        }
+        public int? TokenLastTime { get; set; }
     }
 }
