@@ -49,20 +49,15 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
             if (transactionInfoResponse.IsValid)
                 transactionInfo = transactionInfoResponse.DecodedPayload;
 
-            var response = new OrderTransaction()
+            var response = new AppStoreResponseModel()
             {
-                ResponseBody = new AppStoreResponseModel()
-                {
-                    NotificationType = v2Notification.DecodedPayload?.NotificationType,
-                    Subtype = v2Notification.DecodedPayload?.Subtype,
-                    NotificationUUID = v2Notification.DecodedPayload?.NotificationUUID,
-                    NotificationVersion = v2Notification.DecodedPayload?.NotificationVersion,
-                    TransactionInfo = transactionInfo,
-                    RenewalInfoV2 = renewalInfo,
-                    SignedDate = v2Notification.DecodedPayload?.SignedDate
-                },
-                Type = EnumOrderTransactionType.AppStore,
-                Status = EnumOrderTransactionStatus.Success
+                NotificationType = v2Notification.DecodedPayload?.NotificationType,
+                Subtype = v2Notification.DecodedPayload?.Subtype,
+                NotificationUUID = v2Notification.DecodedPayload?.NotificationUUID,
+                NotificationVersion = v2Notification.DecodedPayload?.NotificationVersion,
+                TransactionInfo = transactionInfo,
+                RenewalInfoV2 = renewalInfo,
+                SignedDate = v2Notification.DecodedPayload?.SignedDate
             };
 
             _logger.LogError(response.Serialize());
