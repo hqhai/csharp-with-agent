@@ -65,7 +65,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
                 Status = EnumOrderTransactionStatus.Success
             };
 
-            _logger.LogError(response.Deserialize<string>());
+            _logger.LogError(response.Serialize());
 
             var createOrderResult = await _mediator.Send(new PaymentWithAppStoreCommand() { DecodedPayload = v2Notification.DecodedPayload, RenewalInfo = renewalInfo, TransactionInfo = transactionInfo }).ConfigureAwait(false);
             if (createOrderResult.Result)
