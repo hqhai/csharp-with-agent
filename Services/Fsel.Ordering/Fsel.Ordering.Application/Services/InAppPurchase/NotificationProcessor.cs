@@ -26,6 +26,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
 
         public async Task<bool> Process(AppleNotification notification)
         {
+            _logger.LogError(notification.SignedPayload);
             var v2Notification = GetVerifiedDecodedData<NotificationV2>(notification.SignedPayload);
             if (v2Notification?.DecodedPayload?.Data == null || !v2Notification.IsValid)
             {
