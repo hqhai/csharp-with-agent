@@ -87,8 +87,14 @@ ILmsCourseService courseService)
                 return methodResult;
             }
             var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
-            var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
+            if (package == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(order));
+                return methodResult;
+            }
+
             var course = courseResults.Content?.Result?.FirstOrDefault();
+
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 if (request.OrderStatus == EnumOrderStatus.Reject)
@@ -102,7 +108,9 @@ ILmsCourseService courseService)
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
-                    var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.UserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
+                    var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
+
+                    var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
                     if (!addStudentIntoClassResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(addStudentIntoClassResult.Error);
@@ -115,6 +123,9 @@ ILmsCourseService courseService)
                         methodResult.AddError(updateNextUnitResult.Error);
                         return methodResult;
                     }
+
+                    order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
+
                     await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
                         UserIds = new List<Guid>() { order.UserId },
