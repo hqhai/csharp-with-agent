@@ -348,7 +348,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                         RemainToken = tokensAchieved,
                         VolatileToken = student.NumberOfToken + tokensAchieved,
                         Feature = EnumTokenFeature.Learn,
-                        Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.HomeworkSecondSubmit,
+                        Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit,
                         Type = EnumTokenHistoryType.Exchanged,
                         UserId = _authContext.CurrentUserId,
                     }
