@@ -3,11 +3,12 @@
 namespace Fsel.System.Application.Queues.Consumers
 {
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.System.Application.Commands.TokenHistoryCmd;
     using global::System.Threading.Tasks;
     using MassTransit;
     using MediatR;
 
-    public class CreateTokenHistoryConsumer : IConsumer<TokenHistoryQueueModel>
+    public class CreateTokenHistoryConsumer : IConsumer<IList<TokenHistoryQueueModel>>
     {
         private readonly IMediator _mediator;
 
@@ -16,23 +17,16 @@ namespace Fsel.System.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<TokenHistoryQueueModel> context)
+        public async Task Consume(ConsumeContext<IList<TokenHistoryQueueModel>> context)
         {
             var message = context?.Message;
             if (message == null)
             {
                 return;
             }
-            await _mediator.Send(new TokenHistoryQueueModel
+            await _mediator.Send(new CreateTokenHistoryCommand
             {
-                ObjectId = message.ObjectId,
-                InitialToken = message.InitialToken,
-                RemainToken = message.RemainToken,
-                VolatileToken = message.VolatileToken,
-                Mission = message.Mission,
-                Feature = message.Feature,
-                Type = message.Type,
-                UserId = message.UserId
+                TokenHistorys = message
             }).ConfigureAwait(false);
         }
     }
