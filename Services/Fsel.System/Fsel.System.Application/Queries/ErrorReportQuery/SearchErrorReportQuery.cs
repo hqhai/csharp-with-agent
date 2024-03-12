@@ -49,7 +49,7 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
                 FeatureLearn = x.FeatureLearn,
                 LessonId = x.LessonId,
                 FeaturePlatform = x.FeaturePlatform,
-                Priority = x.Priority ?? default,
+                Priority = x.Priority,
                 Status = x.Status,
                 Content = x.Content,
                 Type = x.Type,

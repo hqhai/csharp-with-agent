@@ -13,7 +13,19 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public PayooConfig? PayooConfig { get; set; }
         public new Services? Services { get; set; }
         public UrBoxConfig? UrBoxConfig { get; set; }
+        public PurchaseSettings? PurchaseSettings { get; set; }
         public ResourceContent? ResourceContent { get; set; }
+    }
+
+    public class PurchaseSettings
+    {
+        public AppStore? AppStore { get; set; }
+    }
+
+    public class AppStore
+    {
+        public string? AppId { get; set; }
+        public string? BundleId { get; set; }
     }
 
     public class ResourceContent

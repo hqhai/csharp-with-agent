@@ -16,7 +16,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
         public long ExpiresDate { get; set; }
 
         [JsonPropertyName("inAppOwnershipType")]
-        public OwnershipType InAppOwnershipType { get; set; }
+        public EnumOwnershipType InAppOwnershipType { get; set; }
 
         [JsonPropertyName("isUpgraded")]
         public bool IsUpgraded { get; set; }
@@ -25,7 +25,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
         public string? OfferIdentifier { get; set; }
 
         [JsonPropertyName("offerType")]
-        public OfferType OfferType { get; set; }
+        public EnumOfferType OfferType { get; set; }
 
         [JsonPropertyName("originalPurchaseDate")]
         public long OriginalPurchaseDate { get; set; }
@@ -55,7 +55,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
         public string? TransactionId { get; set; }
 
         [JsonPropertyName("type")]
-        public PurchaseType Type { get; set; }
+        public EnumPurchaseType Type { get; set; }
 
         [JsonPropertyName("webOrderLineItemId")]
         public string? WebOrderLineItemId { get; set; }

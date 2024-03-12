@@ -16,7 +16,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
         public string BundleVersion { get; set; }
 
         [JsonProperty("environment")]
-        public EnvironmentName Environment { get; set; }
+        public EnumAppStoreEnvironment Environment { get; set; }
 
         [JsonProperty("signedRenewalInfo")]
         public string SignedRenewalInfo { get; set; }

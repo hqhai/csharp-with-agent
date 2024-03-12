@@ -2,10 +2,8 @@
 
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Core.Base;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.CommandModels.UnitResults;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Course.Lms.Application.Services.UserServices.Models;
 using Fsel.Shared.Enums;
@@ -15,18 +13,17 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
 {
     public class OpenNextUnitForExtendCmd : IRequest<MethodResult<bool>>
     {
+        public Guid UserId { get; set; }
     }
 
     public class OpenNextUnitForExtendCmdHandler : IRequestHandler<OpenNextUnitForExtendCmd, MethodResult<bool>>
     {
         private readonly IUnitResultRepository _unitResultRepository;
-        private readonly AuthContext _authContext;
         private readonly IUserService _userService;
 
-        public OpenNextUnitForExtendCmdHandler(IUnitResultRepository unitResultRepository, AuthContext authContext, IUserService userService)
+        public OpenNextUnitForExtendCmdHandler(IUnitResultRepository unitResultRepository,IUserService userService)
         {
             _unitResultRepository = unitResultRepository;
-            _authContext = authContext;
             _userService = userService;
         }
 
@@ -35,30 +32,25 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var studentRegistration = await _userService.GetStudentTrialRegistration();
+            var studentRegistration = await _userService.GetStudentTrialRegistration(request.UserId);
             var studentRegistrationResult = studentRegistration?.Content?.Result;
 
-            if (studentRegistrationResult == null)
-            {
-                return methodResult;
-            }
-
-            if (studentRegistrationResult.Status != EnumTrialRegistrationStatus.Payment)
+            if (studentRegistrationResult != null && studentRegistrationResult.Status != EnumTrialRegistrationStatus.Payment)
             {
                 StudentTrialRegistrationModel model = new StudentTrialRegistrationModel()
                 {
-                    UserId = _authContext.CurrentUserId,
+                    UserId = request.UserId,
                     Status = EnumTrialRegistrationStatus.Payment
                 };
                 await UpdateTrialRegistrationStatus(model);
             }
 
-            if (studentRegistrationResult.Status != EnumTrialRegistrationStatus.Finished)
+            if (studentRegistrationResult != null && studentRegistrationResult.Status != EnumTrialRegistrationStatus.Finished)
             {
                 return methodResult;
             }
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
             var studentId = studentResult.Content?.Result?.Id;
 
             var unitResult = _unitResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done);

@@ -68,12 +68,12 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpPut("open-next-unit")]
+        [HttpPut("open-next-unit/{userId}")]
         [ProducesResponseType(typeof(MethodResult<StudentCourseUnitModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> OpenNextUnitForTrial()
+        public async Task<IActionResult> OpenNextUnitForTrial([FromRoute] Guid userId)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(new OpenNextUnitForExtendCmd()).ConfigureAwait(false);
+            MethodResult<bool> queryResult = await _mediator.Send(new OpenNextUnitForExtendCmd { UserId = userId}).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -7,6 +7,8 @@ namespace Fsel.Shared.Enums
         Card,
         Wallet,
         BankTransfer,
-        Payoo
+        Payoo,
+        AppStore,
+        CHPlay
     }
 }
