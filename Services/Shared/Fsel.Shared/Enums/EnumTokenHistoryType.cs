@@ -4,6 +4,6 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumTokenHistoryType
     {
-        Earn, Purchase
+        Recevived, Exchanged
     }
 }

@@ -14,6 +14,9 @@ namespace Fsel.System.Domain.Entities
         public double VolatileToken { get; set; }
 
         public double RemainToken { get; set; }
+        public EnumTokenFeature Feature { get; set; }
+
+        public EnumTokenMission Mission { get; set; }
 
         public Guid UserId { get; set; }
 
