@@ -109,7 +109,7 @@ ILmsCourseService courseService)
                         return methodResult;
                     }
 
-                    var updateNextUnitResult = await _courseService.UpdateNextUnit();
+                    var updateNextUnitResult = await _courseService.UpdateNextUnit(order.CreatedUserId);
                     if (!updateNextUnitResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(updateNextUnitResult.Error);
