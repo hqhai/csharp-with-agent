@@ -2,9 +2,7 @@
 
 namespace Fsel.System.Domain.Models.EntityModels
 {
-    using Fsel.Core.Base.BaseModels;
-
-    public class SearchTokenHistoryModel : BaseModel
+    public class CurrentUserTokenHistoryModel
     {
         public double? TotalToken { get; set; }
         public double? ReciveToken { get; set; }
