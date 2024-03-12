@@ -93,23 +93,23 @@ ILmsCourseService courseService)
             {
                 if (request.OrderStatus == EnumOrderStatus.Reject)
                 {
-                    var classStudent = await _trainingService.DeleteStudentFromClass(order.UserId);
-                    if (!classStudent.IsSuccessStatusCode)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
-                        return methodResult;
-                    }
+                    //var classStudent = await _trainingService.DeleteStudentFromClass(order.UserId);
+                    //if (!classStudent.IsSuccessStatusCode)
+                    //{
+                    //    methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
+                    //    return methodResult;
+                    //}
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
-                    var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
+                    var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.UserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
                     if (!addStudentIntoClassResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(addStudentIntoClassResult.Error);
                         return methodResult;
                     }
 
-                    var updateNextUnitResult = await _courseService.UpdateNextUnit();
+                    var updateNextUnitResult = await _courseService.UpdateNextUnit(order.UserId);
                     if (!updateNextUnitResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(updateNextUnitResult.Error);
@@ -132,7 +132,7 @@ ILmsCourseService courseService)
                     ResponseBody = request.Receipt,
                     Type = request.Type == EnumOrderTransactionType.AppStore ? EnumOrderTransactionType.AppStore : (request.Type == EnumOrderTransactionType.GooglePlay ? EnumOrderTransactionType.GooglePlay : EnumOrderTransactionType.BankTransfer)
                 });
-                ;
+
                 order.Status = request.OrderStatus;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
