@@ -25,6 +25,12 @@ namespace Fsel.System.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumTokenMission>());
+
+            builder.Property(e => e.CourseType)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumCourseType>());
         }
     }
 }

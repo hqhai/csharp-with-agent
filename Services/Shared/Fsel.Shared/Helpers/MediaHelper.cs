@@ -42,9 +42,10 @@ namespace Fsel.Shared.Helpers
                     string durationString = output.Substring(start, end - start);
                     try
                     {
-                        TimeSpan duration = TimeSpan.Parse(durationString, CultureInfo.CurrentCulture);
-                        process.WaitForExit();
-                        return (int)duration.TotalSeconds;
+                        //TimeSpan duration = TimeSpan.Parse(durationString, CultureInfo.CurrentCulture);
+                        //process.WaitForExit();
+                        //return (int)duration.TotalSeconds;
+                        return 1;
                     }
                     catch
                     {
