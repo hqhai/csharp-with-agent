@@ -51,6 +51,7 @@ namespace Fsel.Course.Domain.Entities
 
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
+
         public ICollection<VideoTimeCodeResult> VideoTimeCodeResults { get; set; } = new List<VideoTimeCodeResult>();
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }
