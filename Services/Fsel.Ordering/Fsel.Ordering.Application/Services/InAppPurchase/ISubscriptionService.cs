@@ -6,6 +6,6 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
 
     public interface ISubscriptionService
     {
-        void Update(NotificationV2 decodedPayload, RenewalInfoV2? renewalInfo, TransactionInfoV2? transactionInfo);
+        Task<bool> Update(NotificationV2 decodedPayload, RenewalInfoV2? renewalInfo, TransactionInfoV2? transactionInfo);
     }
 }

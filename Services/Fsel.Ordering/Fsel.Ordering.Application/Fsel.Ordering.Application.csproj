@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="jose-jwt" Version="4.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Fsel.Ordering.Infrastructure\Fsel.Ordering.Infrastructure.csproj" />
   </ItemGroup>
 

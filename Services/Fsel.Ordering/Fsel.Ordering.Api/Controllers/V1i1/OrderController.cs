@@ -24,13 +24,11 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
     {
         private readonly IMediator _mediator;
         private readonly INotificationProcessor _notificationProcessor;
-        private readonly IInAppPurchaseService _inAppPurchaseService;
 
-        public OrderController(IMediator mediator, INotificationProcessor notificationProcessor, IInAppPurchaseService inAppPurchaseService)
+        public OrderController(IMediator mediator, INotificationProcessor notificationProcessor)
         {
             _mediator = mediator;
             _notificationProcessor = notificationProcessor;
-            _inAppPurchaseService = inAppPurchaseService;
         }
 
         /// <summary>
@@ -66,11 +64,11 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [HttpPost("app-store")]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public IActionResult AppStore([FromBody] AppleNotification appleNotification)
+        public async Task<IActionResult> AppStore([FromBody] AppleNotification appleNotification)
         {
             try
             {
-                _notificationProcessor.Process(appleNotification);
+                await _notificationProcessor.Process(appleNotification);
                 return Ok();
             }
             catch

@@ -5,7 +5,9 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
+    using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
     using Fsel.Ordering.Application.Services.InAppPurchase.Models;
+    using MediatR;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.Extensions.Logging;
     using Microsoft.IdentityModel.Tokens;
@@ -15,14 +17,16 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
     {
         private readonly ISubscriptionService _subscriptionService;
         private readonly ILogger<NotificationProcessor> _logger;
+        private readonly IMediator _mediator;
 
-        public NotificationProcessor(ISubscriptionService subscriptionService, ILogger<NotificationProcessor> logger)
+        public NotificationProcessor(ISubscriptionService subscriptionService, ILogger<NotificationProcessor> logger, IMediator mediator)
         {
             _subscriptionService = subscriptionService;
             _logger = logger;
+            _mediator = mediator;
         }
 
-        public void Process(AppleNotification notification)
+        public async Task<bool> Process(AppleNotification notification)
         {
             var v2Notification = GetVerifiedDecodedData<NotificationV2>(notification.SignedPayload);
             if (v2Notification?.DecodedPayload?.Data == null || !v2Notification.IsValid)
@@ -42,6 +46,8 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
             TransactionInfoV2? transactionInfo = null;
             if (transactionInfoResponse.IsValid)
                 transactionInfo = transactionInfoResponse.DecodedPayload;
+            await _mediator.Send(new PaymentWithAppStoreSuccessCommand() { DecodedPayload = v2Notification.DecodedPayload, RenewalInfo = renewalInfo, TransactionInfo = transactionInfo }).ConfigureAwait(false);
+            return false;
         }
 
         private VerifiedDecodedDataModel<TNotificationData> GetVerifiedDecodedData<TNotificationData>(string signedPayload)
