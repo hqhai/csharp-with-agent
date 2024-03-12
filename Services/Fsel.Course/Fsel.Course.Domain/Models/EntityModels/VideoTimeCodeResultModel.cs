@@ -6,7 +6,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class VideoTimeCodeResultModel : BaseLearnResultModel, ITokenResult
     {
-        private int? _tokenLastTime;
         public Guid VideoResultId { get; set; }
         public Guid? CurrentVideoTimeCodeId { get; set; }
         public Guid VideoTimeCodeId { get; set; }
