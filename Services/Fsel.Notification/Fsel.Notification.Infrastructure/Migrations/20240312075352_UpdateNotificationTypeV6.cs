@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -85,7 +85,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                 columns: new[] { "Id", "Content", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "Icon", "IsDeleted", "Priority", "TemplateLink", "TemplateMessage", "Type", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
                 values: new object[,]
                 {
-                    { new Guid("05441907-46a9-4178-9a69-fce295d670be"), "NoticePayment", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/account/my-subscription", "Thời gian học thử của bạn sẽ kết thúc sau 2 ngày nữa. Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé !", "LinkPage", null, null, null },
+                    { new Guid("05441907-46a9-4178-9a69-fce295d670be"), "NoticePayment", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/pricing-plan", "Thời gian học thử của bạn sẽ kết thúc trong vòng 2 ngày tới. Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé", "LinkPage", null, null, null },
                     { new Guid("27007edb-25d8-493e-84d8-85f6f9e165b2"), "DeleteComment", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}", "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.", "LinkComment", null, null, null },
                     { new Guid("3881403a-d412-4593-aee5-5a38f4e078f9"), "OrderCreate", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/payment", "Bạn có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.", "Text", null, null, null },
                     { new Guid("46526095-5284-46f0-8c86-e00d95f1c985"), "FullMockTest", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/learn/full-mock-test/{0}?courseId={1}", "Bài {0} đã được giáo viên chấm điểm. Nhấn để xem chi tiết", "LinkPage", null, null, null },
@@ -93,8 +93,10 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     { new Guid("69cc9e39-82d5-4d1a-81b9-8c97ec54bfad"), "ApprovePostClassForum", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum", "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết", "LinkPage", null, null, null },
                     { new Guid("75540141-a6d9-409d-a3ce-90c9a7577e8a"), "RejectApprovalPostClassForum", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum", "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!", "LinkPage", null, null, null },
                     { new Guid("9da28757-2d28-40cb-b88c-cc51fc15bb43"), "LeaderBoard", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/home", "Chúc mừng bạn đã đạt top {0} trên Bảng xếp hạng!", "LinkPage", null, null, null },
+                    { new Guid("a99bfaae-4139-4766-9405-ef24332fb51a"), "NoticeExpireAfterTwoDay", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/pricing-plan", "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé", "LinkPage", null, null, null },
                     { new Guid("cd8a1edb-029f-4b2d-9725-c796e6fd7e5b"), "OrderChangeStatus", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/learn", "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!", "Text", null, null, null },
-                    { new Guid("e89b5850-33ff-4922-89e1-1a2f7de29375"), "CreateClassForumResult", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/class-forum-management", "Bạn có bài đăng của học sinh đang chờ duyệt.", "Text", null, null, null }
+                    { new Guid("e89b5850-33ff-4922-89e1-1a2f7de29375"), "CreateClassForumResult", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/class-forum-management", "Bạn có bài đăng của học sinh đang chờ duyệt.", "Text", null, null, null },
+                    { new Guid("f9d5a75f-fd55-4b1e-ade8-a446b6465e34"), "NoticeExpireAfterTwoWeek", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "/pricing-plan", "Khóa học của bạn sẽ kết thúc trong 2 tuần tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé", "LinkPage", null, null, null }
                 });
         }
 
@@ -144,12 +146,22 @@ namespace Fsel.Notification.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "NotificationTypes",
                 keyColumn: "Id",
+                keyValue: new Guid("a99bfaae-4139-4766-9405-ef24332fb51a"));
+
+            migrationBuilder.DeleteData(
+                table: "NotificationTypes",
+                keyColumn: "Id",
                 keyValue: new Guid("cd8a1edb-029f-4b2d-9725-c796e6fd7e5b"));
 
             migrationBuilder.DeleteData(
                 table: "NotificationTypes",
                 keyColumn: "Id",
                 keyValue: new Guid("e89b5850-33ff-4922-89e1-1a2f7de29375"));
+
+            migrationBuilder.DeleteData(
+                table: "NotificationTypes",
+                keyColumn: "Id",
+                keyValue: new Guid("f9d5a75f-fd55-4b1e-ade8-a446b6465e34"));
 
             migrationBuilder.UpdateData(
                 table: "NotificationTypes",

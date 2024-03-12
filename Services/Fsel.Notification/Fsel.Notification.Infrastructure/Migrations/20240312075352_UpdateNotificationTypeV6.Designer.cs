@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    [Migration("20240304115855_UpdateNotificationTypeV6")]
+    [Migration("20240312075352_UpdateNotificationTypeV6")]
     partial class UpdateNotificationTypeV6
     {
         /// <inheritdoc />
@@ -541,8 +541,36 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/account/my-subscription",
-                            TemplateMessage = "Thời gian học thử của bạn sẽ kết thúc sau 2 ngày nữa. Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé !",
+                            TemplateLink = "/pricing-plan",
+                            TemplateMessage = "Thời gian học thử của bạn sẽ kết thúc trong vòng 2 ngày tới. Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+                            Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("f9d5a75f-fd55-4b1e-ade8-a446b6465e34"),
+                            Content = "NoticeExpireAfterTwoWeek",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "/pricing-plan",
+                            TemplateMessage = "Khóa học của bạn sẽ kết thúc trong 2 tuần tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+                            Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("a99bfaae-4139-4766-9405-ef24332fb51a"),
+                            Content = "NoticeExpireAfterTwoDay",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "/pricing-plan",
+                            TemplateMessage = "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
                             Type = "LinkPage"
                         });
                 });

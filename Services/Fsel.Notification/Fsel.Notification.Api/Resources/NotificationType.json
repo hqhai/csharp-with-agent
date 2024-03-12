@@ -205,8 +205,28 @@
     "content": "NoticePayment",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Thời gian học thử của bạn sẽ kết thúc sau 2 ngày nữa. Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé !",
-    "templateLink": "/account/my-subscription",
+    "templateMessage": "Thời gian học thử của bạn sẽ kết thúc trong vòng 2 ngày tới. Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+    "templateLink": "/pricing-plan",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "F9D5A75F-FD55-4B1E-ADE8-A446B6465E34",
+    "type": "LinkPage",
+    "content": "NoticeExpireAfterTwoWeek",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 tuần tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+    "templateLink": "/pricing-plan",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "A99BFAAE-4139-4766-9405-EF24332FB51A",
+    "type": "LinkPage",
+    "content": "NoticeExpireAfterTwoDay",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
+    "templateLink": "/pricing-plan",
     "createdDate": "2023-08-28"
   }
 ]

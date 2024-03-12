@@ -24,6 +24,8 @@ namespace Fsel.Shared.Enums
         LeaderBoard,
         ApprovePostClassForum,
         RejectApprovalPostClassForum,
-        NoticePayment
+        NoticePayment,
+        NoticeExpireAfterTwoWeek,
+        NoticeExpireAfterTwoDay,
     }
 }
