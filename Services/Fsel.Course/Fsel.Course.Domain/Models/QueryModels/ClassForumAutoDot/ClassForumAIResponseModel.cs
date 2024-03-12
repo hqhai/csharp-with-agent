@@ -11,8 +11,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
         public string? WordContent { get; set; }
 
         public bool? IsRetry { get; set; } = false;
-
-
     }
 
     public class MockTestAnswerResponseModel : SubmitAICommandModel
@@ -21,7 +19,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
         public Guid SectionGroupId { get; set; }
         public string? WordContent { get; set; }
         public Guid MockTestResultId { get; set; }
-
     }
 
     public class MockTestAIGradingModel

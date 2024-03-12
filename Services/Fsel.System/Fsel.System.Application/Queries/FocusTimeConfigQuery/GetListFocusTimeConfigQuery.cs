@@ -36,20 +36,21 @@ namespace Fsel.System.Application.Queries.FocusTimeConfigQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<FocusTimeConfigModel>> methodResult = new MethodResult<IList<FocusTimeConfigModel>>();
-
             var listFocusTime = await _focusTimeConfigRepository.Queryable.ToListAsync(cancellationToken);
 
             var tokenConfig = await _tokenConfigRepository.Queryable
-                .Where(x => x.Feature == EnumTokenFeature.FocusMode && x.Mission == EnumTokenMission.FocusTime)
+                .Where(x => x.Feature == EnumTokenFeature.FocusMode && x.Mission == EnumTokenMission.FocusMode)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            var config = tokenConfig?.Config.Deserialize<TokenFocusTime>();
+            var tokenConfigFocusModes = tokenConfig?.Config.Deserialize<List<TokenConfigFocusModes>>();
 
-            var listFocusTimeModel = _mapper.Map<IList<FocusTimeConfigModel>>(listFocusTime);
-
-            foreach (var item in listFocusTimeModel)
+            var listFocusTimeModel = _mapper.Map<List<FocusTimeConfigModel>>(listFocusTime);
+            if (tokenConfigFocusModes != null)
             {
-                item.TokenNumber = config!.FocusTimes!.Where(x => x.FocusTimeId == item.Id).Select(x => x.Number ?? default).FirstOrDefault();
+                foreach (var item in listFocusTimeModel)
+                {
+                    item.TokenNumber = (int)(tokenConfigFocusModes.FirstOrDefault(x => x.FocusTimeId == item.Id)?.BaseValue ?? default);
+                }
             }
 
             methodResult.Result = listFocusTimeModel;

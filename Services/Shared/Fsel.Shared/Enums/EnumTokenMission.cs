@@ -4,58 +4,58 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumTokenMission
     {
-        //Test done
-        TestDone,
-
-        //Highest Streak
-        HighestStreak,
-
-        //Super fire mode
-        SuperFire,
-
-        //Question Reward
-        QuestionReward,
-
-        //Check in mỗi ngày
+        TimeCodeFirstSubmit,
+        TimeCodeSecondSubmit,
+        ClassForumWriting,
+        ClassForumSpeakingAudio,
+        ClassForumSpeakingVideo,
+        HomeworkFirstSubmit,
+        HomeworkSecondSubmit,
+        FocusMode,
         DailyCheckin,
+        SkillTest,
+        UnitTest,
+        FinalTest,
 
-        //Quest Board
-        QuestBoard,
+        SkillMockTestReading,
+        SkillMockTestListening,
+        SkillMockTestSpeakingFC,
+        SkillMockTestSpeakingLR,
+        SkillMockTestSpeakingGRA,
+        SkillMockTestSpeakingPron,
+        SkillMockTestWritingTask1Work150,
+        SkillMockTestWritingTask1TA,
+        SkillMockTestWritingTask1CC,
+        SkillMockTestWritingTask1LR,
+        SkillMockTestWritingTask1GRA,
+        SkillMockTestWritingTask2Work250,
+        SkillMockTestWritingTask2TA,
+        SkillMockTestWritingTask2CC,
+        SkillMockTestWritingTask2LR,
+        SkillMockTestWritingTask2GRA,
 
-        // forcus time
-        FocusTime,
-
-        //Permium Quest
-        PermiumQuest,
-
-        //SideQuest
-        SideQuest,
-
-        //MainQuest
-        MainQuest,
-
-        //DailyQuest
-        DailyQuest,
-
-        //Complete achievement
-        CompleteAchievement,
-
-        //Complete phases
-        CompletePhaseAchievement,
-
-        //buy course standad
-        Standard,
-
-        //buy course Premium
-        Permium,
-
-        //Upgrade course
-        UpgradeCourse,
-
-        //Review course
-        ReviewCourse,
-
-        //Review FSEL
-        ReviewPlatform,
+        FullMockTestReading,
+        FullMockTestListening,
+        FullMockTestSpeakingFC,
+        FullMockTestSpeakingLR,
+        FullMockTestSpeakingGRA,
+        FullMockTestSpeakingPron,
+        FullMockTestWritingTask1Work150,
+        FullMockTestWritingTask1TA,
+        FullMockTestWritingTask1CC,
+        FullMockTestWritingTask1LR,
+        FullMockTestWritingTask1GRA,
+        FullMockTestWritingTask2Work250,
+        FullMockTestWritingTask2TA,
+        FullMockTestWritingTask2CC,
+        FullMockTestWritingTask2LR,
+        FullMockTestWritingTask2GRA,
+        QuestionCompleted,
+        PhaseI,
+        PhaseII,
+        PhaseIII,
+        PhaseIV,
+        PhaseV,
+        PhaseVI
     }
 }

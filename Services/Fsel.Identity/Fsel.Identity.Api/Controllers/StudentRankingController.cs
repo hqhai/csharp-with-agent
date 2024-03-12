@@ -14,7 +14,8 @@ using Fsel.Shared.Constants;
 
 namespace Fsel.Identity.Api.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student-ranking")]
     [ApiController]
     public class StudentRankingController : ControllerBase
@@ -37,7 +38,6 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<List<StudentRankingModel>> commandResult = await _mediator.Send(new CreateStudentRankingsCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
 
         /// <summary>
         /// Lấy ra list danh sách xếp hạng của học sinh
