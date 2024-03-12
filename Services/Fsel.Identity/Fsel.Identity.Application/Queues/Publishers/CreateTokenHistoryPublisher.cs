@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(TokenHistoryQueueModel? request, CancellationToken cancellationToken)
+        public async Task Publish(IList<TokenHistoryQueueModel>? request, CancellationToken cancellationToken)
         {
             if (request == null)
             {
