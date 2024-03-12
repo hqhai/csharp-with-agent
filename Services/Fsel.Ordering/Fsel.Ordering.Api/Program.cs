@@ -34,7 +34,6 @@ builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
 builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
-builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<VnPayLibrary>();
@@ -45,7 +44,6 @@ builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApi
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUrBoxService), appSetting?.Services?.UrBoxApiUrl);
 builder.AddRefitClients(typeof(IPayooService), appSetting?.Services?.PayooApiUrl);
-builder.AddRefitClients(typeof(IInAppPurchaseService), appSetting?.Services?.AppStoreServerApiUrl);
 builder.AddMassTransit(appSetting);
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>

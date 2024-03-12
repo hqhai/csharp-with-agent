@@ -4,7 +4,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 {
     using System.Runtime.Serialization;
 
-    public enum OwnershipType
+    public enum EnumOwnershipType
     {
         [EnumMember(Value = "PURCHASED")]
         Purchased = 1,

@@ -24,13 +24,11 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
     {
         private readonly IMediator _mediator;
         private readonly INotificationProcessor _notificationProcessor;
-        private readonly IInAppPurchaseService _inAppPurchaseService;
 
-        public OrderController(IMediator mediator, INotificationProcessor notificationProcessor, IInAppPurchaseService inAppPurchaseService)
+        public OrderController(IMediator mediator, INotificationProcessor notificationProcessor)
         {
             _mediator = mediator;
             _notificationProcessor = notificationProcessor;
-            _inAppPurchaseService = inAppPurchaseService;
         }
 
         /// <summary>
@@ -66,30 +64,24 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [HttpPost("app-store")]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public IActionResult AppStore([FromBody] AppleNotification appleNotification)
+        public async Task<IActionResult> AppStore([FromBody] AppleNotification appleNotification)
         {
             try
             {
-                _notificationProcessor.Process(appleNotification);
-                return Ok();
+                var decode = await _notificationProcessor.Process(appleNotification);
+                if (decode)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return StatusCode(500);
+                }
             }
             catch
             {
                 return StatusCode(500);
             }
-        }
-
-        /// <summary>
-        /// Get Notification from App Store
-        /// </summary>
-        [AllowAnonymous]
-        [HttpPost("get-notification")]
-        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetNotification()
-        {
-            var commandResult = await _mediator.Send(new GenerateTokenPaymentAppStoreCommand() { }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
         }
     }
 }
