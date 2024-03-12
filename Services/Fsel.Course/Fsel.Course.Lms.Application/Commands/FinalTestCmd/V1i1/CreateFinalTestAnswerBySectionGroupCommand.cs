@@ -160,7 +160,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 return methodResult;
             });
 
-            await UpdateFinalTestResultAsync(finalTestResult, student.NumberOfToken, cancellationToken);
+            await UpdateFinalTestResultAsync(finalTestResult, student, cancellationToken);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = finalTestResult.Status == EnumResultStatus.Done;
             methodResult.Result = sectionGroupResultDto;
@@ -168,7 +168,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task UpdateFinalTestResultAsync(FinalTestResult finalTestResult, double numberOfToken, CancellationToken cancellationToken)
+        private async Task UpdateFinalTestResultAsync(FinalTestResult finalTestResult, StudentModel student, CancellationToken cancellationToken)
         {
             var numberOfDone = 3;
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.FinalTestResultId == finalTestResult.Id).ToListAsync(cancellationToken);
@@ -184,15 +184,19 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     StudentId = finalTestResult.StudentId,
                 }).ConfigureAwait(false);
 
-                await _createTokenHistoryPublisher.Publish(new TokenHistoryQueueModel
+                await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
                 {
-                    ObjectId = finalTestResult.Id,
-                    InitialToken = numberOfToken,
-                    RemainToken = token,
-                    VolatileToken = numberOfToken + token,
-                    TokenConfigId = tokenConfigId,
-                    Type = EnumTokenHistoryType.Earn,
-                    UserId = _authContext.CurrentUserId,
+                    new TokenHistoryQueueModel
+                    {
+                        ObjectId = finalTestResult.Id,
+                        InitialToken = student.NumberOfToken,
+                        RemainToken = token,
+                        VolatileToken = student.NumberOfToken + token,
+                        Type = EnumTokenHistoryType.Exchanged,
+                        Feature = EnumTokenFeature.Test,
+                        Mission = EnumTokenMission.FinalTest,
+                        UserId = student.Human?.UserId ?? default,
+                    }
                 }, cancellationToken).ConfigureAwait(false);
 
                 _finalTestResultRepository.Update(finalTestResult);

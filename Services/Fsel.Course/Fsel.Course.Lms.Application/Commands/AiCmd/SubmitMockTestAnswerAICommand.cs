@@ -312,11 +312,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             if (checkSkillMockTest)
             {
-                (var tokenHistoryWordConent, numberOfToken) = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallWordContent ?? default, tokenConfigWork?.Id ?? default, userId, cancellationToken);
-                numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallTaskResponse ?? default, tokenConfigTaskResponse?.Id ?? default, userId, cancellationToken);
-                numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallCoherence ?? default, tokenConfigCoherence?.Id ?? default, userId, cancellationToken);
-                numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallLexicalResource ?? default, tokenConfigLexicalResource?.Id ?? default, userId, cancellationToken);
-                numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallGrammaticalRange ?? default, tokenConfigGrammaticalRange?.Id ?? default, userId, cancellationToken);
+                //(var tokenHistoryWordConent, numberOfToken) = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallWordContent ?? default, tokenConfigWork?.Id ?? default, userId, cancellationToken);
+                //numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallTaskResponse ?? default, tokenConfigTaskResponse?.Id ?? default, userId, cancellationToken);
+                //numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallCoherence ?? default, tokenConfigCoherence?.Id ?? default, userId, cancellationToken);
+                //numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallLexicalResource ?? default, tokenConfigLexicalResource?.Id ?? default, userId, cancellationToken);
+                //numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallGrammaticalRange ?? default, tokenConfigGrammaticalRange?.Id ?? default, userId, cancellationToken);
             }
 
             var taskResponseToken = new List<double?> { tokenOverallWordContent, tokenOverallTaskResponse, tokenOverallCoherence, tokenOverallLexicalResource, tokenOverallGrammaticalRange };

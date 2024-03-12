@@ -138,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return methodResult;
             }
 
-            await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, course.CourseType, student.NumberOfToken, cancellationToken);
+            await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, course.CourseType, student, cancellationToken);
             methodResult = await _mediator.Send(new GetHomeWorkQuery { HomeWorkId = homeWorkResult.HomeWorkId, LessonResultId = homeWorkResult.LessonResultId, IsShowSubStatus = request.IsSubmit }, cancellationToken);
             return methodResult;
         }
@@ -219,7 +219,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return homeWorkAnswer;
         }
 
-        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, bool isSubmit, EnumCourseType courseType, double numberOfToken, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, bool isSubmit, EnumCourseType courseType, StudentModel student, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(homeWorkResult);
             var methodResult = new MethodResult<bool>();
@@ -248,17 +248,21 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     }
 
                     var tokensAchieved = await UpdateHomeWorkAnswers(homeWorkResult, isHomeWorkDone) * token;
-                    homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
-                    await _createTokenHistoryPublisher.Publish(new TokenHistoryQueueModel
+                    await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
                     {
-                        ObjectId = homeWorkResult.Id,
-                        InitialToken = numberOfToken,
-                        RemainToken = tokensAchieved,
-                        VolatileToken = numberOfToken + tokensAchieved,
-                        TokenConfigId = tokenConfigId,
-                        Type = EnumTokenHistoryType.Earn,
-                        UserId = _authContext.CurrentUserId,
+                        new TokenHistoryQueueModel
+                        {
+                            ObjectId = homeWorkResult.Id,
+                            InitialToken = student.NumberOfToken,
+                            RemainToken = tokensAchieved,
+                            VolatileToken = student.NumberOfToken + tokensAchieved,
+                            Feature = EnumTokenFeature.Learn,
+                            Mission = homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit ? EnumTokenMission.HomeworkFirstSubmit : EnumTokenMission.HomeworkSecondSubmit,
+                            Type = EnumTokenHistoryType.Exchanged,
+                            UserId = student.Human?.UserId ?? default,
+                        }
                     }, cancellationToken).ConfigureAwait(false);
+                    homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
                 }
                 _homeWorkResultRepository.Update(homeWorkResult);
                 await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

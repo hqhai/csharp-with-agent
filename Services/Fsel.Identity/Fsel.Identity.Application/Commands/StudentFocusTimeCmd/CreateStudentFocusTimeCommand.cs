@@ -139,15 +139,19 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
                         if (targetNumber.HasValue && !studentFocusTime.IsReceivedToken && tokenConfigResult != null)
                         {
-                            await _createTokenHistoryPublisher.Publish(new TokenHistoryQueueModel
+                            await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
                             {
-                                ObjectId = studentFocusTime.Id,
-                                InitialToken = student.NumberOfToken,
-                                RemainToken = targetNumber.Value,
-                                VolatileToken = student.NumberOfToken + targetNumber.Value,
-                                TokenConfigId = tokenConfigResult.Id,
-                                Type = EnumTokenHistoryType.Earn,
-                                UserId = _authContext.CurrentUserId,
+                                new TokenHistoryQueueModel
+                                {
+                                    ObjectId = studentFocusTime.Id,
+                                    InitialToken = student.NumberOfToken,
+                                    RemainToken = targetNumber.Value,
+                                    VolatileToken = student.NumberOfToken + targetNumber.Value,
+                                    Type = EnumTokenHistoryType.Exchanged,
+                                    Feature = EnumTokenFeature.FocusMode,
+                                    Mission = EnumTokenMission.FocusMode,
+                                    UserId = student.Human?.UserId ?? default,
+                                }
                             }, cancellationToken).ConfigureAwait(false);
 
                             student.NumberOfToken += targetNumber.Value;

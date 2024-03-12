@@ -83,15 +83,19 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             if (tokenConfigResult != null && tokenConfigDailyCheckIns != null)
             {
                 var targetNumber = tokenConfigDailyCheckIns.Where(x => x.Level == studentDailyStreak.LevelOfGift).Max(x => x.BaseValue);
-                await _createTokenHistoryPublisher.Publish(new TokenHistoryQueueModel
+                await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
                 {
-                    ObjectId = studentDailyStreak.Id,
-                    InitialToken = student.NumberOfToken,
-                    RemainToken = targetNumber,
-                    VolatileToken = student.NumberOfToken + targetNumber,
-                    TokenConfigId = tokenConfigResult.Id,
-                    Type = EnumTokenHistoryType.Earn,
-                    UserId = _authContext.CurrentUserId,
+                    new TokenHistoryQueueModel
+                    {
+                        ObjectId = studentDailyStreak.Id,
+                        InitialToken = student.NumberOfToken,
+                        RemainToken = targetNumber,
+                        VolatileToken = student.NumberOfToken + targetNumber,
+                        Type = EnumTokenHistoryType.Exchanged,
+                        Feature = EnumTokenFeature.DailyCheckin,
+                        Mission = EnumTokenMission.DailyCheckin,
+                        UserId = _authContext.CurrentUserId,
+                    }
                 }, cancellationToken).ConfigureAwait(false);
 
                 student.NumberOfToken += targetNumber;

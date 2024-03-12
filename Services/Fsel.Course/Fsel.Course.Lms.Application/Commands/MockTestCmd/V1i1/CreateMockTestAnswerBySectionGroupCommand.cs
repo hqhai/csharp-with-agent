@@ -156,7 +156,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             #endregion Validate
 
             var isSkillTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
-            var tokenConfigId = Guid.Empty;
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 if (request.Answers != null && request.Answers.Any())
@@ -173,7 +172,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
                 if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
                 {
-                    (tokenConfigId, sectionGroupResult) = await UpdateSectionGroupResultAsync(sectionGroup, sectionGroupResult, isSkillTest);
+                    sectionGroupResult = await UpdateSectionGroupResultAsync(sectionGroup, sectionGroupResult, isSkillTest);
                 }
                 return methodResult;
             });
@@ -197,7 +196,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 }
             }
 
-            await UpdateMockTestResultAsync(mockTestResult, sectionGroup, isSkillTest, student.NumberOfToken, tokenConfigId, cancellationToken);
+            await UpdateMockTestResultAsync(mockTestResult, sectionGroup, isSkillTest, student, cancellationToken);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = mockTestResult.Status == EnumResultStatus.Done;
             methodResult.Result = sectionGroupResultDto;
@@ -205,29 +204,33 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task<(Guid, SectionGroupResult?)> UpdateSectionGroupResultAsync(SectionGroup sectionGroup, SectionGroupResult? sectionGroupResult, bool isSkillTest)
+        private async Task<SectionGroupResult?> UpdateSectionGroupResultAsync(SectionGroup sectionGroup, SectionGroupResult? sectionGroupResult, bool isSkillTest)
         {
-            var tokenConfigId = Guid.Empty;
             if (sectionGroupResult != null)
             {
+                EnumTokenMission? tokenMission = null;
                 if (sectionGroup.CourseSkill == EnumCourseSkill.Reading)
                 {
-                    (tokenConfigId, var token) = await GetTokenAsync(isSkillTest ? EnumTokenMission.SkillMockTestReading : EnumTokenMission.FullMockTestReading, isSkillTest);
-                    sectionGroupResult.TokenFirstTime = (int?)token * sectionGroupResult.CorrectCount;
+                    tokenMission = isSkillTest ? EnumTokenMission.SkillMockTestReading : EnumTokenMission.FullMockTestReading;
                 }
                 else if (sectionGroup.CourseSkill == EnumCourseSkill.Listening)
                 {
-                    (tokenConfigId, var token) = await GetTokenAsync(isSkillTest ? EnumTokenMission.SkillMockTestListening : EnumTokenMission.FullMockTestListening, isSkillTest);
+                    tokenMission = isSkillTest ? EnumTokenMission.SkillMockTestListening : EnumTokenMission.FullMockTestListening;
+                }
+                if (tokenMission.HasValue)
+                {
+                    var token = await GetTokenAsync(tokenMission.Value, isSkillTest);
                     sectionGroupResult.TokenFirstTime = (int?)token * sectionGroupResult.CorrectCount;
                 }
+
                 _sectionGroupResultRepository.Update(sectionGroupResult);
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
 
-            return (tokenConfigId, sectionGroupResult);
+            return sectionGroupResult;
         }
 
-        private async Task<(Guid, long)> GetTokenAsync(EnumTokenMission mission, bool isSkillTest)
+        private async Task<long> GetTokenAsync(EnumTokenMission mission, bool isSkillTest)
         {
             var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
             {
@@ -240,10 +243,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 return default;
             }
             var tokenConfig = tokenConfigs.Content?.Result;
-            return (tokenConfig?.Id ?? default, tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
+            return tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
         }
 
-        private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, SectionGroup sectionGroup, bool isSkillTest, double numberOfToken, Guid tokenConfigId, CancellationToken cancellationToken)
+        private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, SectionGroup sectionGroup, bool isSkillTest, StudentModel student, CancellationToken cancellationToken)
         {
             var numberOfDone = 4;
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
@@ -261,15 +264,19 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         StudentId = mockTestResult.StudentId,
                     }).ConfigureAwait(false);
 
-                    await _createTokenHistoryPublisher.Publish(new TokenHistoryQueueModel
+                    await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
                     {
-                        ObjectId = mockTestResult.Id,
-                        InitialToken = numberOfToken,
-                        RemainToken = token,
-                        VolatileToken = numberOfToken + token,
-                        TokenConfigId = tokenConfigId,
-                        Type = EnumTokenHistoryType.Earn,
-                        UserId = _authContext.CurrentUserId,
+                        new TokenHistoryQueueModel
+                        {
+                            ObjectId = mockTestResult.Id,
+                            InitialToken = student.NumberOfToken,
+                            RemainToken = token,
+                            VolatileToken = student.NumberOfToken + token,
+                            Type = EnumTokenHistoryType.Exchanged,
+                            Feature = EnumTokenFeature.SkillMockTest,
+                            Mission = sectionGroup.CourseSkill == EnumCourseSkill.Reading ? EnumTokenMission.SkillMockTestReading : EnumTokenMission.SkillMockTestListening,
+                            UserId = student.Human?.UserId ?? default,
+                        }
                     }, cancellationToken).ConfigureAwait(false);
                 }
 
