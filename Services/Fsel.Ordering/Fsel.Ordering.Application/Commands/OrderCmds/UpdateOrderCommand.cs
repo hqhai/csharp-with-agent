@@ -99,7 +99,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 ObjectId = order.Id,
                 Type = EnumNotificationType.Text,
                 Content = EnumNotificationContent.OrderCreate,
-                SenderId = order.CreatedUserId,
+                SenderId = order.UserId,
                 PlatformCode = EnumPlatformCode.LMSAdmin
             }, cancellationToken);
         }

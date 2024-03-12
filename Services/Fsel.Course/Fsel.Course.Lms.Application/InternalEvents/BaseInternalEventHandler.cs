@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Linq;
     using System.Threading;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -16,6 +17,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -375,7 +377,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var studentTrialRegistration = await _userService.CheckStudentTrialRegistration();
                     var checkStudentTrialResult = studentTrialRegistration?.Content?.Result ?? default;
 
-                    if (unitResultNext != null && unitResultNext.Status == EnumResultStatus.Unfinished && !checkStudentTrialResult)
+                    if (unitResultNext == null)
+                    {
+                        break;
+                    }
+                    await UpdateStudentTrialRegistration(checkStudentTrialResult, unitResultNext.CreatedUserId);
+                    if (unitResultNext.Status == EnumResultStatus.Unfinished && !checkStudentTrialResult)
                     {
                         unitResultNext.Status = EnumResultStatus.New;
                         _unitResultRepository.Update(unitResultNext);
@@ -437,7 +444,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var courseResult = await UpdateCourse(course, studentId, cancellationToken);
                 if (courseResult != null)
                 {
-                    var userId = courseResult.CreatedUserId;
+                    //var userId = courseResult.CreatedUserId;
                     //await DoQuestBoard(courseId, userId, cancellationToken);
 
                     courseResult.Status = EnumResultStatus.Done;
@@ -507,6 +514,20 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
                     CourseId = courseId
                 }, cancellationToken);
+            }
+        }
+
+        private async Task UpdateStudentTrialRegistration(bool checkStudentTrialResult, Guid userId)
+        {
+            if (checkStudentTrialResult)
+            {
+
+                StudentTrialRegistrationModel model = new StudentTrialRegistrationModel()
+                {
+                    UserId = userId,
+                    Status = EnumTrialRegistrationStatus.Finished
+                };
+                await _userService.UpdateTrialRegistrationStatusAsync(model);
             }
         }
     }
