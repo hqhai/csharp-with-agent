@@ -2,7 +2,7 @@
 
 namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 {
-    public class PaymentWithAppStoreSuccessCommandModel
+    public class PaymentWithAppStoreCommandModel
     {
         public NotificationV2? DecodedPayload { get; set; }
         public RenewalInfoV2? RenewalInfo { get; set; }

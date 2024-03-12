@@ -68,8 +68,15 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         {
             try
             {
-                await _notificationProcessor.Process(appleNotification);
-                return Ok();
+                var decode = await _notificationProcessor.Process(appleNotification);
+                if (decode)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return StatusCode(500);
+                }
             }
             catch
             {

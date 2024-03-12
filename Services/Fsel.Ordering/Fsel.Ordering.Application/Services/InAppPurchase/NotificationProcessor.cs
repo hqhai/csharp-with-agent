@@ -15,13 +15,11 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
 
     public class NotificationProcessor : INotificationProcessor
     {
-        private readonly ISubscriptionService _subscriptionService;
         private readonly ILogger<NotificationProcessor> _logger;
         private readonly IMediator _mediator;
 
-        public NotificationProcessor(ISubscriptionService subscriptionService, ILogger<NotificationProcessor> logger, IMediator mediator)
+        public NotificationProcessor(ILogger<NotificationProcessor> logger, IMediator mediator)
         {
-            _subscriptionService = subscriptionService;
             _logger = logger;
             _mediator = mediator;
         }
@@ -31,6 +29,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
             var v2Notification = GetVerifiedDecodedData<NotificationV2>(notification.SignedPayload);
             if (v2Notification?.DecodedPayload?.Data == null || !v2Notification.IsValid)
             {
+                _logger.LogError("Data is null or is not valid");
                 throw new ArgumentNullException($"{nameof(v2Notification.DecodedPayload.Data)} is null or is not valid");
             }
 
@@ -46,7 +45,12 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
             TransactionInfoV2? transactionInfo = null;
             if (transactionInfoResponse.IsValid)
                 transactionInfo = transactionInfoResponse.DecodedPayload;
-            await _mediator.Send(new PaymentWithAppStoreSuccessCommand() { DecodedPayload = v2Notification.DecodedPayload, RenewalInfo = renewalInfo, TransactionInfo = transactionInfo }).ConfigureAwait(false);
+
+            var createOrderResult = await _mediator.Send(new PaymentWithAppStoreCommand() { DecodedPayload = v2Notification.DecodedPayload, RenewalInfo = renewalInfo, TransactionInfo = transactionInfo }).ConfigureAwait(false);
+            if (createOrderResult.Result)
+            {
+                return true;
+            }
             return false;
         }
 
@@ -54,10 +58,11 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
         {
             if (string.IsNullOrEmpty(signedPayload))
             {
+                _logger.LogError("Signed Payload is null");
                 throw new ArgumentNullException("Signed Payload is null");
             }
 
-            var splitParts = signedPayload.Split('.');
+            var splitParts = signedPayload.Split('.'); // JWS header, payload, and signature representations
 
             EnsurePartElements(splitParts);
 
@@ -72,30 +77,34 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
             };
         }
 
-        private static void EnsurePartElements(string[] split)
+        private void EnsurePartElements(string[] split)
         {
             if (split.Length != 3)
             {
+                _logger.LogError("Invalid signedPayload");
                 throw new ArgumentException("Invalid signedPayload");
             }
 
             if (string.IsNullOrEmpty(split[0]))
             {
+                _logger.LogError("Invalid jws_header part");
                 throw new ArgumentException("Invalid jws_header part");
             }
 
             if (string.IsNullOrEmpty(split[1]))
             {
+                _logger.LogError("Invalid jws_payload part");
                 throw new ArgumentException("Invalid jws_payload part");
             }
 
             if (string.IsNullOrEmpty(split[2]))
             {
+                _logger.LogError("Invalid jws_signature part");
                 throw new ArgumentException("Invalid jws_signature part");
             }
         }
 
-        private static bool VerifyToken(string token)
+        private bool VerifyToken(string token)
         {
             try
             {
@@ -105,12 +114,14 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
                 var x5cTry = jwtSecurityToken.Header.TryGetValue("x5c", out object x5cCerteficates);
                 if (!x5cTry || x5cCerteficates == null)
                 {
+                    _logger.LogError("Token Header does not contain x5c");
                     throw new KeyNotFoundException("Token Header does not contain x5c");
                 }
 
                 var certeficatesItems = JsonConvert.DeserializeObject<IEnumerable<string>>(x5cCerteficates.ToString());
                 if (certeficatesItems == null || !certeficatesItems.Any())
                 {
+                    _logger.LogError("Certeficates are null");
                     throw new ArgumentNullException("Certeficates are null");
                 }
 
@@ -118,7 +129,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
 
                 return securityToken != null;
             }
-            catch
+            catch (Exception ex)
             {
                 // log it
                 return false;

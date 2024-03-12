@@ -2,10 +2,9 @@
 
 namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 {
-    public enum OfferType
+    public enum EnumPriceConsent
     {
-        Introductory = 0,
-        Promotional = 1,
-        OfferCode = 3
+        Unknown = 0,
+        Consented = 1
     }
 }

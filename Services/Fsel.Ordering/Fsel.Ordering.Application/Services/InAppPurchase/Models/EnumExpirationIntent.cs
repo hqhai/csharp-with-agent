@@ -2,7 +2,7 @@
 
 namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 {
-    public enum ExpirationIntent
+    public enum EnumExpirationIntent
     {
         Canceled = 1,
         BillingError = 2,
