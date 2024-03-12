@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20240312031225_CreateTokenHistoryTable")]
+    [Migration("20240312035723_CreateTokenHistoryTable")]
     partial class CreateTokenHistoryTable
     {
         /// <inheritdoc />
@@ -3054,7 +3054,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<double>("RemainToken")
                         .HasColumnType("float");
 
-                    b.Property<Guid>("TokenConfigId")
+                    b.Property<Guid?>("TokenConfigId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")
@@ -3167,8 +3167,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasOne("Fsel.System.Domain.Entities.TokenConfig", "TokenConfig")
                         .WithMany("TokenHistories")
                         .HasForeignKey("TokenConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("TokenConfig");
                 });

@@ -7,7 +7,7 @@ namespace Fsel.System.Domain.Entities
 
     public class TokenHistory : Entity
     {
-        public Guid TokenConfigId { get; set; }
+        public Guid? TokenConfigId { get; set; }
 
         public double InitialToken { get; set; }
 

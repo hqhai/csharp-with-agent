@@ -26,7 +26,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    TokenConfigId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TokenConfigId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     InitialToken = table.Column<double>(type: "float", nullable: false),
                     VolatileToken = table.Column<double>(type: "float", nullable: false),
                     RemainToken = table.Column<double>(type: "float", nullable: false),
