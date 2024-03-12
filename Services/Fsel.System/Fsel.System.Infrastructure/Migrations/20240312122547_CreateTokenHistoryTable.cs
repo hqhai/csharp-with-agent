@@ -31,9 +31,10 @@ namespace Fsel.System.Infrastructure.Migrations
                     VolatileToken = table.Column<double>(type: "float", nullable: false),
                     RemainToken = table.Column<double>(type: "float", nullable: false),
                     Feature = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Mission = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Mission = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ObjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ConfigStr = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Type = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>

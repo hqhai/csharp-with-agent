@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.TokenHistorys;
@@ -45,17 +46,27 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
             var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => request.TokenHistorys.Select(x => x.Feature).Contains(x.Feature) && request.TokenHistorys.Select(x => x.Mission).Contains(x.Mission)).ToListAsync(cancellationToken);
             foreach (var item in request.TokenHistorys)
             {
-                var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Feature == item.Feature && x.Mission == item.Mission);
-                if (tokenConfig != null)
+                TokenHistory tokenHistory = _mapper.Map<TokenHistory>(item);
+                if (item.Feature == EnumTokenFeature.MarketPlace)
                 {
-                    TokenHistory tokenHistory = _mapper.Map<TokenHistory>(request);
-                    if (!tokenHistory.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(tokenHistory.ErrorMessages);
-                        return methodResult;
-                    }
-                    tokenHistorys.Add(tokenHistory);
+                    item.Mission = null;
+                    item.TokenConfigId = null;
                 }
+                else
+                {
+                    var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Feature == item.Feature && x.Mission == item.Mission);
+                    if (tokenConfig != null)
+                    {
+                        tokenHistory.TokenConfigId = tokenConfig.Id;
+                        if (!tokenHistory.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(tokenHistory.ErrorMessages);
+                            return methodResult;
+                        }
+                    }
+                }
+
+                tokenHistorys.Add(tokenHistory);
             }
             await _tokenHistoryRepository.ExecuteTransactionAsync(async () =>
             {

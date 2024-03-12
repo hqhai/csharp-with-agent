@@ -9,7 +9,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
     public class TokenHistoryModel : BaseModel
     {
-        public Guid TokenConfigId { get; set; }
+        public Guid? TokenConfigId { get; set; }
 
         public double InitialToken { get; set; }
 
@@ -22,13 +22,13 @@ namespace Fsel.System.Domain.Models.EntityModels
         public Guid ObjectId { get; set; }
         public EnumTokenFeature Feature { get; set; }
 
-        public EnumTokenMission Mission { get; set; }
+        public EnumTokenMission? Mission { get; set; }
 
         public EnumTokenHistoryType Type { get; set; }
 
         public double? ReciveToken { get; set; }
         public double? UsedToken { get; set; }
-
+        public object? Config { get; set; }
         public TokenConfigModel? TokenConfig { get; set; }
     }
 }
