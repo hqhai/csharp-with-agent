@@ -11,7 +11,7 @@ namespace Fsel.System.Domain.Entities
 
     public class ErrorReport : Entity
     {
-        public EnumTypeOfError Type { get; set; }
+        public EnumTypeOfError? Type { get; set; }
 
         public Guid? CourseId { get; set; }
 
