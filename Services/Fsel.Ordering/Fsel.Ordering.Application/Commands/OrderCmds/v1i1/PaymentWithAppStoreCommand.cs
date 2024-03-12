@@ -122,7 +122,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                         return methodResult;
                     }
 
-                    var updateNextUnitResult = await _courseService.UpdateNextUnit();
+                    var updateNextUnitResult = await _courseService.UpdateNextUnit(order.UserId);
                     if (!updateNextUnitResult.IsSuccessStatusCode)
                     {
                         _logger.LogError(addStudentIntoClassResult.Error.Content);
