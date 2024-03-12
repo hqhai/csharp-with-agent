@@ -5,8 +5,11 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
+    using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Commands.OrderCmds.v1i1;
     using Fsel.Ordering.Application.Services.InAppPurchase.Models;
+    using Fsel.Ordering.Domain.Entities;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.Extensions.Logging;
@@ -45,6 +48,24 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
             TransactionInfoV2? transactionInfo = null;
             if (transactionInfoResponse.IsValid)
                 transactionInfo = transactionInfoResponse.DecodedPayload;
+
+            var response = new OrderTransaction()
+            {
+                ResponseBody = new AppStoreResponseModel()
+                {
+                    NotificationType = v2Notification.DecodedPayload?.NotificationType,
+                    Subtype = v2Notification.DecodedPayload?.Subtype,
+                    NotificationUUID = v2Notification.DecodedPayload?.NotificationUUID,
+                    NotificationVersion = v2Notification.DecodedPayload?.NotificationVersion,
+                    TransactionInfo = transactionInfo,
+                    RenewalInfoV2 = renewalInfo,
+                    SignedDate = v2Notification.DecodedPayload?.SignedDate
+                },
+                Type = EnumOrderTransactionType.AppStore,
+                Status = EnumOrderTransactionStatus.Success
+            };
+
+            _logger.LogError(response.Serialize());
 
             var createOrderResult = await _mediator.Send(new PaymentWithAppStoreCommand() { DecodedPayload = v2Notification.DecodedPayload, RenewalInfo = renewalInfo, TransactionInfo = transactionInfo }).ConfigureAwait(false);
             if (createOrderResult.Result)
