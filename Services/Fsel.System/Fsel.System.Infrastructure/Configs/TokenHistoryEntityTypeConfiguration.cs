@@ -23,6 +23,18 @@ namespace Fsel.System.Infrastructure.Configs
                    .WithMany(b => b.TokenHistories)
                    .HasForeignKey(b => b.TokenConfigId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(e => e.Feature)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumTokenFeature>());
+
+            builder.Property(e => e.Mission)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumTokenMission>());
         }
     }
 }

@@ -22,6 +22,9 @@ namespace Fsel.System.Domain.Models.EntityModels
         public Guid ObjectId { get; set; }
 
         public EnumTokenHistoryType Type { get; set; }
+        public double? TotalToken { get; set; }
+        public double? ReciveToken { get; set; }
+        public double? UsedToken { get; set; }
 
         public TokenConfigModel? TokenConfig { get; set; }
     }

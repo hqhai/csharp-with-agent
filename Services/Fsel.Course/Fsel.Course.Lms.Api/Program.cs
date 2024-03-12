@@ -99,6 +99,10 @@ builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRa
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
 builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
 
+builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();

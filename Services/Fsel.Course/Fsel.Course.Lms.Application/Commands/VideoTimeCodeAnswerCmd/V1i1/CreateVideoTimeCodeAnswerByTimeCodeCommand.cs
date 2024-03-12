@@ -141,7 +141,19 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     }
                 }
 
-                await UpdateVideoTimeCodeResult(videoTimeCode, videoTimeCodeResult, request.IsSubmit, course.CourseType, student.NumberOfToken, cancellationToken);
+                await UpdateVideoTimeCodeResult(videoTimeCode, videoTimeCodeResult, request.IsSubmit, course.CourseType, cancellationToken);
+                if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone && request.IsSubmit)
+                {
+                    var token = videoTimeCodeResult.TokenLastTime.HasValue ? videoTimeCodeResult.TokenLastTime.Value : videoTimeCodeResult.TokenFirstTime;
+                    if (videoResult.TokenFirstTime.HasValue)
+                    {
+                        videoResult.TokenFirstTime += token;
+                    }
+                    else
+                    {
+                        videoResult.TokenFirstTime = token;
+                    }
+                }
                 _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;

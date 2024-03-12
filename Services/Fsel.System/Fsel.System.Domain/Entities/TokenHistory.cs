@@ -7,13 +7,16 @@ namespace Fsel.System.Domain.Entities
 
     public class TokenHistory : Entity
     {
-        public Guid TokenConfigId { get; set; }
+        public Guid? TokenConfigId { get; set; }
 
         public double InitialToken { get; set; }
 
         public double VolatileToken { get; set; }
 
         public double RemainToken { get; set; }
+        public EnumTokenFeature Feature { get; set; }
+
+        public EnumTokenMission Mission { get; set; }
 
         public Guid UserId { get; set; }
 
