@@ -181,6 +181,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 newOrder.DiscountPercent = 0;
                 newOrder.DiscountPrice = 0;
                 newOrder.TotalPrice = 0;
+                newOrder.UserId = _authContext.CurrentUserId;
 
                 await _userService.CreateStudentTrialRegistration();
                 var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
@@ -196,7 +197,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 newOrder = _orderRepository.Add(newOrder);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                SendNotify(newOrder.Id, newOrder.CreatedUserId, cancellationToken);
+                SendNotify(newOrder.Id, newOrder.UserId, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(newOrder);
                 return methodResult;
