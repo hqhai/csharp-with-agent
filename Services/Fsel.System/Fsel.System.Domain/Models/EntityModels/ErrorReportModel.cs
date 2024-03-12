@@ -10,7 +10,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
     public class ErrorReportModel : BaseModel
     {
-        public EnumTypeOfError Type { get; set; }
+        public EnumTypeOfError? Type { get; set; }
 
         public Guid? CourseId { get; set; }
 
@@ -18,7 +18,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public Guid? LessonId { get; set; }
 
-        public EnumPriority Priority { get; set; }
+        public EnumPriority? Priority { get; set; }
 
         public EnumErrorReportStatus Status { get; set; }
 

@@ -11,6 +11,7 @@ namespace Fsel.System.Domain.Enums
         PlacementTest,
         Progress,
         Chatbot,
+        TokenReport,
         Orther
     }
 }
