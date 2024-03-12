@@ -183,8 +183,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     NumberOfToken = token,
                     StudentId = finalTestResult.StudentId,
                 }).ConfigureAwait(false);
-
-                await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
+                var tokenHistorys = new List<TokenHistoryQueueModel>
                 {
                     new TokenHistoryQueueModel
                     {
@@ -197,7 +196,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                         Mission = EnumTokenMission.FinalTest,
                         UserId = student.Human?.UserId ?? default,
                     }
-                }, cancellationToken).ConfigureAwait(false);
+                };
+                await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
 
                 _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

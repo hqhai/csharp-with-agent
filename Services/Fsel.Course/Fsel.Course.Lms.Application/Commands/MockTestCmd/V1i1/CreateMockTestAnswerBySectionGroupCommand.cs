@@ -263,8 +263,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         NumberOfToken = token,
                         StudentId = mockTestResult.StudentId,
                     }).ConfigureAwait(false);
-
-                    await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
+                    var tokenHistorys = new List<TokenHistoryQueueModel>
                     {
                         new TokenHistoryQueueModel
                         {
@@ -277,7 +276,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                             Mission = sectionGroup.CourseSkill == EnumCourseSkill.Reading ? EnumTokenMission.SkillMockTestReading : EnumTokenMission.SkillMockTestListening,
                             UserId = student.Human?.UserId ?? default,
                         }
-                    }, cancellationToken).ConfigureAwait(false);
+                    };
+                    await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
                 }
 
                 _mockTestResultRepository.Update(mockTestResult);

@@ -48,7 +48,8 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Feature == item.Feature && x.Mission == item.Mission);
                 if (tokenConfig != null)
                 {
-                    TokenHistory tokenHistory = _mapper.Map<TokenHistory>(request);
+                    TokenHistory tokenHistory = _mapper.Map<TokenHistory>(item);
+                    tokenHistory.TokenConfigId = tokenConfig.Id;
                     if (!tokenHistory.IsValid())
                     {
                         methodResult.AddErrorBadRequest(tokenHistory.ErrorMessages);

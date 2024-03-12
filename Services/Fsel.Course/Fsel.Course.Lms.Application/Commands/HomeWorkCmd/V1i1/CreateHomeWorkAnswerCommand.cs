@@ -248,7 +248,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     }
 
                     var tokensAchieved = await UpdateHomeWorkAnswers(homeWorkResult, isHomeWorkDone) * token;
-                    await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
+                    var tokenHistorys = new List<TokenHistoryQueueModel>
                     {
                         new TokenHistoryQueueModel
                         {
@@ -261,7 +261,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                             Type = EnumTokenHistoryType.Exchanged,
                             UserId = student.Human?.UserId ?? default,
                         }
-                    }, cancellationToken).ConfigureAwait(false);
+                    };
+
+                    await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
                     homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
                 }
                 _homeWorkResultRepository.Update(homeWorkResult);

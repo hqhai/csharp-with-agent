@@ -23,7 +23,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.CreateTokenHistory, request, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.CreateTokenHistory, new TokenHistoryQueuesModel { TokenHistories = request }, cancellationToken);
         }
     }
 }

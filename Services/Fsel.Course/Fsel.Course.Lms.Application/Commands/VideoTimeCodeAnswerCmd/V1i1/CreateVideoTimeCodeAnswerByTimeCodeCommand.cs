@@ -339,7 +339,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             if (videoTimeCodeResult.Status != EnumResultStatus.Done)
             {
                 var tokensAchieved = (double)(videoTimeCodeResult.TokenLastTime.HasValue ? videoTimeCodeResult.TokenLastTime.Value : (videoTimeCodeResult.TokenFirstTime ?? default));
-                await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
+                var listToken = new List<TokenHistoryQueueModel>
                 {
                     new TokenHistoryQueueModel
                     {
@@ -350,9 +350,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                         Feature = EnumTokenFeature.Learn,
                         Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit,
                         Type = EnumTokenHistoryType.Exchanged,
-                        UserId = _authContext.CurrentUserId,
+                        UserId = student.Human?.UserId ?? default,
                     }
-                }, cancellationToken).ConfigureAwait(false);
+                };
+
+                await _createTokenHistoryPublisher.Publish(listToken, cancellationToken).ConfigureAwait(false);
             }
         }
 
