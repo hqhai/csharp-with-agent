@@ -7,13 +7,15 @@ using Fsel.Core.Entities;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.Configs;
 using Fsel.Shared.Constants;
+using IdentityServer4.EntityFramework.Entities;
 using MediatR;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserToken>
+    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, UserRoleEntity, UserLoginEntity, RoleClaimEntity, UserToken>, IDataProtectionKeyContext
     {
         public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -22,13 +24,26 @@ namespace Fsel.Identity.Infrastructure
         protected override void OnModelCreating(ModelBuilder builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-
-            builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
-            builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
-            builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
+            base.OnModelCreating(builder);
 
             SeedPlatforms(builder);
             SeedRoles(builder);
+            SeedUsers(builder);
+            SeedUserRoles(builder);
+
+            builder.Entity<User>().ToTable(nameof(Users))
+                .HasQueryFilter(e => !e.IsDeleted)
+                .HasIndex(x => x.NormalizedUserName)
+                .HasFilter($"{nameof(User.NormalizedUserName)} IS NOT NULL")
+                .IsUnique(false);
+            builder.Entity<Role>().ToTable(nameof(Roles))
+                .HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<UserClaimEntity>().ToTable(nameof(UserClaims));
+            builder.Entity<UserRoleEntity>().ToTable(nameof(UserRoles));
+            builder.Entity<UserLoginEntity>().ToTable(nameof(UserLogins));
+            builder.Entity<RoleClaimEntity>().ToTable(nameof(RoleClaims));
+            builder.Entity<UserToken>().ToTable(nameof(UserTokens))
+                .HasQueryFilter(e => !e.IsDeleted);
 
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
@@ -38,21 +53,25 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserEntityTypeConfiguration());
-            builder.ApplyConfiguration(new UserOtpCodeEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserOtpEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserSettingEntityTypeConfiguration());
             builder.ApplyConfiguration(new PlatformEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserPlatformEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudenrRankingEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentFocusTimeEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentTrialRegistrationEntityTypeConfiguration());
-            base.OnModelCreating(builder);
         }
 
         #region Db Set
 
         public override DbSet<User> Users { get; set; }
-        public DbSet<UserToken> UserTokens { get; set; }
-        public DbSet<Role> Roles { get; set; }
+        public override DbSet<UserToken> UserTokens { get; set; }
+        public override DbSet<UserClaimEntity> UserClaims { get; set; }
+        public override DbSet<UserRoleEntity> UserRoles { get; set; }
+        public override DbSet<UserLoginEntity> UserLogins { get; set; }
+        public override DbSet<RoleClaimEntity> RoleClaims { get; set; }
+        public override DbSet<Role> Roles { get; set; }
+        public DbSet<UserOtp> UserOtps { get; set; }
         public DbSet<Human> Humans { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Student> Students { get; set; }
@@ -60,13 +79,13 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<CSO> CSOs { get; set; }
         public DbSet<TeacherBankAccount> TeacherBankAccounts { get; set; }
         public DbSet<ParentStudent> ParentStudents { get; set; }
-        public DbSet<UserOtpCode> UserOtpCodes { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
         public DbSet<Platform> Platform { get; set; }
         public DbSet<UserPlatform> UserPlatforms { get; set; }
         public DbSet<StudentRanking> StudentRankings { get; set; }
         public DbSet<StudentFocusTime> StudentFocusTimes { get; set; }
         public DbSet<StudentTrialRegistration> StudentTrialRegistrations { get; set; }
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
         #endregion Db Set
 
@@ -105,6 +124,28 @@ namespace Fsel.Identity.Infrastructure
             {
                 ArgumentNullException.ThrowIfNull(roles);
                 builder.Entity<Role>().HasData(roles);
+            }
+        }
+
+        private static void SeedUsers(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.UserFileName);
+            var users = ConvertHelper.DeserializeFromFilePath<IList<User>>(path);
+            if (users != null)
+            {
+                ArgumentNullException.ThrowIfNull(users);
+                builder.Entity<User>().HasData(users);
+            }
+        }
+
+        private static void SeedUserRoles(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.UserRoleFileName);
+            var userRoles = ConvertHelper.DeserializeFromFilePath<IList<UserRoleEntity>>(path);
+            if (userRoles != null)
+            {
+                ArgumentNullException.ThrowIfNull(userRoles);
+                builder.Entity<UserRoleEntity>().HasData(userRoles);
             }
         }
     }

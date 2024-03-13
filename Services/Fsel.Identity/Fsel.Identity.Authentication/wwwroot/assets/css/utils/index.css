@@ -1,0 +1,16 @@
+html {
+  --text-input-color: #eef0f7;
+  --label-input-focus: #dce1ef;
+  --disable-bg: #293656;
+  --disable-text-color: #6e7891;
+  --primary-color: #2c5fd3;
+  --secondary-color: #abbfed;
+  --white-color: #fff;
+  --border-color: #42558a;
+  --error-text-color: #c0404c;
+  --error-border-color: #e6b2b7;
+  --tertiary-color: #ec9213;
+  --success-color: #3e8e41;
+}
+
+/*# sourceMappingURL=index.css.map */

@@ -7,7 +7,7 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.StudentCmd;
-using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+using Fsel.Identity.Application.Commands.UserOtpCmd;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;

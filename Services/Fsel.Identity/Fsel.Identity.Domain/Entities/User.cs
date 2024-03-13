@@ -1,20 +1,51 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
-using Fsel.Common.Enums.ErrorCodes;
+using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Core.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace Fsel.Identity.Domain.Entities
 {
     public class User : UserEntity
     {
+        [Key]
+        [Column(Order = 0)]
+        public override Guid Id { get; set; }
+
+        [ProtectedPersonalData]
+        public override string? Email { get; set; }
+
+        [ProtectedPersonalData]
+        public override string? PhoneNumber { get; set; }
+
+        [MaxLength(250)]
+        public string? Code { get; set; }
+
+        [MaxLength(250)]
         [Required]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? FullName { get; set; }
+        public string? FirstName { get; set; }
+
+        [MaxLength(250)]
+        [Required]
+        public string? LastName { get; set; }
+
+        public string? FullName
+        {
+            get { return $"{LastName} {FirstName}".Trim(); }
+        }
+
+        public DateTime? Birthday { get; set; }
+
+        [MaxLength(250)]
+        public string? Address { get; set; }
+
+        [MaxLength(1000)]
+        public string? AvatarPath { get; set; }
 
         public virtual Human? Human { get; set; }
 
-        public virtual ICollection<UserOtpCode> UserOtpCodes { get; set; } = new List<UserOtpCode>();
+        public virtual ICollection<UserOtp> UserOtpCodes { get; set; } = new List<UserOtp>();
 
         public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
 

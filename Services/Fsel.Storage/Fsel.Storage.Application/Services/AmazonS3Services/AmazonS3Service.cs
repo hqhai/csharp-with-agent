@@ -13,7 +13,9 @@ using Fsel.Storage.Infrastructure.ValueSettings;
 using Humanizer.Bytes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Processing;
 
 namespace Fsel.Storage.Application.Services.AmazonS3Services
 {

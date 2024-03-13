@@ -123,7 +123,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     var user = new User();
                     user.UserName = student.Email;
                     user.Email = student.Email;
-                    user.FullName = student.Email;
+                    user.FirstName = student.Email;
                     user.EmailConfirmed = true;
 
                     #region Add Platform to User

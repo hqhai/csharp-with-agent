@@ -1,0 +1,18 @@
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    // ViewData["Title"] = "Register";
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/assets/css/pages/success-form.css" />
+}
+
+<img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+<img src="/assets/img/success-form.svg" alt="" class="logo" />
+
+<h1 class="title">Success</h1>
+<p class="sub-title success-sub-title">
+    @ViewBag.Message
+</p>
+
+<a href="/Account/Login" class="btn">Log in now</a>

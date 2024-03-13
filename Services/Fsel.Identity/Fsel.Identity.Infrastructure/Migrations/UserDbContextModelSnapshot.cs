@@ -43,7 +43,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims", (string)null);
+                    b.ToTable("RoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("Fsel.Core.Entities.UserClaimEntity", b =>
@@ -67,7 +67,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims", (string)null);
+                    b.ToTable("UserClaims", (string)null);
                 });
 
             modelBuilder.Entity("Fsel.Core.Entities.UserLoginEntity", b =>
@@ -88,7 +88,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogins", (string)null);
+                    b.ToTable("UserLogins", (string)null);
                 });
 
             modelBuilder.Entity("Fsel.Core.Entities.UserRoleEntity", b =>
@@ -103,7 +103,14 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles", (string)null);
+                    b.ToTable("UserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("28886c7b-fd8d-49c0-babe-5a3ee2cd83a4"),
+                            RoleId = new Guid("69976022-5dbb-4292-bab6-e94b6701061e")
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.CSO", b =>
@@ -603,7 +610,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("AspNetRoles", (string)null);
+                    b.ToTable("Roles", (string)null);
 
                     b.HasData(
                         new
@@ -1261,6 +1268,21 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("AvatarPath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("Birthday")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -1299,7 +1321,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FullName")
+                    b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
@@ -1307,6 +1329,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -1360,14 +1387,38 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
-                        .IsUnique()
                         .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasFilter("NormalizedUserName IS NOT NULL");
 
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("Users", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("28886c7b-fd8d-49c0-babe-5a3ee2cd83a4"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "082af315-bc6a-40d5-a1a3-bc3060d1b9cf",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Email = "admin@gmail.com",
+                            EmailConfirmed = true,
+                            FirstName = "ADMIN",
+                            IsDeleted = false,
+                            LastName = "ACC",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@GMAIL.COM",
+                            NormalizedUserName = "ADMIN",
+                            PasswordHash = "AQAAAAIAAYagAAAAEODaFKz0IP1OYMn3cJDd8rSt8W+JNWJljuw3ereBa2Nka8y/zOoqzxZHVmc+u3NuVQ==",
+                            PhoneNumber = "1234567890",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "AEW57AWQEQTK7XBWGWWOIMHLRWVD6ZYD",
+                            TwoFactorEnabled = false,
+                            UserName = "Admin"
+                        });
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtpCode", b =>
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtp", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1408,8 +1459,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<string>("OTPCode")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Otp")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1432,11 +1485,14 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("VerifyId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserOtpCodes");
+                    b.ToTable("UserOtps");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserPlatform", b =>
@@ -1659,7 +1715,26 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserTokens", (string)null);
+                    b.ToTable("UserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FriendlyName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Xml")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataProtectionKeys");
                 });
 
             modelBuilder.Entity("Fsel.Core.Entities.RoleClaimEntity", b =>
@@ -1795,7 +1870,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtpCode", b =>
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtp", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
                         .WithMany("UserOtpCodes")

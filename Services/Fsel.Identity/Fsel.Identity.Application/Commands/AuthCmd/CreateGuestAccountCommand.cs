@@ -62,7 +62,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         countUser++;
                     }
                     user.Email = user.UserName + "@gmail.com";
-                    user.FullName = user.UserName;
+                    user.FirstName = user.UserName;
                     user.EmailConfirmed = true;
 
                     #endregion User initialization

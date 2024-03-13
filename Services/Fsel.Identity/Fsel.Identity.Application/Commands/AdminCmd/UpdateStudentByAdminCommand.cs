@@ -9,7 +9,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.AuthCmd;
-    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+    using Fsel.Identity.Application.Commands.UserOtpCmd;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;

@@ -28,11 +28,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
     {
         private readonly UserManager<User> _userManager;
         private readonly IHostEnvironment _environment;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly IUserOtpRepository _userOtpCodeRepository;
 
         public CheckOtpCommandHandler(UserManager<User> userManager
             , IHostEnvironment environment
-            , IUserOtpCodeRepository userOtpCodeRepository)
+            , IUserOtpRepository userOtpCodeRepository)
         {
             _userManager = userManager;
             _environment = environment;
@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
             var methodResult = new MethodResult<bool>();
 
             var user = await _userManager.Users.Include(x => x.UserOtpCodes)
-                               .FirstOrDefaultAsync(x => x.UserOtpCodes.Any(x => x.Status == EnumOtpCodeStatus.New && x.OTPCode == request.Otp), cancellationToken);
+                               .FirstOrDefaultAsync(x => x.UserOtpCodes.Any(x => x.Status == EnumUserOtpStatus.New && x.Otp == request.Otp), cancellationToken);
             if (!string.IsNullOrEmpty(request.Email) && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
             {
                 if (!request.Email.IsValidEmail())
@@ -62,7 +62,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeQuery
             }
 
             var userOtpCode = await _userOtpCodeRepository.Queryable
-                       .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
+                       .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumUserOtpStatus.New && !x.IsDeleted, cancellationToken);
             if (userOtpCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));

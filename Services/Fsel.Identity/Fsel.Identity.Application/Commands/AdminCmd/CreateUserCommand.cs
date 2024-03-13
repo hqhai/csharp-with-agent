@@ -6,7 +6,7 @@ using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.AuthCmd;
-using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+using Fsel.Identity.Application.Commands.UserOtpCmd;
 using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;

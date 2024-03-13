@@ -1,0 +1,9 @@
+.remember-forgot-password {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--white-color);
+}
+
+/*# sourceMappingURL=login.css.map */

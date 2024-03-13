@@ -1,0 +1,54 @@
+.sub-verify-otp {
+  margin-bottom: 32px;
+  margin-top: 8px;
+}
+
+.number-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+@media only screen and (max-width: 576px) {
+  .number-list {
+    gap: 10px;
+  }
+}
+.number-list .number-item {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--white-color);
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.number-list .number-item.number-item--fail {
+  color: var(--error-text-color);
+  border-color: var(--error-border-color);
+}
+@media only screen and (max-width: 576px) {
+  .number-list .number-item {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.resend-otp {
+  margin-top: 32px;
+  font-size: 1.6rem;
+  line-height: 1.5;
+  color: var(--white-color);
+}
+.resend-otp a {
+  color: var(--secondary-color);
+  font-weight: 600;
+}
+
+/*# sourceMappingURL=verify-otp.css.map */

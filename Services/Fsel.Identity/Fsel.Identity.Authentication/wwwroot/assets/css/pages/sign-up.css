@@ -1,0 +1,123 @@
+.role-container {
+  display: flex;
+  justify-content: space-between;
+  align-content: center;
+  gap: 20px;
+}
+
+.role-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--white-text);
+  font-weight: 600;
+  line-height: 1.5;
+  flex: 1;
+  border-radius: 12px;
+  background: var(--disable-bg);
+  height: 80px;
+  color: #fff;
+}
+.role-item.role-item--active {
+  background: var(--fsellms-custom-gradient-primary, linear-gradient(135deg, #567fdc 0%, #234ca9 100%));
+}
+
+.step-list {
+  display: flex;
+  gap: 8px;
+}
+.step-list .step-item {
+  flex: 1;
+  height: 6px;
+  background: var(--fsellms-custom-gradient-surface-container, linear-gradient(180deg, rgba(83, 105, 172, 0.3) 0%, rgba(50, 64, 103, 0.3) 100%));
+}
+.step-list .step-item:first-child {
+  border-top-left-radius: 9999px;
+  border-bottom-left-radius: 9999px;
+}
+.step-list .step-item:last-child {
+  border-top-right-radius: 9999px;
+  border-bottom-right-radius: 9999px;
+}
+.step-list .step-item--active {
+  background: var(--border-color);
+}
+
+.section-survey {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.service-policy {
+  font-size: 1.6rem;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--white-color);
+  gap: 4px;
+}
+.service-policy a {
+  display: inline;
+  color: var(--secondary-color);
+}
+
+.continue-btn {
+  gap: 8px;
+}
+
+.username-input {
+  margin-bottom: 150px;
+}
+
+.sign-up-btn {
+  margin-top: 68px;
+}
+
+.meter {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+.meter-progress {
+  height: 4px;
+  border-radius: 9999px;
+}
+.meter-progress.meter-progress--weak {
+  background-color: var(--error-text-color);
+}
+.meter-progress.meter-progress--good {
+  background-color: var(--tertiary-color);
+}
+.meter-progress.meter-progress--strong {
+  background-color: var(--success-color);
+}
+.meter-text {
+  font-size: 1.4rem;
+  color: var(--white-color);
+  line-height: 1.42;
+}
+
+.rule-list {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.4rem;
+}
+.rule-item.rule-item--invalid {
+  color: var(--disable-text-color);
+}
+.rule-item.rule-item--valid {
+  color: var(--white-color);
+}
+
+/*# sourceMappingURL=sign-up.css.map */

@@ -13,4 +13,10 @@
     <ProjectReference Include="..\Fsel.Identity.Application\Fsel.Identity.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="tempkey.jwk">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

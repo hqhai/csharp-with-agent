@@ -19,7 +19,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
     public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, MethodResult<bool>>
     {
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly IUserOtpRepository _userOtpCodeRepository;
         private readonly IUserSettingRepository _userSettingRepository;
         private readonly IUserPlatformRepository _userPlatformRepository;
         private readonly IHumanRepository _humanRepository;
@@ -28,7 +28,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly IStudentFocusTimeRepository _studentFocusTimeRepository;
         private readonly UserManager<User> _userManager;
 
-        public DeleteUserCommandHandler(IUserOtpCodeRepository userOtpCodeRepository
+        public DeleteUserCommandHandler(IUserOtpRepository userOtpCodeRepository
                                                  , IUserSettingRepository userSettingRepository
                                                  , IUserPlatformRepository userPlatformRepository
                                                  , IHumanRepository humanRepository

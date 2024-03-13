@@ -1,0 +1,16 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
+{
+    using System.ComponentModel.DataAnnotations;
+
+    public class VerifyOtpModel
+    {
+        [Required(ErrorMessage = "Otp cannot be empty.")]
+        public string? Otp { get; set; }
+
+        public string? Type { get; set; }
+
+        public string? ReturnUrl { get; set; }
+    }
+}

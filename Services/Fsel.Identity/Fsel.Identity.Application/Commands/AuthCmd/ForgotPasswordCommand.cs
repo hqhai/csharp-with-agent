@@ -5,7 +5,7 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
-using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+using Fsel.Identity.Application.Commands.UserOtpCmd;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
@@ -29,13 +29,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
         private readonly IHostEnvironment _environment;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly IUserOtpRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
 
         public ForgotPasswordCommandHandler(UserManager<User> userManager
             , IMediator mediator
             , IHostEnvironment environment
-            , IUserOtpCodeRepository userOtpCodeRepository
+            , IUserOtpRepository userOtpCodeRepository
             , AppSetting appSetting)
         {
             _userManager = userManager;

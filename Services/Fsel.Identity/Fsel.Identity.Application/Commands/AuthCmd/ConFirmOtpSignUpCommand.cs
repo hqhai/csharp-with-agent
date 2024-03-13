@@ -9,7 +9,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+    using Fsel.Identity.Application.Commands.UserOtpCmd;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
