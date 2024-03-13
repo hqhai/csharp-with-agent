@@ -49,7 +49,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 UserAIConfig = userAiConfig,
             }, cancellationToken).ConfigureAwait(false);
 
-
             if (classForumResult != null)
             {
                 if (request.IsRetry != null && (bool)request.IsRetry)
@@ -59,7 +58,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 else
                 {
                     classForumResult.GradingAlFeedback = aIResponse;
-
                 }
 
                 _classForumResultRepository.Update(classForumResult);

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20231214075800_UpdateTokenConfigConfigTable")]
-    partial class UpdateTokenConfigConfigTable
+    [Migration("20240307130546_CreateErrorReportTable")]
+    partial class CreateErrorReportTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,165 @@ namespace Fsel.System.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("ApprovalTimeConfigId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<DateTime>("ExpiredDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("ObjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("UserIdsStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovalTimeConfigId");
+
+                    b.ToTable("ApprovalLog");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalTimeConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("ApprovalType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<long>("ExpiredTime")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApprovalTimeConfigs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("380388c3-f4ca-4062-8698-47b61f4703c9"),
+                            ApprovalType = "DiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            ExpiredTime = 180L,
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = new Guid("80b1eee1-ddb1-4599-8008-959c5e3f6bb2"),
+                            ApprovalType = "DiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            ExpiredTime = 120L,
+                            IsDeleted = false
+                        });
+                });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.Configs.CourseTimeConfig", b =>
                 {
@@ -88,6 +247,109 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CourseTimeConfigs");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.ErrorReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Content")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("FeatureLearn")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FeaturePlatform")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FeedBack")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ImagePathsStr")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid?>("LessonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Priority")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("UnitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ErrorReports");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.FeatureAccessTime", b =>
@@ -242,7 +504,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Bắt đầu nhẹ nhàng",
                             IsDeleted = false,
-                            TargetTime = 1800.0
+                            TargetTime = 900.0
                         },
                         new
                         {
@@ -252,7 +514,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Hình thành thói quen chưa?",
                             IsDeleted = false,
-                            TargetTime = 3600.0
+                            TargetTime = 1800.0
                         },
                         new
                         {
@@ -262,7 +524,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Tập trung hơn nữa nào",
                             IsDeleted = false,
-                            TargetTime = 5400.0
+                            TargetTime = 2700.0
                         },
                         new
                         {
@@ -272,7 +534,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Chăm chỉ phết",
                             IsDeleted = false,
-                            TargetTime = 7200.0
+                            TargetTime = 3600.0
                         },
                         new
                         {
@@ -282,7 +544,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Thách đấu FSEL",
                             IsDeleted = false,
-                            TargetTime = 10800.0
+                            TargetTime = 5400.0
                         });
                 });
 
@@ -713,6 +975,107 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("LiveTimeFrames");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.Location", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("IdPath")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LocationName")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("LongPath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ShortPath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<int>("UrBoxId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("Locations");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.LogAction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -931,9 +1294,25 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("DisplayType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<int>("MaxPoints")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Operator")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TaskPageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -965,7 +1344,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -975,17 +1357,23 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
                         {
                             Id = new Guid("cfce3f4b-66d5-467d-8f57-50a089257bcb"),
-                            Category = "FinishOneUnitTest",
+                            Category = "FinishOneLesson",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -995,7 +1383,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -1005,7 +1396,10 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
                         },
                         new
@@ -1015,8 +1409,297 @@ namespace Fsel.System.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
                             IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
                             Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("1b35cdbf-98a7-4ce7-9b71-f457b386d62c"),
+                            Category = "FinishOneClassForumPost",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("9935cdbf-98a7-4ce7-9b71-f457b386d64c"),
+                            Category = "CommentOnOtherPost",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("8333c5e5-e853-45fb-8abf-1a09336af78e"),
+                            Category = "SeeFiveTeacherReview",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 5,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("ac0f0c74-cc2a-41a2-a82f-748ed5f2c75c"),
+                            Category = "SeeTenTeacherReview",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 10,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("7a37fa61-1a04-4d70-8590-90fa3d563d8e"),
+                            Category = "SeeAllTeacherReview",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Percent",
+                            IsDeleted = false,
+                            MaxPoints = 100,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("f31d44ff-226e-4244-a9a0-a06ed397368a"),
+                            Category = "PostOneDiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0c1633d5-f145-44c7-80c3-a167c0bbd1a1"),
+                            Category = "PostThreeDiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 3,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("85659470-7d45-4ddf-8b3c-dba6458bf4f4"),
+                            Category = "PostFiveDiscussionBoard",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 5,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0407d174-a779-46e9-bbe4-5f27ae6075b6"),
+                            Category = "ParticipationScore",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Percent",
+                            IsDeleted = false,
+                            MaxPoints = 80,
+                            Operator = "GreaterThan",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0aee60ff-65bc-4277-803c-8a21c38b2b84"),
+                            Category = "ThirtyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("d34cf82a-8582-4dd8-b76b-e89857f4c910"),
+                            Category = "NinetyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("e0608ce3-6514-4fd2-88f6-f62db89e5fa7"),
+                            Category = "OneHundredTwentytyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("e527e048-f02e-4a22-bec4-427b67c93d63"),
+                            Category = "OneHundredEightyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("f62373aa-3fde-4848-8fef-7567fd0c7e8b"),
+                            Category = "SixtyMinutesFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("c3c2c8aa-fc4a-4b01-8d55-1026062a47c6"),
+                            Category = "SuccessfulIntroduceCode",
+                            CreatedDate = new DateTime(2023, 11, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("0417a848-1cd0-4aef-ae33-2757652701d0"),
+                            Category = "RateAndComment",
+                            CreatedDate = new DateTime(2023, 11, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "SideQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("012a3990-47bc-436f-8d7d-10fd824bd579"),
+                            Category = "SeeAllReviewsAndFeedback",
+                            CreatedDate = new DateTime(2023, 11, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "PremiumQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("38045664-20f8-4780-9c62-9736c2bce90c"),
+                            Category = "FinishDailyFocusMode",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "DailyQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("31c2d3aa-ec1d-4ebb-99d1-5a8a2ae391c7"),
+                            Category = "LearnInteractTwentyMinutes",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "DailyQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("2ea59046-ea24-4f3f-b390-36d9629ae11e"),
+                            Category = "CommentOnNewLessonOfTwoClassMate",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 2,
+                            Operator = "Equal",
+                            Type = "DailyQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("9d333771-8c0d-481c-95e7-542a12002684"),
+                            Category = "CompleteHomeWorkAtLeastFiftyPercent",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "DailyQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("f8c5416c-118e-45dc-942c-f61e985b9827"),
+                            Category = "ReviseYourNotes",
+                            CreatedDate = new DateTime(2023, 11, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayType = "Number",
+                            IsDeleted = false,
+                            MaxPoints = 1,
+                            Operator = "Equal",
+                            Type = "DailyQuests"
                         });
                 });
 
@@ -1026,6 +1709,12 @@ namespace Fsel.System.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
+
+                    b.Property<float>("AchievedPoints")
+                        .HasColumnType("real");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -1163,6 +1852,130 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ReferralDiscountConfigs");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.School", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("EducationLevel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("IdPath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid?>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LocationName")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("LongPath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("PrincipalEmail")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("PrincipalName")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("PrincipalPhone")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("SchoolType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ShortPath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("Website")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("Schools");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.TeachingCost", b =>
@@ -1633,6 +2446,17 @@ namespace Fsel.System.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalLog", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.ApprovalTimeConfig", "ApprovalTimeConfig")
+                        .WithMany("ApprovalLogs")
+                        .HasForeignKey("ApprovalTimeConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApprovalTimeConfig");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.GameVocabulary", b =>
                 {
                     b.HasOne("Fsel.System.Domain.Entities.GameTopic", "GameTopic")
@@ -1665,6 +2489,16 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Navigation("GameVocabulary");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.Location", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.Location", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardStudent", b =>
                 {
                     b.HasOne("Fsel.System.Domain.Entities.QuestBoard", "QuestBoard")
@@ -1674,6 +2508,21 @@ namespace Fsel.System.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("QuestBoard");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.School", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.Location", "Location")
+                        .WithMany("Schools")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalTimeConfig", b =>
+                {
+                    b.Navigation("ApprovalLogs");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.GameTopic", b =>
@@ -1686,6 +2535,13 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Navigation("GameVocabularyPlatforms");
 
                     b.Navigation("GameVocabularyTypes");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.Location", b =>
+                {
+                    b.Navigation("Children");
+
+                    b.Navigation("Schools");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoard", b =>

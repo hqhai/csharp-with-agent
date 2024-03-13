@@ -153,7 +153,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             return methodResult;
         }
 
-
         public async Task DoQuestBoard(Guid classForumResultId, Guid courseId, Guid userId, CancellationToken cancellationToken)
         {
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };

@@ -4,7 +4,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 {
     using System.Runtime.Serialization;
 
-    public enum PurchaseType
+    public enum EnumPurchaseType
     {
         [EnumMember(Value = "Auto-Renewable Subscription")] AutoRenewSub,
 

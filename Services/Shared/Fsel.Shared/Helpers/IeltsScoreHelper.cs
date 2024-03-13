@@ -48,6 +48,12 @@ namespace Fsel.Shared.Helpers
             }
             return (false, default);
         }
+
+        public static double GetBandScore(this EnumCourseLevel courseLevel)
+        {
+            var targetBandScoreConfig = s_targetBandScoreConfigs.FirstOrDefault(x => x.CourseLevel == courseLevel);
+            return targetBandScoreConfig?.Score ?? default;
+        }
     }
 
     public static class IeltsScoreHelper

@@ -13,7 +13,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
         public AutoRenewStatus AutoRenewStatus { get; set; }
 
         [JsonProperty("expirationIntent")]
-        public ExpirationIntent ExpirationIntent { get; set; }
+        public EnumExpirationIntent ExpirationIntent { get; set; }
 
         [JsonProperty("gracePeriodExpiresDate")]
         public long GracePeriodExpiresDate { get; set; }
@@ -25,13 +25,13 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
         public string OfferIdentifier { get; set; }
 
         [JsonProperty("offerType")]
-        public OfferType OfferType { get; set; }
+        public EnumOfferType OfferType { get; set; }
 
         [JsonProperty("originalTransactionId")]
         public string OriginalTransactionId { get; set; }
 
         [JsonProperty("priceIncreaseStatus")]
-        public PriceConsent PriceIncreaseStatus { get; set; }
+        public EnumPriceConsent PriceIncreaseStatus { get; set; }
 
         [JsonProperty("productId")]
         public string ProductId { get; set; }

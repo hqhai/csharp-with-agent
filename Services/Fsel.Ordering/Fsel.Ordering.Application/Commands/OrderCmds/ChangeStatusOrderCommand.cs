@@ -87,21 +87,29 @@ ILmsCourseService courseService)
                 return methodResult;
             }
             var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
-            var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
+            if (package == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(order));
+                return methodResult;
+            }
+
             var course = courseResults.Content?.Result?.FirstOrDefault();
+
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 if (request.OrderStatus == EnumOrderStatus.Reject)
                 {
-                    var classStudent = await _trainingService.DeleteStudentFromClass(order.UserId);
-                    if (!classStudent.IsSuccessStatusCode)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
-                        return methodResult;
-                    }
+                    //var classStudent = await _trainingService.DeleteStudentFromClass(order.UserId);
+                    //if (!classStudent.IsSuccessStatusCode)
+                    //{
+                    //    methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
+                    //    return methodResult;
+                    //}
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
+                    var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
+
                     var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
                     if (!addStudentIntoClassResult.IsSuccessStatusCode)
                     {
@@ -109,12 +117,15 @@ ILmsCourseService courseService)
                         return methodResult;
                     }
 
-                    var updateNextUnitResult = await _courseService.UpdateNextUnit();
+                    var updateNextUnitResult = await _courseService.UpdateNextUnit(order.UserId);
                     if (!updateNextUnitResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(updateNextUnitResult.Error);
                         return methodResult;
                     }
+
+                    order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
+
                     await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
                         UserIds = new List<Guid>() { order.UserId },
@@ -132,7 +143,7 @@ ILmsCourseService courseService)
                     ResponseBody = request.Receipt,
                     Type = request.Type == EnumOrderTransactionType.AppStore ? EnumOrderTransactionType.AppStore : (request.Type == EnumOrderTransactionType.GooglePlay ? EnumOrderTransactionType.GooglePlay : EnumOrderTransactionType.BankTransfer)
                 });
-                ;
+
                 order.Status = request.OrderStatus;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

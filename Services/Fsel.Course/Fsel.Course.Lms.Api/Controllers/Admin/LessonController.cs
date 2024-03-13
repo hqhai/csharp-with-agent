@@ -3,17 +3,19 @@
 namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.LessonQuery;
     using Fsel.Course.Lms.Application.Queries.StudentQuery;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/lesson")]
     [ApiController]
     public class LessonController : ControllerBase
@@ -34,6 +36,30 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         public async Task<IActionResult> Get([FromRoute] Guid studentId)
         {
             MethodResult<IList<LessonCommentByStudentModel>> queryResult = await _mediator.Send(new GetLessonCommentByStudentQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get List Lesson by ids
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLessonsByIds([FromBody] IList<Guid> lessonIds)
+        {
+            MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(new GetLessonsByIdsQuery { LessonIds = lessonIds }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get lesson
+        /// </summary>
+        [HttpGet("lesson-display-order")]
+        [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetListLessonByUnitIdQuery query)
+        {
+            MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

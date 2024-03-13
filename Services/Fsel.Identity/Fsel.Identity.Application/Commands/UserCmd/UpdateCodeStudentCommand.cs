@@ -84,6 +84,10 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 user.Human!.Student!.CourseLevel = EnumCourseLevel.B1;
             }
 
+            user.Human.Student!.ProvinceId = request.ProvinceId;
+            user.Human.Student.DistrictId = request.DistrictId;
+            user.Human.Student.SchoolId = request.SchoolId;
+
             _mapper.Map(request, user.Human);
             await _userManager.UpdateAsync(user);
 

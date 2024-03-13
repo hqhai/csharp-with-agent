@@ -27,6 +27,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     public class WeeklyReportCommand : IRequest<MethodResult<bool>>
     {
         public ICollection<Guid>? StudentIds { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 
     public class WeeklyReportCommandHandler : IRequestHandler<WeeklyReportCommand, MethodResult<bool>>
@@ -75,9 +77,10 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 return methodResult;
             }
 
-            var currentDate = DateTime.UtcNow;
+            DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value : DateTime.UtcNow;
 
-            var lastFridayAt13 = currentDate.AddDays(-6);
+            // L?y ngày th? 6 g?n nh?t lúc 13h
+            DateTime lastFridayAt13 = request.StartDate.HasValue ? request.StartDate.Value : currentDate.AddDays(-6);
 
             var lastLastFridayAt13 = currentDate.AddDays(-14);
 
@@ -179,7 +182,13 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 foreach (var unit in unitsResult)
                 {
-                    var lessonResultsDone = await _lessonResultRepository.Queryable.Include(p => p.VideoResult).Include(x => x.ClassForumResults).Where(p => p.StudentId == item.Id && p.Status == EnumResultStatus.Done && p.UnitId == unit.UnitId).Where(p => p.UpdatedDate >= lastFridayAt13 && p.UpdatedDate <= currentDate).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
+                    var lessonResultsDone = await _lessonResultRepository.Queryable.Include(p => p.VideoResult).Include(x => x.ClassForumResults)
+                        .Include(x => x.Lesson)
+                        .ThenInclude(x => x.UnitLessons.Where(x => x.UnitId == unit.UnitId))
+                        .Where(p => p.StudentId == item.Id && p.Status == EnumResultStatus.Done && p.UnitId == unit.UnitId)
+                        .Where(p => p.UpdatedDate >= lastFridayAt13 && p.UpdatedDate <= currentDate)
+                        .Where(x => x.ClassForumResults.Any(x => x.Status == EnumClassForumResultStatus.Graded))
+                        .OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
                     int index = 1;
 
                     if (lessonResultsDone.Count > 0)
@@ -188,9 +197,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                         for (var i = 0; i < lessonResultsDone.Count; i++)
                         {
-                            unitName += string.Format(CultureInfo.InvariantCulture, lessonNameHtml, index, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
+                            unitName += string.Format(CultureInfo.InvariantCulture, lessonNameHtml, lessonResultsDone[i].Lesson?.UnitLessons.FirstOrDefault(x => x.UnitId == unit.UnitId)?.DisplayOrder, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
 
-                            foreach (var ls in lessonResultsDone[i].SkillScores!)
+                            foreach (var ls in lessonResultsDone[i].SkillScores!.OrderBy(x => x.Skill))
                             {
                                 //if (i > 0)
                                 //{

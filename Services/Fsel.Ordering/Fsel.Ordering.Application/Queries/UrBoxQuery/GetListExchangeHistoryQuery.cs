@@ -47,7 +47,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExchangeHistoryModel>();
 
-            var orderTransactions = await _orderTransactionRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.Status == EnumOrderTransactionStatus.Success && p.Type == EnumOrderTransactionType.UrBox).ToListAsync(cancellationToken);
+            var orderTransactions = await _orderTransactionRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.Status == EnumOrderTransactionStatus.Success && p.Type == EnumOrderTransactionType.UrBox).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
 
             var responses = orderTransactions.Select(p => p?.ResponseBody).Deserialize<List<RedemptionResponseModel>>();
 

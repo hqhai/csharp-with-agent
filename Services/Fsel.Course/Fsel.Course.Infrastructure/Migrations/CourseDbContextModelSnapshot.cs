@@ -283,6 +283,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("TokenFirstTime")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TokenLastTime")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -298,6 +304,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("WordContent")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("WordCount")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -355,6 +364,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<bool>("IsRetry")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("TimeCount")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -1757,16 +1769,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TokenDone")
+                    b.Property<int?>("TokenFirstTime")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TokenHighestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenQuestionReward")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenSuperFire")
+                    b.Property<int?>("TokenLastTime")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -2157,6 +2163,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("TokenFirstTime")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TokenLastTime")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -2929,6 +2941,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("TimeCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -2941,6 +2956,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
+
+                    b.Property<int?>("WordCount")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -3033,16 +3051,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TokenDone")
+                    b.Property<int?>("TokenFirstTime")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TokenHighestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenQuestionReward")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenSuperFire")
+                    b.Property<int?>("TokenLastTime")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("UnitId")
@@ -3911,6 +3923,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("TokenFirstTime")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TokenLastTime")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -4753,16 +4771,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TokenDone")
+                    b.Property<int?>("TokenFirstTime")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TokenHighestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenQuestionReward")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenSuperFire")
+                    b.Property<int?>("TokenLastTime")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -5040,16 +5052,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TokenDone")
+                    b.Property<int?>("TokenFirstTime")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TokenHighestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenQuestionReward")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenSuperFire")
+                    b.Property<int?>("TokenLastTime")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")

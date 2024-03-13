@@ -9,18 +9,29 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Helpers;
 
-    public class ClassForumResult : Entity
+    public class ClassForumResult : Entity, ITokenResult
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
 
-        public string? WordContent { get; set; }
+        private string? _wordContent;
 
-        [NotMapped]
-        public int WordCount
-        { get { return StringHelper.CountWords(WordContent); } }
+        public string? WordContent
+        {
+            get { return _wordContent; }
+            set { _wordContent = value; WordCount = StringHelper.CountWords(value); }
+        }
+
+        private int? _wordCount;
+        public int? WordCount
+        {
+            get { return _wordCount == null ? StringHelper.CountWords(WordContent) : _wordCount; }
+            set { _wordCount = value; }
+        }
+
 
         [NotMapped]
         public int? TimeCount
@@ -62,6 +73,8 @@ namespace Fsel.Course.Domain.Entities
         public string? RetryGradingAlFeedBack { get; set; }
 
         public bool IsViewed { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
 
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 

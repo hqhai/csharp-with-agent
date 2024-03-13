@@ -279,10 +279,6 @@ namespace Fsel.Course.Infrastructure.Common
             videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
             videoResult.VideoSkillScores = listSkillScore;
-            videoResult.TokenDone = await query.Where(x => x.TokenDone.HasValue).SumAsync(x => x.TokenDone!.Value, cancellationToken);
-            videoResult.TokenHighestStreak = await query.Where(x => x.TokenHighestStreak.HasValue).SumAsync(x => x.TokenHighestStreak!.Value, cancellationToken);
-            videoResult.TokenQuestionReward = await query.Where(x => x.TokenQuestionReward.HasValue).SumAsync(x => x.TokenQuestionReward!.Value, cancellationToken);
-            videoResult.TokenSuperFire = await query.Where(x => x.TokenSuperFire.HasValue).SumAsync(x => x.TokenSuperFire!.Value, cancellationToken);
             return methodResult;
         }
 
@@ -290,12 +286,15 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoResult);
             var answerQuery = from baseQ in _videoResultRepository.Queryable
-                              join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
-                              join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+
+                              join q in _questionRepository.Queryable on vtca.QuestionId equals q.Id
+                              join eq in _exerciseQuestionRepository.Queryable on q.Id equals eq.QuestionId
+
+                              join e in _exerciseRepository.Queryable on eq.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
-                              where baseQ.Id == videoResult.Id
+                              where baseQ.Id == videoResult.Id && !q.Ungraded && q.QuestionType != EnumQuestionType.ExercisePreparation
                               group new { vt, vtca } by new { vt.TimeCodeType, e.CourseSkill } into g
                               select new
                               {
@@ -312,7 +311,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
                                 join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
                                 join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                                where baseQ.Id == videoResult.Id
+                                where baseQ.Id == videoResult.Id && !q.Ungraded && q.QuestionType != EnumQuestionType.ExercisePreparation
                                 group new { vt, q } by new { vt.TimeCodeType, e.CourseSkill } into g
                                 select new
                                 {
@@ -562,7 +561,7 @@ namespace Fsel.Course.Infrastructure.Common
             return (questions.Where(x => unansweredQuestionIds.Contains(x.Id)).ToList(), videoTimeCodeAnswers.Where(x => x.Status != EnumAnswerStatus.Done).ToList());
         }
 
-        public async Task<VideoTimeCodeResult> UpdateVideoAnswers(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, bool isDone = false, bool isSubmit = true)
+        public async Task<long> UpdateVideoAnswers(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, bool isDone = false, bool isSubmit = true)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
             var (questions, updateVideoTimeCodeAnswers) = await GetUnansweredQuestionIds(videoTimeCodeResult);
@@ -596,7 +595,7 @@ namespace Fsel.Course.Infrastructure.Common
                 _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                 await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
-            return videoTimeCodeResult;
+            return updateVideoTimeCodeAnswers?.Where(x => x.Question != null && !x.Question.Ungraded && x.Question.QuestionType != EnumQuestionType.ExercisePreparation)?.Where(x => x.Status == EnumAnswerStatus.Done).Sum(x => x.CorrectCount) ?? default;
         }
 
         private static EnumAnswerStatus GetAnswerStatus(EnumTimeCodeType? timeCodeType, bool isSubmit, int correctCount, int correctTotal)

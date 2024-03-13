@@ -7,7 +7,6 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -16,6 +15,7 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     {
         public EnumTokenFeature Feature { get; set; }
         public EnumTokenMission Mission { get; set; }
+        public EnumCourseType CourseType { get; set; }
     }
 
     public class GetTokenConfigQueryHandler : IRequestHandler<GetTokenConfigQuery, MethodResult<TokenConfigModel>>
@@ -33,11 +33,7 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<TokenConfigModel>();
-            var tokenConfig = await _tokenConfigRepository.Queryable.FirstOrDefaultAsync(x => x.Feature == request.Feature && x.Mission == request.Mission, cancellationToken);
-            if (tokenConfig == null)
-            {
-                return methodResult;
-            }
+            var tokenConfig = await _tokenConfigRepository.Queryable.FirstOrDefaultAsync(x => x.Feature == request.Feature && x.Mission == request.Mission && x.CourseType == request.CourseType, cancellationToken);
             methodResult.Result = _mapper.Map<TokenConfigModel>(tokenConfig);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

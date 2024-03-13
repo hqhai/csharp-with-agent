@@ -10,6 +10,7 @@ using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.UserServices;
 using Fsel.System.Domain.IRepositories;
 using Fsel.System.Infrastructure;
+using Fsel.System.Infrastructure.Common;
 using Fsel.System.Infrastructure.Repositories;
 using Fsel.System.Infrastructure.ValueSettings;
 
@@ -42,7 +43,9 @@ builder.Services.AddScoped<IApprovalTimeConfigRepository, ApprovalTimeConfigRepo
 builder.Services.AddScoped<IApprovalLogRepository, ApprovalLogRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
+builder.Services.AddScoped<IErrorReportRepository, ErrorReportRepository>();
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
+builder.Services.AddScoped<TokenConfigsConverter>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
