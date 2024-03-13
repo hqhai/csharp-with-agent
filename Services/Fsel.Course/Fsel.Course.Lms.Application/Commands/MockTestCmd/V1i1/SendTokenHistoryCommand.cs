@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -34,7 +33,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
     public class SendTokenHistoryCommandHandler : IRequestHandler<SendTokenHistoryCommand, MethodResult<bool>>
     {
-        private readonly IMapper _mapper;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
@@ -43,9 +41,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly ISystemService _systemService;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
 
-        public SendTokenHistoryCommandHandler(IMapper mapper, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestResultRepository mockTestResultRepository, ISectionGroupResultRepository sectionGroupResultRepository, IUserService userService, ICourseRepository courseRepository, ISystemService systemService, CreateTokenHistoryPublisher createTokenHistoryPublisher)
+        public SendTokenHistoryCommandHandler(IMockTestAnswerRepository mockTestAnswerRepository, IMockTestResultRepository mockTestResultRepository, ISectionGroupResultRepository sectionGroupResultRepository, IUserService userService, ICourseRepository courseRepository, ISystemService systemService, CreateTokenHistoryPublisher createTokenHistoryPublisher)
         {
-            _mapper = mapper;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
@@ -59,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).FirstOrDefaultAsync(x => x.Id == request.MockTestResultId, cancellationToken);
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores.OrderBy(x => x.CreatedDate)).Include(x => x.MockTest).FirstOrDefaultAsync(x => x.Id == request.MockTestResultId, cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
@@ -93,13 +90,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var isSkillMockTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
             if (mockTestResult.Status == EnumResultStatus.Done && (isSkillMockTest || mockTestResult.GradingTeacherId.HasValue))
             {
-                await GetTokenHistoryAsync(mockTestResult, isSkillMockTest, student, cancellationToken);
+                await GetTokenHistoryAsync(mockTestResult, course, student, isSkillMockTest, cancellationToken);
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task GetTokenHistoryAsync(MockTestResult mockTestResult, bool isSkillMockTest, StudentModel student, CancellationToken cancellationToken)
+        private async Task GetTokenHistoryAsync(MockTestResult mockTestResult, Course course, StudentModel student, bool isSkillMockTest, CancellationToken cancellationToken)
         {
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).ThenInclude(x => x!.Sections.OrderBy(x => x.DisplayOrder)).Where(x => x.MockTestResultId == mockTestResult.Id).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             var tokenHistoryQueues = new List<TokenHistoryQueueModel>();
@@ -110,7 +107,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 {
                     if (item.Status == EnumResultStatus.Done)
                     {
-                        var listTokenHistory = await UpdateSectionGroupResultsAsync(item, isSkillMockTest, userId, cancellationToken);
+                        var listTokenHistory = await UpdateSectionGroupResultsAsync(mockTestResult, item, course, userId, isSkillMockTest, cancellationToken);
                         if (listTokenHistory.Any())
                         {
                             tokenHistoryQueues.AddRange(listTokenHistory);
@@ -142,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task<IList<TokenHistoryQueueModel>> UpdateSectionGroupResultsAsync(SectionGroupResult? sectionGroupResult, Course course, Guid userId, bool isSkillMockTest, CancellationToken cancellationToken)
+        private async Task<IList<TokenHistoryQueueModel>> UpdateSectionGroupResultsAsync(MockTestResult mockTestResult, SectionGroupResult? sectionGroupResult, Course course, Guid userId, bool isSkillMockTest, CancellationToken cancellationToken)
         {
             var tokenHistorys = new List<TokenHistoryQueueModel>();
             if (sectionGroupResult != null && sectionGroupResult.SectionGroup != null)
@@ -160,23 +157,44 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
                     case EnumCourseSkill.Writing:
                         var mocktestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync(cancellationToken);
+                        var tokenHistoryWritings = new List<TokenHistoryQueueModel>();
                         foreach (var section in sectionGroupResult.SectionGroup.Sections)
                         {
                             var mockTestAnswer = mocktestAnswers.FirstOrDefault(x => x.SectionId == section.Id);
                             if (mockTestAnswer != null)
                             {
-                                await UpdateSectionGroupResultToWritingAsync(sectionGroupResult, section, course, mockTestAnswer, isSkillMockTest, userId);
+                                (sectionGroupResult, var listTokenHistory) = await UpdateSectionGroupResultToWritingAsync(sectionGroupResult, section, course, mockTestAnswer, isSkillMockTest, userId);
+                                if (listTokenHistory.Any())
+                                {
+                                    tokenHistoryWritings.AddRange(listTokenHistory);
+                                }
                             }
                         }
-
+                        await UpdateSectionGroupResultAsync(sectionGroupResult, cancellationToken);
+                        if (tokenHistoryWritings.Any())
+                        {
+                            tokenHistorys.AddRange(tokenHistoryWritings);
+                        }
                         break;
 
                     case EnumCourseSkill.Speaking:
+                        var tokenHistorySpeakings = new List<TokenHistoryQueueModel>();
+                        var listTokenHistorySpeaking = await UpdateSectionGroupResultSpeakingAsync(mockTestResult, sectionGroupResult, course, userId, isSkillMockTest, cancellationToken);
+                        if (listTokenHistorySpeaking.Any())
+                        {
+                            tokenHistorys.AddRange(listTokenHistorySpeaking);
+                        }
                         break;
                 }
             }
 
-            return tokenHistorys;
+            return tokenHistorys.Where(x => x.RemainToken > 0).ToList();
+        }
+
+        private async Task UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
+        {
+            _sectionGroupResultRepository.Update(sectionGroupResult);
+            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         #region Skill Reading And Listening
@@ -228,6 +246,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         }
 
         #endregion Skill Reading And Listening
+
+        #region Writing
 
         private async Task<(SectionGroupResult, List<TokenHistoryQueueModel>)> UpdateSectionGroupResultToWritingAsync(SectionGroupResult sectionGroupResult, Section section, Course course, MockTestAnswer mockTestAnswer, bool checkSkillMockTest, Guid userId)
         {
@@ -281,7 +301,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var tokenOverallLexicalResource = CalculateOverall(lexicalResource, tokenLexicalResource?.BaseValue, course);
             var tokenOverallGrammaticalRange = CalculateOverall(grammaticalRange, tokenGrammaticalRange?.BaseValue, course);
 
-            var userId = student.Human?.UserId ?? default;
             if (checkSkillMockTest)
             {
                 tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionWork, tokenOverallWordContent ?? default));
@@ -300,7 +319,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 sectionGroupResult.TokenFirstTime = (int?)taskResponseToken.Sum();
             }
-            return (sectionGroupResult, tokenHistoryQueues);
+            return (sectionGroupResult, tokenHistoryQueues.Where(x => x.RemainToken > 0).ToList());
         }
 
         private static TokenCoinConfigs? GetTokenCoinConfig(IList<TokenConfigModel>? tokenConfigs, EnumTokenMission mission)
@@ -362,5 +381,97 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             public string? LexicalResource { get; set; }
             public string? GrammaticalRange { get; set; }
         }
+
+        #endregion Writing
+
+        #region Speaking
+
+        private async Task<List<TokenHistoryQueueModel>> UpdateSectionGroupResultSpeakingAsync(MockTestResult mockTestResult, SectionGroupResult sectionGroupResult, Course course, Guid userId, bool isSkillTest, CancellationToken cancellationToken)
+        {
+            var tokenHistorys = new List<TokenHistoryQueueModel>();
+            var level = course.CourseLevel;
+            var tokenMissionFC = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingFC : EnumTokenMission.FullMockTestSpeakingFC;
+            var tokenMissionGRA = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingGRA : EnumTokenMission.FullMockTestSpeakingGRA;
+            var tokenMissionLR = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingLR : EnumTokenMission.FullMockTestSpeakingLR;
+            var tokenMissionPron = isSkillTest ? EnumTokenMission.SkillMockTestSpeakingPron : EnumTokenMission.FullMockTestSpeakingPron;
+
+            var missions = new List<EnumTokenMission> { tokenMissionFC, tokenMissionGRA, tokenMissionLR, tokenMissionPron }.Select(x => x.ToString()).ToList();
+            var tokenConfigs = await GetTokenConfigsAsync(isSkillTest, missions);
+            sectionGroupResult.TokenFirstTime = 0;
+            foreach (var item in mockTestResult.MockTestScores)
+            {
+                switch (item.Criteria)
+                {
+                    case EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy:
+                        var tokenConfig = tokenConfigs?.FirstOrDefault(x => x.Mission == tokenMissionGRA);
+                        var tokenGRA = GetBandScore(level, tokenConfig.GetTokenConfig<TokenCoinConfigs>(), item.Score);
+                        if (tokenGRA > 0)
+                        {
+                            sectionGroupResult.TokenFirstTime += (int?)tokenGRA;
+                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionGRA, tokenGRA));
+                        }
+
+                        break;
+
+                    case EnumMockTestScoreCriteria.Pronunciation:
+                        var tokenConfigPon = tokenConfigs?.FirstOrDefault(x => x.Mission == tokenMissionPron);
+                        var tokenPon = GetBandScore(level, tokenConfigPon.GetTokenConfig<TokenCoinConfigs>(), item.Score);
+                        if (tokenPon > 0)
+                        {
+                            sectionGroupResult.TokenFirstTime += (int?)tokenPon;
+                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionPron, tokenPon));
+                        }
+
+                        break;
+
+                    case EnumMockTestScoreCriteria.FluencyAndCoherence:
+                        var tokenConfigFC = tokenConfigs?.FirstOrDefault(x => x.Mission == tokenMissionFC);
+                        var tokenFC = GetBandScore(level, tokenConfigFC.GetTokenConfig<TokenCoinConfigs>(), item.Score);
+                        if (tokenFC > 0)
+                        {
+                            sectionGroupResult.TokenFirstTime += (int?)tokenFC;
+                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionFC, tokenFC));
+                        }
+                        break;
+
+                    case EnumMockTestScoreCriteria.LexicalResource:
+                        var tokenConfigLR = tokenConfigs?.FirstOrDefault(x => x.Mission == tokenMissionLR);
+                        var tokenLR = GetBandScore(level, tokenConfigLR.GetTokenConfig<TokenCoinConfigs>(), item.Score);
+                        if (tokenLR > 0)
+                        {
+                            sectionGroupResult.TokenFirstTime += (int?)tokenLR;
+                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionLR, tokenLR));
+                        }
+                        sectionGroupResult.TokenFirstTime += (int?)GetBandScore(level, tokenConfigLR.GetTokenConfig<TokenCoinConfigs>(), item.Score);
+                        break;
+                }
+            }
+            _sectionGroupResultRepository.Update(sectionGroupResult);
+            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            return tokenHistorys;
+        }
+
+        private static long GetBandScore(EnumCourseLevel level, TokenCoinConfigs? configs, double score)
+        {
+            var bandScore = level.GetBandScore();
+            return score >= bandScore - 1 && configs != null ? configs.BaseValue : default;
+        }
+
+        private async Task<IList<TokenConfigModel>?> GetTokenConfigsAsync(bool isSkillTest, List<string> missions)
+        {
+            var tokenConfigs = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+            {
+                Feature = isSkillTest ? EnumTokenFeature.SkillMockTest : EnumTokenFeature.FullMockTest,
+                CourseType = EnumCourseType.Ielts,
+                Missions = string.Join(",", missions),
+            });
+            if (!tokenConfigs.IsSuccessStatusCode)
+            {
+                return default;
+            }
+            return tokenConfigs.Content?.Result;
+        }
+
+        #endregion Speaking
     }
 }
