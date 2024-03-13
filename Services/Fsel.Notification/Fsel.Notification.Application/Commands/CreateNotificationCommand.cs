@@ -95,7 +95,7 @@ namespace Fsel.Notification.Application.Commands
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 //Push notification to onesignal
-                await PushToOneSignal(notificationType, notificationNew, userIds, avatarPath, cancellationToken);
+                //await PushToOneSignal(notificationType, notificationNew, userIds, avatarPath, cancellationToken);
 
                 //Push notification to websocket
                 await PushToWebSocket(notificationNew, userIds, avatarPath, cancellationToken);
@@ -176,7 +176,15 @@ namespace Fsel.Notification.Application.Commands
                 notificationType.Type,
                 notificationType.Content
             };
-            await _oneSignalProvider.CreateNotificationAsync(oneSignalMessage, cancellationToken);
+
+            try
+            {
+                await _oneSignalProvider.CreateNotificationAsync(oneSignalMessage, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
     }
 }

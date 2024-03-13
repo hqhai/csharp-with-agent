@@ -4,8 +4,9 @@ namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.IEntities;
 
-    public class SectionGroupResult : BaseLearnResult
+    public class SectionGroupResult : BaseLearnResult, ITokenResult
     {
         public SectionGroup? SectionGroup { get; set; }
 
@@ -22,7 +23,8 @@ namespace Fsel.Course.Domain.Entities
         public Guid? ExtraPracticeResultId { get; set; }
 
         public PlacementTestResult? PlacementTestResult { get; set; }
-
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
         public Guid? PlacementTestResultId { get; set; }
 
         public Guid? CurrentSectionTimeCodeId { get; set; }

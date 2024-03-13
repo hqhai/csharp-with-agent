@@ -15,7 +15,8 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
     using Fsel.Shared.Constants;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/teacher/mock-test-result")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]

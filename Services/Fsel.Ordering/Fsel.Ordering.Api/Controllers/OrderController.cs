@@ -2,7 +2,6 @@
 
 namespace Fsel.Ordering.Api.Controllers
 {
-    using System.Collections.Generic;
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
@@ -16,7 +15,6 @@ namespace Fsel.Ordering.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
     public class OrderController : ControllerBase
@@ -99,5 +97,19 @@ namespace Fsel.Ordering.Api.Controllers
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+
+        /// <summary>
+        /// Check Current Status Of User
+        /// </summary>
+        [HttpGet("get-current-status")]
+        [ProducesResponseType(typeof(MethodResult<EnumTrialRegistrationStatus?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCurrentStatus()
+        {
+            MethodResult<EnumTrialRegistrationStatus?> commandResult = await _mediator.Send(new GetCurrentStatusQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
     }
 }

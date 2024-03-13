@@ -10,27 +10,28 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
     public interface ILmsCourseService
     {
-        [Post("/placement-test/admin/get-pt-point-by-ids")]
+        [Post("/v1/placement-test/admin/get-pt-point-by-ids")]
         Task<IApiResponse<MethodResult<List<StudentPTPointModel>>>> GetPTPointByIds([Body] IList<Guid>? studentIds);
 
-        [Get("/placement-test/check-result/{studentId}")]
+        [Get("/v1/placement-test/check-result/{studentId}")]
         Task<IApiResponse<MethodResult<bool>>> IsPlacementTestAsync([FromRoute] Guid studentId);
 
-        [Get("/placement-test/count-result/{studentId}")]
+        [Get("/v1/placement-test/count-result/{studentId}")]
         Task<IApiResponse<MethodResult<int>>> CountResultByStudentId([FromRoute] Guid studentId);
 
-        [Get("/admin/lesson/{studentId}")]
+        [Get("/v1/admin/lesson/{studentId}")]
         Task<IApiResponse<MethodResult<IList<StudentLessonCommentModel>>>> GetLessonCommentByStudent([FromRoute] Guid studentId);
 
-        [Get("/dashboard/leader-board")]
+        [Get("/v1/dashboard/leader-board")]
         Task<IApiResponse<MethodResult<LeaderBoardSearchModel>>> GetLeaderBoard();
 
-
-        [Get("/admin/course/get-course-by-code/{code}")]
+        [Get("/v1/admin/course/get-course-by-code/{code}")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByCode([FromRoute] string code);
 
+        [Get("/v1/course/get-course-studied")]
+        Task<IApiResponse<MethodResult<CourseModel>>> GetCourseStudied();
 
-        [Post("/progress/students-competition")]
+        [Post("/v1/progress/students-competition")]
         Task<IApiResponse<MethodResult<IList<CompetitionStudentProgressModel>>>> GetStudentProgress([FromQuery] StudentCompetitionStatQueryModel query);
     }
 }

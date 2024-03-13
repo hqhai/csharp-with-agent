@@ -38,7 +38,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .AnyAsync(x => x.Id == id && x.CourseUnitMockTests.Count > 0);
         }
 
-        public override async Task<EntityCourse?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<EntityCourse?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
@@ -76,15 +76,16 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<EntityCourse?> GetIncludeCourseUnitMockTestByIdAsync(Guid id)
+        public async Task<EntityCourse?> GetIncludeCourseUnitMockTestByIdAsync(Guid id, Guid? studentId)
         {
             try
             {
                 return await Queryable.Include(x => x.CourseUnitMockTests)
-                                                  .Include(x => x.UnitResults)
-                                                  .Include(x => x.MockTestResults)
-                                                  .Include(x => x.FinalTestResults)
-                                                  .FirstOrDefaultAsync(x => x.Id == id);
+                                        .Include(x => x.CourseResults.Where(x => x.CourseId == id && x.StudentId == studentId))
+                                        .Include(x => x.UnitResults.Where(x => x.CourseId == id && x.StudentId == studentId))
+                                        .Include(x => x.MockTestResults.Where(x => x.CourseId == id && x.StudentId == studentId))
+                                        .Include(x => x.FinalTestResults.Where(x => x.CourseId == id && x.StudentId == studentId))
+                                        .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {

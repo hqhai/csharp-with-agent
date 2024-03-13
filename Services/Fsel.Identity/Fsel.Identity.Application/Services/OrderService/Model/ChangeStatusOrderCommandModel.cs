@@ -8,7 +8,6 @@ namespace Fsel.Identity.Application.Services.OrderService.Model
     public class ChangeStatusOrderCommandModel
     {
         public Guid OrderId { get; set; }
-        public Guid? PackageId { get; set; }
         public EnumOrderStatus OrderStatus { get; set; }
     }
 }

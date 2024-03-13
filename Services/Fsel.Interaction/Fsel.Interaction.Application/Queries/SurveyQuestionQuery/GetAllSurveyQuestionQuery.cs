@@ -13,9 +13,8 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
     public class GetAllSurveyQuestionQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
     {
-        public bool IsPilot { get; set; }
-
         public int? DisplayLevel { get; set; } = 1;
+        public bool IsPilot { get; set; }
     }
 
     public class GetAllSurveyQuestionQueryHandler : IRequestHandler<GetAllSurveyQuestionQuery, MethodResult<IList<SurveyQuestionModel>>>
@@ -32,7 +31,8 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
             var methodResult = new MethodResult<IList<SurveyQuestionModel>>();
 
             var surveyQuestionquery = await _surveyQuestionRepository.Queryable
-                .Where(x => x.IsPilot == request.IsPilot && x.DisplayLevel == request.DisplayLevel)
+                .Where(x => x.DisplayLevel == request.DisplayLevel)
+                .Where(x => x.IsPilot == request.IsPilot)
                 .OrderBy(x => x.DisplayOrder)
                 .Select(x => new SurveyQuestionModel
                 {
@@ -43,7 +43,6 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
                     Icon = x.Icon,
                     Question = x.Question,
                     Answers = x.Answers,
-                    IsPilot = x.IsPilot,
                     DisplayLevel = x.DisplayLevel,
                 }).ToListAsync(cancellationToken: cancellationToken);
 
