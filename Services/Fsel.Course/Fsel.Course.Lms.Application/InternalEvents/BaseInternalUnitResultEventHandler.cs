@@ -118,7 +118,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             mockTestResult?.SkillScores.ForEach(p =>
                             {
                                 var (@class, skillName, icon) = ConvertEnum(p.Skill);
-                                var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.Skill1, icon, skillName, p.Percent, 100 - p.Percent, p.Percent);
+                                var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.Skill2, icon, skillName, p.Percent, 100 - p.Percent, p.Scores);
                                 mockTestHtml += html;
                             });
 
