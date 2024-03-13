@@ -36,31 +36,20 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
 
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
-            var reciveToken = _tokenHistoryRepository.Queryable
-                    .Where(x => x.Type == EnumTokenHistoryType.Recevived && x.UserId == userId)
-                    .GroupBy(x => x.UserId)
-                    .Select(x => new TokenHistoryModel
-                    {
-                        ReciveToken = x.Sum(x => x.VolatileToken),
-                    }).ToList();
-
-            var usedToken = _tokenHistoryRepository.Queryable
-                   .Where(x => x.Type == EnumTokenHistoryType.Exchanged && x.UserId == userId)
-                   .GroupBy(x => x.UserId)
-                   .Select(x => new TokenHistoryModel
-                   {
-                       UsedToken = x.Sum(x => x.VolatileToken),
-                   }).ToList();
-
             var tokenHistorys = await _tokenHistoryRepository.Queryable
-                   .Where(x => x.UserId == userId)
-                   .Select(x => new CurrentUserTokenHistoryModel
-                   {
-                       ReciveToken = reciveToken.Select(x => x.ReciveToken).Sum(),
-                       UsedToken = usedToken.Select(x => x.UsedToken).Sum(),
-                   }).FirstOrDefaultAsync(cancellationToken);
+                .Where(x => x.UserId == userId)
+                .GroupBy(x => x.UserId)
+                .Select(x => new CurrentUserTokenHistoryModel
+                {
+                    ReciveToken = x.Sum(x => x.Type == EnumTokenHistoryType.Recevived ? x.VolatileToken : 0),
+                    UsedToken = x.Sum(x => x.Type == EnumTokenHistoryType.Exchanged ? x.VolatileToken : 0),
+                })
+                .FirstOrDefaultAsync(cancellationToken);
 
-            tokenHistorys!.TotalToken = tokenHistorys.ReciveToken + tokenHistorys.UsedToken;
+            if (tokenHistorys != null)
+            {
+                tokenHistorys.TotalToken = tokenHistorys.ReciveToken + tokenHistorys.UsedToken;
+            }
 
             methodResult.Result = tokenHistorys;
             return methodResult;

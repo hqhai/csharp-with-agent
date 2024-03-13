@@ -25,9 +25,6 @@ namespace Fsel.System.Domain.Models.EntityModels
         public EnumTokenMission? Mission { get; set; }
 
         public EnumTokenHistoryType Type { get; set; }
-
-        public double? ReciveToken { get; set; }
-        public double? UsedToken { get; set; }
         public object? Config { get; set; }
         public TokenConfigModel? TokenConfig { get; set; }
     }
