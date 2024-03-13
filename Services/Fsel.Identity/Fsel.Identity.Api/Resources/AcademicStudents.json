@@ -447,5 +447,13 @@
     "Grade": 7,
     "StudentId": "E963435E-5293-4DDF-8451-955BE0623440",
     "UserId": "BFE091EB-D077-4D2B-F255-08DC1358A8B5"
+  },
+  {
+    "SchoolName": "THCS Hanoi Academy",
+    "FullName": "Phan Huy Gia Hưng",
+    "Email": "huukhoa@atlantic.edu.vn",
+    "Grade": 7,
+    "StudentId": "7cc48335-b67d-48b3-b1e1-1dba59c5018b",
+    "UserId": "3AC569A6-55F1-41CC-F1EA-08DC2488E8AC"
   }
 ]
