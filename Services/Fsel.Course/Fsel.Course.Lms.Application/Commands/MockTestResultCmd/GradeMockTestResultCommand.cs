@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -45,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             ISectionGroupRepository sectionGroupRepository,
             ISectionGroupResultRepository sectionGroupResultRepository,
             IUserService userService,
-            NotificationMessagePublisher notificationMessagePublisher)
+            NotificationMessagePublisher notificationMessagePublisher,
             ISystemService systemService,
             AuthContext authContext)
         {

@@ -59,7 +59,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         {
             DateTime compareWithCreateDate = DateTime.UtcNow.AddDays(remainDays);
 
-            return queryable.Where(x => x.ExpireDate != null && ((DateTime)x.ExpireDate).Date < compareWithCreateDate.Date && ((DateTime)x.ExpireDate).Month < compareWithCreateDate.Month && ((DateTime)x.ExpireDate).Year < compareWithCreateDate.Year);
+            return queryable.Where(x => x.ExpireDate != null && ((DateTime)x.ExpireDate).Date == compareWithCreateDate.Date && ((DateTime)x.ExpireDate).Month == compareWithCreateDate.Month && ((DateTime)x.ExpireDate).Year == compareWithCreateDate.Year);
         }
 
 
@@ -72,20 +72,32 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         /// <returns></returns>
         private async Task CreateListUserForSendNotification(List<Order> orders, int remainDays, CancellationToken cancellationToken)
         {
-            var groupedOrders = orders
-                                 .GroupBy(x => x.IsTrial)
-                                 .ToDictionary(g => g.Key, g => g.Select(x => x.UserId).ToList());
-
-            var listUserOnlyTrial = groupedOrders.GetValueOrDefault(true, new List<Guid>())
-                .Except(groupedOrders.GetValueOrDefault(false, new List<Guid>()))
-                .ToList();
+            var studentTrialIds = orders.Where(x => x.IsTrial).Select(x => x.UserId).ToList(); // học sinh đã và đang học thử
+            var studentOrders = orders.Where(x => !x.IsTrial).Select(x => x.UserId).ToList(); // học sinh đã thanh toán, sắp hết hạn
+            var listUserOnlyTrial = GetListStudentIsTrialing(_orderRepository.Queryable, studentTrialIds); // học sinh học thử, chưa thanh toán
 
             if (listUserOnlyTrial.Count > 0 && remainDays == RemainTwoDays)
             {
                 await SendNotification(listUserOnlyTrial, true, remainDays, cancellationToken);
             }
 
-            await SendNotification(groupedOrders.GetValueOrDefault(false, new List<Guid>()), false, remainDays, cancellationToken);
+            await SendNotification(studentOrders, false, remainDays, cancellationToken);
+        }
+
+        /// <summary>
+        /// Lấy danh sách học sinh đang học thử
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="queryable"></param>
+        /// <param name="studentIds"></param>
+        /// <returns></returns>
+        private static List<Guid> GetListStudentIsTrialing<T>(IQueryable<T> queryable, List<Guid> studentIds) where T : Order
+        {
+            var exceptStudent = queryable.Where(x => !x.IsTrial && studentIds.Contains(x.UserId)).Select(x => x.UserId).ToList();
+
+            List<Guid> newStudentIds = studentIds.Except(exceptStudent).ToList();
+
+            return newStudentIds;
         }
 
 

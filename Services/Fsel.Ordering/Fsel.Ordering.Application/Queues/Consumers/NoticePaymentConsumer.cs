@@ -1,11 +1,11 @@
+using Fsel.Core.Base.BaseModels;
 using Fsel.Ordering.Application.Commands.OrderCmds;
-using Fsel.Shared.Models.ShareModels;
 using MassTransit;
 using MediatR;
 
 namespace Fsel.Ordering.Application.Queues.Consumers
 {
-    public class NoticePaymentConsumer : IConsumer<NoticePaymentModel>
+    public class NoticePaymentConsumer : IConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
@@ -14,7 +14,7 @@ namespace Fsel.Ordering.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<NoticePaymentModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueModel> context)
         {
             var message = context?.Message;
             if (message == null)

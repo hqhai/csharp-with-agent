@@ -5,7 +5,6 @@ namespace Fsel.Hangfire.Application.Queues.Publishers
     using System.Threading.Tasks;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Models.ShareModels;
 
     public class UpdateStatusTrialStudentPublisher
     {
