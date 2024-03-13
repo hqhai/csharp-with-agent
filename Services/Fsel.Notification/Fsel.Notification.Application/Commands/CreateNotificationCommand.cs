@@ -99,7 +99,7 @@ namespace Fsel.Notification.Application.Commands
 
 
                 //Push notification to onesignal
-                await PushToOneSignal(notificationType, notificationNew, userIds, avatarPath, cancellationToken);
+                //await PushToOneSignal(notificationType, notificationNew, userIds, avatarPath, cancellationToken);
 
                 //Push notification to websocket
                 await PushToWebSocket(notificationNew, userIds, avatarPath, cancellationToken);
