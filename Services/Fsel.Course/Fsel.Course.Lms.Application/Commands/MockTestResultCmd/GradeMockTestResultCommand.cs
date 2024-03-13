@@ -153,7 +153,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
                 _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<List<MockTestScoreModel>>(mockTestResult.MockTestScores);
