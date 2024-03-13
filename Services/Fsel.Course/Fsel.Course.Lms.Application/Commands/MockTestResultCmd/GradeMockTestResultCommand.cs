@@ -199,7 +199,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
                 _sectionGroupResultRepository.UpdateList(sectionGroupResults);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 // Update Token To Student
                 await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
