@@ -14,7 +14,7 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListTokenHistoryQuery : IRequest<MethodResult<IList<ListTokenHistoryModel>>>
+    public class GetListTokenHistoryQuery : IRequest<MethodResult<IList<TokenHistoryListModel>>>
     {
         public Guid? UserId { get; set; }
 
@@ -25,7 +25,7 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
         public EnumTokenHistoryType? Type { get; set; }
     }
 
-    public class GetListTokenHistoryQueryHandler : IRequestHandler<GetListTokenHistoryQuery, MethodResult<IList<ListTokenHistoryModel>>>
+    public class GetListTokenHistoryQueryHandler : IRequestHandler<GetListTokenHistoryQuery, MethodResult<IList<TokenHistoryListModel>>>
     {
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
         private readonly AuthContext _authContext;
@@ -36,10 +36,10 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<IList<ListTokenHistoryModel>>> Handle(GetListTokenHistoryQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TokenHistoryListModel>>> Handle(GetListTokenHistoryQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<ListTokenHistoryModel>>();
+            var methodResult = new MethodResult<IList<TokenHistoryListModel>>();
 
             if (request.StartDate != null && request.StartDate!.Value.Year > DateTime.UtcNow.Year + 2)
             {
@@ -75,19 +75,35 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
 
             var tokenHistoryModel = await tokenHistorys.Where(x => x.UserId == userId)
                             .GroupBy(x => x.CreatedDate.Date)
-                            .Select(x => new ListTokenHistoryModel
+                            .Select(x => new TokenHistoryListModel
                             {
                                 Date = x.Key,
-                                TokenHistories = x.GroupBy(x => x.Feature).Select(x => new TokenHistoryQueryModel
+                                Features = x.GroupBy(x => x.Feature).Select(x => new FeatureModel
                                 {
                                     Feature = x.Key,
                                     InitialToken = x.Sum(x => x.InitialToken),
                                     VolatileToken = x.Sum(x => x.VolatileToken),
                                     RemainToken = x.Sum(x => x.RemainToken),
                                     Type = x.Select(x => x.Type).FirstOrDefault(),
+                                    TokenHistories = x.Select(x => new TokenHistoryModel
+                                    {
+                                        Id = x.Id,
+                                        TokenConfigId = x.TokenConfigId,
+                                        Config = x.Config,
+                                        CreatedDate = x.CreatedDate,
+                                        CreatedFullName = x.CreatedFullName,
+                                        CreatedUserId = x.UserId,
+                                        Feature = x.Feature,
+                                        InitialToken = x.InitialToken,
+                                        VolatileToken = x.VolatileToken,
+                                        RemainToken = x.RemainToken,
+                                        Mission = x.Mission,
+                                        ObjectId = x.ObjectId,
+                                        Type = x.Type,
+                                        UserId = x.UserId,
+                                    }).ToList(),
                                 }).ToList(),
-                            })
-                            .ToListAsync(cancellationToken);
+                            }).ToListAsync(cancellationToken);
 
             methodResult.Result = tokenHistoryModel;
             return methodResult;
