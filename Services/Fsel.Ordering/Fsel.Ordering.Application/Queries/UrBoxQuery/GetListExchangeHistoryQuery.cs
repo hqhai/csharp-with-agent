@@ -111,6 +111,8 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                     BrandTitle = giftDetail?.Data?.BrandImage,
                     Delivery = item?.Delivery,
                     Offices = giftDetail?.Data?.Offices?.Select(p => p.Address).ToList(),
+                    Pin = gift.Pin,
+                    Serial = gift.Serial
                 };
                 if (item != null && GetStatusGift(item.DeliveryCode))
                 {
