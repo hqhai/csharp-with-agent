@@ -112,9 +112,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             #endregion Validate
 
             var isSkillTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
-            var tokenConfigs = await GetTokenConfigsAsync(isSkillTest);
+            var missions = isSkillTest ? new List<string> { nameof(EnumTokenMission.SkillMockTestSpeakingFC), nameof(EnumTokenMission.SkillMockTestSpeakingGRA), nameof(EnumTokenMission.SkillMockTestSpeakingLR), nameof(EnumTokenMission.SkillMockTestSpeakingPron) }
+                                       : new List<string> { nameof(EnumTokenMission.FullMockTestSpeakingFC), nameof(EnumTokenMission.FullMockTestSpeakingGRA), nameof(EnumTokenMission.FullMockTestSpeakingLR), nameof(EnumTokenMission.FullMockTestSpeakingPron) };
+
+            var tokenConfigs = await GetTokenConfigsAsync(isSkillTest, missions);
 
             long numberOfToken = 0;
+
             IList<MockTestScore> mockTestScores = new List<MockTestScore>();
             foreach (var item in request.MockTestScores)
             {
@@ -224,11 +228,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             return score >= bandScore - 1 && configs != null ? configs.BaseValue : default;
         }
 
-        private async Task<IList<TokenConfigModel>?> GetTokenConfigsAsync(bool isSkillTest)
+        private async Task<IList<TokenConfigModel>?> GetTokenConfigsAsync(bool isSkillTest, List<string> missions)
         {
-            var missions = isSkillTest ? new List<string> { nameof(EnumTokenMission.SkillMockTestSpeakingFC), nameof(EnumTokenMission.SkillMockTestSpeakingGRA), nameof(EnumTokenMission.SkillMockTestSpeakingLR), nameof(EnumTokenMission.SkillMockTestSpeakingPron) }
-            : new List<string> { nameof(EnumTokenMission.FullMockTestSpeakingFC), nameof(EnumTokenMission.FullMockTestSpeakingGRA), nameof(EnumTokenMission.FullMockTestSpeakingLR), nameof(EnumTokenMission.FullMockTestSpeakingPron) };
-
             var tokenConfigs = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
             {
                 Feature = isSkillTest ? EnumTokenFeature.SkillMockTest : EnumTokenFeature.FullMockTest,

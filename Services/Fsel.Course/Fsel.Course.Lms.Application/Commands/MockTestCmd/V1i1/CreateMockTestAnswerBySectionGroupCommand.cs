@@ -270,9 +270,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         new TokenHistoryQueueModel
                         {
                             ObjectId = mockTestResult.Id,
-                            InitialToken = student.NumberOfToken,
                             RemainToken = token,
-                            VolatileToken = student.NumberOfToken + token,
                             Type = EnumTokenHistoryType.Exchanged,
                             Feature = EnumTokenFeature.SkillMockTest,
                             Mission = sectionGroup.CourseSkill == EnumCourseSkill.Reading ? EnumTokenMission.SkillMockTestReading : EnumTokenMission.SkillMockTestListening,

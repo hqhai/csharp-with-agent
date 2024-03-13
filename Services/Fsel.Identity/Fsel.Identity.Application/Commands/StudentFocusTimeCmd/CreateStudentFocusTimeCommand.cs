@@ -144,9 +144,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                                 new TokenHistoryQueueModel
                                 {
                                     ObjectId = studentFocusTime.Id,
-                                    InitialToken = student.NumberOfToken,
                                     RemainToken = targetNumber.Value,
-                                    VolatileToken = student.NumberOfToken + targetNumber.Value,
                                     Type = EnumTokenHistoryType.Exchanged,
                                     Feature = EnumTokenFeature.FocusMode,
                                     Mission = EnumTokenMission.FocusMode,

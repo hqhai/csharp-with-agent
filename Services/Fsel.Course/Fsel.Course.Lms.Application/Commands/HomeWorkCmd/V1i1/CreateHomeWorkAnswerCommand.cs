@@ -251,20 +251,17 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     if (tokensAchieved > 0)
                     {
                         var tokenHistorys = new List<TokenHistoryQueueModel>
-                    {
-                        new TokenHistoryQueueModel
                         {
-                            ObjectId = homeWorkResult.Id,
-                            InitialToken = student.NumberOfToken,
-                            RemainToken = tokensAchieved,
-                            VolatileToken = student.NumberOfToken + tokensAchieved,
-                            Feature = EnumTokenFeature.Learn,
-                            Mission = homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit ? EnumTokenMission.HomeworkFirstSubmit : EnumTokenMission.HomeworkSecondSubmit,
-                            Type = EnumTokenHistoryType.Exchanged,
-                            UserId = student.Human?.UserId ?? default,
-                        }
-                    };
-
+                            new TokenHistoryQueueModel
+                            {
+                                ObjectId = homeWorkResult.Id,
+                                RemainToken = tokensAchieved,
+                                Feature = EnumTokenFeature.Learn,
+                                Mission = homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit ? EnumTokenMission.HomeworkFirstSubmit : EnumTokenMission.HomeworkSecondSubmit,
+                                Type = EnumTokenHistoryType.Exchanged,
+                                UserId = student.Human?.UserId ?? default,
+                            }
+                        };
                         await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
                     }
 
