@@ -6,14 +6,14 @@ namespace Fsel.System.Domain.Models.EntityModels
     using global::System;
     using global::System.Collections.Generic;
 
-    public class ListTokenHistoryModel
+    public class TokenHistoryListModel
     {
         public DateTime Date { get; set; }
 
-        public IList<TokenHistoryQueryModel>? TokenHistories { get; set; }
+        public IList<FeatureModel>? Features { get; set; }
     }
 
-    public class TokenHistoryQueryModel
+    public class FeatureModel
     {
         public double InitialToken { get; set; }
 
@@ -23,5 +23,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public EnumTokenFeature Feature { get; set; }
 
         public EnumTokenHistoryType Type { get; set; }
+
+        public IList<TokenHistoryModel>? TokenHistories { get; set; }
     }
 }
