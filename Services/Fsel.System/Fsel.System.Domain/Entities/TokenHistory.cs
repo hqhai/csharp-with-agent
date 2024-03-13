@@ -9,13 +9,32 @@ namespace Fsel.System.Domain.Entities
 
     public class TokenHistory : Entity
     {
+        private double _volatileToken;
         public Guid? TokenConfigId { get; set; }
 
+        /// <summary>
+        /// Token Ban Đầu
+        /// </summary>
         public double InitialToken { get; set; }
 
-        public double VolatileToken { get; set; }
-
+        /// <summary>
+        /// Token đạt được
+        /// </summary>
         public double RemainToken { get; set; }
+
+        /// <summary>
+        /// Token Tổng
+        /// </summary>
+        public double VolatileToken
+        {
+            get
+            {
+                _volatileToken = InitialToken + RemainToken;
+                return _volatileToken;
+            }
+            set { _volatileToken = value; }
+        }
+
         public EnumTokenFeature Feature { get; set; }
 
         public EnumTokenMission? Mission { get; set; }
@@ -24,7 +43,7 @@ namespace Fsel.System.Domain.Entities
 
         public Guid? ObjectId { get; set; }
 
-       public string? ConfigStr { get; set; }
+        public string? ConfigStr { get; set; }
 
         [NotMapped]
         public object? Config

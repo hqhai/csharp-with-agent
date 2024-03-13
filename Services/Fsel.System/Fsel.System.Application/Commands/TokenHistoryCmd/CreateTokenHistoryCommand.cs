@@ -4,7 +4,10 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.TokenHistorys;
@@ -23,12 +26,14 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
     {
         private readonly IMapper _mapper;
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
+        private readonly IUserService _userService;
         private readonly ITokenConfigRepository _tokenConfigRepository;
 
-        public CreateTokenHistoryCommandHandler(IMapper mapper, ITokenHistoryRepository tokenHistoryRepository, ITokenConfigRepository tokenConfigRepository)
+        public CreateTokenHistoryCommandHandler(IMapper mapper, ITokenHistoryRepository tokenHistoryRepository, IUserService userService, ITokenConfigRepository tokenConfigRepository)
         {
             _mapper = mapper;
             _tokenHistoryRepository = tokenHistoryRepository;
+            _userService = userService;
             _tokenConfigRepository = tokenConfigRepository;
         }
 
@@ -36,23 +41,34 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<TokenHistoryModel>> methodResult = new MethodResult<IList<TokenHistoryModel>>();
+
             if (request.TokenHistorys == null || request.TokenHistorys.Count == 0)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.TokenHistorys.Select(x => x.UserId).FirstOrDefault());
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            var numberOfToken = student.NumberOfToken;
+
             var tokenHistorys = new List<TokenHistory>();
             var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => request.TokenHistorys.Select(x => x.Feature).Contains(x.Feature) && request.TokenHistorys.Select(x => x.Mission).Contains(x.Mission)).ToListAsync(cancellationToken);
             foreach (var item in request.TokenHistorys)
             {
                 TokenHistory tokenHistory = _mapper.Map<TokenHistory>(item);
-                if (item.Feature == EnumTokenFeature.MarketPlace)
-                {
-                    item.Mission = null;
-                    item.TokenConfigId = null;
-                }
-                else
+                tokenHistory.InitialToken = numberOfToken;
+                if (item.Feature != EnumTokenFeature.MarketPlace)
                 {
                     var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Feature == item.Feature && x.Mission == item.Mission);
                     if (tokenConfig != null)
@@ -66,6 +82,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                     }
                 }
 
+                numberOfToken = tokenHistory.VolatileToken;
                 tokenHistorys.Add(tokenHistory);
             }
             await _tokenHistoryRepository.ExecuteTransactionAsync(async () =>
