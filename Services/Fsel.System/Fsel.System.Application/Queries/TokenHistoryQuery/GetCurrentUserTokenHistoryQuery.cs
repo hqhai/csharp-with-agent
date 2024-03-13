@@ -2,7 +2,6 @@
 
 namespace Fsel.System.Application.Queries.TokenHistoryQuery
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
@@ -35,8 +34,10 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<CurrentUserTokenHistoryModel>();
 
+            var userId = request.UserId ?? _authContext.CurrentUserId;
+
             var reciveToken = _tokenHistoryRepository.Queryable
-                    .Where(x => x.Type == EnumTokenHistoryType.Recevived)
+                    .Where(x => x.Type == EnumTokenHistoryType.Recevived && x.UserId == userId)
                     .GroupBy(x => x.UserId)
                     .Select(x => new TokenHistoryModel
                     {
@@ -44,14 +45,12 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
                     }).ToList();
 
             var usedToken = _tokenHistoryRepository.Queryable
-                   .Where(x => x.Type == EnumTokenHistoryType.Exchanged)
+                   .Where(x => x.Type == EnumTokenHistoryType.Exchanged && x.UserId == userId)
                    .GroupBy(x => x.UserId)
                    .Select(x => new TokenHistoryModel
                    {
                        UsedToken = x.Sum(x => x.VolatileToken),
                    }).ToList();
-
-            var userId = request.UserId ?? _authContext.CurrentUserId;
 
             var tokenHistorys = await _tokenHistoryRepository.Queryable
                    .Where(x => x.UserId == userId)
