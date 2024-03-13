@@ -177,27 +177,29 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 (finalTestResult, var tokenConfigId) = await GetFinalTestResult(sectionGroupResults, finalTestResult);
 
                 var token = finalTestResult.TokenFirstTime ?? default;
-
-                await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+                if (token > 0)
                 {
-                    NumberOfToken = token,
-                    StudentId = finalTestResult.StudentId,
-                }).ConfigureAwait(false);
-                var tokenHistorys = new List<TokenHistoryQueueModel>
-                {
-                    new TokenHistoryQueueModel
+                    await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
                     {
-                        ObjectId = finalTestResult.Id,
-                        InitialToken = student.NumberOfToken,
-                        RemainToken = token,
-                        VolatileToken = student.NumberOfToken + token,
-                        Type = EnumTokenHistoryType.Exchanged,
-                        Feature = EnumTokenFeature.Test,
-                        Mission = EnumTokenMission.FinalTest,
-                        UserId = student.Human?.UserId ?? default,
-                    }
-                };
-                await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
+                        NumberOfToken = token,
+                        StudentId = finalTestResult.StudentId,
+                    }).ConfigureAwait(false);
+                    var tokenHistorys = new List<TokenHistoryQueueModel>
+                    {
+                        new TokenHistoryQueueModel
+                        {
+                            ObjectId = finalTestResult.Id,
+                            InitialToken = student.NumberOfToken,
+                            RemainToken = token,
+                            VolatileToken = student.NumberOfToken + token,
+                            Type = EnumTokenHistoryType.Exchanged,
+                            Feature = EnumTokenFeature.Test,
+                            Mission = EnumTokenMission.FinalTest,
+                            UserId = student.Human?.UserId ?? default,
+                        }
+                    };
+                    await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
+                }
 
                 _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

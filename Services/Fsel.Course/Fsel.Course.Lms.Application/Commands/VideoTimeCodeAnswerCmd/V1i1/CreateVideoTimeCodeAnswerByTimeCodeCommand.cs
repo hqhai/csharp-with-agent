@@ -255,11 +255,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private async Task UpdateVideoResultAsync(VideoResult videoResult, CancellationToken cancellationToken)
         {
             var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.VideoId == videoResult.VideoId).ToListAsync(cancellationToken);
-
             var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done).ToList();
             if (videoTimeCodes.Count == videoTimeCodeResults.Count)
             {
-                await _mediator.Send(new ReviewLessonVideoCommand { LessonResultId = videoResult.LessonResultId }, cancellationToken);
+                await _mediator.Send(new ReviewLessonVideoCommand { LessonResultId = videoResult.LessonResultId }, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -276,9 +275,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private async Task UpdateVideoTimeCodeResult(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, bool isSubmit, EnumCourseType courseType, StudentModel student, CancellationToken cancellationToken)
         {
             videoTimeCodeResult = await GetVideoTimeCodeResultAsync(videoTimeCodeResult, videoTimeCode, isSubmit, courseType, student, cancellationToken);
-            if (isSubmit)
+            var tokensAchieved = (videoTimeCodeResult.TokenLastTime ?? videoTimeCodeResult.TokenFirstTime ?? default);
+
+            if (isSubmit && tokensAchieved > 0)
             {
-                var tokensAchieved = (videoTimeCodeResult.TokenLastTime ?? videoTimeCodeResult.TokenFirstTime ?? default);
                 await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
                 {
                     NumberOfToken = tokensAchieved,
@@ -339,7 +339,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             if (videoTimeCodeResult.Status != EnumResultStatus.Done)
             {
                 var tokensAchieved = (double)(videoTimeCodeResult.TokenLastTime.HasValue ? videoTimeCodeResult.TokenLastTime.Value : (videoTimeCodeResult.TokenFirstTime ?? default));
-                var listToken = new List<TokenHistoryQueueModel>
+                if (tokensAchieved > 0)
+                {
+                    var listToken = new List<TokenHistoryQueueModel>
                 {
                     new TokenHistoryQueueModel
                     {
@@ -354,7 +356,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     }
                 };
 
-                await _createTokenHistoryPublisher.Publish(listToken, cancellationToken).ConfigureAwait(false);
+                    await _createTokenHistoryPublisher.Publish(listToken, cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 

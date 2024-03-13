@@ -259,42 +259,29 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 LexicalResource = resultDictionary[EnumMockTestAIType.LexicalResource],
                 GrammaticalRange = resultDictionary[EnumMockTestAIType.GrammaticalRange]
             };
-            TokenConfigModel? tokenConfigWork, tokenConfigTaskResponse, tokenConfigCoherence, tokenConfigLexicalResource, tokenConfigGrammaticalRange;
-            TokenCoinConfigs? tokenWork, tokenTaskResponse, tokenCoherence, tokenLexicalResource, tokenGrammaticalRange;
+            EnumTokenMission misstionWork, misstionTaskResponse, misstionCoherence, misstionLexicalResource, misstionGrammaticalRange;
+
             if (section.DisplayOrder == 1)
             {
-                tokenConfigWork = GetTokenCoinConfig(tokenConfigs, checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1Work150 : EnumTokenMission.FullMockTestWritingTask1Work150);
-                tokenWork = tokenConfigWork.GetTokenConfig<TokenCoinConfigs>();
-
-                tokenConfigTaskResponse = GetTokenCoinConfig(tokenConfigs, checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1TA : EnumTokenMission.FullMockTestWritingTask1TA);
-                tokenTaskResponse = tokenConfigTaskResponse.GetTokenConfig<TokenCoinConfigs>();
-
-                tokenConfigCoherence = GetTokenCoinConfig(tokenConfigs, checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1CC : EnumTokenMission.FullMockTestWritingTask1CC);
-                tokenCoherence = tokenConfigCoherence.GetTokenConfig<TokenCoinConfigs>();
-
-                tokenConfigLexicalResource = GetTokenCoinConfig(tokenConfigs, checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1LR : EnumTokenMission.FullMockTestWritingTask1LR);
-                tokenLexicalResource = tokenConfigLexicalResource.GetTokenConfig<TokenCoinConfigs>();
-
-                tokenConfigGrammaticalRange = GetTokenCoinConfig(tokenConfigs, checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1GRA : EnumTokenMission.FullMockTestWritingTask1GRA);
-                tokenGrammaticalRange = tokenConfigGrammaticalRange.GetTokenConfig<TokenCoinConfigs>();
+                misstionWork = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1Work150 : EnumTokenMission.FullMockTestWritingTask1Work150;
+                misstionTaskResponse = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1TA : EnumTokenMission.FullMockTestWritingTask1TA;
+                misstionCoherence = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1CC : EnumTokenMission.FullMockTestWritingTask1CC;
+                misstionLexicalResource = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1LR : EnumTokenMission.FullMockTestWritingTask1LR;
+                misstionGrammaticalRange = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1GRA : EnumTokenMission.FullMockTestWritingTask1GRA;
             }
             else
             {
-                tokenConfigWork = GetTokenCoinConfig(tokenConfigs, checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask2Work250 : EnumTokenMission.FullMockTestWritingTask2Work250);
-                tokenWork = tokenConfigWork.GetTokenConfig<TokenCoinConfigs>();
-
-                tokenConfigTaskResponse = GetTokenCoinConfig(tokenConfigs, checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask2TA : EnumTokenMission.FullMockTestWritingTask2TA);
-                tokenTaskResponse = tokenConfigTaskResponse.GetTokenConfig<TokenCoinConfigs>();
-
-                tokenConfigCoherence = GetTokenCoinConfig(tokenConfigs, checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask2CC : EnumTokenMission.FullMockTestWritingTask2CC);
-                tokenCoherence = tokenConfigCoherence.GetTokenConfig<TokenCoinConfigs>();
-
-                tokenConfigLexicalResource = GetTokenCoinConfig(tokenConfigs, checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask2LR : EnumTokenMission.FullMockTestWritingTask2LR);
-                tokenLexicalResource = tokenConfigLexicalResource.GetTokenConfig<TokenCoinConfigs>();
-
-                tokenConfigGrammaticalRange = GetTokenCoinConfig(tokenConfigs, checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask2GRA : EnumTokenMission.FullMockTestWritingTask2GRA);
-                tokenGrammaticalRange = tokenConfigGrammaticalRange.GetTokenConfig<TokenCoinConfigs>();
+                misstionWork = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask2Work250 : EnumTokenMission.FullMockTestWritingTask2Work250;
+                misstionTaskResponse = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask2TA : EnumTokenMission.FullMockTestWritingTask2TA;
+                misstionCoherence = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask2CC : EnumTokenMission.FullMockTestWritingTask2CC;
+                misstionLexicalResource = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask2LR : EnumTokenMission.FullMockTestWritingTask2LR;
+                misstionGrammaticalRange = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask2GRA : EnumTokenMission.FullMockTestWritingTask2GRA;
             }
+            var tokenWork = GetTokenCoinConfig(tokenConfigs, misstionWork).GetTokenConfig<TokenCoinConfigs>();
+            var tokenTaskResponse = GetTokenCoinConfig(tokenConfigs, misstionTaskResponse).GetTokenConfig<TokenCoinConfigs>();
+            var tokenCoherence = GetTokenCoinConfig(tokenConfigs, misstionCoherence).GetTokenConfig<TokenCoinConfigs>();
+            var tokenLexicalResource = GetTokenCoinConfig(tokenConfigs, misstionLexicalResource).GetTokenConfig<TokenCoinConfigs>();
+            var tokenGrammaticalRange = GetTokenCoinConfig(tokenConfigs, misstionGrammaticalRange).GetTokenConfig<TokenCoinConfigs>();
 
             var taskResponse = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.TaskResponse);
             var coherence = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.Coherence);
@@ -312,11 +299,13 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             if (checkSkillMockTest)
             {
-                //(var tokenHistoryWordConent, numberOfToken) = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallWordContent ?? default, tokenConfigWork?.Id ?? default, userId, cancellationToken);
-                //numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallTaskResponse ?? default, tokenConfigTaskResponse?.Id ?? default, userId, cancellationToken);
-                //numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallCoherence ?? default, tokenConfigCoherence?.Id ?? default, userId, cancellationToken);
-                //numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallLexicalResource ?? default, tokenConfigLexicalResource?.Id ?? default, userId, cancellationToken);
-                //numberOfToken = await CreateTokenHistoryAsync(mockTestResult, numberOfToken, tokenOverallGrammaticalRange ?? default, tokenConfigGrammaticalRange?.Id ?? default, userId, cancellationToken);
+                var tokenHistoryQueues = new List<TokenHistoryQueueModel>();
+
+                tokenHistoryQueues.Add(GetTokenHistoryQueue(mockTestResult, numberOfToken, tokenOverallWordContent ?? default, misstionWork, userId));
+                tokenHistoryQueues.Add(GetTokenHistoryQueue(mockTestResult, numberOfToken, tokenOverallTaskResponse ?? default, misstionTaskResponse, userId));
+                tokenHistoryQueues.Add(GetTokenHistoryQueue(mockTestResult, numberOfToken, tokenOverallCoherence ?? default, misstionCoherence, userId));
+                tokenHistoryQueues.Add(GetTokenHistoryQueue(mockTestResult, numberOfToken, tokenOverallLexicalResource ?? default, misstionLexicalResource, userId));
+                tokenHistoryQueues.Add(GetTokenHistoryQueue(mockTestResult, numberOfToken, tokenOverallGrammaticalRange ?? default, misstionGrammaticalRange, userId));
             }
 
             var taskResponseToken = new List<double?> { tokenOverallWordContent, tokenOverallTaskResponse, tokenOverallCoherence, tokenOverallLexicalResource, tokenOverallGrammaticalRange };
@@ -324,20 +313,24 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             return (false, (int)(taskResponseToken.Sum() ?? default));
         }
 
-        private async Task<double> CreateTokenHistoryAsync(MockTestResult mockTestResult, double numberOfToken, double token, Guid tokenConfigId, Guid userId, CancellationToken cancellationToken)
+        private async Task CreateTokenHistoryAsync(List<TokenHistoryQueueModel> tokenHistoryQueues, CancellationToken cancellationToken)
         {
-            //await _createTokenHistoryPublisher.Publish(new TokenHistoryQueueModel
-            //{
-            //    ObjectId = mockTestResult.Id,
-            //    InitialToken = numberOfToken,
-            //    RemainToken = token,
-            //    VolatileToken = numberOfToken + token,
-            //    TokenConfigId = tokenConfigId,
-            //    Type = EnumTokenHistoryType.Earn,
-            //    UserId = userId,
-            //}, cancellationToken).ConfigureAwait(false);
+            await _createTokenHistoryPublisher.Publish(tokenHistoryQueues, cancellationToken).ConfigureAwait(false);
+        }
 
-            return numberOfToken + token;
+        private static TokenHistoryQueueModel GetTokenHistoryQueue(MockTestResult mockTestResult, double numberOfToken, double token, EnumTokenMission mission, Guid userId)
+        {
+            return new TokenHistoryQueueModel
+            {
+                ObjectId = mockTestResult.Id,
+                InitialToken = numberOfToken,
+                RemainToken = token,
+                VolatileToken = numberOfToken + token,
+                Type = EnumTokenHistoryType.Exchanged,
+                Feature = EnumTokenFeature.SkillMockTest,
+                Mission = mission,
+                UserId = userId,
+            };
         }
 
         private static double CaculateAverageScore(List<MockTestAIGradingModel>? bandScoreDescription)

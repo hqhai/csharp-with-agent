@@ -23,7 +23,7 @@ namespace Fsel.Identity.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.UserQueue.NameQueue.CreateTokenHistory, request, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.UserQueue.NameQueue.CreateTokenHistory, new TokenHistoryQueuesModel { TokenHistories = request }, cancellationToken);
         }
     }
 }

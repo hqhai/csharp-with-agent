@@ -258,12 +258,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 if (isSkillTest && (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening) && mockTestResult.TokenFirstTime.HasValue)
                 {
                     var token = mockTestResult.TokenFirstTime.Value;
-                    await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+                    if (token > 0)
                     {
-                        NumberOfToken = token,
-                        StudentId = mockTestResult.StudentId,
-                    }).ConfigureAwait(false);
-                    var tokenHistorys = new List<TokenHistoryQueueModel>
+                        await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+                        {
+                            NumberOfToken = token,
+                            StudentId = mockTestResult.StudentId,
+                        }).ConfigureAwait(false);
+                        var tokenHistorys = new List<TokenHistoryQueueModel>
                     {
                         new TokenHistoryQueueModel
                         {
@@ -277,7 +279,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                             UserId = student.Human?.UserId ?? default,
                         }
                     };
-                    await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
+                        await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
+                    }
                 }
 
                 _mockTestResultRepository.Update(mockTestResult);

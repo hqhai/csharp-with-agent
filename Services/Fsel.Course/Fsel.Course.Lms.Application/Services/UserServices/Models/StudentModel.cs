@@ -20,6 +20,5 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public Guid? SchoolId { get; set; }
         public HumanModel? Human { get; set; }
         public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
-        public double NumberOfToken { get; set; }
     }
 }
