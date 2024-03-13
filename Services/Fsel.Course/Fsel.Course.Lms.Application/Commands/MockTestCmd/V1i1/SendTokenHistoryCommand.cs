@@ -125,18 +125,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, IList<SectionGroupResult> sectionGroupResults, CancellationToken cancellationToken)
         {
             mockTestResult.TokenFirstTime = sectionGroupResults.Sum(x => (x.TokenFirstTime ?? default));
-
-            if (mockTestResult.TokenFirstTime.HasValue && mockTestResult.TokenFirstTime.Value > 0)
-            {
-                await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-                {
-                    NumberOfToken = mockTestResult.TokenFirstTime.Value,
-                    StudentId = mockTestResult.StudentId,
-                }).ConfigureAwait(false);
-            }
-
             _mockTestResultRepository.Update(mockTestResult);
-            await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<IList<TokenHistoryQueueModel>> UpdateSectionGroupResultsAsync(MockTestResult mockTestResult, SectionGroupResult? sectionGroupResult, Course course, Guid userId, bool isSkillMockTest, CancellationToken cancellationToken)

@@ -95,21 +95,16 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                         UserId = _authContext.CurrentUserId,
                     }
                 }, cancellationToken).ConfigureAwait(false);
-
-                student.NumberOfToken += targetNumber;
             }
 
             await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>
-             {
-                 _studentRepository.Update(student);
-                 await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                 _studentDailyStreakRepository.Update(studentDailyStreak);
-                 await _studentDailyStreakRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                 methodResult.StatusCode = StatusCodes.Status200OK;
-                 methodResult.Result = true;
-                 return methodResult;
-             });
+            {
+                _studentDailyStreakRepository.Update(studentDailyStreak);
+                await _studentDailyStreakRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = true;
+                return methodResult;
+            });
             return methodResult;
         }
     }

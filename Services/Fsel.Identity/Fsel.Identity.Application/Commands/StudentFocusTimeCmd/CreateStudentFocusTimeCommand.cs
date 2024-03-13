@@ -152,11 +152,8 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                                 }
                             }, cancellationToken).ConfigureAwait(false);
 
-                            student.NumberOfToken += targetNumber.Value;
                             studentFocusTime.IsReceivedToken = true;
                         }
-                        _studentRepository.Update(student);
-                        await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     _studentFocusTimeRepository.Update(studentFocusTime);
                 }

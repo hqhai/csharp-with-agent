@@ -275,16 +275,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private async Task UpdateVideoTimeCodeResult(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, bool isSubmit, EnumCourseType courseType, StudentModel student, CancellationToken cancellationToken)
         {
             videoTimeCodeResult = await GetVideoTimeCodeResultAsync(videoTimeCodeResult, videoTimeCode, isSubmit, courseType, student, cancellationToken);
-            var tokensAchieved = (videoTimeCodeResult.TokenLastTime ?? videoTimeCodeResult.TokenFirstTime ?? default);
-
-            if (isSubmit && tokensAchieved > 0)
-            {
-                await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-                {
-                    NumberOfToken = tokensAchieved,
-                    StudentId = videoTimeCodeResult.StudentId,
-                }).ConfigureAwait(false);
-            }
             _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
             await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -342,17 +332,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 if (tokensAchieved > 0)
                 {
                     var listToken = new List<TokenHistoryQueueModel>
-                {
-                    new TokenHistoryQueueModel
                     {
-                        ObjectId = videoTimeCodeResult.Id,
-                        RemainToken = tokensAchieved,
-                        Feature = EnumTokenFeature.Learn,
-                        Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit,
-                        Type = EnumTokenHistoryType.Exchanged,
-                        UserId = student.Human?.UserId ?? default,
-                    }
-                };
+                        new TokenHistoryQueueModel
+                        {
+                            ObjectId = videoTimeCodeResult.Id,
+                            RemainToken = tokensAchieved,
+                            Feature = EnumTokenFeature.Learn,
+                            Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit,
+                            Type = EnumTokenHistoryType.Exchanged,
+                            UserId = student.Human?.UserId ?? default,
+                        }
+                    };
 
                     await _createTokenHistoryPublisher.Publish(listToken, cancellationToken).ConfigureAwait(false);
                 }

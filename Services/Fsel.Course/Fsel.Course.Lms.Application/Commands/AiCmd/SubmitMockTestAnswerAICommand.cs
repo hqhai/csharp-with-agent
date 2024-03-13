@@ -10,10 +10,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
+    using Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1;
     using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -28,25 +27,19 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     {
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
-        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly IUserService _userService;
         private readonly ISectionRepository _sectionRepository;
-        private readonly ISystemService _systemService;
-        private readonly ICourseRepository _courseRepository;
         private readonly IMockTestAISettingRepository _aiGradeSettingRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMediator _mediator;
         private static int s_correctTotalWriting = 36;
 
-        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, CreateTokenHistoryPublisher createTokenHistoryPublisher, IUserService userService, ISectionRepository sectionRepository, ISystemService systemService, ICourseRepository courseRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
+        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IUserService userService, ISectionRepository sectionRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
             _submitAIResponsePublisher = submitAIResponsePublisher;
-            _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _userService = userService;
             _sectionRepository = sectionRepository;
-            _systemService = systemService;
-            _courseRepository = courseRepository;
             _mediator = mediator;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _aiGradeSettingRepository = aiGradeSettingRepository;
@@ -186,15 +179,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 if (checkSkillMockTest)
                 {
                     _mockTestResultRepository.Update(mockTestResult);
-                    if (mockTestResult.TokenFirstTime.HasValue && mockTestResult.TokenFirstTime != 0)
+                    if (section.DisplayOrder != 1)
                     {
-                        await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-                        {
-                            NumberOfToken = mockTestResult.TokenFirstTime.Value,
-                            StudentId = mockTestResult.StudentId,
-                        }).ConfigureAwait(false);
-
                         await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                        await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
                     }
                     else
                     {

@@ -303,18 +303,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 CountQuestion = homeWorkQuestionCount.TotalAnswer,
                 TotalQuestion = homeWorkQuestionCount.TotalQuestion,
             };
-            await UpdateTokenByStudent(homeWorkResult, tokensAchieved);
             homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
             return homeWorkResult;
-        }
-
-        private async Task UpdateTokenByStudent(HomeWorkResult homeWorkResult, long tokensAchieved)
-        {
-            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-            {
-                NumberOfToken = tokensAchieved,
-                StudentId = homeWorkResult.StudentId,
-            }).ConfigureAwait(false);
         }
 
         public async Task<MethodResult<(IList<Question>, HomeWorkResult)>> Validate(CreateHomeWorkAnswerCommand request)

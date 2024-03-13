@@ -179,11 +179,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 var token = finalTestResult.TokenFirstTime ?? default;
                 if (token > 0)
                 {
-                    await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-                    {
-                        NumberOfToken = token,
-                        StudentId = finalTestResult.StudentId,
-                    }).ConfigureAwait(false);
                     var tokenHistorys = new List<TokenHistoryQueueModel>
                     {
                         new TokenHistoryQueueModel
