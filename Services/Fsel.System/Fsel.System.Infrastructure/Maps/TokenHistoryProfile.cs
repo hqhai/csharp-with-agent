@@ -6,7 +6,6 @@ namespace Fsel.System.Infrastructure.Maps
     using Fsel.Core.Extensions;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.Entities;
-    using Fsel.System.Domain.Models.CommandModels.TokenHistorys;
     using Fsel.System.Domain.Models.EntityModels;
 
     public class TokenHistoryProfile : Profile
@@ -15,7 +14,6 @@ namespace Fsel.System.Infrastructure.Maps
         {
             CreateMap<TokenHistory, TokenHistoryModel>().IgnoreAllNonExisting();
             CreateMap<TokenHistoryQueueModel, TokenHistory>().IgnoreAllNonExisting();
-            CreateMap<CreateTokenHistoryCommandModel, TokenHistory>().IgnoreAllNonExisting();
         }
     }
 }

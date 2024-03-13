@@ -3000,6 +3000,9 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<string>("ConfigStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -3040,11 +3043,10 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("Mission")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<Guid>("ObjectId")
+                    b.Property<Guid?>("ObjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("RemainToken")
