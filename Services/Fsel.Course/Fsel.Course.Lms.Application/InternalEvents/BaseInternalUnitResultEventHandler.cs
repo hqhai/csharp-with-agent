@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _lessonResultRepository = lessonResultRepository;
         }
 
-        public async Task UpdateUnitResultAsync(IList<LessonResult>? lessonResults, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
+        public async Task UpdateUnitResultAsync(IList<LessonResult>? lessonResults, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken, bool isUnitUpdate = true)
 
         {
             ArgumentNullException.ThrowIfNull(unit);
@@ -274,12 +274,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             }
                         }
                     }
-                    unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
-                    unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-                    unitResult.Percent = percent;
-                    unitResult.SkillScores = skillScores;
-                    _unitResultRepository.Update(unitResult);
-                    await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                    if (isUnitUpdate)
+                    {
+                        unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                        unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                        unitResult.Percent = percent;
+                        unitResult.SkillScores = skillScores;
+                        _unitResultRepository.Update(unitResult);
+                        await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    }
                 }
             }
         }
