@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _lessonResultRepository = lessonResultRepository;
         }
 
-        public async Task UpdateUnitResultAsync(IList<LessonResult>? lessonResults, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
+        public async Task UpdateUnitResultAsync(IList<LessonResult>? lessonResults, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken, bool isUnitUpdate = true)
 
         {
             ArgumentNullException.ThrowIfNull(unit);
@@ -75,12 +75,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         //send mail
                         await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken);
                     }
-                    unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
-                    unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-                    unitResult.Percent = percent;
-                    unitResult.SkillScores = skillScores;
-                    _unitResultRepository.Update(unitResult);
-                    await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                    if (isUnitUpdate)
+                    {
+                        unitResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                        unitResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                        unitResult.Percent = percent;
+                        unitResult.SkillScores = skillScores;
+                        _unitResultRepository.Update(unitResult);
+                        await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    }
                 }
             }
         }
@@ -181,7 +185,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             mockTestResult?.SkillScores.ForEach(p =>
             {
                 var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
-                var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
+                var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Scores);
                 mockTestHtml += html;
             });
 
@@ -255,24 +259,27 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 var featureAccessTimePrevious = featureAccessTimePreviousResult.Content?.Result;
 
-                var (skillScoresPrevious, percentPrevious) = await GetUnitSkillScores(previousLessonResults.Select(p => p.Id).ToList(), course.CourseType);
+                //var (skillScoresPrevious, percentPrevious) = await GetUnitSkillScores(previousLessonResults.Select(p => p.Id).ToList(), course.CourseType);
 
                 foreach (var item in skillScores)
                 {
-                    if (skillScoresPrevious.Any(p => p.Skill == item.Skill))
-                    {
-                        var skillScore = skillScoresPrevious.FirstOrDefault(p => p.Skill == item.Skill);
+                    //if (skillScoresPrevious.Any(p => p.Skill == item.Skill))
+                    //{
+                    //    var skillScore = skillScoresPrevious.FirstOrDefault(p => p.Skill == item.Skill);
 
-                        var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
-                        var html = string.Format(CultureInfo.InvariantCulture, compareSkillHtml, icon, skillName, item.Percent, item.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - item.Percent, skillScore?.Percent, SendMailHelper.GetColorText((long)item.Percent, (long)skillScore!.Percent), item.Percent);
-                        skillScoreHtml += html;
-                    }
-                    else
-                    {
-                        var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
-                        var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, item.Percent, item.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - item.Percent, item.Percent);
-                        skillScoreHtml += html;
-                    }
+                    //    var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
+                    //    var html = string.Format(CultureInfo.InvariantCulture, compareSkillHtml, icon, skillName, item.Percent, item.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - item.Percent, skillScore?.Percent, SendMailHelper.GetColorText((long)item.Percent, (long)skillScore!.Percent), item.Percent);
+                    //    skillScoreHtml += html;
+                    //}
+                    //else
+                    //{
+                    //    var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
+                    //    var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, item.Percent, item.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - item.Percent, item.Percent);
+                    //    skillScoreHtml += html;
+                    //}
+                    var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
+                    var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, item.Percent, item.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - item.Percent, item.Percent);
+                    skillScoreHtml += html;
                 }
                 parameter.SkillScore = skillScoreHtml;
                 if (course.CourseType == EnumCourseType.Academic)
@@ -324,7 +331,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 (parameter.ColorOther, parameter.CompareOther) = SendMailHelper.Compare(currentOther, previousOther);
 
-                (parameter.ColorSocial, parameter.CompareSocial) = SendMailHelper.Compare(currentSocial, previousSocial);
+                await SendStudentCompleteUnit(studentId, parameter, course.CourseType, cancellationToken);
             }
             return parameter;
         }
