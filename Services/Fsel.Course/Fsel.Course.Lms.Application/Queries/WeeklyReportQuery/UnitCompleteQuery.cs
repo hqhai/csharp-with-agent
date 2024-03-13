@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
 
             var courseId = lessonResult.First().CourseId;
 
-            await _baseInternalUnitResult.UpdateUnitResultAsync(lessonResult, unit, courseId, request.StudentId, true, cancellationToken);
+            await _baseInternalUnitResult.UpdateUnitResultAsync(lessonResult, unit, courseId, request.StudentId, true, cancellationToken, false);
 
             methodResult.Result = true;
 
