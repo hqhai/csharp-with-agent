@@ -176,7 +176,15 @@ namespace Fsel.Notification.Application.Commands
                 notificationType.Type,
                 notificationType.Content
             };
-            await _oneSignalProvider.CreateNotificationAsync(oneSignalMessage, cancellationToken);
+
+            try
+            {
+                await _oneSignalProvider.CreateNotificationAsync(oneSignalMessage, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
     }
 }
