@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20240312122547_CreateTokenHistoryTable")]
+    [Migration("20240313021142_CreateTokenHistoryTable")]
     partial class CreateTokenHistoryTable
     {
         /// <inheritdoc />
@@ -3049,7 +3049,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<Guid>("ObjectId")
+                    b.Property<Guid?>("ObjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("RemainToken")

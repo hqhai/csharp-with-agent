@@ -19,7 +19,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public Guid UserId { get; set; }
 
-        public Guid ObjectId { get; set; }
+        public Guid? ObjectId { get; set; }
         public EnumTokenFeature Feature { get; set; }
 
         public EnumTokenMission? Mission { get; set; }

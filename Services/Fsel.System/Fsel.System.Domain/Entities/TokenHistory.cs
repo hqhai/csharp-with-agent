@@ -22,7 +22,7 @@ namespace Fsel.System.Domain.Entities
 
         public Guid UserId { get; set; }
 
-        public Guid ObjectId { get; set; }
+        public Guid? ObjectId { get; set; }
 
        public string? ConfigStr { get; set; }
 

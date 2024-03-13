@@ -3046,7 +3046,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<Guid>("ObjectId")
+                    b.Property<Guid?>("ObjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("RemainToken")

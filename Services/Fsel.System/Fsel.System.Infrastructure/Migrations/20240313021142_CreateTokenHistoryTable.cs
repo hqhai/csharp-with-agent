@@ -33,7 +33,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     Feature = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Mission = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ObjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ObjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ConfigStr = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Type = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
