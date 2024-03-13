@@ -75,15 +75,15 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
             {
                 return methodResult;
             }
+
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
-            // Lấy ngày thứ 6 gần nhất lúc 13h
             DateTime lastFridayAt13 = request.StartDate.HasValue ? request.StartDate.Value : currentDate.AddDays(-7);
 
             DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
 
-            // Lấy danh sách ngày từ thứ 7 tuần trước đến giờ
-            var dates = GenerateDateList(lastFridayAt13, currentDate);
+            // Lấy danh sách ngày từ thứ 2 tuần trước đến CN tuần trước
+            var dates = GenerateDateList(lastFridayAt13, currentDate.AddDays(-1));
 
             //var studentDailyStreakResults = await _userService.GetAllDailyStreak(new BaseQueryModel()
             //{
@@ -207,20 +207,20 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 weeklyReport.ColorSocial = totalSocial > previousSocial ? "#53BF65" : (totalSocial == previousSocial ? "#FFAE46" : "#C0404C");
                 weeklyReport.ColorOther = totalOther > previousOther ? "#53BF65" : (totalOther == previousOther ? "#FFAE46" : "#C0404C");
 
-                var unitResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.StudentId == item.Id).OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
+                var unitResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.StudentId == item.Id).OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
 
-                var unitDoneCount = unitResult.Where(p => p.Status == EnumResultStatus.Done).Count();
+                var unitDoneCount = unitResult.Where(p => p.Status == EnumResultStatus.Done && p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date).Count();
                 var courseType = unitResult.FirstOrDefault()?.Course?.CourseType;
-                if (courseType == EnumCourseType.Academic)
-                {
-                    int academicPercent = ((unitDoneCount * 100) / 12);
-                    weeklyReport.CoursePercent = academicPercent.ToString(CultureInfo.CurrentCulture);
-                }
-                else
-                {
-                    int ieltPercent = ((unitDoneCount * 100) / 10);
-                    weeklyReport.CoursePercent = ieltPercent.ToString(CultureInfo.CurrentCulture);
-                }
+                //if (courseType == EnumCourseType.Academic)
+                //{
+                //    int academicPercent = ((unitDoneCount * 100) / 12);
+                //    weeklyReport.CoursePercent = academicPercent.ToString(CultureInfo.CurrentCulture);
+                //}
+                //else
+                //{
+                //    int ieltPercent = ((unitDoneCount * 100) / 10);
+                //    weeklyReport.CoursePercent = ieltPercent.ToString(CultureInfo.CurrentCulture);
+                //}
 
                 string unitName = string.Empty;
 
@@ -304,11 +304,29 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                                     LessonResult = x,
                                     DisplayOrder = x.Lesson!.UnitLessons.Where(x => x.UnitId == unitResultNext.UnitId).Max(x => x.DisplayOrder)
                                 }).FirstOrDefaultAsync(cancellationToken);
+                            if (currentLesson != null)
+                            {
+                                weeklyReport.NextLesson = currentLesson.DisplayOrder;
+                                var percentLesson = await GetLesson(currentLesson.LessonResult?.CourseId, currentLesson.LessonResult?.UnitId, currentLesson.Lesson?.Id, item.Id);
+                                weeklyReport.PercentLesson = percentLesson;
+                                weeklyReport.Weekly3Display = null;
+                                weeklyReport.SkillMockTestDisplay = HtmlSetting.Display;
+                            }
+                            else if (courseType == EnumCourseType.Ielts)
+                            {
+                                var mockTestResult = await _mockTestResultRepository.Queryable.Include(mt => mt.MockTest)
+                                    .ThenInclude(mts => mts.MockTestSections).ThenInclude(sg => sg.SectionGroup)
+                                    .Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done && x.UnitId == unitResultNext.UnitId).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
 
-                            weeklyReport.NextLesson = currentLesson?.DisplayOrder;
-                            var percentLesson = await GetLesson(currentLesson?.LessonResult?.CourseId, currentLesson?.LessonResult?.UnitId, currentLesson?.Lesson?.Id, item.Id);
-                            weeklyReport.PercentLesson = percentLesson;
-                            weeklyReport.Weekly3Display = null;
+                                var skill = mockTestResult?.MockTest?.MockTestSections.Select(p => p.SectionGroup?.CourseSkill).FirstOrDefault();
+                                if (skill.HasValue)
+                                {
+                                    var (@class, skillName, icon) = ConvertEnum(skill.Value);
+                                    weeklyReport.SkillMockTest = skillName;
+                                }
+                                weeklyReport.Weekly3Display = HtmlSetting.Display;
+                                weeklyReport.SkillMockTestDisplay = null;
+                            }
                         }
                     }
                     else if (courseType == EnumCourseType.Academic)
@@ -354,6 +372,10 @@ namespace Fsel.Course.Lms.Application.Queries.WeeklyReportQuery
                 counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);
                 counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count());
                 counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
+            }
+            if (counts.Count == 0)
+            {
+                return 0;
             }
             return (int)NumberHelper.ConvertPercentDouble(counts.Average());
         }
