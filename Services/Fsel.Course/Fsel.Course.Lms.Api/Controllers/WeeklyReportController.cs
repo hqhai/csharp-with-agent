@@ -30,7 +30,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("weekly-report")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetVideoTimeCodeResult([FromBody] WeeklyReportQuery query)
+        public async Task<IActionResult> WeeklyReport([FromBody] WeeklyReportQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get video time code ranking
+        /// </summary>
+        [HttpPost("send-complete-unit")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CompleteUnit([FromBody] UnitCompleteQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
