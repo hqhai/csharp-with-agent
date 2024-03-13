@@ -37,7 +37,7 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// get list token history
+        /// Get User Token History
         /// </summary>
         [HttpGet("user-token-history")]
         [ProducesResponseType(typeof(MethodResult<IList<CurrentUserTokenHistoryModel>>), (int)HttpStatusCode.OK)]
