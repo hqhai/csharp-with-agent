@@ -37,5 +37,8 @@ namespace Fsel.Interaction.Application.Services.CourseServices
 
         [Get("/v1/course/get-course-studying")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseStudying();
+
+        [Get("/v1.1/lesson/detail")]
+        Task<IApiResponse<MethodResult<LessonModel>>> GetLessonResult([FromRoute] Guid LessonResultId);
     }
 }
