@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -42,6 +43,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         protected readonly AppSetting _appSetting;
         protected readonly ISystemService _systemService;
+        protected readonly IOrderService _orderService;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private const int TotalScoreClassForum = 36;
         private const int PercentClassForumAcademic = 20;
@@ -68,7 +70,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IFinalTestResultRepository finalTestResultRepository,
             IMockTestResultRepository mockTestResultRepository,
             IHomeWorkResultRepository homeWorkResultRepository,
-            QuestBoardPublisher questBoardPublisher)
+
+            QuestBoardPublisher questBoardPublisher, IOrderService orderService)
         {
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -85,6 +88,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _appSetting = appSetting;
             _systemService = systemService;
             _questBoardPublisher = questBoardPublisher;
+            _orderService = orderService;
         }
 
         private async Task<(List<SkillScores>, double)> GetCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
@@ -374,15 +378,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 case var value when value == (courseUnitMockTest.UnitId == null):
                     var unitResultNext = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == courseUnitMockTest.UnitId, cancellationToken);
-                    var studentTrialRegistration = await _userService.CheckStudentTrialRegistration();
-                    var checkStudentTrialResult = studentTrialRegistration?.Content?.Result ?? default;
+                    var studentTrialRegistration = await _orderService.GetCurrentStatusAsync();
+                    var currentAccountStatus = studentTrialRegistration?.Content?.Result ?? default;
 
                     if (unitResultNext == null)
                     {
                         break;
                     }
-                    await UpdateStudentTrialRegistration(checkStudentTrialResult, unitResultNext.CreatedUserId);
-                    if (unitResultNext.Status == EnumResultStatus.Unfinished && !checkStudentTrialResult)
+                    await UpdateStudentTrialRegistration(currentAccountStatus, unitResultNext.CreatedUserId);
+                    if (unitResultNext.Status == EnumResultStatus.Unfinished && currentAccountStatus == EnumTrialRegistrationStatus.Payment)
                     {
                         unitResultNext.Status = EnumResultStatus.New;
                         _unitResultRepository.Update(unitResultNext);
@@ -517,9 +521,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        private async Task UpdateStudentTrialRegistration(bool checkStudentTrialResult, Guid userId)
+        private async Task UpdateStudentTrialRegistration(EnumTrialRegistrationStatus status, Guid userId)
         {
-            if (checkStudentTrialResult)
+            if (status == EnumTrialRegistrationStatus.Trial)
             {
 
                 StudentTrialRegistrationModel model = new StudentTrialRegistrationModel()
