@@ -384,7 +384,8 @@ namespace Fsel.Course.Infrastructure.Common
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
             int number = 0;
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, default, EnumQuestionType.ShortAnswerWordCount, isSubmit, isMandatoryAnswer);
-            if ((dataAnswer == null || string.IsNullOrEmpty(dataAnswer.Answers)) || (isMandatoryAnswer && isAnswerMissing))
+            var isAnswered = string.IsNullOrEmpty(dataAnswer?.Answers);
+            if ((dataAnswer == null || isAnswered) || (isMandatoryAnswer && isAnswerMissing))
             {
                 return (default, isAnswerMissing, false);
             }
@@ -403,15 +404,16 @@ namespace Fsel.Course.Infrastructure.Common
                 dataAnswer.IsFirstSubmit = false;
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing, !string.IsNullOrEmpty(dataAnswer.Answers));
+            return (number, isAnswerMissing, !isAnswered);
         }
 
         private (int, bool, bool) HandleShortAnswerWordBase(ref object? configAnswer, ShortAnswerWordBaseAnswer? dataOldAnswer, ShortAnswerQuestionWordBaseQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
             int number = 0;
+            var isAnswered = string.IsNullOrEmpty(dataAnswer?.Answers);
             bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Content, EnumQuestionType.ShortAnswerWordBase, isSubmit, isMandatoryAnswer);
-            if ((dataAnswer == null || string.IsNullOrEmpty(dataAnswer.Answers)) || dataQuestion?.Content == null || (isMandatoryAnswer && isAnswerMissing))
+            if ((dataAnswer == null || isAnswered) || dataQuestion?.Content == null || (isMandatoryAnswer && isAnswerMissing))
             {
                 return (default, isAnswerMissing, false);
             }
@@ -429,7 +431,7 @@ namespace Fsel.Course.Infrastructure.Common
                 dataAnswer.IsFirstSubmit = false;
             }
             configAnswer = dataAnswer;
-            return (number, isAnswerMissing, !string.IsNullOrEmpty(dataAnswer.Answers));
+            return (number, isAnswerMissing, !isAnswered);
         }
 
         private (int, bool, bool) HandleGapFillBySubAnswer(ref object? configAnswer, GapFillAnswer? dataOldAnswer, GapFillQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
