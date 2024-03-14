@@ -190,5 +190,10 @@ namespace Fsel.Shared.Helpers
             var words = input.Trim().Split(new[] { " ", "\n", "\r", Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrEmpty(x));
             return words.Count();
         }
+
+        public static string ReplaceWord(this string? word)
+        {
+            return word?.ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').Replace('‘', '\'').ToString() ?? string.Empty;
+        }
     }
 }
