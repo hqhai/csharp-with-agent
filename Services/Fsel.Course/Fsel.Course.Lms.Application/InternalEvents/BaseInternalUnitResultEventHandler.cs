@@ -230,7 +230,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores.ForEach(p =>
                 {
                     var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
-                    var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
+                    var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent + "%");
                     skillScoreHtml += html;
                 });
                 parameter.SkillScore = skillScoreHtml;
