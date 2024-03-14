@@ -521,7 +521,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             if (checkStudentTrialResult)
             {
-
                 StudentTrialRegistrationModel model = new StudentTrialRegistrationModel()
                 {
                     UserId = userId,

@@ -186,7 +186,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 }
             }
 
-            await UpdateMockTestResultAsync(mockTestResult, sectionGroup, isSkillTest, cancellationToken);
+            await UpdateMockTestResultAsync(mockTestResult, isSkillTest, cancellationToken);
+            if (isSkillTest && (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening))
+            {
+                await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
+            }
+
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = mockTestResult.Status == EnumResultStatus.Done;
             methodResult.Result = sectionGroupResultDto;
@@ -194,7 +199,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, SectionGroup sectionGroup, bool isSkillTest, CancellationToken cancellationToken)
+        private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, bool isSkillTest, CancellationToken cancellationToken)
         {
             var numberOfDone = 4;
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
@@ -203,11 +208,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                 mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
                 mockTestResult = GetMockTestResult(sectionGroupResults, mockTestResult);
-                if (isSkillTest && (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening))
-                {
-                    await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
-                }
-
                 _mockTestResultRepository.Update(mockTestResult);
                 if (mockTestResult.Status == EnumResultStatus.Done)
                 {

@@ -55,5 +55,14 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(new CheckSuperFireModeQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        [HttpPost("receive-token")]
+        [ProducesResponseType(typeof(MethodResult<StudentFocusTimeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReceiveToken()
+        {
+            MethodResult<StudentFocusTimeModel> commandResult = await _mediator.Send(new CreateTokenFocusTimeCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

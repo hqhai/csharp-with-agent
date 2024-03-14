@@ -137,7 +137,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     Skill = EnumCourseSkill.Writing,
                     Scores = averageScore,
                     TotalQuestion = 2,
-                    CountQuestion = 2
+                    CountQuestion = 2,
+                    Total1 = totalScore,
                 };
                 skillScores.Add(skillScore);
             }
@@ -148,6 +149,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
                 skillScores.Single().CorrectCount = correcCount;
                 skillScores.Single().Scores = averageScore;
+                skillScores.Single().Total2 = totalScore;
                 sectionGroupResult.CorrectCount = correcCount;
 
                 if (checkSkillMockTest)
@@ -155,11 +157,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     mockTestResult.CorrectCount = correcCount;
                     mockTestResult.SkillScores = skillScores;
                     mockTestResult.CorrectTotal = s_correctTotalWriting;
-                    mockTestResult.TokenFirstTime = sectionGroupResult.TokenFirstTime;
-                }
-                else
-                {
-                    mockTestResult.TokenFirstTime += sectionGroupResult.TokenFirstTime;
                 }
             }
 

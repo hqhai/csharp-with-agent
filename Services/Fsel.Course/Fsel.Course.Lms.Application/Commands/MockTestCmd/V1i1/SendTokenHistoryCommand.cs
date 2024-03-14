@@ -148,12 +148,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     case EnumCourseSkill.Writing:
                         var mocktestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync(cancellationToken);
                         var tokenHistoryWritings = new List<TokenHistoryQueueModel>();
-                        foreach (var section in sectionGroupResult.SectionGroup.Sections)
+                        var sections = sectionGroupResult.SectionGroup.Sections.ToList();
+                        foreach (var section in sections)
                         {
                             var mockTestAnswer = mocktestAnswers.FirstOrDefault(x => x.SectionId == section.Id);
                             if (mockTestAnswer != null)
                             {
-                                (sectionGroupResult, var listTokenHistory) = await UpdateSectionGroupResultToWritingAsync(sectionGroupResult, section, course, mockTestAnswer, isSkillMockTest, userId);
+                                var index = sections.IndexOf(section);
+                                (sectionGroupResult, var listTokenHistory) = await UpdateSectionGroupResultToWritingAsync(sectionGroupResult, section, index, course, mockTestAnswer, isSkillMockTest, userId);
                                 if (listTokenHistory.Any())
                                 {
                                     tokenHistoryWritings.AddRange(listTokenHistory);
@@ -209,7 +211,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     sectionGroupResult.TokenFirstTime = (int?)token * sectionGroupResult.CorrectCount;
                     if (sectionGroupResult.TokenFirstTime.HasValue && sectionGroupResult.TokenFirstTime.Value > 0)
                     {
-                        tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMission.Value));
+                        tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMission.Value, isSkillTest));
                     }
                 }
 
@@ -239,7 +241,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         #region Writing
 
-        private async Task<(SectionGroupResult, List<TokenHistoryQueueModel>)> UpdateSectionGroupResultToWritingAsync(SectionGroupResult sectionGroupResult, Section section, Course course, MockTestAnswer mockTestAnswer, bool checkSkillMockTest, Guid userId)
+        private async Task<(SectionGroupResult, List<TokenHistoryQueueModel>)> UpdateSectionGroupResultToWritingAsync(SectionGroupResult sectionGroupResult, Section section, int index, Course course, MockTestAnswer mockTestAnswer, bool checkSkillMockTest, Guid userId)
         {
             var tokenHistoryQueues = new List<TokenHistoryQueueModel>();
             var gradingAiFeedBackResult = ConvertHelper.Deserialize<MockTestGradingAiFeedBack>(mockTestAnswer.GradingAlFeedback);
@@ -248,7 +250,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 return (sectionGroupResult, tokenHistoryQueues);
             }
             EnumTokenMission misstionWork, misstionTaskResponse, misstionCoherence, misstionLexicalResource, misstionGrammaticalRange;
-            if (section.DisplayOrder == 1)
+            if (index == 0)
             {
                 misstionWork = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1Work150 : EnumTokenMission.FullMockTestWritingTask1Work150;
                 misstionTaskResponse = checkSkillMockTest ? EnumTokenMission.SkillMockTestWritingTask1TA : EnumTokenMission.FullMockTestWritingTask1TA;
@@ -285,20 +287,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var lexicalResource = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.LexicalResource);
             var grammaticalRange = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.GrammaticalRange);
 
-            var tokenOverallWordContent = CalculateOverall(mockTestAnswer.Answer?.ToString(), section.DisplayOrder == 1 ? 150 : 250, tokenWork?.BaseValue);
+            var tokenOverallWordContent = CalculateOverall(mockTestAnswer.Answer?.ToString(), index == 0 ? 150 : 250, tokenWork?.BaseValue);
             var tokenOverallTaskResponse = CalculateOverall(taskResponse, tokenTaskResponse?.BaseValue, course);
             var tokenOverallCoherence = CalculateOverall(coherence, tokenCoherence?.BaseValue, course);
             var tokenOverallLexicalResource = CalculateOverall(lexicalResource, tokenLexicalResource?.BaseValue, course);
             var tokenOverallGrammaticalRange = CalculateOverall(grammaticalRange, tokenGrammaticalRange?.BaseValue, course);
 
-            if (checkSkillMockTest)
-            {
-                tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionWork, tokenOverallWordContent ?? default));
-                tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionTaskResponse, tokenOverallTaskResponse ?? default));
-                tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionCoherence, tokenOverallCoherence ?? default));
-                tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionLexicalResource, tokenOverallLexicalResource ?? default));
-                tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionGrammaticalRange, tokenOverallGrammaticalRange ?? default));
-            }
+            tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionWork, checkSkillMockTest, tokenOverallWordContent ?? default));
+            tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionTaskResponse, checkSkillMockTest, tokenOverallTaskResponse ?? default));
+            tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionCoherence, checkSkillMockTest, tokenOverallCoherence ?? default));
+            tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionLexicalResource, checkSkillMockTest, tokenOverallLexicalResource ?? default));
+            tokenHistoryQueues.Add(GetTokenHistoryQueue(sectionGroupResult, userId, misstionGrammaticalRange, checkSkillMockTest, tokenOverallGrammaticalRange ?? default));
 
             var taskResponseToken = new List<double?> { tokenOverallWordContent, tokenOverallTaskResponse, tokenOverallCoherence, tokenOverallLexicalResource, tokenOverallGrammaticalRange };
             if (sectionGroupResult.TokenFirstTime.HasValue)
@@ -351,14 +350,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return bandScore;
         }
 
-        private static TokenHistoryQueueModel GetTokenHistoryQueue(SectionGroupResult sectionGroupResult, Guid userId, EnumTokenMission mission, double? token = null)
+        private static TokenHistoryQueueModel GetTokenHistoryQueue(SectionGroupResult sectionGroupResult, Guid userId, EnumTokenMission mission, bool isSkillMockTest, double? token = null)
         {
             return new TokenHistoryQueueModel
             {
                 ObjectId = sectionGroupResult.MockTestResultId,
                 RemainToken = token ?? sectionGroupResult.TokenFirstTime ?? default,
                 Type = EnumTokenHistoryType.Exchanged,
-                Feature = EnumTokenFeature.SkillMockTest,
+                Feature = isSkillMockTest ? EnumTokenFeature.SkillMockTest : EnumTokenFeature.FullMockTest,
                 Mission = mission,
                 UserId = userId,
             };
@@ -398,7 +397,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         if (tokenGRA > 0)
                         {
                             sectionGroupResult.TokenFirstTime += (int?)tokenGRA;
-                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionGRA, tokenGRA));
+                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionGRA, isSkillTest, tokenGRA));
                         }
 
                         break;
@@ -409,7 +408,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         if (tokenPon > 0)
                         {
                             sectionGroupResult.TokenFirstTime += (int?)tokenPon;
-                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionPron, tokenPon));
+                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionPron, isSkillTest, tokenPon));
                         }
 
                         break;
@@ -420,7 +419,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         if (tokenFC > 0)
                         {
                             sectionGroupResult.TokenFirstTime += (int?)tokenFC;
-                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionFC, tokenFC));
+                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionFC, isSkillTest, tokenFC));
                         }
                         break;
 
@@ -430,7 +429,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         if (tokenLR > 0)
                         {
                             sectionGroupResult.TokenFirstTime += (int?)tokenLR;
-                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionLR, tokenLR));
+                            tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, userId, tokenMissionLR, isSkillTest, tokenLR));
                         }
                         sectionGroupResult.TokenFirstTime += (int?)GetBandScore(level, tokenConfigLR.GetTokenConfig<TokenCoinConfigs>(), item.Score);
                         break;

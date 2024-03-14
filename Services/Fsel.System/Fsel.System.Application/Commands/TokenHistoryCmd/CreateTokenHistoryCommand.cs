@@ -89,8 +89,12 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
 
             await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
             {
-                NumberOfToken = (long)request.TokenHistorys.Sum(x => x.RemainToken),
-                StudentId = student.Id,
+                NumberOfToken = (long)request.TokenHistorys.Select(x =>
+                {
+                    x.RemainToken = x.Type == EnumTokenHistoryType.Exchanged ? x.RemainToken : -x.RemainToken;
+                    return x;
+                }).Sum(x => x.RemainToken),
+                StudentId = student.Id
             }).ConfigureAwait(false);
 
             await _tokenHistoryRepository.ExecuteTransactionAsync(async () =>
