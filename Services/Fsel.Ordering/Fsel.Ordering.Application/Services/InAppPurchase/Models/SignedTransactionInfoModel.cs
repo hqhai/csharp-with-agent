@@ -4,9 +4,9 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 {
     using Newtonsoft.Json;
 
-    public class NotificationTokenModel
+    public class SignedTransactionInfoModel
     {
-        [JsonProperty("testNotificationToken")]
-        public string? TestNotificationToken { get; set; }
+        [JsonProperty("signedTransactionInfo")]
+        public string? SignedTransactionInfo { get; set; }
     }
 }
