@@ -243,7 +243,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                 //    unitName += html;
                                 //}
                                 var (color, skillName, icon) = SendMailHelper.ConvertEnum(ls.Skill);
-                                var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, ls.Percent, ls.Percent < 100 ? "100px 0px 0px 100px" : "100px 100px 100px 100px", color, 100 - ls.Percent, ls.Percent);
+                                var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, ls.Percent, ls.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - ls.Percent, ls.Percent + "%");
                                 unitName += html;
                             }
                             index++;
