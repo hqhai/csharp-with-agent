@@ -176,7 +176,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                             Price = package.Price,
                             DiscountPercent = 0,
                             DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent)),
-                            TotalPrice = order.Price - order.DiscountPrice
+                            TotalPrice = order.Price - order.DiscountPrice,
+                            ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber)
                         });
                     }
                     else

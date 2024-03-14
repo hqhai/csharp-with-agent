@@ -193,7 +193,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     Type = EnumOrderTransactionType.AppStore,
                     Status = EnumOrderTransactionStatus.Success
                 });
-
+                order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
 
