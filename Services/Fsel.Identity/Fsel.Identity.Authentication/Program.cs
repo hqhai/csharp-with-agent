@@ -13,16 +13,26 @@ using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 //builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddAuthenticationIdentity(appSetting);
+//builder.AddAuthenticationIdentity(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
 builder.AddIdentity<User, Role, UserDbContext>();
+builder.AddAuthenticationJwtBearers(appSetting);
+builder.Services.Configure(delegate (IdentityOptions options)
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.SignIn.RequireConfirmedEmail = true;
+    options.User.RequireUniqueEmail = true;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@._";
+});
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
@@ -41,15 +51,11 @@ builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepo
 builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>();
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
 
-
-
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
 builder.Services.AddScoped<QuestBoardPublisher>();
-
-
 
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
