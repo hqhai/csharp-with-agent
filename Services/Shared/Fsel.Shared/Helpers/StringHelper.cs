@@ -193,7 +193,7 @@ namespace Fsel.Shared.Helpers
 
         public static string ReplaceWord(this string? word)
         {
-            return word?.ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').Replace('‘', '\'').ToString() ?? string.Empty;
+            return word?.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').Replace('‘', '\'').ToString() ?? string.Empty;
         }
     }
 }
