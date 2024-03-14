@@ -4,28 +4,23 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Shared.Enums;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
+    using Fsel.System.Domain.Models.QueryModels;
     using global::System;
-    using global::System.Collections.Generic;
     using global::System.Threading.Tasks;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListTokenHistoryQuery : IRequest<MethodResult<IList<TokenHistoryListModel>>>
+    public class SearchTokenHistoryQuery : SearchTokenHistoryQueryModel, IRequest<MethodResult<PagingItemsModel<TokenHistoryListModel>>>
     {
-        public Guid? UserId { get; set; }
-
-        public DateTime? StartDate { get; set; }
-
-        public DateTime? EndDate { get; set; }
-
-        public EnumTokenHistoryType? Type { get; set; }
     }
 
-    public class GetListTokenHistoryQueryHandler : IRequestHandler<GetListTokenHistoryQuery, MethodResult<IList<TokenHistoryListModel>>>
+    public class GetListTokenHistoryQueryHandler : IRequestHandler<SearchTokenHistoryQuery, MethodResult<PagingItemsModel<TokenHistoryListModel>>>
     {
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
         private readonly AuthContext _authContext;
@@ -36,10 +31,15 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<IList<TokenHistoryListModel>>> Handle(GetListTokenHistoryQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<TokenHistoryListModel>>> Handle(SearchTokenHistoryQuery request, CancellationToken cancellationToken)
         {
+            MethodResult<PagingItemsModel<TokenHistoryListModel>> methodResult = new MethodResult<PagingItemsModel<TokenHistoryListModel>>();
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<TokenHistoryListModel>>();
+            if (request.PageSize > 100)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
 
             if (request.StartDate != null && request.StartDate!.Value.Year > DateTime.UtcNow.Year + 2)
             {
@@ -60,12 +60,8 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
             if (request.StartDate != null || request.EndDate != null)
             {
                 tokenHistorys = tokenHistorys.Where(m =>
-                                    (request.StartDate == null || m.CreatedDate.Date >= request.StartDate.Value.Date
-                                    && m.CreatedDate.Month >= request.StartDate.Value.Month
-                                    && m.CreatedDate.Year >= request.StartDate.Value.Year) &&
-                                    (request.EndDate == null || m.CreatedDate.Date <= request.EndDate.Value.Date
-                                    && m.CreatedDate.Month <= request.EndDate.Value.Month
-                                    && m.CreatedDate.Year <= request.EndDate.Value.Year));
+                                    (request.StartDate == null || m.CreatedDate.Date >= request.StartDate.Value.Date) &&
+                                    (request.EndDate == null || m.CreatedDate.Date <= request.EndDate.Value.Date));
             }
 
             if (request.Type != null)
@@ -73,7 +69,7 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
                 tokenHistorys = tokenHistorys.Where(x => x.Type == request.Type);
             }
 
-            var tokenHistoryModel = await tokenHistorys.Where(x => x.UserId == userId)
+            var tokenHistoryQuery = tokenHistorys.Where(x => x.UserId == userId)
                             .GroupBy(x => x.CreatedDate.Date)
                             .Select(x => new TokenHistoryListModel
                             {
@@ -103,9 +99,17 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
                                         UserId = x.UserId,
                                     }).ToList(),
                                 }).ToList(),
-                            }).ToListAsync(cancellationToken);
+                            });
 
-            methodResult.Result = tokenHistoryModel;
+            int totalItem = await tokenHistoryQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await tokenHistoryQuery
+                    .ApplySortAndPaging(request)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+            methodResult.Result = new PagingItemsModel<TokenHistoryListModel>(lists, request, totalItem);
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

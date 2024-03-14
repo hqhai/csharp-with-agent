@@ -25,12 +25,12 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// get list token history
+        /// Search Token History
         /// </summary>
-        [HttpGet("list-token-history")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<TokenHistoryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetList([FromQuery] GetListTokenHistoryQuery query)
+        public async Task<IActionResult> GetList([FromQuery] SearchTokenHistoryQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

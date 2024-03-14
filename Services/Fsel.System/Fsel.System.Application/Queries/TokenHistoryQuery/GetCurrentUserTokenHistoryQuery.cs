@@ -48,7 +48,7 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
 
             if (tokenHistorys != null)
             {
-                tokenHistorys.TotalToken = tokenHistorys.ReciveToken + tokenHistorys.UsedToken;
+                tokenHistorys.TotalToken = tokenHistorys.ReciveToken - tokenHistorys.UsedToken;
             }
 
             methodResult.Result = tokenHistorys;
