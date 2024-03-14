@@ -27,6 +27,8 @@ builder.Services.AddScoped<UpdateTeacherGradingInClassForumAndMockTestPublisher>
 builder.Services.AddScoped<SyncStudentShieldEveryDayPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<CompleteTestWhenTimeOutPublisher>();
+builder.Services.AddScoped<ReviewFselPublisher>();
+builder.Services.AddScoped<NoticeAccessTimePublisher>();
 builder.Services.AddScoped<WeeklyReportPublisher>();
 builder.Services.AddScoped<UpdateStatusTrialStudentPublisher>();
 builder.AddMassTransit(appSetting,
@@ -34,6 +36,7 @@ queues: new Dictionary<string, Type>
 {
     { QueueSettings.LmsQueue.NameQueue.SetTimeToCompleteTest, typeof(SetTimeToCompleteTestConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPostTimeOut, typeof(SetTimeToCompleteApprovalConsumer) },
+    { QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
 });
 var app = builder.Build();
 
