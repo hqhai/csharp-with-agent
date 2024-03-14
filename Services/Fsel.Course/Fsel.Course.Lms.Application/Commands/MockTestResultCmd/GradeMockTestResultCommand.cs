@@ -13,9 +13,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -33,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private static int Criteria = 4;
 
         public GradeMockTestResultCommandHandler(IMapper mapper,
@@ -41,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             ISectionGroupRepository sectionGroupRepository,
             ISectionGroupResultRepository sectionGroupResultRepository,
             IUserService userService,
+            NotificationMessagePublisher notificationMessagePublisher,
             AuthContext authContext)
         {
             _mapper = mapper;
@@ -50,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _userService = userService;
             _authContext = authContext;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<List<MockTestScoreModel>>> Handle(GradeMockTestResultCommand request, CancellationToken cancellationToken)
@@ -72,6 +78,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.MockTestScores));
                 return methodResult;
             }
+
             request.MockTestScores = request.MockTestScores.OrderBy(x => x.Criteria).ToList();
             if (request.MockTestScores.GroupBy(x => x.Criteria).Any(x => x.Count() > 1))
             {
@@ -164,8 +171,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
                 _sectionGroupResultRepository.UpdateList(sectionGroupResults);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-
+                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await SendNotification(mockTestResult, cancellationToken);
                 _mockTestResultRepository.Update(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -175,6 +182,53 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             });
             await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
             return methodResult;
+        }
+
+        public async Task SendNotification(MockTestResult mockTestResult, CancellationToken cancellationToken)
+        {
+            if (mockTestResult != null)
+            {
+                bool isSkillMockTest = mockTestResult.MockTest!.MockTestType == EnumMockTestType.SkillMockTest;
+                NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
+                {
+                    ObjectId = mockTestResult!.Id,
+                    UserIds = new List<Guid> { mockTestResult.StudentId },
+                    Type = EnumNotificationType.LinkPage,
+                    Content = isSkillMockTest ? EnumNotificationContent.MockTest : EnumNotificationContent.FullMockTest,
+                    PlatformCode = EnumPlatformCode.LMS,
+                    ParamsMessage = new List<object> { mockTestResult.MockTest!.Name ?? string.Empty },
+                    ParamsLink = BuildParamOfMockTestType(mockTestResult, isSkillMockTest),
+                };
+                await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
+            }
+        }
+
+        private static List<object> BuildParamOfMockTestType(MockTestResult mockTestResult, bool isSkillMockTest)
+        {
+            var result = new List<object>();
+            string sectionGroupId = mockTestResult?.SectionGroupResults.Select(x => x.SectionGroupId).Single().ToString() ?? string.Empty;
+            string mockTestResulId = mockTestResult?.Id.ToString() ?? string.Empty;
+            string mockTestId = mockTestResult?.MockTest?.Id.ToString() ?? string.Empty;
+            string courseId = mockTestResult?.CourseId.ToString() ?? string.Empty;
+            string unitId = mockTestResult?.UnitId.ToString() ?? string.Empty;
+
+            if (isSkillMockTest)
+            {
+                result.AddRange(new object[] {
+                        sectionGroupId,
+                        mockTestResulId,
+                        courseId,
+                        unitId
+                });
+            }
+            {
+                result.AddRange(new object[] {
+                        mockTestId,
+                        courseId
+                });
+            }
+
+            return result;
         }
     }
 }
