@@ -176,13 +176,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #endregion
 
             #region ClassForum
-            var classForumResultCompetion = _classForumResultRepository.Queryable
-                .Include(x => x.ClassForum)
-                .Where(x => (x.Status == EnumClassForumResultStatus.Graded)
-                            && studentIds.Contains(x.StudentId)
-                            && x.ClassForum != null
-                            && EF.Functions.DataLength(x.WordContent) >= x.ClassForum.TaggetWordLimit);
-
             var classForumResultQuery = _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).Where(x => studentIds.Contains(x.StudentId) && x.ClassForum != null).Select(x =>
             new
             {
