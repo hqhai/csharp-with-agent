@@ -42,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IClassForumResultRepository _classForumResultRepository;
         private const int TotalProcess = 217; // tổng số tiến trình hiện có
         private const int TotalProcessIelsts = 106; // tổng số tiến trình hiện có của Ielts
+        private const int ClassForumDominator = 36;
 
         public GetStudentsProgressCoursesQueryHandler(ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, ITrainingService trainingService, IVideoResultRepository videoResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IFinalTestResultRepository finalTestResultRepository, IClassForumResultRepository classForumResultRepository)
         {
@@ -177,24 +178,33 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             #region ClassForum
             var classForumResultCompetion = _classForumResultRepository.Queryable
                 .Include(x => x.ClassForum)
-                .Where(x => (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded)
+                .Where(x => (x.Status == EnumClassForumResultStatus.Graded)
                             && studentIds.Contains(x.StudentId)
                             && x.ClassForum != null
                             && EF.Functions.DataLength(x.WordContent) >= x.ClassForum.TaggetWordLimit);
-            int countClassForumDistinct = classForumResultCompetion.Select(x => x.StudentId).Distinct().Count();
 
-            var classForumnResultGroupByStudentId = classForumResultCompetion
-                .GroupBy(vr => vr.StudentId)
-                .Select(group =>
-                 new StudentCompetitionAverageScore
-                 {
-                     StudentId = group.Key,
-                     LearnRatio = countClassForumDistinct == 0 ? 0 : classForumRatio / group.Count(),
-                     TotalRecords = group.Count(),
-                     AverageScoreByType = group.Count(),
-                     LearnType = EnumLearnType.ClassForum
-                 }).ToList();
-            ;
+            var classForumResultQuery = _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).Where(x => studentIds.Contains(x.StudentId) && x.ClassForum != null).Select(x =>
+            new
+            {
+                ClassForumScores = x.ClassForumScores,
+                StudentId = x.StudentId,
+            }
+           ).ToList();
+
+            int countClassForumDistinct = classForumResultQuery.Select(x => x.StudentId).Count();
+
+            var classForumResults = classForumResultQuery
+                     .GroupBy(x => x.StudentId) // Nhóm theo StudentId
+                     .Select(group =>
+                         new StudentCompetitionAverageScore
+                         {
+                             StudentId = group.Key,
+                             LearnRatio = countClassForumDistinct == 0 ? 0 : classForumRatio / group.Count(),
+                             TotalRecords = group.Count(),
+                             AverageScoreByType = group.Sum(x => x.ClassForumScores.Sum(score => score.Score) / ClassForumDominator),
+                             LearnType = EnumLearnType.ClassForum
+                         })
+                     .ToList();
 
 
             #endregion
@@ -207,7 +217,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     videoResults,
                     skillTestGroupByStudentId,
                     unitTestGroupByStudentId,
-                    classForumnResultGroupByStudentId,
+                    classForumResults,
                     finalResults,
                     homeWorkResults
                 };
@@ -270,12 +280,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 foreach (var item in listStr)
                 {
                     var tempList = ConvertHelper.Deserialize<IList<VideoSkillScores>>(item);
-                    if (tempList != null && tempList.Any(x => x.Type == timCodeType))
+                    if (tempList != null && tempList.Any(x => x.Type == timCodeType && x.SkillScores!.Count > 0))
                     {
                         countComfortableType += 1;
                     }
-
-
                 }
             }
             return countComfortableType;
@@ -289,12 +297,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 foreach (var item in listStr)
                 {
                     var tempList = ConvertHelper.Deserialize<IList<VideoSkillScores>>(item);
-                    if (tempList != null && tempList.Any(x => x.Type == timCodeType))
+                    if (tempList != null && tempList.Any(x => x.Type == timCodeType && x.SkillScores!.Count > 0))
                     {
                         quantity += 1;
                     }
-
-
                 }
             }
 
