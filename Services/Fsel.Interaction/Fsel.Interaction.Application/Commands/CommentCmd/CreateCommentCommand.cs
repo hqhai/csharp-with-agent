@@ -118,8 +118,20 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             IncludePaths = new List<string> { "LessonResult" }
                         });
                         var classForumResult = classForumResultResult.Content?.Result;
+                        if (classForumResult == null)
+                        {
+                            break;
+                        }
 
-                        paramLinksValue = new List<object> { classForumResult?.UnitId ?? default, classForumResult?.CourseId ?? default, request.ObjectId, comment.Id };
+                        var lesson = await _courseService.GetLessonResult(classForumResult.LessonResultId ?? default);
+
+                        paramLinksValue = new List<object>
+                                     {
+                                        lesson?.Content?.Result?.Id ?? default,
+                                        classForumResult?.CourseId ?? default,
+                                        classForumResult?.UnitId ?? default,
+                                        classForumResult?.Id ?? default,
+                                     };
 
                         model = new NotificationSendingQueueModel()
                         {
@@ -149,7 +161,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         var commentOwner = await _commentRepository.GetByIdAsync(request.ObjectId).ConfigureAwait(false);
 
                         //Không thông báo khi trả lời bình luận của chính mình
-                        if (commentOwner == null && commentOwner?.CreatedUserId == _authContext.CurrentUserId)
+                        if (commentOwner == null || commentOwner?.CreatedUserId == _authContext.CurrentUserId)
                         {
                             break;
                         }
@@ -169,13 +181,19 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         });
                         var classForumResultOfCommentOwner = classForumResultOfCommentOwnerResult.Content?.Result;
 
+                        if (classForumResultOfCommentOwner == null)
+                        {
+                            break;
+                        }
+
+                        var lessonOfCommentOwner = await _courseService.GetLessonResult(classForumResultOfCommentOwner.LessonResultId ?? default);
+
                         paramLinksValue = new List<object>
                                     {
-                                        classForumResultOfCommentOwner?.UnitId ?? default,
+                                        lessonOfCommentOwner?.Content?.Result?.Id ?? default,
                                         classForumResultOfCommentOwner?.CourseId ?? default,
-                                        commentOwner?.ObjectId ?? default,
-                                        request.ObjectId,
-                                        comment.Id
+                                        classForumResultOfCommentOwner?.UnitId ?? default,
+                                        classForumResultOfCommentOwner?.Id ?? default,
                                     };
 
                         model = new NotificationSendingQueueModel()
