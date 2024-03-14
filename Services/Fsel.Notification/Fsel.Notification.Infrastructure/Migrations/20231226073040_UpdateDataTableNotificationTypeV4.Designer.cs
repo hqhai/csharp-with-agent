@@ -4,6 +4,7 @@ using Fsel.Notification.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    partial class NotificationsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20231226073040_UpdateDataTableNotificationTypeV4")]
+    partial class UpdateDataTableNotificationTypeV4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,7 +267,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("e89b5850-33ff-4922-89e1-1a2f7de29375"),
+                            Id = new Guid("d789788a-1ba6-405b-f280-ae92cd3b4fc2"),
                             Content = "CreateClassForumResult",
                             CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -300,7 +303,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
                             TemplateMessage = "{0} vừa bình luận bài viết của bạn.",
                             Type = "LinkComment"
                         },
@@ -314,13 +317,13 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={1}&commentId={2}&repCommentId={3}",
                             TemplateMessage = "{0} vừa trả lời bình luận của bạn.",
                             Type = "LinkComment"
                         },
                         new
                         {
-                            Id = new Guid("cd8a1edb-029f-4b2d-9725-c796e6fd7e5b"),
+                            Id = new Guid("a805f268-467b-4149-8d01-b2ea05e1f3bd"),
                             Content = "OrderChangeStatus",
                             CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -334,7 +337,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("3881403a-d412-4593-aee5-5a38f4e078f9"),
+                            Id = new Guid("86c0df96-f131-42bf-b315-0a8a85584f6a"),
                             Content = "OrderCreate",
                             CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -348,7 +351,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("27007edb-25d8-493e-84d8-85f6f9e165b2"),
+                            Id = new Guid("96c0df96-f131-42bf-b315-0a8a85524f6f"),
                             Content = "DeleteComment",
                             CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -356,13 +359,13 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum-comment&resultId={3}",
-                            TemplateMessage = "Bình luận của bạn trong bài viết của {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL.",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
+                            TemplateMessage = "Bình luận của bạn đã vi phạm Tiêu chuẩn cộng đồng của FSEL và đã bị xóa",
                             Type = "LinkComment"
                         },
                         new
                         {
-                            Id = new Guid("57c709a6-03bd-4a3f-ad34-f9449587e1df"),
+                            Id = new Guid("17c0df26-f131-42bf-b315-0a8a85524f6f"),
                             Content = "DeleteClassForumResult",
                             CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -370,8 +373,8 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-                            TemplateMessage = "Bài viết của bạn trong {0} đã bị gỡ do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
+                            TemplateMessage = "Bài viết của bạn đã vi phạm Tiêu chuẩn cộng đồng của FSEL và đã bị xóa",
                             Type = "LinkPage"
                         },
                         new
@@ -384,13 +387,13 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-                            TemplateMessage = "{0} đã thích bài viết của bạn.",
+                            TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}",
+                            TemplateMessage = "{0} vừa thích bài viết của bạn.",
                             Type = "LinkPage"
                         },
                         new
                         {
-                            Id = new Guid("3ad02de7-a8a8-4db6-8286-486c81390ed3"),
+                            Id = new Guid("810c70ca-4f3c-20d4-a491-708fa45d42ea"),
                             Content = "LikeComment",
                             CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -399,7 +402,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "/learn/{0}?courseId={1}&unitId={0}&type=classForum&classForumResultId={2}&commentId={3}",
-                            TemplateMessage = "{0} đã thích bình luận của bạn.",
+                            TemplateMessage = "{0} vừa thích bình luận của bạn.",
                             Type = "LinkComment"
                         },
                         new
@@ -412,162 +415,8 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}?type=aiFeedback",
+                            TemplateLink = "",
                             TemplateMessage = "Bài viết của bạn đã được hệ thống AI ChatGPT nhận xét. Nhấn để xem chi tiết",
-                            Type = "LinkPage"
-                        },
-                        new
-                        {
-                            Id = new Guid("4b5173d1-3d0b-4df6-b3ca-15cd175926a1"),
-                            Content = "ChangeClassLiveTeacher",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "",
-                            TemplateMessage = "Buổi {0} diễn ra vào ngày {1} đã thay đổi giáo viên",
-                            Type = "LinkPopup"
-                        },
-                        new
-                        {
-                            Id = new Guid("85062a12-ab5b-486c-a8ab-db329ea7f46d"),
-                            Content = "MockTest",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "/learn/mock-test-report?sectionGroupId={0}&mockTestResultId={1}&courseId={2}&unitId={3}",
-                            TemplateMessage = "Bài {0} đã được giáo viên chấm điểm. Nhấn để xem chi tiết",
-                            Type = "LinkPage"
-                        },
-                        new
-                        {
-                            Id = new Guid("46526095-5284-46f0-8c86-e00d95f1c985"),
-                            Content = "FullMockTest",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "/learn/full-mock-test/{0}?courseId={1}",
-                            TemplateMessage = "Bài {0} đã được giáo viên chấm điểm. Nhấn để xem chi tiết",
-                            Type = "LinkPage"
-                        },
-                        new
-                        {
-                            Id = new Guid("1a7f9999-79e2-4eb1-85a8-cc8d1398f732"),
-                            Content = "ReviewFsel",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "/review",
-                            TemplateMessage = "Hãy chia sẻ cảm nhận của bạn về LMS!",
-                            Type = "LinkPage"
-                        },
-                        new
-                        {
-                            Id = new Guid("59bc5071-1ef7-4362-9bb0-8848bb6f8ced"),
-                            Content = "DiscussionBoardInActive",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "",
-                            TemplateMessage = "Bay! Bay cao! Bay xa! Hãy cùng khám phá với các bạn trên khắp thế giới qua Diễn đàn chung nào!",
-                            Type = "LinkPage"
-                        },
-                        new
-                        {
-                            Id = new Guid("9da28757-2d28-40cb-b88c-cc51fc15bb43"),
-                            Content = "LeaderBoard",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "/home",
-                            TemplateMessage = "Chúc mừng bạn đã đạt top {0} trên Bảng xếp hạng!",
-                            Type = "LinkPage"
-                        },
-                        new
-                        {
-                            Id = new Guid("69cc9e39-82d5-4d1a-81b9-8c97ec54bfad"),
-                            Content = "ApprovePostClassForum",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-                            TemplateMessage = "Bài đăng của bạn đã được phê duyệt. Nhấn để xem chi tiết",
-                            Type = "LinkPage"
-                        },
-                        new
-                        {
-                            Id = new Guid("75540141-a6d9-409d-a3ce-90c9a7577e8a"),
-                            Content = "RejectApprovalPostClassForum",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "/learn/lesson/{0}?courseId={1}&unitId={2}&type=class-forum",
-                            TemplateMessage = "Bài viết của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL. Vui lòng thử lại!",
-                            Type = "LinkPage"
-                        },
-                        new
-                        {
-                            Id = new Guid("05441907-46a9-4178-9a69-fce295d670be"),
-                            Content = "NoticePayment",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "/pricing-plan",
-                            TemplateMessage = "Thời gian học thử của bạn sẽ kết thúc trong vòng 2 ngày tới. Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
-                            Type = "LinkPage"
-                        },
-                        new
-                        {
-                            Id = new Guid("f9d5a75f-fd55-4b1e-ade8-a446b6465e34"),
-                            Content = "NoticeExpireAfterTwoWeek",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "/pricing-plan",
-                            TemplateMessage = "Khóa học của bạn sẽ kết thúc trong 2 tuần tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
-                            Type = "LinkPage"
-                        },
-                        new
-                        {
-                            Id = new Guid("a99bfaae-4139-4766-9405-ef24332fb51a"),
-                            Content = "NoticeExpireAfterTwoDay",
-                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Icon = "",
-                            IsDeleted = false,
-                            Priority = 1,
-                            TemplateLink = "/pricing-plan",
-                            TemplateMessage = "Khóa học của bạn sẽ kết thúc trong 2 ngày tới.Bạn vui lòng gia hạn khóa học để đảm bảo tiếp tục hành trình học tập mà không bị gián đoạn nhé",
                             Type = "LinkPage"
                         });
                 });
