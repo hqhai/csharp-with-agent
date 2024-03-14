@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.InAppPurchase;
     using Fsel.Ordering.Application.Services.InAppPurchase.Models;
@@ -87,6 +88,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 aud = audience,
                 bid = bundleId
             };
+
+            _logger.LogError(payload.Serialize());
 
             string privateKey = File.ReadAllText(ResourceSettings.AppStore);
 
