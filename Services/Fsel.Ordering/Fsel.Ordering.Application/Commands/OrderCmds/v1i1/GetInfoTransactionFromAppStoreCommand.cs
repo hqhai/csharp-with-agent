@@ -100,6 +100,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             string token = JWT.Encode(payload, key, JwsAlgorithm.ES256, header);
 
             var signedTransactionInfoResult = await _appStoreService.GetInfoTransaction(token, request.TransactionId);
+
+            _logger.LogError(signedTransactionInfoResult.Headers.Serialize());
+            _logger.LogError(signedTransactionInfoResult.RequestMessage.Serialize());
+            _logger.LogError(signedTransactionInfoResult.ContentHeaders.Serialize());
+
             if (!signedTransactionInfoResult.IsSuccessStatusCode)
             {
                 _logger.LogError("Get info transaction not success");
