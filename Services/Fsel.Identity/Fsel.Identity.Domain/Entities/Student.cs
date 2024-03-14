@@ -38,6 +38,10 @@ namespace Fsel.Identity.Domain.Entities
             set { BeginnerGuideStr = ConvertHelper.Serialize(value); }
         }
 
+        public Guid? ProvinceId { get; set; }
+        public Guid? DistrictId { get; set; }
+        public Guid? SchoolId { get; set; }
+
         public Human? Human { get; set; }
 
         public Guid HumanId { get; set; }

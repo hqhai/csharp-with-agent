@@ -47,7 +47,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExchangeHistoryModel>();
 
-            var orderTransactions = await _orderTransactionRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.Status == EnumOrderTransactionStatus.Success && p.Type == EnumOrderTransactionType.UrBox).ToListAsync(cancellationToken);
+            var orderTransactions = await _orderTransactionRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.Status == EnumOrderTransactionStatus.Success && p.Type == EnumOrderTransactionType.UrBox).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
 
             var responses = orderTransactions.Select(p => p?.ResponseBody).Deserialize<List<RedemptionResponseModel>>();
 
@@ -111,6 +111,8 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                     BrandTitle = giftDetail?.Data?.BrandImage,
                     Delivery = item?.Delivery,
                     Offices = giftDetail?.Data?.Offices?.Select(p => p.Address).ToList(),
+                    Pin = gift.Pin,
+                    Serial = gift.Serial
                 };
                 if (item != null && GetStatusGift(item.DeliveryCode))
                 {

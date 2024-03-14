@@ -66,10 +66,8 @@ namespace Fsel.Course.Domain.Entities
             set { _percentUngraded = CorrectTotal + (CorrectTotalUngraded ?? default) > 0 ? NumberHelper.GetPercent(CorrectCount + (CorrectCountUngraded ?? default), CorrectTotal + (CorrectTotalUngraded ?? default)) : value; }
         }
 
-        public int? TokenDone { get; set; }
-        public int? TokenHighestStreak { get; set; }
-        public int? TokenSuperFire { get; set; }
-        public int? TokenQuestionReward { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }
 }

@@ -8,17 +8,17 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models.EntityModels;
-    using global::System;
     using global::System.Linq;
-    using global::System.Text.Json.Serialization;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Newtonsoft.Json;
 
     public class GetTokenConfigsQuery : IRequest<MethodResult<IList<TokenConfigModel>>>
     {
         public EnumTokenFeature Feature { get; set; }
+        public EnumCourseType CourseType { get; set; }
+
         public string? Missions { get; set; }
 
         [JsonIgnore]
@@ -41,12 +41,11 @@ namespace Fsel.System.Application.Queries.TokenConfigQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<TokenConfigModel>>();
-            var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => x.Feature == request.Feature && request.ListMissions != null && request.ListMissions.Contains(x.Mission)).ToListAsync(cancellationToken);
-            if (tokenConfigs == null || !tokenConfigs.Any())
+            if (request.ListMissions != null)
             {
-                return methodResult;
+                var tokenConfigs = await _tokenConfigRepository.Queryable.Where(x => x.Feature == request.Feature && request.ListMissions.Contains(x.Mission) && x.CourseType == request.CourseType).ToListAsync(cancellationToken);
+                methodResult.Result = _mapper.Map<IList<TokenConfigModel>>(tokenConfigs);
             }
-            methodResult.Result = _mapper.Map<IList<TokenConfigModel>>(tokenConfigs);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -13,5 +13,7 @@ namespace Fsel.Identity.Domain.Entities
         public double TargetTime { get; set; }
 
         public bool IsEstablished { get; set; }
+
+        public bool IsReceivedToken { get; set; }
     }
 }

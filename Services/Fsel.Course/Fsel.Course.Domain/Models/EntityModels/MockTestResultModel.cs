@@ -21,5 +21,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? UnitDisplayOrder { get; set; }
         public string? CourseCode { get; set; }
         public double? ProgressPercent { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
     }
 }

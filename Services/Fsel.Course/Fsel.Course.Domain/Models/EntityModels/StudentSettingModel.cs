@@ -15,6 +15,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsLockPT { get; set; }
         public EnumTrialRegistrationStatus? Status { get; set; }
         public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
-
+        public double NumberOfToken { get; set; }
     }
 }

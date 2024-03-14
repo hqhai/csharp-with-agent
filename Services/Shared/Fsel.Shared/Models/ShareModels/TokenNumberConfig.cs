@@ -3,29 +3,34 @@
 namespace Fsel.Shared.Models.ShareModels
 {
     using System;
-    using System.Collections.Generic;
 
-    public class TokenNumber
+    public class TokenCoinConfigs
     {
-        public int? Number { get; set; }
+        public long BaseValue { get; set; }
+        public long TotalActions { get; set; }
     }
 
-    public class TokenFocusTime
+    public class TokenConfigs : TokenCoinConfigs
     {
-        public IList<FocusTimeNumber>? FocusTimes { get; set; }
+        public string? Description { get; set; }
+
+        public long TotalCoinValue
+        {
+            get
+            {
+                return BaseValue * TotalActions;
+            }
+        }
     }
 
-    public class FocusTimeNumber : TokenNumber
+    public class TokenConfigFocusModes : TokenConfigs
     {
         public Guid FocusTimeId { get; set; }
+        public double TargetTime { get; set; }
+        public int DisplayOrder { get; set; }
     }
 
-    public class TokenDailyCheckIn
-    {
-        public IList<DailyCheckInNumber>? DailyCheckIns { get; set; }
-    }
-
-    public class DailyCheckInNumber : TokenNumber
+    public class TokenConfigDailyCheckIns : TokenConfigs
     {
         public int Level { get; set; }
     }

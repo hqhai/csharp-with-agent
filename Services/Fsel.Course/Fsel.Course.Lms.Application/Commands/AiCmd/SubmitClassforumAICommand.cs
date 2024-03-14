@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly IMediator _mediator;
+
         public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator)
         {
             _classForumResultRepository = classForumResultRepository;
@@ -44,7 +45,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 UserAIConfig = userAiConfig,
             }, cancellationToken).ConfigureAwait(false);
 
-
             if (classForumResult != null)
             {
                 if (request.IsRetry != null && (bool)request.IsRetry)
@@ -54,7 +54,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 else
                 {
                     classForumResult.GradingAlFeedback = aIResponse;
-
                 }
 
                 _classForumResultRepository.Update(classForumResult);

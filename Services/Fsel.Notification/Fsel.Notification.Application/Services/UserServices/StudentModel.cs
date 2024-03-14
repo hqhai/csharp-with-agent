@@ -18,6 +18,9 @@ namespace Fsel.Notification.Application.Services.UserServices
 
         public Guid? ClassId { get; set; }
 
+        public Guid? ProvinceId { get; set; }
+        public Guid? DistrictId { get; set; }
+        public Guid? SchoolId { get; set; }
         public HumanModel? Human { get; set; }
     }
 }

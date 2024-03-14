@@ -6,6 +6,6 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
 
     public interface INotificationProcessor
     {
-        void Process(AppleNotification notification);
+        Task<bool> Process(AppleNotification notification);
     }
 }

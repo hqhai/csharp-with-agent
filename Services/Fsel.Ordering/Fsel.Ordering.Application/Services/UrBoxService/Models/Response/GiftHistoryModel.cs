@@ -17,6 +17,8 @@ namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Response
         public string? BrandTitle { get; set; }
         public string? BrandImage { get; set; }
         public string? Delivery { get; set; }
+        public string? Pin { get; set; }
+        public string? Serial { get; set; }
         public IList<string?>? Offices { get; set; }
     }
 }

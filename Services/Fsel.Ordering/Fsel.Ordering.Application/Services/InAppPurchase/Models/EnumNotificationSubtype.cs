@@ -4,7 +4,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 {
     using System.Runtime.Serialization;
 
-    public enum NotificationSubtype
+    public enum EnumNotificationSubtype
     {
         [EnumMember(Value = "INITIAL_BUY")] INITIAL_BUY,
 
@@ -31,5 +31,13 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
         [EnumMember(Value = "PENDING")] PENDING,
 
         [EnumMember(Value = "ACCEPTED")] ACCEPTED,
+
+        [EnumMember(Value = "FAILURE")] FAILURE,
+
+        [EnumMember(Value = "PRODUCT_NOT_FOR_SALE")] PRODUCT_NOT_FOR_SALE,
+
+        [EnumMember(Value = "SUMMARY")] SUMMARY,
+
+        [EnumMember(Value = "UNREPORTED")] UNREPORTED,
     }
 }

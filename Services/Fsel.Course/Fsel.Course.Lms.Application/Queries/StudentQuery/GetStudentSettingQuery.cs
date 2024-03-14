@@ -9,10 +9,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.OrderServices;
-    using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -60,6 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 
             if (student != null)
             {
+                settingStudentModel.NumberOfToken = student.NumberOfToken;
                 var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                                .ToListAsync(cancellationToken);
                 var placementTestResult = placementTestResults.OrderByDescending(x => x.CreatedDate).FirstOrDefault();

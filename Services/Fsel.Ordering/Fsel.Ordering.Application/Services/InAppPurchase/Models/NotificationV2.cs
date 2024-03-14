@@ -7,16 +7,19 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
     public class NotificationV2
     {
         [JsonProperty("notificationType")]
-        public NotificationType NotificationType { get; set; }
+        public EnumNotificationType NotificationType { get; set; }
 
         [JsonProperty("subtype")]
-        public NotificationSubtype Subtype { get; set; }
+        public EnumNotificationSubtype Subtype { get; set; }
 
         [JsonProperty("notificationUUID")]
         public string? NotificationUUID { get; set; }
 
         [JsonProperty("notificationVersion")]
         public string? NotificationVersion { get; set; }
+
+        [JsonProperty("signedDate")]
+        public string? SignedDate { get; set; }
 
         [JsonProperty("data")]
         public NotificationV2Data? Data { get; set; }

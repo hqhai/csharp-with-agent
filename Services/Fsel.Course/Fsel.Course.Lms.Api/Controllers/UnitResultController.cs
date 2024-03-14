@@ -3,18 +3,18 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.UnitResultCmd;
     using Fsel.Course.Lms.Application.Queries.StudentQuery;
     using Fsel.Course.Lms.Application.Queries.UnitQuery;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Course.Lms.Application.Commands.UnitResultCmd;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -68,12 +68,12 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpPut("open-next-unit")]
+        [HttpPut("open-next-unit/{userId}")]
         [ProducesResponseType(typeof(MethodResult<StudentCourseUnitModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> OpenNextUnitForTrial()
+        public async Task<IActionResult> OpenNextUnitForTrial([FromRoute] Guid userId)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(new OpenNextUnitForExtendCmd()).ConfigureAwait(false);
+            MethodResult<bool> queryResult = await _mediator.Send(new OpenNextUnitForExtendCmd { UserId = userId}).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
