@@ -20,7 +20,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             _classForumRepository = classForumRepository;
         }
 
-        public async Task<Lesson?> GetIncludeByIdNoTrackingAsync(Guid id, int? siteId = null)
+        public async Task<Lesson?> GetIncludeByIdNoTrackingAsync(Guid id)
         {
             try
             {
@@ -87,7 +87,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
         }
 
-        public override async Task<Lesson?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<Lesson?> GetIncludeByIdAsync(Guid id)
         {
             try
             {

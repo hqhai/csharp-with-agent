@@ -18,6 +18,9 @@ namespace Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models
 
         public Guid? ClassId { get; set; }
         public long NumberOfToken { get; set; }
+        public Guid? ProvinceId { get; set; }
+        public Guid? DistrictId { get; set; }
+        public Guid? SchoolId { get; set; }
         public HumanProfileModel? Human { get; set; }
     }
 }

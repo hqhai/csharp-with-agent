@@ -354,7 +354,7 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     // - Vị trí thứ 13 bắt buộc là của Final nếu ko phải là Final thì báo lỗi
                     // - Final ở các vị trí khác thì báo lỗi
-                    if (request.CourseUnitMockTests.Any(i => (i.DisplayOrder != 12) && i.FinalTestId != null))
+                    if (request.CourseUnitMockTests.Any(i => i.DisplayOrder != 13 && i.FinalTestId.HasValue))
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIdMustBeAtTheEnd), nameof(finalTestIds));
                         return methodResult;

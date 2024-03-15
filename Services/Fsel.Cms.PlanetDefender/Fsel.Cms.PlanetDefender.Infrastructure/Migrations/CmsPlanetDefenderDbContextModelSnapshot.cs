@@ -913,9 +913,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("StudentTagNameId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("TagNameId")
                         .HasColumnType("uniqueidentifier");
 
@@ -936,7 +933,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 
                     b.HasIndex("AvatarImageId");
 
-                    b.HasIndex("StudentTagNameId");
+                    b.HasIndex("TagNameId");
 
                     b.ToTable("StudentGameInfos");
                 });
@@ -1574,8 +1571,10 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Fsel.Cms.PlanetDefender.Domain.Entities.StudentTagName", "StudentTagName")
-                        .WithMany()
-                        .HasForeignKey("StudentTagNameId");
+                        .WithMany("StudentGameInfos")
+                        .HasForeignKey("TagNameId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("AvatarImage");
 
@@ -1637,6 +1636,11 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Navigation("StudentCharacters");
 
                     b.Navigation("StudentSpaceShips");
+                });
+
+            modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.StudentTagName", b =>
+                {
+                    b.Navigation("StudentGameInfos");
                 });
 
             modelBuilder.Entity("Fsel.Cms.PlanetDefender.Domain.Entities.ZMatter", b =>

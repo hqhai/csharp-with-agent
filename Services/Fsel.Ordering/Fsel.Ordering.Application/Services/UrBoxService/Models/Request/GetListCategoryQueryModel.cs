@@ -13,5 +13,8 @@ namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Request
 
         [AliasAs("parent_id")]
         public int? ParentId { get; set; }
+
+        [AliasAs("lang")]
+        public string? Language { get; set; }
     }
 }

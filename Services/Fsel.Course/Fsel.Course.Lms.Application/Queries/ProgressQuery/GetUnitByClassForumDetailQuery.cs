@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
-            var classForumScores = classForum.ClassForumResults.FirstOrDefault()?.ClassForumScores.ToList();
+            var classForumScores = classForum.ClassForumResults.FirstOrDefault()?.ClassForumScores.OrderBy(x => x.Criteria).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumScores ?? default);
             return methodResult;

@@ -16,6 +16,9 @@ namespace Fsel.Course.Application.Services.UserServices.Models
         public EnumCourseLevel CourseLevel { get; set; }
 
         public Guid? ClassId { get; set; }
+        public Guid? ProvinceId { get; set; }
+        public Guid? DistrictId { get; set; }
+        public Guid? SchoolId { get; set; }
 
         public HumanModel? Human { get; set; }
     }

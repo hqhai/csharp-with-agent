@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -22,7 +23,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     {
         private readonly IMockTestRepository _mockTestRepository;
 
-        public MockTestResultInputThenUpdateUnitResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, ITrainingService trainingService, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IMockTestRepository mockTestRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, trainingService, questBoardPublisher, lessonResultRepository)
+        public MockTestResultInputThenUpdateUnitResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, ITrainingService trainingService, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IMockTestRepository mockTestRepository, IOrderService orderService) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, trainingService, questBoardPublisher, lessonResultRepository, orderService)
         {
             _mockTestRepository = mockTestRepository;
         }
@@ -31,7 +32,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var mockTestResult = notification.Data;
-            var mockTest = await _mockTestRepository.Queryable.Where(x => x.Id == mockTestResult.MockTestId).FirstOrDefaultAsync(cancellationToken);
+            var mockTest = await _mockTestRepository.GetByIdAsync(mockTestResult.MockTestId);
 
             if (mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && mockTestResult.Status == EnumResultStatus.Done)
             {

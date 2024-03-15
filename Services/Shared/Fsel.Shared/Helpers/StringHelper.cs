@@ -9,6 +9,20 @@ namespace Fsel.Shared.Helpers
 
     public static class StringHelper
     {
+        public static string RemoveWhitespace(string input)
+        {
+            StringBuilder sb = new StringBuilder();
+            using (StringReader sr = new StringReader(input))
+            {
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    sb.Append(line.Trim());
+                }
+            }
+            return sb.ToString();
+        }
+
         public static string RemoveHTMLTags(string html)
         {
             return Regex.Replace(html, "<.*?>", string.Empty);
@@ -175,6 +189,11 @@ namespace Fsel.Shared.Helpers
             }
             var words = input.Trim().Split(new[] { " ", "\n", "\r", Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrEmpty(x));
             return words.Count();
+        }
+
+        public static string ReplaceWord(this string? word)
+        {
+            return word?.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').Replace('‘', '\'').ToString() ?? string.Empty;
         }
     }
 }

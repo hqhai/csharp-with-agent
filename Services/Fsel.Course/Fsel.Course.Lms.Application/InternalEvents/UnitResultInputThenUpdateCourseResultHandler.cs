@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
@@ -15,7 +16,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     public class UnitResultInputThenUpdateCourseResultHandler : BaseInternalEventHandler,
         INotificationHandler<EntityChangedEvent<UnitResult>>
     {
-        public UnitResultInputThenUpdateCourseResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
+        public UnitResultInputThenUpdateCourseResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService)
         {
         }
 
@@ -23,7 +24,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var unitResult = notification.Data;
-            await UpdateCourse(unitResult.CourseId, unitResult.StudentId, cancellationToken).ConfigureAwait(false);
+            await UpdateCourse(unitResult.Course, unitResult.StudentId, cancellationToken);
+            Thread.Sleep(2000);
             if (unitResult.Status == EnumResultStatus.Done)
             {
                 await UpdateProcessUnit(unitResult, cancellationToken);

@@ -2,9 +2,9 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using System.Text;
     using Fsel.Common.Helpers;
     using OtpNet;
-    using System.Text;
 
     public static class NumberHelper
     {
