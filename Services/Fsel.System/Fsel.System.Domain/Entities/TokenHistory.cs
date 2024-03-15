@@ -29,7 +29,7 @@ namespace Fsel.System.Domain.Entities
         {
             get
             {
-                _volatileToken = InitialToken + RemainToken;
+                _volatileToken = InitialToken + (Type == EnumTokenHistoryType.Recevived ? -RemainToken : RemainToken);
                 return _volatileToken;
             }
             set { _volatileToken = value; }
