@@ -102,7 +102,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             if (!signedTransactionInfoResult.IsSuccessStatusCode)
             {
                 _logger.LogError("Get info transaction not success");
-                methodResult.AddError(signedTransactionInfoResult.Error);
+                methodResult.AddErrorBadRequest(signedTransactionInfoResult.Error.Serialize());
+                methodResult.StatusCode = (int)signedTransactionInfoResult.StatusCode;
                 return methodResult;
             }
 
