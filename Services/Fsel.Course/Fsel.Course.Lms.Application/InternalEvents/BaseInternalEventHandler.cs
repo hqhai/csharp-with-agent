@@ -70,8 +70,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IFinalTestResultRepository finalTestResultRepository,
             IMockTestResultRepository mockTestResultRepository,
             IHomeWorkResultRepository homeWorkResultRepository,
-
-            QuestBoardPublisher questBoardPublisher, IOrderService orderService)
+            QuestBoardPublisher questBoardPublisher,
+            IOrderService orderService
+            )
         {
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -378,13 +379,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 case var value when value == (courseUnitMockTest.UnitId == null):
                     var unitResultNext = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == courseUnitMockTest.UnitId, cancellationToken);
-                    var studentTrialRegistration = await _orderService.GetCurrentStatusAsync();
-                    var currentAccountStatus = studentTrialRegistration?.Content?.Result ?? default;
-
                     if (unitResultNext == null)
                     {
                         break;
                     }
+                    var currentStatusResult = await _orderService.GetCurrentStatusAsync(unitResultNext.CreatedUserId);
+                    var currentAccountStatus = currentStatusResult?.Content?.Result ?? default;
                     await UpdateStudentTrialRegistration(currentAccountStatus, unitResultNext.CreatedUserId);
                     if (unitResultNext.Status == EnumResultStatus.Unfinished && currentAccountStatus == EnumTrialRegistrationStatus.Payment)
                     {
