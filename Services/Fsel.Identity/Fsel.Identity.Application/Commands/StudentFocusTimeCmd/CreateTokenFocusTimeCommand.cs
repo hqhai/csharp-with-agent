@@ -144,7 +144,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                                 UserId = student.Human?.UserId ?? default,
                             }
                         }, cancellationToken).ConfigureAwait(false);
-
                         studentFocusTime.IsReceivedToken = true;
                     }
                 }
