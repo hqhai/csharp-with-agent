@@ -13,6 +13,7 @@ namespace Fsel.Shared.Constants
 
         public const int DelayOneMinute = 1;
         public const int DelayWorkerSecond = 60;
+        public const int AmountTrialDays = 14;
 
         public static class AcademicStudentResultRatio
         {

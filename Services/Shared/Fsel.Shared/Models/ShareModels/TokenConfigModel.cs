@@ -6,12 +6,10 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class TokenConfigModel
     {
+        public Guid Id { get; set; }
         public EnumTokenFeature Feature { get; set; }
-
         public EnumTokenMission Mission { get; set; }
-
+        public EnumCourseType? CourseType { get; set; }
         public object? Config { get; set; }
-
-        public object? SuperConfig { get; set; }
     }
 }

@@ -10,22 +10,22 @@ namespace Fsel.Training.Application.Services.CourseServices
 
     public interface ICourseService
     {
-        [Get("/cso/course/{id}")]
+        [Get("/v1/cso/course/{id}")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByIdAsync([FromRoute] Guid id);
 
-        [Get("/cso/course/get-course-by-level")]
+        [Get("/v1/cso/course/get-course-by-level")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByLevelAsync([FromQuery] EnumCourseLevel? courseLevel);
 
-        [Post("/placement-test/admin")]
+        [Post("/v1/placement-test/admin")]
         Task<IApiResponse<MethodResult<List<AveragePTPointModel>>>> GetAveragePTPoint([FromBody] GetAveragePTPointByIdsQueryModel model);
 
-        [Get("/teacher/course/get-course-by-ids")]
+        [Get("/v1/teacher/course/get-course-by-ids")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCourseByIdsFromTeacherAsync([Query] IList<Guid> ids);
 
-        [Get("/teacher/course/get-course-by-level")]
+        [Get("/v1/teacher/course/get-course-by-level")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByLevelFromTeacherAsync([FromQuery] EnumCourseLevel? courseLevel);
 
-        [Post("/admin/course")]
+        [Post("/v1/admin/course")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetListCourseByIds([FromBody] IList<Guid> courseIds);
     }
 }

@@ -12,10 +12,10 @@ namespace Fsel.Interaction.Application.Services.SystemService
 
     public interface ISystemService
     {
-        [Get("/forbidden-word/get-list-forbidden-word")]
+        [Get("/v1/forbidden-word/get-list-forbidden-word")]
         Task<IApiResponse<MethodResult<IList<String>>>> CheckContainForbiddenWord([FromQuery] String Word);
 
-        [Get("/token-config/get-token")]
+        [Get("/v1/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
     }
 }

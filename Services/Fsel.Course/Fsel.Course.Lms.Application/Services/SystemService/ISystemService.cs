@@ -12,38 +12,37 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
     public interface ISystemService
     {
-        [Post("/course-time-config/execute-list-query")]
+        [Post("/v1/course-time-config/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<CourseTimeConfigModel>>>> CourseTimeConfigQueryAsync([Body] BaseQueryModel query);
 
-        [Get("/course-time-config")]
+        [Get("/v1/course-time-config")]
         Task<IApiResponse<MethodResult<PagingItemsModel<CourseTimeConfigModel>>>> GetCourseTimeConfigAsync();
 
-        [Get("/log-action/{userId}")]
+        [Get("/v1/log-action/{userId}")]
         Task<IApiResponse<MethodResult<LogActionDaysModel>>> GetLogActionsByUserId([FromRoute] Guid userId);
 
-        [Post("/log-action")]
+        [Post("/v1/log-action")]
         Task<IApiResponse<MethodResult<IList<LogActionDaysModel>>>> GetLogActionsByUserIdsAsync([FromBody] IList<Guid> ids);
 
-        [Post("/feature-access-time/gets")]
+        [Post("/v1/feature-access-time/gets")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimesAsync([FromBody] FeatureAccessTimesQueryModel query);
 
-        [Get("/feature-access-time/get-detail")]
+        [Get("/v1/feature-access-time/get-detail")]
         Task<IApiResponse<MethodResult<FeatureAccessTimeModel>>> GetFeatureAccessTimeAsync([FromQuery] FeatureAccessTimeQueryModel query);
 
-        [Get("/forbidden-word/get-list-forbidden-word")]
+        [Get("/v1/forbidden-word/get-list-forbidden-word")]
         Task<IApiResponse<MethodResult<IList<string>>>> CheckContainForbiddenWord([FromQuery] string Word);
 
-
-        [Get("/token-config/get-token")]
+        [Get("/v1/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
 
-        [Get("/token-config/get-tokens")]
+        [Get("/v1/token-config/get-tokens")]
         Task<IApiResponse<MethodResult<IList<TokenConfigModel>>>> GetTokenConfigsAsync([Query] GetTokenConfigsQueryModel query);
 
-        [Get("/feature-access-time/get-feature-access-time-business")]
+        [Get("/v1/feature-access-time/get-feature-access-time-business")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeBusinessModel>>>> GetFeatureAccessTimeBusiness([FromQuery] GetFeatureAccessTimeBusinessQueryModel model);
 
-        [Get("/feature-access-time/execute-list-query")]
+        [Get("/v1/feature-access-time/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetListFeatureAccessTime([FromQuery] BaseQueryModel model);
     }
 }

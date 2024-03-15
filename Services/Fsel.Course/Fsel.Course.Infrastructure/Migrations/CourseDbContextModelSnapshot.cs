@@ -283,6 +283,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("TokenFirstTime")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TokenLastTime")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -1763,16 +1769,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TokenDone")
+                    b.Property<int?>("TokenFirstTime")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TokenHighestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenQuestionReward")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenSuperFire")
+                    b.Property<int?>("TokenLastTime")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -2163,6 +2163,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("TokenFirstTime")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TokenLastTime")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -3045,16 +3051,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TokenDone")
+                    b.Property<int?>("TokenFirstTime")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TokenHighestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenQuestionReward")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenSuperFire")
+                    b.Property<int?>("TokenLastTime")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("UnitId")
@@ -3923,6 +3923,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("TokenFirstTime")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TokenLastTime")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -4765,16 +4771,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TokenDone")
+                    b.Property<int?>("TokenFirstTime")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TokenHighestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenQuestionReward")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenSuperFire")
+                    b.Property<int?>("TokenLastTime")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -5052,16 +5052,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("TokenDone")
+                    b.Property<int?>("TokenFirstTime")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TokenHighestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenQuestionReward")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokenSuperFire")
+                    b.Property<int?>("TokenLastTime")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")

@@ -4,18 +4,12 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumTokenFeature
     {
-        FinalTest,
-        UnitTest,
-        SkillTest,
-        TimeCode,
+        Learn,
         FocusMode,
-        SkillMockTest,
-        FullMockTest,
         DailyCheckin,
-        QuestBoard,
-        Achievement,
-        ReviewSystem,
-        UpGradeCourse,
-        BuyNextCourse
+        Test,
+        FullMockTest,
+        SkillMockTest,
+        Achievement
     }
 }

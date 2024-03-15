@@ -12,6 +12,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Core.Base;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.InteractionService;
+    using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -29,13 +31,15 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+        private readonly IInteractionService _interactionService;
 
-        public GetClassForumResultQueryHandler(AuthContext authContext, IClassForumResultRepository classForumResultRepository, IMapper mapper, IUserService userService)
+        public GetClassForumResultQueryHandler(AuthContext authContext, IClassForumResultRepository classForumResultRepository, IMapper mapper, IUserService userService, IInteractionService interactionService)
         {
             _authContext = authContext;
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
             _userService = userService;
+            _interactionService = interactionService;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(GetClassForumResultQuery request, CancellationToken cancellationToken)
@@ -138,6 +142,21 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 }).ToList(),
                 PostArea = "L" + lesson?.DisplayOrder + "_" + "U" + unit?.Number + "_" + course?.Code
             };
+            var studentResult = await _userService.GetStudentByUserIdAsync(classForumResultModel.CreatedUserId);
+            var student = studentResult.Content?.Result;
+            classForumResultModel.CourseLevel = student!.CourseLevel;
+
+            List<Guid> classForumResultIds = new List<Guid>() { classForumResultModel.Id };
+            var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResultIds, UserId = _authContext.CurrentUserId });
+            var actions = actionsResult.Content?.Result;
+
+            if (actions != null)
+            {
+                var action = actions.FirstOrDefault(x => x.ObjectId == classForumResultModel.Id);
+                classForumResultModel.LikeNumber = action?.LikeNumber;
+                classForumResultModel.CommentNumber = action?.CommentNumber;
+                classForumResultModel.IsLiked = action?.IsLiked;
+            }
 
             methodResult.Result = classForumResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

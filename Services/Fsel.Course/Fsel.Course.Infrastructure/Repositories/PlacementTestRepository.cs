@@ -15,7 +15,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
-        public override async Task<PlacementTest?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<PlacementTest?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
