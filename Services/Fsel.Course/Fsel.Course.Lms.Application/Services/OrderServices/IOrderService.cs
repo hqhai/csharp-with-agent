@@ -16,8 +16,8 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
         [Get("/v1/order/get-status")]
         Task<IApiResponse<MethodResult<EnumOrderStatus?>>> GetStatusAsync([Query] GetStatusByUserCommandModel command);
 
-        [Get("/v1/order/get-current-status")]
-        Task<IApiResponse<MethodResult<EnumTrialRegistrationStatus?>>> GetCurrentStatusAsync();
+        [Get("/v1/order/get-current-status/{id}")]
+        Task<IApiResponse<MethodResult<EnumTrialRegistrationStatus?>>> GetCurrentStatusAsync([FromRoute] Guid id);
 
         [Post("/v1/order")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
