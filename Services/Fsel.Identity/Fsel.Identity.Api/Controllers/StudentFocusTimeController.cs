@@ -8,6 +8,7 @@ using Fsel.Identity.Application.Commands.StudentFocusTimeCmd;
 using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -57,6 +58,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         [HttpPost("receive-token")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<StudentFocusTimeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReceiveToken()
