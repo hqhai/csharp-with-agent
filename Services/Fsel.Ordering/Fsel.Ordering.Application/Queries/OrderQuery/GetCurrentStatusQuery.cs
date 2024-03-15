@@ -3,7 +3,6 @@
 namespace Fsel.Ordering.Application.Queries.OrderQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -11,17 +10,16 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
     public class GetCurrentStatusQuery : IRequest<MethodResult<EnumTrialRegistrationStatus?>>
     {
+        public Guid UserId { get; set; }
     }
 
     public class GetCurrentStatusQueryHandler : IRequestHandler<GetCurrentStatusQuery, MethodResult<EnumTrialRegistrationStatus?>>
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly AuthContext _authContext;
 
-        public GetCurrentStatusQueryHandler(IOrderRepository orderRepository, AuthContext authContext)
+        public GetCurrentStatusQueryHandler(IOrderRepository orderRepository)
         {
             _orderRepository = orderRepository;
-            _authContext = authContext;
         }
 
         public async Task<MethodResult<EnumTrialRegistrationStatus?>> Handle(GetCurrentStatusQuery request, CancellationToken cancellationToken)
@@ -30,7 +28,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             MethodResult<EnumTrialRegistrationStatus?> methodResult = new MethodResult<EnumTrialRegistrationStatus?>();
             var currentStatus = EnumTrialRegistrationStatus.New;
 
-            var query = _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => (x.UserId == _authContext.CurrentUserId));
+            var query = _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => (x.UserId == request.UserId));
 
             if (query == null)
             {

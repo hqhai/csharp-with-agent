@@ -60,6 +60,7 @@ ILmsCourseService courseService)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
+            bool allowOpenNextUnit = false;
 
             var order = await _orderRepository.Queryable.Include(ot => ot.OrderTransactions).FirstOrDefaultAsync(p => p.Id == request.OrderId, cancellationToken);
             if (order == null)
@@ -116,13 +117,8 @@ ILmsCourseService courseService)
                         methodResult.AddError(addStudentIntoClassResult.Error);
                         return methodResult;
                     }
+                    allowOpenNextUnit = true;
 
-                    var updateNextUnitResult = await _courseService.UpdateNextUnit(order.UserId);
-                    if (!updateNextUnitResult.IsSuccessStatusCode)
-                    {
-                        methodResult.AddError(updateNextUnitResult.Error);
-                        return methodResult;
-                    }
 
                     order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
 
@@ -147,6 +143,8 @@ ILmsCourseService courseService)
                 order.Status = request.OrderStatus;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                // Mở Unit tiếp theo. 
 
                 //var orders = await _orderRepository.Queryable.Where(p => p.ClassId == order.ClassId && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
                 //if (orders.Count == 12)
@@ -177,6 +175,16 @@ ILmsCourseService courseService)
                 methodResult.Result = true;
                 return methodResult;
             });
+
+            if (allowOpenNextUnit)
+            {
+                var updateNextUnitResult = await _courseService.UpdateNextUnit(order.UserId);
+                if (!updateNextUnitResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(updateNextUnitResult.Error);
+                    return methodResult;
+                }
+            }
             return methodResult;
         }
     }
