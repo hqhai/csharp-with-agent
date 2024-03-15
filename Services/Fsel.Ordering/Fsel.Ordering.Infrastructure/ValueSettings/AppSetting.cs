@@ -26,6 +26,9 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     {
         public string? AppId { get; set; }
         public string? BundleId { get; set; }
+        public string? KeyId { get; set; }
+        public string? Audience { get; set; }
+        public string? Issuer { get; set; }
     }
 
     public class ResourceContent
@@ -77,7 +80,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public string? SystemApiUrl { get; set; }
         public string? UrBoxApiUrl { get; set; }
         public string? PayooApiUrl { get; set; }
-        public string? AppStoreServerApiUrl { get; set; }
+        public string? AppStoreApiUrl { get; set; }
     }
 
     public class Otp

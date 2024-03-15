@@ -7,5 +7,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
     public interface INotificationProcessor
     {
         Task<bool> Process(AppleNotification notification);
+
+        TransactionInfoV2? TransactionInfo(string signedTransactionInfo);
     }
 }

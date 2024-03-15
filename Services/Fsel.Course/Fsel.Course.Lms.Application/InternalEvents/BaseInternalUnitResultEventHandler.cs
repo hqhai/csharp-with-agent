@@ -186,7 +186,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             mockTestResult?.SkillScores.ForEach(p =>
             {
                 var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
-                var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Scores.ToString("0.0", CultureInfo.CurrentCulture));
+                var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Scores == 0 ? 0 : p.Scores.ToString("0.0", CultureInfo.CurrentCulture));
                 mockTestHtml += html;
             });
 
@@ -231,7 +231,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores.ForEach(p =>
                 {
                     var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
-                    var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent);
+                    var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, p.Percent, p.Percent < 100 ? SendMailSetting.NoBorder : SendMailSetting.Border, color, 100 - p.Percent, p.Percent + "%");
                     skillScoreHtml += html;
                 });
                 parameter.SkillScore = skillScoreHtml;

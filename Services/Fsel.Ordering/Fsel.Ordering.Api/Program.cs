@@ -46,12 +46,17 @@ builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApi
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUrBoxService), appSetting?.Services?.UrBoxApiUrl);
 builder.AddRefitClients(typeof(IPayooService), appSetting?.Services?.PayooApiUrl);
-
+builder.AddRefitClients(typeof(IAppStoreService), appSetting?.Services?.AppStoreApiUrl);
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) }
 });
+//builder.AddMassTransit(appSetting,
+//queues: new Dictionary<string, Type>
+//{
+//    { QueueSettings.LmsQueue.NameQueue.OrderCreateNotification, typeof(CreateOrderConsumer) }
+//});
 var app = builder.Build();
 app.UseServices();
 app.Run();
