@@ -138,7 +138,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     Scores = averageScore,
                     TotalQuestion = 2,
                     CountQuestion = 2,
-                    Total1 = totalScore,
                 };
                 skillScores.Add(skillScore);
             }
@@ -149,7 +148,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
                 skillScores.Single().CorrectCount = correcCount;
                 skillScores.Single().Scores = averageScore;
-                skillScores.Single().Total2 = totalScore;
                 sectionGroupResult.CorrectCount = correcCount;
 
                 if (checkSkillMockTest)
