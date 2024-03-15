@@ -102,12 +102,12 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Check Current Status Of User
         /// </summary>
-        [HttpGet("get-current-status")]
+        [HttpGet("get-current-status/{id}")]
         [ProducesResponseType(typeof(MethodResult<EnumTrialRegistrationStatus?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetCurrentStatus()
+        public async Task<IActionResult> GetCurrentStatus([FromRoute] Guid id)
         {
-            MethodResult<EnumTrialRegistrationStatus?> commandResult = await _mediator.Send(new GetCurrentStatusQuery()).ConfigureAwait(false);
+            MethodResult<EnumTrialRegistrationStatus?> commandResult = await _mediator.Send(new GetCurrentStatusQuery { UserId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
