@@ -14,6 +14,7 @@ using Fsel.Ordering.Infrastructure;
 using Fsel.Ordering.Infrastructure.Common;
 using Fsel.Ordering.Infrastructure.Repositories;
 using Fsel.Ordering.Infrastructure.ValueSettings;
+using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,7 +45,11 @@ builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApi
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUrBoxService), appSetting?.Services?.UrBoxApiUrl);
 builder.AddRefitClients(typeof(IPayooService), appSetting?.Services?.PayooApiUrl);
-builder.AddRefitClients(typeof(IAppStoreService), appSetting?.Services?.AppStoreApiUrl);
+//builder.AddRefitClients(typeof(IAppStoreService), appSetting?.Services?.AppStoreApiUrl);
+builder.Services.AddRefitClient<IAppStoreService>().ConfigureHttpClient(x =>
+{
+    x.BaseAddress = new Uri(appSetting?.Services?.AppStoreApiUrl ?? string.Empty);
+});
 builder.AddMassTransit(appSetting);
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>
