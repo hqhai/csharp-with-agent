@@ -68,5 +68,17 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 
         [JsonPropertyName("transactionReason")]
         public string? TransactionReason { get; set; }
+
+        [JsonPropertyName("storefront")]
+        public string? Storefront { get; set; }
+
+        [JsonPropertyName("storefrontId")]
+        public string? StorefrontId { get; set; }
+
+        [JsonPropertyName("price")]
+        public string? Price { get; set; }
+
+        [JsonPropertyName("currency")]
+        public string? Currency { get; set; }
     }
 }
