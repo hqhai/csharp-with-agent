@@ -40,9 +40,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly INotificationService _notificationService;
         private readonly IInteractionService _interactionService;
         private readonly AuthContext _authContext;
-        private readonly IStudentFeedbackRepository _studentFeedbackRepository;
 
-        public SearchAllStudentClassForumResultQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, IUserService userService, ITrainingService trainingService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext, IStudentFeedbackRepository studentFeedbackRepository)
+        public SearchAllStudentClassForumResultQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, IUserService userService, ITrainingService trainingService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext)
         {
             _mapper = mapper;
             _classForumResultRepository = classForumResultRepository;
@@ -53,7 +52,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _notificationService = notificationService;
             _interactionService = interactionService;
             _authContext = authContext;
-            _studentFeedbackRepository = studentFeedbackRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultModel>>> Handle(SearchAllStudentClassForumResultQuery request, CancellationToken cancellationToken)
@@ -75,14 +73,18 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
 
+            if (lessonResult == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
             var classForum = await _classForumRepository.Queryable.Where(x => x.LessonId == lessonResult!.LessonId).FirstOrDefaultAsync(cancellationToken);
 
-            var classForumResults = _classForumResultRepository.Queryable.Include(x => x.ClassForumResultFiles)
+            var classForumResults = _classForumResultRepository.Queryable
+                .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Include(x => x.ClassForum)
-                .ThenInclude(x => x!.ClassForumFiles)
-                .Where(x => x.LessonResultId == request.LessonResultId
-                && x.ClassForumId == classForum!.Id
+                .Where(x => x.ClassForumId == classForum!.Id
                 && x.Status != EnumClassForumResultStatus.Draft
                 && x.Status != EnumClassForumResultStatus.Pending
                 && x.Id != request.ClassForumResultId
@@ -107,18 +109,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     RetryContent = x.RetryContent,
                     LessonResultId = x.LessonResultId,
                     GradingStartDate = x.GradingStartDate,
-                    ClassForum = _mapper.Map<ClassForumModel>(x.ClassForum),
-                    ClassForumScores = x.ClassForumScores.Select(x => new ClassForumScoreModel
-                    {
-                        Id = x.Id,
-                        Score = x.Score,
-                        ClassForumResultId = x.ClassForumResultId,
-                        CreatedDate = x.CreatedDate,
-                        CreatedFullName = x.CreatedFullName,
-                        CreatedUserId = x.CreatedUserId,
-                        Criteria = x.Criteria,
-                        Feedback = x.Feedback,
-                    }).ToList(),
+                    CreatedDate = x.CreatedDate,
+                    CreatedFullName = x.CreatedFullName,
+                    ClassForumScores = _mapper.Map<IList<ClassForumScoreModel>>(x.ClassForumScores.OrderBy(x => x.CreatedDate)),
+                    ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(x.ClassForumResultFiles),
+                    TokenLastTime = x.TokenLastTime,
+                    TokenFirstTime = x.TokenFirstTime,
+                    IsViewed = x.IsViewed,
                 });
 
             int totalItem = await classForumResults.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

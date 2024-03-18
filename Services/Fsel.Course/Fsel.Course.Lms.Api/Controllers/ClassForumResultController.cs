@@ -112,7 +112,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get student class forum result
         /// </summary>
-        [HttpGet]
+        [HttpGet("student-class-forum")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentClassForumResult([FromQuery] GetStudentClassForumResultQuery query)
@@ -125,7 +125,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Search class forum result 
         /// </summary>
-        [HttpGet]
+        [HttpGet("all-student-class-forum")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchAllStudentClassForum([FromQuery] SearchAllStudentClassForumResultQuery query)
