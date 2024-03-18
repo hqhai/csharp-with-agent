@@ -47,6 +47,21 @@
       },
       {
         "id": 8,
+        "content": "Sự kiện/hội thảo",
+        "image": "event.svg"
+      },
+      {
+        "id": 9,
+        "content": "Trường học",
+        "image": "school.svg"
+      },
+      {
+        "id": 10,
+        "content": "Tờ rơi",
+        "image": "leaflets.svg"
+      },
+      {
+        "id": 11,
         "content": "Khác....",
         "image": "others-icon.svg"
       }
@@ -143,7 +158,12 @@
     "displayLevel": 1,
     "type": "Location",
     "isPilot": false,
-    "answers": null
+    "answers": {
+      "country": "Other",
+      "province": "Other",
+      "district": "Other",
+      "school": "Other"
+    }
   },
   {
     "id": "2BE9A620-143D-41F6-815B-2038C21A7B23",
