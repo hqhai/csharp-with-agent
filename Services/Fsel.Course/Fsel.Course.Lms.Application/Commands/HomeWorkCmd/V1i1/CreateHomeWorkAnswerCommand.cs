@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -28,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class CreateHomeWorkAnswerCommand : CreateHomeWorkAnswerV1i1CommandModel, IRequest<MethodResult<HomeWorkModel>>
     {
@@ -47,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly ISystemService _systemService;
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly IQuestionRepository _questionRepository;
+        private readonly ILogger<object> _logger;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             QuestionConverter questionConverter,
@@ -59,7 +62,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             ILessonResultRepository lessonResultRepository,
             ISystemService systemService,
             FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
-            IQuestionRepository questionRepository
+            IQuestionRepository questionRepository,
+            ILogger<object> logger
             )
         {
             _homeWorkResultRepository = homeWorkResultRepository;
@@ -74,6 +78,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _systemService = systemService;
             _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
             _questionRepository = questionRepository;
+            _logger = logger;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
@@ -92,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 }
                 return methodResult;
             }
-
+            _logger.LogError(ConvertHelper.Serialize(request));
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
