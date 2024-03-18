@@ -8,7 +8,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.InAppPurchase;
     using Fsel.Ordering.Application.Services.InAppPurchase.Models;
@@ -19,7 +18,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Jose;
+    using JWT.Algorithms;
+    using JWT.Builder;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Hosting;
@@ -73,29 +73,25 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var iat = ConvertToUnixTimestamp(DateTimeOffset.UtcNow);
             var exp = ConvertToUnixTimestamp(DateTimeOffset.UtcNow.AddMinutes(60));
 
-            var header = new Dictionary<string, object>()
-            {
-                { "alg", "ES256" },
-                { "kid", keyId ?? string.Empty },
-                { "typ", "JWT" }
-            };
-
-            var payload = new
-            {
-                iss = issuer,
-                iat = iat,
-                exp = exp,
-                aud = audience,
-                bid = bundleId
-            };
-
             string privateKey = File.ReadAllText(ResourceSettings.AppStore);
 
             byte[] privateKeyBytes = Convert.FromBase64String(ExtractBase64FromPem(privateKey));
 
-            CngKey key = CngKey.Import(privateKeyBytes, CngKeyBlobFormat.Pkcs8PrivateBlob);
+            string token;
 
-            string token = JWT.Encode(payload, key, JwsAlgorithm.ES256, header);
+            using (ECDsa prvKey = ECDsa.Create())
+            {
+                prvKey.ImportPkcs8PrivateKey(privateKeyBytes, out var read);
+                var jwtBuilder = new JwtBuilder()
+                    .WithAlgorithm(new ES256Algorithm(prvKey, prvKey))
+                    .AddHeader("kid", keyId)
+                    .ExpirationTime(exp)
+                    .IssuedAt(iat)
+                    .Issuer(issuer)
+                    .Audience(audience)
+                    .AddClaim("bid", bundleId);
+                token = jwtBuilder.Encode();
+            }
 
             var signedTransactionInfoResult = await _appStoreService.GetInfoTransaction(token, request.TransactionId);
 
