@@ -4,6 +4,7 @@ using Fsel.System.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    partial class SystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240315084130_AddTable_ChatBotConfig")]
+    partial class AddTable_ChatBotConfig
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -340,86 +343,6 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasIndex("ChatbotConfigId");
 
                     b.ToTable("ChatbotSkillConfigs");
-                });
-
-            modelBuilder.Entity("Fsel.System.Domain.Entities.Chatbots.ChatbotTokenConfigs", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<Guid>("ChatbotConfigId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<int>("Grammar")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<int>("ListeningToken")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReadingToken")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Speaking")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.Property<int>("Vocabulary")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Writing")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatbotConfigId")
-                        .IsUnique();
-
-                    b.ToTable("ChatbotTokenConfigs");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.Configs.CourseTimeConfig", b =>
@@ -3256,17 +3179,6 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Navigation("ChatbotConfig");
                 });
 
-            modelBuilder.Entity("Fsel.System.Domain.Entities.Chatbots.ChatbotTokenConfigs", b =>
-                {
-                    b.HasOne("Fsel.System.Domain.Entities.Chatbots.ChatbotConfig", "ChatbotConfig")
-                        .WithOne("ChatbotTokenConfigs")
-                        .HasForeignKey("Fsel.System.Domain.Entities.Chatbots.ChatbotTokenConfigs", "ChatbotConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ChatbotConfig");
-                });
-
             modelBuilder.Entity("Fsel.System.Domain.Entities.GameVocabulary", b =>
                 {
                     b.HasOne("Fsel.System.Domain.Entities.GameTopic", "GameTopic")
@@ -3338,8 +3250,6 @@ namespace Fsel.System.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.System.Domain.Entities.Chatbots.ChatbotConfig", b =>
                 {
                     b.Navigation("ChatbotSkillConfigs");
-
-                    b.Navigation("ChatbotTokenConfigs");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.GameTopic", b =>

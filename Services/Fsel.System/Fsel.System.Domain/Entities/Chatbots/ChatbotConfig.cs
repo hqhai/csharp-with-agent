@@ -40,6 +40,9 @@ namespace Fsel.System.Domain.Entities.Chatbots
         public int NumberSkill { get; set; }
         public EnumChatbotConfigStatus Status { get; set; }
         public Guid UnitId { get; set; }
+
+        public ChatbotTokenConfigs? ChatbotTokenConfigs { get; set; }
+
         public ICollection<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; } = new List<ChatbotSkillConfig>();
     }
 }

@@ -3,9 +3,11 @@
 namespace Fsel.System.Domain.Entities.Chatbots
 {
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
     using global::System.ComponentModel.DataAnnotations;
+    using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class ChatbotSkillConfig : Entity
     {
@@ -17,6 +19,16 @@ namespace Fsel.System.Domain.Entities.Chatbots
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Config { get; set; }
 
+        [NotMapped]
+        public IList<SkillConfig>? Configs
+        {
+            get
+            {
+                return ConvertHelper.Deserialize<IList<SkillConfig>>(Config);
+            }
+            set { Config = ConvertHelper.Serialize(value); }
+        }
+
         /// <summary>
         /// Ai Config
         /// </summary>
@@ -25,5 +37,25 @@ namespace Fsel.System.Domain.Entities.Chatbots
 
         public Guid ChatbotConfigId { get; set; }
         public ChatbotConfig? ChatbotConfig { get; set; }
+    }
+
+    public class SkillConfig
+    {
+        public EnumSkillAiConfigType? SkillConfigType { get; set; }
+        public IList<SkillBlockItem>? BlockItems { get; set; }
+    }
+
+    public class SkillBlockItem
+    {
+        public string? Name { get; set; }
+        public IList<ItemSkillContent>? ItemSkillContent { get; set; }
+    }
+
+    public class ItemSkillContent
+    {
+        public EnumGrammarPromptType? ContentType { get; set; }
+
+        public string? Content { get; set; }
+
     }
 }

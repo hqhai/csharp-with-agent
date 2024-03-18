@@ -4,7 +4,6 @@ namespace Fsel.System.Application.Commands.Chatbots
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Helpers;
@@ -44,18 +43,10 @@ namespace Fsel.System.Application.Commands.Chatbots
             if (chatbotConfig == null)
             {
                 chatbotConfig = _mapper.Map<ChatbotConfig>(request);
-
-                if (request.VocabularyModels != null)
-                {
-                    var config = request.VocabularyModels.Deserialize<string>();
-                    var aiConfig = unitInfo + "Vocabulary Lists:";
-                    foreach (var item in request.VocabularyModels)
-                    {
-                        aiConfig += "[\r\n{\r\n\"listA\": \"string\"\r\n}\r\n]";
-                    }
-                }
             }
             return methodResult;
         }
+
+
     }
 }

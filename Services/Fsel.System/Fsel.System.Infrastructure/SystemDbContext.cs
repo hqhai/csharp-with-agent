@@ -42,6 +42,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new SchoolEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ChatbotConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ChatbotSkillConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ChatbotTokenConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ErrorReportEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
@@ -68,6 +69,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<ErrorReport> ErrorReports { get; set; }
         public DbSet<ChatbotConfig> ChatbotConfigs { get; set; }
         public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
+        public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
