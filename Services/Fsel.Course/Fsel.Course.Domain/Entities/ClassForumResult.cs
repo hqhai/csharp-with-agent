@@ -26,12 +26,12 @@ namespace Fsel.Course.Domain.Entities
         }
 
         private int? _wordCount;
+
         public int? WordCount
         {
             get { return _wordCount == null ? StringHelper.CountWords(WordContent) : _wordCount; }
             set { _wordCount = value; }
         }
-
 
         [NotMapped]
         public int? TimeCount

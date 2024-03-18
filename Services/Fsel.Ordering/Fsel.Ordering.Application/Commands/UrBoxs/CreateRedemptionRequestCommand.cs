@@ -181,18 +181,30 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
 
                 if (orderTransaction.Status == EnumOrderTransactionStatus.Success)
                 {
-                    var tokenHistorys = new List<TokenHistoryQueueModel>
+                    var configs = new List<object>();
+
+                    for (int i = 0; i < quantity; i++)
+                    {
+                        var data = new
                         {
-                            new TokenHistoryQueueModel
-                            {
-                                ObjectId = orderTransaction.Id,
-                                RemainToken = totalPrice,
-                                Feature = EnumTokenFeature.MarketPlace,
-                                Type = EnumTokenHistoryType.Recevived,
-                                UserId = student?.Human?.UserId ?? default,
-                                Config = createRedemptionRequest.Content
-                            }
+                            Id = gift.Result.Id,
+                            Title = gift.Result.Title,
+                            Price = price
                         };
+                        configs.Add(data);
+                    }
+                    var tokenHistorys = new List<TokenHistoryQueueModel>
+                    {
+                        new TokenHistoryQueueModel
+                        {
+                            ObjectId = orderTransaction.Id,
+                            RemainToken = totalPrice,
+                            Feature = EnumTokenFeature.MarketPlace,
+                            Type = EnumTokenHistoryType.Recevived,
+                            UserId = student?.Human?.UserId ?? default,
+                            Config = configs
+                        }
+                    };
                     await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
                 }
                 return methodResult;
