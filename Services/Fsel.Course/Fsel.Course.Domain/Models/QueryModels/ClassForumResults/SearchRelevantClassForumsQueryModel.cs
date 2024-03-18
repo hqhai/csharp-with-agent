@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumResults
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchAllStudentClassForumResultQueryModel : BaseQueryModel
+    public class SearchRelevantClassForumsQueryModel : BaseQueryModel
     {
         public Guid LessonResultId { get; set; }
 

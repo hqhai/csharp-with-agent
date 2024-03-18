@@ -24,12 +24,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentClassForumResultQuery : IRequest<MethodResult<ClassForumResultModel>>
+    public class GetCurrentClassForumQuery : IRequest<MethodResult<ClassForumResultModel>>
     {
         public Guid LessonResultId { get; set; }
     }
 
-    public class GetStudentClassForumResultQueryHandler : IRequestHandler<GetStudentClassForumResultQuery, MethodResult<ClassForumResultModel>>
+    public class GetCurrentClassForumQueryHandler : IRequestHandler<GetCurrentClassForumQuery, MethodResult<ClassForumResultModel>>
     {
         private readonly IMapper _mapper;
         private readonly IClassForumResultRepository _classForumResultRepository;
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly AuthContext _authContext;
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
 
-        public GetStudentClassForumResultQueryHandler(IMapper mapper,
+        public GetCurrentClassForumQueryHandler(IMapper mapper,
             IClassForumResultRepository classForumResultRepository,
             IClassForumRepository classForumRepository,
             ILessonResultRepository lessonResultRepository,
@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _studentFeedbackRepository = studentFeedbackRepository;
         }
 
-        public async Task<MethodResult<ClassForumResultModel>> Handle(GetStudentClassForumResultQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassForumResultModel>> Handle(GetCurrentClassForumQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
