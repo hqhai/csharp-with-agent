@@ -17,8 +17,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -31,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     public class CreateClassForumResultCommandHandler : IRequestHandler<CreateClassForumResultCommand, MethodResult<ClassForumResultModel>>
     {
         private readonly IMapper _mapper;
+        private readonly ICourseRepository _courseRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IClassForumResultRepository _classForumResultRepository;
@@ -39,11 +43,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly SubmitClassForumGradingPublisher _submitClassForumGradingPublisher;
         private readonly ISystemService _systemService;
-        private readonly IMediator _mediator;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, IMediator mediator, SubmitClassForumGradingPublisher submitClassForumGradingPublisher)
+        public CreateClassForumResultCommandHandler(IMapper mapper, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, SubmitClassForumGradingPublisher submitClassForumGradingPublisher)
         {
             _mapper = mapper;
+            _courseRepository = courseRepository;
             _authContext = authContext;
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
@@ -51,7 +55,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _lessonResultRepository = lessonResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
             _systemService = systemService;
-            _mediator = mediator;
             _submitClassForumGradingPublisher = submitClassForumGradingPublisher;
         }
 
@@ -84,6 +87,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             if (lessonResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
+                return methodResult;
+            }
+
+            var course = await _courseRepository.GetByIdAsync(lessonResult.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
 
@@ -120,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             FilePath = x,
                         }).ToList();
                     }
-
+                    classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType);
                     classForumResult = _classForumResultRepository.Add(classForumResult);
                     if (classForumResult.Status == EnumClassForumResultStatus.Draft)
                     {
@@ -145,6 +155,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         }).ToList();
                     }
 
+                    classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType);
                     classForumResult = _classForumResultRepository.Update(classForumResult);
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
@@ -152,6 +163,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumHasSubmitted));
                     return methodResult;
+                }
+                if (classForumResult.TokenFirstTime.HasValue && classForumResult.TokenFirstTime.Value > 0 && classForumResult.Status == EnumClassForumResultStatus.Pending && classForumResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
+                {
+                    await UpdateTokenByStudent(classForumResult, classForumResult.TokenFirstTime.Value);
                 }
 
                 //check AI feedback
@@ -193,6 +208,49 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             });
 
             return methodResult;
+        }
+
+        private async Task<ClassForumResult> GetClassForumResultToSubmissionCount(ClassForumResult classForumResult, ClassForum classForum, EnumCourseType courseType)
+        {
+            if (classForumResult.Status == EnumClassForumResultStatus.Pending && !classForumResult.SubmissionCount.HasValue)
+            {
+                classForumResult.SubmissionCount = EnumSubmissionCount.FirstSubmit;
+                var tokenMission = classForum.CourseSkill == EnumCourseSkill.Writing ? EnumTokenMission.ClassForumWriting
+                : classForumResult.MediaType == EnumMediaType.Video ? EnumTokenMission.ClassForumSpeakingVideo
+                : EnumTokenMission.ClassForumSpeakingAudio;
+                var token = await GetToken(tokenMission, courseType);
+                classForumResult.TokenFirstTime = token;
+            }
+            else if (classForumResult.Status == EnumClassForumResultStatus.Pending && classForumResult.SubmissionCount.HasValue)
+            {
+                classForumResult.SubmissionCount = EnumSubmissionCount.SecondSubmit;
+            }
+            return classForumResult;
+        }
+
+        private async Task<int> GetToken(EnumTokenMission tokenMission, EnumCourseType courseType)
+        {
+            var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+            {
+                Feature = EnumTokenFeature.Learn,
+                Mission = tokenMission,
+                CourseType = courseType
+            });
+            if (!tokenConfigs.IsSuccessStatusCode)
+            {
+                return default;
+            }
+            var tokenConfig = tokenConfigs.Content?.Result;
+            return (int)(tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
+        }
+
+        private async Task UpdateTokenByStudent(ClassForumResult classForumResult, long token)
+        {
+            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+            {
+                NumberOfToken = token,
+                StudentId = classForumResult.StudentId,
+            }).ConfigureAwait(false);
         }
     }
 }

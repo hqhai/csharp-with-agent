@@ -7,8 +7,10 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
 
-    public class HomeWorkResult : BaseScoreResult, ITokenResult
+    public class HomeWorkResult : BaseScoreResult, ITokenResult, ISubmissionCount
     {
+        private EnumSubmissionCount? SUBMISSIONCOUNT { get; set; }
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid HomeWorkId { get; set; }
 
@@ -16,10 +18,19 @@ namespace Fsel.Course.Domain.Entities
         public Guid LessonResultId { get; set; }
 
         public HomeWork? HomeWork { get; set; }
-        public EnumSubmissionCount SubmissionCount { get; set; }
         public LessonResult? LessonResult { get; set; }
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
+
+        public EnumSubmissionCount? SubmissionCount
+        {
+            get
+            {
+                return SUBMISSIONCOUNT.HasValue ? EnumSubmissionCount.FirstSubmit : SUBMISSIONCOUNT;
+            }
+            set { SUBMISSIONCOUNT = value; }
+        }
+
         public ICollection<HomeWorkAnswer> HomeWorkAnswers { get; set; } = new List<HomeWorkAnswer>();
     }
 }

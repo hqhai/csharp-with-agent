@@ -191,7 +191,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return methodResult;
         }
 
-        private async Task<long> GetToken(EnumSubmissionCount submissionCount, EnumCourseType courseType)
+        private async Task<long> GetToken(EnumSubmissionCount? submissionCount, EnumCourseType courseType)
         {
             var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
             {
