@@ -1,8 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Ordering.Application.Queues.Consumers;
 using Fsel.Ordering.Application.Queues.Publishers;
 using Fsel.Ordering.Application.Services.CourseService;
+using Fsel.Ordering.Application.Services.InAppPurchase;
 using Fsel.Ordering.Application.Services.PayooService;
 using Fsel.Ordering.Application.Services.SystemService;
 using Fsel.Ordering.Application.Services.TrainingService;
@@ -13,6 +15,8 @@ using Fsel.Ordering.Infrastructure;
 using Fsel.Ordering.Infrastructure.Common;
 using Fsel.Ordering.Infrastructure.Repositories;
 using Fsel.Ordering.Infrastructure.ValueSettings;
+using Refit;
+using Fsel.Shared.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +36,8 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
-builder.Services.AddScoped<IUrBoxTransactionRepository, UrBoxTransactionRepository>();
+builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
+builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<VnPayLibrary>();
 
@@ -42,7 +47,17 @@ builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApi
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUrBoxService), appSetting?.Services?.UrBoxApiUrl);
 builder.AddRefitClients(typeof(IPayooService), appSetting?.Services?.PayooApiUrl);
-builder.AddMassTransit(appSetting);
+//builder.AddRefitClients(typeof(IAppStoreService), appSetting?.Services?.AppStoreApiUrl);
+builder.Services.AddRefitClient<IAppStoreService>().ConfigureHttpClient(x =>
+{
+    x.BaseAddress = new Uri(appSetting?.Services?.AppStoreApiUrl ?? string.Empty);
+});
+
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
+{
+    { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) }
+});
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>
 //{

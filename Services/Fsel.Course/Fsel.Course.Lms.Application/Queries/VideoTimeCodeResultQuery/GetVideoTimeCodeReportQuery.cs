@@ -114,9 +114,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 CorrectTotal = x.Sum(x => x.CorrectTotal),
                 StudentId = x.Key,
                 HighestStreak = x.Max(x => x.HighestStreak),
-                TokenDone = x.Sum(x => x.TokenDone),
-                TokenHighestStreak = x.Sum(x => x.TokenHighestStreak),
-                TokenQuestionReward = x.Sum(x => x.TokenQuestionReward),
                 SkillScores = x.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => new SkillScores
                 {
                     Skill = x.Key,
@@ -126,7 +123,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                     TotalQuestion = x.Sum(x => x.TotalQuestion),
                     Scores = x.Average(x => x.Scores)
                 }).ToList(),
-                TokenSuperFire = x.Sum(x => x.TokenSuperFire),
                 Percent = NumberHelper.GetPercent(x.Sum(x => x.CorrectCount), x.Sum(x => x.CorrectTotal)),
                 WorkingTime = x.Sum(x => x.WorkingTime),
                 Status = x.Select(x => x.VideoResult).Select(x => x!.Status).FirstOrDefault(),

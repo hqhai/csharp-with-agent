@@ -5,6 +5,7 @@ using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
+using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -23,7 +24,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
     [Permission(role: nameof(EnumRole.Student))]
-    public class CourseController : ControllerBase
+    public class CourseController : BaseController
     {
         private readonly IMediator _mediator;
         private readonly ICourseRepository _courseRepository;
@@ -50,12 +51,13 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Execute-list-query
         /// </summary>
-        [HttpPost("execute-query")]
+        [HttpGet("execute-query")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission]
-        public async Task<IActionResult> Execute([FromBody] BaseQueryModel query)
+        public async Task<IActionResult> Execute([FromQuery] BaseQueryModel query)
         {
+            SetQuery(query);
             var result = await _courseRepository.GetResultAsync<CourseModel>(query);
             return result.GetActionResult();
         }
@@ -72,7 +74,7 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
+         
         /// <summary>
         /// Get Course Studying
         /// </summary>
@@ -83,6 +85,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetCourseStudying()
         {
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseStudyingQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Course studied
+        /// </summary>
+        [HttpGet("get-course-studied")]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetCourseStudied()
+        {
+            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseStudiedQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

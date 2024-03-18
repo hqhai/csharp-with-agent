@@ -19,7 +19,6 @@ namespace Fsel.Training.Api.Controllers.Cso
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/cso/class-live")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.CSO))]
     public class ClassLiveController : ControllerBase
     {
         private readonly IMediator _mediator;

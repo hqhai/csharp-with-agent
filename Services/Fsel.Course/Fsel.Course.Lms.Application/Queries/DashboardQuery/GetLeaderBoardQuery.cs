@@ -4,13 +4,16 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 {
     using System.Collections.Generic;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -25,18 +28,24 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly ISystemService _systemService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly AuthContext _authContext;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private const int LEADERBOARD_TOP = 50; // Chỉ lấy ra 50 người đứng đầu , sau đó sẽ lọc theo daily streak để lấy ra 30 người đứng đầu
         private const int ROUND_DIGIT = 2; // Làm tròn đến số thập phân thú 2
 
         public GetLeaderBoardQueryHandler(IUserService userService
             , ISystemService systemService
             , IUnitResultRepository unitResultRepository
-            , ICourseResultRepository courseResultRepository)
+            , ICourseResultRepository courseResultRepository
+            , AuthContext authContext
+            , NotificationMessagePublisher notificationMessagePublisher)
         {
             _userService = userService;
             _systemService = systemService;
             _unitResultRepository = unitResultRepository;
             _courseResultRepository = courseResultRepository;
+            _authContext = authContext;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<LeaderBoardSearchModel>> Handle(GetLeaderBoardQuery request, CancellationToken cancellationToken)
@@ -101,6 +110,34 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                                     .OrderBy(x => x.CourseLevel)
                                     .ToList();
 
+            // Gửi thông báo khi đạt top
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentId = student?.Content?.Result?.Id;
+
+            if (studentId != null)
+            {
+                var location = finalLeaderBoards.FindIndex(x => x.Id == studentId);
+                int locationStudent = 0;
+                if (location != -1)
+                {
+                    locationStudent = location + 1;
+                }
+
+                if (locationStudent <= 100 && locationStudent != 0)
+                {
+                    NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+                    {
+                        ObjectId = studentId ?? default,
+                        UserIds = new List<Guid>() { studentId ?? default },
+                        SenderId = _authContext.CurrentUserId,
+                        ParamsMessage = new List<object> { locationStudent.ToString() ?? string.Empty },
+                        Type = EnumNotificationType.LinkPage,
+                        Content = EnumNotificationContent.LeaderBoard
+                    };
+
+                    await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+                }
+            }
 
             leaderBoardSearch.LeaderBoards = finalLeaderBoards;
 

@@ -13,7 +13,9 @@ using Fsel.Storage.Infrastructure.ValueSettings;
 using Humanizer.Bytes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Processing;
 
 namespace Fsel.Storage.Application.Services.AmazonS3Services
 {
@@ -144,7 +146,6 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                     {
                         thumbWidth = ((float)image.Width / image.Height) * thumbHeight;
                     }
-
 
                     // Tạo một ảnh vuông với kích thước đã resize
                     image.Mutate(x => x
@@ -418,7 +419,6 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             var inputPath = await _systemFileProvider.SaveFile(file);
 
             _logger.LogInformation($"End save file to disk");
-
 
             _logger.LogInformation($"Start resolutions");
 

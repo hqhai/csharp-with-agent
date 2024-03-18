@@ -20,6 +20,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid CourseId { get; set; }
 
         public Guid UnitId { get; set; }
+        public Guid CurrentUnitId { get; set; }
 
         public EnumClassForumResultStatus Status { get; set; }
 
