@@ -25,11 +25,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchAllStudentClassForumResultQuery : SearchAllStudentClassForumResultQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultModel>>>
+    public class SearchRelevantClassForumsQuery : SearchRelevantClassForumsQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultModel>>>
     {
     }
 
-    public class SearchAllStudentClassForumResultQueryHandler : IRequestHandler<SearchAllStudentClassForumResultQuery, MethodResult<PagingItemsModel<ClassForumResultModel>>>
+    public class SearchRelevantClassForumsQueryHandler : IRequestHandler<SearchRelevantClassForumsQuery, MethodResult<PagingItemsModel<ClassForumResultModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IClassForumResultRepository _classForumResultRepository;
@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IInteractionService _interactionService;
         private readonly AuthContext _authContext;
 
-        public SearchAllStudentClassForumResultQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, IUserService userService, ITrainingService trainingService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext)
+        public SearchRelevantClassForumsQueryHandler(IMapper mapper, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, IUserService userService, ITrainingService trainingService, INotificationService notificationService, IInteractionService interactionService, AuthContext authContext)
         {
             _mapper = mapper;
             _classForumResultRepository = classForumResultRepository;
@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassForumResultModel>>> Handle(SearchAllStudentClassForumResultQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassForumResultModel>>> Handle(SearchRelevantClassForumsQuery request, CancellationToken cancellationToken)
         {
             MethodResult<PagingItemsModel<ClassForumResultModel>> methodResult = new MethodResult<PagingItemsModel<ClassForumResultModel>>();
             ArgumentNullException.ThrowIfNull(request);
