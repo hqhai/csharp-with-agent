@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Ordering.Application.Queues.Consumers;
 using Fsel.Ordering.Application.Queues.Publishers;
 using Fsel.Ordering.Application.Services.CourseService;
 using Fsel.Ordering.Application.Services.InAppPurchase;
@@ -15,6 +16,7 @@ using Fsel.Ordering.Infrastructure.Common;
 using Fsel.Ordering.Infrastructure.Repositories;
 using Fsel.Ordering.Infrastructure.ValueSettings;
 using Refit;
+using Fsel.Shared.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,7 +52,12 @@ builder.Services.AddRefitClient<IAppStoreService>().ConfigureHttpClient(x =>
 {
     x.BaseAddress = new Uri(appSetting?.Services?.AppStoreApiUrl ?? string.Empty);
 });
-builder.AddMassTransit(appSetting);
+
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
+{
+    { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) }
+});
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>
 //{

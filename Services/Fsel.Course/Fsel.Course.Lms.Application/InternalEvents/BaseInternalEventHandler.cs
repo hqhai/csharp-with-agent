@@ -43,8 +43,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         protected readonly AppSetting _appSetting;
         protected readonly ISystemService _systemService;
+        protected readonly IOrderService _orderService;
         private readonly QuestBoardPublisher _questBoardPublisher;
-        private readonly IOrderService _orderService;
         private const int TotalScoreClassForum = 36;
         private const int PercentClassForumAcademic = 20;
         private const int PercentClassForumIELST = 32;

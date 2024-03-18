@@ -56,6 +56,7 @@ builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
 builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<NotificationMessagePublisher>();
 
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
