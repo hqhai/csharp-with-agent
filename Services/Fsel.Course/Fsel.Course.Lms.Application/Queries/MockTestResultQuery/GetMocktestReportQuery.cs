@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 return methodResult;
             }
 
-            if (mockTestResult.MockTestScores != null)
+            if (mockTestResult.MockTestScores != null && mockTestResult.MockTestScores.Any())
             {
                 mockTestResult.IsViewed = true;
                 _mockTestResultRepository.Update(mockTestResult);

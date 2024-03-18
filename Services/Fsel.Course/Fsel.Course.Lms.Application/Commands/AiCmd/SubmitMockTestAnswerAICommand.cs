@@ -195,13 +195,13 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                             NumberOfToken = mockTestResult.TokenFirstTime.Value,
                             StudentId = mockTestResult.StudentId,
                         }).ConfigureAwait(false);
+                    }
 
-                        await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    }
+                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
 
