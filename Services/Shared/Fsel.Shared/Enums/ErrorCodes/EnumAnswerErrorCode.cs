@@ -10,8 +10,13 @@ namespace Fsel.Shared.Enums.ErrorCodes
         NotAnsweredEnough,
 
         /// <summary>
-        /// Questions not completed
+        /// Duplicate Answers
         /// </summary>
-        QuestionsDuplicate
+        DuplicateAnswers,
+
+        /// <summary>
+        /// Answer Is In The Wrong Format
+        /// </summary>
+        AnswerIsInTheWrongFormat
     }
 }
