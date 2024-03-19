@@ -4,7 +4,7 @@ namespace Fsel.System.Domain.Models.CommandModels.ChatbotConfigs
 {
     using Fsel.System.Domain.Models.EntityModels;
 
-    public class SaveChatbotConfigCommandModel : ChatbotSkillConfigModel
+    public class SaveChatbotConfigCommandModel
     {
         public string? ProgramName { get; set; }
         public string? CourseName { get; set; }
@@ -12,5 +12,8 @@ namespace Fsel.System.Domain.Models.CommandModels.ChatbotConfigs
         public string? UnitNumber { get; set; }
         public int NumberSkill { get; set; }
         public Guid UnitId { get; set; }
+        public IList<ChatbotSkillConfigModel>? ChatbotSkillConfigs { get; set; }
+
+        public ChatbotTokenConfigsModel? ChatbotTokenConfigs { get; set; }
     }
 }

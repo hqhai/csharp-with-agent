@@ -2,13 +2,13 @@
 
 namespace Fsel.System.Domain.Models.EntityModels
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class ChatbotSkillConfigModel
+    public class ChatbotSkillConfigModel : BaseModel
     {
-        public IList<SkillConfig>? SkillConfigs { get; set; }
-
-        public ChatbotTokenConfigs? ChatbotTokenConfigs { get; set; }
+        public IList<SkillConfigModel>? Configs { get; set; }
+        public string? AiConfig { get; set; }
         //public IList<ChatbotSkillVocabularyModel>? VocabularyModels { get; set; }
         //public ChatbotSkillGrammarModel? GrammarModel { get; set; }
         //public ChatbotSkillReadingListeningModel? ReadingModel { get; set; }
@@ -55,33 +55,23 @@ namespace Fsel.System.Domain.Models.EntityModels
     #endregion
 
 
-    public class SkillConfig
+    public class SkillConfigModel
     {
-        public EnumSkillAiConfigType? SkillConfigType { get; set; }
-        public IList<SkillBlockItem>? BlockItems { get; set; }
+        public EnumCourseSkill? SkillConfigType { get; set; }
+        public IList<SkillBlockItemModel>? BlockItems { get; set; }
     }
 
-    public class SkillBlockItem
+    public class SkillBlockItemModel
     {
         public string? Name { get; set; }
-        public IList<ItemSkillContent>? ItemSkillContent { get; set; }
+        public IList<ItemSkillContentModel>? ItemSkillContent { get; set; }
     }
 
-    public class ItemSkillContent
+    public class ItemSkillContentModel
     {
         public EnumGrammarPromptType? ContentType { get; set; }
 
         public string? Content { get; set; }
 
-    }
-
-    public class ChatbotTokenConfigs
-    {
-        public int ReadingToken { get; set; }
-        public int ListeningToken { get; set; }
-        public int Writing { get; set; }
-        public int Speaking { get; set; }
-        public int Vocabulary { get; set; }
-        public int Grammar { get; set; }
     }
 }

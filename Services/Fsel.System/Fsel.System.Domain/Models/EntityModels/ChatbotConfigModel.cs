@@ -2,12 +2,13 @@
 
 namespace Fsel.System.Domain.Models.EntityModels
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Models.CommandModels.ChatbotConfigs;
     using global::System;
 
-    public class ChatbotConfigModel : ChatbotSkillConfigModel
+    public class ChatbotConfigModel : BaseModel
     {
-        public Guid Id { get; set; }
         public string? ProgramName { get; set; }
         public string? CourseName { get; set; }
         public string? CEFRLevel { get; set; }
@@ -15,5 +16,9 @@ namespace Fsel.System.Domain.Models.EntityModels
         public int NumberSkill { get; set; }
         public EnumChatbotConfigStatus Status { get; set; }
         public Guid UnitId { get; set; }
+
+        public IList<ChatbotSkillConfigModel>? ChatbotSkillConfigs { get; set; }
+
+        public ChatbotTokenConfigsModel? ChatbotTokenConfigs { get; set; }
     }
 }

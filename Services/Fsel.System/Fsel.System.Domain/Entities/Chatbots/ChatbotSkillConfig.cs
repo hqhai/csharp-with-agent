@@ -41,7 +41,7 @@ namespace Fsel.System.Domain.Entities.Chatbots
 
     public class SkillConfig
     {
-        public EnumSkillAiConfigType? SkillConfigType { get; set; }
+        public EnumCourseSkill? SkillConfigType { get; set; }
         public IList<SkillBlockItem>? BlockItems { get; set; }
     }
 

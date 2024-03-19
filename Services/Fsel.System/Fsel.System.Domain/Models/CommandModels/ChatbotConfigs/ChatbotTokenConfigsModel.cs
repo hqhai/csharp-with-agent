@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Entities.Chatbots
+namespace Fsel.System.Domain.Models.CommandModels.ChatbotConfigs
 {
-    using Fsel.Core.Entities;
+    using Fsel.Core.Base.BaseModels;
 
-    public class ChatbotTokenConfigs : Entity
+    public class ChatbotTokenConfigsModel : BaseModel
     {
         public int ReadingToken { get; set; }
         public int ListeningToken { get; set; }
@@ -12,7 +12,5 @@ namespace Fsel.System.Domain.Entities.Chatbots
         public int SpeakingToken { get; set; }
         public int VocabularyToken { get; set; }
         public int GrammarToken { get; set; }
-        public Guid ChatbotConfigId { get; set; }
-        public ChatbotConfig? ChatbotConfig { get; set; }
     }
 }

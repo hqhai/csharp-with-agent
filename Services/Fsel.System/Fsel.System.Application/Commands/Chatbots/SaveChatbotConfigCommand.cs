@@ -4,15 +4,13 @@ namespace Fsel.System.Application.Commands.Chatbots
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Helpers;
+    using Fsel.Common.Helpers;
     using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.ChatbotConfigs;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
+    using Microsoft.AspNetCore.Http;
 
     public class SaveChatbotConfigCommand : SaveChatbotConfigCommandModel, IRequest<MethodResult<ChatbotConfigModel>>
     {
@@ -21,13 +19,11 @@ namespace Fsel.System.Application.Commands.Chatbots
     public class SaveChatbotConfigCommandHandler : IRequestHandler<SaveChatbotConfigCommand, MethodResult<ChatbotConfigModel>>
     {
         private readonly IChatbotConfigRepository _chatbotConfigRepository;
-        private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
 
-        public SaveChatbotConfigCommandHandler(IChatbotConfigRepository chatbotConfigRepository, AuthContext authContext, IMapper mapper)
+        public SaveChatbotConfigCommandHandler(IChatbotConfigRepository chatbotConfigRepository, IMapper mapper)
         {
             _chatbotConfigRepository = chatbotConfigRepository;
-            _authContext = authContext;
             _mapper = mapper;
         }
 
@@ -36,14 +32,22 @@ namespace Fsel.System.Application.Commands.Chatbots
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ChatbotConfigModel>();
 
-            var chatbotConfig = await _chatbotConfigRepository.Queryable.Include(p => p.ChatbotSkillConfigs).FirstOrDefaultAsync(p => p.UnitId == request.UnitId, cancellationToken);
-
-            var unitInfo = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ChatbotUnitInfo, cancellationToken);
-
-            if (chatbotConfig == null)
+            foreach (var item in request.ChatbotSkillConfigs!)
             {
-                chatbotConfig = _mapper.Map<ChatbotConfig>(request);
+                item.AiConfig += ConvertHelper.Serialize(item.Configs);
             }
+
+            ChatbotConfig chatbotConfig = new ChatbotConfig();
+            chatbotConfig = _mapper.Map<ChatbotConfig>(request);
+
+            await _chatbotConfigRepository.ExecuteTransactionAsync(async () =>
+            {
+                _chatbotConfigRepository.Add(chatbotConfig);
+                await _chatbotConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<ChatbotConfigModel>(chatbotConfig);
+                return methodResult;
+            });
             return methodResult;
         }
 
