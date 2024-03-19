@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             ISystemService systemService,
             FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
             IQuestionRepository questionRepository,
-            CreateTokenHistoryPublisher createTokenHistoryPublisher
+            CreateTokenHistoryPublisher createTokenHistoryPublisher,
             ILogger<object> logger
             )
         {
@@ -203,7 +203,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return methodResult;
         }
 
-        private async Task<(Guid, long)> GetToken(EnumSubmissionCount submissionCount, EnumCourseType courseType)
+        private async Task<long> GetToken(EnumSubmissionCount? submissionCount, EnumCourseType courseType)
         {
             var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
             {
@@ -216,7 +216,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return default;
             }
             var tokenConfig = tokenConfigs.Content?.Result;
-            return (tokenConfig?.Id ?? default, tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
+            return tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
         }
 
         private static HomeWorkAnswer GetHomeWorkAnswer(HomeWorkAnswer homeWorkAnswer, object? answerConfig, bool isAnswered, int correctCount, int correctCTotal)
@@ -247,7 +247,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 homeWorkResult.Status = EnumResultStatus.Process;
                 if (isSubmit)
                 {
-                    var (tokenConfigId, token) = await GetToken(homeWorkResult.SubmissionCount, courseType);
+                    var token = await GetToken(homeWorkResult.SubmissionCount, courseType);
 
                     var isHomeWorkDone = homeWorkQuestionCount.CorrectCount == homeWorkQuestionCount.CorrectTotal || homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
                     if (homeWorkQuestionCount.TotalAnswer > homeWorkQuestionCount.TotalQuestion)

@@ -136,9 +136,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     TotalCount = 36,
                     Skill = EnumCourseSkill.Writing,
                     Scores = averageScore,
+                    Total1 = totalScore,
                     TotalQuestion = 2,
                     CountQuestion = 2,
                 };
+
                 skillScores.Add(skillScore);
             }
             else
@@ -148,6 +150,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
                 skillScores.Single().CorrectCount = correcCount;
                 skillScores.Single().Scores = averageScore;
+                skillScores.Single().Total2 = totalScore;
                 sectionGroupResult.CorrectCount = correcCount;
 
                 if (checkSkillMockTest)

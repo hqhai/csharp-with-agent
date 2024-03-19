@@ -18,7 +18,8 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
     [Permission]
@@ -26,12 +27,12 @@ namespace Fsel.Course.Lms.Api.Controllers
     {
         private readonly IMediator _mediator;
         private readonly IClassForumResultRepository _classForumResultRepository;
+
         public ClassForumResultController(IMediator mediator, IClassForumResultRepository classForumResultRepository)
         {
             _mediator = mediator;
             _classForumResultRepository = classForumResultRepository;
         }
-
 
         /// <summary>
         /// Execute-list-query
@@ -121,9 +122,8 @@ namespace Fsel.Course.Lms.Api.Controllers
             return commandResult.GetActionResult();
         }
 
-
         /// <summary>
-        /// Search class forum result 
+        /// Search class forum result
         /// </summary>
         [HttpGet("get-relevant-class-forums")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultModel>>), (int)HttpStatusCode.OK)]

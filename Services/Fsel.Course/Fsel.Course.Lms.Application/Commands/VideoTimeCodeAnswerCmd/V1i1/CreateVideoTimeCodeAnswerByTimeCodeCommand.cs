@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             , DateTimeConverter dateTimeConverter
             , IQuestionRepository questionRepository
             , QuestionConverter questionConverter
-            , CreateTokenHistoryPublisher createTokenHistoryPublisher)
+            , CreateTokenHistoryPublisher createTokenHistoryPublisher
             , ILogger<object> logger)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
