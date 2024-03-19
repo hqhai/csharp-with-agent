@@ -10,9 +10,10 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IEntities;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
-    public class ClassForumResult : Entity, ITokenResult
+    public class ClassForumResult : Entity, ITokenResult, ISubmissionCount
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
@@ -26,6 +27,7 @@ namespace Fsel.Course.Domain.Entities
         }
 
         private int? _wordCount;
+        private EnumMediaType? _mediaType;
 
         public int? WordCount
         {
@@ -76,6 +78,14 @@ namespace Fsel.Course.Domain.Entities
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
 
+        [NotMapped]
+        public EnumMediaType? MediaType
+        {
+            get { return _mediaType.HasValue ? _mediaType : MediaHelper.GetMediaType(ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault()); }
+            set { _mediaType = value; }
+        }
+
+        public EnumSubmissionCount? SubmissionCount { get; set; }
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
