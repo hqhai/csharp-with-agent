@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -140,7 +139,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return methodResult;
             }
 
-            await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, course.CourseType, cancellationToken);
+            var methodHomeWork = await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, course.CourseType, cancellationToken);
+            if (!methodHomeWork.IsOK)
+            {
+                methodResult.AddErrorBadRequest(methodHomeWork.ErrorMessages);
+                return methodResult;
+            }
             methodResult = await _mediator.Send(new GetHomeWorkQuery { HomeWorkId = homeWorkResult.HomeWorkId, LessonResultId = homeWorkResult.LessonResultId, IsShowSubStatus = request.IsSubmit }, cancellationToken);
             return methodResult;
         }
@@ -243,9 +247,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     var token = await GetToken(homeWorkResult.SubmissionCount, courseType);
 
                     var isHomeWorkDone = homeWorkQuestionCount.CorrectCount == homeWorkQuestionCount.CorrectTotal || homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
-                    if (homeWorkQuestionCount.TotalAnswer != homeWorkQuestionCount.TotalQuestion)
+                    if (homeWorkQuestionCount.TotalAnswer > homeWorkQuestionCount.TotalQuestion)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.QuestionNotCompleted));
+                        methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.DuplicateAnswers));
+                        return methodResult;
+                    }
+                    if (homeWorkQuestionCount.TotalAnswer < homeWorkQuestionCount.TotalQuestion)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.NotAnsweredEnough));
                         return methodResult;
                     }
 
@@ -332,7 +341,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 
             if (listQuestion.Any(x => x.TotalQuestion > 1))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.QuestionNotCompleted), nameof(listQuestion));
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsDuplicate), nameof(listQuestion));
                 return methodResult;
             }
 
