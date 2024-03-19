@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20240318110056_AddTable_ChatbotTokenConfig")]
-    partial class AddTable_ChatbotTokenConfig
+    [Migration("20240319083025_AddTable_ChatBotConfig")]
+    partial class AddTable_ChatBotConfig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -320,11 +320,6 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<string>("Skill")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -382,7 +377,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<int>("Grammar")
+                    b.Property<int>("GrammarToken")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -395,7 +390,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<int>("ReadingToken")
                         .HasColumnType("int");
 
-                    b.Property<int>("Speaking")
+                    b.Property<int>("SpeakingToken")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -411,10 +406,10 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<int>("Vocabulary")
+                    b.Property<int>("VocabularyToken")
                         .HasColumnType("int");
 
-                    b.Property<int>("Writing")
+                    b.Property<int>("WritingToken")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

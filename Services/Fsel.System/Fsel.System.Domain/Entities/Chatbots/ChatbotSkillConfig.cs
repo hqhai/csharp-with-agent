@@ -11,8 +11,6 @@ namespace Fsel.System.Domain.Entities.Chatbots
 
     public class ChatbotSkillConfig : Entity
     {
-        public EnumCourseSkill Skill { get; set; }
-
         /// <summary>
         /// Config Real
         /// </summary>

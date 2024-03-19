@@ -2,8 +2,6 @@
 
 namespace Fsel.System.Infrastructure.Configs
 {
-    using Fsel.Common.Helpers;
-    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities.Chatbots;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,11 +11,6 @@ namespace Fsel.System.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<ChatbotSkillConfig> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Property(e => e.Skill)
-                    .HasMaxLength(100)
-                    .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumCourseSkill>());
             builder.HasOne(a => a.ChatbotConfig)
                    .WithMany(b => b.ChatbotSkillConfigs)
                    .HasForeignKey(b => b.ChatbotConfigId)

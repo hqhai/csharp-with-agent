@@ -9,52 +9,9 @@ namespace Fsel.System.Domain.Models.EntityModels
     {
         public IList<SkillConfigModel>? Configs { get; set; }
         public string? AiConfig { get; set; }
-        //public IList<ChatbotSkillVocabularyModel>? VocabularyModels { get; set; }
-        //public ChatbotSkillGrammarModel? GrammarModel { get; set; }
-        //public ChatbotSkillReadingListeningModel? ReadingModel { get; set; }
-        //public ChatbotSkillReadingListeningModel? ListeningModel { get; set; }
-        //public ChatbotSkillWritingSpeakingModel? WritingModel { get; set; }
-        //public ChatbotSkillWritingSpeakingModel? SpeakingModel { get; set; }
     }
 
-
-    #region OldModel
-    public class ChatbotSkillVocabularyModel
-    {
-        public string? Name { get; set; }
-        public IList<string>? Items { get; set; }
-    }
-
-    public class ChatbotSkillGrammarModel
-    {
-        public string? Name { get; set; }
-
-        public IList<ChatBotGrammarItemModel>? Items { get; set; }
-
-    }
-
-    public class ChatBotGrammarItemModel
-    {
-        public IList<string>? Items { get; set; }
-
-        public EnumGrammarPromptType Type { get; set; }
-    }
-
-
-    public class ChatbotSkillReadingListeningModel
-    {
-        public string? Name { get; set; }
-        public ChatbotSkillVocabularyModel? Vocabs { get; set; }
-        public ChatbotSkillGrammarModel? Grammars { get; set; }
-    }
-
-    public class ChatbotSkillWritingSpeakingModel
-    {
-        public ChatbotSkillGrammarModel? Grammars { get; set; }
-    }
-    #endregion
-
-
+    #region ChildClass
     public class SkillConfigModel
     {
         public EnumCourseSkill? SkillConfigType { get; set; }
@@ -74,4 +31,5 @@ namespace Fsel.System.Domain.Models.EntityModels
         public string? Content { get; set; }
 
     }
+    #endregion
 }
