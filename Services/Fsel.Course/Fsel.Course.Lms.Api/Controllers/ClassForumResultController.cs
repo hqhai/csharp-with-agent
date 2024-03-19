@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get student class forum result
         /// </summary>
         [HttpGet("get-current-class-forum")]
-        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ClassForumByStudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetCurrentClassForum([FromQuery] GetCurrentClassForumQuery query)
         {

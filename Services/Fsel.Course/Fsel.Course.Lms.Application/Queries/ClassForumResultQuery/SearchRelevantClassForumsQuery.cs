@@ -112,10 +112,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     CreatedDate = x.CreatedDate,
                     CreatedFullName = x.CreatedFullName,
                     ClassForumScores = _mapper.Map<IList<ClassForumScoreModel>>(x.ClassForumScores.OrderBy(x => x.CreatedDate)),
-                    ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(x.ClassForumResultFiles)
-                    CreatedDate = x.CreatedDate,
-                    CreatedFullName = x.CreatedFullName,
-                    ClassForumScores = _mapper.Map<IList<ClassForumScoreModel>>(x.ClassForumScores.OrderBy(x => x.CreatedDate)),
                     ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(x.ClassForumResultFiles),
                     TokenLastTime = x.TokenLastTime,
                     TokenFirstTime = x.TokenFirstTime,
