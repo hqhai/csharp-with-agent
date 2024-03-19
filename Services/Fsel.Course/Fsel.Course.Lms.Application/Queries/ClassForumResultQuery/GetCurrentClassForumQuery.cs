@@ -24,12 +24,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetCurrentClassForumQuery : IRequest<MethodResult<ClassForumResultModel>>
+    public class GetCurrentClassForumQuery : IRequest<MethodResult<ClassForumByStudentModel>>
     {
         public Guid LessonResultId { get; set; }
     }
 
-    public class GetCurrentClassForumQueryHandler : IRequestHandler<GetCurrentClassForumQuery, MethodResult<ClassForumResultModel>>
+    public class GetCurrentClassForumQueryHandler : IRequestHandler<GetCurrentClassForumQuery, MethodResult<ClassForumByStudentModel>>
     {
         private readonly IMapper _mapper;
         private readonly IClassForumResultRepository _classForumResultRepository;
@@ -65,10 +65,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _studentFeedbackRepository = studentFeedbackRepository;
         }
 
-        public async Task<MethodResult<ClassForumResultModel>> Handle(GetCurrentClassForumQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassForumByStudentModel>> Handle(GetCurrentClassForumQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
+            MethodResult<ClassForumByStudentModel> methodResult = new MethodResult<ClassForumByStudentModel>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
@@ -94,60 +94,52 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 return methodResult;
             }
 
-            var classForum = await _classForumRepository.Queryable.Where(x => x.LessonId == lessonResult.LessonId).FirstOrDefaultAsync(cancellationToken);
+            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).Where(x => x.LessonId == lessonResult.LessonId).FirstOrDefaultAsync(cancellationToken);
 
-            if (classForum == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
-                return methodResult;
-            }
+            var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);
 
             var classForumResult = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Include(x => x.ClassForum)
-                .ThenInclude(x => x!.ClassForumFiles)
-                .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum.Id && x.Status != EnumClassForumResultStatus.Draft)
+                .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum!.Id && x.Status != EnumClassForumResultStatus.Draft)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-            if (classForumResult == null)
+            classForumByStudentModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);
+            var classForumResultModel = classForumByStudentModel.ClassForumResultCurrentStudent;
+
+            if (classForumResultModel != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
-                return methodResult;
-            }
+                classForumResultModel.IsTeacherFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultModel.Id && x.Type == EnumStudentFeedBackType.Teacher, cancellationToken);
+                classForumResultModel.IsAIFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultModel.Id && x.Type == EnumStudentFeedBackType.AI, cancellationToken);
 
-            var classForumResultModel = _mapper.Map<ClassForumResultModel>(classForumResult);
-
-            classForumResultModel.IsTeacherFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultModel.Id && x.Type == EnumStudentFeedBackType.Teacher, cancellationToken);
-            classForumResultModel.IsAIFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultModel.Id && x.Type == EnumStudentFeedBackType.AI, cancellationToken);
-
-            IList<Guid> classForumResultIds = new List<Guid>()
-            {
-                classForumResult.Id
-            };
-            var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResultIds.ToList(), UserId = _authContext.CurrentUserId });
-            var actions = actionsResult.Content?.Result;
-
-            if (actions != null)
-            {
-                GetListNotificationRemindQuery query = new GetListNotificationRemindQuery
+                IList<Guid> classForumResultIds = new List<Guid>()
                 {
-                    ObjectIds = classForumResultIds.ToList(),
-                    Status = EnumNotificationRemindStatus.Off
+                    classForumResult!.Id
                 };
+                var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResultIds.ToList(), UserId = _authContext.CurrentUserId });
+                var actions = actionsResult.Content?.Result;
 
-                var notificationRemind = await _notificationService.GetListNotificationRemind(query);
-                var notificationTurnOff = notificationRemind.Content?.Result;
+                if (actions != null)
+                {
+                    GetListNotificationRemindQuery query = new GetListNotificationRemindQuery
+                    {
+                        ObjectIds = classForumResultIds.ToList(),
+                        Status = EnumNotificationRemindStatus.Off
+                    };
 
-                var action = actions.FirstOrDefault(x => x.ObjectId == classForumResultModel.Id);
-                classForumResultModel.CommentNumber = action?.CommentNumber;
-                classForumResultModel.LikeNumber = action?.LikeNumber;
-                classForumResultModel.IsLiked = action?.IsLiked;
-                classForumResultModel.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == classForumResultModel.Id);
-                classForumResultModel.CourseLevel = student?.CourseLevel ?? default;
+                    var notificationRemind = await _notificationService.GetListNotificationRemind(query);
+                    var notificationTurnOff = notificationRemind.Content?.Result;
+
+                    var action = actions.FirstOrDefault(x => x.ObjectId == classForumResultModel.Id);
+                    classForumResultModel.CommentNumber = action?.CommentNumber;
+                    classForumResultModel.LikeNumber = action?.LikeNumber;
+                    classForumResultModel.IsLiked = action?.IsLiked;
+                    classForumResultModel.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == classForumResultModel.Id);
+                    classForumResultModel.CourseLevel = student.CourseLevel;
+                }
             }
 
-            methodResult.Result = classForumResultModel;
+            methodResult.Result = classForumByStudentModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
