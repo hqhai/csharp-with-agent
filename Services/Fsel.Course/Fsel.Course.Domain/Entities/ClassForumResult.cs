@@ -27,6 +27,7 @@ namespace Fsel.Course.Domain.Entities
         }
 
         private int? _wordCount;
+        private EnumMediaType? _mediaType;
 
         public int? WordCount
         {
@@ -79,7 +80,10 @@ namespace Fsel.Course.Domain.Entities
 
         [NotMapped]
         public EnumMediaType? MediaType
-        { get { return MediaHelper.GetMediaType(ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault()); } }
+        {
+            get { return _mediaType.HasValue ? _mediaType : MediaHelper.GetMediaType(ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault()); }
+            set { _mediaType = value; }
+        }
 
         public EnumSubmissionCount? SubmissionCount { get; set; }
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();

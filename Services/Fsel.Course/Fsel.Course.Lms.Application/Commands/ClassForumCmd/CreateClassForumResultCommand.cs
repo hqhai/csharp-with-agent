@@ -130,6 +130,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             FilePath = x,
                         }).ToList();
                     }
+                    classForumResult.MediaType = MediaHelper.GetMediaType(classForumResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
+
                     classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType);
                     classForumResult = _classForumResultRepository.Add(classForumResult);
                     if (classForumResult.Status == EnumClassForumResultStatus.Draft)
@@ -154,7 +156,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             FilePath = x,
                         }).ToList();
                     }
-
                     classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType);
                     classForumResult = _classForumResultRepository.Update(classForumResult);
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

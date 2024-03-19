@@ -9,7 +9,7 @@ namespace Fsel.Course.Domain.Entities
 
     public class HomeWorkResult : BaseScoreResult, ITokenResult, ISubmissionCount
     {
-        private EnumSubmissionCount? SUBMISSIONCOUNT { get; set; }
+        private EnumSubmissionCount? _submissionCount;
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid HomeWorkId { get; set; }
@@ -26,9 +26,9 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                return SUBMISSIONCOUNT.HasValue ? EnumSubmissionCount.FirstSubmit : SUBMISSIONCOUNT;
+                return _submissionCount.HasValue ? _submissionCount : EnumSubmissionCount.FirstSubmit;
             }
-            set { SUBMISSIONCOUNT = value; }
+            set { _submissionCount = value; }
         }
 
         public ICollection<HomeWorkAnswer> HomeWorkAnswers { get; set; } = new List<HomeWorkAnswer>();
