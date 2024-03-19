@@ -80,9 +80,11 @@ namespace Fsel.Course.Infrastructure.Common
 
         public bool IsShortAnswer(string? question, string? answer)
         {
+            string pattern = "[,.]";
+            string replacement = "";
             string q = " " + question.ReplaceWord() + " ";
-            string a = " " + answer.ReplaceWord() + " ";
-            return a.Contains(q, StringComparison.OrdinalIgnoreCase);
+            var strs = answer.ReplaceWord().StringSplitToList().Select(x => " " + x.ReplaceWord(pattern, replacement) + " ").ToList();
+            return strs.Any(x => x.Contains(q, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
