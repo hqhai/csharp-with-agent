@@ -103,7 +103,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 return true;
             }
             var sectionGroupResult = _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefault(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId);
-
+            if (sectionGroupResult == null)
+            {
+                return true;
+            }
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { mockTestResult.StudentId });
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -133,12 +136,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 skillScore = new SkillScores
                 {
                     CorrectCount = totalScore,
-                    TotalCount = 36,
                     Skill = EnumCourseSkill.Writing,
                     Scores = averageScore,
-                    Total1 = totalScore,
                     TotalQuestion = 2,
                     CountQuestion = 2,
+                    TotalCount = s_correctTotalWriting,
                 };
 
                 skillScores.Add(skillScore);
@@ -150,7 +152,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
                 skillScores.Single().CorrectCount = correcCount;
                 skillScores.Single().Scores = averageScore;
-                skillScores.Single().Total2 = totalScore;
                 sectionGroupResult.CorrectCount = correcCount;
 
                 if (checkSkillMockTest)
@@ -167,7 +168,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             if (mockTestAnswer != null)
             {
                 mockTestAnswer.GradingAlFeedback = gradingAiFeedBack;
-
                 _mockTestAnswerRepository.Update(mockTestAnswer);
                 await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -176,8 +176,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                 if (checkSkillMockTest)
                 {
+                    var sections = await _sectionRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
                     _mockTestResultRepository.Update(mockTestResult);
-                    if (section.DisplayOrder != 1)
+                    if (sections.IndexOf(section) == 1)
                     {
                         await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                         await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
