@@ -13,6 +13,29 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public PayooConfig? PayooConfig { get; set; }
         public new Services? Services { get; set; }
         public UrBoxConfig? UrBoxConfig { get; set; }
+        public PurchaseSettings? PurchaseSettings { get; set; }
+        public ResourceContent? ResourceContent { get; set; }
+    }
+
+    public class PurchaseSettings
+    {
+        public AppStore? AppStore { get; set; }
+    }
+
+    public class AppStore
+    {
+        public string? AppId { get; set; }
+        public string? BundleId { get; set; }
+        public string? KeyId { get; set; }
+        public string? Audience { get; set; }
+        public string? Issuer { get; set; }
+    }
+
+    public class ResourceContent
+    {
+        public string? LmsWebsiteUrl { get; set; }
+        public string? HotLine { get; set; }
+        public string? Email { get; set; }
     }
 
     public class ConstantUrl
@@ -57,6 +80,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public string? SystemApiUrl { get; set; }
         public string? UrBoxApiUrl { get; set; }
         public string? PayooApiUrl { get; set; }
+        public string? AppStoreApiUrl { get; set; }
     }
 
     public class Otp

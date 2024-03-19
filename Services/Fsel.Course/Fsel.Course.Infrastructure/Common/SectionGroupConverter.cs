@@ -431,8 +431,9 @@ namespace Fsel.Course.Infrastructure.Common
         private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
         {
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
+            var remainingTime = sectionGroup.ExecutionTime - sectionGroupResult.WorkingTime;
             sectionGroupResultDto.IsFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == sectionGroupResult.Id);
-            sectionGroupResultDto.RemainingTime = sectionGroup.ExecutionTime - sectionGroupResult.WorkingTime;
+            sectionGroupResultDto.RemainingTime = remainingTime > 0 ? remainingTime : default;
             return sectionGroupResultDto;
         }
 

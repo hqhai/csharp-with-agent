@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
     using Fsel.Identity.Application.Queues.Publishers;
+    using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Application.Services.TrainingService;
@@ -17,11 +18,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Shared.Helpers;
 
     public class CreateStudentFocusTimeCommand : CreateStudentFocusTimeCommandModel, IRequest<MethodResult<StudentFocusTimeModel>>
     {
@@ -31,6 +33,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     {
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
+        private readonly ILmsCourseService _lmsCourseService;
         private readonly IStudentFocusTimeRepository _studentFocusTimeRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly AuthContext _authContext;
@@ -38,11 +41,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
 
-        public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher,
+        public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, ILmsCourseService lmsCourseService, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher,
             ITrainingService trainingService)
         {
             _mediator = mediator;
             _mapper = mapper;
+            _lmsCourseService = lmsCourseService;
             _studentFocusTimeRepository = studentFocusTimeRepository;
             _studentRepository = studentRepository;
             _authContext = authContext;
@@ -71,7 +75,6 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-
 
             //Thực hiện các hành động lưu xuống database , gửi lên websocket
             await _studentFocusTimeRepository.ExecuteTransactionAsync(async () =>
@@ -107,10 +110,19 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                       studentFocusTime.IsEstablished
                     )
                     {
+                        var courseResult = await _lmsCourseService.GetCourseStudied();
+                        var course = courseResult.Content?.Result;
+
+                        if (!courseResult.IsSuccessStatusCode)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError));
+                            return methodResult;
+                        }
                         var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
                         {
                             Feature = EnumTokenFeature.FocusMode,
-                            Mission = EnumTokenMission.FocusTime
+                            Mission = EnumTokenMission.FocusMode,
+                            CourseType = course?.CourseType
                         });
                         var tokenConfigResult = tokenConfig.Content?.Result;
 
@@ -120,12 +132,13 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                         var checkSuperFireMode = await _mediator.Send(new CheckSuperFireModeQuery());
                         var isSuperMode = checkSuperFireMode.Result;
 
-                        var targetConfig = tokenConfigResult.GetTokenNumber<TokenFocusTime>(isSuperMode);
-                        var targetNumber = targetConfig?.FocusTimes?.FirstOrDefault(x => x.FocusTimeId == systemConfigMap.Id)?.Number;
+                        var tokenConfigFocusModes = tokenConfigResult.GetTokenConfig<IList<TokenConfigFocusModes>>();
+                        var targetNumber = tokenConfigFocusModes?.Where(x => x.FocusTimeId == systemConfigMap.Id)?.Max(x => x.BaseValue);
 
-                        if (targetNumber.HasValue)
+                        if (targetNumber.HasValue && !studentFocusTime.IsReceivedToken)
                         {
                             student.NumberOfToken += targetNumber.Value;
+                            studentFocusTime.IsReceivedToken = true;
                         }
                         _studentRepository.Update(student);
                         await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -149,25 +162,27 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
             IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>();
             var categoryToElement = EnumQuestBoardCategory.ThirtyMinutesFocusMode;
-
             switch (targetTime)
             {
                 case (double)EnumQuestBoardFocusMode.FocusModeThirtyMinutes:
                     categoryToElement = EnumQuestBoardCategory.ThirtyMinutesFocusMode;
                     break;
+
                 case (double)EnumQuestBoardFocusMode.FocusModeSixtyMinutes:
                     categoryToElement = EnumQuestBoardCategory.SixtyMinutesFocusMode;
                     break;
+
                 case (double)EnumQuestBoardFocusMode.FocusModeNinetyMinutes:
                     categoryToElement = EnumQuestBoardCategory.NinetyMinutesFocusMode;
                     break;
+
                 case (double)EnumQuestBoardFocusMode.FocusModeOneHundredTwentytyMinutes:
                     categoryToElement = EnumQuestBoardCategory.OneHundredTwentytyMinutesFocusMode;
                     break;
+
                 case (double)EnumQuestBoardFocusMode.FocusModeOneHundredEightyMinutes:
                     categoryToElement = EnumQuestBoardCategory.OneHundredEightyMinutesFocusMode;
                     break;
-
             };
             categories.Add(categoryToElement);
 
@@ -185,6 +200,5 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
             }
         }
-
     }
 }

@@ -6,7 +6,7 @@ namespace Fsel.Shared.Enums
 
     public enum EnumCourseLevel
     {
-        [Description("Think Starter")]
+        [Description("Think A1")]
         A1,
 
         [Description("Think A2")]

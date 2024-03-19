@@ -154,57 +154,43 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 finalTestResult = await GetFinalTestResult(sectionGroupResults, finalTestResult);
-                await UpdateUserToken(finalTestResult).ConfigureAwait(false);
+                await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+                {
+                    NumberOfToken = finalTestResult.TokenFirstTime ?? default,
+                    StudentId = finalTestResult.StudentId,
+                }).ConfigureAwait(false);
                 _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private async Task<FinalTestResult> GetTokenFinalTestResult(FinalTestResult finalTestResult)
+        private async Task<long?> GetTokenConfig()
         {
-            var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
-            var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+            var getTokenQuery = new GetTokenQueryModel
             {
-                Feature = EnumTokenFeature.FinalTest,
-                Missions = string.Join(",", misstions)
-            });
-            var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
-            if (!tokenConfigResults.IsSuccessStatusCode || !isSuperFireModeResult.IsSuccessStatusCode)
+                Feature = EnumTokenFeature.Test,
+                Mission = EnumTokenMission.FinalTest,
+                CourseType = EnumCourseType.Academic
+            };
+            var tokenConfigResults = await _systemService.GetTokenConfigAsync(getTokenQuery);
+            if (!tokenConfigResults.IsSuccessStatusCode)
             {
-                return finalTestResult;
+                return default;
             }
-            var tokenConfigs = tokenConfigResults.Content?.Result;
-            var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
-            var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
-            var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
-            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
-
-            finalTestResult.TokenDone = configDone?.Number;
-            finalTestResult.TokenHighestStreak = configHighestStreak?.Number * finalTestResult.HighestStreak;
-            finalTestResult.TokenSuperFire = configSuperFire?.Number;
-            return finalTestResult;
-        }
-
-        private async Task UpdateUserToken(FinalTestResult finalTestResult)
-        {
-            var tokens = new List<int?> { finalTestResult.TokenDone, finalTestResult.TokenHighestStreak, finalTestResult.TokenQuestionReward, finalTestResult.TokenSuperFire };
-            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-            {
-                NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
-                StudentId = finalTestResult.StudentId,
-            }).ConfigureAwait(false);
+            var tokenConfig = tokenConfigResults?.Content?.Result;
+            return tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
         }
 
         private async Task<FinalTestResult> GetFinalTestResult(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult)
         {
-            var skillScores = sectionGroupResults.SelectMany(x => x.SkillScores!).ToList();
+            var skillScores = sectionGroupResults.SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
             finalTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
             finalTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
             finalTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             finalTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             finalTestResult.Status = EnumResultStatus.Done;
             finalTestResult.SkillScores = skillScores;
-            finalTestResult = await GetTokenFinalTestResult(finalTestResult);
+            finalTestResult.TokenFirstTime = (int)(await GetTokenConfig() * finalTestResult.CorrectCount);
             return finalTestResult;
         }
 

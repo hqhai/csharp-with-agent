@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 return methodResult;
             }
 
-            if (mockTestResult.MockTestScores != null)
+            if (mockTestResult.MockTestScores != null && mockTestResult.MockTestScores.Any())
             {
                 mockTestResult.IsViewed = true;
                 _mockTestResultRepository.Update(mockTestResult);
@@ -85,9 +85,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             }
 
             var mockTestResultModel = GetMockTestResult(mockTestResult);
-            if (mockTestResult.SkillScores != null)
+            if (mockTestResult.SkillScores != null && mockTestResult.SkillScores.Any())
             {
                 mockTestResultModel.Scores = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores));
+            }
+            if (mockTest.MockTestSections.Any())
+            {
                 mockTestResultModel.IsTeacherGraded = await _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
             }
 

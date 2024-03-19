@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService.Models
     public class GetTokenConfigsQueryModel
     {
         public EnumTokenFeature Feature { get; set; }
+        public EnumCourseType CourseType { get; set; }
         public string? Missions { get; set; }
     }
 }

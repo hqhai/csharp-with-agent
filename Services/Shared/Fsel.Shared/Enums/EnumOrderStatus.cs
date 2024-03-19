@@ -6,6 +6,7 @@ namespace Fsel.Shared.Enums
     {
         New,
         Payment,
-        Reject
+        Reject,
+        Fail
     }
 }

@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class CourseTeacherModel : BaseModel
     {
@@ -13,6 +14,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? FullName { get; set; }
 
         private string? _avatarPath;
+
         public string? AvatarPath
         {
             set { _avatarPath = value; }
@@ -28,5 +30,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Experience { get; set; }
 
         public string? Strength { get; set; }
+        public string? Certifications { get; set; }
+
+        public IList<EnumCourseLevel>? TeacherLevels { get; set; }
     }
 }

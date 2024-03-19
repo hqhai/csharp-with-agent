@@ -65,7 +65,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-            var changeStatusOrder = await _mediator.Send(new ChangeStatusOrderCommand { OrderId = order.Id, OrderStatus = EnumOrderStatus.Payment, PackageId = order.PackageId }, cancellationToken).ConfigureAwait(false);
+            var changeStatusOrder = await _mediator.Send(new ChangeStatusOrderCommand { OrderId = order.Id, OrderStatus = EnumOrderStatus.Payment }, cancellationToken).ConfigureAwait(false);
             if (!changeStatusOrder.IsOK)
             {
                 methodResult.AddError(changeStatusOrder.ErrorMessages);

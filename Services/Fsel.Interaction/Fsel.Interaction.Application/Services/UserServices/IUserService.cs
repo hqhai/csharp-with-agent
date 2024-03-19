@@ -12,25 +12,25 @@ namespace Fsel.Interaction.Application.Services.UserServices
 
     public interface IUserService
     {
-        [Post("/student/get-by-user-ids")]
+        [Post("/v1/student/get-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByUserIdsAsync([Body] IList<Guid> ids);
 
-        [Get("/student/get-by-user-id/{id}")]
+        [Get("/v1/student/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 
-        [Post("/student/get-by-student-ids")]
+        [Post("/v1/student/get-by-student-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid> studentIds);
 
-        [Post("/user/get-users-by-ids")]
+        [Post("/v1/user/get-users-by-ids")]
         Task<IApiResponse<MethodResult<IList<HumanProfileModel>>>> GetUsersByIdsAsync([Body] GetUsersByIdsQueryModel model);
 
-        [Get("/user/get-user-by-id")]
+        [Get("/v1/user/get-user-by-id")]
         Task<IApiResponse<MethodResult<HumanProfileModel>>> GetUserByIdAsync([Query] string? id);
 
-        [Get("/student/execute-list-query")]
+        [Get("/v1/student/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> ExecuteListStudentQueryAsync([Query] BaseQueryModel query);
 
-        [Put("/student/update-student-token")]
+        [Put("/v1/student/update-student-token")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
 
     }

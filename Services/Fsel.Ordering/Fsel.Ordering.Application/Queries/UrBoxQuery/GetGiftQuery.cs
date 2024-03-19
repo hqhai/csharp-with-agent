@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Services.UrBoxService;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
@@ -15,18 +16,19 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
     public class GetGiftQuery : IRequest<MethodResult<GiftDetailModel>>
     {
         public string? Id { get; set; }
-        public string? Language { get; set; }
     }
 
     public class GetTheGiftQueryHandler : IRequestHandler<GetGiftQuery, MethodResult<GiftDetailModel>>
     {
         private readonly IUrBoxService _urBoxService;
         private readonly AppSetting _appSetting;
+        private readonly LanguageContext _languageContext;
 
-        public GetTheGiftQueryHandler(IUrBoxService urBoxService, AppSetting appSetting)
+        public GetTheGiftQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, LanguageContext languageContext)
         {
             _urBoxService = urBoxService;
             _appSetting = appSetting;
+            _languageContext = languageContext;
         }
 
         public async Task<MethodResult<GiftDetailModel>> Handle(GetGiftQuery request, CancellationToken cancellationToken)
@@ -39,7 +41,7 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
                 AppSecret = _appSetting.UrBoxConfig?.AppSecret,
                 AppId = _appSetting.UrBoxConfig?.AppId,
                 Id = request.Id,
-                Language = request.Language,
+                Language = _languageContext.CurrentCountryInfo?.CultureCode?.Substring(0, 2),
             });
 
             var theGift = theGiftResult.Content;

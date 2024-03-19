@@ -11,8 +11,6 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys
 
         public Guid? UserId { get; set; }
 
-        public bool? IsPilot { get; set; }
-
         [EmailValid]
         public string? Email { get; set; }
     }

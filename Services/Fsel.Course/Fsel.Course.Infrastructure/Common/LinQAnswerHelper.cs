@@ -5,9 +5,9 @@ namespace Fsel.Course.Infrastructure.Common
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
+    using Fsel.Shared.Helpers;
 
     public class LinQAnswerHelper
     {
@@ -64,13 +64,13 @@ namespace Fsel.Course.Infrastructure.Common
                     string[] questionWords = words[index].Split('|');
                     foreach (var item in questionWords)
                     {
-                        if (word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == item.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
+                        if (word.ReplaceWord() == item.ReplaceWord())
                         {
                             return true;
                         }
                     }
                 }
-                else if (words[index].Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
+                else if (words[index].ReplaceWord() == word.ReplaceWord())
                 {
                     return true;
                 }
@@ -80,8 +80,8 @@ namespace Fsel.Course.Infrastructure.Common
 
         public bool IsShortAnswer(string? question, string? answer)
         {
-            string q = " " + question?.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
-            string a = " " + answer?.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            string q = " " + question.ReplaceWord() + " ";
+            string a = " " + answer.ReplaceWord() + " ";
             return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
     }
