@@ -338,7 +338,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 }
                 if (!string.IsNullOrEmpty(item.Human?.Email))
                 {
-                    await SendWeekly(item.Human?.Email, weeklyReport, cancellationToken);
+                    await SendWeekly(item.Human?.Email, item.ParentEmail, weeklyReport, cancellationToken);
                 }
             }
             return methodResult;
@@ -423,7 +423,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             }
         }
 
-        private async Task SendWeekly(string? email, WeeklyReportModel model, CancellationToken cancellationToken)
+        private async Task SendWeekly(string? email, string? parentEmail, WeeklyReportModel model, CancellationToken cancellationToken)
         {
             var sendResult = await _mediator.Send(new SenderCommand
             {
@@ -431,6 +431,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 Subject = GetSubjectEmail(model.SenderTemplate),
                 Params = model,
                 Template = model.SenderTemplate,
+                CcEmail = parentEmail,
             }, cancellationToken).ConfigureAwait(false);
         }
 

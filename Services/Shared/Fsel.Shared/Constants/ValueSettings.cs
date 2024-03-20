@@ -41,5 +41,16 @@ namespace Fsel.Shared.Constants
             public const double HomeWorkRatio = 48;
             public const double ClassForumRatio = 32;
         }
+
+        public static class PromptNameTemplate
+        {
+            public const string ProgramName = "Program Name";
+            public const string CourseName = "Course Name";
+            public const string CEFRLevel = "Course CEFR Level";
+            public const string UnitTopic = "Unit Topic";
+            public const string UnitNumber = "Unit Number";
+            public const string GrammarTopicList = "Grammar Topic List";
+            public const string VocabularyLists = "Vocabulary Lists";
+        }
     }
 }

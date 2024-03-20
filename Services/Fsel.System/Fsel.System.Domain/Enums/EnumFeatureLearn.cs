@@ -7,5 +7,7 @@ namespace Fsel.System.Domain.Enums
         ClassForum,
         HomeWork,
         VideoLesson,
+        SkillMockTest,
+        FullMockTest
     }
 }
