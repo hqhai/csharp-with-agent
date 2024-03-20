@@ -3234,6 +3234,99 @@ namespace Fsel.System.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TokenHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("ConfigStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Feature")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<double>("InitialToken")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Mission")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("ObjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("RemainToken")
+                        .HasColumnType("float");
+
+                    b.Property<Guid?>("TokenConfigId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("VolatileToken")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenConfigId");
+
+                    b.ToTable("TokenHistories");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalLog", b =>
                 {
                     b.HasOne("Fsel.System.Domain.Entities.ApprovalTimeConfig", "ApprovalTimeConfig")
@@ -3330,6 +3423,16 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Navigation("Location");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TokenHistory", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.TokenConfig", "TokenConfig")
+                        .WithMany("TokenHistories")
+                        .HasForeignKey("TokenConfigId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("TokenConfig");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.ApprovalTimeConfig", b =>
                 {
                     b.Navigation("ApprovalLogs");
@@ -3364,6 +3467,11 @@ namespace Fsel.System.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoard", b =>
                 {
                     b.Navigation("QuestBoardStudents");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.TokenConfig", b =>
+                {
+                    b.Navigation("TokenHistories");
                 });
 #pragma warning restore 612, 618
         }

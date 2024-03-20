@@ -25,6 +25,7 @@ namespace Fsel.Shared.Constants
                 public const string UpdateStatusTrialStudent = $"{KeyQueue}_UpdateStatusTrialStudent";
                 public const string SetTimeToSendReviewFsel = $"{KeyQueue}_SetTimeToSendReviewFsel";
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
+                public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
             }
         }
 
@@ -86,6 +87,7 @@ namespace Fsel.Shared.Constants
                 public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
                 public const string MockTestAnwserResponse = $"{KeyQueue}_MockTestAnwserResponse";
                 public const string WeeklyReport = $"{KeyQueue}_WeeklyReport";
+                public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
             }
         }
 

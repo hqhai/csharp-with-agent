@@ -11,6 +11,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.UrBoxQuery;
+    using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UrBoxService;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
@@ -22,6 +23,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
 
     public class CreateRedemptionRequestCommand : CreateRedemptionRequestCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
@@ -31,15 +33,17 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     public class CreateRedemptionRequestCommandHandler : IRequestHandler<CreateRedemptionRequestCommand, MethodResult<RedemptionResponseModel>>
     {
         private readonly IUrBoxService _urBoxService;
+        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly AppSetting _appSetting;
         private readonly IMediator _mediator;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IOrderTransactionRepository _orderTransactionRepository;
 
-        public CreateRedemptionRequestCommandHandler(IUrBoxService urBoxService, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IOrderTransactionRepository orderTransactionRepository)
+        public CreateRedemptionRequestCommandHandler(IUrBoxService urBoxService, CreateTokenHistoryPublisher createTokenHistoryPublisher, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IOrderTransactionRepository orderTransactionRepository)
         {
             _urBoxService = urBoxService;
+            _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _appSetting = appSetting;
             _mediator = mediator;
             _authContext = authContext;
@@ -79,8 +83,8 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 methodResult.AddError(studentResult.Error);
                 return methodResult;
             }
-
-            var token = studentResult.Content?.Result?.NumberOfToken ?? 0;
+            var student = studentResult.Content?.Result;
+            var token = student?.NumberOfToken ?? default;
 
             var gift = await _mediator.Send(new GetGiftQuery { Id = request.DataBuy.FirstOrDefault()?.PriceId }, cancellationToken).ConfigureAwait(false);
             if (!gift.IsOK)
@@ -161,12 +165,6 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
                 if (createRedemptionRequest.Content?.Status == 200)
                 {
-                    var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new Application.Services.UserService.Models.UpdateStudentByTokenModel { StudentId = studentResult.Content?.Result?.Id ?? default, NumberOfToken = -totalPrice });
-                    if (!updateTokenResult.IsSuccessStatusCode)
-                    {
-                        methodResult.AddError(updateTokenResult.Error);
-                        return methodResult;
-                    }
                     methodResult.Result = createRedemptionRequest.Content;
                 }
                 else
@@ -180,8 +178,38 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
 
                 _orderTransactionRepository.Update(orderTransaction);
                 await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                if (orderTransaction.Status == EnumOrderTransactionStatus.Success)
+                {
+                    var configs = new List<object>();
+
+                    for (int i = 0; i < quantity; i++)
+                    {
+                        var data = new
+                        {
+                            Id = gift.Result.Id,
+                            Title = gift.Result.Title,
+                            Price = price
+                        };
+                        configs.Add(data);
+                    }
+                    var tokenHistorys = new List<TokenHistoryQueueModel>
+                    {
+                        new TokenHistoryQueueModel
+                        {
+                            ObjectId = orderTransaction.Id,
+                            RemainToken = totalPrice,
+                            Feature = EnumTokenFeature.MarketPlace,
+                            Type = EnumTokenHistoryType.Recevived,
+                            UserId = student?.Human?.UserId ?? default,
+                            Config = configs
+                        }
+                    };
+                    await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
+                }
                 return methodResult;
             });
+
             return methodResult;
         }
     }

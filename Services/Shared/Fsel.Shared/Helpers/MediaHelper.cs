@@ -4,9 +4,14 @@ namespace Fsel.Shared.Helpers
 {
     using System.Diagnostics;
     using System.Globalization;
+    using System.Text.RegularExpressions;
+    using Fsel.Shared.Enums;
 
     public static class MediaHelper
     {
+        private const string PATTERNVIDEO = @"\.mp4$|\.avi$|\.mkv$";
+        private const string PATTERNAUDIO = @"\.mp3$|\.wav$|\.ogg$|\.m4a$";
+
         public static int? GetMediaDurationAsync(string? mediaUrl)
         {
             if (string.IsNullOrEmpty(mediaUrl))
@@ -58,6 +63,11 @@ namespace Fsel.Shared.Helpers
                 Console.WriteLine($"MediaHelper.GetMediaDurationAsync: {ex}");
                 return null;
             }
+        }
+
+        public static EnumMediaType? GetMediaType(string? mediaUrl)
+        {
+            return !string.IsNullOrEmpty(mediaUrl) ? (Regex.IsMatch(mediaUrl, PATTERNVIDEO) ? EnumMediaType.Video : Regex.IsMatch(mediaUrl, PATTERNAUDIO) ? EnumMediaType.Audio : default) : default;
         }
     }
 }
