@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.Chatbots
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.IRepositories;
@@ -23,13 +24,13 @@ namespace Fsel.System.Application.Commands.Chatbots
         private readonly IChatbotConfigRepository _chatbotConfigRepository;
         private readonly IMapper _mapper;
 
-        private const string ProgramName = "Program Name";
-        private const string CourseName = "Course Name";
-        private const string CEFRLevel = "CEFR Level";
-        private const string UnitTopic = "Unit Topic";
-        private const string UnitNumber = "Unit Number";
-        private const string GrammarTopicList = "Grammar Topic List";
-        private const string VocabularyLists = "Vocabulary Lists";
+        private readonly string Program_Name = ValueSettings.PromptNameTemplate.ProgramName;
+        private readonly string Course_Name = ValueSettings.PromptNameTemplate.CourseName;
+        private readonly string CEFR_Level = ValueSettings.PromptNameTemplate.CEFRLevel;
+        private readonly string Unit_Topic = ValueSettings.PromptNameTemplate.UnitTopic;
+        private readonly string Unit_Number = ValueSettings.PromptNameTemplate.UnitNumber;
+        private readonly string Grammar_TopicList = ValueSettings.PromptNameTemplate.GrammarTopicList;
+        private readonly string Vocabulary_Lists = ValueSettings.PromptNameTemplate.VocabularyLists;
 
         public SaveChatbotConfigCommandHandler(IChatbotConfigRepository chatbotConfigRepository, IMapper mapper)
         {
@@ -44,21 +45,21 @@ namespace Fsel.System.Application.Commands.Chatbots
 
 
             //Config chung
-            string programConfig = BuildTemplatePrompt(ProgramName, nameof(request.ProgramName), request.ProgramName?.ToString() ?? string.Empty);
-            string courseConfig = BuildTemplatePrompt(CourseName, nameof(request.CourseName), request.CourseName?.ToString() ?? string.Empty);
-            string cefrConfig = BuildTemplatePrompt(CEFRLevel, nameof(request.CEFRLevel), request.CEFRLevel?.ToString() ?? string.Empty);
-            string unitTopicConfig = BuildTemplatePrompt(UnitTopic, nameof(request.UnitTopic), request.UnitTopic?.ToString() ?? string.Empty);
-            string unitNumberConfig = BuildTemplatePrompt(UnitNumber, nameof(request.UnitNumber), request.UnitNumber?.ToString() ?? string.Empty);
+            string programConfig = BuildTemplatePrompt(Program_Name, nameof(request.ProgramName), request.ProgramName?.ToString() ?? string.Empty);
+            string courseConfig = BuildTemplatePrompt(Course_Name, nameof(request.CourseName), request.CourseName?.ToString() ?? string.Empty);
+            string cefrConfig = BuildTemplatePrompt(CEFR_Level, nameof(request.CEFRLevel), request.CEFRLevel?.ToString() ?? string.Empty);
+            string unitTopicConfig = BuildTemplatePrompt(Unit_Topic, nameof(request.UnitTopic), request.UnitTopic?.ToString() ?? string.Empty);
+            string unitNumberConfig = BuildTemplatePrompt(Unit_Number, nameof(request.UnitNumber), request.UnitNumber?.ToString() ?? string.Empty);
             List<string> aiConfig = new List<string> { programConfig, courseConfig, cefrConfig, unitNumberConfig };
 
 
             var vocabConfigs = request.ChatbotSkillConfigs?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Vocabulary)?.Configs ?? new List<SkillConfigModel>();
-            string vocabConfigsPart = BuildTemplateConfigPrompt(VocabularyLists, vocabConfigs, false, true);
-            string vocabConfigsFull = BuildTemplateConfigPrompt(VocabularyLists, vocabConfigs, true, true);
+            string vocabConfigsPart = BuildTemplateConfigPrompt(Vocabulary_Lists, vocabConfigs, false, true);
+            string vocabConfigsFull = BuildTemplateConfigPrompt(Vocabulary_Lists, vocabConfigs, true, true);
 
             var grammarConfigs = request.ChatbotSkillConfigs?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Grammar)?.Configs ?? new List<SkillConfigModel>();
-            string grammarPart = BuildTemplateConfigPrompt(GrammarTopicList, vocabConfigs, false, true);
-            string grammarFull = BuildTemplateConfigPrompt(GrammarTopicList, vocabConfigs, true, true);
+            string grammarPart = BuildTemplateConfigPrompt(Grammar_TopicList, vocabConfigs, false, true);
+            string grammarFull = BuildTemplateConfigPrompt(Grammar_TopicList, vocabConfigs, true, true);
 
             //Config động
             foreach (var item in request.ChatbotSkillConfigs!)
@@ -71,12 +72,12 @@ namespace Fsel.System.Application.Commands.Chatbots
                 }
                 else if (item.Skill == EnumCourseSkill.Grammar)
                 {
-                    aiConfig.Add(BuildTemplateConfigPrompt(GrammarTopicList, item.Configs!, true, true));
+                    aiConfig.Add(BuildTemplateConfigPrompt(Grammar_TopicList, item.Configs!, true, true));
                     item.AiConfig = string.Join("\n", aiConfig);
                 }
                 else
                 {
-                    aiConfig.Add(UnitTopic);
+                    aiConfig.Add(Unit_Topic);
                     aiConfig.Add(grammarPart);
                     aiConfig.Add(vocabConfigsPart);
                     item.AiConfig = string.Join("\n", aiConfig);
@@ -136,11 +137,6 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// <returns></returns>
         private static string BuildTemplatePrompt(string skillType, string customProp, string customValue)
         {
-            if (skillType == CEFRLevel)
-            {
-                skillType = "Course " + skillType;
-            }
-
             string item = ConvertToAiPrompt(customProp, customValue);
             return $"{skillType}:\n" + $"[{item}]\n";
         }
