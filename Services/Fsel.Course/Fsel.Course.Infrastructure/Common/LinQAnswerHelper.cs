@@ -5,6 +5,7 @@ namespace Fsel.Course.Infrastructure.Common
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Helpers;
@@ -83,7 +84,7 @@ namespace Fsel.Course.Infrastructure.Common
             string pattern = "[,.]";
             string replacement = "";
             string q = " " + question.ReplaceWord() + " ";
-            var strs = answer.ReplaceWord().StringSplitToList().Select(x => " " + x.ReplaceWord(pattern, replacement) + " ").ToList();
+            var strs = answer.ReplaceWord().StringSplitToList().Select(x => " " + x.TrimHiddenChars().ToLower(CultureInfo.CurrentCulture).ReplaceWord(pattern, replacement) + " ").ToList();
             return strs.Any(x => x.Contains(q, StringComparison.OrdinalIgnoreCase));
         }
     }
