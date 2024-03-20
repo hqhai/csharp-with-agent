@@ -331,8 +331,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 (parameter.ColorLearn, parameter.CompareLearn) = SendMailHelper.Compare(currentLearn, previousLearn);
 
                 (parameter.ColorOther, parameter.CompareOther) = SendMailHelper.Compare(currentOther, previousOther);
-
-                await SendStudentCompleteUnit(studentId, parameter, course.CourseType, cancellationToken);
             }
             return parameter;
         }
@@ -443,12 +441,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
             var student = studentResult.Content?.Result?.FirstOrDefault();
-            var sendResult = await _mediator.Send(new SenderCommand
+            model.FullName = student?.Human?.FullName;
+
+            await _mediator.Send(new SenderCommand
             {
                 Email = student?.Human?.Email,
                 Subject = GetSubjectEmail(model.SenderTemplate, courseType, model.CompareMockTest),
                 Params = model,
                 Template = model.SenderTemplate,
+                ParentEmail = student?.ParentEmail,
             }, cancellationToken).ConfigureAwait(false);
         }
 
