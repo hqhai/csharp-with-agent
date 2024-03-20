@@ -11,8 +11,10 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/dashboard")]
     [ApiController]
     public class DashboardController : ControllerBase
@@ -52,6 +54,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get Lesson Overview
         /// </summary>
         [HttpGet("lesson-overview")]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<LessonOverviewModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLessonOverview()

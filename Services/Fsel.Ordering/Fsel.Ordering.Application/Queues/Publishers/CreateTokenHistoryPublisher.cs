@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Queues.Publishers
+namespace Fsel.Ordering.Application.Queues.Publishers
 {
     using System.Threading.Tasks;
     using Fsel.Core.Base.Interfaces;
@@ -23,7 +23,7 @@ namespace Fsel.Identity.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.UserQueue.NameQueue.CreateTokenHistory, new TokenHistoryQueuesModel { TokenHistories = request }, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.CreateTokenHistory, new TokenHistoryQueuesModel { TokenHistories = request }, cancellationToken);
         }
     }
 }

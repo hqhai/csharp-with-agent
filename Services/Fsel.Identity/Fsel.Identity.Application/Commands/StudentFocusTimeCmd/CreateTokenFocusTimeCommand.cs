@@ -1,0 +1,207 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
+    using Fsel.Identity.Application.Queues.Publishers;
+    using Fsel.Identity.Application.Services.LmsCourseService;
+    using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SystemService.Model;
+    using Fsel.Identity.Application.Services.TrainingService;
+    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class CreateTokenFocusTimeCommand : IRequest<MethodResult<StudentFocusTimeModel>>
+    {
+    }
+
+    public class CreateTokenFocusTimeCommandHandler : IRequestHandler<CreateTokenFocusTimeCommand, MethodResult<StudentFocusTimeModel>>
+    {
+        private readonly IMapper _mapper;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly ITrainingService _trainingService;
+        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
+        private readonly ILmsCourseService _lmsCourseService;
+        private readonly IStudentFocusTimeRepository _studentFocusTimeRepository;
+        private readonly IStudentRepository _studentRepository;
+        private readonly AuthContext _authContext;
+        private readonly ISystemService _systemService;
+
+        public CreateTokenFocusTimeCommandHandler(IMapper mapper, QuestBoardPublisher questBoardPublisher, ITrainingService trainingService, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILmsCourseService lmsCourseService, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService)
+        {
+            _mapper = mapper;
+            _questBoardPublisher = questBoardPublisher;
+            _trainingService = trainingService;
+            _createTokenHistoryPublisher = createTokenHistoryPublisher;
+            _lmsCourseService = lmsCourseService;
+            _studentFocusTimeRepository = studentFocusTimeRepository;
+            _studentRepository = studentRepository;
+            _authContext = authContext;
+            _systemService = systemService;
+        }
+
+        public async Task<MethodResult<StudentFocusTimeModel>> Handle(CreateTokenFocusTimeCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<StudentFocusTimeModel> methodResult = new MethodResult<StudentFocusTimeModel>();
+
+            var student = await _studentRepository.Queryable.Include(x => x.Human).FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId, cancellationToken);
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(_authContext.CurrentUserId), _authContext.CurrentUserId);
+                return methodResult;
+            }
+            var studentFocusTime = _studentFocusTimeRepository.Queryable.FirstOrDefault(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
+            if (studentFocusTime == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentFocusTime));
+                return methodResult;
+            }
+            if (!studentFocusTime.IsEstablished)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.UserNotEstablished), nameof(studentFocusTime));
+                return methodResult;
+            }
+
+            if (studentFocusTime.IsReceivedToken)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.UserReceivedTokens), nameof(studentFocusTime.IsReceivedToken));
+                return methodResult;
+            }
+            var systemConfig = await _systemService.GetFocusTimeConfig();
+            if (!systemConfig.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(systemConfig));
+                return methodResult;
+            }
+
+            var systemConfigResult = systemConfig?.Content?.Result;
+            if (systemConfigResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+            var systemConfigMap = systemConfigResult.FirstOrDefault(x => x.TargetTime == studentFocusTime.TargetTime);
+            if (systemConfigMap != null && studentFocusTime.ExecuteTime < systemConfigMap!.TargetTime)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.UserNotEnoughTime), nameof(studentFocusTime.ExecuteTime));
+                return methodResult;
+            }
+
+            //Thực hiện các hành động lưu xuống database , gửi lên websocket
+            await _studentFocusTimeRepository.ExecuteTransactionAsync(async () =>
+            {
+                if (systemConfigMap != null && studentFocusTime.ExecuteTime >= systemConfigMap!.TargetTime && studentFocusTime.IsEstablished)
+                {
+                    // làm nhiệm vụ
+                    // await DoQuestBoard(student, request.ExecuteTime, studentFocusTime.TargetTime, cancellationToken);
+
+                    var courseResult = await _lmsCourseService.GetCourseStudied();
+                    if (!courseResult.IsSuccessStatusCode)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError));
+                        return methodResult;
+                    }
+                    var course = courseResult.Content?.Result;
+                    var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+                    {
+                        Feature = EnumTokenFeature.FocusMode,
+                        Mission = EnumTokenMission.FocusMode,
+                        CourseType = course?.CourseType
+                    });
+                    var tokenConfigResult = tokenConfig.Content?.Result;
+                    var tokenConfigFocusModes = tokenConfigResult.GetTokenConfig<IList<TokenConfigFocusModes>>();
+                    var targetNumber = tokenConfigFocusModes?.Where(x => x.FocusTimeId == systemConfigMap.Id)?.Max(x => x.BaseValue);
+
+                    if (targetNumber.HasValue)
+                    {
+                        await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
+                        {
+                            new TokenHistoryQueueModel
+                            {
+                                ObjectId = studentFocusTime.Id,
+                                RemainToken = targetNumber.Value,
+                                Type = EnumTokenHistoryType.Exchanged,
+                                Feature = EnumTokenFeature.FocusMode,
+                                Mission = EnumTokenMission.FocusMode,
+                                UserId = student.Human?.UserId ?? default,
+                            }
+                        }, cancellationToken).ConfigureAwait(false);
+                        studentFocusTime.IsReceivedToken = true;
+                    }
+                }
+                _studentFocusTimeRepository.Update(studentFocusTime);
+                await _studentFocusTimeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = _mapper.Map<StudentFocusTimeModel>(studentFocusTime);
+                return methodResult;
+            });
+
+            return methodResult;
+        }
+
+        public async Task DoQuestBoard(Student student, double executeTime, double targetTime, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(student);
+            var classModel = await _trainingService.GetClassByStudentId(student.Id);
+            var courseId = classModel.Content!.Result!.CourseId;
+
+            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>();
+            var categoryToElement = EnumQuestBoardCategory.ThirtyMinutesFocusMode;
+            switch (targetTime)
+            {
+                case (double)EnumQuestBoardFocusMode.FocusModeThirtyMinutes:
+                    categoryToElement = EnumQuestBoardCategory.ThirtyMinutesFocusMode;
+                    break;
+
+                case (double)EnumQuestBoardFocusMode.FocusModeSixtyMinutes:
+                    categoryToElement = EnumQuestBoardCategory.SixtyMinutesFocusMode;
+                    break;
+
+                case (double)EnumQuestBoardFocusMode.FocusModeNinetyMinutes:
+                    categoryToElement = EnumQuestBoardCategory.NinetyMinutesFocusMode;
+                    break;
+
+                case (double)EnumQuestBoardFocusMode.FocusModeOneHundredTwentytyMinutes:
+                    categoryToElement = EnumQuestBoardCategory.OneHundredTwentytyMinutesFocusMode;
+                    break;
+
+                case (double)EnumQuestBoardFocusMode.FocusModeOneHundredEightyMinutes:
+                    categoryToElement = EnumQuestBoardCategory.OneHundredEightyMinutesFocusMode;
+                    break;
+            };
+            categories.Add(categoryToElement);
+
+            QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
+            {
+                StudentId = student.Id,
+                Categories = categories,
+                AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
+                CourseId = courseId
+            };
+
+            if (executeTime >= targetTime)
+            {
+                questBoardQueueModel.Categories.Add(EnumQuestBoardCategory.FinishDailyFocusMode); // Mốc hoàn thành focusmode hàng ngày
+                await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
+            }
+        }
+    }
+}

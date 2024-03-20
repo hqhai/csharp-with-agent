@@ -8,6 +8,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.System.Application.Services.UserServices;
+    using Fsel.System.Application.Services.UserServices.Models;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.TokenHistorys;
@@ -85,6 +86,17 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 numberOfToken = tokenHistory.VolatileToken;
                 tokenHistorys.Add(tokenHistory);
             }
+
+            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+            {
+                NumberOfToken = (long)request.TokenHistorys.Select(x =>
+                {
+                    x.RemainToken = x.Type == EnumTokenHistoryType.Exchanged ? x.RemainToken : -x.RemainToken;
+                    return x;
+                }).Sum(x => x.RemainToken),
+                StudentId = student.Id
+            }).ConfigureAwait(false);
+
             await _tokenHistoryRepository.ExecuteTransactionAsync(async () =>
             {
                 await _tokenHistoryRepository.AddList(tokenHistorys);

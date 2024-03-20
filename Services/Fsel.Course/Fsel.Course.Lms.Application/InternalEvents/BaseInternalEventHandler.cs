@@ -525,7 +525,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             if (status == EnumTrialRegistrationStatus.Trial)
             {
-
                 StudentTrialRegistrationModel model = new StudentTrialRegistrationModel()
                 {
                     UserId = userId,

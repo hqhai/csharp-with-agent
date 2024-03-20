@@ -73,7 +73,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> OpenNextUnitForTrial([FromRoute] Guid userId)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(new OpenNextUnitForExtendCmd { UserId = userId}).ConfigureAwait(false);
+            MethodResult<bool> queryResult = await _mediator.Send(new OpenNextUnitForExtendCmd { UserId = userId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

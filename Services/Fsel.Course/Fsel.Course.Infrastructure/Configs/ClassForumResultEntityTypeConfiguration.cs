@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Configs
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,10 +21,17 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumClassForumResultStatus>());
 
+            builder.Property(e => e.SubmissionCount)
+               .HasMaxLength(100)
+               .HasConversion(
+                   v => v.ToString(),
+                   v => v.EnumParse<EnumSubmissionCount>());
+
             builder.HasOne(a => a.ClassForum)
                  .WithMany(b => b.ClassForumResults)
                  .HasForeignKey(p => p.ClassForumId)
                  .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasOne(a => a.LessonResult)
                  .WithMany(b => b.ClassForumResults)
                  .HasForeignKey(p => p.LessonResultId)
