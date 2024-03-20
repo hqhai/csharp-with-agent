@@ -449,7 +449,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Subject = GetSubjectEmail(model.SenderTemplate, courseType, model.CompareMockTest),
                 Params = model,
                 Template = model.SenderTemplate,
-                ParentEmail = student?.ParentEmail,
+                CcEmail = student?.ParentEmail,
             }, cancellationToken).ConfigureAwait(false);
         }
 

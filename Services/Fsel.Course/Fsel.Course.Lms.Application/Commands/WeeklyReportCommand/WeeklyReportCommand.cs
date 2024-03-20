@@ -431,7 +431,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 Subject = GetSubjectEmail(model.SenderTemplate),
                 Params = model,
                 Template = model.SenderTemplate,
-                ParentEmail = parentEmail,
+                CcEmail = parentEmail,
             }, cancellationToken).ConfigureAwait(false);
         }
 

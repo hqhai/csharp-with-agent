@@ -14,7 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.SenderCmd
     public class SenderCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
-        public string? ParentEmail { get; set; }
+        public string? CcEmail { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Content { get; set; }
         public string? Subject { get; set; }
@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.SenderCmd
                     Params = request.Params,
                     Template = request.Template,
                     ToEmails = new List<string> { $"{request.Email}" },
-                    CcEmails = !string.IsNullOrEmpty(request.ParentEmail) ? new List<string> { $"{request.ParentEmail}" } : new List<string>()
+                    CcEmails = !string.IsNullOrEmpty(request.CcEmail) ? new List<string> { $"{request.CcEmail}" } : new List<string>()
                 };
 
                 IApiResponse<MethodResult<bool>> sendResult;
