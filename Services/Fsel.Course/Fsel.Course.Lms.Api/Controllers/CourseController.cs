@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
+         
         /// <summary>
         /// Get Course Studying
         /// </summary>

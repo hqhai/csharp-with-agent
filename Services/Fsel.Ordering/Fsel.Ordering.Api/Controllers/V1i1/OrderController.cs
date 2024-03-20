@@ -83,5 +83,18 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
                 return StatusCode(500);
             }
         }
+
+        /// <summary>
+        /// Get info transaction from app store
+        /// </summary>
+        [AllowAnonymous]
+        [HttpGet("get-info-transaction")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetInfoTransaction([FromQuery] GetInfoTransactionFromAppStoreCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

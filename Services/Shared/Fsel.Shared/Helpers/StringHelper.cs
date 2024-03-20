@@ -187,8 +187,25 @@ namespace Fsel.Shared.Helpers
             {
                 return 0;
             }
-            var words = input.Trim().Split(new[] { " ", "\n", "\r", Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrEmpty(x));
-            return words.Count();
+            var words = input.StringSplitToList();
+            return words.Count;
+        }
+
+        public static IList<string> StringSplitToList(this string input)
+        {
+            return input?.Trim().Split(new[] { " ", "\n", "\r", Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new List<string>();
+        }
+
+        public static string ReplaceWord(this string? word)
+        {
+            string pattern = "[‘’']";
+            string replacement = "'";
+            return word?.Trim().ToLower(CultureInfo.CurrentCulture).ReplaceWord(pattern, replacement) ?? string.Empty;
+        }
+
+        public static string ReplaceWord(this string? word, string pattern, string replacement)
+        {
+            return Regex.Replace(word ?? string.Empty, pattern, replacement);
         }
     }
 }

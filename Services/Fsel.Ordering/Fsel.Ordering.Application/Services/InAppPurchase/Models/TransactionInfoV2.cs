@@ -9,6 +9,9 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
         [JsonPropertyName("appAccountToken")]
         public string? AppAccountToken { get; set; }
 
+        [JsonPropertyName("environment")]
+        public EnumAppStoreEnvironment? Environment { get; set; }
+
         [JsonPropertyName("bundleId")]
         public string? BundleId { get; set; }
 
@@ -62,5 +65,20 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Models
 
         [JsonPropertyName("signedDate")]
         public long SignatureDate { get; set; }
+
+        [JsonPropertyName("transactionReason")]
+        public string? TransactionReason { get; set; }
+
+        [JsonPropertyName("storefront")]
+        public string? Storefront { get; set; }
+
+        [JsonPropertyName("storefrontId")]
+        public string? StorefrontId { get; set; }
+
+        [JsonPropertyName("price")]
+        public string? Price { get; set; }
+
+        [JsonPropertyName("currency")]
+        public string? Currency { get; set; }
     }
 }

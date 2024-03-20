@@ -7,6 +7,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class BaseResultModel
     {
         public Guid Id { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         public double Percent { get; set; }
         public int CorrectCount { get; set; }
         public int CorrectTotal { get; set; }

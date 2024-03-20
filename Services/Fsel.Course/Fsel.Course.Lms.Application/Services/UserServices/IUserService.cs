@@ -64,10 +64,14 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/v1/student-trial-registration/{userId}")]
         Task<IApiResponse<MethodResult<StudentTrialRegistrationModel>>> GetStudentTrialRegistration([FromRoute] Guid userId);
 
-        [Get("/v1/student-trial-registration/check")]
-        Task<IApiResponse<MethodResult<bool>>> CheckStudentTrialRegistration();
+        [Get("/v1/student-trial-registration/check/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> CheckStudentTrialRegistration([FromRoute] Guid id);
 
         [Put("/v1/student-trial-registration")]
         Task<IApiResponse<MethodResult<StudentTrialRegistrationModel>>> UpdateTrialRegistrationStatusAsync([Body] StudentTrialRegistrationModel cmd);
+
+
+        [Get("/v1/user/get-by-student-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
     }
 }

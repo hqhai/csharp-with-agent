@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Ordering.Application.Queues.Consumers;
 using Fsel.Ordering.Application.Queues.Publishers;
 using Fsel.Ordering.Application.Services.CourseService;
 using Fsel.Ordering.Application.Services.InAppPurchase;
@@ -14,6 +15,8 @@ using Fsel.Ordering.Infrastructure;
 using Fsel.Ordering.Infrastructure.Common;
 using Fsel.Ordering.Infrastructure.Repositories;
 using Fsel.Ordering.Infrastructure.ValueSettings;
+using Refit;
+using Fsel.Shared.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,7 +47,17 @@ builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApi
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUrBoxService), appSetting?.Services?.UrBoxApiUrl);
 builder.AddRefitClients(typeof(IPayooService), appSetting?.Services?.PayooApiUrl);
-builder.AddMassTransit(appSetting);
+//builder.AddRefitClients(typeof(IAppStoreService), appSetting?.Services?.AppStoreApiUrl);
+builder.Services.AddRefitClient<IAppStoreService>().ConfigureHttpClient(x =>
+{
+    x.BaseAddress = new Uri(appSetting?.Services?.AppStoreApiUrl ?? string.Empty);
+});
+
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
+{
+    { QueueSettings.OrderingQueue.NameQueue.NoticePayment, typeof(NoticePaymentConsumer) }
+});
 //builder.AddMassTransit(appSetting,
 //queues: new Dictionary<string, Type>
 //{
