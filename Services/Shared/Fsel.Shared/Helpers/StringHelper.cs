@@ -200,7 +200,7 @@ namespace Fsel.Shared.Helpers
         {
             string pattern = "[‘’']";
             string replacement = "'";
-            return word?.Trim().ToLower(CultureInfo.CurrentCulture).ReplaceWord(pattern, replacement) ?? string.Empty;
+            return word?.Trim().TrimStart(new char[] { ' ', '​', '\t' }).ToLower(CultureInfo.CurrentCulture).ReplaceWord(pattern, replacement) ?? string.Empty;
         }
 
         public static string ReplaceWord(this string? word, string pattern, string replacement)
