@@ -8,6 +8,7 @@ namespace Fsel.Shared.Models.SenderTemplates
     {
         public EnumSenderTemplate SenderTemplate { get; set; }
         public string? UnitName { get; set; }
+        public string? FullName { get; set; }
         public string? StartDate { get; set; }
         public string? EndDate { get; set; }
         public string? Percent { get; set; }
@@ -43,7 +44,5 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? TotalHourPrevious { get; set; }
         public string? UnitDisplay { get; set; }
         public string? SkillDisplay { get; set; }
-
-
     }
 }
