@@ -13,5 +13,10 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         /// Update Not Success
         /// </summary>
         UpdateNotSuccess,
+
+        /// <summary>
+        /// You Chose The Wrong Level
+        /// </summary>
+        YouChoseTheWrongLevel
     }
 }
