@@ -7,9 +7,9 @@ namespace Fsel.System.Domain.Models.CommandModels.ErrorReports
 
     public class UpdateErrorReportCommandModel : BaseCommandModel
     {
-        public EnumTypeOfError Type { get; set; }
+        public EnumTypeOfError? Type { get; set; }
 
-        public EnumPriority Priority { get; set; }
+        public EnumPriority? Priority { get; set; }
 
         public EnumErrorReportStatus Status { get; set; }
 
