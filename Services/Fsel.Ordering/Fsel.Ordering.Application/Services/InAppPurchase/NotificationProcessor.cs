@@ -62,12 +62,21 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase
 
             _logger.LogError(response.Serialize());
 
-            var createOrderResult = await _mediator.Send(new PaymentWithAppStoreCommand() { DecodedPayload = v2Notification.DecodedPayload, RenewalInfo = renewalInfo, TransactionInfo = transactionInfo }).ConfigureAwait(false);
+            var createOrderResult = await _mediator.Send(new NotificationWithAppStoreCommand() { DecodedPayload = v2Notification.DecodedPayload, RenewalInfo = renewalInfo, TransactionInfo = transactionInfo }).ConfigureAwait(false);
             if (createOrderResult.Result)
             {
                 return true;
             }
             return false;
+        }
+
+        public TransactionInfoV2? TransactionInfo(string signedTransactionInfo)
+        {
+            var transactionInfoResponse = GetVerifiedDecodedData<TransactionInfoV2>(signedTransactionInfo);
+            TransactionInfoV2? transactionInfo = null;
+            if (transactionInfoResponse.IsValid)
+                transactionInfo = transactionInfoResponse.DecodedPayload;
+            return transactionInfo;
         }
 
         private VerifiedDecodedDataModel<TNotificationData> GetVerifiedDecodedData<TNotificationData>(string signedPayload)

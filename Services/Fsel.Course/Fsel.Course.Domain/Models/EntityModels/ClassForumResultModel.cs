@@ -77,6 +77,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
 
+        public bool IsViewed { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
+
         public IList<string>? FilePaths
         { get { return ClassForumResultFiles?.Where(x => !x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
 

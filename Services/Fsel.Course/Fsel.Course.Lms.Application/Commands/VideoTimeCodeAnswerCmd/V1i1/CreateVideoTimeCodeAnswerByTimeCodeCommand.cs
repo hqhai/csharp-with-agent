@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -28,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class CreateVideoTimeCodeAnswerByTimeCodeCommand : CreateVideoTimeCodeAnswerV1i1CommandModel, IRequest<MethodResult<VideoTimeCodeModel>>
     {
@@ -49,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IQuestionRepository _questionRepository;
+        private readonly ILogger<object> _logger;
         private readonly QuestionConverter _questionConverter;
 
         public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(
@@ -66,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             , ILessonResultRepository lessonResultRepository
             , DateTimeConverter dateTimeConverter
             , IQuestionRepository questionRepository
+            , ILogger<object> logger
             , QuestionConverter questionConverter)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
@@ -82,6 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _lessonResultRepository = lessonResultRepository;
             _dateTimeConverter = dateTimeConverter;
             _questionRepository = questionRepository;
+            _logger = logger;
             _questionConverter = questionConverter;
         }
 
@@ -89,6 +94,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VideoTimeCodeModel>();
+
+            _logger.LogError(ConvertHelper.Serialize(request));
+
             var method = await HandleAnswerAsync(request, cancellationToken);
             if (!method.IsOK)
             {
@@ -273,6 +281,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             var isDoneTimeCode = videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || videoTimeCodeResult.Status == EnumResultStatus.Process;
 
+            if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+            {
+                videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult.CreatedDate);
+            }
+            else
+            {
+                if (videoTimeCodeResult.Status == EnumResultStatus.New)
+                {
+                    videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                }
+                else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+                {
+                    videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
+                }
+            }
             if (isSubmit)
             {
                 var correctCount = await _videoConverter.UpdateVideoAnswers(videoTimeCode, videoTimeCodeResult, isDoneTimeCode);
@@ -295,21 +318,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 videoTimeCodeResult.Status = EnumResultStatus.Process;
             }
-            if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
-            {
-                videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult.CreatedDate);
-            }
-            else
-            {
-                if (videoTimeCodeResult.Status == EnumResultStatus.New)
-                {
-                    videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
-                }
-                else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
-                {
-                    videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
-                }
-            }
+
             videoTimeCodeResult.IsWorking = false;
             return videoTimeCodeResult;
         }

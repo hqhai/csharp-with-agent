@@ -183,19 +183,19 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 var unitsResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.StudentId == item.Id).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
 
-                var unitDoneCount = unitsResult.Where(p => p.Status == EnumResultStatus.Done).Count();
+                //var unitDoneCount = unitsResult.Where(p => p.Status == EnumResultStatus.Done).Count();
                 var courseType = unitsResult.FirstOrDefault()?.Course?.CourseType;
 
-                if (courseType == EnumCourseType.Academic)
-                {
-                    int academicPercent = unitDoneCount * 100 / 12;
-                    weeklyReport.CoursePercent = academicPercent.ToString(CultureInfo.CurrentCulture);
-                }
-                else
-                {
-                    int ieltPercent = unitDoneCount * 100 / 10;
-                    weeklyReport.CoursePercent = ieltPercent.ToString(CultureInfo.CurrentCulture);
-                }
+                //if (courseType == EnumCourseType.Academic)
+                //{
+                //    int academicPercent = unitDoneCount * 100 / 12;
+                //    weeklyReport.CoursePercent = academicPercent.ToString(CultureInfo.CurrentCulture);
+                //}
+                //else
+                //{
+                //    int ieltPercent = unitDoneCount * 100 / 10;
+                //    weeklyReport.CoursePercent = ieltPercent.ToString(CultureInfo.CurrentCulture);
+                //}
 
                 string unitName = string.Empty;
 
@@ -268,6 +268,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         {
                             weeklyReport.NextLesson = 1;
                             weeklyReport.PercentLesson = 0;
+                            weeklyReport.Weekly3Display = null;
+                            weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
                         }
                         else
                         {
@@ -309,12 +311,14 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         var finalTestResult = await _finalTestResultRepository.Queryable.Include(fn => fn.FinalTest).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
                         weeklyReport.NextUnit = finalTestResult?.FinalTest?.Name;
                         weeklyReport.Weekly3Display = SendMailSetting.Display;
+                        weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
                     }
                     else if (courseType == EnumCourseType.Ielts)
                     {
                         var mockTestResult = await _mockTestResultRepository.Queryable.Include(mt => mt.MockTest).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
                         weeklyReport.NextUnit = mockTestResult?.MockTest?.Name;
                         weeklyReport.Weekly3Display = SendMailSetting.Display;
+                        weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
                     }
                 }
                 else if (previousFeatureAccessTimes?.Count == 0)
@@ -334,7 +338,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 }
                 if (!string.IsNullOrEmpty(item.Human?.Email))
                 {
-                    await SendWeekly(item.Human?.Email, weeklyReport, cancellationToken);
+                    await SendWeekly(item.Human?.Email, item.ParentEmail, weeklyReport, cancellationToken);
                 }
             }
             return methodResult;
@@ -419,7 +423,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             }
         }
 
-        private async Task SendWeekly(string? email, WeeklyReportModel model, CancellationToken cancellationToken)
+        private async Task SendWeekly(string? email, string? parentEmail, WeeklyReportModel model, CancellationToken cancellationToken)
         {
             var sendResult = await _mediator.Send(new SenderCommand
             {
@@ -427,6 +431,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 Subject = GetSubjectEmail(model.SenderTemplate),
                 Params = model,
                 Template = model.SenderTemplate,
+                CcEmail = parentEmail,
             }, cancellationToken).ConfigureAwait(false);
         }
 
