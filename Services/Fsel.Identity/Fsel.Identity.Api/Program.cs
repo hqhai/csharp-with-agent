@@ -49,6 +49,7 @@ builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegi
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);

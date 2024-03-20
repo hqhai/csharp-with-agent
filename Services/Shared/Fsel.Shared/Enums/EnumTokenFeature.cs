@@ -10,6 +10,7 @@ namespace Fsel.Shared.Enums
         Test,
         FullMockTest,
         SkillMockTest,
-        Achievement
+        Achievement,
+        MarketPlace
     }
 }

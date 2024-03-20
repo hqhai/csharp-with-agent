@@ -44,6 +44,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new ChatbotSkillConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ChatbotTokenConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ErrorReportEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TokenHistoryEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -67,6 +68,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<Location> Locations { get; set; }
         public DbSet<School> Schools { get; set; }
         public DbSet<ErrorReport> ErrorReports { get; set; }
+        public DbSet<TokenHistory> TokenHistories { get; set; }
         public DbSet<ChatbotConfig> ChatbotConfigs { get; set; }
         public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
         public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
