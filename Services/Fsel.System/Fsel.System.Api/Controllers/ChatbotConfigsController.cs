@@ -10,6 +10,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Commands.Chatbots;
+    using Fsel.System.Application.Queries.ChatbotConfigQuery;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
@@ -48,9 +49,18 @@ namespace Fsel.System.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<ChatbotConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLogActionsByUserIds([FromBody] SaveChatbotConfigCommand cmd)
+        public async Task<IActionResult> SaveChatBotConfig([FromBody] SaveChatbotConfigCommand cmd)
         {
             MethodResult<ChatbotConfigModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpGet("{unitId}")]
+        [ProducesResponseType(typeof(MethodResult<ChatbotConfigModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetChatBotConfig([FromRoute] Guid unitId)
+        {
+            MethodResult<ChatbotConfigModel> commandResult = await _mediator.Send(new GetChatBotConfigQuery { UnitId = unitId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

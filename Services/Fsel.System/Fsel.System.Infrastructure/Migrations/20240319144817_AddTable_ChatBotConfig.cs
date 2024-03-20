@@ -54,6 +54,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    Skill = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Config = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AiConfig = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ChatbotConfigId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
