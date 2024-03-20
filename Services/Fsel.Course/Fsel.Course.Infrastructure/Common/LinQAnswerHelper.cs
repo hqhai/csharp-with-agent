@@ -84,7 +84,7 @@ namespace Fsel.Course.Infrastructure.Common
             string pattern = "[,.]";
             string replacement = "";
             string q = " " + question.ReplaceWord() + " ";
-            var strs = answer.ReplaceWord().StringSplitToList().Select(x => " " + x.TrimWordToCompare().ReplaceWord(pattern, replacement) + " ").ToList();
+            var strs = answer.ReplaceWord().StringSplitToList().Select(x => " " + x.TrimHiddenChars().ToLower(CultureInfo.CurrentCulture).ReplaceWord(pattern, replacement) + " ").ToList();
             return strs.Any(x => x.Contains(q, StringComparison.OrdinalIgnoreCase));
         }
     }
