@@ -3,13 +3,15 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
 
-    public class OverallScoreReportModel
+    public class OverallScoreReportModel : IHighestStreak
     {
         public double CountQuestion { get; set; }
         public double TotalQuestion { get; set; }
         public long WorkingTime { get; set; }
+        public int? HighestStreak { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public IList<EnumCourseSkill>? CourseSkills { get; set; }
     }
