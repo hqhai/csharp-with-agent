@@ -229,7 +229,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             courseUnitMockTestResult.Name = unit.Name;
             courseUnitMockTestResult.DisplayOrder = displayOrder;
             courseUnitMockTestResult.Type = nameof(Domain.Entities.Unit);
-            courseUnitMockTestResult.MockTestId = unit.UnitSkillMockTests.Select(x => x.MockTestId).FirstOrDefault();
+            courseUnitMockTestResult.MockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;
             return courseUnitMockTestResult;
         }
 
