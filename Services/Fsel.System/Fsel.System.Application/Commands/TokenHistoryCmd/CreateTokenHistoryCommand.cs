@@ -83,7 +83,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                     }
                 }
 
-                numberOfToken = tokenHistory.VolatileToken;
+                numberOfToken = tokenHistory.RemainToken;
                 tokenHistorys.Add(tokenHistory);
             }
 
@@ -91,9 +91,9 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
             {
                 NumberOfToken = (long)request.TokenHistorys.Select(x =>
                 {
-                    x.RemainToken = x.Type == EnumTokenHistoryType.Exchanged ? x.RemainToken : -x.RemainToken;
+                    x.VolatileToken = x.Type == EnumTokenHistoryType.Recevived ? x.VolatileToken : -x.VolatileToken;
                     return x;
-                }).Sum(x => x.RemainToken),
+                }).Sum(x => x.VolatileToken),
                 StudentId = student.Id
             }).ConfigureAwait(false);
 

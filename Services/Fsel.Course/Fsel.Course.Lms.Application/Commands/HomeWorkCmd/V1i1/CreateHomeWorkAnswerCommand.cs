@@ -269,10 +269,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                             new TokenHistoryQueueModel
                             {
                                 ObjectId = homeWorkResult.Id,
-                                RemainToken = tokensAchieved,
+                                VolatileToken = tokensAchieved,
                                 Feature = EnumTokenFeature.Learn,
                                 Mission = homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit ? EnumTokenMission.HomeworkFirstSubmit : EnumTokenMission.HomeworkSecondSubmit,
-                                Type = EnumTokenHistoryType.Exchanged,
+                                Type = EnumTokenHistoryType.Recevived,
                                 UserId = student.Human?.UserId ?? default,
                             }
                         };

@@ -9,7 +9,7 @@ namespace Fsel.System.Domain.Entities
 
     public class TokenHistory : Entity
     {
-        private double _volatileToken;
+        private double _remainToken;
         public Guid? TokenConfigId { get; set; }
 
         /// <summary>
@@ -17,22 +17,23 @@ namespace Fsel.System.Domain.Entities
         /// </summary>
         public double InitialToken { get; set; }
 
+        ///
+        /// <summary>
+        /// Token biến động
+        /// </summary>
+        public double VolatileToken { get; set; }
+
         /// <summary>
         /// Token đạt được
         /// </summary>
-        public double RemainToken { get; set; }
-
-        /// <summary>
-        /// Token Tổng
-        /// </summary>
-        public double VolatileToken
+        public double RemainToken
         {
             get
             {
-                _volatileToken = InitialToken + (Type == EnumTokenHistoryType.Recevived ? -RemainToken : RemainToken);
-                return _volatileToken;
+                _remainToken = InitialToken + (Type == EnumTokenHistoryType.Recevived ? VolatileToken : -VolatileToken);
+                return _remainToken;
             }
-            set { _volatileToken = value; }
+            set { _remainToken = value; }
         }
 
         public EnumTokenFeature Feature { get; set; }
