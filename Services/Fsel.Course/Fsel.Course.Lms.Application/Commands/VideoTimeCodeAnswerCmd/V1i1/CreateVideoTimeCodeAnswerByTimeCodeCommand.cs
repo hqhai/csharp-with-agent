@@ -342,10 +342,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                         new TokenHistoryQueueModel
                         {
                             ObjectId = videoTimeCodeResult.Id,
-                            RemainToken = tokensAchieved,
+                            VolatileToken = tokensAchieved,
                             Feature = EnumTokenFeature.Learn,
                             Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit,
-                            Type = EnumTokenHistoryType.Exchanged,
+                            Type = EnumTokenHistoryType.Recevived,
                             UserId = student.Human?.UserId ?? default,
                         }
                     };

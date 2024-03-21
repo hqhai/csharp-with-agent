@@ -198,9 +198,9 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                         new TokenHistoryQueueModel
                         {
                             ObjectId = orderTransaction.Id,
-                            RemainToken = totalPrice,
+                            VolatileToken = totalPrice,
                             Feature = EnumTokenFeature.MarketPlace,
-                            Type = EnumTokenHistoryType.Recevived,
+                            Type = EnumTokenHistoryType.Exchanged,
                             UserId = student?.Human?.UserId ?? default,
                             Config = configs
                         }

@@ -3,6 +3,7 @@
 namespace Fsel.Course.Infrastructure.Maps
 {
     using AutoMapper;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -18,6 +19,7 @@ namespace Fsel.Course.Infrastructure.Maps
             .ForMember(x => x.Score, p => p.MapFrom(o => o.CorrectCount));
             CreateMap<FinalTestResult, TestResultReportModel>()
             .ForMember(x => x.Score, p => p.MapFrom(o => o.CorrectCount));
+            CreateMap<FinalTestResult, CourseUnitMockTestResultModel>().IgnoreAllNonExisting();
         }
     }
 }

@@ -180,7 +180,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 }
             }
 
-            return tokenHistorys.Where(x => x.RemainToken > 0).ToList();
+            return tokenHistorys.Where(x => x.VolatileToken > 0).ToList();
         }
 
         private async Task UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
@@ -308,7 +308,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 sectionGroupResult.TokenFirstTime = (int?)taskResponseToken.Sum();
             }
-            return (sectionGroupResult, tokenHistoryQueues.Where(x => x.RemainToken > 0).ToList());
+            return (sectionGroupResult, tokenHistoryQueues.Where(x => x.VolatileToken > 0).ToList());
         }
 
         private static TokenCoinConfigs? GetTokenCoinConfig(IList<TokenConfigModel>? tokenConfigs, EnumTokenMission mission)
@@ -355,8 +355,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             return new TokenHistoryQueueModel
             {
                 ObjectId = sectionGroupResult.MockTestResultId,
-                RemainToken = token ?? sectionGroupResult.TokenFirstTime ?? default,
-                Type = EnumTokenHistoryType.Exchanged,
+                VolatileToken = token ?? sectionGroupResult.TokenFirstTime ?? default,
+                Type = EnumTokenHistoryType.Recevived,
                 Feature = isSkillMockTest ? EnumTokenFeature.SkillMockTest : EnumTokenFeature.FullMockTest,
                 Mission = mission,
                 UserId = userId,
