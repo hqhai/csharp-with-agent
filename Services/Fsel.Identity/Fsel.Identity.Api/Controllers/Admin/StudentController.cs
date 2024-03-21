@@ -17,6 +17,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Asp.Versioning;
     using Fsel.Shared.Constants;
     using Fsel.Identity.Application.Commands.StudentCmd;
+    using Fsel.Identity.Application.Commands.AuthCmd;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -115,6 +116,15 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsQuery query)
         {
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("token/{id}")]
+        [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetJWT([FromRoute] Guid id)
+        {
+            MethodResult<TokenModel> queryResult = await _mediator.Send(new GenerateTokenCommand { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
