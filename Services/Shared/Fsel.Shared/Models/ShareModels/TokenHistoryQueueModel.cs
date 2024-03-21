@@ -7,7 +7,7 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class TokenHistoryQueueModel
     {
-        public double RemainToken { get; set; }
+        public double VolatileToken { get; set; }
         public Guid UserId { get; set; }
         public Guid? ObjectId { get; set; }
         public EnumTokenFeature Feature { get; set; }

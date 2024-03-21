@@ -184,7 +184,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                         new TokenHistoryQueueModel
                         {
                             ObjectId = finalTestResult.Id,
-                            RemainToken = token,
+                            VolatileToken = token,
                             Type = EnumTokenHistoryType.Exchanged,
                             Feature = EnumTokenFeature.Test,
                             Mission = EnumTokenMission.FinalTest,

@@ -88,7 +88,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                     new TokenHistoryQueueModel
                     {
                         ObjectId = studentDailyStreak.Id,
-                        RemainToken = targetNumber,
+                        VolatileToken = targetNumber,
                         Type = EnumTokenHistoryType.Exchanged,
                         Feature = EnumTokenFeature.DailyCheckin,
                         Mission = EnumTokenMission.DailyCheckin,
