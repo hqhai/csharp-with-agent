@@ -185,7 +185,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                         {
                             ObjectId = finalTestResult.Id,
                             VolatileToken = token,
-                            Type = EnumTokenHistoryType.Exchanged,
+                            Type = EnumTokenHistoryType.Recevived,
                             Feature = EnumTokenFeature.Test,
                             Mission = EnumTokenMission.FinalTest,
                             UserId = student.Human?.UserId ?? default,

@@ -356,7 +356,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 ObjectId = sectionGroupResult.MockTestResultId,
                 VolatileToken = token ?? sectionGroupResult.TokenFirstTime ?? default,
-                Type = EnumTokenHistoryType.Exchanged,
+                Type = EnumTokenHistoryType.Recevived,
                 Feature = isSkillMockTest ? EnumTokenFeature.SkillMockTest : EnumTokenFeature.FullMockTest,
                 Mission = mission,
                 UserId = userId,

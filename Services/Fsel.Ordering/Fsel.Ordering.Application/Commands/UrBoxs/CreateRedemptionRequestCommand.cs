@@ -200,7 +200,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                             ObjectId = orderTransaction.Id,
                             VolatileToken = totalPrice,
                             Feature = EnumTokenFeature.MarketPlace,
-                            Type = EnumTokenHistoryType.Recevived,
+                            Type = EnumTokenHistoryType.Exchanged,
                             UserId = student?.Human?.UserId ?? default,
                             Config = configs
                         }

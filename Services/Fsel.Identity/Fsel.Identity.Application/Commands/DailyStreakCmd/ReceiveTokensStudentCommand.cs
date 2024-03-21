@@ -89,7 +89,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                     {
                         ObjectId = studentDailyStreak.Id,
                         VolatileToken = targetNumber,
-                        Type = EnumTokenHistoryType.Exchanged,
+                        Type = EnumTokenHistoryType.Recevived,
                         Feature = EnumTokenFeature.DailyCheckin,
                         Mission = EnumTokenMission.DailyCheckin,
                         UserId = _authContext.CurrentUserId,

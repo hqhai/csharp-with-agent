@@ -138,7 +138,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                             {
                                 ObjectId = studentFocusTime.Id,
                                 VolatileToken = targetNumber.Value,
-                                Type = EnumTokenHistoryType.Exchanged,
+                                Type = EnumTokenHistoryType.Recevived,
                                 Feature = EnumTokenFeature.FocusMode,
                                 Mission = EnumTokenMission.FocusMode,
                                 UserId = student.Human?.UserId ?? default,

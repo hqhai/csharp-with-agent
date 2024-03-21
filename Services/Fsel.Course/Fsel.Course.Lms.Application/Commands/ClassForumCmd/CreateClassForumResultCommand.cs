@@ -221,7 +221,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         VolatileToken = classForumResult.TokenFirstTime.Value,
                         Feature = EnumTokenFeature.Learn,
                         Mission = GetTokenMission(classForum,classForumResult),
-                        Type = EnumTokenHistoryType.Exchanged,
+                        Type = EnumTokenHistoryType.Recevived,
                         UserId = student.Human?.UserId ?? default,
                     }
                 };

@@ -91,7 +91,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
             {
                 NumberOfToken = (long)request.TokenHistorys.Select(x =>
                 {
-                    x.VolatileToken = x.Type == EnumTokenHistoryType.Exchanged ? x.VolatileToken : -x.VolatileToken;
+                    x.VolatileToken = x.Type == EnumTokenHistoryType.Recevived ? x.VolatileToken : -x.VolatileToken;
                     return x;
                 }).Sum(x => x.VolatileToken),
                 StudentId = student.Id
