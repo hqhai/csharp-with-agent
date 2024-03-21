@@ -74,11 +74,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
-            else if (mockTestResult.Status == EnumResultStatus.Unfinished)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(mockTestResult));
-                return methodResult;
-            }
 
             methodResult.Result = await GetMockTest(mockTest, mockTestResult);
             methodResult.StatusCode = StatusCodes.Status200OK;

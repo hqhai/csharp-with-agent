@@ -2,10 +2,10 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Course.Domain.IEntities;
-
-    public class MockTestResultReportModel : TestResultReportModel, ITokenResult
+    public class MockTestResultReportModel : TestResultReportModel
     {
-        public bool IsTeacherGraded { get; set; }
+        public bool? IsTeacherGraded { get; set; }
+        public double TargetBandScore { get; set; }
+        public bool IsCheckScoreColor { get; set; }
     }
 }
