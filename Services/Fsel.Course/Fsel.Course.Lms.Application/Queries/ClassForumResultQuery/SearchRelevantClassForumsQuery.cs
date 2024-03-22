@@ -136,10 +136,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var notificationRemind = await _notificationService.GetListNotificationRemind(query);
             var notificationTurnOff = notificationRemind.Content?.Result;
-
+            List<ClassForumResultModel> classForumResultModels = new List<ClassForumResultModel>();
             if (actions != null)
             {
-                var classForumResultModels = lists.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
+                classForumResultModels = lists.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
                 foreach (var item in classForumResultModels)
                 {
                     var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 }
             }
 
-            methodResult.Result = new PagingItemsModel<ClassForumResultModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<ClassForumResultModel>(classForumResultModels, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
