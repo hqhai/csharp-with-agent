@@ -98,7 +98,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                 switch (filter.Value)
                 {
                     case EnumCommentFilter.Newest:
-                        results = results.OrderByDescending(x => x.CreatedDate).ToList();
+                        results = results.OrderByDescending(x => x.CreatedDate).ApplyPaging(request).ToList();
                         break;
 
                     case EnumCommentFilter.MostPopular:
@@ -106,7 +106,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                         break;
 
                     case EnumCommentFilter.AllComment:
-                        results = results.OrderBy(x => x.CreatedDate).ToList();
+                        results = results.OrderBy(x => x.CreatedDate).ApplyPaging(request).ToList();
                         break;
                 }
             }
