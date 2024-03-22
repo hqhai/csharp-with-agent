@@ -106,7 +106,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                         break;
 
                     case EnumCommentFilter.AllComment:
-                        results = results.OrderBy(x => x.CreatedDate).ApplyPaging(request).ToList();
+                        results = results.OrderBy(x => x.CreatedDate).ToList();
                         break;
                 }
             }
