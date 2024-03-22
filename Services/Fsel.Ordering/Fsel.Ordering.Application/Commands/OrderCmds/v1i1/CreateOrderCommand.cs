@@ -20,6 +20,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -73,6 +74,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
             var student = studentResult.Content?.Result;
 
+            var isCheckLevel = request.CourseLevel.IsCheckCourseLevel(student?.CourseLevel ?? default);
+            if (!isCheckLevel)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.YouChoseTheWrongLevel), nameof(isCheckLevel));
+                return methodResult;
+            }
+
             if (string.IsNullOrEmpty(student?.Human?.FullName) || string.IsNullOrEmpty(student?.Human?.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human.FullName), nameof(student.Human.Email));
@@ -95,7 +103,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             }
 
             var existsOrder = await _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && x.Status == EnumOrderStatus.Payment, cancellationToken);
-
 
             var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
             {
