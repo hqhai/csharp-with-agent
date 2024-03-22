@@ -66,7 +66,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
                     return methodResult;
                 }
-                sectionGroup.Sections = sectionGroup.Sections.OrderBy(x => x.DisplayOrder).Select((x, index) => { x.DisplayOrder = index + 1; return x; }).ToList();
+                sectionGroup.Sections = sectionGroup.Sections.OrderBy(x => x.DisplayOrder).Select((x, index) => { x.DisplayOrder = index; return x; }).ToList();
                 SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
                 if (!newSectionGroup.IsValid())
                 {
