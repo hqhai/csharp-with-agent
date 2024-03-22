@@ -104,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 };
                 return skillScore;
             }).ToList();
-
+            overallScoreReport.HighestStreak = videoTimeCodeResults.Max(x => x.HighestStreak);
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.WorkingTime = videoTimeCodeResults.Sum(x => GetSecond(x));
             overallScoreReport.CourseSkills = skillScores.Select(x => x.Skill).ToList();

@@ -8,10 +8,5 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Answer Is In The Wrong Format
         /// </summary>
         AnswerIsInTheWrongFormat,
-
-        /// <summary>
-        /// Question not completed
-        /// </summary>
-        QuestionNotCompleted
     }
 }
