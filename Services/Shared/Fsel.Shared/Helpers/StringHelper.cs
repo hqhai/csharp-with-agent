@@ -193,19 +193,14 @@ namespace Fsel.Shared.Helpers
 
         public static IList<string> StringSplitToList(this string input)
         {
-            return input?.TrimHiddenChars(new char[] { '​', '.' }).ToLower(CultureInfo.CurrentCulture).Split(new[] { " ", "\n", "\r", Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new List<string>();
+            return input?.Trim(new char[] { '​', '.' }).ToLower(CultureInfo.CurrentCulture).Split(new[] { " ", "\n", "\r", Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new List<string>();
         }
 
         public static string ReplaceWord(this string? word)
         {
             string pattern = "[‘’']";
             string replacement = "'";
-            return word?.TrimHiddenChars(new char[] { '​', '.' }).ToLower(CultureInfo.CurrentCulture).ReplaceWord(pattern, replacement) ?? string.Empty;
-        }
-
-        public static string TrimHiddenChars(this string? word, char[] keys)
-        {
-            return word?.Trim(keys) ?? string.Empty;
+            return word?.Trim(new char[] { '​', '.' }).ToLower(CultureInfo.CurrentCulture).ReplaceWord(pattern, replacement) ?? string.Empty;
         }
 
         public static string ReplaceWord(this string? word, string pattern, string replacement)
