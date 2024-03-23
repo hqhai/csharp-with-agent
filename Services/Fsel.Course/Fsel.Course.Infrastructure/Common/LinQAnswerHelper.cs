@@ -5,7 +5,6 @@ namespace Fsel.Course.Infrastructure.Common
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Helpers;
@@ -81,11 +80,9 @@ namespace Fsel.Course.Infrastructure.Common
 
         public bool IsShortAnswer(string? question, string? answer)
         {
-            string pattern = "[,.]";
-            string replacement = "";
             string q = " " + question.ReplaceWord() + " ";
-            var strs = answer.ReplaceWord().StringSplitToList().Select(x => " " + x.TrimHiddenChars().ToLower(CultureInfo.CurrentCulture).ReplaceWord(pattern, replacement) + " ").ToList();
-            return strs.Any(x => x.Contains(q, StringComparison.OrdinalIgnoreCase));
+            string a = " " + answer.ReplaceWord() + " ";
+            return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
