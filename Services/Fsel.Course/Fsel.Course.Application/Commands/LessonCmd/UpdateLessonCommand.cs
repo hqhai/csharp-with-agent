@@ -194,10 +194,10 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             }
         }
 
-        private async Task UpdateLessonClassForumAsync(Lesson lesson, CreateClassForumCommandModel requestClassForum, CancellationToken cancellationToken)
+        private async Task UpdateLessonClassForumAsync(Lesson lesson, CreateClassForumCommandModel? requestClassForum, CancellationToken cancellationToken)
         {
             var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).FirstOrDefaultAsync(x => x.LessonId == lesson.Id, cancellationToken);
-            if (classForum != null)
+            if (classForum != null && requestClassForum != null)
             {
                 _mapper.Map(requestClassForum, classForum);
                 if (requestClassForum.FilePaths != null && requestClassForum.FilePaths.Any())
