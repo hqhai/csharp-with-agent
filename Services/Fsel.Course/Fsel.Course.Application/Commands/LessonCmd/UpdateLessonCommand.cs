@@ -6,6 +6,7 @@ using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Domain.Models.CommandModels.ClassForums;
 using Fsel.Course.Domain.Models.CommandModels.LessonInstructions;
 using Fsel.Course.Domain.Models.CommandModels.Lessons;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -25,6 +26,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IVideoRepository _videoRepository;
+        private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonExtraPracticeRepository _lessonExtraPracticeRepository;
         private readonly ILessonVideoRepository _lessonVideoRepository;
         private readonly ILessonHomeWorkRepository _lessonHomeWorkRepository;
@@ -34,6 +36,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         public UpdateLessonCommandHandler(ILessonRepository lessonRepository
             , IMapper mapper, IHomeWorkRepository homeWorkRepository
             , IVideoRepository videoRepository
+            , IClassForumRepository classForumRepository
             , ILessonExtraPracticeRepository lessonExtraPracticeRepository
             , ILessonVideoRepository lessonVideoRepository
             , ILessonHomeWorkRepository lessonHomeWorkRepository
@@ -44,6 +47,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
             _videoRepository = videoRepository;
+            _classForumRepository = classForumRepository;
             _lessonExtraPracticeRepository = lessonExtraPracticeRepository;
             _lessonVideoRepository = lessonVideoRepository;
             _lessonHomeWorkRepository = lessonHomeWorkRepository;
@@ -135,6 +139,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 await UpdateLessonHomeWorkAsync(lesson, request.HomeWorkIds, cancellationToken);
                 await UpdateLessonVideoAsync(lesson, request.VideoIds, cancellationToken);
                 await UpdateLessonIntructionAsync(lesson, request.LessonInstructions, cancellationToken);
+                await UpdateLessonClassForumAsync(lesson, request.ClassForum, cancellationToken);
 
                 lesson = _lessonRepository.Update(lesson);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -186,6 +191,25 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 await _lessonHomeWorkRepository.DeleteListAsync(lessonHomeWorks);
                 await _lessonHomeWorkRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private async Task UpdateLessonClassForumAsync(Lesson lesson, CreateClassForumCommandModel? requestClassForum, CancellationToken cancellationToken)
+        {
+            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).FirstOrDefaultAsync(x => x.LessonId == lesson.Id, cancellationToken);
+            if (classForum != null && requestClassForum != null)
+            {
+                _mapper.Map(requestClassForum, classForum);
+                if (requestClassForum.FilePaths != null && requestClassForum.FilePaths.Any())
+                {
+                    classForum.ClassForumFiles = requestClassForum.FilePaths.Select(x => new ClassForumFile
+                    {
+                        FilePath = x,
+                    }).ToList();
+                }
+
+                _classForumRepository.Update(classForum);
+                await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
