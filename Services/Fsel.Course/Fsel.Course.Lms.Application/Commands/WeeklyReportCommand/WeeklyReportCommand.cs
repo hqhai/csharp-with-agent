@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             if (request.StudentIds == null || request.StudentIds.Count == 0)
             {
-                var studentResults = await _userService.ExecuteListQueryAsync(new BaseQueryModel { IncludePaths = new List<string>() { "Human" } });
+                var studentResults = await _userService.ExecuteListQueryAsync(new BaseQueryModel { IncludePaths = new List<string>() { "Human", "ParentStudents.Parent.Human" } });
                 students = studentResults.Content?.Result?.ToList();
             }
             else
