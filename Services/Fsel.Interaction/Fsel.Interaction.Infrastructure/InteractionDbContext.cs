@@ -38,6 +38,7 @@ namespace Fsel.Interaction.Infrastructure
         }
 
         public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
+        public DbSet<SurveyQuestionTranslation> SurveyQuestionTranslations { get; set; }
         public DbSet<CustomerSurvey> CustomerSurveys { get; set; }
         public DbSet<InteractionAction> InteractionActions { get; set; }
         public DbSet<Comment> Comments { get; set; }

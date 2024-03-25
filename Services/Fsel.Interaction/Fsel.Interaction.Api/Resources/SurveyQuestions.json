@@ -65,6 +65,138 @@
         "content": "Khác....",
         "image": "others-icon.svg"
       }
+    ],
+    "translations": [
+      {
+        "id": "2f64ab09-6e2a-4d11-a4c2-bf239226bfb0",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "1856facb-028a-48a1-bbec-59a934c36192",
+        "question": "Bạn biết đến Fsel từ đâu?",
+        "language": "vi-VN",
+        "description": "addd",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Google",
+            "image": "gmail-icon.svg"
+          },
+          {
+            "id": 2,
+            "content": "Facebook",
+            "image": "facebook-icon.svg"
+          },
+          {
+            "id": 3,
+            "content": "Youtube",
+            "image": "youtube-icon.svg"
+          },
+          {
+            "id": 4,
+            "content": "Tiktok",
+            "image": "tiktok-icon.svg"
+          },
+          {
+            "id": 5,
+            "content": "Bạn bè/gia đình",
+            "image": "friends_family-icon.svg"
+          },
+          {
+            "id": 6,
+            "content": "Tin tức/báo chí",
+            "image": "blog-icon.svg"
+          },
+          {
+            "id": 7,
+            "content": "Tivi",
+            "image": "tv-icon.svg"
+          },
+          {
+            "id": 8,
+            "content": "Sự kiện/hội thảo",
+            "image": "event.svg"
+          },
+          {
+            "id": 9,
+            "content": "Trường học",
+            "image": "school.svg"
+          },
+          {
+            "id": 10,
+            "content": "Tờ rơi",
+            "image": "leaflets.svg"
+          },
+          {
+            "id": 11,
+            "content": "Khác....",
+            "image": "others-icon.svg"
+          }
+        ]
+      },
+      {
+        "id": "b8e648f6-baf1-49ca-b187-3b9efb75af13",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "1856facb-028a-48a1-bbec-59a934c36192",
+        "question": "Where did you know Fsel? ",
+        "language": "en-US",
+        "description": "addd",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Google",
+            "image": "gmail-icon.svg"
+          },
+          {
+            "id": 2,
+            "content": "Facebook",
+            "image": "facebook-icon.svg"
+          },
+          {
+            "id": 3,
+            "content": "Youtube",
+            "image": "youtube-icon.svg"
+          },
+          {
+            "id": 4,
+            "content": "Tiktok",
+            "image": "tiktok-icon.svg"
+          },
+          {
+            "id": 5,
+            "content": "Bạn bè/gia đình",
+            "image": "friends_family-icon.svg"
+          },
+          {
+            "id": 6,
+            "content": "Tin tức/báo chí",
+            "image": "blog-icon.svg"
+          },
+          {
+            "id": 7,
+            "content": "Tivi",
+            "image": "tv-icon.svg"
+          },
+          {
+            "id": 8,
+            "content": "Sự kiện/hội thảo",
+            "image": "event.svg"
+          },
+          {
+            "id": 9,
+            "content": "Trường học",
+            "image": "school.svg"
+          },
+          {
+            "id": 10,
+            "content": "Tờ rơi",
+            "image": "leaflets.svg"
+          },
+          {
+            "id": 11,
+            "content": "Khác....",
+            "image": "others-icon.svg"
+          }
+        ]
+      }
     ]
   },
   {

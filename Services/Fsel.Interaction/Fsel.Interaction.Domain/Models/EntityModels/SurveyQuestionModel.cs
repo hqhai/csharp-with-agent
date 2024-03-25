@@ -3,6 +3,7 @@
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Shared.Enums;
 
@@ -16,5 +17,19 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public EnumSurveyQuestion Type { get; set; }
         public object? Answers { get; set; }
         public IList<CustomerSurvey>? CustomerSurveys { get; set; }
+    }
+
+    public class AlbumTranslationModel : BaseModel, ITranslationObject
+    {
+        public string? Language { get; set; }
+
+        public string? Question { get; set; }
+        public string? Description { get; set; }
+
+        public object? Answers { get; set; }
+
+        public Guid SurveyQuestionId { get; set; }
+
+        public SurveyQuestionModel? SurveyQuestion { get; set; }
     }
 }
