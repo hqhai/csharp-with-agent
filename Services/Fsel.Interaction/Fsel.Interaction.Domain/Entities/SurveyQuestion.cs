@@ -65,7 +65,6 @@ namespace Fsel.Interaction.Domain.Entities
         public Guid SurveyQuestionId { get; set; }
 
         public SurveyQuestion? SurveyQuestion { get; set; }
-
         public string? Language { get; set; }
     }
 }

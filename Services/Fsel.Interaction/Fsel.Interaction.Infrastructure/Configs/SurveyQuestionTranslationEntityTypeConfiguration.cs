@@ -11,10 +11,11 @@ namespace Fsel.Interaction.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<SurveyQuestionTranslation> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.SurveyQuestion)
-                .WithMany(b => b.Translations)
-                .HasForeignKey(p => p.SurveyQuestionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany(b => b.Translations)
+                  .HasForeignKey(p => p.SurveyQuestionId)
+                  .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -11,7 +11,9 @@ namespace Fsel.Interaction.Infrastructure.Maps
     {
         public SurveyQuestionProfile()
         {
-            CreateMap<SurveyQuestion, SurveyQuestionModel>().IgnoreAllNonExisting();
+            CreateMap<SurveyQuestion, SurveyQuestionModel>().IgnoreEntity()?.ReverseMap();
+            CreateMap<SurveyQuestionTranslation, SurveyQuestionTranslationModel>().IgnoreAllNonExisting()?.ReverseMap();
+            CreateMap<SurveyQuestion, SurveyQuestionModel>().IgnoreAllNonExisting()?.MapTranslations<SurveyQuestion, SurveyQuestionModel, SurveyQuestionTranslation>();
         }
     }
 }
