@@ -19,5 +19,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<string>? TeacherNames { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
+
+        public EnumChatbotConfigStatus Status { get; set; }
+
     }
 }

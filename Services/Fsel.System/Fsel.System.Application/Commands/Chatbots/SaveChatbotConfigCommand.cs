@@ -53,11 +53,11 @@ namespace Fsel.System.Application.Commands.Chatbots
             List<string> aiConfig = new List<string> { programConfig, courseConfig, cefrConfig, unitNumberConfig };
 
 
-            var vocabConfigs = request.ChatbotSkillConfigs?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Vocabulary)?.Configs ?? new List<SkillConfigModel>();
+            var vocabConfigs = request.ChatbotSkillConfigs?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Vocabulary)?.Configs ?? new List<SkillConfigCommandModel>();
             string vocabConfigsPart = BuildTemplateConfigPrompt(Vocabulary_Lists, vocabConfigs, false, true);
             string vocabConfigsFull = BuildTemplateConfigPrompt(Vocabulary_Lists, vocabConfigs, true, true);
 
-            var grammarConfigs = request.ChatbotSkillConfigs?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Grammar)?.Configs ?? new List<SkillConfigModel>();
+            var grammarConfigs = request.ChatbotSkillConfigs?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Grammar)?.Configs ?? new List<SkillConfigCommandModel>();
             string grammarPart = BuildTemplateConfigPrompt(Grammar_TopicList, vocabConfigs, false, true);
             string grammarFull = BuildTemplateConfigPrompt(Grammar_TopicList, vocabConfigs, true, true);
 
@@ -149,7 +149,7 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// <param name="getTopic" desciption="chỉ hiển thị TopicName"></param>
         /// <param name="getItem" desciption="chỉ hiển thị Item"></param>
         /// <returns></returns>
-        private static string BuildTemplateConfigPrompt(string skillType, IList<SkillConfigModel> configs, bool getTopic, bool getItem)
+        private static string BuildTemplateConfigPrompt(string skillType, IList<SkillConfigCommandModel> configs, bool getTopic, bool getItem)
         {
             string topicName = string.Empty;
             string itemName = string.Empty;

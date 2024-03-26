@@ -13,10 +13,10 @@ namespace Fsel.System.Infrastructure.Maps
         public ChatbotConfigsProfile()
         {
             CreateMap<SaveChatbotConfigCommandModel, ChatbotConfig>().IgnoreAllNonExisting();
-            CreateMap<ChatbotSkillConfigModel, ChatbotSkillConfig>().IgnoreAllNonExisting();
-            CreateMap<ChatbotTokenConfigsModel, ChatbotTokenConfigs>().IgnoreAllNonExisting();
-            CreateMap<SkillConfigModel, SkillConfig>().IgnoreAllNonExisting();
-            CreateMap<ItemSkillContentModel, ItemSkillContent>().IgnoreAllNonExisting();
+            CreateMap<ChatbotSkillConfigsCommandModel, ChatbotSkillConfig>().IgnoreAllNonExisting();
+            CreateMap<ChatbotTokenConfigsCommandModel, ChatbotTokenConfigs>().IgnoreAllNonExisting();
+            CreateMap<SkillConfigCommandModel, SkillConfig>().IgnoreAllNonExisting();
+            CreateMap<ItemSkillContentCommandModel, ItemSkillContent>().IgnoreAllNonExisting();
 
             CreateMap<ChatbotSkillConfig, ChatbotSkillConfigModel>().IgnoreAllNonExisting();
             CreateMap<ChatbotTokenConfigs, ChatbotTokenConfigsModel>().IgnoreAllNonExisting();
