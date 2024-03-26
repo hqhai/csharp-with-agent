@@ -37,6 +37,13 @@ namespace Fsel.System.Domain.Entities.Chatbots
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? UnitNumber { get; set; }
 
+        /// <summary>
+        /// Unit Number
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? UnitTopic { get; set; }
+
         public int NumberSkill { get; set; }
         public EnumChatbotConfigStatus Status { get; set; }
         public Guid UnitId { get; set; }
