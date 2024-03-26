@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         var mockTestAnswers = await _mockTestResultRepository.Queryable.Include(x => x.MockTestAnswers).Where(x => x.Id == skillMockTestResult.Id).SelectMany(x => x.MockTestAnswers).ToListAsync(cancellationToken);
                         isSendEmail = mockTestAnswers.All(x => !string.IsNullOrEmpty(x.GradingAlFeedback));
                     }
-                    else
+                    else if (skillMockTestResult.SkillScores.Any(x => x.Skill == EnumCourseSkill.Reading || x.Skill == EnumCourseSkill.Listening))
                     {
                         isSendEmail = true;
                     }
