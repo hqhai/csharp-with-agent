@@ -197,6 +197,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var parameter = new SendStudentCompleteUnitModel
             {
                 UnitName = unit.Name,
+                UnitNumber = numberUnit.ToString(CultureInfo.CurrentCulture),
                 StartDate = startUnit?.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
                 EndDate = endUnit.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
                 Percent = percent.ToString(CultureInfo.CurrentCulture),
@@ -335,30 +336,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return parameter;
         }
 
-        private static string GetSubjectEmail(EnumSenderTemplate senderTemplate, EnumCourseType courseType, string? compareMockTest)
-        {
-            if (senderTemplate == EnumSenderTemplate.Unit1Report && courseType == EnumCourseType.Academic)
-            {
-                return SenderSettings.TitleUnit1;
-            }
-            else if (senderTemplate == EnumSenderTemplate.Unit2AboveReport && courseType == EnumCourseType.Academic)
-            {
-                return SenderSettings.TitleUnit2;
-            }
-            else if (senderTemplate == EnumSenderTemplate.Unit1Report && courseType == EnumCourseType.Ielts && string.IsNullOrEmpty(compareMockTest))
-            {
-                return SenderSettings.TitleIeltUnit1;
-            }
-            else if (senderTemplate == EnumSenderTemplate.Unit2AboveReport && courseType == EnumCourseType.Ielts && string.IsNullOrEmpty(compareMockTest))
-            {
-                return SenderSettings.TitleIeltUnit2;
-            }
-            else
-            {
-                return SenderSettings.TitleIeltUnit3;
-            }
-        }
-
         private static CourseUnitMockTest? GetCourseUnitMockTest(IList<CourseUnitMockTest>? courseUnitMockTests, Guid objectId, string? type, int indexNext)
         {
             if (courseUnitMockTests != null && courseUnitMockTests.Any())
@@ -446,7 +423,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             await _mediator.Send(new SenderCommand
             {
                 Email = student?.Human?.Email,
-                Subject = GetSubjectEmail(model.SenderTemplate, courseType, model.CompareMockTest),
+                Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.TitleUnit, model.UnitNumber),
                 Params = model,
                 Template = model.SenderTemplate,
                 CcEmail = student?.ParentEmail,
