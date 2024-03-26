@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models.CommandModels.ChatbotConfigs
+namespace Fsel.System.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
 

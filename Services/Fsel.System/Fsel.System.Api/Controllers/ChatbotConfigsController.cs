@@ -46,6 +46,12 @@ namespace Fsel.System.Api.Controllers
             return result.GetActionResult();
         }
 
+
+        /// <summary>
+        /// Lưu ChatbotConfig
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<ChatbotConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -55,12 +61,32 @@ namespace Fsel.System.Api.Controllers
             return commandResult.GetActionResult();
         }
 
+
+        /// <summary>
+        /// Lấy chatbotconfig theo unitid
+        /// </summary>
+        /// <param name="unitId"></param>
+        /// <returns></returns>
         [HttpGet("{unitId}")]
         [ProducesResponseType(typeof(MethodResult<ChatbotConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetChatBotConfig([FromRoute] Guid unitId)
         {
             MethodResult<ChatbotConfigModel> commandResult = await _mediator.Send(new GetChatBotConfigQuery { UnitId = unitId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Lấy chatbotconfig theo unitid
+        /// </summary>
+        /// <param name="unitId"></param>
+        /// <returns></returns>
+        [HttpPost("unit-chatbot-configs")]
+        [ProducesResponseType(typeof(MethodResult<IList<ChatbotConfigModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetChatbotConfigsByUserIds([FromBody] GetUnitChatBotConfigsQuery query)
+        {
+            MethodResult<IList<ChatbotConfigModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
