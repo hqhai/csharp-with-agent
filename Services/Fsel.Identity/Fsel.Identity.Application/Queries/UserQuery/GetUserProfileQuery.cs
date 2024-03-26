@@ -156,7 +156,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         }
                         userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == userModel.PackageId)?.Code;
 
-                        var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
+                        /*var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
                         {
                             Filters = new List<GenericFilterModel>
                             {
@@ -169,7 +169,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             }
                         });
                         var school = schoolResult.Content?.Result;
-                        userModel.SchoolName = school?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;
+                        userModel.SchoolName = school?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;*/
                     }
                 }
             }
