@@ -200,13 +200,10 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (classForum != null && requestClassForum != null)
             {
                 _mapper.Map(requestClassForum, classForum);
-                if (requestClassForum.FilePaths != null && requestClassForum.FilePaths.Any())
+                classForum.ClassForumFiles = requestClassForum.FilePaths?.Select(x => new ClassForumFile
                 {
-                    classForum.ClassForumFiles = requestClassForum.FilePaths.Select(x => new ClassForumFile
-                    {
-                        FilePath = x,
-                    }).ToList();
-                }
+                    FilePath = x,
+                }).ToList() ?? new List<ClassForumFile>();
 
                 _classForumRepository.Update(classForum);
                 await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
