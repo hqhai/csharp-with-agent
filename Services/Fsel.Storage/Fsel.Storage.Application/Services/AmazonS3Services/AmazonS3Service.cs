@@ -5,8 +5,11 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
+using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 using Fsel.Storage.Domain.Enums;
 using Fsel.Storage.Domain.Enums.ErrorCodes;
 using Fsel.Storage.Infrastructure.ValueSettings;
@@ -168,7 +171,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return stream;
         }
 
-        private MethodResult<string?> IsValidFile(IFormFile? file, EnumFolderType folderType)
+        private async Task<MethodResult<string?>> IsValidFileAsync(IFormFile? file, EnumFolderType folderType, bool isValidEmpty = false)
         {
             var result = new MethodResult<string?>();
             if (file == null || !_appSetting.StorageConfig!.IsValid())
@@ -182,6 +185,29 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             {
                 result.AddErrorBadRequest(nameof(EnumFileErrorCode.FileIsLargerThanAllowedSize), nameof(file), file.Length);
                 return result;
+            }
+
+            if (isValidEmpty && (file.IsFileType(Common.Enums.EnumFileType.Video) || file.IsFileType(Common.Enums.EnumFileType.Audio)))
+            {
+                var text = await _cognitiveProvider.GetTranscriptionAsync(file);
+                if (string.IsNullOrEmpty(text))
+                {
+                    result.AddErrorBadRequest(nameof(EnumMediaErrorCode.EmptyMediaFile), nameof(file), text);
+                    return result;
+                }
+
+                var time = await MediaHelper.GetMediaDurationAsync(file);
+                if (!time.HasValue)
+                {
+                    result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(time), time);
+                    return result;
+                }
+
+                if (time / Shared.Helpers.StringHelper.CountWords(text) > 5)
+                {
+                    result.AddErrorBadRequest(nameof(EnumMediaErrorCode.NotEnough1WordEvery5Seconds), nameof(time), time);
+                    return result;
+                }
             }
 
             return result;
@@ -208,7 +234,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             GC.SuppressFinalize(this);
         }
 
-        public async Task<MethodResult<IList<string>>> UploadFilesAsync(EnumBucketType? bucketType, IList<IFormFile> files, EnumFolderType folderType, bool isResize = false)
+        public async Task<MethodResult<IList<string>>> UploadFilesAsync(EnumBucketType? bucketType, IList<IFormFile> files, EnumFolderType folderType, bool isResize = false, bool isValidEmpty = false)
         {
             MethodResult<IList<string>> results = new MethodResult<IList<string>>();
             results.Result = new List<string>();
@@ -263,9 +289,9 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return await UploadFileAsync(bucketType, stream, key);
         }
 
-        public async Task<MethodResult<string?>> UploadFileAsync(EnumBucketType? bucketType, IFormFile? file, EnumFolderType folderType, bool isResize = false)
+        public async Task<MethodResult<string?>> UploadFileAsync(EnumBucketType? bucketType, IFormFile? file, EnumFolderType folderType, bool isResize = false, bool isValidEmpty = false)
         {
-            MethodResult<string?> result = IsValidFile(file, folderType);
+            MethodResult<string?> result = await IsValidFileAsync(file, folderType, isValidEmpty);
             if (file == null || !result.IsOK)
             {
                 return result;
@@ -448,32 +474,6 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 await process.WaitForExitAsync();
                 process.WaitForExit();
             }
-        }
-
-        private async Task<bool> IsEmptyFile(List<string> filePaths)
-        {
-            foreach (var filePath in filePaths)
-            {
-                var result = await _cognitiveProvider.GetTranscriptionAsync(filePath);
-                if (string.IsNullOrEmpty(result))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private async Task<bool> IsEmptyMediaFile(List<string> filePaths)
-        {
-            foreach (var filePath in filePaths)
-            {
-                var result = await _cognitiveProvider.GetTranscriptionAsync(filePath);
-                if (string.IsNullOrEmpty(result))
-                {
-                    return true;
-                }
-            }
-            return false;
         }
     }
 }
