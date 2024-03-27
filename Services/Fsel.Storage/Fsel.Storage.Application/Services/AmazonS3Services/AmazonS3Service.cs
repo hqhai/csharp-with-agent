@@ -13,6 +13,7 @@ using Fsel.Storage.Infrastructure.ValueSettings;
 using Humanizer.Bytes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Nest;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
@@ -29,6 +30,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         private readonly float _targetWidthResize = 270F;
         private readonly float _targetHeightResize = 180F;
         private readonly double _partSize = ByteSize.FromMegabytes(100).Bytes; // Size of each part (100 MB)
+        private readonly ICognitiveProvider _cognitiveProvider;
 
         private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
         {
@@ -40,7 +42,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             { EnumFolderType.Images, ByteSize.FromMegabytes(500).Bytes } //maximum image size (500 MB)
         };
 
-        public AmazonS3Service(AppSetting appSetting, ISystemFileProvider systemFileProvider, ILogger<AmazonS3Service> logger)
+        public AmazonS3Service(AppSetting appSetting, ISystemFileProvider systemFileProvider, ILogger<AmazonS3Service> logger, ICognitiveProvider cognitiveProvider)
         {
             _appSetting = appSetting;
 
@@ -54,6 +56,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             _transferUtility = new TransferUtility(_amazonS3Client);
             _systemFileProvider = systemFileProvider;
             _logger = logger;
+            _cognitiveProvider = cognitiveProvider;
         }
 
         private async Task<string> UploadFileAsync(EnumBucketType? bucketType, Stream? stream, string? key)
@@ -445,6 +448,32 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 await process.WaitForExitAsync();
                 process.WaitForExit();
             }
+        }
+
+        private async Task<bool> IsEmptyFile(List<string> filePaths)
+        {
+            foreach (var filePath in filePaths)
+            {
+                var result = await _cognitiveProvider.GetTranscriptionAsync(filePath);
+                if (string.IsNullOrEmpty(result))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private async Task<bool> IsEmptyMediaFile(List<string> filePaths)
+        {
+            foreach (var filePath in filePaths)
+            {
+                var result = await _cognitiveProvider.GetTranscriptionAsync(filePath);
+                if (string.IsNullOrEmpty(result))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
