@@ -19,17 +19,4 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public IList<CustomerSurvey>? CustomerSurveys { get; set; }
         public IList<SurveyQuestionTranslation>? Translations { get; set; }
     }
-
-    public class SurveyQuestionTranslationModel : BaseModel, ITranslationObject
-    {
-        public string? Question { get; set; }
-
-        public string? Description { get; set; }
-
-        public object? Answers { get; set; }
-        public Guid SurveyQuestionId { get; set; }
-
-        public SurveyQuestionModel? SurveyQuestion { get; set; }
-        public string? Language { get; set; }
-    }
 }

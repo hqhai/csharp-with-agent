@@ -39,10 +39,12 @@ namespace Fsel.Interaction.Domain.Entities
             get { return ConvertHelper.Deserialize<object>(AnswerStr); }
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
+
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();
 
         public ICollection<SurveyQuestionTranslation> Translations { get; set; } = new List<SurveyQuestionTranslation>();
     }
+
     public class SurveyQuestionTranslation : Entity, ITranslationObject
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
@@ -63,8 +65,8 @@ namespace Fsel.Interaction.Domain.Entities
         }
 
         public Guid SurveyQuestionId { get; set; }
-
         public SurveyQuestion? SurveyQuestion { get; set; }
+
         public string? Language { get; set; }
     }
 }
