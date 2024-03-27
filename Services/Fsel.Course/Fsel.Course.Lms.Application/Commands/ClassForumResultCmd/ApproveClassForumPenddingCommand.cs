@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var packageResults = await _orderService.GetPackages();
             var packages = packageResults.Content?.Result;
 
-            var studentCode = packages?.FirstOrDefault(x => x.Id == student?.PackageId)?.Code;
+            var studentPackageCode = packages?.FirstOrDefault(x => x.Id == student?.PackageId)?.Code;
 
             if (classForumResult.Status != EnumClassForumResultStatus.Pending)
             {
@@ -97,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
                 if (request.IsApprove)
                 {
-                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot || (studentCode == EnumPackageCode.BASIC && classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.TeacherGrading))
+                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot || (studentPackageCode == EnumPackageCode.BASIC && classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.TeacherGrading))
                     {
                         long score = 0;
                         if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= classForumResult.WordCount) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= classForumResult.TimeCount))
