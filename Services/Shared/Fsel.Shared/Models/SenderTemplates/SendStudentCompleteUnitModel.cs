@@ -8,6 +8,7 @@ namespace Fsel.Shared.Models.SenderTemplates
     {
         public EnumSenderTemplate SenderTemplate { get; set; }
         public string? UnitName { get; set; }
+        public string? UnitNumber { get; set; }
         public string? FullName { get; set; }
         public string? StartDate { get; set; }
         public string? EndDate { get; set; }
