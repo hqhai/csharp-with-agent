@@ -36,7 +36,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private const int CorrectTotal_Writing = 36;
         private const int Last_DisplayOrder = 1;
 
-
         public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IUserService userService, ISectionRepository sectionRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
             _submitAIResponsePublisher = submitAIResponsePublisher;
@@ -180,7 +179,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 {
                     var sections = await _sectionRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
                     _mockTestResultRepository.Update(mockTestResult);
-                    if (sections.IndexOf(section) == Last_DisplayOrder)
+                    if (skillScore != null)
                     {
                         await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                         await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
