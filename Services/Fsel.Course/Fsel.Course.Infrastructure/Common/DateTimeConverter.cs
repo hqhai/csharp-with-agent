@@ -26,8 +26,9 @@ namespace Fsel.Course.Infrastructure.Common
             return workingTime;
         }
 
-        public double GetWorkingTime(double workingTime, double executionTime, DateTime inputDate)
+        public double GetWorkingTime(double executionTime, DateTime inputDate)
         {
+            double workingTime = default;
             if (executionTime != default)
             {
                 workingTime = GetWorkingTime(inputDate, DateTime.UtcNow, executionTime);
