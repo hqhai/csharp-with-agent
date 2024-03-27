@@ -33,7 +33,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMediator _mediator;
-        private static int s_correctTotalWriting = 36;
+        private const int CorrectTotal_Writing = 36;
+        private const int Last_DisplayOrder = 1;
+
 
         public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IUserService userService, ISectionRepository sectionRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
@@ -140,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     Scores = averageScore,
                     TotalQuestion = 2,
                     CountQuestion = 2,
-                    TotalCount = s_correctTotalWriting,
+                    TotalCount = CorrectTotal_Writing,
                 };
 
                 skillScores.Add(skillScore);
@@ -148,8 +150,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             else
             {
                 skillScore = skillScores.Single();
-                int correcCount = (int)CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore);
-                averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore);
+                int correcCount = (int)CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore, section.DisplayOrder);
+                averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore, section.DisplayOrder);
                 skillScores.Single().CorrectCount = correcCount;
                 skillScores.Single().Scores = averageScore;
                 sectionGroupResult.CorrectCount = correcCount;
@@ -158,7 +160,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 {
                     mockTestResult.CorrectCount = correcCount;
                     mockTestResult.SkillScores = skillScores;
-                    mockTestResult.CorrectTotal = s_correctTotalWriting;
+                    mockTestResult.CorrectTotal = CorrectTotal_Writing;
                 }
             }
 
@@ -178,7 +180,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 {
                     var sections = await _sectionRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
                     _mockTestResultRepository.Update(mockTestResult);
-                    if (sections.IndexOf(section) == 1)
+                    if (sections.IndexOf(section) == Last_DisplayOrder)
                     {
                         await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                         await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
@@ -233,9 +235,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             return (NumberHelper.RoundNumberDouble(average), totalScore);
         }
 
-        private static double CaculateAverageScoreWritingSection(double firstScore, double average)
+        private static double CaculateAverageScoreWritingSection(double firstScore, double average, int displayOrder)
         {
-            return NumberHelper.RoundNumberDouble((firstScore + average * 2) / 3);
+            if (displayOrder == Last_DisplayOrder)
+            {
+                return NumberHelper.RoundNumberDouble((firstScore + average * 2) / 3);
+            }
+
+            return NumberHelper.RoundNumberDouble((average + firstScore * 2) / 3);
         }
     }
 }
