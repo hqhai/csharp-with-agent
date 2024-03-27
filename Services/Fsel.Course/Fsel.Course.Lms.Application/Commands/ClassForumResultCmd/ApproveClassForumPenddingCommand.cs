@@ -74,10 +74,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var csoId = csoResults.Content?.Result?.Id;
 
             var studentResult = await _userService.GetStudentByUserIdAsync(classForumResult.CreatedUserId);
-            var studentPackageId = studentResult.Content?.Result?.PackageId;
+            var student = studentResult.Content?.Result;
 
             var packageResults = await _orderService.GetPackages();
-            var packageBasic = packageResults.Content?.Result?.FirstOrDefault(x => x.Code == EnumPackageCode.BASIC);
+            var packages = packageResults.Content?.Result;
+
+            var studentPackageCode = packages?.FirstOrDefault(x => x.Id == student?.PackageId)?.Code;
 
             if (classForumResult.Status != EnumClassForumResultStatus.Pending)
             {
@@ -95,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
                 if (request.IsApprove)
                 {
-                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot || (studentPackageId == packageBasic?.Id && classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.TeacherGrading))
+                    if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot || (studentPackageCode == EnumPackageCode.BASIC && classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.TeacherGrading))
                     {
                         long score = 0;
                         if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= classForumResult.WordCount) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= classForumResult.TimeCount))
