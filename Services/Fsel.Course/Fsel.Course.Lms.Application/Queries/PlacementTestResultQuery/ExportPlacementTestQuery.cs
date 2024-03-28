@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -29,6 +30,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     {
         private readonly IUserService _userService;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
+
+        private const int ChildrenAge = 13;
+        private const int StudentAge = 14;
 
         public ExportPlacementTestQueryHandler(
             IUserService userService,
@@ -56,8 +60,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     var student = studentResult.Content?.Result;
                     if (student != null)
                     {
+                        var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == item.StudentId).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                         int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
-                        var (levelCompleted, isLock) = item.Level.GetLevelInScore(item.Percent, age);
+                        var (levelCompleted, isLock) = item.Level.GetLevelInScore(item.Percent, IeltsScoreHelper.GetInitialAge(placementTestResult?.Level, age));
                         placementTestResultExports.Add(new PlacementTestResultExportModel
                         {
                             CurrentLevel = student.CourseLevel,

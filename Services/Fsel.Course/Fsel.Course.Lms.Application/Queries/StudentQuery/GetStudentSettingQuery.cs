@@ -60,16 +60,20 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             {
                 settingStudentModel.NumberOfToken = student.NumberOfToken;
                 var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
+                                                                               .OrderByDescending(x => x.CreatedDate)
                                                                                .ToListAsync(cancellationToken);
-                var placementTestResult = placementTestResults.OrderByDescending(x => x.CreatedDate).FirstOrDefault();
-                var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent, age) ?? (null, default);
+
+                var placementTestResultLast = placementTestResults.FirstOrDefault();
+                var placementTestResultInitial = placementTestResults.LastOrDefault();
+
+                var (levelNext, isLock) = placementTestResultLast?.Level.GetLevelInScore(placementTestResultLast.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age)) ?? (null, default);
 
                 settingStudentModel.BeginnerGuide = student.BeginnerGuide;
                 settingStudentModel.ModuleNumber = placementTestResults.Count + 1;
                 settingStudentModel.Level = student.CourseLevel;
-                settingStudentModel.IsPlacementTest = placementTestResult != null;
+                settingStudentModel.IsPlacementTest = placementTestResultLast != null;
                 settingStudentModel.ClassId = student.ClassId ?? null;
-                settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
+                settingStudentModel.PTLevel = placementTestResultLast?.Level ?? null;
                 settingStudentModel.IsLockPT = isLock;
                 settingStudentModel.StartPTLevel = placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault() == null ? student.CourseLevel : placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault()?.Level.GetCourseLevelByPlacementTestLevel();
 
