@@ -31,9 +31,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly IUserService _userService;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
 
-        private const int ChildrenAge = 13;
-        private const int StudentAge = 14;
-
         public ExportPlacementTestQueryHandler(
             IUserService userService,
             IPlacementTestResultRepository placementTestResultRepository)
