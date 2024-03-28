@@ -72,8 +72,8 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
                 return methodResult;
             }
             var lessons = lessonResults.Content?.Result;
-            errorReportModel.CourseType = courses?.FirstOrDefault(x => x.Id == errorReportModel.CourseId)?.CourseType ?? default;
-            errorReportModel.CourseLevel = courses?.FirstOrDefault(x => x.Id == errorReportModel.CourseId)?.CourseLevel ?? default;
+            errorReportModel.CourseType = courses?.FirstOrDefault(x => x.Id == errorReportModel.CourseId)?.CourseType;
+            errorReportModel.CourseLevel = courses?.FirstOrDefault(x => x.Id == errorReportModel.CourseId)?.CourseLevel;
             errorReportModel.CourseName = courses?.FirstOrDefault(x => x.Id == errorReportModel.CourseId)?.Name;
             errorReportModel.UnitName = units?.FirstOrDefault(x => x.Id == errorReportModel.UnitId)?.Name;
             errorReportModel.LessonName = lessons?.FirstOrDefault(x => x.Id == errorReportModel.LessonId)?.Name;

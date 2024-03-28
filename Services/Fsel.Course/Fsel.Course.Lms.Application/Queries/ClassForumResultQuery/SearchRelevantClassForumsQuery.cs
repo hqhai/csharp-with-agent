@@ -87,6 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Where(x => x.ClassForumId == classForum!.Id
                 && x.Status != EnumClassForumResultStatus.Draft
                 && x.Status != EnumClassForumResultStatus.Pending
+                && x.Status != EnumClassForumResultStatus.Denied
                 && x.Id != request.ClassForumResultId
                 && classStudentIds!.Contains(x.StudentId))
                 .Select(x => new ClassForumResultModel
@@ -112,7 +113,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     CreatedDate = x.CreatedDate,
                     CreatedFullName = x.CreatedFullName,
                     ClassForumScores = _mapper.Map<IList<ClassForumScoreModel>>(x.ClassForumScores.OrderBy(x => x.CreatedDate)),
-                    ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(x.ClassForumResultFiles)
+                    ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(x.ClassForumResultFiles),
+                    TokenLastTime = x.TokenLastTime,
+                    TokenFirstTime = x.TokenFirstTime,
+                    IsViewed = x.IsViewed,
                 });
 
             int totalItem = await classForumResults.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

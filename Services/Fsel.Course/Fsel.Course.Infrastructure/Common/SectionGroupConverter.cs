@@ -79,7 +79,7 @@ namespace Fsel.Course.Infrastructure.Common
             sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
             sectionGroupResult.Status = EnumResultStatus.Done;
             sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult, sectionGroup);
-            sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.CreatedDate, DateTime.UtcNow, sectionGroup.ExecutionTime);
+            sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroup.ExecutionTime, sectionGroupResult.CreatedDate);
             if (sectionGroup.CourseSkill != EnumCourseSkill.Writing)
             {
                 if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())

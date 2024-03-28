@@ -2,6 +2,7 @@
 
 namespace Fsel.Interaction.Infrastructure.Maps
 {
+    using System.Reflection;
     using AutoMapper;
     using Fsel.Core.Extensions;
     using Fsel.Interaction.Domain.Entities;
@@ -11,7 +12,8 @@ namespace Fsel.Interaction.Infrastructure.Maps
     {
         public SurveyQuestionProfile()
         {
-            CreateMap<SurveyQuestion, SurveyQuestionModel>().IgnoreAllNonExisting();
+            CreateMap<SurveyQuestionTranslation, SurveyQuestion>().IgnoreEntity()?.ReverseMap();
+            CreateMap<SurveyQuestion, SurveyQuestionModel>().IgnoreAllNonExisting()?.MapTranslations<SurveyQuestion, SurveyQuestionModel, SurveyQuestionTranslation>();
         }
     }
 }

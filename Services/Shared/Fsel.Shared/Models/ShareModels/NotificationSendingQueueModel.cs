@@ -12,7 +12,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public IList<EnumRole>? Roles { get; set; }
 
-        public Guid SenderId { get; set; }
+        public Guid? SenderId { get; set; }
 
         public IList<object>? ParamsMessage { get; set; }
 
