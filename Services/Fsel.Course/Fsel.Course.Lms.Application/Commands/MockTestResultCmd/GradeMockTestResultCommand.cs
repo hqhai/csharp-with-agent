@@ -22,7 +22,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Nest;
 
     public class GradeMockTestResultCommand : GradeMockTestResultCommandModel, IRequest<MethodResult<List<MockTestScoreModel>>>
     {
