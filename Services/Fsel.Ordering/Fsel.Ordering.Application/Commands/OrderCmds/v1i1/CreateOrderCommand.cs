@@ -73,11 +73,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
             var student = studentResult.Content?.Result;
+            request.CourseLevel = request.CourseLevel ?? student?.CourseLevel;
 
-            var isCheckLevel = request.CourseLevel.IsCheckCourseLevel(student?.CourseLevel ?? default);
-            if (!isCheckLevel)
+            if (request.CourseLevel == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.YouChoseTheWrongLevel), nameof(isCheckLevel));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseLevel));
+                return methodResult;
+            }
+
+            if (request.CourseLevel.Value.IsCheckCourseLevel(student?.CourseLevel ?? default))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.YouChoseTheWrongLevel), nameof(request.CourseLevel));
                 return methodResult;
             }
 
@@ -132,7 +138,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && (p.Status == EnumOrderStatus.New), cancellationToken);
 
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
+            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel.Value, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
 
             string code = codeSend.Result?.Code ?? string.Empty;
 
