@@ -158,7 +158,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 string requestBody = urBoxSignature.Serialize();
                 string? privateKeyPath;
 
-                if (_hostEnvironment.IsProduction())
+                if (_hostEnvironment.IsProduction() || _hostEnvironment.IsStaging())
                 {
                     privateKeyPath = ResourceSettings.PrivateKeyProdUrBox;
                 }
