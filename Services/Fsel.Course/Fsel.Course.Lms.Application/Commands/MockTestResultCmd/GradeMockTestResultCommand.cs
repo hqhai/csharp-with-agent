@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Nest;
 
     public class GradeMockTestResultCommand : GradeMockTestResultCommandModel, IRequest<MethodResult<List<MockTestScoreModel>>>
     {
@@ -164,6 +165,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 }
             }
 
+            mockTestResult.CorrectCount += sectionGroupResults.Sum(x => x.CorrectCount);
             mockTestResult.SkillScores = skillScores;
             mockTestResult.MockTestScores = mockTestScores;
             mockTestResult.GradingTeacherId = teacherId;
