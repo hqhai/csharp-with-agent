@@ -81,7 +81,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            if (request.CourseLevel.Value.IsCheckCourseLevel(student?.CourseLevel ?? default))
+            if (!request.CourseLevel.Value.IsCheckCourseLevel(student?.CourseLevel ?? default))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.YouChoseTheWrongLevel), nameof(request.CourseLevel));
                 return methodResult;
