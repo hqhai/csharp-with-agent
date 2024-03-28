@@ -13,7 +13,8 @@ namespace Fsel.Interaction.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/customerSurvey")]
     [ApiController]
     public class CustomerSurveyController : ControllerBase
@@ -47,6 +48,18 @@ namespace Fsel.Interaction.Api.Controllers
         public async Task<IActionResult> IsSurveyCompletedByStudentId([FromRoute] Guid id)
         {
             MethodResult<bool> queryResult = await _mediator.Send(new GetIsSurveyByStudentIdQuery { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get School By User
+        /// </summary>
+        [HttpGet("get-schools-by-user")]
+        [ProducesResponseType(typeof(MethodResult<IList<object>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSchoolByUser([FromQuery] GetCustomerSurveyByQuestionIdQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
