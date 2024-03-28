@@ -196,7 +196,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                     return result;
                 }
 
-                var time = await MediaHelper.GetMediaDurationAsync(file);
+                var time = await MediaHelper.GetMediaDurationAsync(file, _systemFileProvider);
                 if (!time.HasValue)
                 {
                     result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(time), time);
