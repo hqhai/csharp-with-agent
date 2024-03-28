@@ -14,6 +14,18 @@ namespace Fsel.Shared.Enums
         DeleteClassForumResult,
         DeleteComment,
         LikeComment,
-        LikeClassForum
+        LikeClassForum,
+        AIFeedBack,
+        ChangeClassLiveTeacher,
+        MockTest,
+        FullMockTest,
+        ReviewFsel,
+        DiscussionBoardInActive,
+        LeaderBoard,
+        ApprovePostClassForum,
+        RejectApprovalPostClassForum,
+        NoticePayment,
+        NoticeExpireAfterTwoWeek,
+        NoticeExpireAfterTwoDay,
     }
 }

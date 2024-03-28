@@ -43,9 +43,12 @@ builder.Services.AddScoped<IApprovalTimeConfigRepository, ApprovalTimeConfigRepo
 builder.Services.AddScoped<IApprovalLogRepository, ApprovalLogRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
+builder.Services.AddScoped<IChatbotConfigRepository, ChatbotConfigRepository>();
 builder.Services.AddScoped<IErrorReportRepository, ErrorReportRepository>();
+builder.Services.AddScoped<ITokenHistoryRepository, TokenHistoryRepository>();
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
+builder.Services.AddScoped<NotificationMessagePublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
@@ -57,7 +60,9 @@ queues: new Dictionary<string, Type>
 {
     { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardFinishConsumer) },
     { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(QuestBoardConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.CompleteApprovalPostTimeOut, typeof(CompleteApprovalConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.CompleteApprovalPostTimeOut, typeof(CompleteApprovalConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
+    { QueueSettings.UserQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) }
 });
 
 var app = builder.Build();

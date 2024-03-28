@@ -26,14 +26,16 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
             if (dataReceipt != null)
             {
+
+                var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == dataReceipt.Type && x.Content == dataReceipt.Content);
+
+                string message = dataReceipt.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, dataReceipt.ParamsMessage.ToArray()) : "";
+
+                string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : "";
+
+
                 if (dataReceipt!.InterationType == EnumInteractionActionType.Flag)
                 {
-                    var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == dataReceipt.Type && x.Content == dataReceipt.Content);
-
-                    string message = dataReceipt.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, dataReceipt.ParamsMessage.ToArray()) : "";
-
-                    string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : "";
-
                     CreateNotificationCommand model = new CreateNotificationCommand()
                     {
                         UserIds = dataReceipt.UserIds ?? default,
@@ -41,7 +43,21 @@ namespace Fsel.Notification.Application.Queues.Consumers
                         Message = message,
                         Link = link,
                         Roles = dataReceipt.Roles,
-                        NotificationTypeId = notificationType?.Id ?? default
+                        NotificationTypeId = notificationType?.Id ?? default,
+                        SenderId = dataReceipt.SenderId ?? default,
+                    };
+                    await _mediator.Send(model).ConfigureAwait(false);
+                }
+                else if (dataReceipt!.InterationType == EnumInteractionActionType.Like)
+                {
+                    UpdateNotificationCommand model = new UpdateNotificationCommand()
+                    {
+                        UserId = dataReceipt.UserIds!.Single(),
+                        ObjectId = dataReceipt.ObjectId,
+                        Message = message,
+                        Link = link,
+                        NotificationTypeId = notificationType?.Id ?? default,
+                        SenderId = dataReceipt.SenderId ?? default
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
                 }
@@ -58,5 +74,5 @@ namespace Fsel.Notification.Application.Queues.Consumers
                 }
             }
         }
-    } 
+    }
 }
