@@ -19,5 +19,7 @@ namespace Fsel.Identity.Application.Services.InteractionService
 
         [Post("/v1/customerSurvey")]
         Task<IApiResponse<MethodResult<IList<CustomerSurveyModel>>>> CreateSurvey([FromBody] CreateCustomerSurveyCommandModel model);
+        [Get("/v1/customerSurvey/get-schools-by-user")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetSchoolByQuestion([FromQuery] GetSchollByQuestionSurveyQueryModel model);
     }
 }

@@ -80,5 +80,17 @@ namespace Fsel.Course.Lms.Api.Controllers
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "placementTest_export.xlsx");
         }
+
+        /// <summary>
+        /// Integration Placement Test Result
+        /// </summary>
+        [HttpGet("integration-placement-test-results")]
+        [ProducesResponseType(typeof(MethodResult<IList<object>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetIntegrationPlacementTestResult([FromQuery] IntegrationPlacementTestResultsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

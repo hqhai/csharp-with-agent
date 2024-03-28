@@ -24,5 +24,7 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Put("/v1/admin/order/change-status-order")]
         Task<IApiResponse<MethodResult<bool>>> ChangeStatusOrder([Body] ChangeStatusOrderCommandModel command);
+        [Get("/v1/order/get-order-by-status")]
+        Task<IApiResponse<MethodResult<IList<OrderSearchModel>>>> GetOrderByStatusAsync([FromQuery] GetOrderByStatusQueryModel query);
     }
 }

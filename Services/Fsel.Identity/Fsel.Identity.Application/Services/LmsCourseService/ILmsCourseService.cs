@@ -33,5 +33,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1/progress/students-competition")]
         Task<IApiResponse<MethodResult<IList<CompetitionStudentProgressModel>>>> GetStudentProgress([FromQuery] StudentCompetitionStatQueryModel query);
+        [Get("/v1/placement-test-result/integration-placement-test-results")]
+        Task<IApiResponse<MethodResult<IList<PlacementTestResultModel>>>> GetPalcementTestResults([FromQuery] GetPTTestModel query);
     }
 }
