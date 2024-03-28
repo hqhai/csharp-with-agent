@@ -25,6 +25,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
+    using Microsoft.Extensions.Hosting;
 
     public class CreateRedemptionRequestCommand : CreateRedemptionRequestCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
     {
@@ -39,8 +40,9 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IOrderTransactionRepository _orderTransactionRepository;
+        private readonly IHostEnvironment _hostEnvironment;
 
-        public CreateRedemptionRequestCommandHandler(IUrBoxService urBoxService, CreateTokenHistoryPublisher createTokenHistoryPublisher, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IOrderTransactionRepository orderTransactionRepository)
+        public CreateRedemptionRequestCommandHandler(IUrBoxService urBoxService, CreateTokenHistoryPublisher createTokenHistoryPublisher, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IOrderTransactionRepository orderTransactionRepository, IHostEnvironment hostEnvironment)
         {
             _urBoxService = urBoxService;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -49,6 +51,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
             _authContext = authContext;
             _userService = userService;
             _orderTransactionRepository = orderTransactionRepository;
+            _hostEnvironment = hostEnvironment;
         }
 
         public async Task<MethodResult<RedemptionResponseModel>> Handle(CreateRedemptionRequestCommand request, CancellationToken cancellationToken)
@@ -153,8 +156,18 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 };
 
                 string requestBody = urBoxSignature.Serialize();
+                string? privateKeyPath;
 
-                var signature = EncodeHelper.CreateDigitalSignature(requestBody, ResourceSettings.PrivateKeyUrBox, HashAlgorithmName.SHA256);
+                if (_hostEnvironment.IsProduction())
+                {
+                    privateKeyPath = ResourceSettings.PrivateKeyProdUrBox;
+                }
+                else
+                {
+                    privateKeyPath = ResourceSettings.PrivateKeyDevUrBox;
+                }
+
+                var signature = EncodeHelper.CreateDigitalSignature(requestBody, privateKeyPath, HashAlgorithmName.SHA256);
 
                 if (string.IsNullOrEmpty(signature) || string.IsNullOrEmpty(redemptionRequest.AppId) || string.IsNullOrEmpty(redemptionRequest.AppSecret))
                 {
