@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var methodResult = new MethodResult<IList<object>>();
 
             var querys = await _placementTestResultRepository.Queryable
-                                                             .Where(x => x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate)
+                                                             .Where(x => x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date)
                                                              .GroupBy(x => x.CreatedUserId)
                                                              .Select(x => x.OrderByDescending(x => x.CreatedDate).FirstOrDefault())
                                                              .ToListAsync(cancellationToken);

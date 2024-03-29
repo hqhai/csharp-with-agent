@@ -47,7 +47,7 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
 
             var customerSurveys = await _customerSurveyRepository.Queryable
                                                                  .Where(x => x.SurveyQuestionId == questionId)
-                                                                 .Where(x => x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate)
+                                                                 .Where(x => x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date)
                                                                  .ToListAsync(cancellationToken);
 
             List<SchoolModel> schools = new();

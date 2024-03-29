@@ -22,7 +22,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
         public string? SchoolName { get; set; }
         public EnumIntegrationStatus? Status { get; set; }
         public string? StatusDetail { get; set; }
-        public int? LearningPackage { get; set; }
+        public string? CourseLever { get; set; }
         public string? PTLever { get; set; }
     }
 }

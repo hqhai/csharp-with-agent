@@ -127,7 +127,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                               .ThenInclude(x => x!.ParentStudents)
                                               .ThenInclude(x => x.Parent)
                                               .ThenInclude(x => x!.Human)
-                                              .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate >= request.StartDate && x.UpdatedDate <= request.EndDate))
+                                              .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
                                               .Select(x => new LeadsIntegrationModel
                                               {
                                                   UserId = x.UserId ?? default,
@@ -152,9 +152,10 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var userIdentityIds = users.Select(x => x.UserId).ToList();
             #endregion
 
+            #region SetData
             // hợp list Id và lấy ra Id duy nhất
             var listUserIds = userIdentityIds.Concat(userSchoolIds).Concat(userPtTestIds).Concat(userOrderIds).ToList();
-            var distinctUserIds = userIdentityIds.Distinct().ToList();
+            var distinctUserIds = listUserIds.Distinct().ToList();
 
             // gán dữ liệu
             List<LeadsIntegrationModel> leadsIntegrations = new List<LeadsIntegrationModel>();
@@ -166,8 +167,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 var orderItems = orderResults.Where(x => x.UserId == item).ToList();
                 EnumIntegrationStatus status = EnumIntegrationStatus.Register;
                 var statusDetail = string.Empty;
-                int learningPackage = 0;
-                if (orderItems != null)
+                string courseLever = string.Empty;
+                if (orderItems.Count != 0)
                 {
                     foreach (var orderItem in orderItems)
                     {
@@ -175,10 +176,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         {
                             status = EnumIntegrationStatus.Trial;
                             statusDetail = orderItem.ExpireDate.ToString();
+                            courseLever = orderItem.CourseName.ToString() ?? string.Empty;
                         }
                         else
                         {
-                            learningPackage = orderItem.MonthNumber;
+                            courseLever = orderItem.CourseName.ToString() ?? string.Empty;
                         }
                     }
                 }
@@ -194,6 +196,33 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         statusDetail = "Process";
                     }
                 }
+
+                if (user == null)
+                {
+                    user = await _humanRepository.Queryable
+                                                 .Include(x => x.User)
+                                                 .Include(x => x.Student)
+                                                 .ThenInclude(x => x!.ParentStudents)
+                                                 .ThenInclude(x => x.Parent)
+                                                 .ThenInclude(x => x!.Human)
+                                                 .Where(x => x.UserId == item)
+                                                 .Select(x => new LeadsIntegrationModel
+                                                 {
+                                                     UserId = x.UserId ?? default,
+                                                     FullName = x.FullName,
+                                                     UserName = x.User!.UserName,
+                                                     StudentEmail = x.Email,
+                                                     StudentPhone = x.PhoneNumber,
+                                                     EnumGender = x.Gender,
+                                                     Birthday = x.Birthday,
+                                                     Address = x.Address,
+                                                     ParentName = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.FullName,
+                                                     ParentPhone = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.PhoneNumber,
+                                                     ParentEmail = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Email,
+                                                     ParentGender = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Gender
+                                                 }).FirstOrDefaultAsync(cancellationToken);
+                }
+
                 var leadsIntegration = new LeadsIntegrationModel
                 {
                     UserId = item,
@@ -212,11 +241,13 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     StatusDetail = statusDetail,
                     SchoolName = survey?.Name,
                     PTLever = ptTestResult?.Lever,
-                    LearningPackage = learningPackage
+                    CourseLever = courseLever
                 };
                 leadsIntegrations.Add(leadsIntegration);
             }
+            #endregion
 
+            leadsIntegrations = leadsIntegrations.OrderByDescending(x => x.Status).ToList();
             int totalItem = leadsIntegrations.Count;
             var lists = leadsIntegrations
                     .ApplySortAndPaging(request)

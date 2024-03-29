@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -26,11 +27,13 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
+        private readonly ILmsCourseService _lmsCourseService;
 
-        public GetOrderByStatusQueryHandler(IOrderRepository orderRepository, IMapper mapper)
+        public GetOrderByStatusQueryHandler(IOrderRepository orderRepository, IMapper mapper, ILmsCourseService lmsCourseService)
         {
             _orderRepository = orderRepository;
             _mapper = mapper;
+            _lmsCourseService = lmsCourseService;
         }
 
         public async Task<MethodResult<IList<OrderSearchModel>>> Handle(GetOrderByStatusQuery request, CancellationToken cancellationToken)
@@ -40,8 +43,8 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
             var orders = await _orderRepository.Queryable
                                                .Include(p => p.Package)
-                                               .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate >= request.StartDate && x.UpdatedDate <= request.EndDate))
-                                               .Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New)
+                                               .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
+                                               .Where(p => request.Status == false ? p.Status == EnumOrderStatus.New || p.IsTrial : p.Status != EnumOrderStatus.New)
                                                .Select(x => new OrderSearchModel
                                                {
                                                    Id = x.Id,
@@ -50,14 +53,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                                                    CourseId = x.CourseId,
                                                    CreatedDate = x.CreatedDate,
                                                    CreatedFullName = x.CreatedFullName,
-                                                   PackageName = x.Package!.Code.ToString(),
+                                                   PackageName = x.Package != null ? x.Package.Code.ToString() : string.Empty,
                                                    Status = x.Status,
                                                    PaymentMethod = x.PaymentMethod,
                                                    PackageId = x.PackageId ?? default,
                                                    FullName = x.FullName,
                                                    IsTrial = x.IsTrial,
                                                    ExpireDate = x.ExpireDate,
-                                                   MonthNumber = x.Package!.MonthNumber
+                                                   MonthNumber = x.Package != null ? x.Package.MonthNumber : 0,
                                                })
                                                .ToListAsync(cancellationToken);
 
@@ -65,6 +68,15 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(orders));
                 return methodResult;
+            }
+
+            var courses = await _lmsCourseService.GetCoursesByIdsAsync(orders.Select(p => p.CourseId).ToList()!);
+            if (courses.IsSuccessStatusCode)
+            {
+                foreach (var item in orders)
+                {
+                    item.CourseName = courses.Content?.Result?.FirstOrDefault(x => item.CourseId == x.Id)?.CourseLevel;
+                }
             }
 
             methodResult.Result = _mapper.Map(orders, methodResult.Result);
