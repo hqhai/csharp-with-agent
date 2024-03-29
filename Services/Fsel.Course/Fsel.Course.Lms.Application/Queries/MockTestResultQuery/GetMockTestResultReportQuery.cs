@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -24,14 +25,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     public class GetMockTestResultReportQueryHandler : IRequestHandler<GetMockTestResultReportQuery, MethodResult<MockTestResultReportModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly ICourseRepository _courseRepository;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMapper _mapper;
 
-        public GetMockTestResultReportQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionGroupConverter sectionGroupConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMapper mapper)
+        public GetMockTestResultReportQueryHandler(IMockTestResultRepository mockTestResultRepository, ICourseRepository courseRepository, IMockTestRepository mockTestRepository, SectionGroupConverter sectionGroupConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
+            _courseRepository = courseRepository;
             _mockTestRepository = mockTestRepository;
             _sectionGroupConverter = sectionGroupConverter;
             _mockTestAnswerRepository = mockTestAnswerRepository;
@@ -71,7 +74,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private async Task<MockTestResultReportModel> GetMockTestReport(MockTestResult mockTestResult, MockTest mockTest)
         {
             var query = _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id);
+            var course = await _courseRepository.GetByIdAsync(mockTestResult.CourseId);
             var mockTestResultDto = _mapper.Map<MockTestResultReportModel>(mockTestResult);
+            if (course != null)
+            {
+                (mockTestResultDto.IsCheckScoreColor, mockTestResultDto.TargetBandScore) = course.CourseLevel.CheckScoreColor(mockTestResultDto.Score ?? default);
+            }
             mockTestResultDto.IsTeacherGraded = await _sectionGroupConverter.IsTeacherGraded(mockTestResult, mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList());
             return mockTestResultDto;
         }

@@ -164,6 +164,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 }
             }
 
+            mockTestResult.CorrectCount += sectionGroupResults.Sum(x => x.CorrectCount);
             mockTestResult.SkillScores = skillScores;
             mockTestResult.MockTestScores = mockTestScores;
             mockTestResult.GradingTeacherId = teacherId;

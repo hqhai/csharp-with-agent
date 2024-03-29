@@ -192,7 +192,12 @@ AppSetting appSetting)
                 {
                     int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
                     placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
-                    var (currentLevel, isLockPT) = placementTest.Level.GetLevelInScore(placementTestResult.Percent, age);
+
+                    var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == placementTestResult.StudentId)
+                                                                          .OrderBy(x => x.CreatedDate)
+                                                                          .FirstOrDefaultAsync(cancellationToken);
+
+                    var (currentLevel, isLockPT) = placementTest.Level.GetLevelInScore(placementTestResult.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
                     if (currentLevel.HasValue)
                     {
                         await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
