@@ -2,28 +2,28 @@
   {
     "id": "42d7ddb2-9f36-4f86-badc-67dc16bb722b",
     "code": "BASIC",
-    "name": "Fsel_3_Months",
-    "price": 3000000,
-    "monthNumber": 3,
-    "descriptionStr": "",
+    "name": "Fsel_1_Month",
+    "price": 650000,
+    "monthNumber": 1,
+    "descriptionStr": "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
     "createdDate": "2023-07-24"
   },
   {
     "id": "daa6fc87-6461-49d4-b3a5-c9e4cc30bc59",
     "code": "BASIC",
     "name": "Fsel_6_Months",
-    "price": 5000000,
+    "price": 2100000,
     "monthNumber": 6,
-    "descriptionStr": "",
+    "descriptionStr": "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
     "createdDate": "2023-07-24"
   },
   {
     "id": "d13ee4ab-785a-425c-bd70-b74b61df42eb",
     "code": "BASIC",
     "name": "Fsel_12_Months",
-    "price": 8000000,
+    "price": 3100000,
     "monthNumber": 12,
-    "descriptionStr": "",
+    "descriptionStr": "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
     "createdDate": "2023-07-24"
   }
 ]
