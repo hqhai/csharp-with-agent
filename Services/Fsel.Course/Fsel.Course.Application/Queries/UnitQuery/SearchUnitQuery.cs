@@ -1,10 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
 using Fsel.Course.Application.Services.UserServices;
+using Fsel.Course.Application.Services.SystemServices;
+using Fsel.Course.Application.Services.SystemServices.Models;
 using Fsel.Course.Application.Services.UserServices.Models;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -13,6 +14,7 @@ using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Application.Queries.UnitQuery
 {
@@ -24,11 +26,13 @@ namespace Fsel.Course.Application.Queries.UnitQuery
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
+        private readonly ISystemService _systemService;
 
-        public SearchUnitQueryHandler(IUnitRepository unitRepository, IUserService userService)
+        public SearchUnitQueryHandler(IUnitRepository unitRepository, IUserService userService, ISystemService systemService)
         {
             _unitRepository = unitRepository;
             _userService = userService;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<PagingItemsModel<UnitSearchModel>>> Handle(SearchUnitQuery request, CancellationToken cancellationToken)
@@ -89,13 +93,18 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     .ConfigureAwait(false);
 
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
-            if (teacherResults.IsSuccessStatusCode)
+
+            var unitchatbotconfigs = await _systemService.GetUnitChatbotsStatus(new GetUnitChatbotConfigsQueryModel { UnitIds = lists.Select(x => x.Id).ToList() });
+
+            if (teacherResults.IsSuccessStatusCode && unitchatbotconfigs.IsSuccessStatusCode)
             {
                 var teachers = teacherResults.Content?.Result;
+                var unitStatus = unitchatbotconfigs.Content?.Result;
 
                 foreach (var item in lists)
                 {
                     item.TeacherNames = teachers?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
+                    item.Status = unitStatus!.Any(x => x.UnitId == item.Id) ? (unitStatus!.FirstOrDefault(x => x.UnitId == item.Id)?.Status ?? EnumChatbotConfigStatus.InCompleted) : EnumChatbotConfigStatus.InCompleted;
                 }
             }
 

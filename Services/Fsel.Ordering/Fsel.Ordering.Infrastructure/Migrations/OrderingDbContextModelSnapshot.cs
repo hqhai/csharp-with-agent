@@ -306,11 +306,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DescriptionStr = "",
+                            DescriptionStr = "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
                             IsDeleted = false,
-                            MonthNumber = 3,
-                            Name = "Fsel_3_Months",
-                            Price = 3000000m
+                            MonthNumber = 1,
+                            Name = "Fsel_1_Month",
+                            Price = 650000m
                         },
                         new
                         {
@@ -319,11 +319,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DescriptionStr = "",
+                            DescriptionStr = "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
                             IsDeleted = false,
                             MonthNumber = 6,
                             Name = "Fsel_6_Months",
-                            Price = 5000000m
+                            Price = 2100000m
                         },
                         new
                         {
@@ -332,11 +332,11 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DescriptionStr = "",
+                            DescriptionStr = "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
                             IsDeleted = false,
                             MonthNumber = 12,
                             Name = "Fsel_12_Months",
-                            Price = 8000000m
+                            Price = 3100000m
                         });
                 });
 

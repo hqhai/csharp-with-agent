@@ -34,10 +34,12 @@ namespace Fsel.Interaction.Infrastructure
             modelBuilder.ApplyConfiguration(new SupportQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SupportTicketEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FlagEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SurveyQuestionTranslationEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
+        public DbSet<SurveyQuestionTranslation> SurveyQuestionTranslations { get; set; }
         public DbSet<CustomerSurvey> CustomerSurveys { get; set; }
         public DbSet<InteractionAction> InteractionActions { get; set; }
         public DbSet<Comment> Comments { get; set; }
@@ -66,12 +68,25 @@ namespace Fsel.Interaction.Infrastructure
             }
         }
 
-        private static void SeedSurveyQuestions(ModelBuilder builder)
+        /*private static void SeedSurveyQuestions(ModelBuilder builder)
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SurveyQuestionFileName);
             var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
             ArgumentNullException.ThrowIfNull(surveyQuestions);
             builder.Entity<SurveyQuestion>().HasData(surveyQuestions);
+        }*/
+
+        private static void SeedSurveyQuestions(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SurveyQuestionFileName);
+            var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
+            ArgumentNullException.ThrowIfNull(surveyQuestions);
+
+            var surveyQuestionTranslations = surveyQuestions.SelectMany(x => x.Translations).ToList();
+            surveyQuestions.ForEach(x => x.Translations.Clear());
+
+            builder.Entity<SurveyQuestion>().HasData(surveyQuestions);
+            builder.Entity<SurveyQuestionTranslation>().HasData(surveyQuestionTranslations);
         }
     }
 }

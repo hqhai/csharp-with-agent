@@ -8,12 +8,16 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
+    using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Fsel.Training.Application.Queues.Publishers;
+    using System.Globalization;
 
     public class ReplaceTeacherByCsoCommand : AssignNewTeacherToLessonCommandModel, IRequest<MethodResult<bool>>
     {
@@ -24,14 +28,20 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
         public ReplaceTeacherByCsoCommandHandler(IClassLiveCalendarRepository classLiveCalendarRepository,
                                                  IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
-                                                 AuthContext authContext)
+                                                 AuthContext authContext,
+                                                 IUserService userService,
+                                                 NotificationMessagePublisher notificationMessagePublisher)
         {
             _classLiveCalendarRepository = classLiveCalendarRepository;
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _authContext = authContext;
+            _userService = userService;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(ReplaceTeacherByCsoCommand request, CancellationToken cancellationToken)
@@ -91,6 +101,36 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 return methodResult;
             });
             return methodResult;
+        }
+
+
+
+        /// <summary>
+        /// Gửi thông báo
+        /// </summary>
+        /// <param name="studentIds"></param>
+        /// <param name="classLiveCalendarId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task SendNotification(ClassLiveCalendar classLiveCalendar, CancellationToken cancellationToken)
+        {
+            var studentsResult = await _userService.GetStudentByClassIdAsync(classLiveCalendar?.ClassId ?? new Guid());
+
+            var students = studentsResult?.Content?.Result?.Select(x => x.Id).ToList();
+
+            string liveDate = classLiveCalendar?.LiveDate != null ? classLiveCalendar.LiveDate!.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)! : string.Empty;
+
+            NotificationSendingQueueModel notificationQueue = new NotificationSendingQueueModel()
+            {
+                ObjectId = classLiveCalendar!.Id,
+                UserIds = students,
+                Type = EnumNotificationType.LinkPopup,
+                Content = EnumNotificationContent.ChangeClassLiveTeacher,
+                PlatformCode = EnumPlatformCode.LMS,
+                ParamsMessage = new List<object> { classLiveCalendar?.Class?.Code ?? string.Empty, liveDate ?? string.Empty },
+            };
+            await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
+
         }
     }
 }

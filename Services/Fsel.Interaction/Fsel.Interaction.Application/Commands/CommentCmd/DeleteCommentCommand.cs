@@ -62,7 +62,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 var classForumResult = await _courseService.GetClassForumResultByIdAsync(comment.ObjectId);
                 var classForumResultTemp = classForumResult?.Content?.Result;
 
-                var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(comment.Id, comment!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId);
+                var lesson = await _courseService.GetLessonResult(classForumResultTemp.LessonResultId ?? default);
+
+                var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(comment!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId, lesson?.Content?.Result?.Id, classForumResultTemp?.Id);
 
                 NotificationSendingQueueModel notificationQueueModel = new NotificationSendingQueueModel()
                 {
@@ -84,7 +86,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             return methodResult;
         }
 
-        public static (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(Guid objectId, dynamic templateResult, Guid? courseId, Guid? unitId)
+        public static (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(dynamic templateResult, Guid? courseId, Guid? unitId, Guid? lessonId, Guid? resultId)
         {
             if (templateResult == null)
             {
@@ -92,7 +94,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             }
 
             // param
-            var paramsLink = new List<object> { unitId?.ToString() ?? string.Empty, courseId?.ToString() ?? string.Empty, templateResult?.Id.ToString() ?? string.Empty, objectId };
+            var paramsLink = new List<object> { lessonId ?? default, courseId ?? default, unitId ?? default, resultId ?? default };
             var ownerObjectId = templateResult?.CreatedUserId ?? default;
 
             return (paramsLink, ownerObjectId);
