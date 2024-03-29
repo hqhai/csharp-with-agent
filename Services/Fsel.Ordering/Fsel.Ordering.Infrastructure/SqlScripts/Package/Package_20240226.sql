@@ -28,7 +28,7 @@ CREATE TABLE [dbo].[Packages](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-UPDATE [dbo].[Packages] SET [Name] = N'Fsel_3_Months_Beta' WHERE [Id] = N'42d7ddb2-9f36-4f86-badc-67dc16bb722b'
+UPDATE [dbo].[Packages] SET [Name] = N'Fsel_1_Month_Beta' WHERE [Id] = N'42d7ddb2-9f36-4f86-badc-67dc16bb722b'
 GO
 UPDATE [dbo].[Packages] SET [Name] = N'Fsel_6_Months_Beta' WHERE [Id] = N'daa6fc87-6461-49d4-b3a5-c9e4cc30bc59'
 GO

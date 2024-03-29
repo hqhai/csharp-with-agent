@@ -8,7 +8,7 @@ namespace Fsel.System.Domain.Models.CommandModels.ErrorReports
 
     public class CreateErrorReportCommandModel
     {
-        public EnumTypeOfError Type { get; set; }
+        public EnumTypeOfError? Type { get; set; }
 
         public Guid? CourseId { get; set; }
 
