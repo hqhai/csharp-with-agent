@@ -96,5 +96,18 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Order trial
+        /// </summary>
+        [HttpGet("get-order-trial")]
+        [ProducesResponseType(typeof(MethodResult<OrderModel?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetOrderTrial()
+        {
+            var commandResult = await _mediator.Send(new GetOrderTrialQuery() { }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
