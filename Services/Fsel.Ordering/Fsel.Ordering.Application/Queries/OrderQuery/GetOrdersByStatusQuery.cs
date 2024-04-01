@@ -9,39 +9,38 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetOrderByStatusQuery : IRequest<MethodResult<OrderModel?>>
+    public class GetOrdersByStatusQuery : IRequest<MethodResult<IList<OrderModel?>>>
     {
         public EnumOrderStatus Status { get; set; }
     }
 
-    public class GetOrderByStatusQueryHandler : IRequestHandler<GetOrderByStatusQuery, MethodResult<OrderModel?>>
+    public class GetOrdersByStatusQueryHandler : IRequestHandler<GetOrdersByStatusQuery, MethodResult<IList<OrderModel?>>>
     {
         private readonly IOrderRepository _orderRepository;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
 
-        public GetOrderByStatusQueryHandler(IOrderRepository orderRepository, AuthContext authContext, IMapper mapper)
+        public GetOrdersByStatusQueryHandler(IOrderRepository orderRepository, AuthContext authContext, IMapper mapper)
         {
             _orderRepository = orderRepository;
             _authContext = authContext;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<OrderModel?>> Handle(GetOrderByStatusQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<OrderModel?>>> Handle(GetOrdersByStatusQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<OrderModel?>();
+            var methodResult = new MethodResult<IList<OrderModel?>>();
 
-            Order? order = order = await _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId && p.Status == request.Status).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+            var order = await _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId && p.Status == request.Status).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
 
-            methodResult.Result = _mapper.Map<OrderModel?>(order);
+            methodResult.Result = _mapper.Map<IList<OrderModel?>>(order);
             return methodResult;
         }
     }
