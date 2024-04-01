@@ -18,8 +18,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
     public class GetOrderByStatusQuery : IRequest<MethodResult<OrderModel?>>
     {
-        public bool? IsTrial { get; set; }
-        public EnumOrderStatus? Status { get; set; }
+        public EnumOrderStatus Status { get; set; }
     }
 
     public class GetOrderByStatusQueryHandler : IRequestHandler<GetOrderByStatusQuery, MethodResult<OrderModel?>>
@@ -40,15 +39,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel?>();
 
-            Order? order = null;
-            if (request.IsTrial.HasValue)
-            {
-                order = await _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId && p.IsTrial).FirstOrDefaultAsync(cancellationToken);
-            }
-            else if (request.Status.HasValue)
-            {
-                order = await _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId && p.Status == request.Status && p.IsTrial).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-            }
+            Order? order = order = await _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId && p.Status == request.Status).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<OrderModel?>(order);
             return methodResult;
