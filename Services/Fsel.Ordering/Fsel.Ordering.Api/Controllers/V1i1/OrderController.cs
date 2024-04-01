@@ -106,7 +106,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> GetOrderTrial()
         {
-            var commandResult = await _mediator.Send(new GetOrderTrialQuery() { }).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new GetOrderByStatusQuery() { }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
