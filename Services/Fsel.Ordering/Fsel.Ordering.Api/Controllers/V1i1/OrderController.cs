@@ -100,7 +100,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         /// <summary>
         /// Get Order trial
         /// </summary>
-        [HttpGet("get-order-trial")]
+        [HttpGet("get-order-by-status")]
         [ProducesResponseType(typeof(MethodResult<OrderModel?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
