@@ -54,15 +54,17 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             ArgumentNullException.ThrowIfNull(request);
             var mockTestAnswer = _mockTestAnswerRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId && x.MockTestResultId == request.MockTestResultId);
 
+            var aiConfigs = _aiGradeSettingRepository.Queryable.Where(x => x.SectionId == request.SectionId).ToList();
+
             var aiConfig = _aiGradeSettingRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId);
 
             var resultDictionary = new Dictionary<EnumMockTestAIType, string>();
 
-            foreach (var item in aiConfig!.Prompts!)
+            foreach (var item in aiConfigs)
             {
                 //var answer = string.Concat(aiConfig.Task!, item.PromptContent!);
 
-                var answer = string.Concat(new string[] { aiConfig.Task!, Environment.NewLine, item.PromptContent! });
+                var answer = string.Concat(new string[] { aiConfig!.Task!, Environment.NewLine, item.Prompts!.Single().PromptContent! });
 
                 var userAiConfig = answer?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
 
@@ -83,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     UserAIConfig = userAiConfig,
                 }, cancellationToken).ConfigureAwait(false);
 
-                resultDictionary[item.Type] = aIResponse!;
+                resultDictionary[item.Criteria] = aIResponse!;
             }
 
             var gradingAiFeedBackResult = new
