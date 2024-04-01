@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.InAppPurchase;
     using Fsel.Ordering.Application.Services.InAppPurchase.Models;
@@ -70,8 +71,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var bundleId = _appSetting.PurchaseSettings?.AppStore?.BundleId;
             var keyId = _appSetting.PurchaseSettings?.AppStore?.KeyId;
             var audience = _appSetting.PurchaseSettings?.AppStore?.Audience;
-            var iat = ConvertToUnixTimestamp(DateTimeOffset.UtcNow);
-            var exp = ConvertToUnixTimestamp(DateTimeOffset.UtcNow.AddMinutes(60));
+            var iat = ConvertToUnixTimestamp(DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam));
+            var exp = ConvertToUnixTimestamp(DateTime.UtcNow.AddMinutes(60).ConvertTimeFromUtc(EnumCountryKey.Vietnam));
 
             string privateKey = File.ReadAllText(ResourceSettings.AppStore);
 
@@ -195,11 +196,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             return methodResult;
         }
 
-        private static long ConvertToUnixTimestamp(DateTimeOffset dateTime)
+        private static long ConvertToUnixTimestamp(DateTime dateTime)
         {
-            DateTimeOffset epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-            TimeSpan timeDifference = dateTime - epoch;
+            TimeSpan timeDifference = dateTime.ToUniversalTime() - epoch;
 
             return (long)timeDifference.TotalSeconds;
         }
