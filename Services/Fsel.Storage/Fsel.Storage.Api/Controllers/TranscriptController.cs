@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Asp.Versioning;
 using Fsel.Shared.Constants;
 using Fsel.Storage.Domain.Models.CommandModels;
+using Fsel.Storage.Domain.Enums;
+using Fsel.Storage.Application.Services.AmazonS3Services;
+using Fsel.Storage.Domain.Models.EntityModels;
 
 namespace Fsel.Storage.Api.Controllers
 {
@@ -19,11 +22,13 @@ namespace Fsel.Storage.Api.Controllers
     {
         private readonly IDeepgramProvider _deepgramProvider;
         private readonly ICognitiveProvider _cognitiveProvider;
+        private readonly IAmazonS3Service _amazonS3Service;
 
-        public TranscriptController(IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider)
+        public TranscriptController(IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider, IAmazonS3Service amazonS3Service)
         {
             _deepgramProvider = deepgramProvider;
             _cognitiveProvider = cognitiveProvider;
+            _amazonS3Service = amazonS3Service;
         }
 
         /// <summary>
@@ -36,6 +41,31 @@ namespace Fsel.Storage.Api.Controllers
         {
             MethodResult<string> result = new MethodResult<string>();
             result.Result = await _deepgramProvider.GetTranscriptionAsync(request?.Url ?? string.Empty);
+            return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Transcription
+        /// </summary>
+        [HttpPost("file")]
+        [ProducesResponseType(typeof(MethodResult<TranscriptFileModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Post([FromRoute] EnumFolderType folderType, [FromQuery] EnumBucketType? bucketType, IFormFile file, [FromQuery] bool isResize = false, [FromQuery] bool isValidEmpty = false)
+        {
+            MethodResult<TranscriptFileModel> result = new MethodResult<TranscriptFileModel>();
+
+            var uploadResult = await _amazonS3Service.UploadFileAsync(bucketType, file, folderType, isResize, isValidEmpty);
+            if (!uploadResult.IsOK)
+            {
+                result.AddError(uploadResult.ErrorMessages);
+                return result.GetActionResult();
+            }
+
+            result.Result = new TranscriptFileModel
+            {
+                FilePath = uploadResult.Result,
+                Content = await _deepgramProvider.GetTranscriptionAsync(file)
+            };
             return result.GetActionResult();
         }
 
