@@ -18,5 +18,7 @@ namespace Fsel.Ordering.Application.Services.CourseService
 
         [Put("/v1/unit-result/open-next-unit/{userId}")]
         Task<IApiResponse<MethodResult<bool>>> UpdateNextUnit([FromRoute] Guid userId);
+        [Post("/v1/integration/integration-course")]
+        Task<IApiResponse<MethodResult<IList<CourseResultModel>>>> GetCourseResultsByUserIds([FromBody] IList<Guid> userIds);
     }
 }
