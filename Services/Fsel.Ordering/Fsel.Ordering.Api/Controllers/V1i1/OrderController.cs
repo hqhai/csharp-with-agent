@@ -104,9 +104,9 @@ namespace Fsel.Ordering.Api.Controllers.V1i1
         [ProducesResponseType(typeof(MethodResult<OrderModel?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
-        public async Task<IActionResult> GetOrderTrial()
+        public async Task<IActionResult> GetOrderTrial([FromQuery] GetOrderByStatusQuery query)
         {
-            var commandResult = await _mediator.Send(new GetOrderByStatusQuery() { }).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
