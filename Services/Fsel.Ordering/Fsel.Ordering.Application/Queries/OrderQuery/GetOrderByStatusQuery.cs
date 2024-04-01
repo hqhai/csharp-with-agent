@@ -44,7 +44,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             var orders = await _orderRepository.Queryable
                                                .Include(p => p.Package)
                                                .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
-                                               .Where(p => request.Status == false ? p.Status == EnumOrderStatus.New || p.IsTrial : p.Status != EnumOrderStatus.New)
+                                               .Where(p => request.Status == false ? p.Status == EnumOrderStatus.New || p.IsTrial : p.Status == EnumOrderStatus.Payment && !p.IsDeleted)
                                                .Select(x => new OrderSearchModel
                                                {
                                                    Id = x.Id,
@@ -61,6 +61,9 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                                                    IsTrial = x.IsTrial,
                                                    ExpireDate = x.ExpireDate,
                                                    MonthNumber = x.Package != null ? x.Package.MonthNumber : 0,
+                                                   UpdatedDate = x.UpdatedDate,
+                                                   TotalPrice = x.TotalPrice,
+                                                   DiscountPrice = x.DiscountPrice
                                                })
                                                .ToListAsync(cancellationToken);
 
@@ -70,12 +73,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 return methodResult;
             }
 
-            var courses = await _lmsCourseService.GetCoursesByIdsAsync(orders.Select(p => p.CourseId).ToList()!);
-            if (courses.IsSuccessStatusCode)
+            var userIds = orders.Select(x => x.UserId).Distinct().ToList();
+            var courseResults = await _lmsCourseService.GetCourseResultsByUserIds(userIds);
+            if (courseResults.IsSuccessStatusCode)
             {
                 foreach (var item in orders)
                 {
-                    item.CourseName = courses.Content?.Result?.FirstOrDefault(x => item.CourseId == x.Id)?.CourseLevel;
+                    item.CourseName = courseResults.Content?.Result?.FirstOrDefault(x => x.CourseId == item.CourseId)?.CourseLevel;
+                    item.StatusCourseResult = courseResults.Content?.Result?.FirstOrDefault(x => x.CourseId == item.CourseId && x.UserId == item.UserId)?.Status;
                 }
             }
 

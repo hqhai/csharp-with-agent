@@ -36,5 +36,17 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// client
+        /// </summary>
+        [HttpGet("client")]
+        [ProducesResponseType(typeof(MethodResult<ClientsIntegrationModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> ClientsIntegration([FromQuery] ClientIntegrationQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
