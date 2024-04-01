@@ -120,13 +120,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            if (transactionInfo.TransactionReason != "PURCHASE")
-            {
-                _logger.LogError("Transaction in not PURCHASE");
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-                return methodResult;
-            }
-
             #region Check environment
 
             if ((_hostEnvironment.IsDevelopment() || _hostEnvironment.IsStaging() || _hostEnvironment.IsEnvironment(Settings.Environments.Testing)) && transactionInfo.Environment != EnumAppStoreEnvironment.Sandbox)
