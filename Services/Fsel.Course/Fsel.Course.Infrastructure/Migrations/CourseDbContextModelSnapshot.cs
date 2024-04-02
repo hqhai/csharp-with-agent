@@ -2887,9 +2887,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Conherence")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
@@ -2923,18 +2920,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<string>("GradingAlFeedback")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("GrammaticalRage")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool?>("IsCorrect")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
-
-                    b.Property<string>("LexicalResourse")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("MockTestResultId")
                         .HasColumnType("uniqueidentifier");
@@ -2955,9 +2946,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("TaskResponse")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("TimeCount")
                         .HasColumnType("int");
