@@ -26,7 +26,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     public class SubmitMockTestAnswerCommandHandler : IRequestHandler<SubmitMockTestAnswerAICommand, bool>
     {
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
-        private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
+        private readonly SubmitMockTestCriteriaPublisher _submitMockTestCriteria;
         private readonly IUserService _userService;
         private readonly ISectionRepository _sectionRepository;
         private readonly IMockTestAISettingRepository _aiGradeSettingRepository;
@@ -37,9 +37,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private const int Last_DisplayOrder = 1;
 
 
-        public SubmitMockTestAnswerCommandHandler(SubmitAIResponsePublisher submitAIResponsePublisher, IUserService userService, ISectionRepository sectionRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
+        public SubmitMockTestAnswerCommandHandler(SubmitMockTestCriteriaPublisher submitMockTestCriteria, IUserService userService, ISectionRepository sectionRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
-            _submitAIResponsePublisher = submitAIResponsePublisher;
+            _submitMockTestCriteria = submitMockTestCriteria;
             _userService = userService;
             _sectionRepository = sectionRepository;
             _mediator = mediator;
@@ -59,6 +59,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             var aiConfig = _aiGradeSettingRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId);
 
             var resultDictionary = new Dictionary<EnumMockTestAIType, string>();
+
+            var section = await _sectionRepository.GetByIdAsync(request.SectionId);
+            if (section == null)
+            {
+                return true;
+            }
 
             foreach (var item in aiConfigs)
             {
@@ -86,11 +92,19 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 }, cancellationToken).ConfigureAwait(false);
 
                 resultDictionary[item.Criteria] = aIResponse!;
+
+                await _submitMockTestCriteria.Publish(new SubmitMockTestResponseModel
+                {
+                    GradingAlFeedBack = aIResponse,
+                    CriteriaName = item.Criteria.ToString(),
+                    DisplayOrder = section.DisplayOrder,
+                    MockTestResultId = request.MockTestResultId
+                }, cancellationToken);
             }
 
             var gradingAiFeedBackResult = new
             {
-                TaskResponse = resultDictionary[EnumMockTestAIType.TaskResponse],
+                TaskResponse = resultDictionary.ContainsKey(EnumMockTestAIType.TaskResponse) ? resultDictionary[EnumMockTestAIType.TaskResponse] : resultDictionary[EnumMockTestAIType.TaskAchievement],
                 Coherence = resultDictionary[EnumMockTestAIType.Coherence],
                 LexicalResource = resultDictionary[EnumMockTestAIType.LexicalResource],
                 GrammaticalRange = resultDictionary[EnumMockTestAIType.GrammaticalRange]
@@ -122,11 +136,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 return true;
             }
 
-            var section = await _sectionRepository.GetByIdAsync(request.SectionId);
-            if (section == null)
-            {
-                return true;
-            }
+
             bool checkSkillMockTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
 
             (double averageScore, double totalScore) = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
@@ -172,6 +182,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             if (mockTestAnswer != null)
             {
                 mockTestAnswer.GradingAlFeedback = gradingAiFeedBack;
+                mockTestAnswer.TaskResponse = gradingAiFeedBackResult.TaskResponse;
+                mockTestAnswer.Conherence = gradingAiFeedBackResult.Coherence;
+                mockTestAnswer.LexicalResourse = gradingAiFeedBackResult.LexicalResource;
+                mockTestAnswer.GrammaticalRage = gradingAiFeedBackResult.GrammaticalRange;
                 _mockTestAnswerRepository.Update(mockTestAnswer);
                 await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -194,10 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 }
             }
 
-            await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
-            {
-                GradingAlFeedback = gradingAiFeedBack,
-            }, cancellationToken);
+
 
             return true;
         }
