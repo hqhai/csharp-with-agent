@@ -1,0 +1,256 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Identity.Application.Commands.AdminCmd
+{
+    using System.Threading;
+    using System.Transactions;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.UserCmd;
+    using Fsel.Identity.Application.Services.InteractionService;
+    using Fsel.Identity.Application.Services.InteractionService.Models;
+    using Fsel.Identity.Application.Services.LmsCourseService;
+    using Fsel.Identity.Application.Services.LmsCourseService.CommandModels;
+    using Fsel.Identity.Application.Services.LmsCourseService.Model;
+    using Fsel.Identity.Application.Services.OrderService;
+    using Fsel.Identity.Application.Services.OrderService.CommandModels;
+    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class CreateUserStudentToAdminCommand : IRequest<MethodResult<UserModel>>
+    {
+        public string? Email { get; set; }
+        public Guid CourseId { get; set; }
+    }
+
+    public class CreateUserStudentToAdminCommandHandler : IRequestHandler<CreateUserStudentToAdminCommand, MethodResult<UserModel>>
+    {
+        private readonly IMediator _mediator;
+        private readonly AuthContext _authContext;
+        private readonly UserManager<User> _userManager;
+        private readonly IOrderService _orderService;
+        private readonly IHumanRepository _humanRepository;
+        private readonly ILmsCourseService _lmsCourseService;
+        private readonly IInteractionService _interactionService;
+        private readonly IPlatformRepository _platformRepository;
+        private const string DefaultPassword = "Admin@123";
+        private const string RoleStudent = nameof(Student);
+        private const int TotalUserDateNow = 50;
+
+        public CreateUserStudentToAdminCommandHandler(IMediator mediator, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
+        {
+            _mediator = mediator;
+            _authContext = authContext;
+            _userManager = userManager;
+            _orderService = orderService;
+            _humanRepository = humanRepository;
+            _lmsCourseService = lmsCourseService;
+            _interactionService = interactionService;
+            _platformRepository = platformRepository;
+        }
+
+        public async Task<MethodResult<UserModel>> Handle(CreateUserStudentToAdminCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<UserModel>();
+            if (string.IsNullOrEmpty(request.Email))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
+                return methodResult;
+            }
+            var countUser = await _userManager.Users.Where(x => x.CreatedUserId == _authContext.CurrentUserId && x.CreatedDate.Date == DateTime.UtcNow.Date).CountAsync(cancellationToken);
+            if (countUser > TotalUserDateNow)
+            {
+                methodResult.AddErrorBadRequest("exceeding 50 Users created");
+                return methodResult;
+            }
+
+            #region Get Course
+
+            var courseResult = await _lmsCourseService.GetCourseByIdAsync(request.CourseId);
+            if (!courseResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError));
+                return methodResult;
+            }
+            var course = courseResult?.Content?.Result;
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
+            var isIELST = course.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts;
+
+            #endregion Get Course
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(user));
+                return methodResult;
+            }
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    user = new User();
+                    user.UserName = request.Email;
+                    user.Email = request.Email;
+                    user.FullName = request.Email;
+                    user.EmailConfirmed = true;
+                    user = CreateHumanToUser(user);
+                    await UpdatePlatformToUserAsync(user, cancellationToken);
+
+                    if (!user.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(user.ErrorMessages);
+                        return methodResult;
+                    }
+
+                    var result = await _userManager.CreateAsync(user, DefaultPassword);
+                    if (!result.Succeeded)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                        return methodResult;
+                    }
+                    await _userManager.AddToRoleAsync(user, nameof(Student));
+                    scope.Complete();
+                }
+                catch
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
+                    scope.Dispose();
+                }
+            }
+            if (!methodResult.IsOK || user == null)
+            {
+                return methodResult;
+            }
+            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = GetBirthdayOfStudent(isIELST) }, cancellationToken);
+            if (!updateCode.IsOK)
+            {
+                methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
+                return methodResult;
+            }
+            var student = user.Human?.Student;
+            var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
+            {
+                Email = user.Email,
+                UserId = user.Id,
+                Answers = new List<CreateSurveyCommandModel>
+                {
+                    new CreateSurveyCommandModel
+                    {
+                        Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
+                        Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
+                    }
+                }
+            });
+            await _lmsCourseService.SavePlacementTestDoneAsync(new SavePlacementTestDoneCommandModel { CourseLevel = GetCourseLevel(course.CourseLevel), StudentId = student?.Id ?? default });
+            var orderResult = await SaveOrderAsync(user, course);
+            if (!orderResult.IsOK)
+            {
+                methodResult.AddErrorBadRequest(orderResult.ErrorMessages);
+                return methodResult;
+            }
+
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        private static EnumCourseLevel GetCourseLevel(EnumCourseLevel courseLevel)
+        {
+            if (courseLevel.GetEnumCourseType() == EnumCourseType.Ielts)
+            {
+                courseLevel = courseLevel.GetLevelAcaToLevelIELTS();
+            }
+            return courseLevel;
+        }
+
+        private async Task UpdatePlatformToUserAsync(User user, CancellationToken cancellationToken)
+        {
+            var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
+            if (platform != null)
+            {
+                user.UserPlatforms.Add(new UserPlatform
+                {
+                    PlatformId = platform.Id
+                });
+            }
+        }
+
+        private async Task<VoidMethodResult> SaveOrderAsync(User user, CourseModel course)
+        {
+            var methodResult = new VoidMethodResult();
+            var packagesResult = await _orderService.GetPackages();
+            if (!packagesResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
+                return methodResult;
+            }
+            var package = packagesResult.Content?.Result?.FirstOrDefault(p => p.Code == EnumPackageCode.BASIC.ToString());
+            if (package == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            var createOrderResult = await _orderService.CreateOrderForStudentAsync(new CreateOrderByUserIdCommandModel
+            {
+                UserId = user.Id,
+                CourseLevel = course.CourseLevel,
+                Address = "35 Lac Trung",
+                PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
+                CourseId = course.Id,
+                PackageId = package.Id,
+            });
+            if (!createOrderResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(createOrderResult.Error);
+                return methodResult;
+            }
+            var order = createOrderResult.Content?.Result;
+            if (order == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        private static User CreateHumanToUser(User user)
+        {
+            Human human = new();
+            human.Email = user.Email;
+            human.FullName = user.FullName;
+            human.Gender = EnumGender.Male;
+            human.UserId = user.Id;
+            human.Student = new Student
+            {
+                HumanId = human.Id,
+                CreatedByParent = false,
+                Occupation = RoleStudent
+            };
+            user.Human = human;
+            return user;
+        }
+
+        private static DateTime GetBirthdayOfStudent(bool isIELST)
+        {
+            return new DateTime(isIELST ? 2000 : 2014, 1, 1);
+        }
+    }
+}

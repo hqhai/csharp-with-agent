@@ -34,6 +34,11 @@ namespace Fsel.Shared.Helpers
             return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
         }
 
+        public static EnumCourseLevel GetLevelAcaToLevelIELTS(this EnumCourseLevel courseLevel)
+        {
+            return s_levelMapping.FirstOrDefault(x => x.Value == courseLevel).Key;
+        }
+
         public static object GetEnumPlacementTestSkills()
         {
             var results = new List<object>();

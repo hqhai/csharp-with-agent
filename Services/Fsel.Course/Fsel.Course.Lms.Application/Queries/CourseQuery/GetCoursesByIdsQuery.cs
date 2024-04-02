@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -40,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var courses = await _courseRepository.Queryable.Where(p => request.CourseIds.Contains(p.Id)).Select(x => new CourseModel
+            var courses = await _courseRepository.Queryable.Where(p => request.CourseIds.Contains(p.Id) && p.Status != EnumCourseStatus.New).Select(x => new CourseModel
             {
                 Id = x.Id,
                 Code = x.Code,
