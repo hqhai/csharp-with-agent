@@ -182,10 +182,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             if (mockTestAnswer != null)
             {
                 mockTestAnswer.GradingAlFeedback = gradingAiFeedBack;
-                mockTestAnswer.TaskResponse = gradingAiFeedBackResult.TaskResponse;
-                mockTestAnswer.Conherence = gradingAiFeedBackResult.Coherence;
-                mockTestAnswer.LexicalResourse = gradingAiFeedBackResult.LexicalResource;
-                mockTestAnswer.GrammaticalRage = gradingAiFeedBackResult.GrammaticalRange;
                 _mockTestAnswerRepository.Update(mockTestAnswer);
                 await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
