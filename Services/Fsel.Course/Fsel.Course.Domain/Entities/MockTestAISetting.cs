@@ -9,11 +9,14 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Helpers;
     using System.ComponentModel.DataAnnotations.Schema; 
     using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
+    using Fsel.Shared.Enums;
 
     public class MockTestAISetting : Entity
     {
         public string? SystemRoleAlConfig { get; set; }
         public string? UserAlConfig { get; set; }
+
+        public EnumMockTestAIType Criteria { get; set; }
 
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

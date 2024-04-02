@@ -71,6 +71,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [Permission(role: nameof(EnumRole.Student))]
         public async Task<IActionResult> Get()
         {
+
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
