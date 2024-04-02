@@ -123,17 +123,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             #region Check environment
 
-            if ((_hostEnvironment.IsDevelopment() || _hostEnvironment.IsStaging() || _hostEnvironment.IsEnvironment(Settings.Environments.Testing)) && transactionInfo.Environment != EnumAppStoreEnvironment.Sandbox)
-            {
-                _logger.LogError("Invalid Environment");
-                return methodResult;
-            }
+            //if ((_hostEnvironment.IsDevelopment() || _hostEnvironment.IsStaging() || _hostEnvironment.IsEnvironment(Settings.Environments.Testing)) && transactionInfo.Environment != EnumAppStoreEnvironment.Sandbox)
+            //{
+            //    _logger.LogError("Invalid Environment");
+            //    return methodResult;
+            //}
 
-            if (_hostEnvironment.IsProduction() && transactionInfo.Environment != EnumAppStoreEnvironment.Production)
-            {
-                _logger.LogError("Invalid Environment");
-                return methodResult;
-            }
+            //if (_hostEnvironment.IsProduction() && transactionInfo.Environment != EnumAppStoreEnvironment.Production)
+            //{
+            //    _logger.LogError("Invalid Environment");
+            //    return methodResult;
+            //}
 
             #endregion Check environment
 
