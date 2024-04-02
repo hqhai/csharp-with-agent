@@ -47,7 +47,7 @@ namespace Fsel.Storage.Api.Controllers
         /// <summary>
         /// Get Transcription
         /// </summary>
-        [HttpPost("file")]
+        [HttpPost("upload-file")]
         [ProducesResponseType(typeof(MethodResult<TranscriptFileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Post([FromRoute] EnumFolderType folderType, [FromQuery] EnumBucketType? bucketType, IFormFile file, [FromQuery] bool isResize = false, [FromQuery] bool isValidEmpty = false)
