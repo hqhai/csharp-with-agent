@@ -306,8 +306,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         parameter.IeltDisplay = SendMailSetting.Display;
                         var (@class, skillName, icon) = SendMailHelper.ConvertEnum(skillMockTestPrevious!.Skill);
                         parameter.Skill = skillName;
-                        parameter.CurrentUnitTestScore = currentMockTestScore.ToString();
-                        parameter.PreviousUnitTestScore = previousMockTestScore.ToString();
+                        parameter.CurrentUnitTestScore = currentMockTestScore > 0 ? currentMockTestScore?.ToString("0.0", CultureInfo.CurrentCulture) : "0";
+                        parameter.PreviousUnitTestScore = previousMockTestScore > 0 ? previousMockTestScore?.ToString("0.0", CultureInfo.CurrentCulture) : "0";
                         parameter.CompareMockTest = currentMockTestScore > previousMockTestScore ? SendMailSetting.Less : (currentMockTestScore == previousMockTestScore ? SendMailSetting.Equal : SendMailSetting.Bigger);
                         parameter.PreviousUnitName = mockTestResultPrevious.Unit?.Name;
                     }

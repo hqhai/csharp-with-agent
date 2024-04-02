@@ -59,6 +59,8 @@ namespace Fsel.Shared.Helpers
     public static class IeltsScoreHelper
     {
         public const double MaxScorePT = 6.5;
+        private const int ChildrenAge = 13;
+        private const int StudentAge = 14;
 
         private static IList<IeltsScoreConfig> s_ieltsScoreConfigs = new List<IeltsScoreConfig>
         {
@@ -119,6 +121,15 @@ namespace Fsel.Shared.Helpers
                 return skill == EnumCourseSkill.Listening ? config.ListeningScore : config.ReadingScore;
             }
             return default;
+        }
+
+        public static int GetInitialAge(EnumPlacementTestLevel? level, int age)
+        {
+            if (level.HasValue)
+            {
+                return level == EnumPlacementTestLevel.A2 ? ChildrenAge : StudentAge;
+            }
+            return age;
         }
 
         public static (EnumCourseLevel?, bool) GetLevelInScore(this EnumPlacementTestLevel enumPlacementTestLevel, double? value = 0, int? yearOld = 0)
