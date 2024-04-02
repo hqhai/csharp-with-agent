@@ -11,5 +11,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? WordCount { get; set; }
 
         public string? GradingAlFeedback { get; set; }
+
+        public string? TaskResponse { get; set; }
+
+        public string? Conherence { get; set; }
+
+        public string? LexicalResourse { get; set; }
+
+        public string? GrammaticalRage { get; set; }
     }
 }

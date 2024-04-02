@@ -39,6 +39,7 @@ namespace Fsel.Shared.Constants
                 public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
                 public const string AIFeedBack = $"{KeyQueue}_AIFeedBack";
+                public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
             }
         }
 

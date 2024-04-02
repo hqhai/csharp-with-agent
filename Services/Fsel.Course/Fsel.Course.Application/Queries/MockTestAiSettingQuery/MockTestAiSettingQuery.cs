@@ -11,12 +11,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.MockTestAiSettingQuery
 {
-    public class GetMockTestAiSettingQuery : IRequest<MethodResult<MockTestAISettingModel>>
+    public class GetMockTestAiSettingQuery : IRequest<MethodResult<IList<MockTestAISettingModel>>>
     {
         public Guid Id { get; set; }
     }
 
-    public class GetMockTestAiSettingQueryHandler : IRequestHandler<GetMockTestAiSettingQuery, MethodResult<MockTestAISettingModel>>
+    public class GetMockTestAiSettingQueryHandler : IRequestHandler<GetMockTestAiSettingQuery, MethodResult<IList<MockTestAISettingModel>>>
     {
         private readonly IMockTestAISettingRepository _mockTestAISettingRepository;
         private readonly IMapper _mapper;
@@ -27,20 +27,20 @@ namespace Fsel.Course.Application.Queries.MockTestAiSettingQuery
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<MockTestAISettingModel>> Handle(GetMockTestAiSettingQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<MockTestAISettingModel>>> Handle(GetMockTestAiSettingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<MockTestAISettingModel> methodResult = new MethodResult<MockTestAISettingModel>();
+            MethodResult<IList<MockTestAISettingModel>> methodResult = new MethodResult<IList<MockTestAISettingModel>>();
 
-            var mockTestAiSetting = await _mockTestAISettingRepository.Queryable.FirstOrDefaultAsync(x => x.SectionId == request.Id, cancellationToken);
+            var mockTestAiSettings = await _mockTestAISettingRepository.Queryable.Where(x => x.SectionId == request.Id).ToListAsync(cancellationToken);
 
-            if (mockTestAiSetting == null)
+            if (mockTestAiSettings == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestAiSetting));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestAiSettings));
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<MockTestAISettingModel>(mockTestAiSetting);
+            methodResult.Result = _mapper.Map<IList<MockTestAISettingModel>>(mockTestAiSettings);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

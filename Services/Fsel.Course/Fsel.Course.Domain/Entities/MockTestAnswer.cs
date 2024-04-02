@@ -65,5 +65,13 @@ namespace Fsel.Course.Domain.Entities
         public Guid? SectionGroupResultId { get; set; }
 
         public string? GradingAlFeedback { get; set; }
+
+        public string? TaskResponse { get; set; }
+
+        public string? Conherence { get; set; }
+
+        public string? LexicalResourse { get; set; }
+
+        public string? GrammaticalRage { get; set; }
     }
 }
