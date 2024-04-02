@@ -26,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
     {
         public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }
+        public Guid? UserId { get; set; }
     }
 
     public class GetLessonsQueryHandler : IRequestHandler<GetLessonsQuery, MethodResult<IList<LessonMockTestResultModel>>>
@@ -65,20 +66,26 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LessonMockTestResultModel>>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var userId = request.UserId ?? _authContext.CurrentUserId;
+            var studentsResult = await _userService.GetStudentByUserIdAsync(userId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentsResult));
                 return methodResult;
             }
-            var studentId = studentsResult.Content?.Result?.Id;
+            var student = studentsResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var unit = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == student.Id && x.CourseId == request.CourseId))
                                  .Include(x => x.UnitLessons)
                                  .Include(x => x.UnitSkillMockTests)
                                  .FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
@@ -99,10 +106,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                 return methodResult;
             }
             var data = new List<LessonMockTestResultModel>();
-            data.AddRange(await UpdateLessonResults(request, studentId, unit, cancellationToken));
+            data.AddRange(await UpdateLessonResults(request, student.Id, unit, cancellationToken));
             if (unit.UnitSkillMockTests.Any())
             {
-                data.Add(await UpdateMockTestResults(request, studentId, unit, course, cancellationToken));
+                data.Add(await UpdateMockTestResults(request, student.Id, unit, course, cancellationToken));
             }
             methodResult.Result = data;
             methodResult.StatusCode = StatusCodes.Status200OK;
