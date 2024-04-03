@@ -40,6 +40,36 @@
     "createdDate": "2023-08-28"
   },
   {
+    "id": "10C2D5F8-1316-45E4-8FA1-E512EC1510C0",
+    "type": "LinkComment",
+    "content": "CommentPost",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa bình luận bài viết của bạn.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "B09FA1F2-3936-4E52-AA9C-D3A354F1C566",
+    "type": "LinkComment",
+    "content": "LikePost",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa thích bài viết của bạn.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "6A55C6BD-0494-4FE9-8A72-911210C8A215",
+    "type": "LinkComment",
+    "content": "ReplyCommentPost",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "{0} vừa trả lời bình luận của bạn.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
     "id": "9E983172-DBA2-4CA7-B602-372C011ECB99",
     "type": "LinkComment",
     "content": "ReplyComment",

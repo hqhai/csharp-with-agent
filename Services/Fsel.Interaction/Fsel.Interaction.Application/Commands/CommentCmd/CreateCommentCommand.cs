@@ -44,8 +44,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly IPostRepository _postRepository;
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, IUserService userService, QuestBoardPublisher questBoardPublisher)
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService, ISystemService systemService, IUserService userService, QuestBoardPublisher questBoardPublisher, IPostRepository postRepository)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
@@ -56,6 +57,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _systemService = systemService;
             _userService = userService;
             _questBoardPublisher = questBoardPublisher;
+            _postRepository = postRepository;
         }
 
         public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -91,6 +93,25 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 {
                     case EnumInteractionType.DiscussionBoard:
                         await _discussionBoardCommentPublisher.Publish(comment, cancellationToken).ConfigureAwait(false);
+
+                        //Gửi thông báo
+                        var post = _postRepository.Queryable.FirstOrDefault(x => x.Id == request.ObjectId);
+                        if (post != null && post.CreatedUserId != _authContext.CurrentUserId)
+                        {
+                            var modelDiscusionBoard = new NotificationSendingQueueModel()
+                            {
+                                ObjectId = request.ObjectId,
+                                UserIds = new List<Guid>() { post.CreatedUserId },
+                                SenderId = _authContext.CurrentUserId,
+                                Content = EnumNotificationContent.CommentPost,
+                                Type = EnumNotificationType.LinkComment,
+                                ParamsLink = paramLinksValue,
+                                ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, }
+                            };
+
+                            await _classForumCommentPublisher.Publish(modelDiscusionBoard, cancellationToken);
+                        }
+
 
                         break;
 
