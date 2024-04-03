@@ -29,7 +29,8 @@ namespace Fsel.Shared.Constants
         public const string NoActive = "https://s3-sgn10.fptcloud.com/fsel/Images/Ellipse_925_1706799389.png";
 
         public const string Border = "100px 100px 100px 100px";
-        public const string NoBorder = "100px 0px 0px 100px";
+        public const string NoBorderRight = "100px 0px 0px 100px";
+        public const string NoBorderLeft = "0px 100px 100px 0px";
 
         public const string Skill = "Resources//MailTemplates//Skill.html";
         public const string CompareSkill = "Resources//MailTemplates//CompareSkill.html";
