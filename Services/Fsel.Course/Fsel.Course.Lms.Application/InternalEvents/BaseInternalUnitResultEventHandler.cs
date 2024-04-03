@@ -90,11 +90,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         _unitResultRepository.Update(unitResult);
                         await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                        if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseType == EnumCourseType.Academic)
+                        if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseType == EnumCourseType.Academic && isDone)
                         {
                             await SendMailMidCourseReport(studentId, course, cancellationToken);
                         }
-                        else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts)
+                        else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts && isDone)
                         {
                             await SendMailMidCourseReport(studentId, course, cancellationToken);
                         }
