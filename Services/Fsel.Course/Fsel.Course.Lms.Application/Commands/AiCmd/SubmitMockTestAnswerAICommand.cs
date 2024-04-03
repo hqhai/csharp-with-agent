@@ -91,12 +91,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     UserAIConfig = userAiConfig,
                 }, cancellationToken).ConfigureAwait(false);
 
-                resultDictionary[item.Criteria] = aIResponse!;
+                resultDictionary[item.Prompts![0].Type] = aIResponse!;
 
                 await _submitMockTestCriteria.Publish(new SubmitMockTestResponseModel
                 {
                     GradingAlFeedBack = aIResponse,
-                    CriteriaName = item.Criteria.ToString(),
+                    CriteriaName = item.Prompts![0].Type.ToString(),
                     DisplayOrder = section.DisplayOrder,
                     MockTestResultId = request.MockTestResultId
                 }, cancellationToken);

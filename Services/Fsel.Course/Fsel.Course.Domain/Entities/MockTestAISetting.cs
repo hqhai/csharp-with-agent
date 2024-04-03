@@ -16,9 +16,6 @@ namespace Fsel.Course.Domain.Entities
         public string? SystemRoleAlConfig { get; set; }
         public string? UserAlConfig { get; set; }
 
-        public EnumMockTestAIType Criteria { get; set; }
-
-
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SettingModel { get; set; }
 
