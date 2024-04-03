@@ -44,8 +44,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly SubmitClassForumGradingPublisher _submitClassForumGradingPublisher;
         private readonly ISystemService _systemService;
+        private readonly IClassforumDetailResultRepository _classforumDetailResultRepository;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, SubmitClassForumGradingPublisher submitClassForumGradingPublisher)
+        public CreateClassForumResultCommandHandler(IMapper mapper, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassforumDetailResultRepository classforumDetailResultRepository)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -56,8 +57,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _classForumRepository = classForumRepository;
             _lessonResultRepository = lessonResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
-            _systemService = systemService;
             _submitClassForumGradingPublisher = submitClassForumGradingPublisher;
+            _systemService = systemService;
+            _classforumDetailResultRepository = classforumDetailResultRepository;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -113,36 +115,53 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             }
             var studentId = student.Id;
             var classForumResult = await _classForumResultRepository.Queryable
+                    .Include(x => x.ClassForumDetailResults)
                     .Include(x => x.ClassForumResultFiles)
                     .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
+            if (classForumResult != null)
+            {
+                var classForumDetailResults = await _classforumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult.Id).ToListAsync(cancellationToken);
+            }
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
+                List<ClassForumResultFile> classForumResultFiles = new List<ClassForumResultFile>();
                 if (classForumResult == null)
                 {
-                    classForumResult = new ClassForumResult
+                    var classForumDetailResults = new List<ClassForumDetailResult>
                     {
-                        Content = request.Content,
-                        StudentId = studentId,
-                        LessonResultId = request.LessonResultId,
-                        Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
-                        ClassForumId = classForum.Id,
-                        WordContent = request.WordContent,
+                        new ClassForumDetailResult
+                        {
+                            Content = request.Content,
+                            WordContent = request.WordContent,
+                            Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
+                            ClassForumResultFiles = classForumResultFiles
+                        }
                     };
 
                     if (request.FilePaths != null)
                     {
-                        classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
+                        classForumResultFiles = request.FilePaths!.Select(x => new ClassForumResultFile
                         {
                             FilePath = x,
+                            ClassForumDetailResultId = classForumResult!.Id
                         }).ToList();
                     }
-                    classForumResult.MediaType = MediaHelper.GetMediaType(classForumResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
+
+                    classForumResult = new ClassForumResult
+                    {
+                        StudentId = studentId,
+                        LessonResultId = request.LessonResultId,
+                        ClassForumId = classForum.Id,
+                        ClassForumDetailResults = classForumDetailResults,
+                    };
+
+                    classForumDetailResults.FirstOrDefault()!.MediaType = MediaHelper.GetMediaType(classForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
 
                     classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType, cancellationToken);
                     classForumResult = _classForumResultRepository.Add(classForumResult);
-                    if (classForumResult.Status == EnumClassForumResultStatus.Draft)
+                    if (classForumDetailResults.FirstOrDefault()?.Status == EnumClassForumResultStatus.Draft)
                     {
                         await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -154,12 +173,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
                 {
                     _mapper.Map(request, classForumResult);
-                    classForumResult.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
+                    classForumResult.ClassForumDetailResults.FirstOrDefault()!.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
                     classForumResult.GradingAlFeedback = null;
 
                     if (request.FilePaths != null)
                     {
-                        classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
+                        classForumResult.ClassForumDetailResults.FirstOrDefault()!.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
                         {
                             FilePath = x,
                         }).ToList();

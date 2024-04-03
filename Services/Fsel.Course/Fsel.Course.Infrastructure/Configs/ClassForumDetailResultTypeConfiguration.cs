@@ -7,18 +7,13 @@ namespace Fsel.Course.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class ClassForumResultFileEntityTypeConfiguration : IEntityTypeConfiguration<ClassForumResultFile>
+    public class ClassForumDetailResultTypeConfiguration : IEntityTypeConfiguration<ClassForumDetailResult>
     {
-        public void Configure(EntityTypeBuilder<ClassForumResultFile> builder)
+        public void Configure(EntityTypeBuilder<ClassForumDetailResult> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.HasOne(a => a.ClassForumDetailResult)
-                 .WithMany(b => b.ClassForumResultFiles)
-                 .HasForeignKey(p => p.ClassForumDetailResultId)
-                 .OnDelete(DeleteBehavior.Cascade);
-
             builder.HasOne(a => a.ClassForumResult)
-                 .WithMany(b => b.ClassForumResultFiles)
+                 .WithMany(b => b.ClassForumDetailResults)
                  .HasForeignKey(p => p.ClassForumResultId)
                  .OnDelete(DeleteBehavior.Cascade);
         }

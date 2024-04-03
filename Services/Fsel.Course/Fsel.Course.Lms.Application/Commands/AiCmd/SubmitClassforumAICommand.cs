@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IMediator _mediator;
+
         public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher)
         {
             _classForumResultRepository = classForumResultRepository;
@@ -53,7 +54,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 if (request.IsRetry != null && (bool)request.IsRetry)
                 {
-                    classForumResult.RetryGradingAlFeedBack = aIResponse;
                 }
                 else
                 {
@@ -69,7 +69,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 GradingAlFeedback = aIResponse,
                 ClassForumResultId = request.ClassForumResultId,
             }, cancellationToken);
-
 
             if (!string.IsNullOrEmpty(aIResponse))
             {
@@ -91,7 +90,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     };
                     await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
                 }
-
             }
             return true;
         }

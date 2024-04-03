@@ -37,7 +37,7 @@ namespace Fsel.Course.Domain.Entities
 
         [NotMapped]
         public int? TimeCount
-        { get { return ClassForumResultFiles.Where(x => x.IsRetry == false).Select(p => p.TimeCount).Sum(); } }
+        { get { return ClassForumResultFiles.Select(p => p.TimeCount).Sum(); } }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
@@ -47,7 +47,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Trạng thái
         /// </summary>
-        public EnumClassForumResultStatus Status { get; set; }
+        public EnumClassForumResultStatus? Status { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid LessonResultId { get; set; }
@@ -68,12 +68,6 @@ namespace Fsel.Course.Domain.Entities
 
         public DateTime? GradingStartDate { get; set; }
 
-        public string? RetryContent { get; set; }
-
-        public string? RetryWordContent { get; set; }
-
-        public string? RetryGradingAlFeedBack { get; set; }
-
         public bool IsViewed { get; set; }
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
@@ -91,5 +85,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
 
         public ICollection<ClassForumResultRandom> ClassForumResultRandoms { get; set; } = new List<ClassForumResultRandom>();
+        public ICollection<ClassForumDetailResult> ClassForumDetailResults { get; set; } = new List<ClassForumDetailResult>();
     }
 }
