@@ -9,6 +9,6 @@ namespace Fsel.Shared.Enums
         SkillsTests,
         HomeWork,
         ClassForum,
-        FinalTest
+        FinalTest,
     }
 }

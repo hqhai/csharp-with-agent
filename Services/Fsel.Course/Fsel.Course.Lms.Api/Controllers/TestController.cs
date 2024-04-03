@@ -5,8 +5,10 @@ using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.Interfaces;
+using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -68,6 +70,19 @@ namespace Fsel.Course.Lms.Api.Controllers
             }, CancellationToken.None);
 
             MethodResult<bool> queryResult = new MethodResult<bool>();
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update Module Process
+        /// </summary>
+        [HttpPut("module-process")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> UpdateModuleProcess([FromQuery] UpdateModuleProcessCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

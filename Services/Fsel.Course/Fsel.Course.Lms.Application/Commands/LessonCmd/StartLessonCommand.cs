@@ -67,20 +67,27 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonResultModel> methodResult = new MethodResult<LessonResultModel>();
+            var userId = request.UserId ?? _authContext.CurrentUserId;
 
             #region Validation
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                 return methodResult;
             }
-            var studentId = studentResult?.Content?.Result?.Id;
+
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
 
             #endregion Validation
 
-            var method = await Validate(request, studentId, cancellationToken);
+            var method = await Validate(request, student.Id, cancellationToken);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
