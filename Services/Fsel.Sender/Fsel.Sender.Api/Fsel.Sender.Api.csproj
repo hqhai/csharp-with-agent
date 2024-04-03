@@ -28,6 +28,9 @@
     <None Update="Resources\SendMailMidCourseAcademic.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\SendMailMidCourseIELT.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\SendStudentCompleteCourseAcademic.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
