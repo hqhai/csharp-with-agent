@@ -193,9 +193,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
 
             if (mockTestResult.MockTest.MockTestType == EnumMockTestType.FullMockTest)
             {
-                var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests).FirstOrDefaultAsync(p => p.Id == mockTestResult.CourseId, cancellationToken);
+                var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder)).FirstOrDefaultAsync(p => p.Id == mockTestResult.CourseId, cancellationToken);
 
-                await _mockTestResultInputThenUpdateUnitResultHandler.SendMailMidCourseReport(mockTestResult.StudentId, course!, mockTestResult, cancellationToken);
+                if (course.CourseUnitMockTests.Where(p => p.MockTestId.HasValue).FirstOrDefault()?.MockTestId == mockTestResult.MockTestId)
+                {
+                    await _mockTestResultInputThenUpdateUnitResultHandler.SendMailMidCourseReport(mockTestResult.StudentId, course!, cancellationToken);
+                }
             }
             return methodResult;
         }
