@@ -330,7 +330,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "",
                             TemplateMessage = "{0} vừa thích bài viết của bạn.",
-                            Type = "LinkComment"
+                            Type = "LinkPage"
                         },
                         new
                         {

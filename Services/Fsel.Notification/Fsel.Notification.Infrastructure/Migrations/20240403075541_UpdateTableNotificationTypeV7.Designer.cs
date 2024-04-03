@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    [Migration("20240402100643_UpdateNotificationType_v7")]
-    partial class UpdateNotificationType_v7
+    [Migration("20240403075541_UpdateTableNotificationTypeV7")]
+    partial class UpdateTableNotificationTypeV7
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -333,7 +333,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "",
                             TemplateMessage = "{0} vừa thích bài viết của bạn.",
-                            Type = "LinkComment"
+                            Type = "LinkPage"
                         },
                         new
                         {
