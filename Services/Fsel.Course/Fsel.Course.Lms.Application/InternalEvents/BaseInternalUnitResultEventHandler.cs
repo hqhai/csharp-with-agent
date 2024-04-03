@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 {
     using System;
     using System.Globalization;
+    using System.Linq;
     using System.Threading;
     using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
@@ -29,7 +30,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using static MassTransit.Logging.OperationName;
 
     public class BaseInternalUnitResultEventHandler : BaseInternalEventHandler
     {
@@ -90,45 +90,86 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         _unitResultRepository.Update(unitResult);
                         await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                        if (course.CourseUnitMockTests.Where(x => x.UnitId.HasValue).Select(x => x.Unit).ToList().IndexOf(unit) == 5 && course.CourseType == EnumCourseType.Academic && unitResult.Status == EnumResultStatus.Done)
+                        if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 6 && course.CourseType == EnumCourseType.Academic)
                         {
-                            await SendMailMidCourseReport(studentId, course, null, cancellationToken);
+                            await SendMailMidCourseReport(studentId, course, cancellationToken);
+                        }
+                        else if (unit.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder <= 4 && course.CourseType == EnumCourseType.Ielts)
+                        {
+                            await SendMailMidCourseReport(studentId, course, cancellationToken);
                         }
                     }
                 }
             }
         }
 
-        public async Task SendMailMidCourseReport(Guid studentId, Course course, MockTestResult? mockTestResult, CancellationToken cancellationToken)
+        public async Task SendMailMidCourseReport(Guid studentId, Course course, CancellationToken cancellationToken)
         {
-            var unitResultFromUnit1ToNow = await _unitResultRepository.Queryable.Include(p => p.Unit).ThenInclude(p => p.CourseUnitMockTests).Where(p => p.CourseId == course.Id && p.Status == EnumResultStatus.Done && p.StudentId == studentId).ToListAsync(cancellationToken);
-
-            var unitNow = unitResultFromUnit1ToNow.OrderByDescending(p => p.CreatedDate).First();
-
-            CourseUnitMockTest? unit1;
-
+            var listUnitId = new List<Guid>();
+            int numberUnitDone;
             if (course.CourseType == EnumCourseType.Academic)
             {
-                unit1 = GetCourseUnitMockTest(course.CourseUnitMockTests.ToList(), unitNow.UnitId, "UnitId", -5);
+                numberUnitDone = 6;
+                listUnitId = course.CourseUnitMockTests.Where(p => p.DisplayOrder <= numberUnitDone && p.UnitId.HasValue).Select(p => p.UnitId ?? default).ToList();
             }
             else
             {
-                unit1 = GetCourseUnitMockTest(course.CourseUnitMockTests.ToList(), unitNow.UnitId, "UnitId", -3);
+                numberUnitDone = 4;
+                listUnitId = course.CourseUnitMockTests.Where(p => p.DisplayOrder <= numberUnitDone && p.UnitId.HasValue).Select(p => p.UnitId ?? default).ToList();
             }
 
-            var lessonResultsFromUnit1ToUnit6 = await _lessonResultRepository.Queryable.Include(p => p.LessonNotes).Where(p => p.CourseId == course.Id && p.StudentId == studentId && p.Status == EnumResultStatus.Done).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
+            var unitResults = await _unitResultRepository.Queryable.Include(p => p.Unit).ThenInclude(p => p.CourseUnitMockTests).Where(p => p.CourseId == course.Id && p.Status == EnumResultStatus.Done && p.StudentId == studentId && listUnitId.Contains(p.UnitId)).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
 
-            var lessonResultIdsFromUnit1ToNow = lessonResultsFromUnit1ToUnit6.Select(x => x.Id).ToList();
+            if (unitResults.Count != numberUnitDone)
+            {
+                return;
+            }
 
-            var videoResult = await _videoResultRepository.Queryable.Where(p => lessonResultIdsFromUnit1ToNow.Contains(p.LessonResultId)).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
+            var unitResultEnd = unitResults.OrderByDescending(p => p.CreatedDate).First();
+
+            var courseUnitMockTest1 = course.CourseUnitMockTests.FirstOrDefault();
+
+            var lessonResultsFromUnit1ToUnit6 = await _lessonResultRepository.Queryable.Include(p => p.LessonNotes).Where(p => p.CourseId == course.Id && p.StudentId == studentId && p.Status == EnumResultStatus.Done && listUnitId.Contains(p.UnitId)).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
+
+            var lessonResultIds = lessonResultsFromUnit1ToUnit6.Select(x => x.Id).ToList();
+
+            var listClassForumResult = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
+
+            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded);
+            if (!isSendEmail)
+                return;
+            MockTestResult? mockTestResult = default;
+            if (course.CourseType == EnumCourseType.Ielts && isSendEmail)
+            {
+                var skillMockTestResults = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(x => x.UnitId.HasValue && listUnitId.Contains(x.UnitId.Value) && x.CourseId == course.Id && x.StudentId == studentId && x.Status == EnumResultStatus.Done).ToListAsync(cancellationToken);
+
+                if (skillMockTestResults.Count != unitResults.Count)
+                    return;
+
+                var skillMockTestResultsSpeaking = skillMockTestResults.Where(p => p.SkillScores != null && p.SkillScores.Any(x => x.Skill == EnumCourseSkill.Speaking)).Select(p => p.MockTestScores.Any()).ToList();
+
+                if (skillMockTestResultsSpeaking != null && skillMockTestResultsSpeaking.Count > 0 && !skillMockTestResultsSpeaking.All(p => p))
+                {
+                    return;
+                }
+
+                mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(x => x.CourseId == course.Id && x.StudentId == studentId && x.Status == EnumResultStatus.Done).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+
+                if (mockTestResult == null || !mockTestResult.MockTestScores.Any())
+                {
+                    return;
+                }
+            }
+
+            var videoResult = await _videoResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
 
             var startDate = videoResult.First().CreatedDate;
 
-            var numberOfCorrectAnswers = unitResultFromUnit1ToNow.Sum(p => p.CorrectCount);
+            var numberOfCorrectAnswers = unitResults.Sum(p => p.CorrectCount);
 
-            var numberOfAnswers = unitResultFromUnit1ToNow.Sum(p => p.CorrectTotal);
+            var numberOfAnswers = unitResults.Sum(p => p.CorrectTotal);
 
-            var userId = unitResultFromUnit1ToNow.First().CreatedUserId;
+            var userId = unitResults.First().CreatedUserId;
 
             var featureAccessTimeResults = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
             {
@@ -154,11 +195,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
             });
 
-            var homeworkResultFromUnit1ToNow = await _homeWorkResultRepository.Queryable.Where(p => p.StudentId == studentId && lessonResultIdsFromUnit1ToNow.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
+            var homeworkResultFromUnit1ToNow = await _homeWorkResultRepository.Queryable.Where(p => p.StudentId == studentId && lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
 
-            var classForumResultFromUnit1ToNow = await _classForumResultRepository.Queryable.Include(p => p.ClassForum).Where(p => p.StudentId == studentId && lessonResultIdsFromUnit1ToNow.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
+            var classForumResultFromUnit1ToNow = await _classForumResultRepository.Queryable.Include(p => p.ClassForum).Where(p => p.StudentId == studentId && lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
 
-            var (unitTestResult, skillTestResult) = await GetUnitTestAndSkillTest(lessonResultIdsFromUnit1ToNow);
+            var (unitTestResult, skillTestResult) = await GetUnitTestAndSkillTest(lessonResultIds);
 
             var skillHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill, cancellationToken);
 
@@ -237,19 +278,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CourseLevel = course.CourseLevel.ToString(),
                 StartDate = startDate.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
                 EndDate = DateTime.UtcNow.ToString("dd-MM-yyy", CultureInfo.CurrentCulture),
-                Unit1Name = unit1?.Unit?.Name,
-                UnitNowName = unitNow.Unit?.Name,
+                Unit1Name = courseUnitMockTest1?.Unit?.Name,
+                UnitNowName = unitResultEnd.Unit?.Name,
                 UnitNowNumber = course.CourseType == EnumCourseType.Academic ? "6" : "4",
                 TotalLesson = lessonResultsFromUnit1ToUnit6.Count.ToString(CultureInfo.CurrentCulture),
                 TotalDay = featureAccessTimeResults.Content?.Result?.Select(p => p.CreatedDate!.Value.Date).Distinct().Count().ToString(CultureInfo.CurrentCulture),
-                TotalNote = lessonResultsFromUnit1ToUnit6.Select(p => p.LessonNotes).Count().ToString(CultureInfo.CurrentCulture),
+                TotalNote = lessonResultsFromUnit1ToUnit6.Where(p => p.LessonNotes.Count > 1).Select(p => p.LessonNotes).Count().ToString(CultureInfo.CurrentCulture),
                 Video = videoHtml,
                 Homework = homeworkHtml,
                 ClassForum = classForumHtml,
                 UnitTest = unitTestHtml,
                 SkillTest = skillTestHtml,
                 CourseType = course.CourseType,
-                Percent = unitResultFromUnit1ToNow.Where(p => p.SkillScores != null).SelectMany(p => p.SkillScores!).Average(p => p.Percent).ToString(CultureInfo.CurrentCulture)
+                Percent = unitResults.Where(p => p.SkillScores != null).SelectMany(p => p.SkillScores!).Average(p => p.Percent).ToString(CultureInfo.CurrentCulture)
             };
             if (course.CourseType == EnumCourseType.Ielts && mockTestResult != null)
             {
