@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 {
     using System.Threading;
     using System.Transactions;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -37,6 +38,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class CreateUserStudentToAdminCommandHandler : IRequestHandler<CreateUserStudentToAdminCommand, MethodResult<UserModel>>
     {
         private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly UserManager<User> _userManager;
         private readonly IOrderService _orderService;
@@ -48,9 +50,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private const string RoleStudent = nameof(Student);
         private const int TotalUserDateNow = 50;
 
-        public CreateUserStudentToAdminCommandHandler(IMediator mediator, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
+        public CreateUserStudentToAdminCommandHandler(IMediator mediator, IMapper mapper, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
         {
             _mediator = mediator;
+            _mapper = mapper;
             _authContext = authContext;
             _userManager = userManager;
             _orderService = orderService;
@@ -164,7 +167,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(orderResult.ErrorMessages);
                 return methodResult;
             }
-
+            methodResult.Result = _mapper.Map<UserModel>(user);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

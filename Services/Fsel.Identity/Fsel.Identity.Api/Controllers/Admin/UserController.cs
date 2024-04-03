@@ -137,5 +137,17 @@ namespace Fsel.Identity.Api.Controllers.Admin
             MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Create Students
+        /// </summary>
+        [HttpPost("create-students")]
+        [ProducesResponseType(typeof(MethodResult<IList<UserModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateStudents([FromBody] CreateUserStudentsToAdminCommand command)
+        {
+            MethodResult<IList<UserModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

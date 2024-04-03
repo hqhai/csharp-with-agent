@@ -1,0 +1,55 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Identity.Application.Commands.AdminCmd
+{
+    using System.Threading;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.Models.EntityModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+
+    public class CreateUserStudentsToAdminCommand : IRequest<MethodResult<IList<UserModel>>>
+    {
+        public IList<string>? Emails { get; set; }
+        public Guid CourseId { get; set; }
+    }
+
+    public class CreateUserStudentsToAdminCommandHandler : IRequestHandler<CreateUserStudentsToAdminCommand, MethodResult<IList<UserModel>>>
+    {
+        private readonly IMediator _mediator;
+
+        public CreateUserStudentsToAdminCommandHandler(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        public async Task<MethodResult<IList<UserModel>>> Handle(CreateUserStudentsToAdminCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<IList<UserModel>>();
+            if (request.Emails == null || !request.Emails.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Emails));
+                return methodResult;
+            }
+            var listUser = new List<UserModel>();
+            foreach (var email in request.Emails)
+            {
+                var userResult = await _mediator.Send(new CreateUserStudentToAdminCommand { CourseId = request.CourseId, Email = email }, cancellationToken);
+                if (!userResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(userResult.ErrorMessages);
+                    return methodResult;
+                }
+                if (userResult.Result != null)
+                {
+                    listUser.Add(userResult.Result);
+                }
+            }
+            methodResult.Result = listUser;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}
