@@ -61,6 +61,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
+            _logger.LogError(_appSetting.Services.AppStoreApiUrl);
+
             if (string.IsNullOrEmpty(request.TransactionId))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -93,6 +95,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     .AddClaim("bid", bundleId);
                 token = jwtBuilder.Encode();
             }
+
+            var purchaseSetting = _appSetting.PurchaseSettings.Serialize();
+            _logger.LogError(purchaseSetting);
 
             var signedTransactionInfoResult = await _appStoreService.GetInfoTransaction(token, request.TransactionId);
 
