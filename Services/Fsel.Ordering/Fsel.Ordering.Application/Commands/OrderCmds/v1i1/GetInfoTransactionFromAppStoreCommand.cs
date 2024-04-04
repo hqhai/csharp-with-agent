@@ -61,7 +61,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            _logger.LogError(_appSetting.Services.AppStoreApiUrl);
+            _logger.LogError(_appSetting.Services.AppStoreApiUrl ?? "AppStoreApiUrl");
 
             if (string.IsNullOrEmpty(request.TransactionId))
             {
@@ -96,7 +96,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 token = jwtBuilder.Encode();
             }
 
-            var purchaseSetting = _appSetting.PurchaseSettings.Serialize();
+            var purchaseSetting = _appSetting.PurchaseSettings.Serialize() ?? "PurchaseSettings";
             _logger.LogError(purchaseSetting);
 
             var signedTransactionInfoResult = await _appStoreService.GetInfoTransaction(token, request.TransactionId);
