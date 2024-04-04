@@ -11,8 +11,8 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public MockTestAISettingProfile()
         {
-            CreateMap<SectionAiSettingModel, MockTestAISetting>().IgnoreAllNonExisting();
-            CreateMap<MockTestAISettingModel, SectionAiSettingModel>().IgnoreAllNonExisting();
+            //CreateMap<SectionAiSettingModel, MockTestAISetting>().IgnoreAllNonExisting();
+            //CreateMap<MockTestAISettingModel, SectionAiSettingModel>().IgnoreAllNonExisting();
             CreateMap<MockTestAISetting, MockTestAISettingModel>().IgnoreAllNonExisting();
             CreateMap<MockTestAICriteriaSetting, MockTestAICriteriaSettingModel>().IgnoreAllNonExisting();
             CreateMap<MockTestAICriteriaSettingModel, MockTestAICriteriaSetting>().IgnoreAllNonExisting();
