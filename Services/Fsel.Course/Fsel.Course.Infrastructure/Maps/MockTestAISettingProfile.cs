@@ -3,7 +3,6 @@
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
 using Fsel.Course.Domain.Models.CommandModels.Sections;
 
 namespace Fsel.Course.Infrastructure.Maps
@@ -15,6 +14,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<SectionAiSettingModel, MockTestAISetting>().IgnoreAllNonExisting();
             CreateMap<MockTestAISettingModel, SectionAiSettingModel>().IgnoreAllNonExisting();
             CreateMap<MockTestAISetting, MockTestAISettingModel>().IgnoreAllNonExisting();
+            CreateMap<MockTestAICriteriaSetting, MockTestAICriteriaSettingModel>().IgnoreAllNonExisting();
+            CreateMap<MockTestAICriteriaSettingModel, MockTestAICriteriaSetting>().IgnoreAllNonExisting();
         }
     }
 }

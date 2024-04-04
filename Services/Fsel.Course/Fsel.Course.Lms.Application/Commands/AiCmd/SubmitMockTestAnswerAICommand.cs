@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -54,9 +55,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             ArgumentNullException.ThrowIfNull(request);
             var mockTestAnswer = _mockTestAnswerRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId && x.MockTestResultId == request.MockTestResultId);
 
-            var aiConfigs = _aiGradeSettingRepository.Queryable.Where(x => x.SectionId == request.SectionId).ToList();
 
-            var aiConfig = _aiGradeSettingRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId);
+            var aiConfig = _aiGradeSettingRepository.Queryable.Include(x => x.MockTestAICriteriaSettings).FirstOrDefault(x => x.SectionId == request.SectionId);
 
             var resultDictionary = new Dictionary<EnumMockTestAIType, string>();
 
@@ -66,40 +66,56 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 return true;
             }
 
-            foreach (var item in aiConfigs)
+            if (aiConfig == null || aiConfig.MockTestAICriteriaSettings == null || aiConfig.MockTestAICriteriaSettings.Count == 0)
             {
-                //var answer = string.Concat(aiConfig.Task!, item.PromptContent!);
+                return true;
+            }
 
-                var answer = string.Concat(new string[] { aiConfig!.Task!, Environment.NewLine, item.Prompts!.Single().PromptContent! });
-
-                var userAiConfig = answer?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
-
-                if (userAiConfig == null)
+            if (!string.IsNullOrEmpty(aiConfig.SystemRoleAlConfig) || aiConfig.Prompts != null && aiConfig.Prompts.Count == 0)
+            {
+                foreach (var item in aiConfig.MockTestAICriteriaSettings)
                 {
-                    return false;
+                    //var answer = string.Concat(aiConfig.Task!, item.PromptContent!);
+
+                    var answer = string.Concat(new string[] { aiConfig!.Task!, Environment.NewLine, item.Prompts!.Single().PromptContent! });
+
+                    var userAiConfig = answer?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
+
+                    if (userAiConfig == null)
+                    {
+                        return false;
+                    }
+
+                    var aIResponse = await SendChatGPT(aiConfig, userAiConfig, cancellationToken);
+
+                    resultDictionary[item.Prompts![0].Type] = aIResponse!;
+
+                    await SendWebSocket(aIResponse, item.Prompts![0].Type.ToString(), section.DisplayOrder, request.MockTestResultId, cancellationToken);
                 }
 
-                var aIResponse = await _mediator.Send(new SubmitAICommand
+            }
+            else
+            {
+                foreach (var item in aiConfig.Prompts!)
                 {
-                    SettingModel = aiConfig?.SettingModel,
-                    SettingTemperature = aiConfig!.SettingTemperature,
-                    SettingFrequecy = aiConfig!.SettingFrequecy,
-                    SettingWordMaxLength = aiConfig!.SettingWordMaxLength,
-                    SettingPresence = aiConfig!.SettingPresence,
-                    SettingTopP = aiConfig!.SettingTopP,
-                    SystemRoleAlConfig = aiConfig!.SystemRoleAlConfig,
-                    UserAIConfig = userAiConfig,
-                }, cancellationToken).ConfigureAwait(false);
+                    //var answer = string.Concat(aiConfig.Task!, item.PromptContent!);
 
-                resultDictionary[item.Criteria] = aIResponse!;
+                    var answer = string.Concat(new string[] { aiConfig.Task!, Environment.NewLine, item.PromptContent! });
 
-                await _submitMockTestCriteria.Publish(new SubmitMockTestResponseModel
-                {
-                    GradingAlFeedBack = aIResponse,
-                    CriteriaName = item.Criteria.ToString(),
-                    DisplayOrder = section.DisplayOrder,
-                    MockTestResultId = request.MockTestResultId
-                }, cancellationToken);
+                    var userAiConfig = answer?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
+
+                    if (userAiConfig == null)
+                    {
+                        return false;
+                    }
+
+                    var aIResponse = await SendChatGPT(aiConfig, userAiConfig, cancellationToken);
+
+                    resultDictionary[item.Type] = aIResponse!;
+
+                    await SendWebSocket(aIResponse, item.Type.ToString(), section.DisplayOrder, request.MockTestResultId, cancellationToken);
+
+                }
             }
 
             var gradingAiFeedBackResult = new
@@ -252,6 +268,46 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
 
             return NumberHelper.RoundNumberDouble((average + firstScore * 2) / 3);
+        }
+
+        private async Task<string> SendChatGPT(MockTestAISetting aiConfig, string userAiConfig, CancellationToken cancellationToken)
+        {
+            string aIResponse = "";
+            if (string.IsNullOrEmpty(userAiConfig))
+            {
+                return aIResponse;
+            }
+
+            var result = await _mediator.Send(new SubmitAICommand
+            {
+                SettingModel = aiConfig.SettingModel,
+                SettingTemperature = aiConfig.SettingTemperature,
+                SettingFrequecy = aiConfig.SettingFrequecy,
+                SettingWordMaxLength = aiConfig.SettingWordMaxLength,
+                SettingPresence = aiConfig.SettingPresence,
+                SettingTopP = aiConfig.SettingTopP,
+                SystemRoleAlConfig = aiConfig.SystemRoleAlConfig,
+                UserAIConfig = userAiConfig,
+            }, cancellationToken).ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(result))
+            {
+                aIResponse = result;
+            }
+            return aIResponse;
+        }
+
+
+
+        private async Task SendWebSocket(string aIResponse, string type, int displayOrder, Guid mockTestResultId, CancellationToken cancellationToken)
+        {
+            await _submitMockTestCriteria.Publish(new SubmitMockTestResponseModel
+            {
+                GradingAlFeedBack = aIResponse,
+                CriteriaName = type,
+                DisplayOrder = displayOrder,
+                MockTestResultId = mockTestResultId
+            }, cancellationToken);
         }
     }
 }
