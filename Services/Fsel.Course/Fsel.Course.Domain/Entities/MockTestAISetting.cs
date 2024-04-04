@@ -51,5 +51,7 @@ namespace Fsel.Course.Domain.Entities
         }
 
         public Section? Section { get; set; }
+
+        public IList<MockTestAICriteriaSetting>? MockTestAICriteriaSettings { get; set; }
     }
 }

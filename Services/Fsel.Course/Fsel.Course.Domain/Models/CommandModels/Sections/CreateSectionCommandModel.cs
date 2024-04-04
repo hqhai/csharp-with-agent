@@ -29,7 +29,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
     {
         public bool IsUseAIGrade { get; set; }
         public string? SystemRoleAlConfig { get; set; }
-        public EnumMockTestAIType Criteria { get; set; }
         public string? UserAlConfig { get; set; }
         public string? SettingModel { get; set; }
         public double? SettingTemperature { get; set; }
@@ -39,5 +38,21 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
         public double? SettingPresence { get; set; }
         public string? Task { get; set; }
         public IList<MockTestPromptModel>? Prompts { get; set; }
+
+        public IList<MockTestAICriteriaSettingModel>? MockTestAICriteriaSettings { get; set; }
+    }
+
+    public class MockTestAICriteriaSettingModel
+    {
+        public string? SystemRoleAlConfig { get; set; }
+
+        public string? PromptStr { get; set; }
+
+        public IList<MockTestPromptModel>? Prompts { get; set; }
+
+        public Guid? MockTestAISettingId { get; set; }
+
+        public EnumMockTestAIType CriteriaName { get; set; }
+
     }
 }
