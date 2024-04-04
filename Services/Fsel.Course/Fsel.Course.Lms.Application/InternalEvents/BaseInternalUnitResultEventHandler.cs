@@ -273,7 +273,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
             }
 
-            var percentUnit = NumberHelper.GetPercent(numberOfCorrectCount, numberOfCorrectTotal);
+            var percentUnit = NumberHelper.ConvertRound(unitResults.Any() ? unitResults.Average(x => x.Percent) : default);
 
             var model = new SendStudentCompleteMidCourseModel()
             {

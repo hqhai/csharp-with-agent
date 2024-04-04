@@ -37,7 +37,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private const int CorrectTotal_Writing = 36;
         private const int Last_DisplayOrder = 1;
 
-
         public SubmitMockTestAnswerCommandHandler(SubmitMockTestCriteriaPublisher submitMockTestCriteria, IUserService userService, ISectionRepository sectionRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
             _submitMockTestCriteria = submitMockTestCriteria;
@@ -54,7 +53,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var mockTestAnswer = _mockTestAnswerRepository.Queryable.FirstOrDefault(x => x.SectionId == request.SectionId && x.MockTestResultId == request.MockTestResultId);
-
 
             var aiConfig = _aiGradeSettingRepository.Queryable.Include(x => x.MockTestAICriteriaSettings).FirstOrDefault(x => x.SectionId == request.SectionId);
 
@@ -92,7 +90,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                     await SendWebSocket(aIResponse, item.Prompts![0].Type.ToString(), section.DisplayOrder, request.MockTestResultId, cancellationToken);
                 }
-
             }
             else
             {
@@ -114,7 +111,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     resultDictionary[item.Type] = aIResponse!;
 
                     await SendWebSocket(aIResponse, item.Type.ToString(), section.DisplayOrder, request.MockTestResultId, cancellationToken);
-
                 }
             }
 
@@ -151,7 +147,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 return true;
             }
-
 
             bool checkSkillMockTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
 
@@ -219,8 +214,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     }
                 }
             }
-
-
 
             return true;
         }
@@ -296,8 +289,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
             return aIResponse;
         }
-
-
 
         private async Task SendWebSocket(string aIResponse, string type, int displayOrder, Guid mockTestResultId, CancellationToken cancellationToken)
         {
