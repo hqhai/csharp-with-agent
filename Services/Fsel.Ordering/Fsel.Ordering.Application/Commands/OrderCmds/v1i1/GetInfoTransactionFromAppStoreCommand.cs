@@ -96,8 +96,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 token = jwtBuilder.Encode();
             }
 
-            var purchaseSetting = _appSetting.PurchaseSettings.Serialize() ?? "PurchaseSettings";
-            _logger.LogError(purchaseSetting);
+            var purchaseSetting = _appSetting.PurchaseSettings.Serialize();
+            if (purchaseSetting == "null")
+            {
+                _logger.LogError("PurchaseSettings");
+            }
+            else
+            {
+                _logger.LogError(purchaseSetting);
+            }
 
             var signedTransactionInfoResult = await _appStoreService.GetInfoTransaction(token, request.TransactionId);
 
