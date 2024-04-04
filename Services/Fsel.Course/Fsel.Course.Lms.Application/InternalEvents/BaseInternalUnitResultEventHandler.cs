@@ -273,6 +273,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
             }
 
+            var percentUnit = NumberHelper.ConvertPercentDouble(unitResults.Sum(p => p.CorrectCount) / unitResults.Sum(p => p.CorrectTotal));
+
             var model = new SendStudentCompleteMidCourseModel()
             {
                 CourseLevel = course.CourseLevel.ToString(),
@@ -290,7 +292,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 UnitTest = unitTestHtml,
                 SkillTest = skillTestHtml,
                 CourseType = course.CourseType,
-                Percent = unitResults.Where(p => p.SkillScores != null).SelectMany(p => p.SkillScores!).Average(p => p.Percent).ToString(CultureInfo.CurrentCulture)
+                Percent = percentUnit.ToString(CultureInfo.CurrentCulture)
             };
             if (course.CourseType == EnumCourseType.Ielts && mockTestResult != null)
             {
