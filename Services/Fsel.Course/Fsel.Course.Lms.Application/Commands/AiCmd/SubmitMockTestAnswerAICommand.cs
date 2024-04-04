@@ -64,12 +64,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 return true;
             }
 
-            if (aiConfig == null || aiConfig.MockTestAICriteriaSettings == null || aiConfig.MockTestAICriteriaSettings.Count == 0)
+            if (aiConfig == null || (aiConfig.MockTestAICriteriaSettings == null && aiConfig.SystemRoleAlConfig == null || aiConfig!.MockTestAICriteriaSettings!.Count == 0 && aiConfig.SystemRoleAlConfig == null))
             {
                 return true;
             }
 
-            if (!string.IsNullOrEmpty(aiConfig.SystemRoleAlConfig) || aiConfig.Prompts != null && aiConfig.Prompts.Count == 0)
+            if (string.IsNullOrEmpty(aiConfig.SystemRoleAlConfig) || (aiConfig.Prompts != null && aiConfig.Prompts.Count == 0))
             {
                 foreach (var item in aiConfig.MockTestAICriteriaSettings)
                 {
