@@ -75,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
+            var classForumResult = await _classForumResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
             if (classForumResult != null)
             {
                 var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
@@ -103,8 +103,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             classForumStudentProgress.SkillScores = new SkillScores
             {
                 Skill = classForum.CourseSkill,
-                TotalCount = 36,
-                CorrectCount = classForumResult?.ClassForumScores.Sum(x => x.Score) ?? default,
+                TotalCount = classForumResult?.CorrectTotal ?? default,
+                CorrectCount = classForumResult?.CorrectCount ?? default,
             };
             classForumStudentProgress.ClassForumId = classForum.Id;
             if (videoResult.Status == EnumResultStatus.Done)
@@ -112,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 classForumStudentProgress.Status = EnumResultStatus.New;
                 if (classForumResult != null)
                 {
-                    if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
+                    if (classForumResult.Status == EnumClassForumResultStatus.Denied || classForumResult.Status == EnumClassForumResultStatus.Graded)
                     {
                         classForumStudentProgress.Status = EnumResultStatus.Done;
                     }

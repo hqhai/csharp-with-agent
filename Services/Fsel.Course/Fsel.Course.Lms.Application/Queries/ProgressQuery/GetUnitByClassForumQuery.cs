@@ -77,6 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForums));
                 return methodResult;
             }
+
             var classForumReports = classForums.Select(x => new ClassForumReportModel
             {
                 Id = x.Id,
@@ -88,8 +89,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
                 {
                     Id = x.Id,
-                    CorrectCount = default,
-                    TotalCorrect = 36,
+                    CorrectCount = x.CorrectCount,
+                    TotalCorrect = x.CorrectTotal,
                     Status = x.Status,
                 }).FirstOrDefault(),
             }).ToList();
