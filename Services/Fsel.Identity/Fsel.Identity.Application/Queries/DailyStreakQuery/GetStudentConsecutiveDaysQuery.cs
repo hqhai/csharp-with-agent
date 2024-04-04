@@ -51,7 +51,8 @@ namespace Fsel.Identity.Application.Queries.DailyStreakQuery
                 Id = x.Id,
                 IsGiftReceive = x.IsGiftReceive,
                 DailyDate = x.DailyDate,
-                LevelOfGift = x.LevelOfGift ?? default
+                LevelOfGift = x.LevelOfGift ?? default,
+                StudentId = student.Id,
             }).ToList();
             studentDailyStreak.CountStudentDaily = studentDailyQuery.Count();
             methodResult.Result = studentDailyStreak;

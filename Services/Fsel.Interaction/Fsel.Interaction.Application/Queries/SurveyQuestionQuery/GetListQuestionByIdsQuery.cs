@@ -49,7 +49,6 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
                     Icon = x.Icon,
                     Question = x.Question,
                     Answers = x.Answers,
-                    IsPilot = x.IsPilot,
                     DisplayLevel = x.DisplayLevel,
                 }).ToListAsync(cancellationToken: cancellationToken);
 

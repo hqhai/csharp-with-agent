@@ -6,6 +6,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.StudentGameInfos
 
     public class ChooseUserLevelCommandModel
     {
-        public EnumGameCourseLevel? Level { get; set; }
+        public EnumGameCourseLevel? CourseLevel { get; set; }
     }
 }

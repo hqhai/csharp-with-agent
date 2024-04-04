@@ -13,6 +13,7 @@
   <ItemGroup>
     <Folder Include="Commands\ClassForumCmd\" />
     <Folder Include="Events\" />
+    <Folder Include="Queues\Publishers\" />
   </ItemGroup>
 
 </Project>

@@ -16,6 +16,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Asp.Versioning;
     using Fsel.Shared.Constants;
     using Fsel.Identity.Application.Commands.StudentCmd;
+    using Fsel.Identity.Application.Commands.AuthCmd;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]

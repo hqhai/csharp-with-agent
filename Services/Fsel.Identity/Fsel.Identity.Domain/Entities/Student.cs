@@ -26,6 +26,8 @@ namespace Fsel.Identity.Domain.Entities
 
         public bool CreatedByParent { get; set; }
         public long NumberOfToken { get; set; }
+        public long NumberOfTokenReceived { get; set; }
+        public long NumberOfTokenExchanged { get; set; }
         public int NumberOfShield { get; set; }
         public Guid? ClassId { get; set; }
 
@@ -37,6 +39,10 @@ namespace Fsel.Identity.Domain.Entities
             get { return ConvertHelper.Deserialize<StudentBeginnerGuide>(BeginnerGuideStr); }
             set { BeginnerGuideStr = ConvertHelper.Serialize(value); }
         }
+
+        public Guid? ProvinceId { get; set; }
+        public Guid? DistrictId { get; set; }
+        public Guid? SchoolId { get; set; }
 
         public Human? Human { get; set; }
 

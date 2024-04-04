@@ -9,22 +9,35 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IEntities;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
-    public class ClassForumResult : Entity
+    public class ClassForumResult : Entity, ITokenResult, ISubmissionCount
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
 
-        public string? WordContent { get; set; }
+        private string? _wordContent;
 
-        [NotMapped]
-        public int WordCount
-        { get { return StringHelper.CountWords(WordContent); } }
+        public string? WordContent
+        {
+            get { return _wordContent; }
+            set { _wordContent = value; WordCount = StringHelper.CountWords(value); }
+        }
+
+        private int? _wordCount;
+        private EnumMediaType? _mediaType;
+
+        public int? WordCount
+        {
+            get { return _wordCount == null ? StringHelper.CountWords(WordContent) : _wordCount; }
+            set { _wordCount = value; }
+        }
 
         [NotMapped]
         public int? TimeCount
-        { get { return ClassForumResultFiles.Select(p => p.TimeCount).Sum(); } }
+        { get { return ClassForumResultFiles.Where(x => x.IsRetry == false).Select(p => p.TimeCount).Sum(); } }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
@@ -62,7 +75,17 @@ namespace Fsel.Course.Domain.Entities
         public string? RetryGradingAlFeedBack { get; set; }
 
         public bool IsViewed { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
 
+        [NotMapped]
+        public EnumMediaType? MediaType
+        {
+            get { return _mediaType.HasValue ? _mediaType : MediaHelper.GetMediaType(ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault()); }
+            set { _mediaType = value; }
+        }
+
+        public EnumSubmissionCount? SubmissionCount { get; set; }
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();

@@ -11,15 +11,25 @@ namespace Fsel.Course.Domain.Entities
 
     public class ClassForumResultFile : Entity
     {
+        private string? _filePath;
+
         /// <summary>
         /// File Link
         /// </summary>
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? FilePath { get; set; }
+        public string? FilePath
+        {
+            get { return _filePath; }
+            set { _filePath = value; TimeCount = MediaHelper.GetMediaDurationAsync(value); }
+        }
 
-        [NotMapped]
+        private int? _timeCount;
+
         public int? TimeCount
-        { get { return MediaHelper.GetMediaDurationAsync(FilePath); } }
+        {
+            get { return _timeCount == null ? MediaHelper.GetMediaDurationAsync(FilePath) : _timeCount; }
+            set { _timeCount = value; }
+        }
 
         public bool IsRetry { get; set; }
 

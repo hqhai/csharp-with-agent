@@ -6,6 +6,9 @@ namespace Fsel.Shared.Enums
     {
         Card,
         Wallet,
-        BankTransfer
+        BankTransfer,
+        Payoo,
+        AppStore,
+        CHPlay
     }
 }

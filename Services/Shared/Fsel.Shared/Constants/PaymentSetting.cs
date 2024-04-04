@@ -22,5 +22,10 @@ namespace Fsel.Shared.Constants
             public const string VnpSecureHashType = "vnp_SecureHashType";
             public const string VnpSecureHash = "vnp_SecureHash";
         }
+
+        public static class Payoo
+        {
+            public const string OrderDescription = "Thanh toan hoa đon mua khoa hoc cho cong ty FSEL, chi tiet lien he voi cong ty tai dia chi: 35 Lac Trung, Hai Ba Trung, Ha Noi, hoac hotline: 19000033";
+        }
     }
 }

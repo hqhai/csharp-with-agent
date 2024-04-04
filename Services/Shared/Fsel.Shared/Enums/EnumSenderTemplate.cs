@@ -11,6 +11,15 @@ namespace Fsel.Shared.Enums
         SendStudentCompleteUnitGood,
         SendStudentCompleteUnitWeak,
         SendStudentCompleteCourseIetls,
-        SendStudentCompleteCourseAcademic
+        SendStudentCompleteCourseAcademic,
+        Unit1Report,
+        Unit2AboveReport,
+        WeeklyReport,
+        WeeklyReport2,
+        WeeklyReport3,
+        WeeklyReport4,
+        StudentCompletePT,
+        SendMailMidCourseAcademic,
+        SendMailMidCourseIELT
     }
 }

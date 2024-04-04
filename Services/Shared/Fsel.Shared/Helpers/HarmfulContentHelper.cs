@@ -10,6 +10,9 @@ namespace Fsel.Shared.Helpers
         private static Dictionary<EnumHarmfulContent, int> s_wordSetting = new Dictionary<EnumHarmfulContent, int>()
         {
             { EnumHarmfulContent.Hate, 2 },
+            { EnumHarmfulContent.Violence, 4 },
+            { EnumHarmfulContent.SelfHarm, 4 },
+            { EnumHarmfulContent.Sexual, 2 },
         };
 
         public static bool CheckHarmfulWords(ICollection<CategoriesAnalysisModel>? categories)

@@ -19,10 +19,10 @@ namespace Fsel.Shared.Helpers
 
             #region Bỏ check tuổi theo ngày chỉ tính năm sinh
 
-            //if (today > birthday?.AddYears(age))
-            //{
-            //    age--;
-            //}
+            if (today < birthday?.AddYears(age))
+            {
+                age--;
+            }
 
             #endregion Bỏ check tuổi theo ngày chỉ tính năm sinh
 
@@ -70,6 +70,26 @@ namespace Fsel.Shared.Helpers
                 var firstDateDifference = DateTime.UtcNow.Date - sortedDates[0].Date;
                 return (firstDateDifference.Days <= 1 ? consecutiveDays : 0, firstDateDifference.Days <= 1);
             }
+        }
+
+
+        public static ICollection<DateTime> GenerateDateList(DateTime startDate, DateTime endDate)
+        {
+            List<DateTime> dateList = new List<DateTime>();
+
+            while (startDate <= endDate)
+            {
+                dateList.Add(startDate);
+                startDate = startDate.AddDays(1);
+            }
+
+            return dateList;
+        }
+
+        public static int ConvertSecondsToMinutes(long seconds)
+        {
+            long minutes = seconds / 60;
+            return (int)minutes;
         }
     }
 }

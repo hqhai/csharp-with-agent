@@ -24,14 +24,11 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid MockTestId { get; set; }
 
-        public int? TokenDone { get; set; }
-        public int? TokenHighestStreak { get; set; }
-        public int? TokenSuperFire { get; set; }
-        public int? TokenQuestionReward { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
+
         public DateTime? GradingStartDate { get; set; }
-
         public bool IsViewed { get; set; }
-
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
         public ICollection<MockTestScore> MockTestScores { get; set; } = new List<MockTestScore>();
         public ICollection<SectionGroupResult> SectionGroupResults { get; set; } = new List<SectionGroupResult>();

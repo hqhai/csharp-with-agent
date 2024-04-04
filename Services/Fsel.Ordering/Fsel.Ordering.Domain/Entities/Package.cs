@@ -18,11 +18,21 @@ namespace Fsel.Ordering.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public EnumPackageCode? Code { get; set; }
 
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(100)]
+        public string? Name { get; set; }
+
         /// <summary>
         /// Giá Khóa Học
         /// </summary>
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public decimal Price { get; set; }
+
+        /// <summary>
+        /// Thời gian Khóa Học
+        /// </summary>
+        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int MonthNumber { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? DescriptionStr { get; set; }

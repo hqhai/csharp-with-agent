@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
                 sectionGroupResult.Status = EnumResultStatus.Process;
-                sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.WorkingTime, sectionGroup.ExecutionTime, sectionGroupResult);
+                sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroup.ExecutionTime, sectionGroupResult.CreatedDate);
                 sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }

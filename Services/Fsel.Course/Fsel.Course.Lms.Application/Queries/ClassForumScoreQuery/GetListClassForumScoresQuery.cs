@@ -118,7 +118,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
 
             double checkViewedAllRatio = (double)classForumResults.Count(x => x.IsViewed) / classForumResults.Count;
 
-
             if (checkViewedAllRatio == Standard_Ratio)
             {
                 await _questBoardPublisher.Publish(new QuestBoardQueueModel

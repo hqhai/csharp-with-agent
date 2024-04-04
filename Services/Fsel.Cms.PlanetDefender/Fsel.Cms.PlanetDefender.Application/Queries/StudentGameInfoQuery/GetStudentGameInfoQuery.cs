@@ -44,22 +44,23 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
             var studentId = studentResult.Content?.Result?.Id;
 
             var studentGameInfo = await _studentGameInfoRepository.Queryable
-                        .Where(x => x.StudentId == studentId)
-                        .Select(x => new StudentGameInfoModel
-                        {
-                            Id = x.Id,
-                            StudentId = x.StudentId,
-                            CreatedDate = x.CreatedDate,
-                            Gender = x.Gender,
-                            Level = x.Level,
-                            TagNameId = x.TagNameId,
-                            CourseLevel = x.CourseLevel,
-                            NickName = x.NickName,
-                            AvatarImageId = x.AvatarImageId,
-                            TagName = x.StudentTagName!.TagName,
-                            /*HighestRoundNumber = roundNumber,
-                            HighestScore = score*/
-                        }).FirstOrDefaultAsync(cancellationToken);
+                                                                  .Include(x => x.StudentSpaceShips)
+                                                                  .Include(x => x.StudentCharacters)
+                                                                  .Where(x => x.StudentId == studentId)
+                                                                  .Select(x => new StudentGameInfoModel
+                                                                  {
+                                                                      Id = x.Id,
+                                                                      StudentId = x.StudentId,
+                                                                      CreatedDate = x.CreatedDate,
+                                                                      Level = x.Level,
+                                                                      TagNameId = x.TagNameId,
+                                                                      CourseLevel = x.CourseLevel,
+                                                                      NickName = x.NickName,
+                                                                      AvatarImageId = x.AvatarImageId,
+                                                                      TagName = x.StudentTagName!.TagName,
+                                                                      CharacterId = x.StudentCharacters.Where(x => x.IsActive).Select(x => x.CharacterId).FirstOrDefault(),
+                                                                      SpaceShipId = x.StudentSpaceShips.Where(x => x.IsActive).Select(x => x.SpaceShipId).FirstOrDefault(),
+                                                                  }).FirstOrDefaultAsync(cancellationToken);
             var gameHistory = await _gameHistoryRepository.Queryable.Where(x => x.StudentGameInfoId == studentGameInfo!.Id).OrderByDescending(p => p.RoundNumber).FirstOrDefaultAsync(cancellationToken);
 
             var roundNumber = gameHistory?.RoundNumber;

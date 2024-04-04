@@ -12,25 +12,30 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
 
     public interface ITrainingService
     {
-        [Post("/class/get-class-list-status-new")]
+        [Post("/v1/class/get-class-list-status-new")]
         Task<IApiResponse<MethodResult<IList<CourseClassModel>>>> GetClassListStatusNewAsync([Body] GetClassListStatusNewModel command);
 
-        [Get("/class/get-new-class-code")]
+        [Get("/v1/class/get-new-class-code")]
         Task<IApiResponse<MethodResult<string>>> GetNewClassCodeAsync([Query] EnumCourseLevel courseLevel);
 
-        [Post("/class/register-class")]
+        [Post("/v1/class/register-class")]
         Task<IApiResponse<MethodResult<ClassModel>>> RegisterClass([Body] CreateClassStudentModel command);
 
-        [Get("/class/get-class-by-student/{studentId}")]
+        [Get("/v1/class/get-class-by-student/{studentId}")]
         Task<IApiResponse<MethodResult<ClassModel>>> GetClassByStudentId([FromRoute] Guid studentId);
 
-        [Post("/class/classes-by-studentids")]
+        [Post("/v1/class/classes-by-studentids")]
         Task<IApiResponse<MethodResult<IList<ClassStudentModel>>>> GetClassByStudentIdsAsync([FromBody] GetClassListByStudentIdsModel query);
 
-        [Get("/class/get-classes/{studentId}")]
+        [Get("/v1/class/get-classes/{studentId}")]
         Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetListClassByStudentIdAsync([FromRoute] Guid studentId);
 
-        [Get("/class/get-classes-by-csoId/{csoId}")]
+
+        [Post("/v1/class/classes-by-studentids/diffirent-course")]
+        Task<IApiResponse<MethodResult<IList<CompetitionClassStudentModel>>>> GetListClassBySpecificStudentIdsAsync([FromBody] GetClassListBySpecificStudentIdsModel query);
+
+
+        [Get("/v1/class/get-classes-by-csoId/{csoId}")]
         Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetClassesByCsoIdAsync([FromRoute] Guid csoId);
     }
 }

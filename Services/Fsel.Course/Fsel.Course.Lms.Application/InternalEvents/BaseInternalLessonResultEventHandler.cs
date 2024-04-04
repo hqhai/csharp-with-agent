@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
@@ -25,8 +26,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyClassForum = 30;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly IOrderService _orderService;
 
-        public BaseInternalLessonResultEventHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
+        public BaseInternalLessonResultEventHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService)
         {
             _lessonResultRepository = lessonResultRepository;
             _questBoardPublisher = questBoardPublisher;
@@ -93,7 +95,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 skillScores = skillScores.Union(skillScoreClassForums).ToList();
             }
-            List<SkillScores> groupedSkillScores = skillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
+            List<SkillScores> groupedSkillScores = skillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).OrderBy(x => x.Skill).ToList();
             var correctCounts = new List<double> { correctVideo, correctHomeWork, correctClassForum };
             var correctTotals = new List<double> { totalVideo, totalHomeWork, totalClassForum };
             var percents = new List<double> { percentVideo * PercentOccupyVideo, percentHomeWork * PercentOccupyHomeWork, percentClassForum * PercentOccupyClassForum };

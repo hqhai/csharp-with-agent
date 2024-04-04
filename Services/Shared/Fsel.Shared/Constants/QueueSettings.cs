@@ -22,6 +22,10 @@ namespace Fsel.Shared.Constants
                 public const string SyncStudentShieldEveryDay = $"{KeyQueue}_SyncStudentShieldEveryDay";
                 public const string UpdateStudentsDailyStreak = $"{KeyQueue}_UpdateStudentsDailyStreak";
                 public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
+                public const string UpdateStatusTrialStudent = $"{KeyQueue}_UpdateStatusTrialStudent";
+                public const string SetTimeToSendReviewFsel = $"{KeyQueue}_SetTimeToSendReviewFsel";
+                public const string SendNotification = $"{KeyQueue}_SendNotification";
+                public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
             }
         }
 
@@ -35,6 +39,7 @@ namespace Fsel.Shared.Constants
                 public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
                 public const string AIFeedBack = $"{KeyQueue}_AIFeedBack";
+                public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
             }
         }
 
@@ -81,6 +86,9 @@ namespace Fsel.Shared.Constants
                 public const string SetTimeToCompleteTest = $"{KeyQueue}_SetTimeToCompleteTest";
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
                 public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
+                public const string MockTestAnwserResponse = $"{KeyQueue}_MockTestAnwserResponse";
+                public const string WeeklyReport = $"{KeyQueue}_WeeklyReport";
+                public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
             }
         }
 
@@ -94,6 +102,8 @@ namespace Fsel.Shared.Constants
                 public const string SetCompleteApprovalPost = $"{KeyQueue}_SetCompleteApprovalPost";
                 public const string CompleteApprovalPostTimeOut = $"{KeyQueue}_CompleteApprovalPostTimeOut";
                 public const string SetCompleteApprovalPostTimeOut = $"{KeyQueue}_SetCompleteApprovalPostTimeOut";
+                public const string ReviewFsel = $"{KeyQueue}_ReviewFsel";
+                public const string NoticeAccessTime = $"{KeyQueue}_NoticeAccessTime";
 
             }
         }
@@ -116,6 +126,8 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
+                public const string FinishSubmission = $"{KeyQueue}_FinishSubmission";
+                public const string NoticePayment = $"{KeyQueue}_NoticePayment";
             }
         }
 

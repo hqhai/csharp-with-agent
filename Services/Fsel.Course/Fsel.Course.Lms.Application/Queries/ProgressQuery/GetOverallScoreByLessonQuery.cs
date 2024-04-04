@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -65,18 +66,23 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
                 return methodResult;
             }
-            var videoIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x.VideoId).ToList();
-            var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && videoIds.Contains(x.VideoId)).Select(x => x.Id).ToListAsync(cancellationToken);
+
+            var listVideoIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Where(x => !x.IsDeleted).Select(x => x.VideoId).AsQueryable();
+
+            var videoDuplicateIds = listVideoIds.GroupBy(x => x)
+                .Select(x => new
+                {
+                    Id = x.Key,
+                    NumberOfDuplicate = x.Count()
+                }).ToList();
+            var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && videoDuplicateIds.Select(x => x.Id).Contains(x.VideoId)).Select(x => x.Id).ToListAsync(cancellationToken);
             var videos = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
                                                     .ThenInclude(x => x.TimeCodeExercises)
                                                     .ThenInclude(x => x.Exercise)
                                                     .ThenInclude(x => x!.ExerciseQuestions)
                                                     .ThenInclude(x => x.Question)
-                                                    .Include(x => x.VideoTimeCodes)
-                                                    .ThenInclude(x => x.TimeCodeExercises)
-                                                    .ThenInclude(x => x.Exercise)
                                                     .ThenInclude(x => x!.VideoTimeCodeAnswers)
-                                                    .Where(x => videoIds.Contains(x.Id))
+                                                    .Where(x => videoDuplicateIds.Select(x => x.Id).Contains(x.Id))
                                                     .AsNoTracking()
                                                     .ToListAsync(cancellationToken);
             if (videos == null || videos.Count == 0)
@@ -89,14 +95,28 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x =>
             {
-                var videoResultAnswers = x.SelectMany(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId.HasValue && videoResultIds.Contains(x.VideoResultId.Value)));
+                var videoResultAnswers = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question)
+                .Where(x => !x!.Ungraded && x.QuestionType != EnumQuestionType.ExercisePreparation)
+                .SelectMany(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId.HasValue && videoResultIds.Contains(x.VideoResultId.Value)));
+
+                double totalQuestion = 0, totalCount = 0;
+                foreach (var item in x.ToList())
+                {
+                    var questions = item?.ExerciseQuestions.Select(x => x.Question!).Where(x => !x!.Ungraded && x.QuestionType != EnumQuestionType.ExercisePreparation).ToList();
+
+                    var videoId = item?.TimeCodeExercises.Select(x => x.VideoTimeCode!.VideoId).FirstOrDefault();
+                    var numberOfDuplicate = videoDuplicateIds.FirstOrDefault(vid => vid.Id == videoId)?.NumberOfDuplicate ?? default;
+                    totalQuestion += (questions?.Count ?? default) * numberOfDuplicate;
+                    totalCount += (questions?.Sum(x => x!.CorrectTotal) ?? default) * numberOfDuplicate;
+                }
+
                 return new SkillScores
                 {
                     Skill = x.Key,
                     CountQuestion = videoResultAnswers.Count(),
-                    TotalQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
                     CorrectCount = videoResultAnswers.Sum(x => x.CorrectCount),
-                    TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                    TotalQuestion = totalQuestion,
+                    TotalCount = totalCount,
                 };
             }).ToList();
             overallScoreReport.SkillScores = skillScores;

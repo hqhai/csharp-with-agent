@@ -10,6 +10,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
@@ -46,9 +47,19 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             #region Validation
 
-            if (request.SectionGroups == null || !request.SectionGroups.Any())
+            if (request.SectionGroups == null || (!request.SectionGroups.Any() || request.SectionGroups.Any(x => x == null)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
+                return methodResult;
+            }
+            if (request.MockTestType == EnumMockTestType.SkillMockTest && request.SectionGroups.Count != 1)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SectionGroups));
+                return methodResult;
+            }
+            else if (request.MockTestType == EnumMockTestType.FullMockTest && request.SectionGroups.Count != 4)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SectionGroups));
                 return methodResult;
             }
             request.SectionGroups = request.SectionGroups.OrderBy(obj => obj.CourseSkill).ToList();
@@ -84,6 +95,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                     return methodResult;
                 }
+
+                sectionGroup.Sections = sectionGroup.Sections.OrderBy(x => x.DisplayOrder).Select((x, index) => { x.DisplayOrder = index; return x; }).ToList();
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
                 if (!newSectionGroup.IsValid())
                 {

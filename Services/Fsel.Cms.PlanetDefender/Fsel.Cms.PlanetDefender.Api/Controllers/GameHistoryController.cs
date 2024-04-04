@@ -62,5 +62,17 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
             var commandResult = await _mediator.Send(new GetGameHistoryQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get ranking
+        /// </summary>
+        [HttpGet("get-ranking-game")]
+        [ProducesResponseType(typeof(MethodResult<GameHistoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetRankingGame([FromQuery] SearchRankingGameQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

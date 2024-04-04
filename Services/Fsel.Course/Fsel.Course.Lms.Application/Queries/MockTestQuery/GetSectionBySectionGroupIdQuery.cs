@@ -31,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
         private readonly ISectionRepository _sectionRepository;
+        private readonly IMockTestScoreRepository _mockTestScoreRepository;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
         private readonly SectionGroupConverter _sectionGroupConverter;
@@ -41,9 +42,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
 
-        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, DateTimeConverter dateTimeConverter, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
+        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, IMockTestScoreRepository mockTestScoreRepository, DateTimeConverter dateTimeConverter, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
         {
             _sectionRepository = sectionRepository;
+            _mockTestScoreRepository = mockTestScoreRepository;
             _dateTimeConverter = dateTimeConverter;
             _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
             _sectionGroupConverter = sectionGroupConverter;
@@ -122,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
                 sectionGroupResult.Status = EnumResultStatus.Process;
-                sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.WorkingTime, sectionGroup.ExecutionTime, sectionGroupResult);
+                sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroup.ExecutionTime, sectionGroupResult.CreatedDate);
                 sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult);
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }

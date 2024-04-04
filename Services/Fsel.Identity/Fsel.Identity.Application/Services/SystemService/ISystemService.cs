@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
@@ -11,12 +12,15 @@ namespace Fsel.Identity.Application.Services.SystemService
 
     public interface ISystemService
     {
-        [Get("/focus-time-config")]
+        [Get("/v1/focus-time-config")]
         Task<IApiResponse<MethodResult<IList<FocusTimeConfigModel>>>> GetFocusTimeConfig();
 
-        [Get("/token-config/get-token")]
+        [Get("/v1/token-config/get-token")]
         Task<IApiResponse<MethodResult<TokenConfigModel>>> GetTokenConfigAsync([Query] GetTokenQueryModel query);
-        [Delete("/admin/student/delete-student/{id}")]
+        [Delete("/v1/admin/student/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
+
+        [Post("/v1/school/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<SchoolModel>>>> ExecuteListSchoolQueryAsync([Body] BaseQueryModel query);
     }
 }

@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
             foreach (var item in lessonIds)
             {
-                var lessonProgress = await GetLesson(item, studentId);
+                var lessonProgress = await GetLesson(request, item);
                 var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.LessonId == item);
                 lessonProgress.Type = nameof(Lesson);
                 if (featureAccessTime != null)
@@ -136,18 +136,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return methodResult;
         }
 
-        private async Task<LessonStudentProgressModel> GetLesson(Guid? lessonId, Guid? studentId)
+        private async Task<LessonStudentProgressModel> GetLesson(GetStudentProgressLessonsQuery request, Guid? lessonId)
         {
             LessonStudentProgressModel lessonProgress = new LessonStudentProgressModel();
             var counts = new List<int>();
-            var lessonResult = await _lessonResultRepository.GetAsync(lessonId, studentId);
+            var lessonResult = await _lessonResultRepository.GetAsync(request.CourseId, request.UnitId, lessonId, request.StudentId);
             lessonProgress.Type = nameof(lessonResult.Lesson);
             if (lessonResult != null)
             {
                 var lesson = lessonResult.Lesson;
                 counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);
-                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count());
-                counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
+                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == request.StudentId).Count());
+                counts.Add(lessonResult.HomeWorkResults.Any() && lessonResult.HomeWorkResults.All(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId) ? 1 : 0);
                 if (lesson != null)
                 {
                     lessonProgress.ObjectId = lesson.Id;

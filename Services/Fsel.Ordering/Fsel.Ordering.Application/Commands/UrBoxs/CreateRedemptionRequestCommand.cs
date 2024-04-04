@@ -11,6 +11,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.UrBoxQuery;
+    using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UrBoxService;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
@@ -22,7 +23,9 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
+    using Microsoft.Extensions.Hosting;
 
     public class CreateRedemptionRequestCommand : CreateRedemptionRequestCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
     {
@@ -31,20 +34,24 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     public class CreateRedemptionRequestCommandHandler : IRequestHandler<CreateRedemptionRequestCommand, MethodResult<RedemptionResponseModel>>
     {
         private readonly IUrBoxService _urBoxService;
+        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly AppSetting _appSetting;
         private readonly IMediator _mediator;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private readonly IUrBoxTransactionRepository _urBoxTransactionRepository;
+        private readonly IOrderTransactionRepository _orderTransactionRepository;
+        private readonly IHostEnvironment _hostEnvironment;
 
-        public CreateRedemptionRequestCommandHandler(IUrBoxService urBoxService, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IUrBoxTransactionRepository urBoxTransactionRepository)
+        public CreateRedemptionRequestCommandHandler(IUrBoxService urBoxService, CreateTokenHistoryPublisher createTokenHistoryPublisher, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IOrderTransactionRepository orderTransactionRepository, IHostEnvironment hostEnvironment)
         {
             _urBoxService = urBoxService;
+            _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _appSetting = appSetting;
             _mediator = mediator;
             _authContext = authContext;
             _userService = userService;
-            _urBoxTransactionRepository = urBoxTransactionRepository;
+            _orderTransactionRepository = orderTransactionRepository;
+            _hostEnvironment = hostEnvironment;
         }
 
         public async Task<MethodResult<RedemptionResponseModel>> Handle(CreateRedemptionRequestCommand request, CancellationToken cancellationToken)
@@ -79,8 +86,8 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 methodResult.AddError(studentResult.Error);
                 return methodResult;
             }
-
-            var token = studentResult.Content?.Result?.NumberOfToken ?? 0;
+            var student = studentResult.Content?.Result;
+            var token = student?.NumberOfToken ?? default;
 
             var gift = await _mediator.Send(new GetGiftQuery { Id = request.DataBuy.FirstOrDefault()?.PriceId }, cancellationToken).ConfigureAwait(false);
             if (!gift.IsOK)
@@ -96,21 +103,29 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 return methodResult;
             }
 
-            if (token < price)
+            if (!long.TryParse(request.DataBuy.FirstOrDefault()?.Quantity, out long quantity))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            var totalPrice = quantity * price;
+
+            if (token < totalPrice)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Min));
                 return methodResult;
             }
 
-            await _urBoxTransactionRepository.ExecuteTransactionAsync(async () =>
+            await _orderTransactionRepository.ExecuteTransactionAsync(async () =>
             {
-                var urBoxTransaction = _urBoxTransactionRepository.Add(new UrBoxTransaction());
-                await _urBoxTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                var orderTransaction = _orderTransactionRepository.Add(new OrderTransaction() { Type = EnumOrderTransactionType.UrBox });
+                await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 var redemptionRequest = new CreateRedemptionRequestModel(_appSetting);
 
                 redemptionRequest.SiteUserId = _authContext.CurrentUserId.ToString();
-                redemptionRequest.TransactionId = urBoxTransaction.Id.ToString();
+                redemptionRequest.TransactionId = orderTransaction.Id.ToString();
                 redemptionRequest.PhoneNumber = request.PhoneNumber;
                 redemptionRequest.IsSendSms = 0;
                 redemptionRequest.DataBuy = request.DataBuy.Select(p => new DataBuy { PriceId = p.PriceId, Quantity = p.Quantity }).ToList();
@@ -141,8 +156,18 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 };
 
                 string requestBody = urBoxSignature.Serialize();
+                string? privateKeyPath;
 
-                var signature = EncodeHelper.CreateDigitalSignature(requestBody, ResourceSettings.PrivateKeyUrBox, HashAlgorithmName.SHA256);
+                if (_hostEnvironment.IsProduction() || _hostEnvironment.IsStaging())
+                {
+                    privateKeyPath = ResourceSettings.PrivateKeyProdUrBox;
+                }
+                else
+                {
+                    privateKeyPath = ResourceSettings.PrivateKeyDevUrBox;
+                }
+
+                var signature = EncodeHelper.CreateDigitalSignature(requestBody, privateKeyPath, HashAlgorithmName.SHA256);
 
                 if (string.IsNullOrEmpty(signature) || string.IsNullOrEmpty(redemptionRequest.AppId) || string.IsNullOrEmpty(redemptionRequest.AppSecret))
                 {
@@ -153,12 +178,6 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
                 if (createRedemptionRequest.Content?.Status == 200)
                 {
-                    var updateTokenResult = await _userService.UpdateStudentByTokenAsync(new Application.Services.UserService.Models.UpdateStudentByTokenModel { StudentId = studentResult.Content?.Result?.Id ?? default, NumberOfToken = token - price });
-                    if (!updateTokenResult.IsSuccessStatusCode)
-                    {
-                        methodResult.AddError(updateTokenResult.Error);
-                        return methodResult;
-                    }
                     methodResult.Result = createRedemptionRequest.Content;
                 }
                 else
@@ -166,14 +185,44 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                     methodResult.AddErrorBadRequest(createRedemptionRequest.Content?.Msg);
                 }
 
-                urBoxTransaction.RequestBody = redemptionRequest;
-                urBoxTransaction.ResponseBody = createRedemptionRequest.Content;
-                urBoxTransaction.Status = createRedemptionRequest.Content?.Status == 200 ? EnumUrBoxTransactionStatus.Success : EnumUrBoxTransactionStatus.Unsuccessful;
+                orderTransaction.RequestBody = redemptionRequest;
+                orderTransaction.ResponseBody = createRedemptionRequest.Content;
+                orderTransaction.Status = createRedemptionRequest.Content?.Status == 200 ? EnumOrderTransactionStatus.Success : EnumOrderTransactionStatus.Fail;
 
-                _urBoxTransactionRepository.Update(urBoxTransaction);
-                await _urBoxTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                _orderTransactionRepository.Update(orderTransaction);
+                await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                if (orderTransaction.Status == EnumOrderTransactionStatus.Success)
+                {
+                    var configs = new List<object>();
+
+                    for (int i = 0; i < quantity; i++)
+                    {
+                        var data = new
+                        {
+                            Id = gift.Result.Id,
+                            Title = gift.Result.Title,
+                            Price = price
+                        };
+                        configs.Add(data);
+                    }
+                    var tokenHistorys = new List<TokenHistoryQueueModel>
+                    {
+                        new TokenHistoryQueueModel
+                        {
+                            ObjectId = orderTransaction.Id,
+                            VolatileToken = totalPrice,
+                            Feature = EnumTokenFeature.MarketPlace,
+                            Type = EnumTokenHistoryType.Exchanged,
+                            UserId = student?.Human?.UserId ?? default,
+                            Config = configs
+                        }
+                    };
+                    await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
+                }
                 return methodResult;
             });
+
             return methodResult;
         }
     }

@@ -2,7 +2,10 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class SectionGroupResultModel : BaseLearnResultModel
+    using Fsel.Course.Domain.Entities.BandScoresConfigs;
+    using Fsel.Course.Domain.IEntities;
+
+    public class SectionGroupResultModel : BaseLearnResultModel, ITokenResult
     {
         public Guid SectionGroupId { get; set; }
         public Guid? MockTestResultId { get; set; }
@@ -12,5 +15,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? CurrentSectionTimeCodeId { get; set; }
         public bool? IsTestDone { get; set; }
         public double RemainingTime { get; set; }
+        public BandScoresReport? BandScoresReport { get; set; }
+        public double TargetBandScore { get; set; }
+        public bool IsCheckScoreColor { get; set; }
+        public bool IsFeedBack { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
     }
 }

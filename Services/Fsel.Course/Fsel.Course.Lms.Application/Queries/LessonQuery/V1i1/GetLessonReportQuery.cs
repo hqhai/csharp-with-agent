@@ -1,7 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
+namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 {
+    using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
@@ -64,6 +65,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
                 return methodResult;
             }
             methodResult.Result = GetLessonReport(video, videoResult);
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

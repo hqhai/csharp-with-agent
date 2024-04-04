@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 {
     using System;
-    using System.Globalization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -16,14 +15,11 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -89,10 +85,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
                                                                            .OrderByDescending(x => x.CreatedDate)
                                                                            .FirstOrDefaultAsync(cancellationToken);
+
+            var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == studentId)
+                                                                      .OrderBy(x => x.CreatedDate)
+                                                                      .FirstOrDefaultAsync(cancellationToken);
+
             int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
             if (placementTestResultDone != null)
             {
-                var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, age);
+                var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
                 if (isLock)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(isLock));
@@ -196,7 +197,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             placementTestResult.PlacementTestAnswers = placementTestAnswers;
 
             var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());
-            var (currentLevel, isLockPT) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent, age);
+            var (currentLevel, isLockPT) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
 
             if (currentLevel.HasValue)
             {
@@ -226,18 +227,20 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             });
             if (isLockPT)
             {
-                var param = new SendStudentPTTemplateModel
-                {
-                    StudentName = student!.Human?.FullName,
-                    CourseLevel = placementTestResult.Level,
-                    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {Math.Round(x.Percent, MidpointRounding.AwayFromZero)} %")),
-                };
-                var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
-                var sendResult = new MethodResult<bool>();
-                if (!string.IsNullOrEmpty(student.Human?.Email))
-                {
-                    sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
-                }
+                #region
+                //var param = new SendStudentPTTemplateModel
+                //{
+                //    StudentName = student!.Human?.FullName,
+                //    CourseLevel = placementTestResult.Level,
+                //    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {Math.Round(x.Percent, MidpointRounding.AwayFromZero)} %")),
+                //};
+                //var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
+                //var sendResult = new MethodResult<bool>();
+                //if (!string.IsNullOrEmpty(student.Human?.Email))
+                //{
+                //    sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
+                //}
+                #endregion
             }
             return methodResult;
         }

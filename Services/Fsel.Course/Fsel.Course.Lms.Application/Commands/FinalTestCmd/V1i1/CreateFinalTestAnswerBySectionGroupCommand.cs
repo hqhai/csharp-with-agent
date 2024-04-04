@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -45,6 +46,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly IMapper _mapper;
 
         public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
@@ -57,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             , IFinalTestAnswerRepository finalTestAnswerRepository
             , ISectionGroupResultRepository sectionGroupResultRepository
             , ISectionGroupRepository sectionGroupRepository
+            , CreateTokenHistoryPublisher createTokenHistoryPublisher
             , IMapper mapper)
         {
             _questionRepository = questionRepository;
@@ -69,6 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             _finalTestAnswerRepository = finalTestAnswerRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _sectionGroupRepository = sectionGroupRepository;
+            _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _mapper = mapper;
         }
 
@@ -79,14 +83,31 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             #region Validate
 
             var methodResult = new MethodResult<SectionGroupResultModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
+            StudentModel? student;
+            if (request.StudentId.HasValue)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId.Value });
+                if (!studentResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
+                    return methodResult;
+                }
+                student = studentResults.Content?.Result?.FirstOrDefault();
+            }
+            else
+            {
+                var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                if (!studentResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                    return methodResult;
+                }
+                student = studentResult.Content?.Result;
+            }
+            if (student == null)
+            {
                 return methodResult;
             }
-            var student = studentResult?.Content?.Result;
-            var studentId = student?.Id ?? request.StudentId ?? default;
 
             var finalTestResult = await _finalTestResultRepository.GetByIdAsync(request.FinalTestResultId);
             if (finalTestResult == null)
@@ -110,7 +131,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.StudentId == studentId && x.SectionGroupId == request.SectionGroupId && x.FinalTestResultId == finalTestResult.Id).FirstOrDefaultAsync(cancellationToken);
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.SectionGroupId == request.SectionGroupId && x.FinalTestResultId == finalTestResult.Id).FirstOrDefaultAsync(cancellationToken);
             if (sectionGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResult));
@@ -139,7 +160,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 return methodResult;
             });
 
-            await UpdateFinalTestResultAsync(finalTestResult, cancellationToken);
+            await UpdateFinalTestResultAsync(finalTestResult, student, cancellationToken);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = finalTestResult.Status == EnumResultStatus.Done;
             methodResult.Result = sectionGroupResultDto;
@@ -147,65 +168,67 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task UpdateFinalTestResultAsync(FinalTestResult finalTestResult, CancellationToken cancellationToken)
+        private async Task UpdateFinalTestResultAsync(FinalTestResult finalTestResult, StudentModel student, CancellationToken cancellationToken)
         {
             var numberOfDone = 3;
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.FinalTestResultId == finalTestResult.Id).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                finalTestResult = await GetFinalTestResult(sectionGroupResults, finalTestResult);
-                await UpdateUserToken(finalTestResult).ConfigureAwait(false);
+                (finalTestResult, var tokenConfigId) = await GetFinalTestResult(sectionGroupResults, finalTestResult);
+
+                var token = finalTestResult.TokenFirstTime ?? default;
+                if (token > 0)
+                {
+                    var tokenHistorys = new List<TokenHistoryQueueModel>
+                    {
+                        new TokenHistoryQueueModel
+                        {
+                            ObjectId = finalTestResult.Id,
+                            VolatileToken = token,
+                            Type = EnumTokenHistoryType.Recevived,
+                            Feature = EnumTokenFeature.Test,
+                            Mission = EnumTokenMission.FinalTest,
+                            UserId = student.Human?.UserId ?? default,
+                        }
+                    };
+                    await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
+                }
+
                 _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private async Task<FinalTestResult> GetTokenFinalTestResult(FinalTestResult finalTestResult)
+        private async Task<(Guid, long)> GetTokenConfig()
         {
-            var misstions = new List<string> { nameof(EnumTokenMission.HighestStreak), nameof(EnumTokenMission.TestDone), nameof(EnumTokenMission.SuperFire) };
-            var tokenConfigResults = await _systemService.GetTokenConfigsAsync(new GetTokenConfigsQueryModel
+            var getTokenQuery = new GetTokenQueryModel
             {
-                Feature = EnumTokenFeature.FinalTest,
-                Missions = string.Join(",", misstions)
-            });
-            var isSuperFireModeResult = await _userService.CheckSuperFireModeAsync();
-            if (!tokenConfigResults.IsSuccessStatusCode || !isSuperFireModeResult.IsSuccessStatusCode)
+                Feature = EnumTokenFeature.Test,
+                Mission = EnumTokenMission.FinalTest,
+                CourseType = EnumCourseType.Academic
+            };
+            var tokenConfigResults = await _systemService.GetTokenConfigAsync(getTokenQuery);
+            if (!tokenConfigResults.IsSuccessStatusCode)
             {
-                return finalTestResult;
+                return default;
             }
-            var tokenConfigs = tokenConfigResults.Content?.Result;
-            var isSuperFireMode = isSuperFireModeResult.Content?.Result ?? default;
-            var configDone = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.TestDone).GetTokenNumber<TokenNumber>(isSuperFireMode);
-            var configHighestStreak = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.HighestStreak).GetTokenNumber<TokenNumber>(isSuperFireMode);
-            var configSuperFire = tokenConfigs?.FirstOrDefault(x => x.Mission == EnumTokenMission.SuperFire).GetTokenNumber<TokenNumber>(isSuperFireMode);
-
-            finalTestResult.TokenDone = configDone?.Number;
-            finalTestResult.TokenHighestStreak = configHighestStreak?.Number * finalTestResult.HighestStreak;
-            finalTestResult.TokenSuperFire = configSuperFire?.Number;
-            return finalTestResult;
+            var tokenConfig = tokenConfigResults?.Content?.Result;
+            return (tokenConfig?.Id ?? default, tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
         }
 
-        private async Task UpdateUserToken(FinalTestResult finalTestResult)
+        private async Task<(FinalTestResult, Guid)> GetFinalTestResult(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult)
         {
-            var tokens = new List<int?> { finalTestResult.TokenDone, finalTestResult.TokenHighestStreak, finalTestResult.TokenQuestionReward, finalTestResult.TokenSuperFire };
-            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-            {
-                NumberOfToken = tokens.Where(x => x.HasValue).Sum(x => x!.Value),
-                StudentId = finalTestResult.StudentId,
-            }).ConfigureAwait(false);
-        }
+            var skillScores = sectionGroupResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
+            var (tokenConfigId, token) = await GetTokenConfig();
 
-        private async Task<FinalTestResult> GetFinalTestResult(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult)
-        {
-            var skillScores = sectionGroupResults.SelectMany(x => x.SkillScores!).ToList();
             finalTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
             finalTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
             finalTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             finalTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             finalTestResult.Status = EnumResultStatus.Done;
             finalTestResult.SkillScores = skillScores;
-            finalTestResult = await GetTokenFinalTestResult(finalTestResult);
-            return finalTestResult;
+            finalTestResult.TokenFirstTime = (int)(token * finalTestResult.CorrectCount);
+            return (finalTestResult, tokenConfigId);
         }
 
         private async Task<MethodResult<IList<FinalTestAnswer>>> CreateAnswerAsync(CreateFinalTestAnswerBySectionGroupCommand request, SectionGroupResult sectionGroupResult)

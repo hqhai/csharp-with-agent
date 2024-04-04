@@ -4,12 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Interaction.Domain.Entities
 {
-    public class SurveyQuestion : Entity
+    public class SurveyQuestion : Entity, IMultiLingualObject<SurveyQuestionTranslation>
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -22,6 +23,8 @@ namespace Fsel.Interaction.Domain.Entities
         public string? Icon { get; set; }
 
         public float DisplayOrder { get; set; }
+
+        public bool? IsPilot { get; set; }
 
         public int DisplayLevel { get; set; }
 
@@ -37,7 +40,33 @@ namespace Fsel.Interaction.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
-        public bool IsPilot { get; set; }
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();
+
+        public ICollection<SurveyQuestionTranslation> Translations { get; set; } = new List<SurveyQuestionTranslation>();
+    }
+
+    public class SurveyQuestionTranslation : Entity, ITranslationObject
+    {
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Question { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Description { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? AnswerStr { get; set; }
+
+        [NotMapped]
+        public object? Answers
+        {
+            get { return ConvertHelper.Deserialize<object>(AnswerStr); }
+            set { AnswerStr = ConvertHelper.Serialize(value); }
+        }
+
+        public Guid SurveyQuestionId { get; set; }
+        public SurveyQuestion? SurveyQuestion { get; set; }
+
+        public string? Language { get; set; }
     }
 }

@@ -38,7 +38,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .AnyAsync(x => x.Id == id && x.CourseUnitMockTests.Count > 0);
         }
 
-        public override async Task<EntityCourse?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<EntityCourse?> GetIncludeByIdAsync(Guid id)
         {
             try
             {
@@ -76,15 +76,16 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<EntityCourse?> GetIncludeCourseUnitMockTestByIdAsync(Guid id)
+        public async Task<EntityCourse?> GetIncludeCourseUnitMockTestByIdAsync(Guid id, Guid? studentId)
         {
             try
             {
                 return await Queryable.Include(x => x.CourseUnitMockTests)
-                                                  .Include(x => x.UnitResults)
-                                                  .Include(x => x.MockTestResults)
-                                                  .Include(x => x.FinalTestResults)
-                                                  .FirstOrDefaultAsync(x => x.Id == id);
+                                        .Include(x => x.CourseResults.Where(x => x.CourseId == id && x.StudentId == studentId))
+                                        .Include(x => x.UnitResults.Where(x => x.CourseId == id && x.StudentId == studentId))
+                                        .Include(x => x.MockTestResults.Where(x => x.CourseId == id && x.StudentId == studentId))
+                                        .Include(x => x.FinalTestResults.Where(x => x.CourseId == id && x.StudentId == studentId))
+                                        .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {
@@ -168,7 +169,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                                  .Where(y => y.StudentId == studentId && y.CourseId == x.CourseId)
                                                                  .AsNoTracking().FirstOrDefault()),
                                  } : null,
-                                 Type = x.FinalTest != null ? nameof(x.FinalTest) : x.MockTest != null ? nameof(x.MockTest) : x.Unit != null ? nameof(x.Unit) : null
                              }).ToList()
                          })
                          .FirstOrDefaultAsync();
@@ -226,7 +226,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                 var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
                 counts.Add(lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).Count());
                 counts.Add(lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && (x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.PendingForGrading) && lessonResultIds.Contains(x.LessonResultId)).Count());
-                counts.Add(lessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).GroupBy(x => x.LessonResultId).Count());
+                counts.Add(lessonResults.Select(x =>
+                {
+                    return x.HomeWorkResults.Any() && x.HomeWorkResults.All(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == courseResult.StudentId) ? 1 : 0;
+                }).Sum());
             }
             if (courseResult.CourseType == EnumCourseType.Academic)
             {

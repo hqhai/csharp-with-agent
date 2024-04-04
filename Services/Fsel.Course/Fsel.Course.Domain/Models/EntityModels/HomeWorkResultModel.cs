@@ -2,9 +2,15 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class HomeWorkResultModel : BaseScoreResultModel
+    using Fsel.Course.Domain.IEntities;
+    using Fsel.Shared.Enums;
+
+    public class HomeWorkResultModel : BaseScoreResultModel, ITokenResult
     {
         public Guid HomeWorkId { get; set; }
         public Guid LessonResultId { get; set; }
+        public EnumSubmissionCount SubmissionCount { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
     }
 }

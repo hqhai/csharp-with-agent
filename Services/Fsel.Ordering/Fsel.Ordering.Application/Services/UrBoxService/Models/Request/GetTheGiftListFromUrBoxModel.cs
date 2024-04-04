@@ -13,5 +13,8 @@ namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Request
 
         [AliasAs("cat_id")]
         public int? CatId { get; set; }
+
+        [AliasAs("lang")]
+        public string? Language { get; set; }
     }
 }

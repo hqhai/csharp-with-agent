@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
+namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 {
     using System.Threading;
     using AutoMapper;
@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.V1i1.LessonQuery
                 {
                     lessonDto.IsClassForumLock = false;
                 }
-                if (classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft)
+                if (lessonResult.HomeWorkResults.Any(x => x.Status != EnumResultStatus.Unfinished) || (classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft))
                 {
                     lessonDto.IsHomeWorkLock = false;
                 }

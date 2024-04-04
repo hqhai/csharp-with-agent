@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Course.Application.Services.SystemServices;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
@@ -70,6 +71,8 @@ builder.Services.AddScoped<IFinalTestAnswerRepository, FinalTestAnswerRepository
 builder.Services.AddScoped<IFinalTestResultRepository, FinalTestResultRepository>();
 builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultRepository>();
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
+builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
+builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -85,6 +88,7 @@ builder.Services.AddScoped<SectionGroupManagerConverter>();
 builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
+builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 
 var app = builder.Build();
 

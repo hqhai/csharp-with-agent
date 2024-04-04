@@ -21,12 +21,15 @@ namespace Fsel.System.Infrastructure.ValueSettings
     public class GoogleSheetConfig
     {
         public string? I18NSpreadSheetId { get; set; }
+        public string? I18NSheetVN { get; set; }
+        public string? I18NSheetEN { get; set; }
     }
 
     public class Services : BaseServices
     {
         public string? LmsCourseApiUrl { get; set; }
         public string? OrderApiUrl { get; set; }
+        public string? DictionaryApiUrl { get; set; }
     }
 
     public class Otp

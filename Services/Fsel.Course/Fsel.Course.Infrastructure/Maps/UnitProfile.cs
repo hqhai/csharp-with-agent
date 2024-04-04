@@ -16,8 +16,16 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<CreateUnitCommandModel, Unit>().IgnoreAllNonExisting();
             CreateMap<UpdateUnitCommandModel, Unit>().IgnoreAllNonExisting();
-            CreateMap<UnitResult, UnitResultModel>().ForMember(x => x.ProgressPercent, p => p.MapFrom(x => x.Unit != null ? NumberHelper.GetPercent(x.Unit.LessonResults.Where(y => y.Status == EnumResultStatus.Done).Count(), x.Unit.UnitLessons.Count) : default));
+            CreateMap<UnitResult, UnitResultModel>().ForMember(x => x.ProgressPercent, p => p.MapFrom(x =>
+                x.Unit != null ?
+                    x.Unit.UnitSkillMockTests.Any() ?
+                    NumberHelper.GetPercent(x.Unit.LessonResults.Where(y => y.Status == EnumResultStatus.Done).Count() + x.Unit.UnitSkillMockTests.Select(x => x.MockTest).Where(x => x!.MockTestResults.Any()).SelectMany(x => x!.MockTestResults).Count(x => x.Status == EnumResultStatus.Done), x.Unit.UnitLessons.Count + x.Unit.UnitSkillMockTests.Count)
+                    : NumberHelper.GetPercent(x.Unit.LessonResults.Where(y => y.Status == EnumResultStatus.Done).Count(), x.Unit.UnitLessons.Count)
+                : default
+            ));
             CreateMap<Unit, UnitModel>().ForMember(x => x.IsActive, p => p.MapFrom(o => o.CourseUnitMockTests.Any()));
+
+            CreateMap<UnitResult, CourseUnitMockTestResultModel>().IgnoreAllNonExisting();
         }
     }
 }

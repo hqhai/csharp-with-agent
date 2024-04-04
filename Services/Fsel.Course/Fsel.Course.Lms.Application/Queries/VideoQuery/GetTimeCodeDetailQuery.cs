@@ -4,10 +4,15 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 {
     using System;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -71,6 +76,13 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
+            var validateMethod = await Validate(request, videoResult, cancellationToken);
+            if (videoResult.CurrentVideoTimeCodeId != request.VideoTimeCodeId && !validateMethod.IsOK)
+            {
+                methodResult.AddErrorBadRequest(validateMethod.ErrorMessages);
+                return methodResult;
+            }
+
             var videoTimeCode = await _videoTimeCodeRepository.Queryable
                                     .Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                     .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
@@ -97,6 +109,70 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             methodResult.Result = videoTimeCodeModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<VoidMethodResult> Validate(GetTimeCodeDetailQuery request, VideoResult videoResult, CancellationToken cancellationToken)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+
+            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.VideoId == request.VideoId).OrderBy(x => x.DisplayTime).ToListAsync(cancellationToken);
+
+            var videoTimeCodeRequest = videoTimeCodes.FirstOrDefault(x => x.Id == request.VideoTimeCodeId);
+            if (videoTimeCodeRequest == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeRequest));
+                return methodResult;
+            }
+
+            var (isErrorCode, displayTimeCodes) = GetVideoTimeCode(videoTimeCodes, videoTimeCodeRequest);
+            if (isErrorCode)
+            {
+                methodResult.AddErrorBadRequest(new List<ErrorResult>
+                    {
+                        new ErrorResult
+                          {
+                            ErrorCode = nameof(EnumVideoResultErrorCode.VideoTimeCodeNotCompleted),
+                            Errors = new List<Error>
+                            {
+                                new Error
+                                {
+                                    FieldName = nameof(videoTimeCodes),
+                                    ErrorValues = displayTimeCodes.Select(x=> new
+                                    {
+                                        DisplayOrder = x.Item1,
+                                        VideoTimeCodeId = x.Item2
+                                    }).Deserialize<IList<object>>()
+                                }
+                            }
+                          }
+                    });
+                return methodResult;
+            }
+
+            return methodResult;
+        }
+
+        private static (bool, IList<(int, Guid)>) GetVideoTimeCode(IList<VideoTimeCode>? videoTimeCodes, VideoTimeCode videoTimeCodeRequest)
+        {
+            var displayTimeCodes = new List<(int, Guid)>();
+            if (videoTimeCodes != null)
+            {
+                var videoTimeCodePrevios = videoTimeCodes.Where(x => videoTimeCodes.IndexOf(x) < videoTimeCodes.IndexOf(videoTimeCodeRequest)).ToList();
+
+                if (videoTimeCodePrevios != null && videoTimeCodePrevios.Any())
+                {
+                    foreach (var videoTimeCode in videoTimeCodePrevios)
+                    {
+                        var videoTimeCodeResult = videoTimeCode.VideoTimeCodeResults.FirstOrDefault();
+                        if (videoTimeCodeResult == null || videoTimeCodeResult.Status != EnumResultStatus.Done)
+                        {
+                            displayTimeCodes.Add((videoTimeCodes.IndexOf(videoTimeCode) + 1, videoTimeCode.Id));
+                        }
+                    }
+                }
+            }
+
+            return (displayTimeCodes.Any(), displayTimeCodes);
         }
     }
 }

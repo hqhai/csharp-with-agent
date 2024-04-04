@@ -10,18 +10,18 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
 
     public class VideoResultInputThenUpdateLessonResultHandler : BaseInternalLessonResultEventHandler,
         INotificationHandler<EntityChangedEvent<VideoResult>>
     {
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public VideoResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher) : base(lessonResultRepository, systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher)
+        public VideoResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository, ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService) : base(lessonResultRepository, systemService, appSetting, courseUnitMockTestRepository, mediator, userService, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService)
         {
             _lessonResultRepository = lessonResultRepository;
         }
@@ -29,8 +29,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         public async Task Handle(EntityChangedEvent<VideoResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
+            Thread.Sleep(1000);
             var videoResult = notification.Data;
-            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == videoResult.LessonResultId, cancellationToken);
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(videoResult.LessonResultId);
             if (lessonResult != null && videoResult.Status == EnumResultStatus.Done)
             {
                 var skillScores = videoResult.VideoSkillScores?.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;

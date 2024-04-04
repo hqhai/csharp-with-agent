@@ -9,6 +9,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Interaction.Application.Commands.AuthCmd;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
+    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
     using Fsel.Interaction.Domain.Models.EntityModels;
@@ -17,6 +18,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateCustomerSurveyCommand : CreateCustomerSurveyCommandModel, IRequest<MethodResult<IList<CustomerSurveyModel>>>
     {
@@ -49,12 +51,12 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             #region Old logic
 
-            /* var count = await _surveyQuestionRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
-             if (request.Answers.Count < count)
-             {
-                 methodResult.AddErrorBadRequest(nameof(EnumCustomerSurveyErrorCode.NotEnoughQuestions));
-                 return methodResult;
-             }*/
+            //var count = await _surveyQuestionRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
+            //if (request.Answers.Count < count)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumCustomerSurveyErrorCode.NotEnoughQuestions));
+            //    return methodResult;
+            //}
 
             #endregion Old logic
 
@@ -93,20 +95,24 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 await _customerSurveyRepository.AddList(customerSurveys);
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var parentName = request.Answers.Where(x => x.Id == Guid.Parse("ee0e74f5-83ae-44dd-a7d0-0f7b650884f8")).FirstOrDefault();
+                #region Send email Survey Pilot
 
-                var paramSurvey = new SendSurveyTemplateModel
-                {
-                    UserName = parentName?.Answer?.ToString()
-                };
+                //var parentName = request.Answers.Where(x => x.Id == Guid.Parse("ee0e74f5-83ae-44dd-a7d0-0f7b650884f8")).FirstOrDefault();
 
-                var subjectSurvey = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendSurveyResultSubject);
-                var sendSurveyResult = new MethodResult<bool>();
+                //var paramSurvey = new SendSurveyTemplateModel
+                //{
+                //    UserName = parentName?.Answer?.ToString()
+                //};
 
-                if (!string.IsNullOrEmpty(request.Email))
-                {
-                    sendSurveyResult = await _mediator.Send(new SenderCommand { Email = request.Email, Subject = subjectSurvey, Params = paramSurvey, Template = EnumSenderTemplate.SendSurveyToParentStudent }, cancellationToken).ConfigureAwait(false);
-                }
+                //var subjectSurvey = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendSurveyResultSubject);
+                //var sendSurveyResult = new MethodResult<bool>();
+
+                //if (!string.IsNullOrEmpty(request.Email))
+                //{
+                //    sendSurveyResult = await _mediator.Send(new SenderCommand { Email = request.Email, Subject = subjectSurvey, Params = paramSurvey, Template = EnumSenderTemplate.SendSurveyToParentStudent }, cancellationToken).ConfigureAwait(false);
+                //}
+
+                #endregion
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<IList<CustomerSurveyModel>>(customerSurveys);

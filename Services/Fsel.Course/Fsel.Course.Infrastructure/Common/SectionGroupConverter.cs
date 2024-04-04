@@ -16,6 +16,7 @@ namespace Fsel.Course.Infrastructure.Common
     public class SectionGroupConverter
     {
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
@@ -30,9 +31,10 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Clean Code
 
-        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, AnswerTypeConverter answerTypeConverter, ISectionQuestionRepository sectionQuestionRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
+        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, IStudentFeedbackRepository studentFeedbackRepository, AnswerTypeConverter answerTypeConverter, ISectionQuestionRepository sectionQuestionRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
         {
             _sectionGroupResultRepository = sectionGroupResultRepository;
+            _studentFeedbackRepository = studentFeedbackRepository;
             _answerTypeConverter = answerTypeConverter;
             _sectionQuestionRepository = sectionQuestionRepository;
             _questionTypeConverter = questionTypeConverter;
@@ -46,11 +48,12 @@ namespace Fsel.Course.Infrastructure.Common
             _mockTestAnswerRepository = mockTestAnswerRepository;
         }
 
-        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult)
+        public async Task<int> GetHighestStreak(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
         {
+            ArgumentNullException.ThrowIfNull(sectionGroup);
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             var isHighestStreaks = new List<bool>();
-            if (sectionGroupResult.MockTestResultId.HasValue)
+            if (sectionGroupResult.MockTestResultId.HasValue && sectionGroup.CourseSkill != EnumCourseSkill.Writing && sectionGroup.CourseSkill != EnumCourseSkill.Speaking)
             {
                 isHighestStreaks = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                     .Include(x => x.SectionQuestion)
@@ -75,15 +78,18 @@ namespace Fsel.Course.Infrastructure.Common
             sectionGroupResult.CorrectCount = (int)skillScore.CorrectCount;
             sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
             sectionGroupResult.Status = EnumResultStatus.Done;
-            sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult);
-            sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroupResult.CreatedDate, DateTime.UtcNow, sectionGroup.ExecutionTime);
-            if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
+            sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult, sectionGroup);
+            sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroup.ExecutionTime, sectionGroupResult.CreatedDate);
+            if (sectionGroup.CourseSkill != EnumCourseSkill.Writing)
             {
-                sectionGroupResult.SkillScores.Add(skillScore);
-            }
-            else
-            {
-                sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
+                if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
+                {
+                    sectionGroupResult.SkillScores.Add(skillScore);
+                }
+                else
+                {
+                    sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
+                }
             }
             _sectionGroupResultRepository.Update(sectionGroupResult);
             await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
@@ -422,10 +428,12 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Code Chưa Clearn
 
-        private SectionGroupResultModel GetSectionGroupResult(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
+        private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
         {
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
-            sectionGroupResultDto.RemainingTime = sectionGroup.ExecutionTime - sectionGroupResult.WorkingTime;
+            var remainingTime = sectionGroup.ExecutionTime - sectionGroupResult.WorkingTime;
+            sectionGroupResultDto.IsFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == sectionGroupResult.Id);
+            sectionGroupResultDto.RemainingTime = remainingTime > 0 ? remainingTime : default;
             return sectionGroupResultDto;
         }
 
@@ -437,7 +445,7 @@ namespace Fsel.Course.Infrastructure.Common
             var isSectionGroupResultDone = sectionGroupResult.Status == EnumResultStatus.Done;
             var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
             sectonGroupDetail.TotalQuestion = totalCount;
-            sectonGroupDetail.SectionGroupResult = GetSectionGroupResult(sectionGroupResult, sectionGroup);
+            sectonGroupDetail.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult, sectionGroup);
             if (sectionGroupResult.MockTestResultId.HasValue)
             {
                 sectonGroupDetail.Sections = sections.Select(x => GetSectionByMockTest(x, sectionGroup.CourseSkill, isSectionGroupResultDone)).ToList();
@@ -470,7 +478,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (skill == EnumCourseSkill.Speaking)
             {
-                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => GetSectionTimeCodeDto(x)).ToList();
+                sectionDetail.SectionTimeCodes = section.SectionTimeCodes.Select(x => GetSectionTimeCodeDto(x)).OrderBy(x => x.DisplayTime).ToList();
             }
             return sectionDetail;
         }
@@ -607,12 +615,19 @@ namespace Fsel.Course.Infrastructure.Common
             return questionDto;
         }
 
-        public bool IsTeacherGraded(MockTestResult mockTestResult)
+        public async Task<bool> IsTeacherGraded(MockTestResult mockTestResult, IList<EnumCourseSkill>? courseSkills)
         {
-            var sectionGroups = mockTestResult.MockTest?.MockTestSections.Select(x => x.SectionGroup).Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing);
-            if (sectionGroups != null && sectionGroups.Any())
+            ArgumentNullException.ThrowIfNull(mockTestResult);
+            var isTeacherGradedSkill = courseSkills?.Any(x => x == EnumCourseSkill.Speaking);
+            var isAIGraded = courseSkills?.Any(x => x == EnumCourseSkill.Writing);
+            if (isTeacherGradedSkill.HasValue && isTeacherGradedSkill.Value)
             {
-                return sectionGroups.Any() && sectionGroups.SelectMany(x => x!.MockTestScores).Any();
+                return mockTestResult.MockTestScores.Any();
+            }
+            if (isAIGraded.HasValue && isAIGraded.Value)
+            {
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id).ToListAsync();
+                return mockTestAnswers.All(x => !string.IsNullOrEmpty(x.GradingAlFeedback));
             }
             return true;
         }

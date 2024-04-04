@@ -7,6 +7,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
 
     public class QuestionConverter
     {
@@ -30,12 +31,12 @@ namespace Fsel.Course.Infrastructure.Common
             var (answerConfig, correctCount, isAnswerMissing, isAnswered) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, oldAnswer, question, isTryAgain, isSubmit, isMandatoryAnswer);
             if (answerConfig == null && !string.IsNullOrEmpty(answer?.ToString()))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
+                methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
                 return methodResult;
             }
             if (isMandatoryAnswer && isAnswerMissing)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.QuestionNotCompleted), nameof(question), new object[] { question.Id });
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCompleted), nameof(question), new object[] { question.Id });
                 return methodResult;
             }
             methodResult.Result = (question, answerConfig, correctCount, isAnswered);
@@ -46,7 +47,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(question);
             var methodResult = new MethodResult<Question>();
-            var isShowCorrectTotal = (isUseTypeExercisePreparation || question.QuestionType != EnumQuestionType.ExercisePreparation) && !question.Ungraded;
+            var isShowCorrectTotal = (isUseTypeExercisePreparation || question.QuestionType != EnumQuestionType.ExercisePreparation);
             (question.Config, question.CorrectTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal);
             if (question.Config == null)
             {

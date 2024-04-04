@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -34,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly QuestionConverter _questionConverter;
         private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly SubmitMockTestAnswerPublisher _submitMockTestAnswerPublisher;
         private readonly IMapper _mapper;
 
         public CreateMockTestAnswerCommandHandler(IQuestionRepository questionRepository
@@ -43,7 +45,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , QuestionConverter questionConverter
             , ISectionTimeCodeRepository sectionTimeCodeRepository
             , ISectionGroupRepository sectionGroupRepository
-            , IMapper mapper)
+            , IMapper mapper
+            , SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher)
         {
             _questionRepository = questionRepository;
             _mockTestAnswerRepository = mockTestAnswerRepository;
@@ -53,6 +56,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
+            _submitMockTestAnswerPublisher = submitMockTestAnswerPublisher;
         }
 
         public async Task<MethodResult<MockTestResultModel>> Handle(CreateMockTestAnswerCommand request, CancellationToken cancellationToken)
@@ -215,6 +219,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
 
                 _mockTestResultRepository.Update(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
                 return methodResult;

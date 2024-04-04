@@ -56,5 +56,33 @@ namespace Fsel.Shared.Helpers
                 return null;
             }
         }
+
+        public static string SecureHash(string input)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(input);
+            byte[] hashBytes = SHA512.HashData(bytes);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (byte b in hashBytes)
+            {
+                stringBuilder.Append(b.ToString("x2", CultureInfo.CurrentCulture));
+            }
+
+            return stringBuilder.ToString();
+        }
+
+        public static string GenerateChecksum(string checksumKey, string data)
+        {
+            string checksumData = checksumKey + data;
+            byte[] dataBytes = Encoding.UTF8.GetBytes(checksumData);
+            byte[] hashValue = SHA512.HashData(dataBytes);
+            StringBuilder builder = new StringBuilder();
+            foreach (byte b in hashValue)
+            {
+                builder.Append(b.ToString("x2", CultureInfo.InvariantCulture));
+            }
+
+            return builder.ToString();
+        }
     }
 }

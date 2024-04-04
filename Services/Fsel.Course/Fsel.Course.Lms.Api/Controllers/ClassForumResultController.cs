@@ -18,7 +18,8 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
     [Permission]
@@ -26,12 +27,12 @@ namespace Fsel.Course.Lms.Api.Controllers
     {
         private readonly IMediator _mediator;
         private readonly IClassForumResultRepository _classForumResultRepository;
+
         public ClassForumResultController(IMediator mediator, IClassForumResultRepository classForumResultRepository)
         {
             _mediator = mediator;
             _classForumResultRepository = classForumResultRepository;
         }
-
 
         /// <summary>
         /// Execute-list-query
@@ -107,6 +108,30 @@ namespace Fsel.Course.Lms.Api.Controllers
             command.Id = id;
             MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student class forum result
+        /// </summary>
+        [HttpGet("get-current-class-forum")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumByStudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCurrentClassForum([FromQuery] GetCurrentClassForumQuery query)
+        {
+            MethodResult<ClassForumByStudentModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search class forum result
+        /// </summary>
+        [HttpGet("get-relevant-class-forums")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchRelevantClassForums([FromQuery] SearchRelevantClassForumsQuery query)
+        {
+            MethodResult<PagingItemsModel<ClassForumResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

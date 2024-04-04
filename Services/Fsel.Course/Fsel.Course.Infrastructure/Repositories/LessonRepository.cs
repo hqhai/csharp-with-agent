@@ -11,11 +11,16 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class LessonRepository : BaseRepository<Lesson>, ILessonRepository
     {
-        public LessonRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IClassForumRepository _classForumRepository;
+
+        public LessonRepository(CourseDbContext dbContext, ILessonResultRepository lessonResultRepository, IClassForumRepository classForumRepository, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
+            _lessonResultRepository = lessonResultRepository;
+            _classForumRepository = classForumRepository;
         }
 
-        public async Task<Lesson?> GetIncludeByIdNoTrackingAsync(Guid id, int? siteId = null)
+        public async Task<Lesson?> GetIncludeByIdNoTrackingAsync(Guid id)
         {
             try
             {
@@ -36,53 +41,53 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<double> GetPercentHomeWork(Guid unitId, Guid? studentId)
+        public async Task<double> GetPercentHomeWork(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessons = await Queryable.Include(x => x.LessonResults.Where(x => x.UnitId == unitId && x.StudentId == studentId))
-                                    .ThenInclude(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
-                                 .Include(x => x.LessonHomeWorks)
-                                 .Include(x => x.UnitLessons)
-                                 .Where(x => x.UnitLessons.Any(x => x.UnitId == unitId)).ToListAsync();
+            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResult).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
+            var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
+
+            var lessons = await Queryable.Include(x => x.LessonResults.Where(x => lessonResultIds.Contains(x.Id)))
+                                    .ThenInclude(x => x.HomeWorkResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
+                                    .Include(x => x.LessonHomeWorks)
+                                    .Where(x => lessonIds.Contains(x.Id)).ToListAsync();
 
             var listDones = lessons.Select(x => new
             {
-                CountDone = x.LessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x.Status == EnumResultStatus.Done).Count(),
+                CountDone = x.LessonResults.Where(x => lessonResultIds.Contains(x.Id)).SelectMany(x => x.HomeWorkResults).Where(x => x.Status == EnumResultStatus.Done).Count(),
                 TotalDone = x.LessonHomeWorks.Count
             }).ToList();
             return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
         }
 
-        public async Task<double> GetPercentClassForum(Guid unitId, Guid? studentId)
+        public async Task<double> GetPercentClassForum(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessons = await Queryable.Include(x => x.LessonResults.Where(x => x.UnitId == unitId && x.StudentId == studentId))
-                                   .ThenInclude(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                .Include(x => x.ClassForum)
-                                .Include(x => x.UnitLessons)
-                                .Where(x => x.UnitLessons.Any(x => x.UnitId == unitId)).ToListAsync();
+            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResult).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
+            var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
 
-            var listDones = lessons.Select(x => new
+            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId))).Where(x => lessonIds.Contains(x.LessonId)).ToListAsync();
+
+            var listDones = classForums.Select(x => new
             {
-                CountDone = x.LessonResults.SelectMany(x => x.ClassForumResults).Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded).Count(),
+                CountDone = x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)).Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded).Count(),
                 TotalDone = 1
             }).ToList();
             return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
         }
 
-        public async Task<double> GetPercentLesson(Guid unitId, Guid? studentId)
+        public async Task<double> GetPercentLesson(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessons = await Queryable.Include(x => x.UnitLessons)
-                                 .Include(x => x.LessonResults.Where(x => x.UnitId == unitId && x.StudentId == studentId))
-                                 .Where(x => x.UnitLessons.Any(x => x.UnitId == unitId)).ToListAsync();
-
-            var listDones = lessons.Select(x => new
+            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var listDones = lessonResults.Select(x => new
             {
-                CountDone = x.LessonResults.Where(x => x.Status == EnumResultStatus.Done).Count(),
+                CountDone = x.Status == EnumResultStatus.Done ? 1 : default,
                 TotalDone = 1
             }).ToList();
             return NumberHelper.GetPercent(listDones.Sum(x => x.CountDone), listDones.Sum(x => x.TotalDone));
         }
 
-        public override async Task<Lesson?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public override async Task<Lesson?> GetIncludeByIdAsync(Guid id)
         {
             try
             {

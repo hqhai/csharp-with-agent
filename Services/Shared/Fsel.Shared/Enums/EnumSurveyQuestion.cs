@@ -14,5 +14,6 @@ namespace Fsel.Shared.Enums
         MultipleChoiceHorizontal,
         CheckList,
         YearInput,
+        Location
     }
 }

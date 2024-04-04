@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.OrderServices;
-    using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -56,22 +55,32 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             }
             var student = studentResult?.Content?.Result;
             int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
+
             if (student != null)
             {
+                settingStudentModel.NumberOfToken = student.NumberOfToken;
                 var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
-                                                                               .ToListAsync(cancellationToken);
-                var placementTestResult = placementTestResults.OrderByDescending(x => x.CreatedDate).FirstOrDefault();
-                var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent, age) ?? (null, default);
+                                                                              .OrderByDescending(x => x.CreatedDate)
+                                                                              .ToListAsync(cancellationToken);
+
+                var placementTestResultLast = placementTestResults.FirstOrDefault();
+
+                var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id)
+                                                                               .OrderBy(x => x.CreatedDate)
+                                                                               .FirstOrDefaultAsync(cancellationToken);
+
+                var (levelNext, isLock) = placementTestResultLast?.Level.GetLevelInScore(placementTestResultLast.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age)) ?? (null, default);
 
                 settingStudentModel.BeginnerGuide = student.BeginnerGuide;
                 settingStudentModel.ModuleNumber = placementTestResults.Count + 1;
                 settingStudentModel.Level = student.CourseLevel;
-                settingStudentModel.IsPlacementTest = placementTestResult != null;
-                settingStudentModel.ClassId = student.ClassId ?? null;
-                settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
+                settingStudentModel.IsPlacementTest = placementTestResultLast != null;
+                settingStudentModel.ClassId = student.ClassId;
+                settingStudentModel.PTLevel = placementTestResultLast?.Level;
                 settingStudentModel.IsLockPT = isLock;
-                settingStudentModel.StartPTLevel = placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault() == null ? student.CourseLevel : placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault()?.Level.GetCourseLevelByPlacementTestLevel();
-                var status = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel());
+                settingStudentModel.StartPTLevel = placementTestResultInitial == null ? student.CourseLevel : placementTestResultInitial.Level.GetCourseLevelByPlacementTestLevel();
+
+                var status = await _orderService.GetCurrentStatusAsync(_authContext.CurrentUserId);
                 if (!status.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
@@ -91,14 +100,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                     methodResult.Result = settingStudentModel;
                     return methodResult;
                 }
-
-                status = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = _authContext.CurrentUserId });
-                if (!status.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
-                    return methodResult;
-                }
-                settingStudentModel.Status = status?.Content?.Result ?? default;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

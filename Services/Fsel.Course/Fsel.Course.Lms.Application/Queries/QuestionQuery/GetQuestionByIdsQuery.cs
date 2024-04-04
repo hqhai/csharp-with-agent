@@ -79,7 +79,9 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 return default;
             }
             var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions)
-                                        .ThenInclude(x => x.MockTestAnswers.Where(x => mockTestResult != null && x.MockTestResultId == mockTestResult.Id))
+                                            .ThenInclude(x => x.MockTestAnswers.Where(x => mockTestResult != null && x.MockTestResultId == mockTestResult.Id))
+                                        .Include(x => x.SectionQuestions)
+                                            .ThenInclude(x => x.SectionPart)
                                         .Where(x => request.ListQuestionIds.Contains(x.Id))
                                         .OrderBy(x => x.CreatedDate)
                                         .ToListAsync();
@@ -115,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.Section)
+            var questions = await _questionRepository.Queryable
                                 .Include(x => x.SectionQuestions)
                                 .ThenInclude(x => x.FinalTestAnswers.Where(x => finalTestResult != null && x.FinalTestResultId == finalTestResult.Id))
                                 .Where(x => request.ListQuestionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync();
@@ -134,7 +136,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            var questions = await _questionRepository.Queryable.Include(x => x.SectionQuestions).ThenInclude(x => x.Section)
+            var questions = await _questionRepository.Queryable
                                 .Include(x => x.SectionQuestions)
                                 .ThenInclude(x => x.PlacementTestAnswers.Where(x => placementTestResult != null && x.PlacementTestResultId == placementTestResult.Id))
                                 .Where(x => request.ListQuestionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync();
@@ -150,6 +152,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var questionModel = _mapper.Map<QuestionModel>(question);
             var isShowAnswer = status == EnumResultStatus.Done;
             questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
+            questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer));
             questionModel.SectionId = question.SectionQuestions.Any() ? question.SectionQuestions.Select(x => x.SectionId ?? x.SectionPart?.SectionId).FirstOrDefault() : default;
             if (answer != null)
             {
@@ -164,6 +167,21 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 questionModel.ResultAnswer = answerDto;
             }
             return questionModel;
+        }
+
+        private static EnumCorrectStatus? GetCorrectStatus(BaseAnswer? answer)
+        {
+            EnumCorrectStatus? status = null;
+            if (answer != null && answer.IsCorrect.HasValue)
+            {
+                status = EnumCorrectStatus.Process;
+                if (answer.Status == EnumAnswerStatus.Done)
+                {
+                    status = answer.IsCorrect.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
+                }
+            }
+
+            return status;
         }
     }
 }

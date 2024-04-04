@@ -9,10 +9,8 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.SystemService;
-    using Fsel.Interaction.Application.Services.SystemService.Models;
     using Fsel.Interaction.Application.Services.TrainingServices;
     using Fsel.Interaction.Application.Services.UserServices;
-    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.StudentReviews;
@@ -20,7 +18,6 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
-    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -102,23 +99,23 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
 
                 var studentReviewDetails = _mapper.Map<List<StudentReviewDetail>>(request.StudentReviewDetails);
 
-                var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
-                {
-                    Feature = EnumTokenFeature.ReviewSystem,
-                    Mission = request.ReviewType != EnumReviewType.Course ? EnumTokenMission.ReviewPlatform : EnumTokenMission.ReviewCourse
-                });
-                var tokenConfigResult = tokenConfig.Content?.Result;
+                //var tokenConfig = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+                //{
+                //    Feature = EnumTokenFeature.ReviewSystem,
+                //    Mission = request.ReviewType != EnumReviewType.Course ? EnumTokenMission.ReviewPlatform : EnumTokenMission.ReviewCourse
+                //});
+                //var tokenConfigResult = tokenConfig.Content?.Result;
 
-                var targetConfig = tokenConfigResult.GetTokenNumber<TokenNumber>();
-                var targetNumber = targetConfig?.Number;
-                if (targetNumber.HasValue)
-                {
-                    var userToken = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-                    {
-                        StudentId = studentId ?? default,
-                        NumberOfToken = targetNumber.Value,
-                    });
-                }
+                //var targetConfig = tokenConfigResult.GetTokenNumber<TokenNumber>();
+                //var targetNumber = targetConfig?.Number;
+                //if (targetNumber.HasValue)
+                //{
+                //    var userToken = await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
+                //    {
+                //        StudentId = studentId ?? default,
+                //        NumberOfToken = targetNumber.Value,
+                //    });
+                //}
 
                 foreach (var studentReviewDetail in studentReviewDetails)
                 {
