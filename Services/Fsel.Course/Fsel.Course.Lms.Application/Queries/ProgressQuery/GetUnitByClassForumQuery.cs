@@ -51,8 +51,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
                 .ThenInclude(x => x.Lesson)
-                .Include(x => x.CourseUnitMockTests)
-                .FirstOrDefaultAsync(x => x.Id == request.UnitId && x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId), cancellationToken);
+                .Include(x => x.CourseUnitMockTests.Where(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId))
+                .FirstOrDefaultAsync(x => x.Id == request.UnitId && x.CourseUnitMockTests.Any(), cancellationToken);
 
             if (unit == null)
             {
@@ -64,9 +64,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var classForumResultScores = new List<ClassForumResultScoreModel>();
             var classForums = await _classForumRepository.Queryable
                                             .Include(x => x.Lesson)
-                                            .ThenInclude(x => x.LessonResults.Where(x => x.StudentId == studentId))
+                                            .ThenInclude(x => x!.LessonResults.Where(x => x.StudentId == studentId))
                                             .Include(x => x.Lesson)
-                                            .ThenInclude(x => x.UnitLessons)
+                                            .ThenInclude(x => x!.UnitLessons)
                                             .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                             .ThenInclude(x => x.ClassForumScores)
                                             .Where(x => lessonIds.Contains(x.LessonId))
@@ -82,14 +82,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 Id = x.Id,
                 Name = x.Lesson?.Name,
                 CourseSkill = x.CourseSkill,
-                TotalCorrect = 36,
                 LessonId = x.LessonId,
                 GradingStyle = x.GradingStyle,
                 LessonResultId = x.Lesson?.LessonResults.FirstOrDefault(y => y.LessonId == x.LessonId && y.StudentId == studentId)?.Id,
                 ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
                 {
                     Id = x.Id,
-                    CorrectCount = x.ClassForumScores.Count > 0 ? x.ClassForumScores.Sum(x => x.Score) : default,
+                    CorrectCount = default,
                     TotalCorrect = 36,
                     Status = x.Status,
                 }).FirstOrDefault(),
