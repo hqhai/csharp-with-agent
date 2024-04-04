@@ -122,6 +122,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             if (classForumResult != null)
             {
                 var classForumDetailResults = await _classforumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult.Id).ToListAsync(cancellationToken);
+                if (classForumDetailResults.Count > 2)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
+                    return methodResult;
+                }
             }
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>

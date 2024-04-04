@@ -8,12 +8,13 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
-    public class ClassForumResult : Entity, ITokenResult, ISubmissionCount
+    public class ClassForumResult : Entity, ITokenResult
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
@@ -80,6 +81,46 @@ namespace Fsel.Course.Domain.Entities
         }
 
         public EnumSubmissionCount? SubmissionCount { get; set; }
+
+        /// <summary>
+        /// Số câu trả lời đúng của Student
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectCount { get; set; }
+
+        /// <summary>
+        /// Tổng số câu trả lời đúng
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectTotal { get; set; }
+
+        /// <summary>
+        /// Phần trăm câu trả lời đúng
+        /// </summary>
+        private double _percent;
+
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public virtual double Percent
+        {
+            get
+            {
+                return CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : _percent;
+            }
+            set { _percent = CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : value; }
+        }
+
+        public string? SkillScoresStr { get; set; }
+
+        [NotMapped]
+        public IList<SkillScores>? SkillScores
+        {
+            get
+            {
+                return Common.Helpers.ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr);
+            }
+            set { SkillScoresStr = Common.Helpers.ConvertHelper.Serialize(value); }
+        }
+
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();

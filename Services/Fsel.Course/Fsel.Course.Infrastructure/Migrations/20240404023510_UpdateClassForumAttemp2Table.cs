@@ -20,12 +20,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                 table: "ClassForumResults");
 
             migrationBuilder.DropColumn(
-                name: "RetryWordContent",
-                table: "ClassForumResults");
-
-            migrationBuilder.DropColumn(
                 name: "IsRetry",
                 table: "ClassForumResultFiles");
+
+            migrationBuilder.RenameColumn(
+                name: "RetryWordContent",
+                table: "ClassForumResults",
+                newName: "SkillScoresStr");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
@@ -36,6 +37,27 @@ namespace Fsel.Course.Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)",
                 oldMaxLength: 100);
+
+            migrationBuilder.AddColumn<int>(
+                name: "CorrectCount",
+                table: "ClassForumResults",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<int>(
+                name: "CorrectTotal",
+                table: "ClassForumResults",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<double>(
+                name: "Percent",
+                table: "ClassForumResults",
+                type: "float",
+                nullable: false,
+                defaultValue: 0.0);
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ClassForumResultId",
@@ -70,6 +92,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WordContent = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     WordCount = table.Column<int>(type: "int", nullable: true),
+                    SubmissionCount = table.Column<int>(type: "int", nullable: true),
                     GradingAlFeedback = table.Column<string>(type: "nvarchar(max)", maxLength: 10000, nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
                     ClassForumResultId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
@@ -119,8 +142,25 @@ namespace Fsel.Course.Infrastructure.Migrations
                 table: "ClassForumResultFiles");
 
             migrationBuilder.DropColumn(
+                name: "CorrectCount",
+                table: "ClassForumResults");
+
+            migrationBuilder.DropColumn(
+                name: "CorrectTotal",
+                table: "ClassForumResults");
+
+            migrationBuilder.DropColumn(
+                name: "Percent",
+                table: "ClassForumResults");
+
+            migrationBuilder.DropColumn(
                 name: "ClassForumDetailResultId",
                 table: "ClassForumResultFiles");
+
+            migrationBuilder.RenameColumn(
+                name: "SkillScoresStr",
+                table: "ClassForumResults",
+                newName: "RetryWordContent");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
@@ -142,12 +182,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             migrationBuilder.AddColumn<string>(
                 name: "RetryGradingAlFeedBack",
-                table: "ClassForumResults",
-                type: "nvarchar(max)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "RetryWordContent",
                 table: "ClassForumResults",
                 type: "nvarchar(max)",
                 nullable: true);

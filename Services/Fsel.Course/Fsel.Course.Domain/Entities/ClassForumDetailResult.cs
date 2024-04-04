@@ -9,10 +9,11 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
-    public class ClassForumDetailResult : Entity
+    public class ClassForumDetailResult : Entity, ISubmissionCount
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
@@ -40,6 +41,8 @@ namespace Fsel.Course.Domain.Entities
             get { return _mediaType.HasValue ? _mediaType : MediaHelper.GetMediaType(ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault()); }
             set { _mediaType = value; }
         }
+
+        public EnumSubmissionCount? SubmissionCount { get; set; }
 
         [NotMapped]
         public int? TimeCount
