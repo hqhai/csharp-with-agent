@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> UpdateModuleProcess([FromQuery] UpdateModuleProcessCommand command)
+        public async Task<IActionResult> UpdateModuleProcess([FromBody] UpdateModuleProcessCommand command)
         {
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
