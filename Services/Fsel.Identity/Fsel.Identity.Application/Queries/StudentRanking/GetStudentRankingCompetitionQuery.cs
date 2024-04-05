@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<StudentRankingModel>> methodResult = new MethodResult<PagingItemsModel<StudentRankingModel>>();
 
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IeltsStudentsName);
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
             if (_environment.IsProduction() && request.CourseType == EnumCourseType.Academic)
             {
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsName);
@@ -101,7 +101,8 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                              CompetitionEndDate = new DateTime(2024, 6, 15),
                              FullName = studentFile.FullName,
                              AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
-                             UserId = studentFile.UserId
+                             UserId = studentFile.UserId,
+                             RankingScore = Process_Ratio * studentResult?.ContentCompleted + Overall_Ratio * studentResult?.TotalScore
                          };
 
             result = result.OrderByDescending(x => (Process_Ratio * x.Process + Overall_Ratio * x.OverallScore));
