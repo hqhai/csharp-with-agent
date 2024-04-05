@@ -5,13 +5,10 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Models;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.OrderService;
-    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -33,9 +30,8 @@ namespace Fsel.Identity.Application.Queries.UserQuery
         private readonly ITrainingService _trainingService;
         private readonly IOrderService _orderService;
         private readonly ILmsCourseService _lmsCourseService;
-        private readonly ISystemService _systemService;
 
-        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager, ITrainingService trainingService, IOrderService orderService, ILmsCourseService lmsCourseService, ISystemService systemService)
+        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager, ITrainingService trainingService, IOrderService orderService, ILmsCourseService lmsCourseService)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -43,7 +39,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             _trainingService = trainingService;
             _orderService = orderService;
             _lmsCourseService = lmsCourseService;
-            _systemService = systemService;
         }
 
         public async Task<MethodResult<UserProfileModel>> Handle(GetUserProfileQuery request, CancellationToken cancellationToken)
@@ -155,21 +150,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             return methodResult;
                         }
                         userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == userModel.PackageId)?.Code;
-
-                        /*var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
-                        {
-                            Filters = new List<GenericFilterModel>
-                            {
-                                new GenericFilterModel
-                                {
-                                    Property = nameof(student.SchoolId),
-                                    Value = student.SchoolId,
-                                    Operator = Common.Enums.EnumFilterOperator.Equal
-                                }
-                            }
-                        });
-                        var school = schoolResult.Content?.Result;
-                        userModel.SchoolName = school?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;*/
                     }
                 }
             }

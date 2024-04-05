@@ -35,7 +35,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
             {
                 new Client
                 {
-                    ClientId = "app.angular",
+                    ClientId = "app.fsel.angular",
 
                     AllowedGrantTypes = GrantTypes.Code,
 
@@ -46,6 +46,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     AllowedScopes =
                     {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Email,
@@ -55,11 +56,19 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "api"
                     },
 
+                    RequireClientSecret = false,
+                    RequirePkce = true,
+                    RedirectUris = { "https://localhost:4400", "http://localhost:4400" },
+                    PostLogoutRedirectUris = { "https://localhost:4400", "http://localhost:4400" },
+
                     AllowOfflineAccess = true,
+                    RequireConsent = false,
+                    AllowAccessTokensViaBrowser = true,
+                    AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
                 {
-                    ClientId = "app.flutter",
+                    ClientId = "app.fsel.flutter",
                     AllowedGrantTypes = GrantTypes.Code,
 
                     ClientSecrets =
@@ -69,6 +78,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     AllowedScopes =
                     {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Email,
@@ -78,11 +88,51 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "api"
                     },
 
+                    RequireClientSecret = false,
+                    RequirePkce = true,
+                    RedirectUris = { "https://lms.fsel.edu.vn/login", "http://lms.fsel.edu.vn/login" },
+                    PostLogoutRedirectUris = { "https://lms.fsel.edu.vn/login", "http://lms.fsel.edu.vn/login" },
+
                     AllowOfflineAccess = true,
+                    RequireConsent = false,
+                    AllowAccessTokensViaBrowser = true,
+                    AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
                 {
-                    ClientId = "test.password",
+                    ClientId = "com.fsel.lmsapp.uat",
+                    AllowedGrantTypes = GrantTypes.Code,
+
+                    ClientSecrets =
+                    {
+                        new Secret("com.fsel.lmsapp.uat_secret".Sha256())
+                    },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Phone,
+                        IdentityServerConstants.StandardScopes.Address,
+                        "roles",
+                        "api"
+                    },
+
+                    RequireClientSecret = false,
+                    RequirePkce = true,
+                    RedirectUris = { "https://lms.fsel.edu.vn/login", "http://lms.fsel.edu.vn/login" },
+                    PostLogoutRedirectUris = { "https://lms.fsel.edu.vn/login", "http://lms.fsel.edu.vn/login" },
+
+                    AllowOfflineAccess = true,
+                    RequireConsent = false,
+                    AllowAccessTokensViaBrowser = true,
+                    AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
+                },
+                new Client
+                {
+                    ClientId = "test.fsel.password",
 
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
 
@@ -93,6 +143,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     AllowedScopes =
                     {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Email,
@@ -103,13 +154,13 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     },
 
                     AllowOfflineAccess = true, // Cho phép sử dụng refresh token
-                    //RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
-                    //RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
-                    //SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
+                    RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
+                    SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
                 },
                 new Client
                 {
-                    ClientId = "test.mvc",
+                    ClientId = "test.fsel.mvc",
                     ClientName = "MVC Client",
                     AllowedGrantTypes = GrantTypes.Code,
 
@@ -124,6 +175,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     AllowedScopes =
                     {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Email,
@@ -136,7 +188,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     AllowOfflineAccess = true,
                     RequirePkce = true,
                     RequireConsent = false,
-                    AllowAccessTokensViaBrowser = false,
+                    AllowAccessTokensViaBrowser = true,
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
 
                     //Claims = new ClientClaim[]

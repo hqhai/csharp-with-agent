@@ -769,12 +769,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<long>("NumberOfToken")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("NumberOfTokenExchanged")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("NumberOfTokenReceived")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("Occupation")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");

@@ -44,12 +44,12 @@ namespace Fsel.Identity.Api.Controllers
         /// </summary>
         /// <param name="studentId"></param>
         /// <returns></returns>
-        [HttpGet("check/{id}")]
+        [HttpGet("check")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CheckStudentRegistration([FromRoute] Guid id)
+        public async Task<IActionResult> CheckStudentRegistration()
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new CheckStudentTrialRegistrationQuery { UserId = id }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new CheckStudentTrialRegistrationQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

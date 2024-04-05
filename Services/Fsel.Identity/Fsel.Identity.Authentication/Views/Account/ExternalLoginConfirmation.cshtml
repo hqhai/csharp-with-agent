@@ -1,0 +1,111 @@
+@model Fsel.Identity.Domain.Models.CommandModels.Quickstarts.ExternalLoginModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    // ViewData["Title"] = "Register";
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/assets/css/pages/sign-up.css" />
+    <link href="~/lib/daterangepicker/css/daterangepicker.css" rel="stylesheet" />
+}
+
+<img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+<form asp-action="ExternalLoginConfirmation">
+    <input type="hidden" asp-for="ReturnUrl" />
+    @Html.AntiForgeryToken()
+
+    <!-- Choose a password -->
+    <section class="section-survey">
+        <h1 class="title">Confirm information to link your <strong>@Model.Provider</strong> account.</h1>
+
+        <div>
+            <div class="float-input">
+                <input class="text-input"
+                       type="text"
+                       name="Email"
+                       id="email"
+                       placeholder=" "
+                       autocomplete="off"
+                       required
+                       readonly
+                       asp-for="Email" />
+                <label for="Email" class="input-label">Email</label>
+            </div>
+            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="float-input">
+                    <input class="text-input"
+                           type="text"
+                           name="LastName"
+                           id="LastName"
+                           placeholder=" "
+                           autocomplete="off"
+                           required
+                           asp-for="LastName" />
+                    <label for="LastName" class="input-label">Last name</label>
+                </div>
+                @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-sm-6">
+                <div class="float-input">
+                    <input class="text-input"
+                           type="text"
+                           name="FirstName"
+                           id="FirstName"
+                           placeholder=" "
+                           autocomplete="off"
+                           required
+                           asp-for="FirstName" />
+                    <label for="FirstName" class="input-label">First name</label>
+                </div>
+                @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div>
+            <div class="float-input">
+                <input class="text-input"
+                       type="text"
+                       max="@(DateTime.Now.ToString("yyyy-MM-dd"))"
+                       name="Birthday"
+                       id="Birthday"
+                       placeholder=""
+                       autocomplete="off"
+                       value=""
+                       asp-for="Birthday" />
+                <label for="Birthday" class="input-label">Birthday</label>
+            </div>
+            @Html.ValidationMessageFor(model => model.Birthday, "", new { @class = "text-danger" })
+        </div>
+
+        <button type="submit" class="btn continue-btn">
+            Confirm
+            <svg width="19"
+                 height="18"
+                 viewBox="0 0 19 18"
+                 fill="none"
+                 xmlns="http://www.w3.org/2000/svg">
+                <g id="Icon">
+                    <path id="Vector"
+                          d="M15.4965 9.28717C15.5329 9.19939 15.5531 9.1032 15.5534 9.00233V8.99783C15.5528 8.80664 15.4796 8.61562 15.3337 8.46975L10.0304 3.16645C9.73752 2.87355 9.26264 2.87355 8.96975 3.16645C8.67686 3.45934 8.67686 3.93421 8.96975 4.22711L12.9927 8.25008L4.19678 8.25008C3.78256 8.25008 3.44678 8.58587 3.44678 9.00008C3.44678 9.41429 3.78256 9.75008 4.19678 9.75008H12.9927L8.96975 13.773C8.67685 14.0659 8.67685 14.5408 8.96975 14.8337C9.26264 15.1266 9.73751 15.1266 10.0304 14.8337L15.3333 9.53078L15.3353 9.52882C15.4064 9.45728 15.4601 9.37497 15.4965 9.28717Z"
+                          fill="currentcolor" />
+                </g>
+            </svg>
+        </button>
+    </section>
+</form>
+
+<partial class="mt-3" name="_ValidationSummary" />
+
+@section scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/lib/momentjs/js/moment.min.js"></script>
+        <script src="~/lib/daterangepicker/js/daterangepicker.min.js"></script>
+
+        <script src="~/assets/js/pages/external-login.js"></script>
+    }
+}
+

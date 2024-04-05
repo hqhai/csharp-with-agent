@@ -75,6 +75,7 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
             return methodResult;
         }
 
+
         private double GetNearestConfigTime(Guid? studentId)
         {
             var nearestConfigTargetTime = _studentFocusTimeRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefault(x => x.StudentId == studentId && x.CreatedDate.Date != DateTime.UtcNow.Date && x.TargetTime != 0)?.TargetTime ?? 0;

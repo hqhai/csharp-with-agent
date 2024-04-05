@@ -35,14 +35,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
             student.NumberOfToken += request.NumberOfToken;
-            if (request.NumberOfToken > 0)
-            {
-                student.NumberOfTokenReceived += request.NumberOfToken;
-            }
-            else
-            {
-                student.NumberOfTokenExchanged += -request.NumberOfToken;
-            }
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
                 student = _studentRepository.Update(student);

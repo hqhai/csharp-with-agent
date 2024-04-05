@@ -6,4 +6,7 @@
   color: var(--white-color);
 }
 
+.error {
+  border-color: #d98c93;
+}
 /*# sourceMappingURL=login.css.map */

@@ -9,8 +9,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         [Required(ErrorMessage = "Otp cannot be empty.")]
         public string? Otp { get; set; }
 
-        public string? Type { get; set; }
-
         public string? ReturnUrl { get; set; }
     }
 }

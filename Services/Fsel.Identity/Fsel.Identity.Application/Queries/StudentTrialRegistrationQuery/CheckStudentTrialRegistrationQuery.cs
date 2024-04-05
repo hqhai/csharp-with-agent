@@ -13,23 +13,24 @@ namespace Fsel.Identity.Application.Queries.StudentTrialRegistrationQuery
 
     public class CheckStudentTrialRegistrationQuery : IRequest<MethodResult<bool>>
     {
-        public Guid UserId { get; set; }
     }
 
     public class CheckStudentTrialRegistrationQueryHandler : IRequestHandler<CheckStudentTrialRegistrationQuery, MethodResult<bool>>
     {
         private readonly IStudentTrialRegistrationRepository _studentTrialRegistrationRepository;
+        private readonly AuthContext _authContext;
 
-        public CheckStudentTrialRegistrationQueryHandler(IStudentTrialRegistrationRepository studentTrialRegistrationRepository)
+        public CheckStudentTrialRegistrationQueryHandler(IStudentTrialRegistrationRepository studentTrialRegistrationRepository, AuthContext authContext)
         {
             _studentTrialRegistrationRepository = studentTrialRegistrationRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<bool>> Handle(CheckStudentTrialRegistrationQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            var checkStudentRegistration = await _studentTrialRegistrationRepository.Queryable.AnyAsync(x => x.UserId == request.UserId, cancellationToken);
+            var checkStudentRegistration = await _studentTrialRegistrationRepository.Queryable.AnyAsync(x => x.UserId == _authContext.CurrentUserId && (x.Status == EnumTrialRegistrationStatus.Trial || x.Status == EnumTrialRegistrationStatus.Expired || x.Status == EnumTrialRegistrationStatus.Finished), cancellationToken);
 
             methodResult.Result = checkStudentRegistration;
             methodResult.StatusCode = StatusCodes.Status200OK;

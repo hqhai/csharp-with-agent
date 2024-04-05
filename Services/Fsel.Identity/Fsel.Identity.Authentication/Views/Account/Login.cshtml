@@ -73,20 +73,13 @@
                     </svg>
                 </label>
                 <input class="text-input"
-                       type="password"
+                       type="text"
                        name="Password"
                        id="password"
-                       placeholder=""
+                       placeholder=" "
                        autocomplete="off"
+                       required
                        asp-for="Password" />
-                @* <input class="text-input"
-                        type="text"
-                        name="password"
-                        id="password"
-                        placeholder=" "
-                        autocomplete="off"
-                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                        required /> *@
                 <label for="password" class="input-label">Password</label>
             </div>
             @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
@@ -105,7 +98,7 @@
             <a href="/Account/Forgot">Forgot password</a>
         </div>
 
-        <button type="submit" class="btn" name="button" value="login">Login</button>
+        <button type="submit" class="btn" name="button" value="login" id="loginButton">Login</button>
         @* <button type="submit" class="btn" name="button" value="cancel">Cancel</button> *@
     </form>
     <form asp-action="ExternalLogin" asp-route-returnurl="@Model.ReturnUrl" method="post" class="form-horizontal mt-4">
@@ -144,5 +137,6 @@
 @section scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/assets/js/pages/login.js"></script>
     }
 }

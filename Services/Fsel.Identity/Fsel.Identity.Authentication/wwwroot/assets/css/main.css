@@ -253,11 +253,14 @@ form {
   }
 }
 
+
+/*
+TODO
 form:invalid .btn {
   background: var(--disable-bg);
   color: var(--disable-text-color);
   cursor: default;
-}
+}*/
 
 .social {
   display: flex;

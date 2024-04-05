@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-bottom: 32px;
+  /*margin-bottom: 32px;*/
 }
 @media only screen and (max-width: 576px) {
   .number-list {

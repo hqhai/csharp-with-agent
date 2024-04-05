@@ -49,6 +49,8 @@ using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Models.CommandModels.Quickstarts;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -102,12 +104,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// Verify otp for sample user login
         /// </summary>
         /// <returns></returns>
-        public IActionResult VerifyOtp(string? type = null)
+        public IActionResult VerifyOtp()
         {
-            return View(new VerifyOtpModel
-            {
-                Type = type,
-            });
+            return View();
         }
 
         [HttpPost]
@@ -118,13 +117,14 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
             if (ModelState.IsValid)
             {
+                var type = GetFromTempData(nameof(VerifyOtp))?.ToString();
                 var userRegisterModel = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
                 var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
 
                 var email = userRegisterModel?.Email ?? forgotModel?.Email;
 
                 var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
-                if (request.Type == nameof(Register))
+                if (type == nameof(Register))
                 {
                     if (userRegisterModel == null)
                     {
@@ -175,7 +175,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         }
                     }
                 }
-                else
+                else if (type == nameof(Forgot))
                 {
                     if (forgotModel == null)
                     {
@@ -308,14 +308,51 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     return View(request);
                 }
 
-                return RedirectToAction(nameof(VerifyOtp), new
-                {
-                    type = nameof(Forgot),
-                });
+                TempData[nameof(VerifyOtp)] = nameof(Forgot);
+                return RedirectToAction(nameof(VerifyOtp));
             }
 
-
             return View(request);
+        }
+
+        /// <summary>
+        /// ResendOtp
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> ResendOtp()
+        {
+            var verifyOtpType = GetFromTempData(nameof(VerifyOtp))?.ToString();
+            User? user;
+
+            if (verifyOtpType == nameof(Register))
+            {
+                var userRegister = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
+                user = await _userManager.FindByEmailAsync(userRegister?.Email ?? string.Empty);
+                if (user == null)
+                {
+                    return RedirectToAction(nameof(VerifyOtp));
+                }
+            }
+            else
+            {
+                var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
+                user = await _userManager.FindByEmailAsync(forgotModel?.Email ?? string.Empty);
+                if (user == null || !user.EmailConfirmed)
+                {
+                    return RedirectToAction(nameof(VerifyOtp));
+                }
+            }
+
+            var otp = await _userManager.GenerateUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName);
+            var param = new
+            {
+                OtpCode = otp,
+                OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
+            };
+            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
+            var sendResult = await _mediator.Send(new SendOtpCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }).ConfigureAwait(false);
+
+            return RedirectToAction(nameof(VerifyOtp));
         }
 
 
@@ -389,10 +426,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     }
 
                     scope.Complete();
-                    return RedirectToAction(nameof(VerifyOtp), new
-                    {
-                        type = nameof(Register),
-                    });
+
+                    TempData[nameof(VerifyOtp)] = nameof(Register);
+                    return RedirectToAction(nameof(VerifyOtp));
                 }
 
                 //var context = await _interaction.GetAuthorizationContextAsync(request.ReturnUrl);
@@ -625,67 +661,45 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             else
             {
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                var lastName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
-                var firstName = info.Principal.FindFirstValue(ClaimTypes.Surname);
-
-                var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
-
-                IdentityResult result;
-                if (user == null)
+                var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
+                var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
+                var birthday = info.Principal.FindFirstValue(ClaimTypes.DateOfBirth)?.ConvertDateTimeFormat("MM/dd/yyyy");
+                var gender = info.Principal.FindFirstValue(ClaimTypes.Gender);
+                var externalLogin = new ExternalLoginModel
                 {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                    {
-                        user = new User
-                        {
-                            Email = email,
-                            UserName = email,
-                            FirstName = firstName,
-                            LastName = lastName,
-                        };
-                        result = await _userManager.CreateAsync(user);
-                        result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                    Email = email,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Birthday = birthday,
+                    Provider = info.LoginProvider,
+                };
 
-                        if (result.Succeeded)
-                        {
-                            result = await _userManager.AddLoginAsync(user, info);
-                            if (result.Succeeded)
-                            {
-                                await _signInManager.SignInAsync(user, isPersistent: false);
-
-                                scope.Complete();
-                                return Redirect(returnUrl);
-                            }
-                        }
-
-                        scope.Dispose();
-                    }
-                }
-                else
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return Redirect(returnUrl);
-                }
-
-                return RedirectToAction(nameof(Login));
+                TempData[nameof(ExternalLoginModel)] = externalLogin.Serialize();
+                return View(nameof(ExternalLoginConfirmation), externalLogin);
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginModel model, string? returnUrl = null)
+        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginModel request)
         {
+            ArgumentNullException.ThrowIfNull(request);
+            var returnUrl = GetFromTempData(nameof(ExternalLoginModel.ReturnUrl))?.ToString();
+            var externalLogin = GetFromTempData(nameof(ExternalLoginModel))?.ToString().Deserialize<ExternalLoginModel>();
+
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View(request);
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
+            if (info == null || externalLogin == null)
             {
                 return View(nameof(Error));
             }
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            request.Email = externalLogin.Email;
+            var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
             IdentityResult result;
 
             if (user != null)
@@ -694,33 +708,47 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    return Redirect(returnUrl);
+                    return Redirect(returnUrl ?? string.Empty);
                 }
             }
             else
             {
-                model.Principal = info.Principal;
-                //user = new User { UserName = model.Email, Email = model.Email, FullName = $"{model.Principal.FindFirst(ClaimTypes.GivenName).Value} {model.Principal.FindFirst(ClaimTypes.Surname).Value}" };
-                //user.Human = new Human { Email = user.Email, FullName = user.FullName, PhoneNumber = user.PhoneNumber };
-                //result = await _userManager.CreateAsync(user);
-                //if (result.Succeeded)
-                //{
-                //    result = await _userManager.AddLoginAsync(user, info);
-                //    if (result.Succeeded)
-                //    {
-                //        //TODO: Send an email for the email confirmation and add a default role as in the Register action
-                //        await _signInManager.SignInAsync(user, isPersistent: false);
-                //        return Redirect(returnUrl);
-                //    }
-                //}
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    user = new User
+                    {
+                        Email = request.Email,
+                        UserName = request.Email,
+                        FirstName = request.FirstName,
+                        LastName = request.LastName,
+                        Birthday = request.Birthday,
+                        EmailConfirmed = true,
+                    };
+                    result = await _userManager.CreateAsync(user);
+                    result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+
+                    if (result.Succeeded)
+                    {
+                        result = await _userManager.AddLoginAsync(user, info);
+                        if (result.Succeeded)
+                        {
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+
+                            scope.Complete();
+                            return Redirect(returnUrl ?? string.Empty);
+                        }
+                    }
+
+                    scope.Dispose();
+                }
             }
 
-            //foreach (var error in result.Errors)
-            //{
-            //    ModelState.TryAddModelError(error.Code, error.Description);
-            //}
+            foreach (var error in result.Errors)
+            {
+                ModelState.TryAddModelError(error.Code, error.Description);
+            }
 
-            return View(nameof(ExternalLogin), model);
+            return View(nameof(ExternalLoginConfirmation), request);
         }
 
 

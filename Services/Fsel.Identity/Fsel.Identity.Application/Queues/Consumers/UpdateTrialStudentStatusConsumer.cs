@@ -2,7 +2,6 @@
 
 using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.StudentRankingCmd;
-using Fsel.Identity.Application.Commands.StudentRegistrationCmd;
 using MassTransit;
 using MediatR;
 
@@ -19,7 +18,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
 
         public async Task Consume(ConsumeContext<BaseQueueModel> context)
         {
-            await _mediator.Send(new UpdateExpireTrialStudentCommand()).ConfigureAwait(false);
+            await _mediator.Send(new CreateStudentRankingsCommand()).ConfigureAwait(false);
         }
     }
 }

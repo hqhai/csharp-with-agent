@@ -8,4 +8,12 @@
     }
   });
 
+  $("#languageDropdown").on("click", ".language-dropdown-item", function () {
+    const currentHtml = $(this).html();
+    const existingHtml = $("#languageContainer .language").html();
+
+    $(this).html(existingHtml);
+    $("#languageContainer .language").html(currentHtml);
+  });
+
 }(jQuery));	

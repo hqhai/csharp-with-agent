@@ -9,10 +9,10 @@ using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Asp.Versioning;
 using Fsel.Shared.Constants;
-using Fsel.Identity.Application.Commands.AuthCmd;
 
 namespace Fsel.Identity.Api.Controllers.Admin
 {
@@ -114,15 +114,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
-        }
-
-        [HttpGet("token/{id}")]
-        [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetJWT([FromRoute] Guid id)
-        {
-            MethodResult<TokenModel> queryResult = await _mediator.Send(new GenerateTokenCommand { Id = id }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
         }
     }
 }

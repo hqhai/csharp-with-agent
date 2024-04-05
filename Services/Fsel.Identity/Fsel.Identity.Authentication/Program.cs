@@ -25,7 +25,9 @@ using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Fsel.Authentication.Infrastructure.Configs;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Fsel.Identity.Application.Services.UserProfileService;
+using IdentityServer4.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(UserDbContext).Assembly.GetName().Name;
@@ -42,7 +44,6 @@ builder.Services.AddDataProtection().PersistKeysToDbContext<UserDbContext>();
 builder.Services.AddAntiforgery();
 
 builder.AddIdentity<User, Role, UserDbContext>().AddTotpProvider();
-
 builder.Services.AddIdentityServer(options =>
 {
     options.Authentication.CookieSameSiteMode = SameSiteMode.None;
@@ -54,8 +55,14 @@ builder.Services.AddIdentityServer(options =>
 .AddAspNetIdentity<User>()
 .AddConfigurationStore(options => options.ConfigureDbContext = b => b.UseSqlServer(defaultConnString, opt => opt.MigrationsAssembly(assembly)))
 .AddConfigurationStoreCache()
-.AddOperationalStore(options => options.ConfigureDbContext = b => b.UseSqlServer(defaultConnString, opt => opt.MigrationsAssembly(assembly)))
-.AddDeveloperSigningCredential();
+.AddOperationalStore(options =>
+{
+    options.ConfigureDbContext = b => b.UseSqlServer(defaultConnString, opt => opt.MigrationsAssembly(assembly));
+    options.EnableTokenCleanup = true;
+    options.TokenCleanupInterval = 3600;
+})
+.AddDeveloperSigningCredential()
+.AddProfileService<UserProfileService>();
 
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
@@ -77,13 +84,31 @@ builder.Services.AddAuthentication()
                 return Task.CompletedTask;
             }
         };
+
+        //options.Scope.Add("https://www.googleapis.com/auth/user.phonenumbers.read");
+        //options.Scope.Add("https://www.googleapis.com/auth/plus.me");
+        //options.Scope.Add("https://www.googleapis.com/auth/userinfo.email");
+        //options.Scope.Add("https://www.googleapis.com/auth/userinfo.profile");
+        //options.Scope.Add("gender");
+        //options.Scope.Add("phone");
     })
     .AddFacebook(facebookOptions =>
     {
-        facebookOptions.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+        facebookOptions.UsePkce = true;
+        //facebookOptions.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
         facebookOptions.AppId = appSetting?.Authentication?.Facebook?.ClientId ?? string.Empty;
-        facebookOptions.AppSecret = appSetting?.Authentication?.Facebook?.ClientId ?? string.Empty;
+        facebookOptions.AppSecret = appSetting?.Authentication?.Facebook?.ClientSecret ?? string.Empty;
         facebookOptions.CallbackPath = appSetting?.Authentication?.Facebook?.Callback ?? string.Empty;
+        facebookOptions.SendAppSecretProof = true;
+        facebookOptions.Fields.Add("id");
+        facebookOptions.Fields.Add("email");
+        facebookOptions.Fields.Add("name");
+        facebookOptions.Fields.Add("birthday");
+        facebookOptions.Fields.Add("gender");
+        //facebookOptions.Fields.Add("picture");
+        //facebookOptions.Fields.Add("public_profile");
+        //facebookOptions.Fields.Add("phone");
+        //facebookOptions.UserInformationEndpoint = "https://graph.facebook.com/v2.8/me?fields=id,name,email,birthday,gender,phone,avatar_2d_profile_picture";
     })
     .AddCookie(options =>
     {
@@ -105,6 +130,35 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
+
+builder.Services.AddSingleton<ICorsPolicyService>((container) =>
+{
+    var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
+    return new DefaultCorsPolicyService(logger)
+    {
+        AllowAll = true
+        //AllowedOrigins = { "https://localhost:4400", "https://localhost:7088" },
+    };
+});
+
+builder.WebHost.UseKestrel();
+//builder.WebHost.UseFacebookAuthentication();
+//builder.WebHost.UseKestrel(options =>
+//{
+//    options.Listen(IPAddress.Loopback, 443, listenOptions =>
+//    {
+//        listenOptions.UseHttps("certificate.pfx", "password");
+//    });
+//});
+
+var fordwardedHeaderOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+    RequireHeaderSymmetry = false
+};
+fordwardedHeaderOptions.KnownNetworks.Clear();
+fordwardedHeaderOptions.KnownProxies.Clear();
+builder.Services.Configure<ForwardedHeadersOptions>(x => x = fordwardedHeaderOptions);
 
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -141,17 +195,19 @@ builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiU
 
 builder.AddMassTransit(appSetting);
 
-
 builder.Services.AddMvc();
 builder.Services.AddMvcCore();
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 builder.Services.AddLocalApiAuthentication();
+builder.Services.AddHttpsRedirection(opt => opt.HttpsPort = 443);
 
 //App config
 var app = builder.Build();
 app.UseStaticFiles();
 app.UseIdentityServer();
+app.UseCertificateForwarding();
+app.UseAuthorization();
 app.UseAuthentication();
 app.MapControllers();
 app.MapDefaultControllerRoute();
@@ -161,8 +217,20 @@ app.UseCookiePolicy(new CookiePolicyOptions
     // HttpOnly =  HttpOnlyPolicy.Always,
     MinimumSameSitePolicy = SameSiteMode.None,
     Secure = CookieSecurePolicy.Always
-    // MinimumSameSitePolicy = SameSiteMode.Lax
 });
+app.Use(async (context, next) =>
+{
+    //context.SetIdentityServerOrigin("https://fsel-auth-testing.fsel.edu.vn");
+    context.Request.Scheme = "https";
+    context.Request.IsHttps = true;
+    await next();
+});
+
+app.UseCors();
+app.UseCors(Settings.CorsPolicy);
+
+app.UseForwardedHeaders(fordwardedHeaderOptions);
+
 //app.UseServices();
 
 #region Initialized Database
