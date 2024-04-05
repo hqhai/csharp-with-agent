@@ -197,7 +197,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var homeworkResultFromUnit1ToNow = await _homeWorkResultRepository.Queryable.Where(p => p.StudentId == studentId && lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
 
-            var classForumResultFromUnit1ToNow = await _classForumResultRepository.Queryable.Include(p => p.ClassForum).Where(p => p.StudentId == studentId && lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
+            var classForumResultFromUnit1ToNow = await _classForumResultRepository.Queryable.Include(p => p.ClassForum).Include(p => p.ClassForumScores).Where(p => p.StudentId == studentId && lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
 
             var (unitTestResult, skillTestResult) = await GetUnitTestAndSkillTest(lessonResultIds);
 
@@ -242,11 +242,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 if (classForumResultFromUnit1ToNow.Where(p => p.ClassForum != null).Any(p => p.ClassForum!.CourseSkill == item))
                 {
-                    var classForumResult = classForumResultFromUnit1ToNow.Where(p => p.ClassForum != null && p.ClassForum.CourseSkill == item).SelectMany(p => p.ClassForumScores);
+                    var classForumScores = classForumResultFromUnit1ToNow.Where(p => p.ClassForum != null && p.ClassForum.CourseSkill == item).SelectMany(p => p.ClassForumScores);
 
-                    var totalScore = classForumResult.Sum(p => p.Score);
+                    var totalScore = classForumScores.Sum(p => p.Score);
 
-                    var percent = (int)(totalScore * 100) / (classForumResult.Count() * 9);
+                    var percent = (int)(totalScore * 100) / (classForumScores.Count() * 9);
 
                     var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, percent, percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - percent, percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, percent + "%");
 
