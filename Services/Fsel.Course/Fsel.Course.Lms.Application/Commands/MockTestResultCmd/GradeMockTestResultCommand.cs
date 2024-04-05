@@ -12,7 +12,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1;
+    using Fsel.Course.Lms.Application.InternalEvents;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -37,6 +39,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly MockTestResultInputThenUpdateUnitResultHandler _mockTestResultInputThenUpdateUnitResultHandler;
+        private readonly ICourseRepository _courseRepository;
         private static int Criteria = 4;
 
         public GradeMockTestResultCommandHandler(IMapper mapper,
@@ -46,7 +50,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             ISectionGroupResultRepository sectionGroupResultRepository,
             IUserService userService,
             NotificationMessagePublisher notificationMessagePublisher,
-            AuthContext authContext)
+            AuthContext authContext,
+            MockTestResultInputThenUpdateUnitResultHandler mockTestResultInputThenUpdateUnitResultHandler,
+            ICourseRepository courseRepository)
         {
             _mapper = mapper;
             _mediator = mediator;
@@ -56,6 +62,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             _userService = userService;
             _authContext = authContext;
             _notificationMessagePublisher = notificationMessagePublisher;
+            _mockTestResultInputThenUpdateUnitResultHandler = mockTestResultInputThenUpdateUnitResultHandler;
+            _courseRepository = courseRepository;
         }
 
         public async Task<MethodResult<List<MockTestScoreModel>>> Handle(GradeMockTestResultCommand request, CancellationToken cancellationToken)
@@ -182,6 +190,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 return methodResult;
             });
             await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
+
+            if (mockTestResult.MockTest.MockTestType == EnumMockTestType.FullMockTest)
+            {
+                var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder)).FirstOrDefaultAsync(p => p.Id == mockTestResult.CourseId, cancellationToken);
+
+                if (course.CourseUnitMockTests.Where(p => p.MockTestId.HasValue).FirstOrDefault()?.MockTestId == mockTestResult.MockTestId)
+                {
+                    await _mockTestResultInputThenUpdateUnitResultHandler.SendMailMidCourseReport(mockTestResult.StudentId, course!, cancellationToken);
+                }
+            }
             return methodResult;
         }
 
