@@ -1,52 +1,52 @@
 [
   {
     "band": 9,
-    "level": "Thông thạo",
+    "level": "THÔNG THẠO",
     "description": "Bạn đã hoàn toàn nắm vững khả năng sử dụng ngôn ngữ với một sự phù hợp, chính xác, lưu loát và thông hiểu hoàn toàn đầy đù"
   },
   {
     "band": 8,
-    "level": "Rất tốt",
+    "level": "RẤT TỐT",
     "description": "Bạn đã hoàn toàn nắm vững khả năng sử dụng ngôn ngữ, chỉ đôi khi mắc những lỗi như không chính xác, không phù hợp nhưng lỗi này chưa thành hệ thông. Trong những tình huồng không quen thuộc có thế sẽ không hiếu. Sử dụng tốt với những chủ để tranh luận phức tạp, cần có sự hiểu biết sâu về chủ đề."
   },
   {
     "band": 7,
-    "level": "Tốt",
+    "level": "TỐT",
     "description": "Bạn đã hoàn toàn nắm vững khả năng sử dụng ngôn ngữ, nhưng đôi khi có những sự không chính xác, không phù hợp, không hiểu trong một số tình huồng. Sử dụng tốt ngôn ngữ phức tạp và hiểu những lí lẽ chuyên sâu."
   },
   {
     "band": 6,
-    "level": "Khá",
+    "level": "KHÁ",
     "description": "Bạn có khả năng sử dụng ngôn ngữ tương đối hiệu quả tuy có những chỗ không chính xác, không phù hợp, không hiểu. Có thể sử dụng và hiểu tốt ngôn ngữ phức tạp, đặc biệt là trong những tình huống quen thuộc."
   },
   {
     "band": 5,
-    "level": "Bình thường",
+    "level": "BÌNH THƯỜNG",
     "description": "Bạn có khả năng sử dụng được một phần ngôn ngữ, nắm được nghĩa tổng quát trong phần lớn các tình huống, dù thường xuyên mắc lỗi. Có thể sử dụng ngôn ngữ trong những lĩnh vực quen thuộc của cá nhân."
   },
   {
     "band": 4,
-    "level": "Hạn chế",
+    "level": "HẠN CHẾ",
     "description": "Bạn có khả năng sử dụng ngôn ngữ thành thạo ở mức độ cơ bản nhưng bị hạn chế trong những tình huống quen thuộc. Thường có khó khăn trong việc sử dụng ngôn ngữ phức tạp hơn."
   },
   {
     "band": 3,
-    "level": "Cực kỳ hạn chế",
+    "level": "CỰC KỲ HẠN CHẾ",
     "description": "Bạn có khả năng nói và hiểu trong những tình huồng rất quen thuộc. Thường không thể giao tiếp."
   },
   {
     "band": 2,
-    "level": "Kém",
+    "level": "KÉM",
     "description": "Không có những kỹ năng giao tiếp thực sự ngoại trừ những thông tin cơ bản nhất với những từ ngữ riêng lẻ hoặc những cú pháp ngắn trong tình huồng thông thường để đạt được mục đích tại thời điểm giao tiếp. Khó khăn lớn trong việc nói và viết tiếng Anh."
   },
   {
     "band": 1,
-    "level": "Không biết sử dụng",
+    "level": "KHÔNG BIẾT SỬ DỤNG",
     "description": "Hoàn toàn không có khả năng sử dụng tiếng Anh ngoài vài từ riêng lẻ."
   },
   {
     "band": 0,
-    "level": "Bỏ thi",
+    "level": "BỎ THI",
     "description": "Không có câu trả lời cho các phần thi hoặc thí sinh bỏ thi, không tham gia kỳ thi."
   }
 ]
