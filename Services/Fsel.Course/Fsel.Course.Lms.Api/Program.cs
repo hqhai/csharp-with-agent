@@ -7,6 +7,7 @@ using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
+using Fsel.Course.Lms.Application.InternalEvents;
 using Fsel.Course.Lms.Application.Queues.Consumers;
 using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Services.AiService;
@@ -48,6 +49,7 @@ builder.Services.AddScoped<IExtraPracticeExerciseResultRepository, ExtraPractice
 builder.Services.AddScoped<IExtraPracticeResultRepository, ExtraPracticeResultRepository>();
 builder.Services.AddScoped<IExtraPracticeAnswerRepository, ExtraPracticeAnswerRepository>();
 builder.Services.AddScoped<IExtraPracticeChapterRepository, ExtraPracticeChapterRepository>();
+builder.Services.AddScoped<BaseInternalUnitResultEventHandler>();
 
 builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
 builder.Services.AddScoped<IHomeWorkRepository, HomeWorkRepository>();
@@ -101,6 +103,7 @@ builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingReposi
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -132,6 +135,7 @@ builder.Services.AddScoped<GetTimeToCompleteTestPublisher>();
 builder.Services.AddScoped<SubmitAIResponsePublisher>();
 builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

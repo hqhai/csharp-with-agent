@@ -21,6 +21,8 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using Fsel.Interaction.Application.Services.CourseServices.Models;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Shared.Constants;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
+    using Kros.Extensions;
 
     public class CreateActionCommand : CreateActionCommandModel, IRequest<MethodResult<bool>>
     {
@@ -100,13 +102,15 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                     //class forum
                     var classForumResultTemp = await GetClassForumResultModel(request.ObjectId);
 
-                    var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(request.ObjectId, classForumResultTemp!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId);
+                    var lesson = await _courseService.GetLessonResult(classForumResultTemp.LessonResultId ?? default);
+
+                    var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(classForumResultTemp!, classForumResultTemp?.CourseId, classForumResultTemp?.CurrentUnitId, lesson?.Content?.Result?.Id);
                     bool conditionCheckIsClassForum = await CheckObjecIsClassForum(request.ObjectId);
                     if (!conditionCheckIsClassForum)
                     {
                         var comment = await _commentRepository.GetByIdAsync(request.ObjectId);
                         classForumResultTemp = await GetClassForumResultModel(comment!.ObjectId);
-                        (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(request.ObjectId, comment!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId);
+                        (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(comment!, classForumResultTemp?.CourseId, classForumResultTemp?.UnitId, lesson?.Content?.Result?.Id);
 
                         businessType = EnumNotificationType.LinkComment;
                         businessContent = EnumNotificationContent.LikeComment;
@@ -114,18 +118,28 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
                     if (action.Type == EnumInteractionActionType.Like)
                     {
-                        NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+                        var postOwnerResult = await _courseService.GetClassForumResultByIdAsync(request.ObjectId).ConfigureAwait(false);
+                        var postOwner = postOwnerResult.Content?.Result;
+
+                        //Không tìm thấy postOwner và Không thông báo khi like bài viết của chính mình
+                        if (postOwner != null && postOwner!.CreatedUserId != _authContext.CurrentUserId)
                         {
-                            ObjectId = request.ObjectId,
-                            UserIds = new List<Guid>() { objectOwnerId },
-                            SenderId = _authContext.CurrentUserId,
-                            ParamsMessage = new List<object> { _authContext.CurrentFullName! ?? string.Empty, },
-                            ParamsLink = returnedParamsLink,
-                            Type = businessType,
-                            Content = businessContent,
-                            PlatformCode = EnumPlatformCode.LMS
-                        };
-                        await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+                            var userNameLiked = await CustomNotificationLikeMessage(action.ObjectId, _authContext.CurrentUserId);
+
+                            InterationActionQueueModel model = new InterationActionQueueModel()
+                            {
+                                ObjectId = request.ObjectId,
+                                UserIds = new List<Guid>() { objectOwnerId },
+                                SenderId = _authContext.CurrentUserId,
+                                ParamsMessage = new List<object> { userNameLiked ?? string.Empty },
+                                ParamsLink = returnedParamsLink,
+                                Type = businessType,
+                                Content = businessContent,
+                                InterationType = action.Type,
+                                PlatformCode = EnumPlatformCode.LMS
+                            };
+                            await _interationActionPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+                        }
                     }
 
 
@@ -243,19 +257,58 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         /// <param name="userService"></param>
         /// <param name="trainingService"></param>
         /// <returns></returns>
-        public (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(Guid objectId, dynamic templateResult, Guid? courseId, Guid? unitId)
+        public (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(dynamic templateResult, Guid? courseId, Guid? unitId, Guid? lessonId)
         {
             if (templateResult == null)
             {
                 return (new List<object>(), Guid.Empty);
             }
-
             // param
-            var paramsLink = new List<object> { unitId?.ToString() ?? string.Empty, courseId?.ToString() ?? string.Empty, templateResult?.Id.ToString() ?? string.Empty, objectId };
+            var paramsLink = new List<object> { lessonId?.ToString() ?? string.Empty, courseId?.ToString() ?? string.Empty, unitId?.ToString() ?? string.Empty };
             var ownerObjectId = templateResult?.CreatedUserId ?? default;
-
 
             return (paramsLink, ownerObjectId);
         }
+
+
+        /// <summary>
+        /// Custom lại Message khi một tài khoản like bài viết, comment của một tài khoản khác.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<string> CustomNotificationLikeMessage(Guid objectId, Guid userId)
+        {
+            string result = "";
+            List<Guid> listUserIdsLiked = new List<Guid>();
+            List<string?> listNameUserLiked = new List<string?>();
+
+            listUserIdsLiked = _interactionActionRepository.Queryable.OrderByDescending(x => x.CreatedDate).Where(x => x.Type == EnumInteractionActionType.Like && x.ObjectId == objectId).Select(x => x.UserId).ToList();
+            listUserIdsLiked.Add(userId);
+
+            GetUsersByIdsQueryModel model = new GetUsersByIdsQueryModel() { UserIds = listUserIdsLiked };
+            var listUserQuery = await _userService.GetUsersByIdsAsync(model);
+            var listUserQueryResult = listUserQuery?.Content?.Result!;
+
+            listNameUserLiked = listUserQueryResult.Where(x => x.UserId != userId).Select(x => x.FullName).ToList() ?? new List<string?>();
+            var userActionRecently = listUserQueryResult.Where(x => x.UserId == userId).Select(x => x.FullName).Single() ?? string.Empty;
+
+            int totalLiked = listNameUserLiked.Count + 1; // 1 like của người vừa like bài viết "userActionRecently"
+
+            switch (totalLiked)
+            {
+                case ValueSettings.CreateAction.NoOneAction:
+                    break;
+                case ValueSettings.CreateAction.OnePeopleAction:
+                    result = userActionRecently;
+                    break;
+                case ValueSettings.CreateAction.TwoPeopleAction:
+                    result = ValueSettings.CreateAction.TwoPeopleLike.Format(userActionRecently, listNameUserLiked[0]);
+                    break;
+                default:
+                    result = ValueSettings.CreateAction.ThreePeopleOrMoreLike.Format(userActionRecently, listNameUserLiked.Count);
+                    break;
+            }
+            return result;
+        }
+
     }
 }

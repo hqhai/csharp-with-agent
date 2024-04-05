@@ -155,7 +155,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
                                 if (!result.Succeeded)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(request.Password), request.Password);
+                                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
                                     return methodResult;
                                 }
                                 await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);

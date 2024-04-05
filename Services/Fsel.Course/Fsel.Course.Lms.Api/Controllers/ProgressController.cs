@@ -4,19 +4,20 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Collections.Generic;
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.HomeWorkQuery;
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
     using Fsel.Course.Lms.Application.Queries.ProgressQuery;
+    using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/progress")]
     [ApiController]
     public class ProgressController : ControllerBase
@@ -26,6 +27,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public ProgressController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        /// <summary>
+        /// get Course progress
+        /// </summary>
+        [HttpGet("course")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseUnitMockTestResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseProgress([FromQuery] GetCourseUnitMockTestByCourseQuery query)
+        {
+            MethodResult<IList<CourseUnitMockTestResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -231,7 +244,6 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<IList<LessonHomeWorkResultModel>> queryResult = await _mediator.Send(new GetListHomeworkQuery { LessonResultId = lessonResultId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
 
         /// <summary>
         /// get studentprogress

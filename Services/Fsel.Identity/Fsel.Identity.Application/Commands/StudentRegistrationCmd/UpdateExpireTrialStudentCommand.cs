@@ -2,12 +2,11 @@
 
 namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -17,14 +16,14 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
 
     public class UpdateExpireTrialStudentCommandHandler : IRequestHandler<UpdateExpireTrialStudentCommand, MethodResult<bool>>
     {
-        private readonly IMapper _mapper;
         private readonly IStudentTrialRegistrationRepository _studentTrialRegistrationRepository;
-        private const int CompareDate = -14;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private const int CompareDate = -12;
 
-        public UpdateExpireTrialStudentCommandHandler(IMapper mapper, IStudentTrialRegistrationRepository studentTrialRegistrationRepository)
+        public UpdateExpireTrialStudentCommandHandler(IStudentTrialRegistrationRepository studentTrialRegistrationRepository, NotificationMessagePublisher notificationMessagePublisher)
         {
-            _mapper = mapper;
             _studentTrialRegistrationRepository = studentTrialRegistrationRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateExpireTrialStudentCommand request, CancellationToken cancellationToken)
@@ -37,26 +36,29 @@ namespace Fsel.Identity.Application.Commands.StudentRegistrationCmd
 
             if (studentTrialRegistrationResults == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
-            foreach (var item in studentTrialRegistrationResults)
-            {
-                item.Status = EnumTrialRegistrationStatus.Expired;
-            }
-
-            await _studentTrialRegistrationRepository.ExecuteTransactionAsync(async () =>
-            {
-                _studentTrialRegistrationRepository.UpdateList(studentTrialRegistrationResults);
-                await _studentTrialRegistrationRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;
-            });
+            }
 
+            List<Guid> expireUserId = studentTrialRegistrationResults.Select(x => x.UserId).ToList();
+            await SendNotification(expireUserId, cancellationToken);
+
+            methodResult.Result = true;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task SendNotification(List<Guid> expireTrialUserId,CancellationToken cancellationToken)
+        {
+            NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+            {
+                Content = EnumNotificationContent.NoticePayment,
+                Type = EnumNotificationType.LinkPage,
+                UserIds = expireTrialUserId,
+                PlatformCode = EnumPlatformCode.LMS
+            };
+
+            await _notificationMessagePublisher.Publish(model, cancellationToken);
         }
     }
 }
