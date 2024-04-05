@@ -203,6 +203,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
                     {
                         ClassForumResultId = classForumResult.Id,
+                        ClassForumDetailResultId = classForumResult.Id,
                         WordContent = request.WordContent,
                         UserAIConfig = classForum.UserAlConfig,
                         SettingModel = classForum.SettingModel,

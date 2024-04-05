@@ -5,12 +5,17 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public class SubmitClassforumAICommand : ClassForumAIResponseModel, IRequest<bool>
     {
@@ -23,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IMediator _mediator;
+        private const int MaxScoreClassForum = 2;
 
         public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher)
         {
@@ -36,7 +42,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         public async Task<bool> Handle(SubmitClassforumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var classForumResult = await _classForumResultRepository.GetByIdAsync(request.ClassForumResultId);
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumDetailResults)
+                .Include(x => x.ClassForum)
+                .FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId, cancellationToken);
             var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
             var aIResponse = await _mediator.Send(new SubmitAICommand
             {
@@ -52,12 +60,19 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             if (classForumResult != null)
             {
+                int targetScore = 0;
+                if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= classForumResult.WordCount) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= classForumResult.TimeCount))
+                {
+                    ++targetScore;
+                }
+
                 if (request.IsRetry != null && (bool)request.IsRetry)
                 {
                 }
                 else
                 {
-                    classForumResult.GradingAlFeedback = aIResponse;
+                    var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+                    classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
                 }
 
                 _classForumResultRepository.Update(classForumResult);
