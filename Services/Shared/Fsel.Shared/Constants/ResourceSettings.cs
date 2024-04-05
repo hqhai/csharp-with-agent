@@ -38,6 +38,7 @@ namespace Fsel.Shared.Constants
         public const string BandScoreFileName = "Resources//BandScores.json";
         public const string LeaderBoardPercentFileName = "Resources//LeaderBoardScorePercentage.json";
         public const string Payoo = "Resources//Payoo.xml";
+        public const string IELTDescription = "Resources//IELTDescription.json";
 
         public const string ChatbotUnitInfo = "Resources//Chatbots//UnitInfo.xml";
         public const string AppStore = "Resources//AppStore//PrivateKey.txt";
