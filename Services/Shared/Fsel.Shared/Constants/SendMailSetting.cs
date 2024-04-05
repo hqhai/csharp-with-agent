@@ -29,7 +29,8 @@ namespace Fsel.Shared.Constants
         public const string NoActive = "https://s3-sgn10.fptcloud.com/fsel/Images/Ellipse_925_1706799389.png";
 
         public const string Border = "100px 100px 100px 100px";
-        public const string NoBorder = "100px 0px 0px 100px";
+        public const string NoBorderRight = "100px 0px 0px 100px";
+        public const string NoBorderLeft = "0px 100px 100px 0px";
 
         public const string Skill = "Resources//MailTemplates//Skill.html";
         public const string CompareSkill = "Resources//MailTemplates//CompareSkill.html";
@@ -46,11 +47,16 @@ namespace Fsel.Shared.Constants
 
         public const string TeacherBios = "Resources//TeacherBios.json";
 
-        public const string CourseA1Title = "là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của Khung tham chiếu chung Châu Âu (CEFR)";
-        public const string CourseA2Title = "là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của Khung tham chiếu chung Châu Âu (CEFR)";
-        public const string CourseB1Title = "là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của Khung tham chiếu chung Châu Âu (CEFR)";
-        public const string CourseB1PlusTitle = "là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của Khung tham chiếu chung Châu Âu (CEFR)";
-        public const string CourseB2Title = "là cấp độ tiếp theo sau của B1+ trong chương trình Academic Pathway tại FSEL.";
-        public const string CourseC1Title = "là cấp độ cao nhất trong chương trình Academic Pathway tại FSEL.";
+        public const string CourseA1Title = "là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>";
+
+        public const string CourseA2Title = "là cấp độ Anh ngữ thứ hai trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể truyền đạt những nhu cầu đơn giản và cơ bản.";
+
+        public const string CourseB1Title = "là cấp độ Anh ngữ thứ ba trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên đã vượt qua mức cơ bản nhưng họ vẫn chưa thể làm việc hay học tập hoàn toàn bằng tiếng Anh.";
+
+        public const string CourseB1PlusTitle = "cao hơn trình độ B1 trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên đã vượt qua mức cơ bản nhưng họ vẫn chưa thể làm việc hay học tập hoàn toàn bằng tiếng Anh.";
+
+        public const string CourseB2Title = "là cấp độ Anh ngữ thứ tư trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể hoạt động độc lập trong nhiều môi trường học thuật và công việc bằng tiếng Anh, dù ở phạm vi sắc thái và độ chính xác hạn chế.";
+
+        public const string CourseC1Title = "là cấp độ Anh ngữ thứ năm trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể hoạt động độc lập với một độ chính xác cao trong nhiều chủ đề đa dạng và trong gần như mọi hoàn cảnh mà không cần chuẩn bị trước.";
     }
 }
