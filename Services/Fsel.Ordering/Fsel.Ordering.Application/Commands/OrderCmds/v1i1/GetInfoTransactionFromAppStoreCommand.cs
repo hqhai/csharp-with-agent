@@ -96,6 +96,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 token = jwtBuilder.Encode();
             }
 
+            _logger.LogError(token);
+
             var purchaseSetting = _appSetting.PurchaseSettings.Serialize();
             if (purchaseSetting == "null")
             {
