@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         return false;
                     }
 
-                    var aIResponse = await SendChatGPT(aiConfig, userAiConfig, cancellationToken);
+                    var aIResponse = await SendChatGPT(aiConfig, item.SystemRoleAlConfig! ,userAiConfig, cancellationToken);
 
                     resultDictionary[item.Prompts![0].Type] = aIResponse!;
 
@@ -109,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         return false;
                     }
 
-                    var aIResponse = await SendChatGPT(aiConfig, userAiConfig, cancellationToken);
+                    var aIResponse = await SendChatGPT(aiConfig, aiConfig.SystemRoleAlConfig,userAiConfig, cancellationToken);
 
                     resultDictionary[item.Type] = aIResponse!;
 
@@ -270,7 +270,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             return NumberHelper.RoundNumberDouble((average + firstScore * 2) / 3);
         }
 
-        private async Task<string> SendChatGPT(MockTestAISetting aiConfig, string userAiConfig, CancellationToken cancellationToken)
+        private async Task<string> SendChatGPT(MockTestAISetting aiConfig,string systemRole,string userAiConfig, CancellationToken cancellationToken)
         {
             string aIResponse = "";
             if (string.IsNullOrEmpty(userAiConfig))
@@ -286,7 +286,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 SettingWordMaxLength = aiConfig.SettingWordMaxLength,
                 SettingPresence = aiConfig.SettingPresence,
                 SettingTopP = aiConfig.SettingTopP,
-                SystemRoleAlConfig = aiConfig.SystemRoleAlConfig,
+                SystemRoleAlConfig = systemRole,
                 UserAIConfig = userAiConfig,
             }, cancellationToken).ConfigureAwait(false);
 
