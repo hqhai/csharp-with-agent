@@ -144,6 +144,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("ClassForumResultId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -182,6 +185,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<DateTime?>("ProcessDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

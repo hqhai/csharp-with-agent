@@ -113,46 +113,62 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
+            var classForumDetailResult = await _classforumDetailResultRepository.Queryable.Where(x => x.SubmissionCount == EnumSubmissionCount.FirstSubmit && x.Status == EnumClassForumResultStatus.Pending).FirstOrDefaultAsync(cancellationToken);
+            if (classForumDetailResult.CreatedDate >= DateTime.UtcNow.AddHours(24))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
+                return methodResult;
+            }
             var studentId = student.Id;
             var classForumResult = await _classForumResultRepository.Queryable
                     .Include(x => x.ClassForumDetailResults)
                     .Include(x => x.ClassForumResultFiles)
                     .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
-            if (classForumResult != null)
-            {
-                var classForumDetailResults = await _classforumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult.Id).ToListAsync(cancellationToken);
-                if (classForumDetailResults.Count > 2)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
-                    return methodResult;
-                }
-            }
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
                 List<ClassForumResultFile> classForumResultFiles = new List<ClassForumResultFile>();
+                List<ClassForumDetailResult> classForumDetailResults = new List<ClassForumDetailResult>();
+
                 if (classForumResult == null)
                 {
-                    var classForumDetailResults = new List<ClassForumDetailResult>
+                    var classForumDetailResultModels = await _classforumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult.Id).ToListAsync(cancellationToken);
+
+                    if (classForumDetailResultModels.Count > 2)
                     {
-                        new ClassForumDetailResult
-                        {
-                            Content = request.Content,
-                            WordContent = request.WordContent,
-                            Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
-                            ClassForumResultFiles = classForumResultFiles
-                        }
+                        methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
+                        return methodResult;
+                    }
+
+                    var submissionCount = classForumDetailResultModels.Count switch
+                    {
+                        0 => EnumSubmissionCount.FirstSubmit,
+                        1 => EnumSubmissionCount.SecondSubmit,
+                        _ => throw new InvalidOperationException("Unexpected count of classForumDetailResultModels")
                     };
+
+                    var classForumDetailResult = new ClassForumDetailResult
+                    {
+                        Content = request.Content,
+                        WordContent = request.WordContent,
+                        Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
+                        ClassForumResultFiles = classForumResultFiles,
+                        SubmissionCount = submissionCount
+                    };
+
+                    classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
 
                     if (request.FilePaths != null)
                     {
-                        classForumResultFiles = request.FilePaths!.Select(x => new ClassForumResultFile
+                        classForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
                         {
                             FilePath = x,
-                            ClassForumDetailResultId = classForumResult!.Id
+                            ClassForumDetailResultId = classForumDetailResult.Id
                         }).ToList();
                     }
+
+                    classForumDetailResults.Add(classForumDetailResult);
 
                     classForumResult = new ClassForumResult
                     {
@@ -160,9 +176,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         LessonResultId = request.LessonResultId,
                         ClassForumId = classForum.Id,
                         ClassForumDetailResults = classForumDetailResults,
+                        Status = EnumClassForumResultStatus.Pending
                     };
-
-                    classForumDetailResults.FirstOrDefault()!.MediaType = MediaHelper.GetMediaType(classForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
 
                     classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType, cancellationToken);
                     classForumResult = _classForumResultRepository.Add(classForumResult);
@@ -177,19 +192,19 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
                 {
-                    _mapper.Map(request, classForumResult);
-                    classForumResult.ClassForumDetailResults.FirstOrDefault()!.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
-                    classForumResult.GradingAlFeedback = null;
+                    var classForumDetailResult = await _classforumDetailResultRepository.Queryable.FirstOrDefaultAsync(x => x.SubmissionCount == request.SubmissionCount, cancellationToken);
+                    _mapper.Map(request, classForumDetailResult);
+                    classForumDetailResult!.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
 
                     if (request.FilePaths != null)
                     {
-                        classForumResult.ClassForumDetailResults.FirstOrDefault()!.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
+                        classForumDetailResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
                         {
                             FilePath = x,
                         }).ToList();
                     }
-                    classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType, cancellationToken);
-                    classForumResult = _classForumResultRepository.Update(classForumResult);
+                    /* classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType, cancellationToken);*/
+                    classForumDetailResult = _classforumDetailResultRepository.Update(classForumDetailResult);
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else

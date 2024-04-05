@@ -30,6 +30,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? GradingAlFeedback { get; set; }
 
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
+
+        public EnumSubmissionCount? SubmissionCount { get; set; }
+
         public Guid ClassForumResultId { get; set; }
     }
 }

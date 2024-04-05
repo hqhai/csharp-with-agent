@@ -94,6 +94,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     WordCount = table.Column<int>(type: "int", nullable: true),
                     SubmissionCount = table.Column<int>(type: "int", nullable: true),
                     GradingAlFeedback = table.Column<string>(type: "nvarchar(max)", maxLength: 10000, nullable: true),
+                    ProcessDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CompletionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
                     ClassForumResultId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
