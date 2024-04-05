@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 {
                     continue;
                 }
-                var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests).FirstOrDefaultAsync(p => p.Id == unitResult.CourseId, cancellationToken);
+                var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder)).ThenInclude(p => p.Unit).FirstOrDefaultAsync(p => p.Id == unitResult.CourseId, cancellationToken);
                 if (course == null)
                 {
                     continue;
