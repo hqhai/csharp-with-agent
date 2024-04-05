@@ -294,6 +294,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CourseType = course.CourseType,
                 Percent = percentUnit.ToString(CultureInfo.CurrentCulture)
             };
+
             if (course.CourseType == EnumCourseType.Ielts && mockTestResult != null)
             {
                 var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IELTDescription);
@@ -301,11 +302,32 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 var bandScore = NumberHelper.RoundNumberDouble(mockTestResult.SkillScores!.Average(x => x.Scores), false);
 
-                model.BandScore = bandScore.ToString(CultureInfo.CurrentCulture);
+                model.BandScore = bandScore == 0 ? "0" : bandScore.ToString("0.0", CultureInfo.CurrentCulture);
 
                 var iELTDescription = iELTDescriptions!.FirstOrDefault(p => p.Band == (int)bandScore);
                 model.Level = iELTDescription!.Level;
                 model.Description = iELTDescription.Description;
+
+                var checkColorCircle = TargetBandScoreHelper.CheckScoreColor(course.CourseLevel, bandScore);
+                if (checkColorCircle.Item1)
+                {
+                    model.ColorCircle = "#71C174";
+                }
+                else
+                {
+                    model.ColorCircle = "#C0404C";
+                }
+            }
+            else
+            {
+                if (percentUnit >= 50)
+                {
+                    model.ColorCircle = "#71C174";
+                }
+                else
+                {
+                    model.ColorCircle = "#C0404C";
+                }
             }
 
             await SendStudentCompleteMidCourse(studentId, model, cancellationToken);
