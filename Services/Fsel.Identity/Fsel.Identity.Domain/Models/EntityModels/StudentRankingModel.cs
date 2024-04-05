@@ -43,5 +43,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public DateTime? CompetitionEndDate { get; set; }
 
+        public double? RankingScore { get; set; }
+
     }
 }
