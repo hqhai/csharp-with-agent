@@ -180,6 +180,7 @@ builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegi
 
 
 // Queue
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
