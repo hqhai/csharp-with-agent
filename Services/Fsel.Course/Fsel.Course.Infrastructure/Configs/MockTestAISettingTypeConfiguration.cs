@@ -14,12 +14,6 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.Property(e => e.Criteria)
-                  .HasMaxLength(100)
-                  .HasConversion(
-                      v => v.ToString(),
-                      v => v.EnumParse<EnumMockTestAIType>());
-
             builder.HasOne(a => a.Section)
                    .WithMany(b => b.MockTestAISettings)
                    .HasForeignKey(b => b.SectionId)
