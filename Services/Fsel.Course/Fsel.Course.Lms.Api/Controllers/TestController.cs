@@ -92,15 +92,17 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("queue-test/{queueName}/{queueTopic}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public IActionResult QueueTest([FromRoute] string queueName, [FromRoute] string queueTopic)
+        public IActionResult QueueTest([FromRoute] string queueName, [FromRoute] string queueTopic, [FromBody] QueueTestModel data)
         {
-            _queueProvider.Publish(queueName, queueTopic, new
-            {
-                ObjectId = Guid.NewGuid(),
-            });
+            _queueProvider.Publish(queueName, queueTopic, data?.Data);
 
             MethodResult<bool> queryResult = new MethodResult<bool>();
             return queryResult.GetActionResult();
         }
+    }
+
+    public class QueueTestModel
+    {
+        public object? Data { get; set; }
     }
 }
