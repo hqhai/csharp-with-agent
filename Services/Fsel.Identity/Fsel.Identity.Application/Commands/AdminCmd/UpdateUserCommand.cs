@@ -52,23 +52,23 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var role = userRoles.FirstOrDefault();
             if (userRoles.Contains(EnumRoleRegisterWithAdmin.Teacher.ToString()))
             {
-                user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Teacher).ThenInclude(x => x!.TeacherBankAccounts)
+                user = await _userManager.Users.Include(x => x!.Teacher).ThenInclude(x => x!.TeacherBankAccounts)
                                                         .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
                 if (user == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                     return methodResult;
                 }
-                _mapper.Map(request, user.Human?.Teacher);
+                _mapper.Map(request, user.Teacher);
 
-                if (!user.Human?.Teacher?.IsValid() ?? default)
+                if (!user.Teacher?.IsValid() ?? default)
                 {
-                    methodResult.AddErrorBadRequest(user.Human?.Teacher?.ErrorMessages);
+                    methodResult.AddErrorBadRequest(user.Teacher?.ErrorMessages);
                     return methodResult;
                 }
                 if (request.TeacherBankAccount != null)
                 {
-                    var teacherBankApprove = user.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumBankStatus.Approve);
+                    var teacherBankApprove = user.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumBankStatus.Approve);
                     _mapper.Map(request.TeacherBankAccount, teacherBankApprove);
                     if (!teacherBankApprove!.IsValid())
                     {
@@ -79,22 +79,22 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
             else if (role == EnumRoleRegisterWithAdmin.CSO.ToString())
             {
-                user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.CSO).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                user = await _userManager.Users.Include(x => x!.CSO).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
                 if (user == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                     return methodResult;
                 }
-                _mapper.Map(request, user.Human?.CSO);
-                if (!user.Human?.CSO?.IsValid() ?? default)
+                _mapper.Map(request, user.CSO);
+                if (!user.CSO?.IsValid() ?? default)
                 {
-                    methodResult.AddErrorBadRequest(user.Human?.CSO?.ErrorMessages);
+                    methodResult.AddErrorBadRequest(user.CSO?.ErrorMessages);
                     return methodResult;
                 }
             }
             else if (role == EnumRoleRegisterWithAdmin.Moderator.ToString())
             {
-                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
                 if (user == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -103,17 +103,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
 
             _mapper.Map(request, user);
-            _mapper.Map(request, user.Human);
             if (!user.IsValid())
             {
                 methodResult.AddErrorBadRequest(user.ErrorMessages);
                 return methodResult;
             }
-            if (!user.Human!.IsValid())
-            {
-                methodResult.AddErrorBadRequest(user.Human?.ErrorMessages);
-                return methodResult;
-            }
+
             await _userManager.UpdateAsync(user);
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);

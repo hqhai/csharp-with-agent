@@ -68,8 +68,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var studentId = student?.Id;
-            var userId = student?.Human?.UserId;
+            if (student == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var studentId = student.Id;
+            var userId = student.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
@@ -96,12 +101,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 CourseId = request.CourseId,
                 UnitId = request.UnitId,
                 LessonId = x,
-                UserId = userId ?? default
+                UserId = userId
             }).ToList();
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
                 FeatureAccessTimes = featureAccessTimeQuerys,
-                UserId = userId ?? default
+                UserId = userId
             });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
@@ -126,7 +131,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 var mockTestId = unit.UnitSkillMockTests.Select(x => x.MockTestId).FirstOrDefault();
                 var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.MockTestId == mockTestId && x.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
-                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, ObjectId = mockTestResult?.Id, UserId = userId ?? default, EnumFeature = EnumFeature.MockTest });
+                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, ObjectId = mockTestResult?.Id, UserId = userId, EnumFeature = EnumFeature.MockTest });
                 var featureAccessTimeTest = featureAccessTimeResult?.Content?.Result;
                 listLessonProgress.Add(await GetMockTest(request, mockTestId, featureAccessTimeTest));
             }

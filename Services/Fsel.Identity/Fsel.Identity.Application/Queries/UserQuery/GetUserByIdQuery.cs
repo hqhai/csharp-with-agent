@@ -6,36 +6,39 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetUserByIdQuery : IRequest<MethodResult<HumanModel>>
+    public class GetUserByIdQuery : IRequest<MethodResult<UserModel>>
     {
         public Guid? Id { get; set; }
     }
-    public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, MethodResult<HumanModel>>
+
+    public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, MethodResult<UserModel>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly IMapper _mapper;
-        public GetUserByIdQueryHandler(IHumanRepository humanRepository, IMapper mapper)
+        private readonly UserManager<User> _userManager;
+
+        public GetUserByIdQueryHandler(IMapper mapper, UserManager<User> userManager)
         {
-            _humanRepository = humanRepository;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
-        public async Task<MethodResult<HumanModel>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<UserModel>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<HumanModel> methodResult = new MethodResult<HumanModel>();
+            MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
 
-            var human = await _humanRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == request.Id, cancellationToken);
-            if (human == null)
+            var user = await _userManager.Users.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+            if (user == null)
             {
                 return methodResult;
             }
-            methodResult.Result = _mapper.Map<HumanModel>(human);
+            methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
         }
     }

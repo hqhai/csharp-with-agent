@@ -77,8 +77,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                         mockTestResultDto = new TestResultRankingModel();
                     }
                     mockTestResultDto.IsCurrentStudent = item.Id == mockTestResult.StudentId;
-                    mockTestResultDto.FullName = item.Human?.FullName;
-                    mockTestResultDto.AvatarPath = item.Human?.AvatarPath;
+                    mockTestResultDto.FullName = item.User?.FullName;
+                    mockTestResultDto.AvatarPath = item.User?.AvatarPath;
                     testResultRankings.Add(mockTestResultDto);
                 }
             }

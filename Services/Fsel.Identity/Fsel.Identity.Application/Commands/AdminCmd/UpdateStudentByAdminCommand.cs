@@ -14,7 +14,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
-    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Infrastructure.ValueSettings;
@@ -37,15 +36,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly IOrderService _orderService;
         private readonly AppSetting _appSetting;
         private readonly IMediator _mediator;
-        private readonly IHumanRepository _humanRepository;
 
         public UpdateStudentByAdminCommandHandler(UserManager<User> userManager,
             IMapper mapper,
             ITrainingService trainingService,
             IOrderService orderService,
             AppSetting appSetting,
-            IMediator mediator,
-            IHumanRepository humanRepository)
+            IMediator mediator)
         {
             _userManager = userManager;
             _mapper = mapper;
@@ -53,7 +50,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _orderService = orderService;
             _appSetting = appSetting;
             _mediator = mediator;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<StudentModel>> Handle(UpdateStudentByAdminCommand request, CancellationToken cancellationToken)
@@ -61,12 +57,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentModel>();
 
-            var user = await _userManager.Users.Include(x => x.Human)
-                                                         .ThenInclude(x => x!.Student)
-                                                         .ThenInclude(x => x!.ParentStudents)
-                                                         .ThenInclude(x => x.Parent)
-                                                         .ThenInclude(x => x!.Human)
-                                                         .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.Id, cancellationToken);
+            var user = await _userManager.Users.Include(x => x!.Student)
+                                            .ThenInclude(x => x!.ParentStudents)
+                                            .ThenInclude(x => x.Parent)
+                                            .FirstOrDefaultAsync(x => x.Student != null && x.Student.Id == request.Id, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -77,19 +71,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region Validate User
 
-            var student = user.Human?.Student;
+            var student = user.Student;
             _mapper.Map(request, user);
-            _mapper.Map(request, user.Human);
-            student = _mapper.Map(request, user.Human?.Student);
+            student = _mapper.Map(request, user.Student);
             if (!user.IsValid())
             {
                 methodResult.AddErrorBadRequest(user.ErrorMessages);
-                return methodResult;
-            }
-            var method = await Validate(user.Human, cancellationToken);
-            if (!method.IsOK)
-            {
-                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
 
@@ -97,8 +84,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region Save Parent
 
-            var humanParent = student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
-            var userResult = await SaveParent(request, student, humanParent, cancellationToken);
+            var userPrarent = student?.ParentStudents.FirstOrDefault()?.Parent?.User;
+            var userResult = await SaveParent(request, student, userPrarent, cancellationToken);
             if (!userResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(userResult.ErrorMessages);
@@ -141,8 +128,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             #endregion validate and Send OTP
 
             await _userManager.UpdateAsync(user).ConfigureAwait(false);
-            _humanRepository.Update(user.Human ?? new Human());
-            await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = await GetUser(user, student);
             return methodResult;
@@ -151,12 +136,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private async Task<StudentModel> GetUser(User user, Student? student)
         {
             var userModel = _mapper.Map<StudentModel>(user);
-            _mapper.Map(user.Human, userModel.Human);
             _mapper.Map(student, userModel);
             var parentStudent = student?.ParentStudents?.FirstOrDefault();
             if (parentStudent != null && parentStudent.Parent != null)
             {
-                userModel.Parent = _mapper.Map<ParentProfileModel>(parentStudent.Parent.Human);
+                userModel.Parent = _mapper.Map<ParentProfileModel>(parentStudent.Parent.User);
                 userModel.Parent.Occupation = parentStudent.Parent.Occupation;
             }
             var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
@@ -173,7 +157,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             return userModel;
         }
 
-        public async Task<VoidMethodResult> SaveParent(UpdateStudentByAdminCommand request, Student? student, Human? human, CancellationToken cancellationToken)
+        public async Task<VoidMethodResult> SaveParent(UpdateStudentByAdminCommand request, Student? student, User? user, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(student);
@@ -184,34 +168,32 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
             if (student.ParentStudents == null || !student.ParentStudents.Any())
             {
-                human = _mapper.Map<Human>(request.Parent);
-                human.Parent = _mapper.Map<Parent>(request.Parent);
-                human.Parent.ParentStudents.Add(new ParentStudent { Student = student });
-                var validation = await ValidateAndHandleErrors(human, methodResult, cancellationToken);
+                user = _mapper.Map<User>(request.Parent);
+                user.Parent = _mapper.Map<Parent>(request.Parent);
+                user.Parent.ParentStudents.Add(new ParentStudent { Student = student });
+                var validation = await ValidateAndHandleErrors(user, methodResult, cancellationToken);
                 if (!validation)
                 {
                     return methodResult;
                 }
-                _humanRepository.Add(human);
+                await _userManager.CreateAsync(user, "Admin@123");
             }
-            else if (human != null)
+            else if (user != null)
             {
-                _mapper.Map(request.Parent, human);
-                _mapper.Map(request.Parent, human.Parent);
-                var validation = await ValidateAndHandleErrors(human, methodResult, cancellationToken);
+                _mapper.Map(request.Parent, user.Parent);
+                var validation = await ValidateAndHandleErrors(user, methodResult, cancellationToken);
                 if (!validation)
                 {
                     return methodResult;
                 }
-                _humanRepository.Update(human);
+                await _userManager.UpdateAsync(user);
             }
-            await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             return methodResult;
         }
 
-        private async Task<bool> ValidateAndHandleErrors(Human human, VoidMethodResult methodResult, CancellationToken cancellationToken)
+        private async Task<bool> ValidateAndHandleErrors(User user, VoidMethodResult methodResult, CancellationToken cancellationToken)
         {
-            var method = await Validate(human, cancellationToken);
+            var method = await Validate(user, cancellationToken);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -220,40 +202,40 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             return true;
         }
 
-        public async Task<VoidMethodResult> Validate(Human? human, CancellationToken cancellationToken)
+        public async Task<VoidMethodResult> Validate(User user, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(human);
+            ArgumentNullException.ThrowIfNull(user);
             var methodResult = new VoidMethodResult();
-            if (!string.IsNullOrEmpty(human.Email))
+            if (!string.IsNullOrEmpty(user.Email))
             {
-                var emailCheck = await CheckDuplicateAsync(human.Email, human.Id, nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(human.Email), cancellationToken);
+                var emailCheck = await CheckDuplicateAsync(user.Email, user.Id, nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(user.Email), cancellationToken);
                 if (emailCheck != null)
                 {
                     return emailCheck;
                 }
             }
-            if (!string.IsNullOrEmpty(human.PhoneNumber))
+            if (!string.IsNullOrEmpty(user.PhoneNumber))
             {
-                var phoneNumberCheck = await CheckDuplicateAsync(human.PhoneNumber, human.Id, nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(human.PhoneNumber), cancellationToken);
+                var phoneNumberCheck = await CheckDuplicateAsync(user.PhoneNumber, user.Id, nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(user.PhoneNumber), cancellationToken);
                 if (phoneNumberCheck != null)
                 {
                     return phoneNumberCheck;
                 }
             }
 
-            if (!human.IsValid())
+            if (!user.IsValid())
             {
-                methodResult.AddErrorBadRequest(human.ErrorMessages);
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
             }
 
-            if (human.Parent != null && !human.Parent.IsValid())
+            if (user.Parent != null && !user.Parent.IsValid())
             {
-                methodResult.AddErrorBadRequest(human.Parent.ErrorMessages);
+                methodResult.AddErrorBadRequest(user.Parent.ErrorMessages);
             }
 
-            if (human.Student != null && !human.Student.IsValid())
+            if (user.Student != null && !user.Student.IsValid())
             {
-                methodResult.AddErrorBadRequest(human.Student.ErrorMessages);
+                methodResult.AddErrorBadRequest(user.Student.ErrorMessages);
             }
 
             return methodResult;
@@ -261,8 +243,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
         private async Task<VoidMethodResult?> CheckDuplicateAsync(string? fieldValue, Guid? currentId, string errorCode, string fieldName, CancellationToken cancellationToken)
         {
-            var humanOther = await _humanRepository.Queryable
-                .Where(x => (x.Email == fieldValue || x.PhoneNumber == fieldValue) && x.Id != currentId)
+            var humanOther = await _userManager.Users.Where(x => (x.Email == fieldValue || x.PhoneNumber == fieldValue) && x.Id != currentId)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (humanOther != null)

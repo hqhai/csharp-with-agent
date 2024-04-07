@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 {
                     continue;
                 }
-                var userIds = students.Select(x => x.Human).Where(x => x != null && x.UserId != null).Select(x => x!.UserId ?? default).ToList();
+                var userIds = students.Select(x => x.UserId).ToList();
                 var leaderBoardsToAdd = students.Select(student =>
                 {
                     var unitResultCaculate = _unitResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished);
@@ -127,8 +127,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 {
                     NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                     {
-                        ObjectId = studentId ?? default,
-                        UserIds = new List<Guid>() { studentId ?? default },
+                        ObjectId = studentId.Value,
+                        UserIds = new List<Guid>() { studentId.Value },
                         SenderId = _authContext.CurrentUserId,
                         ParamsMessage = new List<object> { locationStudent.ToString() ?? string.Empty },
                         Type = EnumNotificationType.LinkPage,

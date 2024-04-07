@@ -33,7 +33,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<TeacherModel> methodResult = new MethodResult<TeacherModel>();
-            var teacher = await _teacherRepository.Queryable.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var teacher = await _teacherRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             methodResult.Result = _mapper.Map<TeacherModel>(teacher);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

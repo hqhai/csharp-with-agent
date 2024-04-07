@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
+            int age = DateTimeHelper.GetYearOld(student?.User?.Birthday);
 
             if (student != null)
             {

@@ -73,8 +73,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                         finalTestResultDto = new TestResultRankingModel();
                     }
                     finalTestResultDto.IsCurrentStudent = item.Id == finalTestResult.StudentId;
-                    finalTestResultDto.FullName = item.Human?.FullName;
-                    finalTestResultDto.AvatarPath = item.Human?.AvatarPath;
+                    finalTestResultDto.FullName = item.User?.FullName;
+                    finalTestResultDto.AvatarPath = item.User?.AvatarPath;
                     testResultRankings.Add(finalTestResultDto);
                 }
             }

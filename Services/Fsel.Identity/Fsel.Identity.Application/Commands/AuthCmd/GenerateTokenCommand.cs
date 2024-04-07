@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var user = await _userManager.Users.Include(x => x!.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
@@ -120,12 +120,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
-                Code = user.Human?.Code
+                Code = user.Code
             };
 
             if (userRoles.Contains(EnumRole.Student.ToString()))
             {
-                var student = user.Human?.Student;
+                var student = user.Student;
                 tokenLogin.IsOrder = false;
                 tokenLogin.ClassId = student?.ClassId;
                 var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);

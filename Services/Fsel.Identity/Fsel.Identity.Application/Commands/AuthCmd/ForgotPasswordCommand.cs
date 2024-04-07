@@ -8,14 +8,12 @@ using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.UserOtpCmd;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
-using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -28,20 +26,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
-        private readonly IHostEnvironment _environment;
-        private readonly IUserOtpRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
 
         public ForgotPasswordCommandHandler(UserManager<User> userManager
             , IMediator mediator
-            , IHostEnvironment environment
-            , IUserOtpRepository userOtpCodeRepository
             , AppSetting appSetting)
         {
             _userManager = userManager;
             _mediator = mediator;
-            _environment = environment;
-            _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
         }
 

@@ -29,7 +29,6 @@ builder.AddIdentity<User, Role, UserDbContext>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
-builder.Services.AddScoped<IHumanRepository, HumanRepository>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();

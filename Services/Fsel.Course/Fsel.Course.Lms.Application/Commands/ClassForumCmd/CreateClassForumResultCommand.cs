@@ -222,7 +222,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         Feature = EnumTokenFeature.Learn,
                         Mission = GetTokenMission(classForum,classForumResult),
                         Type = EnumTokenHistoryType.Recevived,
-                        UserId = student.Human?.UserId ?? default,
+                        UserId = student.UserId,
                     }
                 };
                 await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken);

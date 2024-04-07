@@ -40,8 +40,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
             var students = await _studentRepository.Queryable
-                                        .Include(i => i.Human)
-                                        .Where(i => i.Human != null && i.Human.UserId.HasValue && request.UserIds.Contains(i.Human.UserId.Value))
+                                        .Include(i => i.User)
+                                        .Where(i => request.UserIds.Contains(i.UserId))
                                         .Select(x => new StudentModel
                                         {
                                             Id = x.Id,
@@ -50,7 +50,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                                             CourseLevel = x.CourseLevel,
                                             CreatedDate = x.CreatedDate,
                                             School = x.School,
-                                            Human = _mapper.Map<HumanProfileModel>(x.Human)
+                                            User = _mapper.Map<UserModel>(x.User)
                                         }).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;

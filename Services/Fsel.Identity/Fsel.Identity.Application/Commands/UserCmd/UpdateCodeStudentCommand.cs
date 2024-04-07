@@ -44,10 +44,15 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == (request.UserId ?? _authContext.CurrentUserId), cancellationToken);
+            var user = await _userManager.Users.Include(x => x!.Student).FirstOrDefaultAsync(x => x.Id == (request.UserId ?? _authContext.CurrentUserId), cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
+                return methodResult;
+            }
+            if (user.Student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user.Student));
                 return methodResult;
             }
 
@@ -69,26 +74,24 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             var lastOfBirthDay = request.Birthday!.Value.Year % 100;
             var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
             var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:000}";
-            if (await _studentRepository.Queryable.Include(x => x.Human).AnyAsync(x => x!.Human!.Code == code, cancellationToken))
+            if (await _studentRepository.Queryable.Include(x => x.User).AnyAsync(x => x!.User!.Code == code, cancellationToken))
             {
                 code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
             }
-            user.Human!.Code = code;
+            user.Code = code;
             int age = DateTimeHelper.GetYearOld(request.Birthday);
             if (age <= 13)
             {
-                user.Human!.Student!.CourseLevel = EnumCourseLevel.A2;
+                user.Student.CourseLevel = EnumCourseLevel.A2;
             }
             else if (age >= 14)
             {
-                user.Human!.Student!.CourseLevel = EnumCourseLevel.B1;
+                user.Student.CourseLevel = EnumCourseLevel.B1;
             }
 
-            user.Human.Student!.ProvinceId = request.ProvinceId;
-            user.Human.Student.DistrictId = request.DistrictId;
-            user.Human.Student.SchoolId = request.SchoolId;
-
-            _mapper.Map(request, user.Human);
+            user.Student.ProvinceId = request.ProvinceId;
+            user.Student.DistrictId = request.DistrictId;
+            user.Student.SchoolId = request.SchoolId;
             await _userManager.UpdateAsync(user);
 
             methodResult.StatusCode = StatusCodes.Status200OK;

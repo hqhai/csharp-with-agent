@@ -56,6 +56,7 @@ namespace Fsel.Notification.Application.Commands
             NotificationMessage notificationNew = _mapper.Map<NotificationMessage>(request);
 
             #region Validation
+
             // check null data
             var notificationType = await _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId);
             if (notificationType == null)
@@ -63,9 +64,10 @@ namespace Fsel.Notification.Application.Commands
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NotificationTypeId), request.NotificationTypeId);
                 return methodResult;
             }
+
             #endregion Validation
 
-            //list user 
+            //list user
             List<Guid> userIds = await FilterListUser(request, cancellationToken);
             List<NotificationMessage> listNotificationMessage = new List<NotificationMessage>();
             string avatarPath = string.Empty;
@@ -87,6 +89,7 @@ namespace Fsel.Notification.Application.Commands
             }
 
             #region Handler
+
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
                 //Save into Database
@@ -95,8 +98,6 @@ namespace Fsel.Notification.Application.Commands
                     await _notificationsRepository.AddList(listNotificationMessage);
                 }
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-
 
                 //Push notification to onesignal
                 //await PushToOneSignal(notificationType, notificationNew, userIds, avatarPath, cancellationToken);
@@ -114,7 +115,6 @@ namespace Fsel.Notification.Application.Commands
 
             return methodResult;
         }
-
 
         /// <summary>
         /// Filter List User nhận thông báo
@@ -145,7 +145,6 @@ namespace Fsel.Notification.Application.Commands
 
             return listUserIds = listUserIds.Except(listUserOffNotification).ToList();
         }
-
 
         /// <summary>
         /// Push notification to websocket
@@ -187,7 +186,6 @@ namespace Fsel.Notification.Application.Commands
             }
             catch (Exception ex)
             {
-
             }
         }
     }

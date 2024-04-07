@@ -33,8 +33,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var student = await _studentRepository.Queryable.Include(x => x.Human)
-                                                  .FirstOrDefaultAsync(x => x.Human!.UserId == request.Id, cancellationToken: cancellationToken);
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == request.Id, cancellationToken: cancellationToken);
 
             if (student == null)
             {

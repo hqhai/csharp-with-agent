@@ -9,18 +9,15 @@ namespace Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models
     public class StudentModel : BaseModel
     {
         public string? Membership { get; set; }
-
         public string? Occupation { get; set; }
-
         public string? School { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
-
         public Guid? ClassId { get; set; }
         public long NumberOfToken { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
-        public HumanProfileModel? Human { get; set; }
+        public Guid UserId { get; set; }
+        public UserModel? User { get; set; }
     }
 }

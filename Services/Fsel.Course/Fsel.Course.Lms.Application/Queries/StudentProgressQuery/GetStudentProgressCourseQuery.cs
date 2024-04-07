@@ -54,8 +54,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var studentId = student?.Id;
-            var userId = student?.Human?.UserId ?? default;
+            if (student == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var studentId = student.Id;
+            var userId = student.UserId;
             var packageResults = await _orderService.GetPackages();
             if (!packageResults.IsSuccessStatusCode)
             {

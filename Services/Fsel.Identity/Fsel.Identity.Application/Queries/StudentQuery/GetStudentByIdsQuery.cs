@@ -43,7 +43,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
             var students = await _studentRepository.Queryable
-                                    .Include(x => x.Human)
+                                    .Include(x => x.User)
                                     .Where(x => request.StudentIds.Contains(x.Id)).ToListAsync(cancellationToken: cancellationToken);
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;

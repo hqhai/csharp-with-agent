@@ -87,9 +87,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            if (string.IsNullOrEmpty(student?.Human?.FullName) || string.IsNullOrEmpty(student?.Human?.Email))
+            if (string.IsNullOrEmpty(student?.User?.FullName) || string.IsNullOrEmpty(student?.User?.Email))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human.FullName), nameof(student.Human.Email));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.User.FullName), nameof(student.User.Email));
                 return methodResult;
             }
 
@@ -156,9 +156,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     Package = package,
                     CourseId = existsOrder?.CourseId ?? course!.Id,
                     Code = code,
-                    FullName = student?.Human?.FullName,
+                    FullName = student?.User?.FullName,
                     PhoneNumber = request.PhoneNumber,
-                    Email = student?.Human?.Email,
+                    Email = student?.User?.Email,
                     Address = request.Address,
                     PaymentMethod = request.PaymentMethod,
                     ProvinceId = request.ProvinceId,
@@ -220,8 +220,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
         private void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId, StudentModel student)
         {
-            order.FullName = student.Human?.FullName;
-            order.Email = student.Human?.Email;
+            order.FullName = student?.User?.FullName;
+            order.Email = student?.User?.Email;
             order.Country = EnumCountryKey.Vietnam.ToString();
             order.Status = EnumOrderStatus.New;
             order.UserId = _authContext.CurrentUserId;

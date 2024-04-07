@@ -94,7 +94,7 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
                 var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
                 item.StartTime = liveTimeFrame?.StartTime;
                 item.EndTime = liveTimeFrame?.EndTime;
-                item.TeacherName = teachers?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+                item.TeacherName = teachers?.FirstOrDefault(x => x.Id == item.TeacherId)?.User?.FullName;
             }
 
             methodResult.Result = new PagingItemsModel<CancelScheduleLiveModel>(lists, request, totalItem);

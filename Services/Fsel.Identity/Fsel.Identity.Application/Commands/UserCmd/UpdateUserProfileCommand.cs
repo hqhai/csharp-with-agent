@@ -8,7 +8,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -25,17 +24,14 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
-        private readonly IHumanRepository _humanRepository;
 
         public UpdateUserProfileCommandHandler(UserManager<User> userManager,
             IMapper mapper,
-            AuthContext authContext,
-            IHumanRepository humanRepository)
+            AuthContext authContext)
         {
             _userManager = userManager;
             _mapper = mapper;
             _authContext = authContext;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
@@ -84,15 +80,14 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
         private async Task<User?> UpdateTeacher(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
-            var userView = await _userManager.Users.Include(x => x.Human)
-                                                   .ThenInclude(x => x!.Teacher)
+            var userView = await _userManager.Users.Include(x => x!.Teacher)
                                                    .ThenInclude(x => x!.TeacherBankAccounts)
                                                    .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
             if (userView == null)
             {
                 return default;
             }
-            var teacherBankAccounts = userView.Human?.Teacher?.TeacherBankAccounts;
+            var teacherBankAccounts = userView.Teacher?.TeacherBankAccounts;
             if (teacherBankAccounts != null && teacherBankAccounts.Any())
             {
                 var teacherBankAccountNew = teacherBankAccounts.FirstOrDefault(x => x.Status == EnumBankStatus.New);
@@ -104,43 +99,39 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 {
                     var teacherBankAccount = _mapper.Map<TeacherBankAccount>(request.TeacherBankAccount);
                     teacherBankAccount.Status = EnumBankStatus.New;
-                    userView.Human?.Teacher?.TeacherBankAccounts?.Add(teacherBankAccount);
+                    userView.Teacher?.TeacherBankAccounts?.Add(teacherBankAccount);
                 }
             }
-            _mapper.Map(request, userView.Human?.Teacher);
+            _mapper.Map(request, userView.Teacher);
             _mapper.Map(request, userView);
-            _mapper.Map(request, userView.Human);
             await _userManager.UpdateAsync(userView);
             return userView;
         }
 
         private async Task<User?> UpdateCSO(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
-            var userView = await _userManager.Users.Include(x => x.Human)
-                                                  .ThenInclude(x => x!.CSO)
+            var userView = await _userManager.Users.Include(x => x!.CSO)
                                                   .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
             if (userView == null)
             {
                 return default;
             }
-            _mapper.Map(request, userView.Human?.CSO);
+            _mapper.Map(request, userView.CSO);
             _mapper.Map(request, userView);
-            _mapper.Map(request, userView.Human);
             await _userManager.UpdateAsync(userView);
             return userView;
         }
 
         private async Task<User?> UpdateStudent(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
-            var userView = await _userManager.Users.Include(x => x.Human)
-                                                   .ThenInclude(x => x!.Student)
+            var userView = await _userManager.Users.Include(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
                                                    .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
             if (userView == null)
             {
                 return default;
             }
-            var student = userView.Human?.Student;
+            var student = userView.Student;
             if (request.Parent != null && student != null && student.CreatedByParent == false)
             {
                 if (student.ParentStudents == null || student.ParentStudents.Count == 0)
@@ -150,30 +141,26 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                         return default;
                     }
 
-                    Human newHuman = _mapper.Map<Human>(request.Parent);
-                    newHuman.Parent = _mapper.Map<Parent>(request.Parent);
-                    newHuman.Parent.ParentStudents.Add(new ParentStudent
+                    userView.Parent = _mapper.Map<Parent>(request.Parent);
+                    userView.Parent.ParentStudents.Add(new ParentStudent
                     {
                         Student = student
                     });
-                    _humanRepository.Add(newHuman);
-                    await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _userManager.UpdateAsync(userView);
                 }
                 else
                 {
-                    userView = await _userManager.Users.Include(x => x.Human)
-                                               .ThenInclude(x => x!.Student)
+                    userView = await _userManager.Users.Include(x => x!.Student)
                                                .ThenInclude(x => x!.ParentStudents)
                                                .ThenInclude(x => x.Parent)
-                                               .ThenInclude(x => x!.Human)
+                                               .ThenInclude(x => x!.User)
                                                .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
-                    var human = userView?.Human?.Student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
-                    if (human != null)
+                    var user = userView?.Student?.ParentStudents.FirstOrDefault()?.Parent?.User;
+                    if (user != null)
                     {
-                        _mapper.Map(request.Parent, human);
-                        _mapper.Map(request.Parent, human.Parent);
-                        _humanRepository.Update(human);
-                        await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                        _mapper.Map(request.Parent, user);
+                        _mapper.Map(request.Parent, user.Parent);
+                        await _userManager.UpdateAsync(user);
                     }
                 }
             }
@@ -181,9 +168,8 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             {
                 return default;
             }
-            _mapper.Map(request, userView.Human?.Student);
+            _mapper.Map(request, userView.Student);
             _mapper.Map(request, userView);
-            _mapper.Map(request, userView.Human);
             await _userManager.UpdateAsync(userView);
             return userView;
         }
@@ -194,8 +180,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             User? userView = null;
             if (request.Students != null && request.Students.Any())
             {
-                userView = await _userManager.Users.Include(x => x.Human)
-                                             .ThenInclude(x => x!.Parent)
+                userView = await _userManager.Users.Include(x => x!.Parent)
                                              .ThenInclude(x => x!.ParentStudents.Where(y => !y.IsDeleted && y.Student != null))
                                              .ThenInclude(x => x.Student)
                                              .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
@@ -206,21 +191,18 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
                 foreach (var item in request.Students)
                 {
-                    var userStudent = await _userManager.Users.Include(x => x.Human)
-                                              .ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Human!.Student!.Id == item.StudentId, cancellationToken);
+                    var userStudent = await _userManager.Users.Include(x => x!.Student).FirstOrDefaultAsync(x => x.Student!.Id == item.StudentId, cancellationToken);
                     if (userStudent != null)
                     {
                         _mapper.Map(item, userStudent);
-                        _mapper.Map(item, userStudent.Human);
-                        _mapper.Map(item, userStudent.Human?.Student);
+                        _mapper.Map(item, userStudent.Student);
                         users.Add(userStudent);
                     }
                 }
             }
             else
             {
-                userView = await _userManager.Users.Include(x => x.Human)
-                                             .ThenInclude(x => x!.Parent)
+                userView = await _userManager.Users.Include(x => x!.Parent)
                                              .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
             }
 
@@ -228,9 +210,8 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             {
                 return default;
             }
-            _mapper.Map(request, userView.Human?.Parent);
+            _mapper.Map(request, userView.Parent);
             _mapper.Map(request, userView);
-            _mapper.Map(request, userView.Human);
             await _userManager.UpdateAsync(userView);
             foreach (var item in users)
             {
@@ -241,14 +222,12 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
         private async Task<User?> UpdateRoleRemaining(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
-            var userView = await _userManager.Users.Include(x => x.Human)
-                                     .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+            var userView = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
             if (userView == null)
             {
                 return default;
             }
             _mapper.Map(request, userView);
-            _mapper.Map(request, userView.Human);
             await _userManager.UpdateAsync(userView);
             return userView;
         }

@@ -4,7 +4,6 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -91,7 +90,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             foreach (var item in lists)
             {
                 var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
-                item.TeacherName = teacher?.Human?.FullName;
+                item.TeacherName = teacher?.User?.FullName;
                 var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
                 item.StartTime = liveTimeFrame?.StartTime ?? default;
                 item.EndTime = liveTimeFrame?.EndTime ?? default;

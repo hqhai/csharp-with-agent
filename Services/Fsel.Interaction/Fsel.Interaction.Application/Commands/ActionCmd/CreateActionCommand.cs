@@ -141,8 +141,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                             await _interationActionPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         }
                     }
-
-
                 }
                 else if (action.Type == EnumInteractionActionType.Like)
                 {
@@ -220,10 +218,8 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
             var response = await _courseService.GetClassForumResultByIdAsync(id) ?? default;
 
-
             return response?.Content?.Result ?? new ClassForumResultModel();
         }
-
 
         /// <summary>
         /// Kiểm tra xem ObjectId truyền vào có phải là ClassForum hay không
@@ -248,7 +244,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             return isClassForum;
         }
 
-
         /// <summary>
         /// Lấy tham số để truyền vào link, message
         /// </summary>
@@ -270,7 +265,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             return (paramsLink, ownerObjectId);
         }
 
-
         /// <summary>
         /// Custom lại Message khi một tài khoản like bài viết, comment của một tài khoản khác.
         /// </summary>
@@ -288,8 +282,8 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             var listUserQuery = await _userService.GetUsersByIdsAsync(model);
             var listUserQueryResult = listUserQuery?.Content?.Result!;
 
-            listNameUserLiked = listUserQueryResult.Where(x => x.UserId != userId).Select(x => x.FullName).ToList() ?? new List<string?>();
-            var userActionRecently = listUserQueryResult.Where(x => x.UserId == userId).Select(x => x.FullName).Single() ?? string.Empty;
+            listNameUserLiked = listUserQueryResult.Where(x => x.Id != userId).Select(x => x.FullName).ToList() ?? new List<string?>();
+            var userActionRecently = listUserQueryResult.Where(x => x.Id == userId).Select(x => x.FullName).Single() ?? string.Empty;
 
             int totalLiked = listNameUserLiked.Count + 1; // 1 like của người vừa like bài viết "userActionRecently"
 
@@ -297,18 +291,20 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             {
                 case ValueSettings.CreateAction.NoOneAction:
                     break;
+
                 case ValueSettings.CreateAction.OnePeopleAction:
                     result = userActionRecently;
                     break;
+
                 case ValueSettings.CreateAction.TwoPeopleAction:
                     result = ValueSettings.CreateAction.TwoPeopleLike.Format(userActionRecently, listNameUserLiked[0]);
                     break;
+
                 default:
                     result = ValueSettings.CreateAction.ThreePeopleOrMoreLike.Format(userActionRecently, listNameUserLiked.Count);
                     break;
             }
             return result;
         }
-
     }
 }

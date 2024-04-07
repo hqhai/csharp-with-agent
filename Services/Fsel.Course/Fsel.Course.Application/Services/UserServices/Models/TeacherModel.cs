@@ -2,21 +2,16 @@
 
 namespace Fsel.Course.Application.Services.UserServices.Models
 {
-    using System;
     using Fsel.Core.Base.BaseModels;
 
     public class TeacherModel : BaseModel
     {
+        public string? FullName { get; set; }
         public string? PassportPath { get; set; }
-
         public string? UniversityDegreePath { get; set; }
-
         public string? CertificationPath { get; set; }
-
         public string? PoliceClearancePath { get; set; }
-
-        public Guid HumanId { get; set; }
-
-        public HumanModel? Human { get; set; }
+        public Guid UserId { get; set; }
+        public UserModel? User { get; set; }
     }
 }

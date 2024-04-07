@@ -66,7 +66,7 @@ namespace Fsel.Notification.Application.Queries
             {
                 foreach (var notify in lists)
                 {
-                    notify.AvatarPath = listSenderInfo.FirstOrDefault(x => notify.SenderId.HasValue && x.UserId == notify.SenderId)?.AvatarPath;
+                    notify.AvatarPath = listSenderInfo.FirstOrDefault(x => notify.SenderId.HasValue && x.Id == notify.SenderId)?.AvatarPath;
                 }
             }
 

@@ -74,7 +74,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             foreach (var item in classQuery)
             {
                 var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
-                item.TeacherName = teacher?.Human?.FullName;
+                item.TeacherName = teacher?.User?.FullName;
             }
             var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
             var timeFrames = timeFramesResult.Content?.Result;

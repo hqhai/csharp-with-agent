@@ -64,6 +64,7 @@ namespace Fsel.Notification.Application.Commands
             }
 
             #region Validation
+
             // check null data
             var notificationType = await _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId);
             if (notificationType == null)
@@ -71,9 +72,10 @@ namespace Fsel.Notification.Application.Commands
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NotificationTypeId), request.NotificationTypeId);
                 return methodResult;
             }
+
             #endregion Validation
 
-            //list user 
+            //list user
             string avatarPath = string.Empty;
 
             if (request.SenderId.HasValue)
@@ -82,8 +84,8 @@ namespace Fsel.Notification.Application.Commands
                 avatarPath = senderInfo?.Content?.Result?.AvatarPath ?? string.Empty;
             }
 
-
             #region Handler
+
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
                 if (!isExistsNotification)
@@ -113,10 +115,6 @@ namespace Fsel.Notification.Application.Commands
 
             return methodResult;
         }
-
-
-
-
 
         /// <summary>
         /// Push notification to websocket

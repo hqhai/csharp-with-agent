@@ -182,13 +182,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             if (lessonResult != null)
             {
                 var user = await _userService.GetUserByStudentId(lessonResult.StudentId);
-                var userId = user?.Content?.Result?.Human?.UserId;
+                var userId = user?.Content?.Result?.UserId;
 
-                List<object> paramLinksValue = new List<object> { lessonResult.LessonId.ToString() ?? string.Empty, lessonResult.CourseId.ToString() ?? string.Empty, lessonResult?.UnitId.ToString() ?? string.Empty };
+                List<object> paramLinksValue = new List<object> { lessonResult.LessonId.ToString() ?? string.Empty, lessonResult.CourseId.ToString() ?? string.Empty, lessonResult.UnitId.ToString() ?? string.Empty };
 
                 NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                 {
-                    ObjectId = lessonResult!.StudentId,
+                    ObjectId = lessonResult.StudentId,
                     UserIds = new List<Guid>() { userId ?? default },
                     SenderId = _authContext.CurrentUserId,
                     ParamsLink = paramLinksValue,

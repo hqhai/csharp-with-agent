@@ -54,7 +54,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var userId = student?.Human?.UserId;
+            if (student == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var userId = student.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
@@ -70,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var lessonIds = unit.UnitLessons.Select(x => x.LessonId).ToList();
                 var mockTestId = unit.UnitSkillMockTests.Any() ? unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId : null;
                 var (currentProgress, progress) = await GetContentComplete(lessonIds, request, mockTestId);
-                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, UserId = userId ?? default });
+                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, UserId = userId });
                 var featureAccessTime = featureAccessTimeResult?.Content?.Result;
                 var unitResult = unit.UnitResults.FirstOrDefault(x => x.StudentId == request.StudentId && x.UnitId == unit.Id && x.CourseId == request.CourseId);
                 unitProgress.Type = nameof(unitResult.Unit);

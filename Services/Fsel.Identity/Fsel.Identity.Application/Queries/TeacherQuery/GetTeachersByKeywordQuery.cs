@@ -39,8 +39,8 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
                 methodResult.Result = null;
                 return methodResult;
             }
-            var teachers = await _teacherRepository.Queryable.Include(x => x.Human).ToListAsync(cancellationToken);
-            teachers = teachers.Where(x => !string.IsNullOrEmpty(x.Human?.FullName) && x.Human.FullName.Contains(request.Keyword!, StringComparison.OrdinalIgnoreCase)).ToList();
+            var teachers = await _teacherRepository.Queryable.Include(x => x.User).ToListAsync(cancellationToken);
+            teachers = teachers.Where(x => !string.IsNullOrEmpty(x.User?.FullName) && x.User.FullName.Contains(request.Keyword!, StringComparison.OrdinalIgnoreCase)).ToList();
             methodResult.Result = _mapper.Map<IList<TeacherModel>>(teachers);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

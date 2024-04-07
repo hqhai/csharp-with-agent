@@ -95,8 +95,8 @@ IMediator mediator)
             var teacherFreeDateModel = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
             var teacherResult = await _userService.GetTeacherByIdAsync(teacherFreeDateModel.TeacherId);
             var teacher = teacherResult.Content?.Result;
-            teacherFreeDateModel.TeacherName = teacher?.Human?.FullName;
-            teacherFreeDateModel.TeacherCode = teacher?.Human?.Code;
+            teacherFreeDateModel.TeacherName = teacher?.User?.FullName;
+            teacherFreeDateModel.TeacherCode = teacher?.User?.Code;
 
             methodResult.Result = teacherFreeDateModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

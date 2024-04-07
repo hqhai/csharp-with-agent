@@ -3,6 +3,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Core.Entities;
+using Fsel.Identity.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace Fsel.Identity.Domain.Entities
@@ -43,12 +44,17 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(1000)]
         public string? AvatarPath { get; set; }
 
-        public virtual Human? Human { get; set; }
+        public EnumGender? Gender { get; set; }
 
         public virtual ICollection<UserOtp> UserOtpCodes { get; set; } = new List<UserOtp>();
 
         public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
 
         public virtual ICollection<UserPlatform> UserPlatforms { get; set; } = new List<UserPlatform>();
+
+        public virtual Parent? Parent { get; set; }
+        public virtual CSO? CSO { get; set; }
+        public virtual Student? Student { get; set; }
+        public virtual Teacher? Teacher { get; set; }
     }
 }

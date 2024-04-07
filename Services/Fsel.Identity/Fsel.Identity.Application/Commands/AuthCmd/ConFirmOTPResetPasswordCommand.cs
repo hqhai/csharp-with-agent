@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base.Managers;
@@ -23,16 +22,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
-        private readonly IMapper _mapper;
-        private readonly IHumanRepository _humanRepository;
         private readonly IParentRepository _parentRepository;
 
-        public ConfirmOtpResetPasswordCommandHandler(UserManager<User> userManager, IMediator mediator, IMapper mapper, IHumanRepository humanRepository, IParentRepository parentRepository)
+        public ConfirmOtpResetPasswordCommandHandler(UserManager<User> userManager, IMediator mediator, IParentRepository parentRepository)
         {
             _userManager = userManager;
             _mediator = mediator;
-            _mapper = mapper;
-            _humanRepository = humanRepository;
             _parentRepository = parentRepository;
         }
 
@@ -70,18 +65,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 await _userManager.ConfirmEmailAsync(user, token);
                 var roles = await _userManager.GetRolesAsync(user);
 
-                var human = await CreateHuman(roles, user);
-                if (!human.IsValid())
+                user = await UpdateUserAsync(roles, user);
+                if (!user.IsValid())
                 {
-                    methodResult.AddError(human.ErrorMessages);
+                    methodResult.AddError(user.ErrorMessages);
                     return methodResult;
                 }
-                await _humanRepository.ExecuteTransactionAsync(async () =>
-                {
-                    human = _humanRepository.Add(human);
-                    await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    return methodResult;
-                });
+                await _userManager.UpdateAsync(user);
             }
 
             var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.NewPassword);
@@ -94,18 +84,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             return methodResult;
         }
 
-        private async Task<Human> CreateHuman(IList<string> roles, User user)
+        private async Task<User> UpdateUserAsync(IList<string> roles, User user)
         {
-            Human human = _mapper.Map<Human>(user);
-            human.UserId = user.Id;
             var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
 
             if (roles.Contains(EnumRoleRegister.Student.ToString()))
             {
-                human.Student = new Student
+                user.Student = new Student
                 {
-                    HumanId = human.Id,
+                    UserId = user.Id,
                     CreatedByParent = false,
                     Occupation = "Student"
                 };
@@ -113,13 +101,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
             {
                 var stt = await _parentRepository.Queryable.CountAsync();
-                human.Parent = new Parent
+                user.Parent = new Parent
                 {
-                    HumanId = human.Id,
+                    UserId = user.Id,
                 };
-                human.Code = $"PH_{weekNumber}{stt:0000}";
+                user.Code = $"PH_{weekNumber}{stt:0000}";
             }
-            return human;
+            return user;
         }
     }
 }

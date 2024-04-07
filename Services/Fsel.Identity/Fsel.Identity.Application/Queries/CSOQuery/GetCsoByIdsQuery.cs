@@ -12,12 +12,12 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetCsoByIdsQuery : IRequest<MethodResult<IList<HumanModel>>>
+    public class GetCsoByIdsQuery : IRequest<MethodResult<IList<UserModel>>>
     {
         public IList<Guid>? Ids { get; set; }
     }
 
-    public class GetCsoByIdsQueryHandler : IRequestHandler<GetCsoByIdsQuery, MethodResult<IList<HumanModel>>>
+    public class GetCsoByIdsQueryHandler : IRequestHandler<GetCsoByIdsQuery, MethodResult<IList<UserModel>>>
     {
         private readonly ICSORepository _csoRepository;
 
@@ -26,28 +26,26 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
             _csoRepository = csoRepository;
         }
 
-        public async Task<MethodResult<IList<HumanModel>>> Handle(GetCsoByIdsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<UserModel>>> Handle(GetCsoByIdsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var methodResult = new MethodResult<IList<HumanModel>>();
+            var methodResult = new MethodResult<IList<UserModel>>();
             if (request.Ids == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Ids));
                 return methodResult;
             }
-            IList<HumanModel> human = new List<HumanModel>();
-            human = await _csoRepository.Queryable.Where(p => request.Ids.Contains(p.Id)).Include(i => i.Human).Select(x => new HumanModel
+            var users = await _csoRepository.Queryable.Where(p => request.Ids.Contains(p.Id)).Select(x => new UserModel
             {
-                Id = x.Id,
-                FullName = x.Human!.FullName,
-                Email = x.Human!.Email,
-                PhoneNumber = x.Human!.PhoneNumber,
-                AvatarPath = x.Human!.AvatarPath,
-
+                Id = x.User!.Id,
+                FullName = x.User.FullName,
+                Email = x.User.Email,
+                PhoneNumber = x.User.PhoneNumber,
+                AvatarPath = x.User.AvatarPath,
             }).ToListAsync(cancellationToken);
 
-            methodResult.Result = human;
+            methodResult.Result = users;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
