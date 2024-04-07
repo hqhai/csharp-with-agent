@@ -177,6 +177,7 @@ builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>(
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
 
 // Queue
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
