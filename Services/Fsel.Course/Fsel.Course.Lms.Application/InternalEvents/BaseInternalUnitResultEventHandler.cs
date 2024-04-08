@@ -292,7 +292,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 UnitTest = unitTestHtml,
                 SkillTest = skillTestHtml,
                 CourseType = course.CourseType,
-                Percent = percentUnit.ToString(CultureInfo.CurrentCulture)
+                Percent = percentUnit.ToString(CultureInfo.CurrentCulture),
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
             };
 
             if (course.CourseType == EnumCourseType.Ielts && mockTestResult != null)
