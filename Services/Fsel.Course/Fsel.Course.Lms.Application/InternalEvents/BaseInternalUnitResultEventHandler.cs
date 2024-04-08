@@ -222,9 +222,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 var (color, skillName, icon) = SendMailHelper.ConvertEnum(item);
 
-                if (videoResult.Where(p => p.VideoSkillScores != null).SelectMany(p => p.VideoSkillScores!).Where(p => p.SkillScores != null).SelectMany(p => p.SkillScores!).Any(p => p.Skill == item))
+                if (videoResult.Where(p => p.VideoSkillScores != null).SelectMany(p => p.VideoSkillScores!).Where(p => p.SkillScores != null && p.Type == EnumTimeCodeType.Standalone).SelectMany(p => p.SkillScores!).Any(p => p.Skill == item))
                 {
-                    var percent = (int)videoResult.Where(p => p.VideoSkillScores != null).SelectMany(p => p.VideoSkillScores!).Where(p => p.SkillScores != null).SelectMany(p => p.SkillScores!).Where(p => p.Skill == item).Average(p => p.Percent);
+                    var videoSkillScores = videoResult.Where(p => p.VideoSkillScores != null).SelectMany(p => p.VideoSkillScores!).Where(p => p.SkillScores != null && p.Type == EnumTimeCodeType.Standalone).SelectMany(p => p.SkillScores!).Where(p => p.Skill == item);
+
+                    var percent = (int)((videoSkillScores.Sum(p => p.CorrectCount) / videoSkillScores.Sum(p => p.TotalCount)) * 100);
 
                     var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, percent, percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - percent, percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, percent + "%");
 
@@ -233,7 +235,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 if (homeworkResultFromUnit1ToNow.Where(p => p.SkillScores != null).SelectMany(p => p.SkillScores!).Any(p => p.Skill == item))
                 {
-                    var percent = (int)homeworkResultFromUnit1ToNow.Where(p => p.SkillScores != null).SelectMany(p => p.SkillScores!).Where(p => p.Skill == item).Average(p => p.Percent);
+                    var homeworkSkillScores = homeworkResultFromUnit1ToNow.Where(p => p.SkillScores != null).SelectMany(p => p.SkillScores!).Where(p => p.Skill == item);
+
+                    var percent = (int)((homeworkSkillScores.Sum(p => p.CorrectCount) / homeworkSkillScores.Sum(p => p.TotalCount)) * 100);
 
                     var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, percent, percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - percent, percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, percent + "%");
 
