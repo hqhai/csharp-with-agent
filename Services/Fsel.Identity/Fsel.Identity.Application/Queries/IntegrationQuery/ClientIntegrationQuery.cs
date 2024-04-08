@@ -195,14 +195,13 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 foreach (var order in orderItems)
                 {
                     var courseName = string.Empty;
-                    if (order.CourseName == EnumCourseLevel.A1 || order.CourseName == EnumCourseLevel.A2 || order.CourseName == EnumCourseLevel.B1 ||
-                        order.CourseName == EnumCourseLevel.B1Plus || order.CourseName == EnumCourseLevel.B2 || order.CourseName == EnumCourseLevel.C1)
+                    if (order.CourseName != null && (int)order.CourseName <= 5)
                     {
-                        courseName = "Ielts";
+                        courseName = EnumCourseType.Academic.ToString();
                     }
                     else
                     {
-                        courseName = "Academic";
+                        courseName = EnumCourseType.Ielts.ToString();
                     }
                     var orderIntegration = new OrderIntegrationModel
                     {
@@ -236,7 +235,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     ParentGender = user.ParentGender,
                     SchoolName = survey?.Name,
                     PTLever = ptTestResult?.Lever,
-                    OrderIntegration  = orderIntegrations
+                    OrderIntegration = orderIntegrations
                 };
                 leadsIntegrations.Add(leadsIntegration);
             }
