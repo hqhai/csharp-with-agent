@@ -47,6 +47,10 @@ namespace Fsel.Identity.Domain.Entities
         public string? AvatarPath { get; set; }
 
         public virtual Human? Human { get; set; }
+        public Parent? Parent { get; set; }
+        public CSO? CSO { get; set; }
+        public Student? Student { get; set; }
+        public Teacher? Teacher { get; set; }
 
         public virtual ICollection<UserOtp> UserOtpCodes { get; set; } = new List<UserOtp>();
 

@@ -54,7 +54,9 @@ namespace Fsel.Identity.Domain.Entities
         public string? PoliceClearancePath { get; set; }
 
         public Human? Human { get; set; }
-
         public Guid HumanId { get; set; }
+
+        public virtual User? User { get; set; }
+        public Guid? UserId { get; set; }
     }
 }

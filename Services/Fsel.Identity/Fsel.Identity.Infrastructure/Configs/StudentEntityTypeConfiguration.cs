@@ -24,6 +24,12 @@ namespace Fsel.Identity.Infrastructure.Configs
                     .HasForeignKey<Student>(b => b.HumanId)
                     .OnDelete(DeleteBehavior.Cascade);
             builder.HasIndex(x => x.HumanId).IsUnique(false);
+
+            builder.HasOne(a => a.User)
+                    .WithOne(b => b.Student)
+                    .HasForeignKey<Student>(b => b.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            builder.HasIndex(x => x.UserId).IsUnique(false);
         }
     }
 }

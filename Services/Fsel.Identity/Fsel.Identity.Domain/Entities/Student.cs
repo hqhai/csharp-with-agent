@@ -45,7 +45,8 @@ namespace Fsel.Identity.Domain.Entities
         public Human? Human { get; set; }
 
         public Guid HumanId { get; set; }
-
+        public virtual User? User { get; set; }
+        public Guid? UserId { get; set; }
         public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
         public ICollection<StudentDailyStreak> StudentDailyStreaks { get; set; } = new List<StudentDailyStreak>();
     }
