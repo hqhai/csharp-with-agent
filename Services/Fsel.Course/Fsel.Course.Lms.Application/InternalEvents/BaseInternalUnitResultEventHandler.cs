@@ -258,7 +258,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 if (course.CourseType == EnumCourseType.Academic)
                 {
-                    if (unitTestResult.Any(p => p.Skill == item))
+                    if (unitTestResult.Any(p => p.Skill == item) && (item == EnumCourseSkill.Vocabulary || item == EnumCourseSkill.Grammar))
                     {
                         var percent = (int)unitTestResult.Where(p => p.Skill == item).Average(p => p.Percent);
 
