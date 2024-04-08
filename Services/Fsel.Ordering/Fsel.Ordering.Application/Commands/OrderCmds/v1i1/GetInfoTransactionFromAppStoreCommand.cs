@@ -73,8 +73,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var bundleId = _appSetting.PurchaseSettings?.AppStore?.BundleId;
             var keyId = _appSetting.PurchaseSettings?.AppStore?.KeyId;
             var audience = _appSetting.PurchaseSettings?.AppStore?.Audience;
-            var iat = ConvertToUnixTimestamp(DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam));
-            var exp = ConvertToUnixTimestamp(DateTime.UtcNow.AddMinutes(60).ConvertTimeFromUtc(EnumCountryKey.Vietnam));
+            var iat = ConvertToUnixTimestamp(DateTime.UtcNow);
+            var exp = ConvertToUnixTimestamp(DateTime.UtcNow.AddMinutes(60));
 
             string privateKey = File.ReadAllText(ResourceSettings.AppStore);
 
