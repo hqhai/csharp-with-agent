@@ -90,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
                 {
-                    ClassForumResultId = classForumResult.Id,
+                    ClassForumDetailResultId = classForumResult.Id,
                     WordContent = wordContent,
                     UserAIConfig = classForum.UserAlConfig,
                     SettingModel = classForum.SettingModel,

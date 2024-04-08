@@ -34,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     public class ApproveClassForumPenddingCommandHandler : IRequestHandler<ApproveClassForumPenddingCommand, MethodResult<ClassForumResultModel>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IClassforumDetailResultRepository _classforumDetailResultRepository;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
@@ -42,16 +43,17 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IOrderService orderService, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher)
+        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IClassforumDetailResultRepository classforumDetailResultRepository, IMapper mapper, AuthContext authContext, IUserService userService, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher)
         {
             _classForumResultRepository = classForumResultRepository;
+            _classforumDetailResultRepository = classforumDetailResultRepository;
             _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
             _questBoardPublisher = questBoardPublisher;
+            _orderService = orderService;
             _lessonResultRepository = lessonResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
-            _orderService = orderService;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveClassForumPenddingCommand request, CancellationToken cancellationToken)

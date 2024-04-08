@@ -36,5 +36,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumSubmissionCount? SubmissionCount { get; set; }
 
         public Guid ClassForumResultId { get; set; }
+
+        public ClassForumResultFileModel? ClassForumResultFile { get; set; }
     }
 }
