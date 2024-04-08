@@ -3,6 +3,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Core.Entities;
+using Fsel.Identity.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace Fsel.Identity.Domain.Entities
@@ -36,6 +37,8 @@ namespace Fsel.Identity.Domain.Entities
         }
 
         public DateTime? Birthday { get; set; }
+
+        public EnumGender? Gender { get; set; }
 
         [MaxLength(250)]
         public string? Address { get; set; }
