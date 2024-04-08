@@ -174,7 +174,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     return methodResult;
                 }
                 //check AI feedback
-                if (classForum.IsAlFeedBack)
+                if (classForum.IsAlFeedBack && classForumResult.Status != EnumClassForumResultStatus.Draft)
                 {
                     await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
                     {
