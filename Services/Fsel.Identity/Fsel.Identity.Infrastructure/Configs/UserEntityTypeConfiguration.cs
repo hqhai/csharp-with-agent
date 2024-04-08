@@ -2,7 +2,9 @@
 
 namespace Fsel.Identity.Infrastructure.Configs
 {
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,6 +13,12 @@ namespace Fsel.Identity.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<User> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
+            builder.Property(e => e.Gender)
+                 .HasMaxLength(100)
+                 .HasConversion(
+                    v => v.HasValue ? v.ToString() : null,
+                    v => v.EnumParse<EnumGender>());
         }
     }
 }

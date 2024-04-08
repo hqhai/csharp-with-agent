@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240408112507_Update_UserTable_Add_GenderField")]
+    partial class Update_UserTable_Add_GenderField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,14 +198,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("HumanId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("CSOs");
                 });
@@ -356,14 +354,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("HumanId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Parents");
                 });
@@ -809,14 +802,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("HumanId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Students");
                 });
@@ -1188,14 +1176,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("HumanId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Teachers");
                 });
@@ -1811,14 +1794,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
-                        .WithOne("CSO")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.CSO", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.Navigation("Human");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Human", b =>
@@ -1839,14 +1815,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
-                        .WithOne("Parent")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.Parent", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.Navigation("Human");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.ParentStudent", b =>
@@ -1872,14 +1841,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
-                        .WithOne("Student")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.Student", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.Navigation("Human");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentDailyStreak", b =>
@@ -1901,14 +1863,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
-                        .WithOne("Teacher")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.Teacher", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.Navigation("Human");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.TeacherBankAccount", b =>
@@ -2004,15 +1959,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.User", b =>
                 {
-                    b.Navigation("CSO");
-
                     b.Navigation("Human");
-
-                    b.Navigation("Parent");
-
-                    b.Navigation("Student");
-
-                    b.Navigation("Teacher");
 
                     b.Navigation("UserOtpCodes");
 

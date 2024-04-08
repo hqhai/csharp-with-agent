@@ -38,13 +38,13 @@ namespace Fsel.Identity.Domain.Entities
 
         public DateTime? Birthday { get; set; }
 
+        public EnumGender? Gender { get; set; }
+
         [MaxLength(250)]
         public string? Address { get; set; }
 
         [MaxLength(1000)]
         public string? AvatarPath { get; set; }
-
-        public EnumGender? Gender { get; set; }
 
         public virtual ICollection<UserOtp> UserOtpCodes { get; set; } = new List<UserOtp>();
 
