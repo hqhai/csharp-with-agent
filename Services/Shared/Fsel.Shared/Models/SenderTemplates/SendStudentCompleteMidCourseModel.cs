@@ -26,6 +26,7 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? Level { get; set; }
         public string? Description { get; set; }
         public string? ColorCircle { get; set; }
+        public string? ContinueLearn { get; set; }
         public EnumCourseType CourseType { get; set; }
     }
 }
