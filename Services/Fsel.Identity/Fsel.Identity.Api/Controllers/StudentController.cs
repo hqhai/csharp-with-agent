@@ -16,8 +16,10 @@ namespace Fsel.Identity.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student")]
     [ApiController]
     public class StudentController : BaseController
@@ -156,19 +158,36 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get list student by student ids
         /// </summary>
-        [HttpPost("import-student-to-course")]
+        [HttpPost("import-students-into-platform")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ImportStudent([FromForm] ImportStudentToCourseCommand command)
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] ImportStudentsIntoPlatformCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
 
-            MethodResult<Stream> commandResult = await _mediator.Send(new ImportStudentToCourseCommand { FormFile = command.FormFile }).ConfigureAwait(false);
+            MethodResult<Stream> commandResult = await _mediator.Send(new ImportStudentsIntoPlatformCommand { FormFile = command.FormFile }).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "import-student-to-course.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, "import-student-into-platform.xlsx");
+        }
+
+        /// <summary>
+        /// Get list student by student ids
+        /// </summary>
+        [HttpPost("export-template-students-into-platform")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportTemplateStudentsIntoPlatform()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateCreateAccountStudentCommand { }).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Template_Create_Account_Student.xlsx");
         }
 
         /// <summary>
