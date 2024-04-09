@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
@@ -12,6 +13,7 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
@@ -211,6 +213,18 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> UpdateBeginnerGuide([FromBody] UpdateStudentBeginnerGuideCommand query)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student by email
+        /// </summary>
+        [HttpGet("get-student-by-email")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentByEmail([FromQuery] string email)
+        {
+            MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByEmailQuery { Email = email }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

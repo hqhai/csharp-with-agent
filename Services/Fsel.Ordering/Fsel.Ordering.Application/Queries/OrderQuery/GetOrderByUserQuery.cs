@@ -9,7 +9,6 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Fsel.Core.Base;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -35,7 +34,8 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel?>();
 
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && (p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Fail), cancellationToken);
+            var order = await _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+
             methodResult.Result = _mapper.Map<OrderModel?>(order);
             return methodResult;
         }
