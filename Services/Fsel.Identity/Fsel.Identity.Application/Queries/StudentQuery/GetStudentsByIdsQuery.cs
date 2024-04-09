@@ -21,12 +21,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentsByIdsQueryHandler : IRequestHandler<GetStudentsByIdsQuery, MethodResult<List<StudentModel>>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
 
-        public GetStudentsByIdsQueryHandler(IHumanRepository humanRepository, IStudentRepository studentRepository)
+        public GetStudentsByIdsQueryHandler(IStudentRepository studentRepository)
         {
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
         }
 
@@ -40,9 +38,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Ids));
                 return methodResult;
             }
-
-            var humans = await _humanRepository.Queryable.Where(p => p.UserId.HasValue && request.Ids.Contains(p.UserId.Value)).Select(p => p.Id).ToListAsync(cancellationToken);
-            var students = await _studentRepository.Queryable.Include(h => h.Human).Select(p => new StudentModel
+            var students = await _studentRepository.Queryable.Where(i => request.Ids.Contains(i.UserId)).Select(p => new StudentModel
             {
                 Id = p.Id,
                 PackageId = p.PackageId,
@@ -50,7 +46,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 School = p.School,
                 CourseLevel = p.CourseLevel,
                 ClassId = p.ClassId,
-            }).Where(i => i.Human != null && humans.Contains(i.Human.Id)).ToListAsync(cancellationToken);
+            }).ToListAsync(cancellationToken);
 
             methodResult.Result = students;
             methodResult.StatusCode = StatusCodes.Status200OK;

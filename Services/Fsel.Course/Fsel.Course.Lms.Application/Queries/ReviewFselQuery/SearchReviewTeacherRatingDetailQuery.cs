@@ -140,7 +140,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 item.Stars = NumberHelper.ConvertRound(item.Stars);
             }
-            methodResult.Result = new ReviewTeacherRatingDetailSearchModel { FullName = teacher?.Human?.FullName, PagingItemsModel = new PagingItemsModel<ReviewTeacherRatingDetailModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewTeacherRatingDetailSearchModel { FullName = teacher?.User?.FullName, PagingItemsModel = new PagingItemsModel<ReviewTeacherRatingDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Application.Queries.AdminQuery
 {
-    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -35,13 +34,13 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var query = _studentRepository.Queryable.Include(x => x.Human).Select(x => new StudentSearchAdminModel
+            var query = _studentRepository.Queryable.Include(x => x.User).Select(x => new StudentSearchAdminModel
             {
                 Id = x.Id,
                 CreatedDate = x.CreatedDate,
-                Birthday = x.Human!.Birthday,
+                Birthday = x.User!.Birthday,
                 CourseLevel = x.CourseLevel,
-                FullName = x.Human.FullName,
+                FullName = x.User.FullName,
                 Type = x.CourseLevel.GetEnumCourseType()
             });
             if (!string.IsNullOrEmpty(request.Keyword))

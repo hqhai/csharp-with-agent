@@ -19,11 +19,12 @@ namespace Fsel.Identity.Infrastructure.Configs
                  .HasConversion(
                      v => v.ToString(),
                      v => v.EnumParse<EnumCourseLevel>());
-            builder.HasOne(a => a.Human)
+
+            builder.HasOne(a => a.User)
                     .WithOne(b => b.Student)
-                    .HasForeignKey<Student>(b => b.HumanId)
+                    .HasForeignKey<Student>(b => b.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-            builder.HasIndex(x => x.HumanId).IsUnique(false);
+            builder.HasIndex(x => x.UserId).IsUnique(false);
         }
     }
 }

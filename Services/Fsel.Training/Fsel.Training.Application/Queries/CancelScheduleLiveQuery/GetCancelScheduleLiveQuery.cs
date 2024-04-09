@@ -67,9 +67,9 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
                 {
                     liveSessionInformation.Students = students?.Select(x => new StudentInfoModel
                     {
-                        FullName = x.Human?.FullName,
-                        PhoneNumber = x.Human?.PhoneNumber,
-                        Email = x.Human?.Email,
+                        FullName = x?.User?.FullName,
+                        PhoneNumber = x?.User?.PhoneNumber,
+                        Email = x?.User?.Email,
                     }).ToList();
                 }
             }
@@ -89,7 +89,7 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
                     return methodResult;
                 }
                 teacher = teacherResult.Content?.Result;
-                liveSessionInformation.TeacherName = teacher?.Human?.FullName;
+                liveSessionInformation.TeacherName = teacher?.User?.FullName;
             }
             var classWorkFlowPlans = classLiveWorkFlow.ClassLiveWorkFlowPlans.Where(x => x.IsActive).ToList();
             var classWorkFlowPlansModel = _mapper.Map<IList<ClassLiveWorkFlowPlanModel>>(classWorkFlowPlans);

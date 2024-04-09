@@ -101,7 +101,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 CourseId = x.CourseId,
                 ReviewType = x.ReviewType,
                 StudentId = x.StudentId,
-                CodeStudent = student?.Human?.Code,
+                CodeStudent = student?.Code,
                 ClassCode = classStudent?.Code,
                 Stars = x.StudentReviewDetails.Average(x => x.VoteStars),
                 StudentReviewQuestionTypes = x.StudentReviewDetails.Select(x => new StudentReviewQuestionTypeModel

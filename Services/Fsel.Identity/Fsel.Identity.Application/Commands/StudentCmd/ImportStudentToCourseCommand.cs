@@ -35,18 +35,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IMediator _mediator;
         private readonly UserManager<User> _userManager;
         private readonly IOrderService _orderService;
-        private readonly IHumanRepository _humanRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IInteractionService _interactionService;
         private readonly IPlatformRepository _platformRepository;
         private const string DefaultPassword = "Hello.123";
 
-        public ImportStudentToCourseCommandHandler(IMediator mediator, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
+        public ImportStudentToCourseCommandHandler(IMediator mediator, UserManager<User> userManager, IOrderService orderService, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
         {
             _mediator = mediator;
             _userManager = userManager;
             _orderService = orderService;
-            _humanRepository = humanRepository;
             _lmsCourseService = lmsCourseService;
             _interactionService = interactionService;
             _platformRepository = platformRepository;
@@ -119,12 +117,27 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 foreach (var student in result.Datas.ToList())
                 {
+                    var getCourseByCodeResult = await _lmsCourseService.GetCourseByCode(student.CodeCourse!);
+                    if (!getCourseByCodeResult.IsSuccessStatusCode)
+                    {
+                        methodResult.AddError(getCourseByCodeResult.Error);
+                        return methodResult;
+                    }
+                    var course = getCourseByCodeResult.Content?.Result;
                     Microsoft.AspNetCore.Identity.IdentityResult identityResult;
                     var user = new User();
                     user.UserName = student.Email;
                     user.Email = student.Email;
                     user.FirstName = student.Email;
                     user.EmailConfirmed = true;
+                    user.Code = "Admin@123";
+                    user.Student = new Student
+                    {
+                        UserId = user.Id,
+                        CreatedByParent = false,
+                        Occupation = "Student",
+                        CourseLevel = course!.CourseLevel
+                    };
 
                     #region Add Platform to User
 
@@ -148,28 +161,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
                     user = await _userManager.Users.FirstOrDefaultAsync(p => p.UserName == user.UserName, cancellationToken);
 
-                    var getCourseByCodeResult = await _lmsCourseService.GetCourseByCode(student.CodeCourse!);
-                    if (!getCourseByCodeResult.IsSuccessStatusCode)
-                    {
-                        methodResult.AddError(getCourseByCodeResult.Error);
-                        return methodResult;
-                    }
-                    var course = getCourseByCodeResult.Content?.Result;
-
-                    Human human = new Human();
-                    human.UserId = user!.Id;
-                    human.Code = "Admin@123";
-                    human.FullName = user?.FullName;
-                    human.Student = new Student
-                    {
-                        HumanId = human.Id,
-                        CreatedByParent = false,
-                        Occupation = "Student",
-                        CourseLevel = course!.CourseLevel
-                    };
-                    _humanRepository.Add(human);
-                    await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
                     var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user?.Id, Gender = EnumGender.Male, Birthday = new DateTime(2011, 1, 1) }, cancellationToken).ConfigureAwait(false);
 
                     if (!updateCode.IsOK)
@@ -177,11 +168,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         methodResult.AddError(updateCode.ErrorMessages);
                         return methodResult;
                     }
-
-                    human.Student.CourseLevel = course!.CourseLevel;
-                    _humanRepository.Update(human);
-                    await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
                     var package = packagesResult.Content?.Result?.FirstOrDefault(p => p.Code == student.CodePackage);
                     if (package == null)
                     {

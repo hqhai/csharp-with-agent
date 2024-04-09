@@ -18,7 +18,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
             try
             {
                 return await Queryable
-                .Include(x => x.Human)
+                .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
@@ -32,7 +32,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
             try
             {
                 return await Queryable
-                .Include(x => x.Human)
+                .Include(x => x.User)
                 .Where(x => ids.Contains(x.Id))
                 .ToListAsync();
             }
@@ -47,8 +47,8 @@ namespace Fsel.Identity.Infrastructure.Repositories
             try
             {
                 return await Queryable
-                .Include(x => x.Human)
-                .FirstOrDefaultAsync(x => x.Human!.UserId == userId);
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.UserId == userId);
             }
             catch (Exception)
             {

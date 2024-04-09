@@ -7,7 +7,6 @@ using Fsel.Core.Entities;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.Configs;
 using Fsel.Shared.Constants;
-using IdentityServer4.EntityFramework.Entities;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +44,6 @@ namespace Fsel.Identity.Infrastructure
             builder.Entity<UserToken>().ToTable(nameof(UserTokens))
                 .HasQueryFilter(e => !e.IsDeleted);
 
-            builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherBankAccountEntityTypeConfiguration());
             builder.ApplyConfiguration(new CSOEntityTypeConfiguration());
@@ -72,7 +70,6 @@ namespace Fsel.Identity.Infrastructure
         public override DbSet<RoleClaimEntity> RoleClaims { get; set; }
         public override DbSet<Role> Roles { get; set; }
         public DbSet<UserOtp> UserOtps { get; set; }
-        public DbSet<Human> Humans { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Parent> Parents { get; set; }

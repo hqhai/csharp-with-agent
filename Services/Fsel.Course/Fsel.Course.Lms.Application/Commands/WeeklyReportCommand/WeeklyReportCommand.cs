@@ -146,11 +146,11 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             foreach (var item in students)
             {
-                var studentDailyStreaks = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
+                var studentDailyStreaks = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
 
                 var weeklyReport = new WeeklyReportModel()
                 {
-                    FullName = item.Human?.FullName,
+                    FullName = item.User?.FullName,
                     StartDate = lastFridayAt13.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
                     EndDate = currentDate.AddDays(-1).ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
                     TotalDay = studentDailyStreaks?.Count.ToString(CultureInfo.CurrentCulture),
@@ -176,8 +176,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 CheckAndAssignStatusDate(weeklyReport, studentDailyStreaks, dates.ToList());
 
-                var featureAccessTimes = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
-                var previousFeatureAccessTimes = previousFeatureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
+                var featureAccessTimes = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.UserId).ToList();
+                var previousFeatureAccessTimes = previousFeatureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.UserId).ToList();
 
                 AddTimeIntoTemplate(weeklyReport, featureAccessTimes, previousFeatureAccessTimes);
 
@@ -336,9 +336,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                     //weeklyReport.DailyStreak = totalDailyStreak >= 7 ? null : SendMailSetting.Display;
                     //weeklyReport.TotalDailyStreak = dailyStreak?.NumberOfDaysStreak.ToString(CultureInfo.CurrentCulture);
                 }
-                if (!string.IsNullOrEmpty(item.Human?.Email))
+                if (!string.IsNullOrEmpty(item.User?.Email))
                 {
-                    await SendWeekly(item.Human?.Email, item.ParentEmail, weeklyReport, cancellationToken);
+                    await SendWeekly(item.User?.Email, item.ParentEmail, weeklyReport, cancellationToken);
                 }
             }
             return methodResult;

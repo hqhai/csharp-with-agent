@@ -159,10 +159,8 @@ fordwardedHeaderOptions.KnownNetworks.Clear();
 fordwardedHeaderOptions.KnownProxies.Clear();
 builder.Services.Configure<ForwardedHeadersOptions>(x => x = fordwardedHeaderOptions);
 
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
-builder.Services.AddScoped<IHumanRepository, HumanRepository>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
@@ -177,13 +175,11 @@ builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepo
 builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>();
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
 
-
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
 builder.Services.AddScoped<QuestBoardPublisher>();
-
 
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
@@ -233,6 +229,7 @@ app.UseForwardedHeaders(fordwardedHeaderOptions);
 //app.UseServices();
 
 #region Initialized Database
+
 using (var serviceScope = app.Services.GetService<IServiceScopeFactory>()!.CreateScope())
 {
     //serviceScope.ServiceProvider.GetRequiredService<UserDbContext>().Database.Migrate();
@@ -284,6 +281,7 @@ using (var serviceScope = app.Services.GetService<IServiceScopeFactory>()!.Creat
 
     context.SaveChanges();
 }
-#endregion
+
+#endregion Initialized Database
 
 await app.RunAsync();

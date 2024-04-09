@@ -49,7 +49,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
-        private readonly ICourseRepository _courseRepository;
         private readonly AppSetting _appSetting;
 
         public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
@@ -64,7 +63,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             , ISectionGroupRepository sectionGroupRepository
             , IPlacementTestRepository placementTestRepository
             , IMapper mapper,
-ICourseRepository courseRepository,
 AppSetting appSetting)
         {
             _questionRepository = questionRepository;
@@ -79,7 +77,6 @@ AppSetting appSetting)
             _sectionGroupRepository = sectionGroupRepository;
             _placementTestRepository = placementTestRepository;
             _mapper = mapper;
-            _courseRepository = courseRepository;
             _appSetting = appSetting;
         }
 
@@ -190,7 +187,7 @@ AppSetting appSetting)
                 var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.PlacementTestResultId == placementTestResult.Id).ToListAsync(cancellationToken);
                 if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
                 {
-                    int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                    int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
                     placementTestResult = GetPlacementTestResult(sectionGroupResults.SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
 
                     var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == placementTestResult.StudentId)
@@ -202,7 +199,7 @@ AppSetting appSetting)
                     {
                         await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
                         {
-                            Id = student.Human?.UserId ?? _authContext.CurrentUserId,
+                            Id = student.UserId,
                             Level = currentLevel.Value
                         }).ConfigureAwait(false);
                     }
@@ -259,7 +256,7 @@ AppSetting appSetting)
 
             var param = new SendStudentPTTemplateModel
             {
-                FullName = student.Human?.FullName,
+                FullName = student.User?.FullName,
                 CourseLevel = courseLevel.GetDescription(),
                 SkillScores = skillsScore,
                 CourseInfo = courseInfoHtml,
@@ -272,9 +269,9 @@ AppSetting appSetting)
 
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
             var sendResult = new MethodResult<bool>();
-            if (!string.IsNullOrEmpty(student.Human?.Email))
+            if (!string.IsNullOrEmpty(student.User?.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = student.User?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT }, cancellationToken).ConfigureAwait(false);
             }
         }
 

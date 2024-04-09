@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 {
                     var student = students.FirstOrDefault(x => x.Id == courseResult.StudentId);
                     studentProgressModel.StudentId = courseResult.StudentId;
-                    studentProgressModel.FullName = student?.Human?.FullName;
+                    studentProgressModel.FullName = student?.User?.FullName;
                 }
                 studentProgressModel.Level = courseResult.CourseLevel ?? default;
                 studentProgressModel.CourseType = courseResult.CourseType ?? default;

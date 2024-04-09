@@ -12,7 +12,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public Guid? PackageId { get; set; }
         public string? Occupation { get; set; }
         public string? School { get; set; }
-        public HumanProfileModel? Human { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public string? Membership { get; set; }
         public Guid? ClassId { get; set; }
@@ -21,7 +20,10 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
+        public string? Role { get; set; }
+        public Guid UserId { get; set; }
         public StudentBeginnerGuide? BeginnerGuide { get; set; }
         public ParentProfileModel? Parent { get; set; }
+        public UserModel? User { get; set; }
     }
 }

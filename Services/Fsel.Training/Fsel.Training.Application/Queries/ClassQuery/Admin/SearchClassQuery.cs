@@ -118,8 +118,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
 
             foreach (var item in lists)
             {
-                item.TeacherName = teacherResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.TeacherId)?.Human?.FullName;
-                item.CSOName = csosResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.CSOId)?.FullName;
+                item.TeacherName = teacherResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.TeacherId)?.User?.FullName;
+                item.CSOName = csosResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.CSOId)?.User?.FullName;
                 item.PackageCode = packagesResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.PackageId)?.Code;
                 item.AveragePT = Math.Round(ptr!.FirstOrDefault(p => p.ClassId == item.Id)!.AveragePTPoint, 2);
             }

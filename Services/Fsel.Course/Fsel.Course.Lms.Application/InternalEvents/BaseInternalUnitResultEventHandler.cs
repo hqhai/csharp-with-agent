@@ -418,11 +418,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
             var student = studentResult.Content?.Result?.FirstOrDefault();
-            model.FullName = student?.Human?.FullName;
+            model.FullName = student?.User?.FullName;
 
             await _mediator.Send(new SenderCommand
             {
-                Email = student?.Human?.Email,
+                Email = student?.User?.Email,
                 Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.TitleUnit, model.UnitNumber),
                 Params = model,
                 Template = model.SenderTemplate,

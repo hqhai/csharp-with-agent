@@ -7,6 +7,6 @@ namespace Fsel.Notification.Application.Services.UserServices
     public class UserModel : BaseModel
     {
         public string? FullName { get; set; }
-        public HumanModel? Human { get; set; }
+        public string? AvatarPath { get; set; }
     }
 }

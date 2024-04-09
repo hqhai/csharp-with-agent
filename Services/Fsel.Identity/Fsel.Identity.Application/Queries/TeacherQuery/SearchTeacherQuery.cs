@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             }
 
             var teacherQuery = _teacherRepository.Queryable
-                              .Include(x => x.Human)
+                              .Include(x => x.User)
                               .Select(x => new TeacherModel
                               {
                                   Id = x.Id,
@@ -51,29 +51,29 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
                                   UniversityDegreePath = x.UniversityDegreePath,
                                   CertificationPath = x.CertificationPath,
                                   PoliceClearancePath = x.PoliceClearancePath,
-                                  HumanId = x.HumanId,
+                                  UserId = x.UserId,
                                   CreatedDate = x.CreatedDate,
                                   CreatedUserId = x.CreatedUserId,
                                   CreatedFullName = x.CreatedFullName,
                                   UpdatedDate = x.UpdatedDate,
                                   UpdatedUserId = x.UpdatedUserId,
                                   UpdatedFullName = x.UpdatedFullName,
-                                  Human = new HumanModel
+                                  User = new UserModel
                                   {
-                                      Id = x!.Human!.Id,
-                                      FullName = x.Human.FullName,
-                                      AvatarPath = x.Human.AvatarPath,
-                                      Birthday = x.Human.Birthday,
-                                      PhoneNumber = x.Human.PhoneNumber,
-                                      Gender = x.Human.Gender,
-                                      Email = x.Human.Email,
-                                      Address = x.Human.Address
+                                      Id = x.User!.Id,
+                                      FullName = x.User.FullName,
+                                      AvatarPath = x.User.AvatarPath,
+                                      Birthday = x.User.Birthday,
+                                      PhoneNumber = x.User.PhoneNumber,
+                                      Gender = x.User.Gender,
+                                      Email = x.User.Email,
+                                      Address = x.User.Address
                                   }
                               });
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                teacherQuery = teacherQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Human != null && (m.Human.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())));
+                teacherQuery = teacherQuery.Where(m => m.Id.ToString() == request.Keyword || ((m.User.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())));
             }
 
             int totalItem = await teacherQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

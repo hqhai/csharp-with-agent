@@ -468,7 +468,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var featureAccessTime = featureAccessTimeResult.Content?.Result;
             var sendStudentCompleteCourseModel = new SendStudentCompleteCourseModel
             {
-                StudentName = student?.Human?.FullName,
+                StudentName = student?.User?.FullName,
                 CourseName = course?.Name,
                 NumberOfHour = featureAccessTime == null ? "0" : Math.Round(((double)featureAccessTime.AccessTime / 3600), 2).ToString(CultureInfo.CurrentCulture),
                 NumberOfUnit = _courseUnitMockTestRepository.Queryable.Where(p => p.CourseId == courseId && p.UnitId.HasValue).Count().ToString(CultureInfo.CurrentCulture),
@@ -493,8 +493,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
             var sendResult = await _mediator.Send(new SenderCommand
             {
-                Email = student?.Human?.Email,
-                Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course?.Name, student?.Human?.FullName),
+                Email = student?.User?.Email,
+                Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course?.Name, student?.User?.FullName),
                 Params = sendStudentCompleteCourseModel,
                 Template = course?.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
             }, cancellationToken).ConfigureAwait(false);

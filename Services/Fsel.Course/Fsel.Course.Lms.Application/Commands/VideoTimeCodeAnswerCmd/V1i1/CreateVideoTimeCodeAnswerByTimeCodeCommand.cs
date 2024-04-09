@@ -346,7 +346,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                             Feature = EnumTokenFeature.Learn,
                             Mission = videoTimeCodeResult.Status == EnumResultStatus.New ? EnumTokenMission.TimeCodeFirstSubmit : EnumTokenMission.TimeCodeSecondSubmit,
                             Type = EnumTokenHistoryType.Recevived,
-                            UserId = student.Human?.UserId ?? default,
+                            UserId = student.UserId,
                         }
                     };
 

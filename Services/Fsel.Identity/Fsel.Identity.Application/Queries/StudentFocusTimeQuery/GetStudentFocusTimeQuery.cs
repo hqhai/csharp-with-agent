@@ -38,7 +38,7 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentFocusTimeModel> methodResult = new MethodResult<StudentFocusTimeModel>();
-            var student = await _studentRepository.Queryable.Include(x => x.Human).FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId, cancellationToken);
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken);
 
             if (student == null)
             {
@@ -74,7 +74,6 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
-
 
         private double GetNearestConfigTime(Guid? studentId)
         {

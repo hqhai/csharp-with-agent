@@ -40,7 +40,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly AppSetting _appSetting;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
-        private readonly IHumanRepository _humanRepository;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
@@ -49,8 +48,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             AppSetting appSetting,
             IPlatformRepository platformRepository,
             QuestBoardPublisher questBoardPublisher,
-            ITrainingService trainingService,
-            IHumanRepository humanRepository
+            ITrainingService trainingService
             )
         {
             _userManager = userManager;
@@ -61,7 +59,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _platformRepository = platformRepository;
             _questBoardPublisher = questBoardPublisher;
             _trainingService = trainingService;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -228,26 +225,23 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task DoQuestBoard(string code, CancellationToken cancellationToken)
         {
-            var humanId = _humanRepository!.Queryable!.FirstOrDefault(x => x.Code == code)!.Id;
-
-            var humanInfo = await _humanRepository.GetIncludeByIdAsync(humanId);
-            if (humanInfo?.Student != null)
+            var user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.Code == code, cancellationToken);
+            if (user != null && user.Student != null)
             {
+                var studentId = user.Student.Id;
                 IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SuccessfulIntroduceCode };
-                var studentId = humanInfo!.Student!.Id;
                 var classModel = await _trainingService.GetClassByStudentId(studentId!);
+                var courseId = classModel.Content?.Result?.CourseId;
 
-                if (classModel?.Content?.Result != null && classModel?.Content?.Result.CourseId != null)
+                if (courseId.HasValue)
                 {
-                    var courseId = classModel.Content!.Result!.CourseId;
                     QuestBoardQueueModel questBoardQueueModel = new QuestBoardQueueModel
                     {
-                        StudentId = studentId!,
+                        StudentId = studentId,
                         Categories = categories,
                         AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                        CourseId = courseId
+                        CourseId = courseId.Value
                     };
-
                     await _questBoardPublisher.Publish(questBoardQueueModel, cancellationToken);
                 }
             }

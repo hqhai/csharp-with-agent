@@ -12,7 +12,8 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/cso")]
     [ApiController]
     public class CSOController : ControllerBase
@@ -28,11 +29,11 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// get list cso by ids
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<IList<HumanModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<UserModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetCSOByIds([FromBody] IList<Guid>? ids)
         {
-            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(new GetCsoByIdsQuery { Ids = ids }).ConfigureAwait(false);
+            MethodResult<IList<UserModel>> commandResult = await _mediator.Send(new GetCsoByIdsQuery { Ids = ids }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

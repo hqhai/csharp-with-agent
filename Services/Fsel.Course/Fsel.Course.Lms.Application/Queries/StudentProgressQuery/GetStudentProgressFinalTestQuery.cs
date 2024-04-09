@@ -55,7 +55,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var userId = student?.Human?.UserId;
+            if (student == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var userId = student.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
@@ -83,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
             {
-                UserId = userId ?? default,
+                UserId = userId,
                 ObjectId = finalTestResult.Id,
                 EnumFeature = EnumFeature.FinalTest,
                 CourseId = course.Id

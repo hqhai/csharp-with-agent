@@ -36,9 +36,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<StudentLessonCommentModel>> methodResult = new MethodResult<PagingItemsModel<StudentLessonCommentModel>>();
 
-            var user = await _userManager.Users.Include(x => x.Human)
-                                        .ThenInclude(x => x!.Student)
-                                        .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
+            var user = await _userManager.Users.Include(x => x!.Student)
+                                        .FirstOrDefaultAsync(x => x.Student != null && x.Student.Id == request.StudentId, cancellationToken);
             var lessonCommentResult = await _courseService.GetLessonCommentByStudent(request.StudentId);
             if (!lessonCommentResult.IsSuccessStatusCode)
             {

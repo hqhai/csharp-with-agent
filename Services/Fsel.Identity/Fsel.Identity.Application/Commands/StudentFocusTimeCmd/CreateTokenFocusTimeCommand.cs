@@ -62,7 +62,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentFocusTimeModel> methodResult = new MethodResult<StudentFocusTimeModel>();
 
-            var student = await _studentRepository.Queryable.Include(x => x.Human).FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId, cancellationToken);
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(_authContext.CurrentUserId), _authContext.CurrentUserId);
@@ -141,7 +141,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                                 Type = EnumTokenHistoryType.Recevived,
                                 Feature = EnumTokenFeature.FocusMode,
                                 Mission = EnumTokenMission.FocusMode,
-                                UserId = student.Human?.UserId ?? default,
+                                UserId = student.UserId,
                             }
                         }, cancellationToken).ConfigureAwait(false);
                         studentFocusTime.IsReceivedToken = true;

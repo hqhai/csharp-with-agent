@@ -11,10 +11,10 @@ namespace Fsel.Notification.Application.Services
     public interface IUserService
     {
         [Post("/v1/user/get-users-by-ids")]
-        Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetUsersByIdsAsync([Body] GetUsersByIdsQueryModel model);
+        Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUsersByIdsAsync([Body] GetUsersByIdsQueryModel model);
 
         [Get("/v1/user/get-user-by-id")]
-        Task<IApiResponse<MethodResult<HumanModel>>> GetUserByIdAsync([Query] string? id);
+        Task<IApiResponse<MethodResult<UserModel>>> GetUserByIdAsync([Query] string? id);
 
         [Get("/v1/user/get-users-by-role")]
         Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRoleAsync([Query] GetUsersByRoleQueryModel query);

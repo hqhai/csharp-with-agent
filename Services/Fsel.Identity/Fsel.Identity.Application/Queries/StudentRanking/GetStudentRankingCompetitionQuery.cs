@@ -53,7 +53,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             else if (_environment.IsStaging() && request.CourseType == EnumCourseType.Academic)
             {
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.AcademicStudentsStagingName);
-
             }
             else if (_environment.IsProduction() && request.CourseType == EnumCourseType.Ielts)
             {
@@ -62,13 +61,11 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             else if (_environment.IsStaging() && request.CourseType == EnumCourseType.Ielts)
             {
                 path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.IeltsStudentsStagingName);
-
             }
 
             var listStudentCompetition = ConvertHelper.DeserializeFromFilePath<IList<StudentJoinCompetitionModel>>(path);
             List<Guid> competitionStudentIds = listStudentCompetition!.Select(x => x.StudentId).ToList();
             var listStudentCompetion = listStudentCompetition!.ToList();
-
 
             var studentProgressAndOverall = await _lmsCourseService.GetStudentProgress(new StudentCompetitionStatQueryModel
             {
@@ -82,7 +79,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 studentResults = new List<CompetitionStudentProgressModel>();
             }
 
-            var studentInfos = _studentRepository.Queryable.Include(x => x.Human).Where(x => competitionStudentIds.Contains(x.Id)).ToList();
+            var studentInfos = _studentRepository.Queryable.Include(x => x.User).Where(x => competitionStudentIds.Contains(x.Id)).ToList();
 
             var result = from studentFile in listStudentCompetion
                          where studentFile != null
@@ -100,7 +97,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                              OverallScore = studentResult?.TotalScore ?? 0, // Thêm kiểm tra null và mặc định giá trị nếu null
                              CompetitionEndDate = new DateTime(2024, 6, 15),
                              FullName = studentFile.FullName,
-                             AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
+                             AvatarPath = studentInfo?.User?.AvatarPath, // Thêm kiểm tra null và mặc định giá trị nếu null
                              UserId = studentFile.UserId
                          };
 

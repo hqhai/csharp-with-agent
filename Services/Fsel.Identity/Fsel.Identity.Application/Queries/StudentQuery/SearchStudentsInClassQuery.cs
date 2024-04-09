@@ -25,6 +25,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ITrainingService _trainingService;
+
         public SearchStudentsInClassQueryHandler(IStudentRepository studentRepository, ILmsCourseService lmsCourseService, ITrainingService trainingService)
         {
             _studentRepository = studentRepository;
@@ -43,14 +44,14 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
 
-            var students = _studentRepository.Queryable.Where(p => p.ClassId.HasValue).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
+            var students = _studentRepository.Queryable.Where(p => p.ClassId.HasValue).Include(x => x.User).Select(i => new SearchStudentsInClassModel
             {
                 Id = i.Id,
-                FullName = i.Human!.FullName,
-                BirthDay = i.Human.Birthday,
-                Code = i.Human.Code,
+                FullName = i.User!.FullName,
+                BirthDay = i.User.Birthday,
+                Code = i.User.Code,
                 CreatedDate = i.CreatedDate,
-                Email = i.Human.Email,
+                Email = i.User.Email,
                 ClassId = i.ClassId
             });
 

@@ -30,6 +30,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+
         public GetOrderQueryHandler(IPackageRepository packageRepository,
             IMapper mapper,
             IUserService userService,
@@ -62,7 +63,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
             CultureInfo culture = new CultureInfo("en-US");
             string formattedDate = DateTime.UtcNow.ToString("ddMMyyyyHHmm", culture);
-            var code = $"{request.CourseLevel.GetEnumCourseType()}{formattedDate}{package.Code.ToString()!.Substring(0, 1)}{student.Content?.Result?.Human?.Code}";
+            var code = $"{request.CourseLevel.GetEnumCourseType()}{formattedDate}{package.Code.ToString()!.Substring(0, 1)}{student.Content?.Result?.User?.Code}";
             order.Code = code;
             order.Package = _mapper.Map<PackageModel>(package);
 

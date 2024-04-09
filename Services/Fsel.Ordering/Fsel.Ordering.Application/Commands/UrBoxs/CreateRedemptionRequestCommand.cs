@@ -214,7 +214,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                             VolatileToken = totalPrice,
                             Feature = EnumTokenFeature.MarketPlace,
                             Type = EnumTokenHistoryType.Exchanged,
-                            UserId = student?.Human?.UserId ?? default,
+                            UserId = student?.UserId ?? default,
                             Config = configs
                         }
                     };

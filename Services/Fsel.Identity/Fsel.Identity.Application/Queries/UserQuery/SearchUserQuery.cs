@@ -5,7 +5,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Globalization;
     using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -27,19 +26,16 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
     public class SearchUserQueryHandler : IRequestHandler<SearchUserQuery, MethodResult<PagingItemsModel<UserSearchModel>>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
         private readonly ITrainingService _trainingService;
         private readonly ITeacherRepository _teacherRepository;
         private readonly ICSORepository _cSORepository;
 
-        public SearchUserQueryHandler(IHumanRepository humanRepository
-            , UserManager<User> userManager
+        public SearchUserQueryHandler(UserManager<User> userManager
             , ITrainingService trainingService
             , ITeacherRepository teacherRepository
             , ICSORepository cSORepository)
         {
-            _humanRepository = humanRepository;
             _userManager = userManager;
             _trainingService = trainingService;
             _teacherRepository = teacherRepository;
@@ -61,8 +57,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
             {
                 userQuery = from u in _userManager.Users
-                            join i in _humanRepository.Queryable on u.Id equals i.UserId
-                            join t in _teacherRepository.Queryable on i.Id equals t.HumanId
+                            join t in _teacherRepository.Queryable on u.Id equals t.UserId
                             where usersByRole.Select(x => x.Id).Contains(u.Id)
                             select new UserSearchModel
                             {
@@ -74,7 +69,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 CourseTypesStr = t.CourseTypesStr,
                                 Email = u.Email,
                                 TeacherId = t.Id,
-                                CreatedDate = i.CreatedDate,
+                                CreatedDate = u.CreatedDate,
                                 Status = u.LockoutEnabled,
                             };
 
@@ -90,8 +85,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
             {
                 userQuery = from u in _userManager.Users
-                            join i in _humanRepository.Queryable on u.Id equals i.UserId
-                            join cso in _cSORepository.Queryable on i.Id equals cso.HumanId
+                            join cso in _cSORepository.Queryable on u.Id equals cso.UserId
                             where usersByRole.Select(x => x.Id).Contains(u.Id)
                             select new UserSearchModel
                             {
@@ -101,14 +95,13 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 Role = EnumRoleRegisterWithAdmin.CSO,
                                 Email = u.Email,
                                 CSOId = cso.Id,
-                                CreatedDate = i.CreatedDate,
+                                CreatedDate = u.CreatedDate,
                                 Status = u.LockoutEnabled,
                             };
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
             {
                 userQuery = from u in _userManager.Users
-                            join i in _humanRepository.Queryable on u.Id equals i.UserId
                             where usersByRole.Select(x => x.Id).Contains(u.Id)
                             select new UserSearchModel
                             {
@@ -118,7 +111,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 Role = EnumRoleRegisterWithAdmin.Moderator,
                                 Email = u.Email,
                                 NumberClass = 0,
-                                CreatedDate = i.CreatedDate,
+                                CreatedDate = u.CreatedDate,
                                 Status = u.LockoutEnabled,
                             };
             }
