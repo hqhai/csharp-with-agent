@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Drawing;
 using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
 using Fsel.Common.ActionResults;
@@ -26,7 +25,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         public SendEmailCommandHandler(AppSetting appSetting)
         {
             _appSetting = appSetting;
-            _wrapper = new SESWrapper(new AmazonSimpleEmailServiceClient(_appSetting?.Smtp?.Username, _appSetting?.Smtp?.Password, region: Amazon.RegionEndpoint.APSoutheast1));
+            _wrapper = new SESWrapper(new AmazonSimpleEmailServiceClient(_appSetting?.Smtp?.AwsAccessKeyId, _appSetting?.Smtp?.AwsSecretAccessKey, region: Amazon.RegionEndpoint.APSoutheast1));
         }
 
         public async Task<MethodResult<bool>> Handle(SendEmailCommand request, CancellationToken cancellationToken)
@@ -64,92 +63,39 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             var emailRequest = new SendEmailRequest
             {
                 Source = _appSetting?.Smtp?.From,
-                Destination = new Destination(),
+                Destination = new Destination
+                {
+                    BccAddresses = message.BccEmails?.Where(x => x.IsValidEmail()).ToList(),
+                    CcAddresses = message.CcEmails?.Where(x => x.IsValidEmail()).ToList(),
+                    ToAddresses = message.ToEmails?.Where(x => x.IsValidEmail()).ToList(),
+                },
                 Message = new Message
                 {
                     Body = new Body
                     {
-                        Text = new Content(message.Content)
+                        Html = new Content
+                        {
+                            Data = message.Content
+                        },
+                        //Text = new Content
+                        //{
+                        //    Data = message.Content,
+                        //    Charset = "UTF-8"
+                        //}
                     },
-                    Subject = new Content(message.Subject)
+                    Subject = new Content
+                    {
+                        Data = message.Subject
+                    }
                 }
             };
 
-            if (message.ToEmails != null)
-            {
-                foreach (var item in message.ToEmails.Where(x => x.IsValidEmail()))
-                {
-                    emailRequest.Destination.ToAddresses.Add(item);
-                }
-            }
-
-            if (message.BccEmails != null)
-            {
-                foreach (var item in message.BccEmails.Where(x => x.IsValidEmail()))
-                {
-                    emailRequest.Destination.BccAddresses.Add(item);
-                }
-            }
-
-            if (message.CcEmails != null)
-            {
-                foreach (var item in message.CcEmails.Where(x => x.IsValidEmail()))
-                {
-                    emailRequest.Destination.CcAddresses.Add(item);
-                }
-            }
             return emailRequest;
         }
 
-        //private async Task Send(MimeMessage mailmessage)
-        //{
-        //    using (var client = new MailKit.Net.Smtp.SmtpClient())
-        //    {
-        //        try
-        //        {
-        //            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-        //            await client.ConnectAsync(_appSetting?.Smtp?.SmtpServer ?? string.Empty, _appSetting?.Smtp?.Port ?? 0, true);
-        //            client.AuthenticationMechanisms.Remove("XOAUTH2");
-        //            await client.AuthenticateAsync(_appSetting?.Smtp?.Username ?? string.Empty, _appSetting?.Smtp?.Password ?? string.Empty);
-        //            await client.SendAsync(mailmessage);
-        //        }
-        //        catch (Exception)
-        //        {
-        //            throw;
-        //        }
-        //        finally
-        //        {
-        //            await client.DisconnectAsync(true);
-        //            client.Dispose();
-        //        }
-        //    }
-        //}
-        //public void SendEmailAsync(SendEmailRequest request)
-        //{
-        //    //AWSCredentials aWSCredentials = new BasicAWSCredentials(_appSetting?.Smtp?.Username, _appSetting?.Smtp?.Password);
-        //    using (var client = AWSClientFactory.CreateAmazonSimpleEmailServiceClient(_appSetting?.Smtp?.Username, _appSetting?.Smtp?.Password))
-        //    {
-        //        try
-        //        {
-        //            var a = client.SendEmail(request);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //        }
-        //    }
-        //}
-
         public async Task SendEmail(SendEmailRequest emailRequest)
         {
-            await _wrapper.SendEmailAsync(
-                 emailRequest.Destination.ToAddresses,
-                 emailRequest.Destination.CcAddresses,
-                 emailRequest.Destination.BccAddresses,
-                 emailRequest.Message.Body.Text.Data,
-                 string.Empty,
-                 emailRequest.Message.Subject.Data,
-                  _appSetting?.Smtp?.From
-                 );
+            await _wrapper.SendEmailAsync(emailRequest);
         }
     }
 }

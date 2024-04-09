@@ -147,6 +147,22 @@ namespace Fsel.Sender.Application.Services
 
         // snippet-end:[SES.dotnetv3.DeleteIdentityAsync]
 
+        public async Task<string> SendEmailAsync(SendEmailRequest sendEmailRequest)
+        {
+            var messageId = "";
+            try
+            {
+                var response = await _amazonSimpleEmailService.SendEmailAsync(sendEmailRequest);
+                messageId = response.MessageId;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("SendEmailAsync failed with exception: " + ex.Message);
+            }
+
+            return messageId;
+        }
+
         // snippet-start:[SES.dotnetv3.SendEmailAsync]
 
         /// <summary>
