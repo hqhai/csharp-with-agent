@@ -10,7 +10,6 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
         public new Services? Services { get; set; }
-        public Authentication? Authentication { get; set; }
     }
 
     public class ConstantUrl
@@ -25,26 +24,6 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? OrderApiUrl { get; set; }
         public string? LmsCourseApiUrl { get; set; }
         public string? SystemApiUrl { get; set; }
-    }
-
-    public class Authentication
-    {
-        public Google? Google { get; set; }
-        public Facebook? Facebook { get; set; }
-    }
-
-    public class Google
-    {
-        public string? ClientId { get; set; }
-        public string? ClientSecret { get; set; }
-        public IList<string>? RedirectUriParams { get; set; }
-    }
-
-    public class Facebook
-    {
-        public string? ClientId { get; set; }
-        public string? ClientSecret { get; set; }
-        public string? Callback { get; set; }
     }
 
     public class Otp

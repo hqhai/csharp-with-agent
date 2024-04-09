@@ -1,9 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using AutoMapper;
-using  Fsel.Identity.Infrastructure.Configs;
 using Fsel.Common.Constants;
-using Fsel.Core.Base;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.InteractionService;
@@ -18,7 +16,6 @@ using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Providers;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
-using IdentityServer4;
 using IdentityServer4.EntityFramework.Mappers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -37,7 +34,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 //builder.AddSwaggerGens(appSetting);
 //builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddAuthenticationIdentity();
+builder.AddConfigureIdentityOptions();
 builder.AddDbContexts<UserDbContext>();
 builder.Services.AddDataProtection().PersistKeysToDbContext<UserDbContext>();
 //.DisableAutomaticKeyGeneration();
@@ -47,6 +44,7 @@ builder.AddIdentity<User, Role, UserDbContext>().AddTotpProvider();
 builder.Services.AddIdentityServer(options =>
 {
     options.Authentication.CookieSameSiteMode = SameSiteMode.None;
+    options.EmitStaticAudienceClaim = true;
 })
 .AddInMemoryApiScopes(Config.ApiScopes)
 .AddInMemoryIdentityResources(Config.IdentityResources)
@@ -67,6 +65,7 @@ builder.Services.AddIdentityServer(options =>
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
+        options.UsePkce = true;
         options.ClientId = appSetting?.Authentication?.Google?.ClientId ?? string.Empty;
         options.ClientSecret = appSetting?.Authentication?.Google?.ClientSecret ?? string.Empty;
         options.Events = new OAuthEvents
@@ -180,7 +179,6 @@ builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegi
 
 
 // Queue
-builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
@@ -237,7 +235,7 @@ app.UseForwardedHeaders(fordwardedHeaderOptions);
 #region Initialized Database
 using (var serviceScope = app.Services.GetService<IServiceScopeFactory>()!.CreateScope())
 {
-    serviceScope.ServiceProvider.GetRequiredService<UserDbContext>().Database.Migrate();
+    //serviceScope.ServiceProvider.GetRequiredService<UserDbContext>().Database.Migrate();
     serviceScope.ServiceProvider.GetRequiredService<IdentityServer4.EntityFramework.DbContexts.PersistedGrantDbContext>().Database.Migrate();
 
     var context = serviceScope.ServiceProvider.GetRequiredService<IdentityServer4.EntityFramework.DbContexts.ConfigurationDbContext>();

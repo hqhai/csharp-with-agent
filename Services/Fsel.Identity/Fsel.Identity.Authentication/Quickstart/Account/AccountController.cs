@@ -73,6 +73,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(
             IIdentityServerInteractionService interaction,
@@ -83,7 +84,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             Core.Base.Managers.UserManager<User> userManager,
             IMediator mediator,
             IMapper mapper,
-            AppSetting appSetting)
+            AppSetting appSetting,
+            ILogger<AccountController> logger)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -98,6 +100,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             _mediator = mediator;
             _mapper = mapper;
             _appSetting = appSetting;
+            _logger = logger;
         }
 
         /// <summary>
@@ -467,6 +470,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         {
             ArgumentNullException.ThrowIfNull(model);
 
+            _logger.LogWarning("Start Login");
+            _logger.LogWarning("Model: " + model.Serialize);
+            _logger.LogWarning("ReturnUrl: " + model.ReturnUrl);
             // check if we are in the context of an authorization request
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
 
@@ -497,6 +503,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 }
             }
 
+            _logger.LogWarning("ModelState.IsValid: " + ModelState.IsValid);
+
             if (ModelState.IsValid)
             {
                 var user = await _signInManager.UserManager.FindByNameAsync(model.Username ?? string.Empty);
@@ -508,6 +516,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     // validate username/password against in-memory store
                     if (userLogin.Succeeded)
                     {
+                        _logger.LogWarning("UserLogin.Succeeded: " + userLogin.Succeeded);
+
                         await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id.ToString(), user.UserName, clientId: context?.Client.ClientId));
 
                         // only set explicit expiration here if user chooses "remember me". 
@@ -532,8 +542,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                         if (context != null)
                         {
+                            _logger.LogWarning("UserLogin.Succeeded: " + 1);
                             if (context.IsNativeClient())
                             {
+                                _logger.LogWarning("UserLogin.Succeeded: " + 2);
+
                                 // The client is native, so this change in how to
                                 // return the response is for better UX for the end user.
                                 return this.LoadingPage("Redirect", model.ReturnUrl ?? string.Empty);
@@ -546,6 +559,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         // request for a local page
                         if (Url.IsLocalUrl(model.ReturnUrl))
                         {
+                            _logger.LogWarning("UserLogin.Succeeded: " + 3);
                             return Redirect(model.ReturnUrl);
                         }
                         else if (string.IsNullOrEmpty(model.ReturnUrl))
