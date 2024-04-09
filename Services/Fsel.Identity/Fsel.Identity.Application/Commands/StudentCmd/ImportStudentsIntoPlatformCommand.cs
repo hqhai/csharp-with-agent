@@ -179,11 +179,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             }
                             await _userManager.AddToRoleAsync(parent, EnumRole.Parent.ToString());
                         }
-                        user.Human.Student.ParentStudents.Add(new ParentStudent
+                        if (parent.Human?.Parent != null)
                         {
-                            ParentId = parent.Human!.Parent!.Id,
-                        });
-                        await _userManager.UpdateAsync(user);
+                            user.Human.Student.ParentStudents.Add(new ParentStudent
+                            {
+                                ParentId = parent.Human!.Parent!.Id,
+                            });
+                            await _userManager.UpdateAsync(user);
+                        }
                     }
 
                     var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday }, cancellationToken);
