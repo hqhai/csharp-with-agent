@@ -43,8 +43,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , IPackageRepository packageRepository
             , ILmsCourseService lmsCourseService
             , NotificationMessagePublisher notificationMessagePublisher
-            , AuthContext authContext,
-ILmsCourseService courseService)
+            , AuthContext authContext
+            , ILmsCourseService courseService)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -111,14 +111,13 @@ ILmsCourseService courseService)
                 {
                     var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
 
-                    var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.CreatedUserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
+                    var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = order.UserId, CourseId = order.CourseId, PackageId = order.PackageId ?? default, NumberOfShield = numberOfShield });
                     if (!addStudentIntoClassResult.IsSuccessStatusCode)
                     {
                         methodResult.AddError(addStudentIntoClassResult.Error);
                         return methodResult;
                     }
                     allowOpenNextUnit = true;
-
 
                     order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
 
@@ -144,7 +143,7 @@ ILmsCourseService courseService)
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                // Mở Unit tiếp theo. 
+                // Mở Unit tiếp theo.
 
                 //var orders = await _orderRepository.Queryable.Where(p => p.ClassId == order.ClassId && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
                 //if (orders.Count == 12)

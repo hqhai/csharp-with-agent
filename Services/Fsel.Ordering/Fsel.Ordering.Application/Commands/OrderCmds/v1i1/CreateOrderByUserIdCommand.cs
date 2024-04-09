@@ -1,0 +1,204 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
+{
+    using System.Threading;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
+    using Fsel.Ordering.Application.Queries.OrderQuery;
+    using Fsel.Ordering.Application.Queues.Publishers;
+    using Fsel.Ordering.Application.Services.CourseService;
+    using Fsel.Ordering.Application.Services.TrainingService;
+    using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
+    using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
+    using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums.ErrorCodes;
+    using Fsel.Ordering.Domain.IRepositories;
+    using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
+    using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class CreateOrderByUserIdCommand : CreateOrderToUserIdCommandModel, IRequest<MethodResult<OrderModel>>
+    {
+    }
+
+    public class CreateOrderByUserIdCommandHandler : IRequestHandler<CreateOrderByUserIdCommand, MethodResult<OrderModel>>
+    {
+        private readonly IMapper _mapper;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IMediator _mediator;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly IPackageRepository _packageRepository;
+        private readonly AuthContext _authContext;
+        private readonly ILmsCourseService _courseService;
+        private readonly IUserService _userService;
+        private readonly ITrainingService _trainingService;
+
+        public CreateOrderByUserIdCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService, IUserService userService, ITrainingService trainingService)
+        {
+            _mapper = mapper;
+            _orderRepository = orderRepository;
+            _mediator = mediator;
+            _notificationMessagePublisher = notificationMessagePublisher;
+            _packageRepository = packageRepository;
+            _authContext = authContext;
+            _courseService = courseService;
+            _userService = userService;
+            _trainingService = trainingService;
+        }
+
+        public async Task<MethodResult<OrderModel>> Handle(CreateOrderByUserIdCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<OrderModel>();
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            if (!request.CourseLevel.IsCheckCourseLevel(student.CourseLevel))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.YouChoseTheWrongLevel), nameof(request.CourseLevel));
+                return methodResult;
+            }
+
+            if (string.IsNullOrEmpty(student.Human?.FullName) || string.IsNullOrEmpty(student.Human?.Email))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human.FullName), nameof(student.Human.Email));
+                return methodResult;
+            }
+
+            var package = await _packageRepository.GetByIdAsync(request.PackageId ?? default);
+            if (package == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
+                return methodResult;
+            }
+
+            var existsOrder = await _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(x => x.UserId == request.UserId && x.Status == EnumOrderStatus.Payment, cancellationToken);
+
+            var courseResult = await _courseService.GetCoursesByIdsAsync(new List<Guid> { request.CourseId });
+            if (!courseResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(courseResult.Error);
+                return methodResult;
+            }
+            var course = courseResult.Content?.Result?.FirstOrDefault();
+
+            var newOrder = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == request.UserId && p.Status == EnumOrderStatus.New, cancellationToken);
+            var isOrderEmpty = newOrder == null;
+            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
+
+            string code = codeSend.Result?.Code ?? string.Empty;
+
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken) && newOrder != null && newOrder.Code != code)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
+                return methodResult;
+            }
+            if (newOrder != null)
+            {
+                newOrder = _mapper.Map(request, newOrder);
+            }
+            else
+            {
+                newOrder = _mapper.Map<Order>(request);
+            }
+
+            AddDataIntoOrder(newOrder, code, package.Price, existsOrder?.CourseId ?? course!.Id, student);
+
+            if (!newOrder.IsValid())
+            {
+                methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
+                return methodResult;
+            }
+
+            var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
+            var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = request.UserId, CourseId = newOrder.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
+            if (!addStudentIntoClassResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(addStudentIntoClassResult.Error);
+                return methodResult;
+            }
+
+            await _orderRepository.ExecuteTransactionAsync(async () =>
+            {
+                if (isOrderEmpty)
+                {
+                    newOrder = _orderRepository.Add(newOrder);
+                }
+                else
+                {
+                    newOrder = _orderRepository.Update(newOrder);
+                }
+                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                SendNotify(newOrder.Id, newOrder.UserId, cancellationToken);
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<OrderModel>(newOrder);
+                return methodResult;
+            });
+
+            var changeStatusOrderResult = await _mediator.Send(new ChangeStatusOrderCommand
+            {
+                OrderId = newOrder.Id,
+                OrderStatus = EnumOrderStatus.Payment,
+                Type = EnumOrderTransactionType.BankTransfer,
+            }, cancellationToken);
+
+            if (!changeStatusOrderResult.IsOK)
+            {
+                methodResult.AddErrorBadRequest(changeStatusOrderResult.ErrorMessages);
+                return methodResult;
+            }
+
+            return methodResult;
+        }
+
+        private static void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId, StudentModel student)
+        {
+            order.FullName = student.Human?.FullName;
+            order.Email = student.Human?.Email;
+            order.Country = EnumCountryKey.Vietnam.ToString();
+            order.Status = EnumOrderStatus.New;
+            order.UserId = student.Human?.UserId ?? default;
+            order.Code = code;
+            order.Price = price;
+            order.DiscountPercent = 0;
+            order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
+            order.TotalPrice = order.Price - order.DiscountPrice;
+            order.CourseId = courseId;
+        }
+
+        private async void SendNotify(Guid orderId, Guid senderId, CancellationToken cancellationToken)
+        {
+            await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
+            {
+                Roles = new List<EnumRole> { EnumRole.Admin },
+                ObjectId = orderId,
+                Type = EnumNotificationType.Text,
+                Content = EnumNotificationContent.OrderCreate,
+                SenderId = senderId,
+                PlatformCode = EnumPlatformCode.LMSAdmin
+            }, cancellationToken);
+        }
+    }
+}
