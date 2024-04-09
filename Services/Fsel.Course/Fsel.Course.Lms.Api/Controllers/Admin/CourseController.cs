@@ -13,7 +13,8 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/course")]
     [ApiController]
     public class CourseController : ControllerBase
@@ -59,6 +60,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         {
             MethodResult<CourseModel> queryResult = await _mediator.Send(new GetCourseByCodeQuery { CourseCode = code }).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Course level
+        /// </summary>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseById([FromRoute] Guid id)
+        {
+            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseLevelQuery { CourseId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
