@@ -165,10 +165,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var startDate = videoResult.First().CreatedDate;
 
-            var numberOfCorrectCount = unitResults.Sum(p => p.CorrectCount);
-
-            var numberOfCorrectTotal = unitResults.Sum(p => p.CorrectTotal);
-
             var userId = unitResults.First().CreatedUserId;
 
             var featureAccessTimeResults = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
@@ -277,7 +273,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
             }
 
-            var percentUnit = NumberHelper.GetPercent(numberOfCorrectCount, numberOfCorrectTotal);
+            var percentUnit = (int)unitResults.Average(p => p.Percent);
 
             var model = new SendStudentCompleteMidCourseModel()
             {
