@@ -3,7 +3,10 @@
 namespace Fsel.Identity.Application.Services.UserProfileService
 {
     using System;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.Security.Claims;
     using System.Threading.Tasks;
+    using Fsel.Common.Constants;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using IdentityModel;
@@ -31,14 +34,14 @@ namespace Fsel.Identity.Application.Services.UserProfileService
 
             var user = await _userManager.GetUserAsync(context.Subject);
 
-            if(user != null)
+            if (user != null)
             {
                 var claims = (await _userManager.GetClaimsAsync(user)).ToList();
                 var roles = await _userManager.GetRolesAsync(user);
 
                 foreach (var role in roles)
                 {
-                    claims.Add(new System.Security.Claims.Claim(JwtClaimTypes.Role, role));
+                    claims.Add(new Claim(JwtClaimTypes.Role, role));
 
                     var roleEntity = await _roleManager.FindByNameAsync(role);
                     if (roleEntity != null)
@@ -47,6 +50,13 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                         claims.AddRange(roleClaims.Where(m => context.RequestedClaimTypes.Any(x => x.Equals(m.Type, StringComparison.Ordinal))));
                     }
                 }
+
+                claims.Add(new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty));
+                claims.Add(new Claim(JwtClaimNames.FullName, user.FullName ?? string.Empty));
+                claims.Add(new Claim(JwtClaimNames.Surname, user.LastName ?? string.Empty));
+                claims.Add(new Claim(JwtClaimNames.GivenName, user.FirstName ?? string.Empty));
+                claims.Add(new Claim(JwtClaimNames.Email, user.FirstName ?? string.Empty));
+                claims.Add(new Claim(JwtClaimNames.UserId, user.Id.ToString()));
 
                 context.IssuedClaims.AddRange(claims);
             }

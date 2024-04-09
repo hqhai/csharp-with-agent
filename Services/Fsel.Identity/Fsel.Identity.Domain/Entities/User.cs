@@ -33,7 +33,7 @@ namespace Fsel.Identity.Domain.Entities
 
         public string? FullName
         {
-            get { return $"{FirstName} {LastName}".Trim(); }
+            get { return $"{LastName} {FirstName}".Trim(); }
         }
 
         public DateTime? Birthday { get; set; }

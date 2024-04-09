@@ -121,9 +121,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     },
 
                     RequireClientSecret = false,
-                    RequirePkce = true,
-                    RedirectUris = { "https://lms.fsel.edu.vn/login", "http://lms.fsel.edu.vn/login" },
-                    PostLogoutRedirectUris = { "https://lms.fsel.edu.vn/login", "http://lms.fsel.edu.vn/login" },
+                    RequirePkce = false,
+                    RedirectUris = { "https://lms-testing.fsel.edu.vn/auth/login", "http://lms-testing.fsel.edu.vn/auth/login" },
+                    PostLogoutRedirectUris = { "https://lms-testing.fsel.edu.vn/auth/login", "http://lms-testing.fsel.edu.vn/auth/login" },
 
                     AllowOfflineAccess = true,
                     RequireConsent = false,
@@ -169,7 +169,6 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         new Secret("test.fsel.mvc_secret".Sha256())
                     },
 
-                    //RedirectUris = { "https://localhost:7088/Home/GetCode" },
                     RedirectUris = { "https://localhost:7088/signin-oidc" },
                     PostLogoutRedirectUris = { "https://localhost:7088/signout-callback-oidc" },
 
@@ -187,6 +186,43 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     AllowOfflineAccess = true,
                     RequirePkce = true,
+                    RequireConsent = false,
+                    AllowAccessTokensViaBrowser = true,
+                    AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
+
+                    //Claims = new ClientClaim[]
+                    //{
+                    //    new ClientClaim(JwtClaimTypes.Role, "Admin")
+                    //},
+                },
+                new Client
+                {
+                    ClientId = "test.fsel.swagger",
+                    ClientName = "Swagger UI",
+                    AllowedGrantTypes = GrantTypes.Code,
+
+                    ClientSecrets =
+                    {
+                        new Secret("test.fsel.swagger_secret".Sha256())
+                    },
+
+                    RedirectUris = { "https://localhost:7203/swagger/oauth2-redirect.html" },
+                    PostLogoutRedirectUris = { "https://localhost:7203/swagger/oauth2-redirect.html" },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Phone,
+                        IdentityServerConstants.StandardScopes.Address,
+                        "roles",
+                        "api"
+                    },
+
+                    AllowOfflineAccess = true,
+                    RequirePkce = false,
                     RequireConsent = false,
                     AllowAccessTokensViaBrowser = true,
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
