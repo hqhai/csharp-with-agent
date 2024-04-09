@@ -183,7 +183,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             user.Human.Student.ParentStudents.Add(new ParentStudent
                             {
-                                ParentId = parent.Human!.Parent!.Id,
+                                ParentId = parent.Human.Parent.Id,
                             });
                             await _userManager.UpdateAsync(user);
                         }
