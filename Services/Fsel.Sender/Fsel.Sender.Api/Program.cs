@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Amazon.SimpleEmail;
 using Fsel.Core.Extensions;
 using Fsel.Sender.Domain.ValueSettings;
 
@@ -10,6 +11,8 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
+
+builder.Services.AddScoped<IAmazonSimpleEmailService, AmazonSimpleEmailServiceClient>();
 
 var app = builder.Build();
 app.UseServices();
