@@ -39,5 +39,14 @@ namespace Fsel.Shared.Constants
                 public const string ClassForumResultFeedBack = $"ClassForumResultFeedBack";
             }
         }
+
+        public static class MockTestWritingAIFeedBackHub
+        {
+            public const string Pattern = $"/mock-test-writing";
+            public static class Methods
+            {
+                public const string MockTestWritingAIFeedBack = $"MockTestWritingAIFeedBack";
+            }
+        }
     }
 }

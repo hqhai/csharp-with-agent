@@ -4,6 +4,7 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumMockTestAIType
     {
+        TaskAchievement,
         TaskResponse,
         Coherence,
         LexicalResource,

@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Services.LmsCourseService
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Identity.Application.Services.LmsCourseService.CommandModels;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Microsoft.AspNetCore.Mvc;
@@ -33,5 +34,11 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1/progress/students-competition")]
         Task<IApiResponse<MethodResult<IList<CompetitionStudentProgressModel>>>> GetStudentProgress([FromQuery] StudentCompetitionStatQueryModel query);
+
+        [Get("/v1/admin/course/{id}")]
+        Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByIdAsync([FromRoute] Guid id);
+
+        [Post("/v1/placement-test/admin/save-done")]
+        Task<IApiResponse<MethodResult<bool>>> SavePlacementTestDoneAsync([FromBody] SavePlacementTestDoneCommandModel command);
     }
 }
