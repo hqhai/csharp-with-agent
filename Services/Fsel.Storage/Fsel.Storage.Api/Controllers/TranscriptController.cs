@@ -53,7 +53,7 @@ namespace Fsel.Storage.Api.Controllers
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
         [ProducesResponseType(typeof(MethodResult<TranscriptFileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [HttpPost("upload-file")]
+        [HttpPost("upload-file/{folderType}")]
         public async Task<IActionResult> Post([FromRoute] EnumFolderType folderType, [FromQuery] EnumBucketType? bucketType, IFormFile file, [FromQuery] bool isResize = false, [FromQuery] bool isValidEmpty = false)
         {
             MethodResult<TranscriptFileModel> result = new MethodResult<TranscriptFileModel>();
