@@ -145,7 +145,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
                     if (!string.IsNullOrEmpty(student.ParentEmail))
                     {
-                        var parent = await _userManager.Users.FirstOrDefaultAsync(p => p.UserName == student.ParentEmail || p.Email == student.ParentEmail, cancellationToken);
+                        var parent = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Parent).FirstOrDefaultAsync(p => p.UserName == student.ParentEmail || p.Email == student.ParentEmail, cancellationToken);
                         if (parent == null)
                         {
                             parent = new User()
