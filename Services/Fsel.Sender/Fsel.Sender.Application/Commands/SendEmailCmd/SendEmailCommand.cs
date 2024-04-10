@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
@@ -22,10 +21,10 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         private readonly AppSetting _appSetting;
         private readonly SESWrapper _wrapper;
 
-        public SendEmailCommandHandler(AppSetting appSetting)
+        public SendEmailCommandHandler(AppSetting appSetting, SESWrapper wrapper)
         {
             _appSetting = appSetting;
-            _wrapper = new SESWrapper(new AmazonSimpleEmailServiceClient(_appSetting?.Smtp?.AwsAccessKeyId, _appSetting?.Smtp?.AwsSecretAccessKey, region: Amazon.RegionEndpoint.APSoutheast1));
+            _wrapper = wrapper;
         }
 
         public async Task<MethodResult<bool>> Handle(SendEmailCommand request, CancellationToken cancellationToken)
