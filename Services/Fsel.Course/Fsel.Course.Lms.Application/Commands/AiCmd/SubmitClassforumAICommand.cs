@@ -27,7 +27,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly IMediator _mediator;
         private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
 
-        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassforumDetailResultRepository classforumDetailResultRepository)
+        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository)
         {
             _lessonResultRepository = lessonResultRepository;
             _submitAIResponsePublisher = submitAIResponsePublisher;

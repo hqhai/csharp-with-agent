@@ -24,15 +24,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     public class UpdateClassForumResultToExpiredTimeCommandHandler : IRequestHandler<UpdateClassForumResultToExpiredTimeCommand, bool>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
-        private readonly IClassforumDetailResultRepository _classforumDetailResultRepository;
+        private readonly IClassForumDetailResultRepository _classforumDetailResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private const int MaxScoreClassForum = 2;
 
-        public UpdateClassForumResultToExpiredTimeCommandHandler(IClassForumResultRepository classForumResultRepository, IClassforumDetailResultRepository classforumDetailResultRepository, NotificationMessagePublisher notificationMessagePublisher)
+        public UpdateClassForumResultToExpiredTimeCommandHandler(IClassForumResultRepository classForumResultRepository, IClassForumDetailResultRepository classForumDetailResultRepository, NotificationMessagePublisher notificationMessagePublisher)
 
         {
             _classForumResultRepository = classForumResultRepository;
-            _classforumDetailResultRepository = classforumDetailResultRepository;
+            _classforumDetailResultRepository = classForumDetailResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
         }
 
