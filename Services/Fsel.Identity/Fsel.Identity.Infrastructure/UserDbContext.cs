@@ -27,8 +27,8 @@ namespace Fsel.Identity.Infrastructure
 
             SeedPlatforms(builder);
             SeedRoles(builder);
-            SeedUsers(builder);
-            SeedUserRoles(builder);
+            //SeedUsers(builder);
+            //SeedUserRoles(builder);
 
             builder.Entity<User>().ToTable(nameof(Users))
                 .HasQueryFilter(e => !e.IsDeleted)

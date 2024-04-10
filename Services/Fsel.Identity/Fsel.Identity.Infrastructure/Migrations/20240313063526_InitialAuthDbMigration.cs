@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -251,16 +251,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "AccessFailedCount", "Address", "AvatarPath", "Birthday", "Code", "ConcurrencyStamp", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "Email", "EmailConfirmed", "FirstName", "IsDeleted", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UpdatedDate", "UpdatedFullName", "UpdatedUserId", "UserName" },
-                values: new object[] { new Guid("28886c7b-fd8d-49c0-babe-5a3ee2cd83a4"), 0, null, null, null, null, "082af315-bc6a-40d5-a1a3-bc3060d1b9cf", new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "admin@gmail.com", true, "ADMIN", false, "ACC", false, null, "ADMIN@GMAIL.COM", "ADMIN", "AQAAAAIAAYagAAAAEODaFKz0IP1OYMn3cJDd8rSt8W+JNWJljuw3ereBa2Nka8y/zOoqzxZHVmc+u3NuVQ==", "1234567890", false, "AEW57AWQEQTK7XBWGWWOIMHLRWVD6ZYD", false, null, null, null, "Admin" });
-
-            migrationBuilder.InsertData(
-                table: "UserRoles",
-                columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("69976022-5dbb-4292-bab6-e94b6701061e"), new Guid("28886c7b-fd8d-49c0-babe-5a3ee2cd83a4") });
-
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "Users",
@@ -421,16 +411,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
             migrationBuilder.DropPrimaryKey(
                 name: "PK_RoleClaims",
                 table: "RoleClaims");
-
-            migrationBuilder.DeleteData(
-                table: "UserRoles",
-                keyColumns: new[] { "RoleId", "UserId" },
-                keyValues: new object[] { new Guid("69976022-5dbb-4292-bab6-e94b6701061e"), new Guid("28886c7b-fd8d-49c0-babe-5a3ee2cd83a4") });
-
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("28886c7b-fd8d-49c0-babe-5a3ee2cd83a4"));
 
             migrationBuilder.DropColumn(
                 name: "Address",

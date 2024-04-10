@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -17,13 +17,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 type: "nvarchar(100)",
                 maxLength: 100,
                 nullable: true);
-
-            migrationBuilder.UpdateData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: new Guid("28886c7b-fd8d-49c0-babe-5a3ee2cd83a4"),
-                column: "Gender",
-                value: null);
         }
 
         /// <inheritdoc />
