@@ -2,8 +2,6 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
 {
-    using Fsel.Shared.Enums;
-
     public class CreateClassForumResultCommandModel
     {
         public string? Content { get; set; }
@@ -11,6 +9,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
         public IList<string>? FilePaths { get; set; }
         public bool IsSubmit { get; set; }
         public string? WordContent { get; set; }
-        public EnumSubmissionCount? SubmissionCount { get; set; }
+        public Guid? ClassForumDetailResultId { get; set; }
     }
 }

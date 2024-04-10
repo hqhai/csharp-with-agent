@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20240405062952_UpdateClassForumAttemp2Table")]
+    [Migration("20240410073905_UpdateClassForumAttemp2Table")]
     partial class UpdateClassForumAttemp2Table
     {
         /// <inheritdoc />
@@ -192,11 +192,14 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<DateTime?>("ProcessDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("SubmissionCount")
-                        .HasColumnType("int");
+                    b.Property<string>("SubmissionCount")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -306,7 +309,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CorrectCount")
@@ -420,7 +422,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<Guid>("ClassForumDetailResultId")
+                    b.Property<Guid?>("ClassForumDetailResultId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ClassForumResultId")
@@ -5242,13 +5244,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasOne("Fsel.Course.Domain.Entities.ClassForumDetailResult", "ClassForumDetailResult")
                         .WithMany("ClassForumResultFiles")
                         .HasForeignKey("ClassForumDetailResultId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Fsel.Course.Domain.Entities.ClassForumResult", "ClassForumResult")
                         .WithMany("ClassForumResultFiles")
                         .HasForeignKey("ClassForumResultId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ClassForumDetailResult");
 

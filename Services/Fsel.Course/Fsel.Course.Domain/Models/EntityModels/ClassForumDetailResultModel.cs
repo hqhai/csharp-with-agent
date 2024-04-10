@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
@@ -37,6 +38,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid ClassForumResultId { get; set; }
 
-        public ClassForumResultFileModel? ClassForumResultFile { get; set; }
+        public IList<ClassForumResultFile>? ClassForumResultFiles { get; set; }
     }
 }
