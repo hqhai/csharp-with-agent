@@ -26,7 +26,7 @@ stages:
 - hangfire-build
 - hangfire-deploy
 - interaction-build
-- interaction- deploy
+- interaction-deploy
 - lcms-build
 - lcms-deploy
 - lms-build
