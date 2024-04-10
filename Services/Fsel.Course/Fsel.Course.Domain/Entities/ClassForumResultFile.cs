@@ -30,7 +30,7 @@ namespace Fsel.Course.Domain.Entities
             set { _timeCount = value; }
         }
 
-        public Guid ClassForumDetailResultId { get; set; }
+        public Guid? ClassForumDetailResultId { get; set; }
 
         public Guid? ClassForumResultId { get; set; }
 

@@ -15,12 +15,12 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.ClassForumDetailResult)
                  .WithMany(b => b.ClassForumResultFiles)
                  .HasForeignKey(p => p.ClassForumDetailResultId)
-                 .OnDelete(DeleteBehavior.Cascade);
+                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(a => a.ClassForumResult)
                  .WithMany(b => b.ClassForumResultFiles)
                  .HasForeignKey(p => p.ClassForumResultId)
-                 .OnDelete(DeleteBehavior.Cascade);
+                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

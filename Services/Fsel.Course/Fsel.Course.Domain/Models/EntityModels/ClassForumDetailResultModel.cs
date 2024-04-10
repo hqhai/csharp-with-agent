@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
@@ -30,6 +31,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? GradingAlFeedback { get; set; }
 
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
+
+        public EnumSubmissionCount? SubmissionCount { get; set; }
+
         public Guid ClassForumResultId { get; set; }
+
+        public IList<ClassForumResultFile>? ClassForumResultFiles { get; set; }
     }
 }

@@ -99,6 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);
 
             var classForumResult = await _classForumResultRepository.Queryable
+                .Include(x => x.ClassForumDetailResults)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum!.Id && x.Status != EnumClassForumResultStatus.Draft)

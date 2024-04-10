@@ -11,6 +11,10 @@ namespace Fsel.Course.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_ClassForumResultFiles_ClassForumResults_ClassForumResultId",
+                table: "ClassForumResultFiles");
+
             migrationBuilder.DropColumn(
                 name: "RetryContent",
                 table: "ClassForumResults");
@@ -37,6 +41,14 @@ namespace Fsel.Course.Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)",
                 oldMaxLength: 100);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Content",
+                table: "ClassForumResults",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)");
 
             migrationBuilder.AddColumn<int>(
                 name: "CorrectCount",
@@ -71,8 +83,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "ClassForumDetailResultId",
                 table: "ClassForumResultFiles",
                 type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "ClassForumDetailResults",
@@ -92,9 +103,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WordContent = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     WordCount = table.Column<int>(type: "int", nullable: true),
-                    SubmissionCount = table.Column<int>(type: "int", nullable: true),
+                    SubmissionCount = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     GradingAlFeedback = table.Column<string>(type: "nvarchar(max)", maxLength: 10000, nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
+                    ProcessDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CompletionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     ClassForumResultId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -124,7 +137,15 @@ namespace Fsel.Course.Infrastructure.Migrations
                 column: "ClassForumDetailResultId",
                 principalTable: "ClassForumDetailResults",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ClassForumResultFiles_ClassForumResults_ClassForumResultId",
+                table: "ClassForumResultFiles",
+                column: "ClassForumResultId",
+                principalTable: "ClassForumResults",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
@@ -132,6 +153,10 @@ namespace Fsel.Course.Infrastructure.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_ClassForumResultFiles_ClassForumDetailResults_ClassForumDetailResultId",
+                table: "ClassForumResultFiles");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_ClassForumResultFiles_ClassForumResults_ClassForumResultId",
                 table: "ClassForumResultFiles");
 
             migrationBuilder.DropTable(
@@ -174,6 +199,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                 oldMaxLength: 100,
                 oldNullable: true);
 
+            migrationBuilder.AlterColumn<string>(
+                name: "Content",
+                table: "ClassForumResults",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true);
+
             migrationBuilder.AddColumn<string>(
                 name: "RetryContent",
                 table: "ClassForumResults",
@@ -202,6 +237,14 @@ namespace Fsel.Course.Infrastructure.Migrations
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ClassForumResultFiles_ClassForumResults_ClassForumResultId",
+                table: "ClassForumResultFiles",
+                column: "ClassForumResultId",
+                principalTable: "ClassForumResults",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }

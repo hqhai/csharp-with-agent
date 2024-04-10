@@ -94,6 +94,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             classForumResult = await _classForumResultRepository.Queryable
+                .Include(x => x.ClassForumDetailResults)
+                .ThenInclude(x => x.ClassForumResultFiles)
                 .Include(x => x.LessonResult)
                 .ThenInclude(x => x!.Lesson)
                 .ThenInclude(x => x!.UnitLessons)
@@ -142,7 +144,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     Criteria = x.Criteria,
                     Score = x.Score
                 }).ToList(),
-                PostArea = "L" + lesson?.DisplayOrder + "_" + "U" + unit?.Number + "_" + course?.Code
+                PostArea = "L" + lesson?.DisplayOrder + "_" + "U" + unit?.Number + "_" + course?.Code,
+                ClassForumDetailResults = _mapper.Map<IList<ClassForumDetailResultModel>>(classForumResult.ClassForumDetailResults),
             };
             var studentResult = await _userService.GetStudentByUserIdAsync(classForumResultModel.CreatedUserId);
             var student = studentResult.Content?.Result;

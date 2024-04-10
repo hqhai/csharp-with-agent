@@ -51,6 +51,9 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
 
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
+
         public EnumClassForumResultStatus Status { get; set; }
         public Guid ClassForumResultId { get; set; }
         public ClassForumResult? ClassForumResult { get; set; }

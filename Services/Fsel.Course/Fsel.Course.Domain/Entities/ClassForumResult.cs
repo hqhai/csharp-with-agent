@@ -16,7 +16,6 @@ namespace Fsel.Course.Domain.Entities
 
     public class ClassForumResult : Entity, ITokenResult
     {
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
 
         private string? _wordContent;
