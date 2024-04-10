@@ -91,6 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
                     TotalCorrect = x.CorrectTotal,
+                    Percent = x.Percent,
                     Status = x.Status,
                 }).FirstOrDefault(),
             }).ToList();

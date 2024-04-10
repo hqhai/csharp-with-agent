@@ -112,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 classForumStudentProgress.Status = EnumResultStatus.New;
                 if (classForumResult != null)
                 {
-                    if (classForumResult.Status == EnumClassForumResultStatus.Denied || classForumResult.Status == EnumClassForumResultStatus.Graded)
+                    if (classForumResult.Status == EnumClassForumResultStatus.Graded)
                     {
                         classForumStudentProgress.Status = EnumResultStatus.Done;
                     }

@@ -9,8 +9,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? SuccessCriteriaItem { get; set; }
         public string? SuccessCriteriaItemDetermination { get; set; }
-        public string? SuccessCriteriaItemEvidence { get; set; }
-        public string? SuccessCriteriaItemFix { get; set; }
+        public object? SuccessCriteriaItemEvidence { get; set; }
+        public object? SuccessCriteriaItemFix { get; set; }
         public string? EncouragementCriteriaItem { get; set; }
 
         public int Score
