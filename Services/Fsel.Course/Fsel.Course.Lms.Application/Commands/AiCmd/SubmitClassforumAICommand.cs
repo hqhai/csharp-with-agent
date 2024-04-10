@@ -6,8 +6,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.Helpers;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
@@ -23,17 +21,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
     public class SubmitAIResponseCommandHandler : IRequestHandler<SubmitClassforumAICommand, bool>
     {
-        private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IMediator _mediator;
-        private const int MaxScoreClassForum = 2;
         private readonly IClassforumDetailResultRepository _classforumDetailResultRepository;
 
-        public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassforumDetailResultRepository classforumDetailResultRepository)
+        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassforumDetailResultRepository classforumDetailResultRepository)
         {
-            _classForumResultRepository = classForumResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _submitAIResponsePublisher = submitAIResponsePublisher;
             _notificationMessagePublisher = notificationMessagePublisher;
@@ -45,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var classForumDetailResult = await _classforumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
+
             var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
             var aIResponse = await _mediator.Send(new SubmitAICommand
             {
@@ -60,19 +56,13 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             if (classForumDetailResult != null)
             {
-                int targetScore = 0;
-                if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= classForumResult.WordCount) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= classForumResult.TimeCount))
-                {
-                    ++targetScore;
-                }
-
                 if (request.IsRetry != null && (bool)request.IsRetry)
                 {
                 }
                 else
                 {
                     var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
-                    classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
+                    classForumDetailResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
                 }
 
                 _classforumDetailResultRepository.Update(classForumDetailResult);
