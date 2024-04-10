@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-testing-dev
+spec:
+  selector:
+    matchLabels:
+      app: auth-testing-dev
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: auth-testing-dev
+    spec:
+      containers:
+      - name: fsel-auth-testing
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/auth:ntdo/feature/auth-openid-a19c9ed8-080424
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+#        volumeMounts:
+#        - name: ssl
+#          mountPath: /app/Resources/ssl
+#          readOnly: true
+      imagePullSecrets:
+        - name: testing-dev-secret
+#      volumes:
+#      - name: ssl
+#        secret:
+#          secretName: fsel-auth-testing.fsel.edu.vn-wildcard
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-testing-dev
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: auth-testing-dev
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auth-testing-dev
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/x-forwarded-proto: "https"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+#    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
+#    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
+spec:
+  ingressClassName: nginx-public
+  rules:
+  - host: auth-testing-dev.fsel.edu.vn
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: auth-testing-dev
+            port:
+              number: 443
+#  tls:
+#  - hosts:
+#    - fsel-auth-testing.fsel.edu.vn
+#    secretName: fsel-auth-testing.fsel.edu.vn-wildcard
+
+status:
+  loadBalancer:
+    ingress:
+    - hostname: 103.22.218.217.nip.io
+
+

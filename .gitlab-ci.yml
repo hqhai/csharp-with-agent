@@ -1,52 +1,457 @@
-include:
-  - project: 'ci-templates/build-docker-images'
-    ref: master
-    file: '/general.yml'
-  - project: 'ci-templates/build-docker-images'
-    ref: master
-    file: '/build-image-gitlab-registry.yml'
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/auth-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/gateway-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/hangfire-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/interaction-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/lcms-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/lms-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/notification-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/ordering-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/realtime-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/sender-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/storage-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/system-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/training-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/user-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/cms-planetdefender.yaml
+variables:
+  DOCKER_TLS_CERTDIR: ''
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2375
+  GIT_STRATEGY: clone
+
+image: mirror.gcr.io/library/docker:stable
+
+services:
+- name: mirror.gcr.io/library/docker:stable-dind
+  alias: docker
+
+before_script:
+  - export CURRENT_TIME=$(date +"%d%m%y")
+  - export TAG=$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA-$CURRENT_TIME
+  - echo $TAG
+
+
+stages:
+- auth-build
+- auth-deploy
+- cms-build
+- cms-deploy
+- gateway-build
+- gateway-deploy
+- hangfire-build
+- hangfire-deploy
+- interaction-build
+- interaction-deploy
+- lcms-build
+- lcms-deploy
+- lms-build
+- lms-deploy
+- notification-build
+- notification-deploy
+- ordering-build
+- ordering-deploy
+- realtime-build
+- realtime-deploy
+- sender-build
+- sender-deploy
+- storage-build
+- storage-deploy
+- system-build
+- system-deploy
+- training-build
+- training-deploy
+- user-build
+- user-deploy
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "ntdo/feature/auth-openid"'
+
+# AUTH STAGE
+
+auth-build:
+  stage: auth-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Auth.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Identity/**/*
+
+auth-deploy:
+  stage: auth-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/auth.yaml
+    - kubectl apply -f Deploy/auth.yaml --kubeconfig=config -n fsel-developer
+  only: 
+    changes:
+      - Services/Fsel.Identity/**/*
+
+# CMS SATGE
+cms-build:
+  stage: cms-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Cms.PlanetDefender.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Cms.PlanetDefender/**/*
+
+cms-deploy:
+  stage: cms-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/cms.yaml
+    - kubectl apply -f Deploy/cms.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Cms.PlanetDefender/**/*
+
+# GATEWAY STAGE
+
+gateway-build:
+  stage: gateway-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Gateway.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Gateway/**/*
+
+gateway-deploy:
+  stage: gateway-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/gateway.yaml
+    - kubectl apply -f Deploy/gateway.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Gateway/**/*
+
+# HANGFIRE STAGE
+
+hangfire-build:
+  stage: hangfire-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Hangfire.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Gateway/**/*
+
+hangfire-deploy:
+  stage: hangfire-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/hangfire.yaml
+    - kubectl apply -f Deploy/hangfire.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Hangfire/**/*
+
+# INTERACTION STAGE
+
+interaction-build:
+  stage: interaction-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Interaction.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Interaction/**/*
+
+interaction-deploy:
+  stage: interaction-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/interaction.yaml
+    - kubectl apply -f Deploy/interaction.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Interaction/**/*
+
+# LCMS STAGE
+
+lcms-build:
+  stage: lcms-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Lcms.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Course/**/*
+
+lcms-deploy:
+  stage: lcms-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/lcms.yaml
+    - kubectl apply -f Deploy/lcms.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Course/**/*
+
+# LMS STAGE
+
+lms-build:
+  stage: lms-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Lms.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Course/**/*
+
+lms-deploy:
+  stage: lms-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/lms.yaml
+    - kubectl apply -f Deploy/lms.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Course/**/*
+
+# NOTIFICATION STAGE
+
+notification-build:
+  stage: notification-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Notification.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Notification/**/*
+
+notification-deploy:
+  stage: notification-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/notification.yaml
+    - kubectl apply -f Deploy/notification.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Notification/**/*
+
+# ORDERING STAGE
+
+ordering-build:
+  stage: ordering-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Ordering.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Ordering/**/*
+
+ordering-deploy:
+  stage: ordering-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/ordering.yaml
+    - kubectl apply -f Deploy/ordering.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Ordering/**/*
+
+# REALTIME STAGE
+
+realtime-build:
+  stage: realtime-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Realtime.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Realtime/**/*
+
+realtime-deploy:
+  stage: realtime-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/realtime.yaml
+    - kubectl apply -f Deploy/realtime.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Realtime/**/*
+
+# SENDER STAGE
+
+sender-build:
+  stage: sender-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Sender.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Sender/**/*
+
+sender-deploy:
+  stage: sender-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/sender.yaml
+    - kubectl apply -f Deploy/sender.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Sender/**/*
+
+# STORAGE STAGE
+
+storage-build:
+  stage: storage-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Storage.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Storage/**/*
+
+storage-deploy:
+  stage: storage-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/storage.yaml
+    - kubectl apply -f Deploy/storage.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Storage/**/*
+
+# SYSTEM STAGE
+
+system-build:
+  stage: system-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/System.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.System/**/*
+
+system-deploy:
+  stage: system-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/system.yaml
+    - kubectl apply -f Deploy/system.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.System/**/*
+
+# TRAINING STAGE
+
+training-build:
+  stage: training-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/Training.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Training/**/*
+
+training-deploy:
+  stage: training-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/training.yaml
+    - kubectl apply -f Deploy/training.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Training/**/*
+
+# USER STAGE
+
+user-build:
+  stage: user-build
+  tags:
+    - atlantic-k8s
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker build -f Environments/Testing/User.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
+    - docker push $CI_REGISTRY_IMAGE:$TAG
+  only:
+    changes:
+      - Services/Fsel.Fsel.Identity/**/*
+
+user-deploy:
+  stage: user-deploy
+  tags:
+    - atlantic-k8s
+  image: bitnami/kubectl
+  script:
+    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/user.yaml
+    - kubectl apply -f Deploy/user.yaml --kubeconfig=config -n fsel-developer
+  only:
+    changes:
+      - Services/Fsel.Identity/**/*
