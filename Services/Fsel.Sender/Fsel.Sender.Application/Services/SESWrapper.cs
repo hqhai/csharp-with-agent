@@ -9,6 +9,8 @@ namespace Fsel.Sender.Application.Services
     using System.Text.Json;
     using Amazon.SimpleEmail;
     using Amazon.SimpleEmail.Model;
+    using Fsel.Sender.Domain.ValueSettings;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Wrapper with examples of usage for Amazon Simple Email Service (Amazon SES).
@@ -16,14 +18,18 @@ namespace Fsel.Sender.Application.Services
     public class SESWrapper
     {
         private readonly IAmazonSimpleEmailService _amazonSimpleEmailService;
+        private readonly AppSetting _appSetting;
+        private readonly ILogger<object> _logger;
 
         /// <summary>
         /// Constructor for the wrapper that uses the injected Amazon SES client.
         /// </summary>
         /// <param name="amazonSimpleEmailService">Amazon Simple Email Service</param>
-        public SESWrapper(IAmazonSimpleEmailService amazonSimpleEmailService)
+        public SESWrapper(AppSetting appSetting, ILogger<object> logger)
         {
-            _amazonSimpleEmailService = amazonSimpleEmailService;
+            _appSetting = appSetting;
+            _logger = logger;
+            _amazonSimpleEmailService = new AmazonSimpleEmailServiceClient(_appSetting?.Smtp?.AwsAccessKeyId, _appSetting?.Smtp?.AwsSecretAccessKey, region: Amazon.RegionEndpoint.APSoutheast1);
         }
 
         // snippet-start:[SES.dotnetv3.ListIdentitiesAsync]
@@ -47,7 +53,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("ListIdentitiesAsync failed with exception: " + ex.Message);
+                _logger.LogError("ListIdentitiesAsync failed with exception: " + ex.Message);
             }
 
             return result;
@@ -78,7 +84,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("GetIdentityStatusAsync failed with exception: " + ex.Message);
+                _logger.LogError("GetIdentityStatusAsync failed with exception: " + ex.Message);
             }
 
             return result;
@@ -110,7 +116,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("VerifyEmailIdentityAsync failed with exception: " + ex.Message);
+                _logger.LogError("VerifyEmailIdentityAsync failed with exception: " + ex.Message);
             }
 
             return success;
@@ -139,7 +145,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("DeleteIdentityAsync failed with exception: " + ex.Message);
+                _logger.LogError("DeleteIdentityAsync failed with exception: " + ex.Message);
             }
 
             return success;
@@ -157,7 +163,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("SendEmailAsync failed with exception: " + ex.Message);
+                _logger.LogError("SendEmailAsync failed with exception: " + ex.Message);
             }
 
             return messageId;
@@ -219,7 +225,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("SendEmailAsync failed with exception: " + ex.Message);
+                _logger.LogError("SendEmailAsync failed with exception: " + ex.Message);
             }
 
             return messageId;
@@ -244,7 +250,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("GetSendQuotaAsync failed with exception: " + ex.Message);
+                _logger.LogError("GetSendQuotaAsync failed with exception: " + ex.Message);
             }
 
             return result;
@@ -269,7 +275,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("ListEmailTemplatesAsync failed with exception: " + ex.Message);
+                _logger.LogError("ListEmailTemplatesAsync failed with exception: " + ex.Message);
             }
 
             return result;
@@ -308,7 +314,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("CreateEmailTemplateAsync failed with exception: " + ex.Message);
+                _logger.LogError("CreateEmailTemplateAsync failed with exception: " + ex.Message);
             }
 
             return success;
@@ -350,7 +356,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("SendTemplateEmailAsync failed with exception: " + ex.Message);
+                _logger.LogError("SendTemplateEmailAsync failed with exception: " + ex.Message);
             }
 
             return messageId;
@@ -379,7 +385,7 @@ namespace Fsel.Sender.Application.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("DeleteEmailTemplateAsync failed with exception: " + ex.Message);
+                _logger.LogError("DeleteEmailTemplateAsync failed with exception: " + ex.Message);
             }
 
             return success;
