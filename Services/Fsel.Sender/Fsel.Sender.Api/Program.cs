@@ -2,6 +2,7 @@
 
 using Amazon.SimpleEmail;
 using Fsel.Core.Extensions;
+using Fsel.Sender.Application.Services;
 using Fsel.Sender.Domain.ValueSettings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,7 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 
 builder.Services.AddScoped<IAmazonSimpleEmailService, AmazonSimpleEmailServiceClient>();
-
+builder.Services.AddScoped<SESWrapper>();
 var app = builder.Build();
 app.UseServices();
 app.Run();
