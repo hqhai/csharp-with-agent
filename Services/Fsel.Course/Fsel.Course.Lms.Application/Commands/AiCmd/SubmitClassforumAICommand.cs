@@ -5,7 +5,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
@@ -19,16 +21,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
     public class SubmitAIResponseCommandHandler : IRequestHandler<SubmitClassforumAICommand, bool>
     {
-        private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IMediator _mediator;
         private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
 
-        public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository)
+        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository)
         {
-            _classForumResultRepository = classForumResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _submitAIResponsePublisher = submitAIResponsePublisher;
             _notificationMessagePublisher = notificationMessagePublisher;
@@ -60,7 +60,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 }
                 else
                 {
-                    classForumDetailResult.GradingAlFeedback = aIResponse;
+                    var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+                    classForumDetailResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
                 }
 
                 _classForumDetailResultRepository.Update(classForumDetailResult);

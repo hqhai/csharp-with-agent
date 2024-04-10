@@ -225,7 +225,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
                 counts.Add(lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).Count());
-                counts.Add(lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && (x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.PendingForGrading) && lessonResultIds.Contains(x.LessonResultId)).Count());
+                counts.Add(lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && (x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.Denied) && lessonResultIds.Contains(x.LessonResultId)).Count());
                 counts.Add(lessonResults.Select(x =>
                 {
                     return x.HomeWorkResults.Any() && x.HomeWorkResults.All(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == courseResult.StudentId) ? 1 : 0;
