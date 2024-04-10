@@ -310,7 +310,7 @@ realtime-build:
       - Services/Fsel.Realtime/**/*
 
 realtime-deploy:
-  stage: reealtime-deploy
+  stage: realtime-deploy
   tags:
     - atlantic-k8s
   image: bitnami/kubectl
