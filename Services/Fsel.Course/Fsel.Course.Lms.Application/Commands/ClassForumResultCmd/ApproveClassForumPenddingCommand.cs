@@ -21,7 +21,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -99,24 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 {
                     if (classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.Autodot || (studentPackageCode == EnumPackageCode.BASIC && classForumResult.ClassForum?.GradingStyle == EnumGradingStyle.TeacherGrading))
                     {
-                        long score = 0;
-                        if ((classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Writing && classForumResult.ClassForum?.TaggetWordLimit <= classForumResult.WordCount) || (classForumResult.ClassForum?.CourseSkill == EnumCourseSkill.Speaking && classForumResult.ClassForum?.TaggetTimeLimit <= classForumResult.TimeCount))
-                        {
-                            score = 9;
-                        }
-
-                        var enumClassForumScores = Enum.GetValues(typeof(EnumClassForumScoreCriteria)).Cast<EnumClassForumScoreCriteria>().ToList();
-                        classForumResult.ClassForumScores = enumClassForumScores.Select(x => new ClassForumScore
-                        {
-                            ClassForumResultId = classForumResult.Id,
-                            Score = score,
-                            Criteria = x,
-                        }).ToList();
                         classForumResult.Status = EnumClassForumResultStatus.Graded;
-                    }
-                    else
-                    {
-                        classForumResult.Status = EnumClassForumResultStatus.PendingForGrading;
                     }
 
                     var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
