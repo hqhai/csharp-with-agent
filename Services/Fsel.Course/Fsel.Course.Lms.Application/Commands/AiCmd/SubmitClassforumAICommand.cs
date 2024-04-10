@@ -24,22 +24,22 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IMediator _mediator;
-        private readonly IClassforumDetailResultRepository _classforumDetailResultRepository;
+        private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
 
-        public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassforumDetailResultRepository classforumDetailResultRepository)
+        public SubmitAIResponseCommandHandler(IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository)
         {
             _classForumResultRepository = classForumResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _submitAIResponsePublisher = submitAIResponsePublisher;
             _notificationMessagePublisher = notificationMessagePublisher;
             _mediator = mediator;
-            _classforumDetailResultRepository = classforumDetailResultRepository;
+            _classForumDetailResultRepository = classForumDetailResultRepository;
         }
 
         public async Task<bool> Handle(SubmitClassforumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var classForumDetailResult = await _classforumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
+            var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
             var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
             var aIResponse = await _mediator.Send(new SubmitAICommand
             {
@@ -63,8 +63,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     classForumDetailResult.GradingAlFeedback = aIResponse;
                 }
 
-                _classforumDetailResultRepository.Update(classForumDetailResult);
-                await _classforumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                _classForumDetailResultRepository.Update(classForumDetailResult);
+                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
@@ -75,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             if (!string.IsNullOrEmpty(aIResponse))
             {
-                var classForumDetailResultOwner = _classforumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
+                var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
                 if (classForumDetailResultOwner != null)
                 {

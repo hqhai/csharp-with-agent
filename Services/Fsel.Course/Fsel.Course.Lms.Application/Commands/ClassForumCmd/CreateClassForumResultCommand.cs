@@ -44,9 +44,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly SubmitClassForumGradingPublisher _submitClassForumGradingPublisher;
         private readonly ISystemService _systemService;
-        private readonly IClassforumDetailResultRepository _classforumDetailResultRepository;
+        private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassforumDetailResultRepository classforumDetailResultRepository)
+        public CreateClassForumResultCommandHandler(IMapper mapper, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -59,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _notificationMessagePublisher = notificationMessagePublisher;
             _submitClassForumGradingPublisher = submitClassForumGradingPublisher;
             _systemService = systemService;
-            _classforumDetailResultRepository = classforumDetailResultRepository;
+            _classForumDetailResultRepository = classForumDetailResultRepository;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 return methodResult;
             }
 
-            var classForumDetailResult = _classforumDetailResultRepository.Queryable.Include(x => x.ClassForumResultFiles).AsQueryable();
+            var classForumDetailResult = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResultFiles).AsQueryable();
 
             var classForumDetailResultAttemp1 = classForumDetailResult.Where(x => x.SubmissionCount == EnumSubmissionCount.FirstSubmit && x.Status == EnumClassForumResultStatus.Pending).FirstOrDefault();
 
@@ -178,7 +178,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 }
                 else if (classForumResult != null && classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate <= classForumDetailResultAttemp1.ProcessDate!.Value.AddHours(2))
                 {
-                    var classForumDetailResultModels = await _classforumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult!.Id).ToListAsync(cancellationToken);
+                    var classForumDetailResultModels = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult!.Id).ToListAsync(cancellationToken);
 
                     if (classForumDetailResultModels.Count > 2)
                     {
@@ -208,14 +208,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         }).ToList();
                     }
 
-                    _classforumDetailResultRepository.Add(classForumDetailResult);
-                    await _classforumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    _classForumDetailResultRepository.Add(classForumDetailResult);
+                    await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                     await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForum, request, cancellationToken);
                 }
                 else if (classForumDetailResult.Where(x => x.Id == request.ClassForumDetailResultId && x.Id == classForumResult!.Id).FirstOrDefault()?.Status == EnumClassForumResultStatus.Draft)
                 {
-                    var classForumDetailResult = await _classforumDetailResultRepository.Queryable.Where(x => x.Id == request.ClassForumDetailResultId && x.Id == classForumResult!.Id).FirstOrDefaultAsync(cancellationToken);
+                    var classForumDetailResult = await _classForumDetailResultRepository.Queryable.Where(x => x.Id == request.ClassForumDetailResultId && x.Id == classForumResult!.Id).FirstOrDefaultAsync(cancellationToken);
                     _mapper.Map(request, classForumDetailResult);
                     classForumDetailResult!.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
 
@@ -232,7 +232,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     }
 
                     classForumResult = await GetClassForumResultToSubmissionCount(classForumResult!, classForum, course.CourseType, cancellationToken);
-                    classForumDetailResult = _classforumDetailResultRepository.Update(classForumDetailResult);
+                    classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult);
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else

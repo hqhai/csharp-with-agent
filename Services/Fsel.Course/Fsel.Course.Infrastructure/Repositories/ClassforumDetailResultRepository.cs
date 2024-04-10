@@ -6,9 +6,9 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
 
-    public class ClassforumDetailResultRepository : BaseRepository<ClassForumDetailResult>, IClassforumDetailResultRepository
+    public class ClassForumDetailResultRepository : BaseRepository<ClassForumDetailResult>, IClassForumDetailResultRepository
     {
-        public ClassforumDetailResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public ClassForumDetailResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }
