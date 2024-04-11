@@ -67,10 +67,10 @@ spec:
             name: sender-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-sender-dev.fsel.edu.vn
-#    secretName: fsel-sender-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-sender-dev.fsel.edu.vn
+    secretName: fsel-sender-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

@@ -67,10 +67,10 @@ spec:
             name: lms-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-lms-dev.fsel.edu.vn
-#    secretName: fsel-lms-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-lms-dev.fsel.edu.vn
+    secretName: fsel-lms-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

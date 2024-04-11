@@ -67,10 +67,10 @@ spec:
             name: interaction-dev
             port:
               number: 443
-#  tls:
-#  - hosts:
-#    - fsel-interaction-dev.fsel.edu.vn
-#    secretName: fsel-interaction-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-interaction-dev.fsel.edu.vn
+    secretName: fsel-interaction-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

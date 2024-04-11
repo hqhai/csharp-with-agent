@@ -67,10 +67,10 @@ spec:
             name: system-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-system-dev.fsel.edu.vn
-#    secretName: fsel-system-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-system-dev.fsel.edu.vn
+    secretName: fsel-system-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

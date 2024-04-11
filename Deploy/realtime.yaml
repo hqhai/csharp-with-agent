@@ -67,10 +67,10 @@ spec:
             name: realtime-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-realtime-dev.fsel.edu.vn
-#    secretName: fsel-realtime-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-realtime-dev.fsel.edu.vn
+    secretName: fsel-realtime-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

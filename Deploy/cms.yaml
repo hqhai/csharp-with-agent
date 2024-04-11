@@ -18,16 +18,8 @@ spec:
         ports:
         - containerPort: 80
         - containerPort: 443 
-#        volumeMounts:
-#        - name: ssl
-#          mountPath: /app/Resources/ssl
-#          readOnly: true
       imagePullSecrets:
         - name: dev-image-secret
-#      volumes:
-#      - name: ssl
-#        secret:
-#          secretName: fsel-auth-testing.fsel.edu.vn-wildcard
 
 ---
 apiVersion: v1
@@ -54,14 +46,9 @@ kind: Ingress
 metadata:
   name: cms-dev
   annotations:
-#    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-#    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-#    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-#    nginx.ingress.kubernetes.io/x-forwarded-proto: "https"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-#    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
 #    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
 spec:
@@ -77,10 +64,10 @@ spec:
             name: cms-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-cms-dev.fsel.edu.vn
-#    secretName: fsel-cms-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-cms-dev.fsel.edu.vn
+    secretName: fsel-cms-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:
