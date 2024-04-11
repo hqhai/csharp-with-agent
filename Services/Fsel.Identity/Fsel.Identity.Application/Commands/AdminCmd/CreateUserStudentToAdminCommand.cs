@@ -260,13 +260,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 case EnumCourseLevel.MS1:
                 case EnumCourseLevel.MS2:
                 case EnumCourseLevel.MS3:
-                    yearOld = MinAgeYoung;
-                    break;
-
                 case EnumCourseLevel.C1:
-                    yearOld = MinAgeYoung;
-                    break;
-
                 case EnumCourseLevel.B2:
                     yearOld = MinAgeYoung;
                     break;
