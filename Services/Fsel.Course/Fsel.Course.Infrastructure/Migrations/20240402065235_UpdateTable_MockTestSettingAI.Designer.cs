@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240402065235_UpdateTable_MockTestSettingAI")]
+    partial class UpdateTable_MockTestSettingAI
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2779,78 +2782,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.ToTable("MockTests");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.MockTestAICriteriaSetting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<string>("CriteriaName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<Guid?>("MockTestAISettingId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("PromptStr")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SystemRoleAlConfig")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MockTestAISettingId");
-
-                    b.ToTable("MockTestAICriteriaSettings");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.MockTestAISetting", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2871,6 +2802,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
+
+                    b.Property<string>("Criteria")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
@@ -5687,16 +5623,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("Video");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.MockTestAICriteriaSetting", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.MockTestAISetting", "MockTestAISetting")
-                        .WithMany("MockTestAICriteriaSettings")
-                        .HasForeignKey("MockTestAISettingId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("MockTestAISetting");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.MockTestAISetting", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.Section", "Section")
@@ -6291,11 +6217,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("MockTestSections");
 
                     b.Navigation("UnitSkillMockTests");
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.MockTestAISetting", b =>
-                {
-                    b.Navigation("MockTestAICriteriaSettings");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.MockTestResult", b =>

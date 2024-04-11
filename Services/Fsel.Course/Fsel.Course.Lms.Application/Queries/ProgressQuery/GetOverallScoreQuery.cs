@@ -92,7 +92,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             TotalQuestion = x.Sum(x => x.TotalQuestion),
                         }).ToList();
                     overallScoreModel.IsPlacement = false;
-                    overallScoreModel.Percent = unitResults.Average(x => x.Percent);
+                    overallScoreModel.Percent = NumberHelper.ConvertRound(unitResults.Any() ? unitResults.Average(x => x.Percent) : default);
                 }
                 else
                 {

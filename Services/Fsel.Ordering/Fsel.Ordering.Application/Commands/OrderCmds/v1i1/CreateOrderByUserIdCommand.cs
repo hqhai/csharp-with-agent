@@ -96,14 +96,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             var existsOrder = await _orderRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(x => x.UserId == request.UserId && x.Status == EnumOrderStatus.Payment, cancellationToken);
 
-            var courseResult = await _courseService.GetCoursesByIdsAsync(new List<Guid> { request.CourseId });
+            var courseResult = await _courseService.GetCourseByIdAsync(request.CourseId);
             if (!courseResult.IsSuccessStatusCode)
             {
                 methodResult.AddError(courseResult.Error);
                 return methodResult;
             }
-            var course = courseResult.Content?.Result?.FirstOrDefault();
-
+            var course = courseResult.Content?.Result;
             var newOrder = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == request.UserId && p.Status == EnumOrderStatus.New, cancellationToken);
             var isOrderEmpty = newOrder == null;
             var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
