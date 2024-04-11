@@ -95,7 +95,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var isYoung = course.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts || course.CourseLevel == EnumCourseLevel.C1 || course.CourseLevel == EnumCourseLevel.B2;
 
             #endregion Get Course
 
@@ -142,7 +141,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 return methodResult;
             }
-            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = GetBirthdayOfStudent(isYoung) }, cancellationToken);
+            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = GetBirthdayToCourseLevel(course.CourseLevel) }, cancellationToken);
             if (!updateCode.IsOK)
             {
                 methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
@@ -253,9 +252,30 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             return user;
         }
 
-        private static DateTime GetBirthdayOfStudent(bool isYoung)
+        private static DateTime GetBirthdayToCourseLevel(EnumCourseLevel courseLevel)
         {
-            return new DateTime(isYoung ? DateTime.UtcNow.AddYears(-MinAgeYoung).Year : DateTime.UtcNow.AddYears(-MaxAgeChildren).Year, 1, 1);
+            int yearOld = default;
+            switch (courseLevel)
+            {
+                case EnumCourseLevel.MS1:
+                case EnumCourseLevel.MS2:
+                case EnumCourseLevel.MS3:
+                    yearOld = MinAgeYoung;
+                    break;
+
+                case EnumCourseLevel.C1:
+                    yearOld = MinAgeYoung;
+                    break;
+
+                case EnumCourseLevel.B2:
+                    yearOld = MinAgeYoung;
+                    break;
+
+                default:
+                    yearOld = MaxAgeChildren;
+                    break;
+            }
+            return new DateTime(DateTime.UtcNow.AddYears(-yearOld).Year, 1, 1);
         }
     }
 }
