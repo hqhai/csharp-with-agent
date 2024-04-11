@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-testing-dev
+  name: auth-dev
 spec:
   selector:
     matchLabels:
-      app: auth-testing-dev
+      app: auth-dev
   replicas: 1 
   template:
     metadata:
       labels:
-        app: auth-testing-dev
+        app: auth-dev
     spec:
       containers:
       - name: fsel-auth-testing
-        image: registry.fsel.edu.vn/fsel/api/fsel_src/auth:ntdo/feature/auth-openid-a19c9ed8-080424
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/auth:ntdo/feature/auth-openid-...............
         ports:
         - containerPort: 80
         - containerPort: 443 
@@ -23,7 +23,7 @@ spec:
 #          mountPath: /app/Resources/ssl
 #          readOnly: true
       imagePullSecrets:
-        - name: testing-dev-secret
+        - name: dev-image-secret
 #      volumes:
 #      - name: ssl
 #        secret:
@@ -33,7 +33,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-testing-dev
+  name: auth-dev
   labels:
 spec:
   ports:
@@ -46,13 +46,13 @@ spec:
     protocol: TCP
     name: https
   selector:
-    app: auth-testing-dev
+    app: auth-dev
 
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: auth-testing-dev
+  name: auth-dev
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
@@ -67,20 +67,20 @@ metadata:
 spec:
   ingressClassName: nginx-public
   rules:
-  - host: auth-testing-dev.fsel.edu.vn
+  - host: fsel-auth-dev.fsel.edu.vn
     http:
       paths:
       - path: /
         pathType: ImplementationSpecific
         backend:
           service:
-            name: auth-testing-dev
+            name: auth-dev
             port:
               number: 443
 #  tls:
 #  - hosts:
-#    - fsel-auth-testing.fsel.edu.vn
-#    secretName: fsel-auth-testing.fsel.edu.vn-wildcard
+#    - fsel-auth-dev.fsel.edu.vn
+#    secretName: fsel-auth-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

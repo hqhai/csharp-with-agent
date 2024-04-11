@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-dev
+spec:
+  selector:
+    matchLabels:
+      app: notification-dev
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: notification-dev
+    spec:
+      containers:
+      - name: fsel-notification-testing
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/notification:ntdo/feature/auth-openid-...............
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+      imagePullSecrets:
+        - name: dev-image-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-dev
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: notification-dev
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: notification-dev
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/x-forwarded-proto: "https"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,notificationorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
+spec:
+  ingressClassName: nginx-public
+  rules:
+  - host: fsel-notification-dev.fsel.edu.vn
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: notification-dev
+            port:
+              number: 443
+#  tls:
+#  - hosts:
+#    - fsel-notification-dev.fsel.edu.vn
+#    secretName: fsel-notification-dev.fsel.edu.vn-wildcard
+
+status:
+  loadBalancer:
+    ingress:
+    - hostname: 103.22.218.217.nip.io
