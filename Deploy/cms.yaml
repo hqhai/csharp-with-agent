@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: fsel-auth-testing
-        image: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender:ntdo/feature/auth-openid-...............
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender:auth-openid-...............
         ports:
         - containerPort: 80
         - containerPort: 443 

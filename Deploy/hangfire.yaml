@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: fsel-hangfire-testing
-        image: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire:ntdo/feature/auth-openid-...............
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire:auth-openid-...............
         ports:
         - containerPort: 80
         - containerPort: 443 

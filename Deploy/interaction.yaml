@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: fsel-interaction-testing
-        image: registry.fsel.edu.vn/fsel/api/fsel_src/interaction:ntdo/feature/auth-openid-...............
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/interaction:auth-openid-...............
         ports:
         - containerPort: 80
         - containerPort: 443 
