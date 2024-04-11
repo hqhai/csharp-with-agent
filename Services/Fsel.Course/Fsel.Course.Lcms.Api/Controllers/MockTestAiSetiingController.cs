@@ -29,11 +29,11 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get Video
         /// </summary>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(MethodResult<MockTestAISettingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<MockTestAISettingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            MethodResult<MockTestAISettingModel> queryResult = await _mediator.Send(new GetMockTestAiSettingQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<IList<MockTestAISettingModel>> queryResult = await _mediator.Send(new GetMockTestAiSettingQuery { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

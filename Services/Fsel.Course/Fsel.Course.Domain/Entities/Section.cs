@@ -44,7 +44,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<ExtraPracticeAnswer> ExtraPracticeAnswers { get; set; } = new List<ExtraPracticeAnswer>();
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
 
-        public MockTestAISetting? MockTestAISetting { get; set; }
+        public ICollection<MockTestAISetting>? MockTestAISettings { get; set; }
 
 
     }
