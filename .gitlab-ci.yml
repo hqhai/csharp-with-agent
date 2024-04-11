@@ -443,7 +443,7 @@ user-build:
     - docker push $CI_REGISTRY_IMAGE/user:$TAG
   only:
     changes:
-      - Services/Fsel.Fsel.Identity/**/*
+      - Services/Fsel.Identity/**/*
 
 user-deploy:
   stage: user-deploy
