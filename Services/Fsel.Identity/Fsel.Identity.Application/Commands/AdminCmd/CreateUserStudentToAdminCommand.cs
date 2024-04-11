@@ -49,6 +49,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private const string DefaultPassword = "Admin@123";
         private const string RoleStudent = nameof(Student);
         private const int TotalUserDateNow = 50;
+        private const int MinAgeYoung = 14;
+        private const int MaxAgeChildren = 13;
 
         public CreateUserStudentToAdminCommandHandler(IMediator mediator, IMapper mapper, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
         {
@@ -93,7 +95,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var isYoung = course.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts || course.CourseLevel == EnumCourseLevel.C1;
+            var isYoung = course.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts || course.CourseLevel == EnumCourseLevel.C1 || course.CourseLevel == EnumCourseLevel.B2;
 
             #endregion Get Course
 
@@ -253,7 +255,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
         private static DateTime GetBirthdayOfStudent(bool isYoung)
         {
-            return new DateTime(isYoung ? 2000 : 2014, 1, 1);
+            return new DateTime(isYoung ? DateTime.UtcNow.AddYears(-MinAgeYoung).Year : DateTime.UtcNow.AddYears(-MaxAgeChildren).Year, 1, 1);
         }
     }
 }
