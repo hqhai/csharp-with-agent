@@ -121,16 +121,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         {
             ArgumentNullException.ThrowIfNull(classForumDetailResult);
             ArgumentNullException.ThrowIfNull(classForumResult);
-            var classForumAIs = new List<ClassForumAIModel>();
             var targetScore = GetTargetCount(classForumDetailResult, classForumResult);
-            if (string.IsNullOrEmpty(classForumResult.GradingAlFeedback))
-            {
-                classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumResult.GradingAlFeedback);
-            }
-            else
-            {
-                classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumDetailResult.GradingAlFeedback);
-            }
+
+            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumDetailResult.GradingAlFeedback);
 
             if (classForumAIs != null && classForumAIs.Any() && classForumResult.CorrectCount == default)
             {

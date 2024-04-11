@@ -85,9 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.ClassForumId == classForum!.Id
-                && x.Status != EnumClassForumResultStatus.Draft
-                && x.Status != EnumClassForumResultStatus.Pending
-                && x.Status != EnumClassForumResultStatus.Denied
+                && x.Status == EnumClassForumResultStatus.Graded
                 && x.Id != request.ClassForumResultId
                 && classStudentIds!.Contains(x.StudentId))
                 .Select(x => new ClassForumResultModel
