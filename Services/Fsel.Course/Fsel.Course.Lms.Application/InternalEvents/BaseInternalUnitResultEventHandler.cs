@@ -153,7 +153,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     return;
                 }
 
-                mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(x => x.CourseId == course.Id && x.StudentId == studentId && x.Status == EnumResultStatus.Done).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(x => x.CourseId == course.Id && x.StudentId == studentId && x.Status == EnumResultStatus.Done && !x.UnitId.HasValue).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
 
                 if (mockTestResult == null || !mockTestResult.MockTestScores.Any())
                 {
