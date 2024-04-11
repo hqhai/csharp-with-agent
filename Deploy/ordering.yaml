@@ -46,10 +46,10 @@ kind: Ingress
 metadata:
   name: ordering-dev
   annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    nginx.ingress.kubernetes.io/x-forwarded-proto: "https"
+#    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+#    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+#    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+#    nginx.ingress.kubernetes.io/x-forwarded-proto: "https"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
@@ -66,7 +66,7 @@ spec:
           service:
             name: ordering-dev
             port:
-              number: 443
+              number: 80
 #  tls:
 #  - hosts:
 #    - fsel-ordering-dev.fsel.edu.vn
