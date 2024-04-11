@@ -193,7 +193,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
 
             if (mockTestResult.MockTest.MockTestType == EnumMockTestType.FullMockTest)
             {
-                var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder)).FirstOrDefaultAsync(p => p.Id == mockTestResult.CourseId, cancellationToken);
+                var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests.OrderBy(x => x.DisplayOrder)).ThenInclude(p => p.Unit).FirstOrDefaultAsync(p => p.Id == mockTestResult.CourseId, cancellationToken);
 
                 if (course.CourseUnitMockTests.Where(p => p.MockTestId.HasValue).FirstOrDefault()?.MockTestId == mockTestResult.MockTestId)
                 {
