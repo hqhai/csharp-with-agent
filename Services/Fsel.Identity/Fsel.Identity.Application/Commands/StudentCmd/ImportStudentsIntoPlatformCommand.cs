@@ -61,6 +61,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentToPlatformModel x, IList<ImportStudentToPlatformModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
+                if (string.IsNullOrEmpty(x.FullName))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = "Full Name is null" });
+                }
                 if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
@@ -73,9 +77,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.ParentEmail), Message = "Parent Email is null or malformed" });
                 }
-                if (!string.IsNullOrEmpty(x.DateOfBirth) && !DateTime.TryParse(x.DateOfBirth, out DateTime dob))
+                if (string.IsNullOrEmpty(x.DateOfBirth) || (!string.IsNullOrEmpty(x.DateOfBirth) && !DateTime.TryParse(x.DateOfBirth, out DateTime dob)))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = "Date of birth is malformed" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = "Date of birth is null or malformed" });
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
