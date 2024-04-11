@@ -12,7 +12,8 @@ services:
 
 before_script:
   - export CURRENT_TIME=$(date +"%d%m%y")
-  - export TAG=$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA-$CURRENT_TIME
+  - export TAG=auth-openid-$CI_COMMIT_SHORT_SHA-$CURRENT_TIME
+  - export IMAGE_VALUES=$CI_COMMIT_SHORT_SHA-$CURRENT_TIME
   - echo $TAG
 
 
@@ -61,8 +62,8 @@ auth-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Auth.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Auth.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/auth:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/auth:$TAG
   only:
     changes:
       - Services/Fsel.Identity/**/*
@@ -73,7 +74,7 @@ auth-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/auth.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/auth.yaml
     - kubectl apply -f Deploy/auth.yaml --kubeconfig=config -n fsel-developer
   only: 
     changes:
@@ -87,8 +88,8 @@ cms-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Cms.PlanetDefender.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Cms.PlanetDefender.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/cms-planetdefender:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/cms-planetdefender:$TAG
   only:
     changes:
       - Services/Fsel.Cms.PlanetDefender/**/*
@@ -99,7 +100,7 @@ cms-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/cms.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/cms.yaml
     - kubectl apply -f Deploy/cms.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -114,8 +115,8 @@ gateway-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Gateway.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Gateway.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/api-gateway:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/api-gateway:$TAG
   only:
     changes:
       - Services/Fsel.Gateway/**/*
@@ -126,7 +127,7 @@ gateway-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/gateway.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/gateway.yaml
     - kubectl apply -f Deploy/gateway.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -141,8 +142,8 @@ hangfire-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Hangfire.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Hangfire.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/hangfire:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/hangfire:$TAG
   only:
     changes:
       - Services/Fsel.Gateway/**/*
@@ -153,7 +154,7 @@ hangfire-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/hangfire.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/hangfire.yaml
     - kubectl apply -f Deploy/hangfire.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -168,8 +169,8 @@ interaction-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Interaction.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Interaction.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/interaction:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/interaction:$TAG
   only:
     changes:
       - Services/Fsel.Interaction/**/*
@@ -180,7 +181,7 @@ interaction-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/interaction.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/interaction.yaml
     - kubectl apply -f Deploy/interaction.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -195,8 +196,8 @@ lcms-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Lcms.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Lcms.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/lcmsapi:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/lcmsapi:$TAG
   only:
     changes:
       - Services/Fsel.Course/**/*
@@ -207,7 +208,7 @@ lcms-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/lcms.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/lcms.yaml
     - kubectl apply -f Deploy/lcms.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -222,8 +223,8 @@ lms-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Lms.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Lms.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/lmsapi:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/lmsapi:$TAG
   only:
     changes:
       - Services/Fsel.Course/**/*
@@ -234,7 +235,7 @@ lms-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/lms.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/lms.yaml
     - kubectl apply -f Deploy/lms.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -249,8 +250,8 @@ notification-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Notification.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Notification.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/notification:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/notification:$TAG
   only:
     changes:
       - Services/Fsel.Notification/**/*
@@ -261,7 +262,7 @@ notification-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/notification.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/notification.yaml
     - kubectl apply -f Deploy/notification.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -276,8 +277,8 @@ ordering-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Ordering.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Ordering.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/ordering:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/ordering:$TAG
   only:
     changes:
       - Services/Fsel.Ordering/**/*
@@ -288,7 +289,7 @@ ordering-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/ordering.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/ordering.yaml
     - kubectl apply -f Deploy/ordering.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -303,8 +304,8 @@ realtime-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Realtime.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Realtime.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/realtime:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/realtime:$TAG
   only:
     changes:
       - Services/Fsel.Realtime/**/*
@@ -315,7 +316,7 @@ realtime-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/realtime.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/realtime.yaml
     - kubectl apply -f Deploy/realtime.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -330,8 +331,8 @@ sender-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Sender.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Sender.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/sender:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/sender:$TAG
   only:
     changes:
       - Services/Fsel.Sender/**/*
@@ -342,7 +343,7 @@ sender-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/sender.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/sender.yaml
     - kubectl apply -f Deploy/sender.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -357,8 +358,8 @@ storage-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Storage.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Storage.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/storage:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/storage:$TAG
   only:
     changes:
       - Services/Fsel.Storage/**/*
@@ -369,7 +370,7 @@ storage-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/storage.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/storage.yaml
     - kubectl apply -f Deploy/storage.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -384,8 +385,8 @@ system-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/System.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/System.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/system:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/system:$TAG
   only:
     changes:
       - Services/Fsel.System/**/*
@@ -396,7 +397,7 @@ system-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/system.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/system.yaml
     - kubectl apply -f Deploy/system.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -411,8 +412,8 @@ training-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/Training.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/Training.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/training:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/training:$TAG
   only:
     changes:
       - Services/Fsel.Training/**/*
@@ -423,7 +424,7 @@ training-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/training.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/training.yaml
     - kubectl apply -f Deploy/training.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -438,8 +439,8 @@ user-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
-    - docker build -f Environments/Testing/User.Testing.Dockerfile -t $CI_REGISTRY_IMAGE:$TAG .
-    - docker push $CI_REGISTRY_IMAGE:$TAG
+    - docker build -f Environments/Testing/User.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/user:$TAG .
+    - docker push $CI_REGISTRY_IMAGE/user:$TAG
   only:
     changes:
       - Services/Fsel.Fsel.Identity/**/*
@@ -450,7 +451,7 @@ user-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/fsel_auth:......................./fsel_auth:$TAG/g" Deploy/user.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/user.yaml
     - kubectl apply -f Deploy/user.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
