@@ -93,7 +93,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var isIELST = course.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts;
+            var isYoung = course.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts || course.CourseLevel == EnumCourseLevel.C1;
 
             #endregion Get Course
 
@@ -140,7 +140,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 return methodResult;
             }
-            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = GetBirthdayOfStudent(isIELST) }, cancellationToken);
+            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = GetBirthdayOfStudent(isYoung) }, cancellationToken);
             if (!updateCode.IsOK)
             {
                 methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
@@ -251,9 +251,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             return user;
         }
 
-        private static DateTime GetBirthdayOfStudent(bool isIELST)
+        private static DateTime GetBirthdayOfStudent(bool isYoung)
         {
-            return new DateTime(isIELST ? 2000 : 2014, 1, 1);
+            return new DateTime(isYoung ? 2000 : 2014, 1, 1);
         }
     }
 }
