@@ -72,7 +72,6 @@ namespace Fsel.Shared.Helpers
             }
         }
 
-
         public static ICollection<DateTime> GenerateDateList(DateTime startDate, DateTime endDate)
         {
             List<DateTime> dateList = new List<DateTime>();
