@@ -3,6 +3,7 @@
 namespace Fsel.Authentication.Infrastructure.Configs
 {
     using System.Collections.Generic;
+    using Fsel.Identity.Domain.Constants;
     using IdentityModel;
     using IdentityServer4;
     using IdentityServer4.Models;
@@ -17,7 +18,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                 new IdentityResources.Email(),
                 new IdentityResources.Phone(),
                 new IdentityResources.Address(),
-                new IdentityResource("roles", "Roles", new[]{ JwtClaimTypes.Role, JwtClaimTypes.NickName })
+                new IdentityResource("roles", "Roles", new[]{ JwtClaimTypes.Role })
            };
 
         public static IEnumerable<ApiScope> ApiScopes =>
@@ -27,7 +28,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
         public static IEnumerable<ApiResource> ApiResources =>
         new List<ApiResource>
             {
-                new ApiResource("api", "My API", new[]{ JwtClaimTypes.Role, JwtClaimTypes.NickName })
+                new ApiResource("api", "My API", new[]{ JwtClaimTypes.Role })
             };
 
         public static IEnumerable<Client> Clients =>
@@ -52,8 +53,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         IdentityServerConstants.StandardScopes.Email,
                         IdentityServerConstants.StandardScopes.Phone,
                         IdentityServerConstants.StandardScopes.Address,
-                        "roles",
-                        "api"
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
                     },
 
                     RequireClientSecret = false,
@@ -84,8 +85,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         IdentityServerConstants.StandardScopes.Email,
                         IdentityServerConstants.StandardScopes.Phone,
                         IdentityServerConstants.StandardScopes.Address,
-                        "roles",
-                        "api"
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
                     },
 
                     RequireClientSecret = false,
@@ -116,8 +117,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         IdentityServerConstants.StandardScopes.Email,
                         IdentityServerConstants.StandardScopes.Phone,
                         IdentityServerConstants.StandardScopes.Address,
-                        "roles",
-                        "api"
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
                     },
 
                     RequireClientSecret = false,
@@ -149,14 +150,16 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         IdentityServerConstants.StandardScopes.Email,
                         IdentityServerConstants.StandardScopes.Phone,
                         IdentityServerConstants.StandardScopes.Address,
-                        "roles",
-                        "api"
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
                     },
 
                     AllowOfflineAccess = true, // Cho phép sử dụng refresh token
+                    AccessTokenLifetime = 5000,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
                     RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
                     SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
+                    AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
                 {
@@ -180,8 +183,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         IdentityServerConstants.StandardScopes.Email,
                         IdentityServerConstants.StandardScopes.Phone,
                         IdentityServerConstants.StandardScopes.Address,
-                        "roles",
-                        "api"
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
                     },
 
                     AllowOfflineAccess = true,
@@ -217,8 +220,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         IdentityServerConstants.StandardScopes.Email,
                         IdentityServerConstants.StandardScopes.Phone,
                         IdentityServerConstants.StandardScopes.Address,
-                        "roles",
-                        "api"
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
                     },
 
                     AllowOfflineAccess = true,
