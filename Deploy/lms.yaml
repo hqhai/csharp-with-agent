@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: fsel-lms-testing
-        image: registry.fsel.edu.vn/fsel/api/fsel_src/lms:auth-openid-...............
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi:auth-openid-...............
         ports:
         - containerPort: 80
         - containerPort: 443 

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: fsel-gateway-testing
-        image: registry.fsel.edu.vn/fsel/api/fsel_src/gateway:auth-openid-...............
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway:auth-openid-...............
         ports:
         - containerPort: 80
         - containerPort: 443 
