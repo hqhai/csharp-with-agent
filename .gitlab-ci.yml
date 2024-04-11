@@ -13,6 +13,7 @@ services:
 before_script:
   - export CURRENT_TIME=$(date +"%d%m%y")
   - export TAG=auth-openid-$CI_COMMIT_SHORT_SHA-$CURRENT_TIME
+  - export IMAGE_VALUES=$CI_COMMIT_SHORT_SHA-$CURRENT_TIME
   - echo $TAG
 
 
@@ -73,7 +74,7 @@ auth-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/auth.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/auth.yaml
     - kubectl apply -f Deploy/auth.yaml --kubeconfig=config -n fsel-developer
   only: 
     changes:
@@ -99,7 +100,7 @@ cms-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/cms.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/cms.yaml
     - kubectl apply -f Deploy/cms.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -126,7 +127,7 @@ gateway-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/gateway.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/gateway.yaml
     - kubectl apply -f Deploy/gateway.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -153,7 +154,7 @@ hangfire-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/hangfire.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/hangfire.yaml
     - kubectl apply -f Deploy/hangfire.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -180,7 +181,7 @@ interaction-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/interaction.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/interaction.yaml
     - kubectl apply -f Deploy/interaction.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -207,7 +208,7 @@ lcms-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/lcms.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/lcms.yaml
     - kubectl apply -f Deploy/lcms.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -234,7 +235,7 @@ lms-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/lms.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/lms.yaml
     - kubectl apply -f Deploy/lms.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -261,7 +262,7 @@ notification-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/notification.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/notification.yaml
     - kubectl apply -f Deploy/notification.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -288,7 +289,7 @@ ordering-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/ordering.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/ordering.yaml
     - kubectl apply -f Deploy/ordering.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -315,7 +316,7 @@ realtime-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/realtime.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/realtime.yaml
     - kubectl apply -f Deploy/realtime.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -342,7 +343,7 @@ sender-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/sender.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/sender.yaml
     - kubectl apply -f Deploy/sender.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -369,7 +370,7 @@ storage-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/storage.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/storage.yaml
     - kubectl apply -f Deploy/storage.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -396,7 +397,7 @@ system-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/system.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/system.yaml
     - kubectl apply -f Deploy/system.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -423,7 +424,7 @@ training-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/training.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/training.yaml
     - kubectl apply -f Deploy/training.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
@@ -450,7 +451,7 @@ user-deploy:
     - atlantic-k8s
   image: bitnami/kubectl
   script:
-    - sed -i "s/auth-openid-.............../auth-openid-$CI_COMMIT_SHORT_SHA/g" Deploy/user.yaml
+    - sed -i "s/auth-openid-.............../auth-openid-$IMAGE_VALUES/g" Deploy/user.yaml
     - kubectl apply -f Deploy/user.yaml --kubeconfig=config -n fsel-developer
   only:
     changes:
