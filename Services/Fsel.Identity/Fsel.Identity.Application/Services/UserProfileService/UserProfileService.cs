@@ -79,13 +79,13 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Email))
                 {
                     claims.Add(new Claim(JwtClaimTypes.Email, user.Email ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(JwtClaimTypes.EmailVerified, user.EmailConfirmed.ToString()));
+                    claims.Add(new Claim(JwtClaimTypes.EmailVerified, user.EmailConfirmed.ToString(), ClaimValueTypes.Boolean));
                 }
 
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Phone))
                 {
                     claims.Add(new Claim(JwtClaimTypes.PhoneNumber, user.PhoneNumber ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(JwtClaimTypes.PhoneNumberVerified, user.PhoneNumberConfirmed.ToString()));
+                    claims.Add(new Claim(JwtClaimTypes.PhoneNumberVerified, user.PhoneNumberConfirmed.ToString(), ClaimValueTypes.Boolean));
                 }
 
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.OpenId))

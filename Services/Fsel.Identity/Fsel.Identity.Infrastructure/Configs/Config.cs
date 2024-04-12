@@ -210,8 +210,16 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         new Secret("test.fsel.swagger_secret".Sha256())
                     },
 
-                    RedirectUris = { "https://localhost:7203/swagger/oauth2-redirect.html" },
-                    PostLogoutRedirectUris = { "https://localhost:7203/swagger/oauth2-redirect.html" },
+                    RedirectUris =
+                    {
+                        "https://localhost:7203/swagger/oauth2-redirect.html",
+                        "https://fsel-lcms-dev.fsel.edu.vn/swagger/oauth2-redirect.html"
+                    },
+                    PostLogoutRedirectUris =
+                    {
+                        "https://localhost:7203/swagger/oauth2-redirect.html",
+                        "https://fsel-lcms-dev.fsel.edu.vn/swagger/oauth2-redirect.html"
+                    },
 
                     AllowedScopes =
                     {
