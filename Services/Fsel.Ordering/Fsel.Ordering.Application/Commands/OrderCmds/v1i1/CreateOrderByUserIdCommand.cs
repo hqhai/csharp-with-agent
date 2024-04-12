@@ -21,6 +21,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -131,7 +132,18 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 methodResult.AddErrorBadRequest(newOrder.ErrorMessages);
                 return methodResult;
             }
-
+            if (request.IsTrialRegistration)
+            {
+                newOrder.IsTrial = request.IsTrialRegistration;
+                newOrder.ExpireDate = DateTime.UtcNow.AddDays(ValueSettings.AmountTrialDays);
+                newOrder.Status = EnumOrderStatus.New;
+                newOrder.Price = 0;
+                newOrder.DiscountPercent = 0;
+                newOrder.DiscountPrice = 0;
+                newOrder.TotalPrice = 0;
+                newOrder.UserId = request.UserId;
+                await _userService.CreateStudentTrialRegistration();
+            }
             var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
             var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = request.UserId, CourseId = newOrder.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
             if (!addStudentIntoClassResult.IsSuccessStatusCode)
