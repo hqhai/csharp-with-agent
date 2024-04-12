@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumDetailResults.OrderBy(x => x.CreatedDate)).Include(x => x.ClassForum)
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumDetailResults.OrderBy(x => x.CreatedDate)).ThenInclude(x => x.ClassForumResultFiles).Include(x => x.ClassForum)
                                     .FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId, cancellationToken);
             if (classForumResult == null || !classForumResult.ClassForumDetailResults.Any())
             {
@@ -112,6 +112,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             foreach (var item in classForumDetailResults)
             {
                 item.Status = item.Id == classForumDetailResult.Id ? EnumClassForumResultStatus.Graded : EnumClassForumResultStatus.Denied;
+                if (item.Id == classForumDetailResult.Id)
+                {
+                    item.ClassForumResultFiles = classForumDetailResult.ClassForumResultFiles.Select(x =>
+                    {
+                        x.ClassForumResultId = classForumDetailResult.ClassForumResultId;
+                        return x;
+                    }).ToList();
+                    item.CompletionDate = DateTime.UtcNow;
+                }
             }
             _classforumDetailResultRepository.UpdateList(classForumDetailResults);
             await _classforumDetailResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
@@ -122,15 +131,17 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             ArgumentNullException.ThrowIfNull(classForumDetailResult);
             ArgumentNullException.ThrowIfNull(classForumResult);
             var targetScore = GetTargetCount(classForumDetailResult, classForumResult);
-
             var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumDetailResult.GradingAlFeedback);
-
             if (classForumAIs != null && classForumAIs.Any() && classForumResult.CorrectCount == default)
             {
                 var correctCount = classForumAIs.Sum(x => x.Score);
                 var correctTotal = classForumAIs.Count * MaxScoreClassForum + targetScore;
                 classForumResult.CorrectCount = correctCount;
                 classForumResult.Status = EnumClassForumResultStatus.Pending;
+                classForumResult.WordContent = classForumDetailResult.WordContent;
+                classForumResult.WordCount = classForumDetailResult.WordCount;
+                classForumResult.Content = classForumDetailResult.Content;
+                classForumResult.SubmissionCount = classForumDetailResult.SubmissionCount;
                 classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
                 classForumResult.CorrectTotal = correctTotal;
                 if (classForumResult.SkillScores != null && classForumResult.SkillScores.Any())
@@ -154,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 }
             }
             _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
         }
     }
 }

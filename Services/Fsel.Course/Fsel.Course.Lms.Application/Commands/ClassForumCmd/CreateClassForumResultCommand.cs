@@ -167,15 +167,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     }
 
                     classForumResult = _classForumResultRepository.Add(classForumResult);
-                    /*if (classForumResult.Status == EnumClassForumResultStatus.Draft)
+                    if (classForumResult.Status == EnumClassForumResultStatus.Draft)
                     {
                         await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
                         await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    }*/
-                    await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    //await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft)
                     {
                         await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
@@ -236,7 +236,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             FilePath = x,
                         }).ToList();
                     }
-                   
 
                     classForumResult = await GetClassForumResultToSubmissionCount(classForumResult!, classForum, course.CourseType, cancellationToken);
                     classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult);
