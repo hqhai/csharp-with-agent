@@ -32,7 +32,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class CreateUserStudentToAdminCommand : IRequest<MethodResult<UserModel>>
     {
         public string? Email { get; set; }
-        public bool IsTrialRegistration { get; set; }
+        public bool IsTrialRegistration { get; set; } = false;
         public Guid CourseId { get; set; }
     }
 
@@ -49,7 +49,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly IPlatformRepository _platformRepository;
         private const string DefaultPassword = "Admin@123";
         private const string RoleStudent = nameof(Student);
-        private const int TotalUserDateNow = 50;
+        private const int TotalUserDateNow = 2100;
         private const int MinAgeYoung = 14;
         private const int MaxAgeChildren = 13;
 

@@ -27,15 +27,15 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<UserModel>>();
-            if (request.Users == null || !request.Users.Any())
+            if (request.Emails == null || !request.Emails.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Users));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Emails));
                 return methodResult;
             }
             var listUser = new List<UserModel>();
-            foreach (var user in request.Users)
+            foreach (var email in request.Emails)
             {
-                var userResult = await _mediator.Send(new CreateUserStudentToAdminCommand { CourseId = request.CourseId, Email = user.Email, IsTrialRegistration = user.IsTrialRegistration }, cancellationToken);
+                var userResult = await _mediator.Send(new CreateUserStudentToAdminCommand { CourseId = request.CourseId, Email = email, IsTrialRegistration = request.IsTrialRegistration }, cancellationToken);
                 if (!userResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(userResult.ErrorMessages);
