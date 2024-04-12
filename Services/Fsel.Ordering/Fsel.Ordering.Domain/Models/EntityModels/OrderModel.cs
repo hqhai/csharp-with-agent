@@ -19,6 +19,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public double DiscountPercent { get; set; }
         public double DiscountPrice { get; set; }
         public double TotalPrice { get; set; }
+        public bool IsTrial { get; set; }
         public Guid CourseId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }

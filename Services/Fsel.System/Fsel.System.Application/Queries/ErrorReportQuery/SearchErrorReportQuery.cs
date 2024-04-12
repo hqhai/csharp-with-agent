@@ -95,12 +95,8 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
             if (request.StartDate != null || request.EndDate != null)
             {
                 query = query.Where(m =>
-                    (request.StartDate == null || m.CreatedDate!.Value.Date >= request.StartDate.Value.Date
-                    && m.CreatedDate.Value.Month >= request.StartDate.Value.Month
-                    && m.CreatedDate.Value.Year >= request.StartDate.Value.Year) &&
-                    (request.EndDate == null || m.CreatedDate!.Value.Date <= request.EndDate.Value.Date
-                    && m.CreatedDate.Value.Month <= request.EndDate.Value.Month
-                    && m.CreatedDate.Value.Year <= request.EndDate.Value.Year));
+                    (request.StartDate == null || m.CreatedDate!.Value.Date >= request.StartDate.Value.Date) &&
+                    (request.EndDate == null || m.CreatedDate!.Value.Date <= request.EndDate.Value.Date));
             }
             if (request.FeatureLearn != null)
             {

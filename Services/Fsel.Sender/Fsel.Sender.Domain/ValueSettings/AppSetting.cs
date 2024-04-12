@@ -16,5 +16,7 @@ namespace Fsel.Sender.Domain.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
+        public string? AwsAccessKeyId { get; set; }
+        public string? AwsSecretAccessKey { get; set; }
     }
 }

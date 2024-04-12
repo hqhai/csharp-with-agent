@@ -77,11 +77,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
             var validateMethod = await Validate(request, videoResult, cancellationToken);
-            if (!validateMethod.IsOK)
+            if (videoResult.CurrentVideoTimeCodeId != request.VideoTimeCodeId && !validateMethod.IsOK)
             {
                 methodResult.AddErrorBadRequest(validateMethod.ErrorMessages);
                 return methodResult;
             }
+
             var videoTimeCode = await _videoTimeCodeRepository.Queryable
                                     .Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                     .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
