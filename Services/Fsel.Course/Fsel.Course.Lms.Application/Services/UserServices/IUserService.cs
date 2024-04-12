@@ -70,6 +70,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Put("/v1/student-trial-registration")]
         Task<IApiResponse<MethodResult<StudentTrialRegistrationModel>>> UpdateTrialRegistrationStatusAsync([Body] StudentTrialRegistrationModel cmd);
 
+        [Get("/v1/student/get-student-by-email")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByEmailAsync([FromQuery] string email);
 
         [Get("/v1/user/get-by-student-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);

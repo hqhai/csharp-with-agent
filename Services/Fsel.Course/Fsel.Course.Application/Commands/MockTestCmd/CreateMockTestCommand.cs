@@ -71,7 +71,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             foreach (var sectionGroup in request.SectionGroups)
             {
-                if (sectionGroup == null)
+                if (sectionGroup == null || sectionGroup.Sections == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                     return methodResult;

@@ -8,13 +8,9 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
     public class CourseModel : BaseModel
     {
         public string? Name { get; set; }
-
         public string? Code { get; set; }
-
         public string? InstructionContent { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
-
         public EnumCourseType CourseType { get; set; }
     }
 }

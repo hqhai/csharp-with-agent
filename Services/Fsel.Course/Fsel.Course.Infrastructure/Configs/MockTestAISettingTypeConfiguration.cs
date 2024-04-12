@@ -2,10 +2,11 @@
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    using System;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
+    using Fsel.Shared.Enums;
 
     public class MockTestAISettingTypeConfiguration : IEntityTypeConfiguration<MockTestAISetting>
     {
@@ -14,8 +15,8 @@ namespace Fsel.Course.Infrastructure.Configs
             ArgumentNullException.ThrowIfNull(builder);
 
             builder.HasOne(a => a.Section)
-                   .WithOne(b=>b.MockTestAISetting)
-                   .HasForeignKey<MockTestAISetting>(b => b.SectionId)
+                   .WithMany(b => b.MockTestAISettings)
+                   .HasForeignKey(b => b.SectionId)
                    .OnDelete(DeleteBehavior.Cascade);
         }
     }
