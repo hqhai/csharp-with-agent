@@ -13,7 +13,7 @@ spec:
         app: storage-dev
     spec:
       containers:
-      - name: fsel-storage-testing
+      - name: storage-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/storage:auth-openid-...............
         ports:
         - containerPort: 80
@@ -67,10 +67,10 @@ spec:
             name: storage-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-storage-dev.fsel.edu.vn
-#    secretName: fsel-storage-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-storage-dev.fsel.edu.vn
+    secretName: fsel-storage-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

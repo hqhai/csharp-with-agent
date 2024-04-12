@@ -13,7 +13,7 @@ spec:
         app: interaction-dev
     spec:
       containers:
-      - name: fsel-interaction-testing
+      - name: interaction-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/interaction:auth-openid-...............
         ports:
         - containerPort: 80
@@ -67,10 +67,10 @@ spec:
             name: interaction-dev
             port:
               number: 443
-#  tls:
-#  - hosts:
-#    - fsel-interaction-dev.fsel.edu.vn
-#    secretName: fsel-interaction-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-interaction-dev.fsel.edu.vn
+    secretName: fsel-interaction-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

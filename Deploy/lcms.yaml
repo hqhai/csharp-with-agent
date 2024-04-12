@@ -13,7 +13,7 @@ spec:
         app: lcms-dev
     spec:
       containers:
-      - name: fsel-lcms-testing
+      - name: lcms-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi:auth-openid-...............
         ports:
         - containerPort: 80
@@ -67,10 +67,10 @@ spec:
             name: lcms-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-lcms-dev.fsel.edu.vn
-#    secretName: fsel-lcms-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-lcms-dev.fsel.edu.vn
+    secretName: fsel-lcms-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

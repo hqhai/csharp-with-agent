@@ -13,7 +13,7 @@ spec:
         app: user-dev
     spec:
       containers:
-      - name: fsel-user-testing
+      - name: user-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/user:auth-openid-...............
         ports:
         - containerPort: 80
@@ -67,10 +67,10 @@ spec:
             name: user-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-user-dev.fsel.edu.vn
-#    secretName: fsel-user-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-user-dev.fsel.edu.vn
+    secretName: fsel-user-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

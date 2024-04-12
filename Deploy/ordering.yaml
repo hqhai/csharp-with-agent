@@ -13,7 +13,7 @@ spec:
         app: ordering-dev
     spec:
       containers:
-      - name: fsel-ordering-testing
+      - name: ordering-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/ordering:auth-openid-...............
         ports:
         - containerPort: 80
@@ -67,10 +67,10 @@ spec:
             name: ordering-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-ordering-dev.fsel.edu.vn
-#    secretName: fsel-ordering-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-ordering-dev.fsel.edu.vn
+    secretName: fsel-ordering-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

@@ -13,7 +13,7 @@ spec:
         app: notification-dev
     spec:
       containers:
-      - name: fsel-notification-testing
+      - name: notification-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/notification:auth-openid-...............
         ports:
         - containerPort: 80
@@ -67,10 +67,10 @@ spec:
             name: notification-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-notification-dev.fsel.edu.vn
-#    secretName: fsel-notification-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-notification-dev.fsel.edu.vn
+    secretName: fsel-notification-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

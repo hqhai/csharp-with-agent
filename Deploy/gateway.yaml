@@ -13,7 +13,7 @@ spec:
         app: gateway-dev
     spec:
       containers:
-      - name: fsel-gateway-testing
+      - name: gateway-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway:auth-openid-...............
         ports:
         - containerPort: 80
@@ -46,14 +46,11 @@ kind: Ingress
 metadata:
   name: gateway-dev
   annotations:
-#    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-#    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-#    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-#    nginx.ingress.kubernetes.io/x-forwarded-proto: "https"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,gatewayorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
+#    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
 spec:
   ingressClassName: nginx-public
   rules:
@@ -67,15 +64,14 @@ spec:
             name: gateway-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-gateway-dev.fsel.edu.vn
-#    secretName: fsel-gateway-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-gateway-dev.fsel.edu.vn
+    secretName: fsel-gateway-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:
     ingress:
     - hostname: 103.22.218.217.nip.io
-
 
 

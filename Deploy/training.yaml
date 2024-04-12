@@ -13,7 +13,7 @@ spec:
         app: training-dev
     spec:
       containers:
-      - name: fsel-training-testing
+      - name: training-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/training:auth-openid-...............
         ports:
         - containerPort: 80
@@ -67,10 +67,10 @@ spec:
             name: training-dev
             port:
               number: 80
-#  tls:
-#  - hosts:
-#    - fsel-training-dev.fsel.edu.vn
-#    secretName: fsel-training-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-training-dev.fsel.edu.vn
+    secretName: fsel-training-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:

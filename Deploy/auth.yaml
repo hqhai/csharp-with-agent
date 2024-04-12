@@ -18,16 +18,8 @@ spec:
         ports:
         - containerPort: 80
         - containerPort: 443 
-#        volumeMounts:
-#        - name: ssl
-#          mountPath: /app/Resources/ssl
-#          readOnly: true
       imagePullSecrets:
         - name: dev-image-secret
-#      volumes:
-#      - name: ssl
-#        secret:
-#          secretName: fsel-auth-testing.fsel.edu.vn-wildcard
 
 ---
 apiVersion: v1
@@ -77,10 +69,10 @@ spec:
             name: auth-dev
             port:
               number: 443
-#  tls:
-#  - hosts:
-#    - fsel-auth-dev.fsel.edu.vn
-#    secretName: fsel-auth-dev.fsel.edu.vn-wildcard
+  tls:
+  - hosts:
+    - fsel-auth-dev.fsel.edu.vn
+    secretName: fsel-auth-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:
