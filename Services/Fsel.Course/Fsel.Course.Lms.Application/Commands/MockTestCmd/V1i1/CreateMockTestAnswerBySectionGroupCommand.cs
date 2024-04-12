@@ -362,10 +362,26 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var sectionTimeCodes = await _sectionTimeCodeRepository.GetByIdsAsync(request.Answers.Where(x => x.SectionTimeCodeId.HasValue).Select(x => x.SectionTimeCodeId!.Value).ToList());
             if (sectionTimeCodes == null || !sectionTimeCodes.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCodes));
                 return methodResult;
             }
-            sectionGroupResult.CurrentSectionTimeCodeId = sectionTimeCodes.OrderByDescending(x => x.DisplayTime).FirstOrDefault()?.Id;
+            if (sectionGroupResult.CurrentSectionTimeCodeId.HasValue)
+            {
+                var currentSectionTimeCode = await _sectionTimeCodeRepository.GetByIdAsync(sectionGroupResult.CurrentSectionTimeCodeId.Value);
+                if (currentSectionTimeCode == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(currentSectionTimeCode));
+                    return methodResult;
+                }
+                if (sectionTimeCodes.Any(x => x.DisplayTime > currentSectionTimeCode.DisplayTime))
+                {
+                    sectionGroupResult.CurrentSectionTimeCodeId = sectionTimeCodes.OrderByDescending(x => x.DisplayTime).FirstOrDefault()?.Id;
+                }
+            }
+            else
+            {
+                sectionGroupResult.CurrentSectionTimeCodeId = sectionTimeCodes.OrderByDescending(x => x.DisplayTime).FirstOrDefault()?.Id;
+            }
 
             var createMockTestAnswers = new List<MockTestAnswer>();
             var updateMockTestAnswers = new List<MockTestAnswer>();
