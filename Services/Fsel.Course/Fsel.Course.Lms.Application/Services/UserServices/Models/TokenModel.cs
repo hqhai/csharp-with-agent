@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 {
     using System;
     using System.Collections.Generic;
-    using Fsel.Core.Base.BaseModels;
 
     public class TokenModel
     {

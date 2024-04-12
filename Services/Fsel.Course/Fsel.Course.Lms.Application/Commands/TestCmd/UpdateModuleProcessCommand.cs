@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             }
             var userId = student.Human?.UserId ?? default;
 
-            var tokenResult = await _userService.GenerateToken(userId);
+            var tokenResult = await _userService.GetJWTAsync(userId);
             var authToken = tokenResult.Content?.Result;
             if (authToken != null && _httpContextAccessor.HttpContext != null)
             {
