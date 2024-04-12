@@ -13,7 +13,7 @@ spec:
         app: gateway-dev
     spec:
       containers:
-      - name: fsel-gateway-testing
+      - name: fsel-auth-testing
         image: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway:auth-openid-...............
         ports:
         - containerPort: 80
@@ -49,7 +49,8 @@ metadata:
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,gatewayorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
+#    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
 spec:
   ingressClassName: nginx-public
   rules:
@@ -72,6 +73,5 @@ status:
   loadBalancer:
     ingress:
     - hostname: 103.22.218.217.nip.io
-
 
 
