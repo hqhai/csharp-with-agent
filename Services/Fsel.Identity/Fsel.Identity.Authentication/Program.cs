@@ -246,38 +246,53 @@ using (var serviceScope = app.Services.GetService<IServiceScopeFactory>()!.Creat
 
     foreach (var client in Config.Clients)
     {
-        var clientDB = await context.Clients.FirstOrDefaultAsync(x => x.ClientId == client.ClientId);
-        if (clientDB == null)
+        var clientDB = await context.Clients
+                        .Include(x => x.RedirectUris)
+                        .Include(x => x.PostLogoutRedirectUris)
+                        .Include(x => x.ClientSecrets)
+                        .Include(x => x.Claims)
+                        .Include(x => x.AllowedScopes)
+                        .Include(x => x.AllowedCorsOrigins)
+                        .Include(x => x.AllowedGrantTypes)
+                        .Include(x => x.Properties)
+                        .Include(x => x.IdentityProviderRestrictions)
+                        .Where(c => c.ClientId == client.ClientId)
+                        .FirstOrDefaultAsync(x => x.ClientId == client.ClientId);
+        if (clientDB != null)
         {
-            context.Clients.Add(client.ToEntity());
+            context.Clients.Remove(clientDB);
         }
+        context.Clients.Add(client.ToEntity());
     }
 
     foreach (var resource in Config.IdentityResources)
     {
         var resourceDB = await context.IdentityResources.FirstOrDefaultAsync(x => x.Name == resource.Name);
-        if (resourceDB == null)
+        if (resourceDB != null)
         {
-            context.IdentityResources.Add(resource.ToEntity());
+            context.IdentityResources.Remove(resourceDB);
         }
+        context.IdentityResources.Add(resource.ToEntity());
     }
 
     foreach (var apiScope in Config.ApiScopes)
     {
         var apiScopeDB = await context.ApiScopes.FirstOrDefaultAsync(x => x.Name == apiScope.Name);
-        if (apiScopeDB == null)
+        if (apiScopeDB != null)
         {
-            context.ApiScopes.Add(apiScope.ToEntity());
+            context.ApiScopes.Remove(apiScopeDB);
         }
+        context.ApiScopes.Add(apiScope.ToEntity());
     }
 
     foreach (var apiResource in Config.ApiResources)
     {
         var apiResourceDB = await context.ApiResources.FirstOrDefaultAsync(x => x.Name == apiResource.Name);
-        if (apiResourceDB == null)
+        if (apiResourceDB != null)
         {
-            context.ApiResources.Add(apiResource.ToEntity());
+            context.ApiResources.Remove(apiResourceDB);
         }
+        context.ApiResources.Add(apiResource.ToEntity());
     }
 
     context.SaveChanges();
