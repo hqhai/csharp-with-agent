@@ -13,7 +13,7 @@ spec:
         app: realtime-dev
     spec:
       containers:
-      - name: fsel-realtime-testing
+      - name: realtime-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/realtime:auth-openid-...............
         ports:
         - containerPort: 80

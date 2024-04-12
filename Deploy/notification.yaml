@@ -13,7 +13,7 @@ spec:
         app: notification-dev
     spec:
       containers:
-      - name: fsel-notification-testing
+      - name: notification-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/notification:auth-openid-...............
         ports:
         - containerPort: 80

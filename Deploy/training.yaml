@@ -13,7 +13,7 @@ spec:
         app: training-dev
     spec:
       containers:
-      - name: fsel-training-testing
+      - name: training-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/training:auth-openid-...............
         ports:
         - containerPort: 80

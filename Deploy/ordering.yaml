@@ -13,7 +13,7 @@ spec:
         app: ordering-dev
     spec:
       containers:
-      - name: fsel-ordering-testing
+      - name: ordering-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/ordering:auth-openid-...............
         ports:
         - containerPort: 80

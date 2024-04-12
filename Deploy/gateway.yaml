@@ -13,7 +13,7 @@ spec:
         app: gateway-dev
     spec:
       containers:
-      - name: fsel-auth-testing
+      - name: gateway-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway:auth-openid-...............
         ports:
         - containerPort: 80

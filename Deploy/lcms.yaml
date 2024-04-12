@@ -13,7 +13,7 @@ spec:
         app: lcms-dev
     spec:
       containers:
-      - name: fsel-lcms-testing
+      - name: lcms-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi:auth-openid-...............
         ports:
         - containerPort: 80

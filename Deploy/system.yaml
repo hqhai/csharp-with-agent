@@ -13,7 +13,7 @@ spec:
         app: system-dev
     spec:
       containers:
-      - name: fsel-system-testing
+      - name: system-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/system:auth-openid-...............
         ports:
         - containerPort: 80
