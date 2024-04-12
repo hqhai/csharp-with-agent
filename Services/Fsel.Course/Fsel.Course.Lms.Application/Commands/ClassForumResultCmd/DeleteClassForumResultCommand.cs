@@ -62,7 +62,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _classForumResulRepository.ExecuteTransactionAsync(async () =>
              {
-                 var result = await _classForumResulRepository.DeleteAsync(classForumResult);
+                 classForumResult.Status = EnumClassForumResultStatus.Denied;
+                 _classForumResulRepository.Update(classForumResult);
                  await _classForumResulRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                  var (returnedParamsLink, objectOwnerId) = CustomDataForParamMessage(classForumResult!, lesson?.Id, classForumResult?.LessonResult?.CourseId, classForumResult?.LessonResult?.UnitId);
@@ -81,14 +82,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                  await _notificationMessagePublisher.Publish(notificationQueueModel, cancellationToken).ConfigureAwait(false);
 
                  methodResult.StatusCode = StatusCodes.Status200OK;
-                 methodResult.Result = result;
+                 methodResult.Result = true;
                  return methodResult;
              });
 
             return methodResult;
         }
-
-
 
         public static (List<object> paramsLink, Guid ownerObjectId) CustomDataForParamMessage(dynamic templateResult, Guid? courseId, Guid? unitId, Guid? lessonId)
         {
@@ -100,7 +99,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             // param
             var paramsLink = new List<object> { lessonId.ToString() ?? string.Empty, courseId.ToString() ?? string.Empty, unitId.ToString() ?? string.Empty };
             var ownerObjectId = templateResult?.CreatedUserId ?? default;
-
 
             return (paramsLink, ownerObjectId);
         }

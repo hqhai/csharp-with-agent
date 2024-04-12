@@ -158,13 +158,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         ProcessDate = DateTime.UtcNow,
                     };
                     classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
+                    classForumResult.ClassForumDetailResults.Add(classForumDetailResult);
+
 
                     if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft)
                     {
                         classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType, cancellationToken);
                     }
 
-                    classForumResult.ClassForumDetailResults.Add(classForumDetailResult);
                     classForumResult = _classForumResultRepository.Add(classForumResult);
                     /*if (classForumResult.Status == EnumClassForumResultStatus.Draft)
                     {
@@ -251,7 +252,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     return methodResult;
                 }
 
-                //mặc định gửi cho tất cả CSO
+               /* //mặc định gửi cho tất cả CSO
                 IList<EnumRole> roles = new List<EnumRole>();
                 roles.Add(EnumRole.CSO);
 
@@ -265,7 +266,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     PlatformCode = EnumPlatformCode.LMSAdmin
                 };
 
-                await _notificationMessagePublisher.Publish(model, cancellationToken);
+                await _notificationMessagePublisher.Publish(model, cancellationToken);*/
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;

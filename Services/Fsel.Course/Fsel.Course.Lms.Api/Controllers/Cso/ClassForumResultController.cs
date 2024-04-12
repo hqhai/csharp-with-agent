@@ -15,7 +15,8 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/cso/class-forum-result")]
     [ApiController]
     public class ClassForumResultController : ControllerBase
@@ -53,7 +54,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
             return commandResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Get Class Forum Result
         /// </summary>
@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         /// <summary>
         /// Delete a Class Forum result
         /// </summary>
-        [HttpDelete("{id}")]
+        [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)

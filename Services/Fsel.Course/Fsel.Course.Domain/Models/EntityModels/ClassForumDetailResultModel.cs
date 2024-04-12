@@ -3,8 +3,8 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
+    using System.Text.Json.Serialization;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
@@ -38,6 +38,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid ClassForumResultId { get; set; }
 
-        public IList<ClassForumResultFile>? ClassForumResultFiles { get; set; }
+        [JsonIgnore]
+        public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
+
+        public IList<string>? FilePaths
+        { get { return ClassForumResultFiles?.Select(x => x.FilePath ?? string.Empty).ToList(); } }
     }
 }
