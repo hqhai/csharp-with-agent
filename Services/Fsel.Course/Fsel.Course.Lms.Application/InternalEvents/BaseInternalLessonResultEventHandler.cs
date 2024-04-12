@@ -36,8 +36,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         public async Task UpdateLessonResultAsync(LessonResult? lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
-            var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done);
-            var isClassForumDone = lessonResult.ClassForumResults.Any(x => (x.Status != EnumClassForumResultStatus.Draft));
+            var isHomeWorksDone = lessonResult.HomeWorkResults.Any() && lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done);
+            var isClassForumDone = lessonResult.ClassForumResults.Any() && lessonResult.ClassForumResults.Any(x => x.Status != EnumClassForumResultStatus.Draft);
             if (isClassForumDone && isHomeWorksDone && lessonResult.Status != EnumResultStatus.Done)
             {
                 //làm nhiệm vụ
@@ -104,8 +104,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         private async Task<BaseScoreResultModule> GetScoreResultOfClassForumResultAsync(Guid lessonResultId, CancellationToken cancellationToken)
         {
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores)
-                                                                            .Include(x => x.ClassForum)
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum)
                                                                             .FirstOrDefaultAsync(x => x.LessonResultId == lessonResultId, cancellationToken);
             return GetValueAsync(classForumResult?.SkillScores, PercentOccupyClassForum);
         }
@@ -127,9 +126,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 return new BaseScoreResultModule
                 {
-                    CorrectCount = skillScores.Count,
-                    CorrectTotal = skillScores.Count,
-                    Percent = NumberHelper.ConvertRound(skillScores.Average(x => x.Percent)) * percentAchieved,
+                    CorrectCount = skillScores.Sum(x => x.CorrectCount),
+                    CorrectTotal = skillScores.Sum(x => x.TotalCount),
+                    Percent = NumberHelper.ConvertRound((skillScores.Sum(x => x.CorrectCount) / skillScores.Sum(x => x.TotalCount)) * percentAchieved),
                     SkillScores = skillScores
                 };
             }

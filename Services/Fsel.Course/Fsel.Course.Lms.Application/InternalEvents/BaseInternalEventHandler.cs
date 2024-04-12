@@ -153,8 +153,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var classForumResults = await _classForumResultRepository.Queryable.Where(x => x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.Draft)
-                .Where(x => lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
+            var classForumResults = await _classForumResultRepository.Queryable.Where(x => x.Status.HasValue).Where(x => lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
             if (classForumResults != null && classForumResults.Any())
             {
                 skillScores = classForumResults.Where(x => x.SkillScores != null && x.SkillScores.Any())

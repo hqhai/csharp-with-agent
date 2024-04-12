@@ -94,7 +94,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
             var listClassForumResult = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
-            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded);
+            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded && p.Status != EnumClassForumResultStatus.Denied);
 
             if (course.CourseType == EnumCourseType.Ielts && isSendEmail)
             {
