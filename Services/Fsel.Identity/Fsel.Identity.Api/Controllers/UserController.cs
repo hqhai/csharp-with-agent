@@ -138,17 +138,5 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteUserCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Generate Token
-        /// </summary>
-        [HttpGet("generate-token/{userId}")]
-        [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GenerateToken([FromRoute] Guid userId)
-        {
-            MethodResult<TokenModel> commandResult = await _mediator.Send(new GenerateTokenCommand { Id = userId }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
     }
 }
