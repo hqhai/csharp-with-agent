@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Net.Http.Headers;
 
     public class CreateUserStudentsToAdminCommand : IRequest<MethodResult<IList<UserModel>>>
     {
@@ -18,10 +19,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class CreateUserStudentsToAdminCommandHandler : IRequestHandler<CreateUserStudentsToAdminCommand, MethodResult<IList<UserModel>>>
     {
         private readonly IMediator _mediator;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CreateUserStudentsToAdminCommandHandler(IMediator mediator)
+        public CreateUserStudentsToAdminCommandHandler(IMediator mediator, IHttpContextAccessor httpContextAccessor)
         {
             _mediator = mediator;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<MethodResult<IList<UserModel>>> Handle(CreateUserStudentsToAdminCommand request, CancellationToken cancellationToken)
@@ -33,6 +36,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Emails));
                 return methodResult;
             }
+            var tokenAdmin = _httpContextAccessor.HttpContext?.Request.Headers[HeaderNames.Authorization].ToString();
             var listUser = new List<UserModel>();
             foreach (var email in request.Emails)
             {
@@ -45,6 +49,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 if (userResult.Result != null)
                 {
                     listUser.Add(userResult.Result);
+                }
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = tokenAdmin;
                 }
             }
             methodResult.Result = listUser;

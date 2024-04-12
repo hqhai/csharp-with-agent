@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -17,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Net.Http.Headers;
 
     public class UpdateModuleProcessCommand : IRequest<MethodResult<bool>>
     {
@@ -30,6 +32,8 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
 
     public class UpdateModuleProcessCommandHandler : IRequestHandler<UpdateModuleProcessCommand, MethodResult<bool>>
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
@@ -40,8 +44,10 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
 
-        public UpdateModuleProcessCommandHandler(IMediator mediator, IVideoTimeCodeRepository videoTimeCodeRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, IFinalTestResultRepository finalTestResultRepository, IUserService userService, IUnitResultRepository unitResultRepository, IMockTestResultRepository mockTestResultRepository)
+        public UpdateModuleProcessCommandHandler(IHttpContextAccessor httpContextAccessor, AuthContext authContext, IMediator mediator, IVideoTimeCodeRepository videoTimeCodeRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, IFinalTestResultRepository finalTestResultRepository, IUserService userService, IUnitResultRepository unitResultRepository, IMockTestResultRepository mockTestResultRepository)
         {
+            _httpContextAccessor = httpContextAccessor;
+            _authContext = authContext;
             _mediator = mediator;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
@@ -79,7 +85,19 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var courseResult = await _mediator.Send(new GetCourseQuery { UserId = student.Human?.UserId ?? default }, cancellationToken);
+            var userId = student.Human?.UserId ?? default;
+
+            var tokenResult = await _userService.GenerateToken(userId);
+            var authToken = tokenResult.Content?.Result;
+            if (authToken != null && _httpContextAccessor.HttpContext != null)
+            {
+                _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = "Bearer " + authToken.AccessToken;
+                _authContext.CurrentUsername = authToken.FullName;
+                _authContext.CurrentUserId = userId;
+                _authContext.CurrentFullName = authToken.FullName;
+                _authContext.Roles = authToken.Roles;
+            }
+            var courseResult = await _mediator.Send(new GetCourseQuery { UserId = userId }, cancellationToken);
             if (!courseResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
