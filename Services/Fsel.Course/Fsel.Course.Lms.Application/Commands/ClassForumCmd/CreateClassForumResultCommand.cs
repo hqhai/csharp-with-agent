@@ -159,22 +159,22 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     };
                     classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
 
+                    classForumResult.ClassForumDetailResults.Add(classForumDetailResult);
                     if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft)
                     {
                         classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType, cancellationToken);
                     }
 
-                    classForumResult.ClassForumDetailResults.Add(classForumDetailResult);
                     classForumResult = _classForumResultRepository.Add(classForumResult);
-                    /*if (classForumResult.Status == EnumClassForumResultStatus.Draft)
+                    if (classForumResult.Status == EnumClassForumResultStatus.Draft)
                     {
                         await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
                         await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    }*/
-                    await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    //await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft)
                     {
                         await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
@@ -235,7 +235,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                             FilePath = x,
                         }).ToList();
                     }
-                   
 
                     classForumResult = await GetClassForumResultToSubmissionCount(classForumResult!, classForum, course.CourseType, cancellationToken);
                     classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult);
@@ -252,20 +251,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 }
 
                 //mặc định gửi cho tất cả CSO
-                IList<EnumRole> roles = new List<EnumRole>();
-                roles.Add(EnumRole.CSO);
+                //IList<EnumRole> roles = new List<EnumRole>();
+                //roles.Add(EnumRole.CSO);
 
-                NotificationSendingQueueModel model = new NotificationSendingQueueModel()
-                {
-                    ObjectId = classForumResult.Id,
-                    Roles = roles,
-                    Content = EnumNotificationContent.CreateClassForumResult,
-                    Type = EnumNotificationType.Text,
-                    SenderId = _authContext.CurrentUserId,
-                    PlatformCode = EnumPlatformCode.LMSAdmin
-                };
+                //NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+                //{
+                //    ObjectId = classForumResult.Id,
+                //    Roles = roles,
+                //    Content = EnumNotificationContent.CreateClassForumResult,
+                //    Type = EnumNotificationType.Text,
+                //    SenderId = _authContext.CurrentUserId,
+                //    PlatformCode = EnumPlatformCode.LMSAdmin
+                //};
 
-                await _notificationMessagePublisher.Publish(model, cancellationToken);
+                //await _notificationMessagePublisher.Publish(model, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
