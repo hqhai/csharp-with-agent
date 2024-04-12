@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Include(x => x.ClassForumDetailResults)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum!.Id && x.Status != EnumClassForumResultStatus.Draft)
+                .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum!.Id)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             classForumByStudentModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);

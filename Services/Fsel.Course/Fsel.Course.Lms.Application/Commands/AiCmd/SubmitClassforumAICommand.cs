@@ -55,14 +55,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             if (classForumDetailResult != null)
             {
-                if (request.IsRetry != null && (bool)request.IsRetry)
-                {
-                }
-                else
-                {
-                    var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
-                    classForumDetailResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
-                }
+                var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+                classForumDetailResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
 
                 _classForumDetailResultRepository.Update(classForumDetailResult);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -71,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
             {
                 GradingAlFeedback = aIResponse,
-                ClassForumResultId = request.ClassForumDetailResultId,
+                ClassForumDetailResultId = request.ClassForumDetailResultId,
             }, cancellationToken);
 
             if (!string.IsNullOrEmpty(aIResponse))
