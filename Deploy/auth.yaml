@@ -69,10 +69,10 @@ spec:
             name: auth-dev
             port:
               number: 443
-  tls:
-  - hosts:
-    - fsel-auth-dev.fsel.edu.vn
-    secretName: fsel-auth-dev.fsel.edu.vn-wildcard
+#  tls:
+#  - hosts:
+#    - fsel-auth-dev.fsel.edu.vn
+#    secretName: fsel-auth-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:
