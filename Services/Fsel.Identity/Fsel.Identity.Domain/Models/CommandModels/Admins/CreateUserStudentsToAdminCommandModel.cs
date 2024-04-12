@@ -4,13 +4,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Admins
 {
     public class CreateUserStudentsToAdminCommandModel
     {
-        public IList<CreateUserStudentToAdminCommandModel>? Users { get; set; }
+        public IList<string>? Emails { get; set; }
+        public bool IsTrialRegistration { get; set; } = false;
         public Guid CourseId { get; set; }
-    }
-
-    public class CreateUserStudentToAdminCommandModel
-    {
-        public string? Email { get; set; }
-        public bool IsTrialRegistration { get; set; }
     }
 }
