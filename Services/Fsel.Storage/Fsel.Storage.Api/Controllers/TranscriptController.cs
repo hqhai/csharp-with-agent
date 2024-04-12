@@ -11,6 +11,7 @@ using Fsel.Storage.Domain.Models.CommandModels;
 using Fsel.Storage.Domain.Enums;
 using Fsel.Storage.Application.Services.AmazonS3Services;
 using Fsel.Storage.Domain.Models.EntityModels;
+using Fsel.Shared.Attributes;
 
 namespace Fsel.Storage.Api.Controllers
 {
@@ -47,9 +48,12 @@ namespace Fsel.Storage.Api.Controllers
         /// <summary>
         /// Get Transcription
         /// </summary>
-        [HttpPost("upload-file")]
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
         [ProducesResponseType(typeof(MethodResult<TranscriptFileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [HttpPost("upload-file/{folderType}")]
         public async Task<IActionResult> Post([FromRoute] EnumFolderType folderType, [FromQuery] EnumBucketType? bucketType, IFormFile file, [FromQuery] bool isResize = false, [FromQuery] bool isValidEmpty = false)
         {
             MethodResult<TranscriptFileModel> result = new MethodResult<TranscriptFileModel>();

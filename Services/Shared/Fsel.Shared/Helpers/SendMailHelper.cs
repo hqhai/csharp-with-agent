@@ -32,12 +32,12 @@ namespace Fsel.Shared.Helpers
         {
             return skill switch
             {
-                EnumCourseSkill.Reading => ("rgb(189,134,227)", "Kĩ năng đọc", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillReading_1706698217.png"),
-                EnumCourseSkill.Writing => ("rgb(56,238,195)", "Kĩ năng viết", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillWriting_1706698232.png"),
-                EnumCourseSkill.Speaking => ("rgb(88,160,255)", "Kĩ năng nói", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillSpeaking_1706698202.png"),
-                EnumCourseSkill.Listening => ("rgb(217,234,77)", "Kĩ năng nghe", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillListening_1706698183.png"),
-                EnumCourseSkill.Vocabulary => ("rgb(255,174,70)", "Từ vựng", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillVocabulary_1706698261.png"),
-                _ => ("rgb(255,215,70)", "Ngữ pháp", "https://s3-sgn10.fptcloud.com/fsel/Images/SkillGrammar_1706698247.png")
+                EnumCourseSkill.Reading => ("rgb(189,134,227)", "Kĩ năng đọc", "https://s3-sgn10.fptcloud.com/fsel-public/Images/SkillReading_1712116761.png"),
+                EnumCourseSkill.Writing => ("rgb(56, 177, 241)", "Kĩ năng viết", "https://s3-sgn10.fptcloud.com/fsel-public/Images/SkillWriting_1712116810.png"),
+                EnumCourseSkill.Speaking => ("rgb(89, 102, 255)", "Kĩ năng nói", "https://s3-sgn10.fptcloud.com/fsel-public/Images/SkillSpeaking_1712116825.png"),
+                EnumCourseSkill.Listening => ("rgb(83, 191, 101)", "Kĩ năng nghe", "https://s3-sgn10.fptcloud.com/fsel-public/Images/SkillListening_1712116789.png"),
+                EnumCourseSkill.Vocabulary => ("rgb(255, 66, 141)", "Từ vựng", "https://s3-sgn10.fptcloud.com/fsel-public/Images/SkillVocabulary_1712116859.png"),
+                _ => ("rgb(255, 174, 70)", "Ngữ pháp", "https://s3-sgn10.fptcloud.com/fsel-public/Images/SkillGrammar_1712116844.png")
             };
         }
 

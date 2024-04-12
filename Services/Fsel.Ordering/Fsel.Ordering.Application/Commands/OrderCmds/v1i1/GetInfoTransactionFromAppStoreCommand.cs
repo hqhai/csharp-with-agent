@@ -61,6 +61,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
+            _logger.LogError(_appSetting.Services.AppStoreApiUrl ?? "AppStoreApiUrl");
+
             if (string.IsNullOrEmpty(request.TransactionId))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -71,8 +73,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var bundleId = _appSetting.PurchaseSettings?.AppStore?.BundleId;
             var keyId = _appSetting.PurchaseSettings?.AppStore?.KeyId;
             var audience = _appSetting.PurchaseSettings?.AppStore?.Audience;
-            var iat = ConvertToUnixTimestamp(DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam));
-            var exp = ConvertToUnixTimestamp(DateTime.UtcNow.AddMinutes(60).ConvertTimeFromUtc(EnumCountryKey.Vietnam));
+            var iat = ConvertToUnixTimestamp(DateTime.UtcNow);
+            var exp = ConvertToUnixTimestamp(DateTime.UtcNow.AddMinutes(60));
 
             string privateKey = File.ReadAllText(ResourceSettings.AppStore);
 
@@ -94,11 +96,25 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 token = jwtBuilder.Encode();
             }
 
+            _logger.LogError(token);
+
+            var purchaseSetting = _appSetting.PurchaseSettings.Serialize();
+            if (purchaseSetting == "null")
+            {
+                _logger.LogError("PurchaseSettings");
+            }
+            else
+            {
+                _logger.LogError(purchaseSetting);
+            }
+
             var signedTransactionInfoResult = await _appStoreService.GetInfoTransaction(token, request.TransactionId);
 
             if (!signedTransactionInfoResult.IsSuccessStatusCode)
             {
                 _logger.LogError("Get info transaction not success");
+                var message = signedTransactionInfoResult.Error?.Message;
+                _logger.LogError(message);
                 methodResult.AddErrorBadRequest(signedTransactionInfoResult.Error?.Message);
                 methodResult.StatusCode = (int)signedTransactionInfoResult.StatusCode;
                 return methodResult;

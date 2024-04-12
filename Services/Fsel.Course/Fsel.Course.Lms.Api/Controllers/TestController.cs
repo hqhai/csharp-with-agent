@@ -80,10 +80,29 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> UpdateModuleProcess([FromQuery] UpdateModuleProcessCommand command)
+        public async Task<IActionResult> UpdateModuleProcess([FromBody] UpdateModuleProcessCommand command)
         {
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Delete Video Time Code Answers
+        /// </summary>
+        [HttpPost("queue-test/{queueName}/{queueTopic}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public IActionResult QueueTest([FromRoute] string queueName, [FromRoute] string queueTopic, [FromBody] QueueTestModel data)
+        {
+            _queueProvider.Publish(queueName, queueTopic, data?.Data);
+
+            MethodResult<bool> queryResult = new MethodResult<bool>();
+            return queryResult.GetActionResult();
+        }
+    }
+
+    public class QueueTestModel
+    {
+        public object? Data { get; set; }
     }
 }
