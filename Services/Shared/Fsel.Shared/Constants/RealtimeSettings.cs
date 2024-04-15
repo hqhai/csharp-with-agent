@@ -39,5 +39,14 @@ namespace Fsel.Shared.Constants
                 public const string ClassForumResultFeedBack = $"ClassForumResultFeedBack";
             }
         }
+
+        public static class FeatureAccessTimeHub
+        {
+            public const string Pattern = $"/feature-access-time";
+            public static class Methods
+            {
+                public const string FeatureAccessTime = $"FeatureAccessTime";
+            }
+        }
     }
 }

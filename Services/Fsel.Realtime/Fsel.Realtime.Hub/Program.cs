@@ -4,6 +4,7 @@ using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Realtime.Application.Queues.Consumers;
+using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Constants;
 using MassTransit;
 
@@ -13,6 +14,7 @@ var appSetting = builder.AddAppSettings<BaseAppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
+builder.Services.AddScoped<FeatureAccessTimePublisher>();
 
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
@@ -28,5 +30,7 @@ app.UseServices();
 app.UseHubs<DiscussionBoardHub>(RealtimeSettings.DiscussionBoardHub.Pattern);
 app.UseHubs<NotificationHub>(RealtimeSettings.NotificationHub.Pattern);
 app.UseHubs<LeaderBoardHub>(RealtimeSettings.LeaderBoardHub.Pattern);
+
 app.UseHubs<ClassForumAIFeedBackHub>(RealtimeSettings.ClassForumAIFeedBackHub.Pattern);
+app.UseHubs<FeatureAccessTimeHub>(RealtimeSettings.FeatureAccessTimeHub.Pattern);
 app.Run();
