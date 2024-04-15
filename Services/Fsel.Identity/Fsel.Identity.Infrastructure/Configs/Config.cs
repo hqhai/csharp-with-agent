@@ -218,11 +218,17 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     RedirectUris =
                     {
                         "https://localhost:7203/swagger/oauth2-redirect.html",
+                        "https://localhost:7202/swagger/oauth2-redirect.html",
+                        "https://localhost:7204/swagger/oauth2-redirect.html",
+                        "https://fsel-gateway-dev.fsel.edu.vn/swagger/oauth2-redirect.html",
                         "https://fsel-lcms-dev.fsel.edu.vn/swagger/oauth2-redirect.html"
                     },
                     PostLogoutRedirectUris =
                     {
                         "https://localhost:7203/swagger/oauth2-redirect.html",
+                        "https://localhost:7202/swagger/oauth2-redirect.html",
+                        "https://localhost:7204/swagger/oauth2-redirect.html",
+                        "https://fsel-gateway-dev.fsel.edu.vn/swagger/oauth2-redirect.html",
                         "https://fsel-lcms-dev.fsel.edu.vn/swagger/oauth2-redirect.html"
                     },
 
