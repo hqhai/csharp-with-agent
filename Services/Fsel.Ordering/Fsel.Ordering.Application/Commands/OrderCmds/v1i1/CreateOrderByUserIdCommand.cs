@@ -10,7 +10,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.OrderQuery;
-    using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
@@ -25,7 +24,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -39,19 +37,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
         private readonly IMediator _mediator;
-        private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IPackageRepository _packageRepository;
         private readonly AuthContext _authContext;
         private readonly ILmsCourseService _courseService;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
 
-        public CreateOrderByUserIdCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, NotificationMessagePublisher notificationMessagePublisher, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService, IUserService userService, ITrainingService trainingService)
+        public CreateOrderByUserIdCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, IPackageRepository packageRepository, AuthContext authContext, ILmsCourseService courseService, IUserService userService, ITrainingService trainingService)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
             _mediator = mediator;
-            _notificationMessagePublisher = notificationMessagePublisher;
             _packageRepository = packageRepository;
             _authContext = authContext;
             _courseService = courseService;
@@ -135,20 +131,21 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 newOrder.IsTrial = request.IsTrialRegistration;
                 newOrder.ExpireDate = DateTime.UtcNow.AddDays(ValueSettings.AmountTrialDays);
-                newOrder.Status = EnumOrderStatus.New;
+                newOrder.Status = EnumOrderStatus.Payment;
                 newOrder.Price = 0;
                 newOrder.DiscountPercent = 0;
                 newOrder.DiscountPrice = 0;
                 newOrder.TotalPrice = 0;
                 newOrder.UserId = request.UserId;
                 await _userService.CreateStudentTrialRegistration();
-            }
-            var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
-            var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = request.UserId, CourseId = newOrder.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
-            if (!addStudentIntoClassResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(addStudentIntoClassResult.Error);
-                return methodResult;
+
+                var numberOfShield = package.Code.HasValue ? (int)package.Code.Value : default;
+                var addStudentIntoClassResult = await _trainingService.AddStudentIntoClass(new AddStudentIntoClassCommandModel() { UserId = request.UserId, CourseId = newOrder.CourseId, PackageId = newOrder.PackageId ?? default, NumberOfShield = numberOfShield });
+                if (!addStudentIntoClassResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(addStudentIntoClassResult.Error);
+                    return methodResult;
+                }
             }
 
             await _orderRepository.ExecuteTransactionAsync(async () =>
@@ -162,23 +159,24 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     newOrder = _orderRepository.Update(newOrder);
                 }
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                SendNotify(newOrder.Id, newOrder.UserId, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(newOrder);
                 return methodResult;
             });
-
-            var changeStatusOrderResult = await _mediator.Send(new ChangeStatusOrderCommand
+            if (!request.IsTrialRegistration)
             {
-                OrderId = newOrder.Id,
-                OrderStatus = EnumOrderStatus.Payment,
-                Type = EnumOrderTransactionType.BankTransfer,
-            }, cancellationToken);
+                var changeStatusOrderResult = await _mediator.Send(new ChangeStatusOrderCommand
+                {
+                    OrderId = newOrder.Id,
+                    OrderStatus = EnumOrderStatus.Payment,
+                    Type = EnumOrderTransactionType.BankTransfer,
+                }, cancellationToken);
 
-            if (!changeStatusOrderResult.IsOK)
-            {
-                methodResult.AddErrorBadRequest(changeStatusOrderResult.ErrorMessages);
-                return methodResult;
+                if (!changeStatusOrderResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(changeStatusOrderResult.ErrorMessages);
+                    return methodResult;
+                }
             }
 
             return methodResult;
@@ -197,19 +195,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.CourseId = courseId;
-        }
-
-        private async void SendNotify(Guid orderId, Guid senderId, CancellationToken cancellationToken)
-        {
-            await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
-            {
-                Roles = new List<EnumRole> { EnumRole.Admin },
-                ObjectId = orderId,
-                Type = EnumNotificationType.Text,
-                Content = EnumNotificationContent.OrderCreate,
-                SenderId = senderId,
-                PlatformCode = EnumPlatformCode.LMSAdmin
-            }, cancellationToken);
         }
     }
 }
