@@ -98,6 +98,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VideoTimeCodeModel>();
+            var requestInfo = new
+            {
+                Timestamp = DateTimeOffset.UtcNow.ToString("o"),
+                Request = ConvertHelper.Serialize(request)
+            };
+            _logger.LogError(ConvertHelper.Serialize(requestInfo));
+
             StudentModel? student;
             if (request.StudentId.HasValue)
             {
@@ -124,7 +131,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-
             var method = await HandleAnswerAsync(request, cancellationToken);
             if (!method.IsOK)
             {

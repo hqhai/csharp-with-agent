@@ -87,6 +87,13 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<HomeWorkModel>();
+            var requestInfo = new
+            {
+                Timestamp = DateTimeOffset.UtcNow.ToString("o"),
+                Request = ConvertHelper.Serialize(request)
+            };
+            _logger.LogError(ConvertHelper.Serialize(requestInfo));
+
             if (request.Answers == null || !request.Answers.Any())
             {
                 if (request.IsSubmit)
@@ -99,7 +106,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 }
                 return methodResult;
             }
-            _logger.LogError(ConvertHelper.Serialize(request));
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {

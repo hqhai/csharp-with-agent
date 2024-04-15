@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -29,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class CreateFinalTestAnswerBySectionGroupCommand : CreateFinalTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
     {
@@ -47,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
+        private readonly ILogger<object> _logger;
         private readonly IMapper _mapper;
 
         public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
@@ -60,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             , ISectionGroupResultRepository sectionGroupResultRepository
             , ISectionGroupRepository sectionGroupRepository
             , CreateTokenHistoryPublisher createTokenHistoryPublisher
+            , ILogger<object> logger
             , IMapper mapper)
         {
             _questionRepository = questionRepository;
@@ -73,12 +77,19 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
+            _logger = logger;
             _mapper = mapper;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            var requestInfo = new
+            {
+                Timestamp = DateTimeOffset.UtcNow.ToString("o"),
+                Request = ConvertHelper.Serialize(request)
+            };
+            _logger.LogError(ConvertHelper.Serialize(requestInfo));
 
             #region Validate
 
