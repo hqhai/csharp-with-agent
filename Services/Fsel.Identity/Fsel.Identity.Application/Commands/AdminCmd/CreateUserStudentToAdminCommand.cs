@@ -32,7 +32,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class CreateUserStudentToAdminCommand : IRequest<MethodResult<UserModel>>
     {
         public string? Email { get; set; }
-        public bool IsTrialRegistration { get; set; } = false;
+        public bool IsTrialRegistration { get; set; }
         public Guid CourseId { get; set; }
     }
 
