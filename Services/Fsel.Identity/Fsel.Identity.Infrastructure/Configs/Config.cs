@@ -59,12 +59,17 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     RequireClientSecret = false,
                     RequirePkce = true,
+                    RequireConsent = false,
                     RedirectUris = { "https://localhost:4400", "http://localhost:4400" },
                     PostLogoutRedirectUris = { "https://localhost:4400", "http://localhost:4400" },
 
                     AllowOfflineAccess = true,
-                    RequireConsent = false,
+                    AccessTokenLifetime = 3600,
                     AllowAccessTokensViaBrowser = true,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
+                    RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
+                    SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
