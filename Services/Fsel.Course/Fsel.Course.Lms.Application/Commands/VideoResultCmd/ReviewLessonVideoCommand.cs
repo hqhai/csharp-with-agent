@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 return methodResult;
             }
             var video = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
-                                                        .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
+                                                        .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done))
                                                         .FirstOrDefaultAsync(x => x.Id == videoResult.VideoId, cancellationToken: cancellationToken);
             if (video == null)
             {
