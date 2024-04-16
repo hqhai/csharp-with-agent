@@ -160,7 +160,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
                     classForumResult.ClassForumDetailResults.Add(classForumDetailResult);
 
-
                     if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft)
                     {
                         classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType, cancellationToken);

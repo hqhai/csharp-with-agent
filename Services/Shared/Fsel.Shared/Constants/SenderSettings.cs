@@ -27,5 +27,6 @@ namespace Fsel.Shared.Constants
         public const string TitleWeekly4 = "[FSEL] BẠN ƠI! FSEL VẪN ĐANG ĐỢI BẠN TRÊN PLATFORM NHÉ!";
 
         public const string TitlePT = "[FSEL] CÙNG XEM KẾT QUẢ ĐÁNH GIÁ ĐẦU VÀO BẠN NHÉ!";
+        public const string MidCourseTitle = "[FSEL] BÁO CÁO HỌC TẬP GIỮA KHÓA";
     }
 }

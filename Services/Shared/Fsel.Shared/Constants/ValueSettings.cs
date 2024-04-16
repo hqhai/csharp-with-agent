@@ -2,8 +2,6 @@
 
 namespace Fsel.Shared.Constants
 {
-    using Microsoft.AspNetCore.Http;
-
     public static class ValueSettings
     {
         public static class QuestBoardPoint
