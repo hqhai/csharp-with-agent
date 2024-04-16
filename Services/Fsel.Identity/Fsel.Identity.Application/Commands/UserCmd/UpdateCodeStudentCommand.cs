@@ -56,38 +56,38 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 return methodResult;
             }
 
-            if (request.Birthday == null && request.YearBirthday == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Birthday));
-                return methodResult;
-            }
+            //if (request.Birthday == null && request.YearBirthday == null)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Birthday));
+            //    return methodResult;
+            //}
 
-            if (request.Birthday == null && request.YearBirthday != null)
-            {
-                request.Birthday = new DateTime(request.YearBirthday.Value, 1, 1);
-            }
+            //if (request.Birthday == null && request.YearBirthday != null)
+            //{
+            //    request.Birthday = new DateTime(request.YearBirthday.Value, 1, 1);
+            //}
 
-            var stt = await _studentRepository.Queryable.CountAsync(cancellationToken);
-            var currentDate = DateTime.UtcNow;
-            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
-            var lastDigitOfYear = currentDate.Year % 10;
-            var lastOfBirthDay = request.Birthday!.Value.Year % 100;
-            var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
-            var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:000}";
-            if (await _studentRepository.Queryable.Include(x => x.User).AnyAsync(x => x!.User!.Code == code, cancellationToken))
-            {
-                code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
-            }
-            user.Code = code;
-            int age = DateTimeHelper.GetYearOld(request.Birthday);
-            if (age <= 13)
-            {
-                user.Student.CourseLevel = EnumCourseLevel.A2;
-            }
-            else if (age >= 14)
-            {
-                user.Student.CourseLevel = EnumCourseLevel.B1;
-            }
+            //var stt = await _studentRepository.Queryable.CountAsync(cancellationToken);
+            //var currentDate = DateTime.UtcNow;
+            //var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
+            //var lastDigitOfYear = currentDate.Year % 10;
+            //var lastOfBirthDay = request.Birthday!.Value.Year % 100;
+            //var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
+            //var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:000}";
+            //if (await _studentRepository.Queryable.Include(x => x.User).AnyAsync(x => x!.User!.Code == code, cancellationToken))
+            //{
+            //    code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
+            //}
+            //user.Code = code;
+            //int age = DateTimeHelper.GetYearOld(request.Birthday);
+            //if (age <= 13)
+            //{
+            //    user.Student.CourseLevel = EnumCourseLevel.A2;
+            //}
+            //else if (age >= 14)
+            //{
+            //    user.Student.CourseLevel = EnumCourseLevel.B1;
+            //}
 
             user.Student.ProvinceId = request.ProvinceId;
             user.Student.DistrictId = request.DistrictId;

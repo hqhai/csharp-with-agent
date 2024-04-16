@@ -74,28 +74,9 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                     claims.Add(new Claim(JwtClaimNames.FullName, user.FullName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.Surname, user.LastName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.GivenName, user.FirstName ?? string.Empty, ClaimValueTypes.String));
-                }
 
-                if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Email))
-                {
-                    claims.Add(new Claim(JwtClaimTypes.Email, user.Email ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(JwtClaimTypes.EmailVerified, user.EmailConfirmed.ToString(), ClaimValueTypes.Boolean));
-                }
+                    #region Custom Profile 
 
-                if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Phone))
-                {
-                    claims.Add(new Claim(JwtClaimTypes.PhoneNumber, user.PhoneNumber ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(JwtClaimTypes.PhoneNumberVerified, user.PhoneNumberConfirmed.ToString(), ClaimValueTypes.Boolean));
-                }
-
-                if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.OpenId))
-                {
-                    claims.Add(new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(JwtClaimNames.UserId, user.Id.ToString()));
-                }
-
-                if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerSettings.AllowedScopes.Api))
-                {
                     var student = user.Student;
                     var classStudentResult = await _trainingService.GetClassByStudentId(student?.Id ?? default);
                     var @class = classStudentResult?.Content?.Result;
@@ -124,6 +105,26 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                     claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsPlacementTest, isPlacementTest?.ToString() ?? string.Empty, ClaimValueTypes.Boolean));
                     claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsSurvey, isSurvey?.ToString() ?? string.Empty, ClaimValueTypes.Boolean));
                     claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsOrder, isOrder.ToString(), ClaimValueTypes.Boolean));
+
+                    #endregion
+                }
+
+                if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Email))
+                {
+                    claims.Add(new Claim(JwtClaimTypes.Email, user.Email ?? string.Empty, ClaimValueTypes.String));
+                    claims.Add(new Claim(JwtClaimTypes.EmailVerified, user.EmailConfirmed.ToString(), ClaimValueTypes.Boolean));
+                }
+
+                if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Phone))
+                {
+                    claims.Add(new Claim(JwtClaimTypes.PhoneNumber, user.PhoneNumber ?? string.Empty, ClaimValueTypes.String));
+                    claims.Add(new Claim(JwtClaimTypes.PhoneNumberVerified, user.PhoneNumberConfirmed.ToString(), ClaimValueTypes.Boolean));
+                }
+
+                if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.OpenId))
+                {
+                    claims.Add(new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty, ClaimValueTypes.String));
+                    claims.Add(new Claim(JwtClaimNames.UserId, user.Id.ToString()));
                 }
 
                 context.IssuedClaims.AddRange(claims);

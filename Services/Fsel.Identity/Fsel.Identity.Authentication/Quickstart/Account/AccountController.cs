@@ -51,6 +51,8 @@ using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
+using Fsel.Identity.Domain.IRepositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -74,6 +76,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
         private readonly ILogger<AccountController> _logger;
+        private readonly IParentRepository _parentRepository;
+        private readonly IStudentRepository _studentRepository;
 
         public AccountController(
             IIdentityServerInteractionService interaction,
@@ -85,7 +89,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             IMediator mediator,
             IMapper mapper,
             AppSetting appSetting,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            IParentRepository parentRepository,
+            IStudentRepository studentRepository)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -101,6 +107,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             _mapper = mapper;
             _appSetting = appSetting;
             _logger = logger;
+            _parentRepository = parentRepository;
+            _studentRepository = studentRepository;
         }
 
         /// <summary>
@@ -155,6 +163,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                             _mapper.Map(userRegisterModel, user);
                             user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, userRegisterModel.Password);
+                            user = await GenerateUserDataAsync(user, EnumRoleRegister.Student);
                             result = await _userManager.UpdateAsync(user);
 
                             if (result.Succeeded)
@@ -188,26 +197,73 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     {
                         ModelState.AddModelError(string.Empty, "User does not exist");
                     }
-
-                    var verify = await _userManager.VerifyUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName, request.Otp ?? string.Empty);
-                    if (verify)
-                    {
-                        TempData[nameof(ForgotPasswordModel)] = new ForgotPasswordModel
-                        {
-                            VerifyId = Guid.NewGuid(),
-                            Email = email,
-                            ReturnUrl = request.ReturnUrl,
-                        }.Serialize();
-                        return RedirectToAction(nameof(ForgotPassword));
-                    }
                     else
                     {
-                        ModelState.AddModelError(nameof(request.Otp), "Otp invalid");
+                        var verify = await _userManager.VerifyUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName, request.Otp ?? string.Empty);
+                        if (verify)
+                        {
+                            TempData[nameof(ForgotPasswordModel)] = new ForgotPasswordModel
+                            {
+                                VerifyId = Guid.NewGuid(),
+                                Email = email,
+                                ReturnUrl = request.ReturnUrl,
+                            }.Serialize();
+                            return RedirectToAction(nameof(ForgotPassword));
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(nameof(request.Otp), "Otp invalid");
+                        }
                     }
                 }
             }
 
             return View(request);
+        }
+
+        private async Task<User> GenerateUserDataAsync(User user, EnumRoleRegister role)
+        {
+            var currentDate = DateTime.UtcNow;
+            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
+
+            if (role == EnumRoleRegister.Student)
+            {
+                var stt = await _studentRepository.Queryable.CountAsync();
+                var lastDigitOfYear = currentDate.Year % 10;
+                var lastOfBirthDay = user.Birthday!.Value.Year % 100;
+
+                user.Code = $"HN_{weekNumber}{lastDigitOfYear}{lastOfBirthDay}{stt:000}";
+                if (await _studentRepository.Queryable.Include(x => x.User).AnyAsync(x => x!.User!.Code == user.Code))
+                {
+                    user.Code = $"HN_{weekNumber}{lastDigitOfYear}{2}{lastOfBirthDay}{stt:000}";
+                }
+
+                var level = EnumCourseLevel.A2;
+                int age = Shared.Helpers.DateTimeHelper.GetYearOld(user.Birthday);
+                if (age >= 14)
+                {
+                    level = EnumCourseLevel.B1;
+                }
+
+                user.Student = new Student
+                {
+                    UserId = user.Id,
+                    CreatedByParent = false,
+                    Occupation = nameof(Student),
+                    CourseLevel = level
+                };
+            }
+            else if (role == EnumRoleRegister.Parent)
+            {
+                var stt = await _parentRepository.Queryable.CountAsync();
+                user.Parent = new Parent
+                {
+                    UserId = user.Id,
+                };
+                user.Code = $"PH_{weekNumber}{stt:0000}";
+            }
+
+            return user;
         }
 
         public IActionResult Success(string? message = null)
@@ -738,6 +794,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         Birthday = request.Birthday,
                         EmailConfirmed = true,
                     };
+
+                    user = await GenerateUserDataAsync(user, EnumRoleRegister.Student);
                     result = await _userManager.CreateAsync(user);
                     result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
 

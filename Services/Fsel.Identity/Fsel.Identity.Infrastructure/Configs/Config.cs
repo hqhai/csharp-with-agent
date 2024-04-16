@@ -64,13 +64,15 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     {
                         "https://localhost:4400",
                         "http://localhost:4400",
-                        "http://test1_lms.fsel.edu.vn"
+                        "http://test1_lms.fsel.edu.vn",
+                        "https://test1_lms.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
                         "https://localhost:4400",
                         "http://localhost:4400",
-                        "http://test1_lms.fsel.edu.vn"
+                        "http://test1_lms.fsel.edu.vn",
+                        "https://test1_lms.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
