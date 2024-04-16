@@ -80,5 +80,17 @@ namespace Fsel.Course.Lms.Api.Controllers
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "placementTest_export.xlsx");
         }
+
+        /// <summary>
+        /// send mail pt
+        /// </summary>
+        [HttpPost("send-mail-pt")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendMailPT([FromQuery] SendPTCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

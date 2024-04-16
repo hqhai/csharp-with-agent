@@ -44,6 +44,9 @@ namespace Fsel.Shared.Constants
         public const string Mindset1 = "Resources//MailTemplates//CourseMS1.html";
         public const string Mindset2 = "Resources//MailTemplates//CourseMS2.html";
         public const string Mindset3 = "Resources//MailTemplates//CourseMS3.html";
+        public const string CourseInfo = "Resources//MailTemplates//CourseInfo.html";
+        public const string AcademicInfo = "đưa học sinh từ trình độ Sơ cấp (A1) đến Nâng cao (C1) và phù hợp với học sinh từ 11-16 tuổi. Chương trình giảng dạy khám phá nhiều chủ đề khác nhau để làm nổi bật ngôn ngữ trong ngữ cảnh và tạo điều kiện cho người dùng để áp dụng những gì đã học thông qua các hoạt động nói và viết dựa trên nhiệm vụ. Chương trình bao gồm 6 cấp độ, mỗi cấp độ có 72 bài học/khóa (180 giờ học/khóa).";
+        public const string IELTInfo = "được thiết kế dành cho học viên từ 16 tuổi trở lên đã đạt trình độ Trung cấp (B1+) và hiện đang chuẩn bị tham gia kỳ thi Cambridge IELTS chính thức. Mỗi khóa học giúp học sinh mở rộng kiến thức về ngôn ngữ học thuật, làm quen với hình thức của kỳ thi chính thức và phát triển các kỹ năng làm bài thi cần thiết để đạt kết quả cao. Chương trình bao gồm 3 khóa học, mỗi khóa có 32 bài học và 4 bài thi thử IELTS đầy đủ cho mỗi khóa học (92 giờ học/khóa).";
 
         public const string TeacherBios = "Resources//TeacherBios.json";
 
@@ -58,5 +61,15 @@ namespace Fsel.Shared.Constants
         public const string CourseB2Title = "là cấp độ Anh ngữ thứ tư trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể hoạt động độc lập trong nhiều môi trường học thuật và công việc bằng tiếng Anh, dù ở phạm vi sắc thái và độ chính xác hạn chế.";
 
         public const string CourseC1Title = "là cấp độ Anh ngữ thứ năm trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể hoạt động độc lập với một độ chính xác cao trong nhiều chủ đề đa dạng và trong gần như mọi hoàn cảnh mà không cần chuẩn bị trước.";
+
+        public const string A1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/A1Photo_1713257418.png";
+        public const string A2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/A2Photo_1713257432.png";
+        public const string B1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B1Photo_1713257450.png";
+        public const string B1PlusPhoto = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B1PlusPhoto_1713257462.png";
+        public const string B2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B2Photo_1713257474.png";
+        public const string C1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/C1Photo_1713257485.png";
+        public const string MS1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS1Photo_1713257496.png";
+        public const string MS2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS2Photo_1713257508.png";
+        public const string MS3Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS3Photo_1713257519.png";
     }
 }
