@@ -60,8 +60,18 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     RequireClientSecret = false,
                     RequirePkce = true,
                     RequireConsent = false,
-                    RedirectUris = { "https://localhost:4400", "http://localhost:4400" },
-                    PostLogoutRedirectUris = { "https://localhost:4400", "http://localhost:4400" },
+                    RedirectUris =
+                    {
+                        "https://localhost:4400",
+                        "http://localhost:4400",
+                        "http://test1_lms.fsel.edu.vn"
+                    },
+                    PostLogoutRedirectUris =
+                    {
+                        "https://localhost:4400",
+                        "http://localhost:4400",
+                        "http://test1_lms.fsel.edu.vn"
+                    },
 
                     AllowOfflineAccess = true,
                     AccessTokenLifetime = 3600,
