@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 {
                     UserId = item!.CreatedUserId,
                     Status = item.Status.ToString(),
-                    Lever = item.Level.ToString()
+                    Level = item.Level.ToString()
                 };
                 results.Add(query);
             }
