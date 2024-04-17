@@ -297,7 +297,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 CourseType = course.CourseType,
                 Percent = percentUnit.ToString(CultureInfo.CurrentCulture),
                 ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
-                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkMockTestReport!, mockTestId, course.Id)
+                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkMockTestReport!, mockTestId, course.Id, userId)
             };
 
             if (course.CourseType == EnumCourseType.Ielts && mockTestResult != null)
