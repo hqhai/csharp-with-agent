@@ -30,7 +30,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
 
     public class CreatePlacementTestAnswerBySectionGroupCommand : CreatePlacementTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<PlacementTestResultModel>>
     {
@@ -49,8 +48,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IPlacementTestRepository _placementTestRepository;
-        private readonly ILogger<object> _logger;
         private readonly IMapper _mapper;
+        private readonly LoggerHelper _loggerHelper;
         private readonly ICourseRepository _courseRepository;
         private readonly AppSetting _appSetting;
 
@@ -65,8 +64,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             , ISectionGroupResultRepository sectionGroupResultRepository
             , ISectionGroupRepository sectionGroupRepository
             , IPlacementTestRepository placementTestRepository
-            , ILogger<object> logger
             , IMapper mapper
+            , LoggerHelper loggerHelper
             , ICourseRepository courseRepository
             , AppSetting appSetting)
         {
@@ -81,8 +80,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _placementTestRepository = placementTestRepository;
-            _logger = logger;
             _mapper = mapper;
+            _loggerHelper = loggerHelper;
             _courseRepository = courseRepository;
             _appSetting = appSetting;
         }
@@ -91,12 +90,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PlacementTestResultModel>();
-            var requestInfo = new
-            {
-                Timestamp = DateTimeOffset.UtcNow.ToString("o"),
-                Request = ConvertHelper.Serialize(request)
-            };
-            _logger.LogError(ConvertHelper.Serialize(requestInfo));
+
+            _loggerHelper.LoggerRequest(request);
 
             StudentModel? student;
             if (request.StudentId.HasValue)

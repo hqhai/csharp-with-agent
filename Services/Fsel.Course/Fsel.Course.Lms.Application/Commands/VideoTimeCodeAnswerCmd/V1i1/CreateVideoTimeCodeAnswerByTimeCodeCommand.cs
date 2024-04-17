@@ -52,9 +52,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IQuestionRepository _questionRepository;
-        private readonly ILogger<object> _logger;
         private readonly QuestionConverter _questionConverter;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
+        private readonly LoggerHelper _loggerHelper;
 
         public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
@@ -73,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             , IQuestionRepository questionRepository
             , QuestionConverter questionConverter
             , CreateTokenHistoryPublisher createTokenHistoryPublisher
-            , ILogger<object> logger)
+            , LoggerHelper loggerHelper)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoResultRepository = videoResultRepository;
@@ -89,21 +89,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _lessonResultRepository = lessonResultRepository;
             _dateTimeConverter = dateTimeConverter;
             _questionRepository = questionRepository;
-            _logger = logger;
             _questionConverter = questionConverter;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
+            _loggerHelper = loggerHelper;
         }
 
         public async Task<MethodResult<VideoTimeCodeModel>> Handle(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VideoTimeCodeModel>();
-            var requestInfo = new
-            {
-                Timestamp = DateTimeOffset.UtcNow.ToString("o"),
-                Request = ConvertHelper.Serialize(request)
-            };
-            _logger.LogError(ConvertHelper.Serialize(requestInfo));
+
+            _loggerHelper.LoggerRequest(request);
 
             StudentModel? student;
             if (request.StudentId.HasValue)

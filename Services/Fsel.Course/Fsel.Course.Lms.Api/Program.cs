@@ -121,6 +121,7 @@ builder.Services.AddScoped<SectionGroupManagerConverter>();
 // Helper
 builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
+builder.Services.AddScoped<LoggerHelper>();
 
 // Publisher
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();

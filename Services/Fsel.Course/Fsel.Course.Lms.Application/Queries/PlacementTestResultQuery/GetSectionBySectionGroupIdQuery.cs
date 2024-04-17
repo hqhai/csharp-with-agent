@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -19,7 +18,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
 
     public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDtoModel>>
     {
@@ -30,7 +28,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
         private readonly ISectionRepository _sectionRepository;
-        private readonly ILogger<object> _logger;
+        private readonly LoggerHelper _loggerHelper;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
@@ -41,10 +39,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
 
-        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, ILogger<object> logger, DateTimeConverter dateTimeConverter, IPlacementTestResultRepository placementTestResultRepository, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
+        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, LoggerHelper loggerHelper, DateTimeConverter dateTimeConverter, IPlacementTestResultRepository placementTestResultRepository, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
         {
             _sectionRepository = sectionRepository;
-            _logger = logger;
+            _loggerHelper = loggerHelper;
             _dateTimeConverter = dateTimeConverter;
             _placementTestResultRepository = placementTestResultRepository;
             _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
@@ -103,12 +101,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == request.PlacementTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
-                var requestInfo = new
-                {
-                    Timestamp = DateTimeOffset.UtcNow.ToString("o"),
-                    Request = ConvertHelper.Serialize(request)
-                };
-                _logger.LogError(ConvertHelper.Serialize(requestInfo));
+                _loggerHelper.LoggerRequest(request);
+
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, PlacementTestResultId = request.PlacementTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel

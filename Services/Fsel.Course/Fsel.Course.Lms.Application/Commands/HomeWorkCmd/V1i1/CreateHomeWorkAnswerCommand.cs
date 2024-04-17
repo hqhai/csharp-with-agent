@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -28,7 +27,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
 
     public class CreateHomeWorkAnswerCommand : CreateHomeWorkAnswerV1i1CommandModel, IRequest<MethodResult<HomeWorkModel>>
     {
@@ -49,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly IQuestionRepository _questionRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
-        private readonly ILogger<object> _logger;
+        private readonly LoggerHelper _loggerHelper;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             QuestionConverter questionConverter,
@@ -64,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
             IQuestionRepository questionRepository,
             CreateTokenHistoryPublisher createTokenHistoryPublisher,
-            ILogger<object> logger
+            LoggerHelper loggerHelper
             )
         {
             _homeWorkResultRepository = homeWorkResultRepository;
@@ -80,19 +78,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
             _questionRepository = questionRepository;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
-            _logger = logger;
+            _loggerHelper = loggerHelper;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<HomeWorkModel>();
-            var requestInfo = new
-            {
-                Timestamp = DateTimeOffset.UtcNow.ToString("o"),
-                Request = ConvertHelper.Serialize(request)
-            };
-            _logger.LogError(ConvertHelper.Serialize(requestInfo));
+            _loggerHelper.LoggerRequest(request);
 
             if (request.Answers == null || !request.Answers.Any())
             {

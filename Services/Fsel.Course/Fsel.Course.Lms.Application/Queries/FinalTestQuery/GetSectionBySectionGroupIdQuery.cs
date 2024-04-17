@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
         private readonly ISectionRepository _sectionRepository;
-        private readonly ILogger<object> _logger;
+        private readonly LoggerHelper _loggerHelper;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
         private readonly SectionGroupConverter _sectionGroupConverter;
@@ -43,10 +43,10 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
         private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
 
-        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, ILogger<object> logger, DateTimeConverter dateTimeConverter, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IFinalTestResultRepository finalTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
+        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, LoggerHelper loggerHelper, DateTimeConverter dateTimeConverter, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IFinalTestResultRepository finalTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
         {
             _sectionRepository = sectionRepository;
-            _logger = logger;
+            _loggerHelper = loggerHelper;
             _dateTimeConverter = dateTimeConverter;
             _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
             _sectionGroupConverter = sectionGroupConverter;
@@ -116,7 +116,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                     Timestamp = DateTimeOffset.UtcNow.ToString("o"),
                     Request = ConvertHelper.Serialize(request)
                 };
-                _logger.LogError(ConvertHelper.Serialize(requestInfo));
+                _loggerHelper.LoggerRequest(request);
 
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, FinalTestResultId = request.FinalTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);

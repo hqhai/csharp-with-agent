@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -28,7 +27,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
 
     public class CreateMockTestAnswerBySectionGroupCommand : CreateAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
     {
@@ -50,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly SubmitMockTestAnswerPublisher _submitMockTestAnswerPublisher;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
-        private readonly ILogger<object> _logger;
+        private readonly LoggerHelper _loggerHelper;
 
         public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
             , AuthContext authContext
@@ -64,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             , ISectionTimeCodeRepository sectionTimeCodeRepository
             , ISectionGroupRepository sectionGroupRepository
             , IMapper mapper
-            , ILogger<object> logger
+            , LoggerHelper loggerHelper
             , SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher
             , IMediator mediator)
         {
@@ -80,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
-            _logger = logger;
+            _loggerHelper = loggerHelper;
             _submitMockTestAnswerPublisher = submitMockTestAnswerPublisher;
             _mediator = mediator;
         }
@@ -88,12 +86,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var requestInfo = new
-            {
-                Timestamp = DateTimeOffset.UtcNow.ToString("o"),
-                Request = ConvertHelper.Serialize(request)
-            };
-            _logger.LogError(ConvertHelper.Serialize(requestInfo));
+
+            _loggerHelper.LoggerRequest(request);
 
             #region Validate
 
