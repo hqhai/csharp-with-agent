@@ -17,12 +17,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class DeleteClassForumResultCommand : IRequest<MethodResult<bool>>
+    public class UpdateStatusClassForumResultCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
     }
 
-    public class DeleteClassForumResultCommandHandler : IRequestHandler<DeleteClassForumResultCommand, MethodResult<bool>>
+    public class UpdateStatusClassForumResultCommandHandler : IRequestHandler<UpdateStatusClassForumResultCommand, MethodResult<bool>>
     {
         private readonly IClassForumResultRepository _classForumResulRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IUnitRepository _unitRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public DeleteClassForumResultCommandHandler(IClassForumResultRepository classForumResulRepository, NotificationMessagePublisher notificationMessagePublisher, AuthContext authContext, ICourseRepository courseRepository, IUnitRepository unitRepository, ILessonResultRepository lessonResultRepository)
+        public UpdateStatusClassForumResultCommandHandler(IClassForumResultRepository classForumResulRepository, NotificationMessagePublisher notificationMessagePublisher, AuthContext authContext, ICourseRepository courseRepository, IUnitRepository unitRepository, ILessonResultRepository lessonResultRepository)
         {
             _classForumResulRepository = classForumResulRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             _lessonResultRepository = lessonResultRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(DeleteClassForumResultCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(UpdateStatusClassForumResultCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
