@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IEntities;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
@@ -47,6 +48,37 @@ namespace Fsel.Course.Domain.Entities
         [NotMapped]
         public int? TimeCount
         { get { return ClassForumResultFiles.Select(p => p.TimeCount).Sum(); } }
+
+        [NotMapped]
+        public double Score { get; set; }
+
+        [NotMapped]
+        public double CorrectCount
+        {
+            get
+            {
+                double score = default;
+
+                if (!string.IsNullOrEmpty(GradingAlFeedback))
+                {
+                    var classForumAIs = Common.Helpers.ConvertHelper.Deserialize<List<ClassForumAIModel>>(GradingAlFeedback);
+                    if (classForumAIs != null && classForumAIs.Any())
+                    {
+                        score = classForumAIs.Sum(x => x.Score);
+                    }
+                }
+                return score;
+            }
+        }
+
+        [NotMapped]
+        public double CorrectTotal
+        {
+            get
+            {
+                return CorrectCount + Score;
+            }
+        }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }

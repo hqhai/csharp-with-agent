@@ -7,12 +7,17 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System.Text.Json.Serialization;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
     public class ClassForumResultModel : BaseModel
     {
+        public double CorrectCount { get; set; }
+        public double CorrectTotal { get; set; }
+        public IList<SkillScores>? SkillScores { get; set; }
+
         public string? Content { get; set; }
 
         public Guid GradingTeacherId { get; set; }

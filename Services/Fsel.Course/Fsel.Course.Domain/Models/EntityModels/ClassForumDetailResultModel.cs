@@ -29,11 +29,14 @@ namespace Fsel.Course.Domain.Models.EntityModels
             set { _wordCount = value; }
         }
 
+        public int? TimeCount { get; set; }
         public string? GradingAlFeedback { get; set; }
 
         public DateTime? ProcessDate { get; set; }
         public DateTime? CompletionDate { get; set; }
-
+        public double Score { get; set; }
+        public double CorrectCount { get; set; }
+        public double CorrectTotal { get; set; }
         public EnumSubmissionCount? SubmissionCount { get; set; }
 
         public Guid ClassForumResultId { get; set; }
