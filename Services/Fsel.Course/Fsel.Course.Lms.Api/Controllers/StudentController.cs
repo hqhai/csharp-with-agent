@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> StudentSetting()
         {
-            _logger.LogError("StudentSetting: " + Request.HttpContext.ToCurl());
+            //_logger.LogError("StudentSetting: " + Request.HttpContext.ToCurl());
             MethodResult<StudentSettingModel> queryResult = await _mediator.Send(new GetStudentSettingQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
