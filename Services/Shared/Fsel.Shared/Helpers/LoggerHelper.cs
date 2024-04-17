@@ -1,20 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Infrastructure.Common
+namespace Fsel.Shared.Helpers
 {
     using Fsel.Common.Helpers;
     using Microsoft.Extensions.Logging;
 
-    public class LoggerHelper
+    public static class LoggerHelper
     {
-        private readonly ILogger<object> _logger;
-
-        public LoggerHelper(ILogger<object> logger)
-        {
-            _logger = logger;
-        }
-
-        public void LoggerRequest(object request)
+        public static void LoggerRequest(this ILogger _logger, object request)
         {
             var requestInfo = new
             {

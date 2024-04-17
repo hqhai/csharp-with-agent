@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class CreateHomeWorkAnswerCommand : CreateHomeWorkAnswerV1i1CommandModel, IRequest<MethodResult<HomeWorkModel>>
     {
@@ -47,23 +48,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly IQuestionRepository _questionRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
-        private readonly LoggerHelper _loggerHelper;
+        private readonly ILogger<object> _logger;
 
-        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
-            QuestionConverter questionConverter,
-            IHomeWorkAnswerRepository homeWorkAnswerRepository,
-            IHomeWorkRepository homeWorkRepository,
-            IMediator mediator,
-            IUserService userService,
-            AuthContext authContext,
-            ICourseRepository courseRepository,
-            ILessonResultRepository lessonResultRepository,
-            ISystemService systemService,
-            FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
-            IQuestionRepository questionRepository,
-            CreateTokenHistoryPublisher createTokenHistoryPublisher,
-            LoggerHelper loggerHelper
-            )
+        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _questionConverter = questionConverter;
@@ -78,14 +65,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
             _questionRepository = questionRepository;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
-            _loggerHelper = loggerHelper;
+            _logger = logger;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<HomeWorkModel>();
-            _loggerHelper.LoggerRequest(request);
+            _logger.LoggerRequest(request);
 
             if (request.Answers == null || !request.Answers.Any())
             {

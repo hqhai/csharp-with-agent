@@ -29,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class CreateFinalTestAnswerBySectionGroupCommand : CreateFinalTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
     {
@@ -47,22 +48,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
-        private readonly LoggerHelper _loggerHelper;
         private readonly IMapper _mapper;
+        private readonly ILogger<object> _logger;
 
-        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
-            , AuthContext authContext
-            , QuestionConverter questionConverter
-            , SectionGroupConverter sectionGroupConverter
-            , IUserService userService
-            , ISystemService systemService
-            , IFinalTestResultRepository finalTestResultRepository
-            , IFinalTestAnswerRepository finalTestAnswerRepository
-            , ISectionGroupResultRepository sectionGroupResultRepository
-            , ISectionGroupRepository sectionGroupRepository
-            , CreateTokenHistoryPublisher createTokenHistoryPublisher
-            , LoggerHelper loggerHelper
-            , IMapper mapper)
+        public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, ISystemService systemService, IFinalTestResultRepository finalTestResultRepository, IFinalTestAnswerRepository finalTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ILogger<object> logger)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -75,14 +64,15 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
-            _loggerHelper = loggerHelper;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            _loggerHelper.LoggerRequest(request);
+
+            _logger.LoggerRequest(request);
 
             #region Validate
 

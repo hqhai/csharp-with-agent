@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class CreateMockTestAnswerBySectionGroupCommand : CreateAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
     {
@@ -48,23 +49,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly SubmitMockTestAnswerPublisher _submitMockTestAnswerPublisher;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
-        private readonly LoggerHelper _loggerHelper;
+        private readonly ILogger<object> _logger;
 
-        public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
-            , AuthContext authContext
-            , IUserService userService
-            , QuestionConverter questionConverter
-            , IMockTestAnswerRepository mockTestAnswerRepository
-            , IMockTestResultRepository mockTestResultRepository
-            , ISectionRepository sectionRepository
-            , SectionGroupConverter sectionGroupConverter
-            , ISectionGroupResultRepository sectionGroupResultRepository
-            , ISectionTimeCodeRepository sectionTimeCodeRepository
-            , ISectionGroupRepository sectionGroupRepository
-            , IMapper mapper
-            , LoggerHelper loggerHelper
-            , SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher
-            , IMediator mediator)
+        public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, IUserService userService, QuestionConverter questionConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestResultRepository mockTestResultRepository, ISectionRepository sectionRepository, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, ISectionTimeCodeRepository sectionTimeCodeRepository, ISectionGroupRepository sectionGroupRepository, SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher, IMediator mediator, IMapper mapper, ILogger<object> logger)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -77,17 +64,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _sectionGroupRepository = sectionGroupRepository;
-            _mapper = mapper;
-            _loggerHelper = loggerHelper;
             _submitMockTestAnswerPublisher = submitMockTestAnswerPublisher;
             _mediator = mediator;
+            _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            _loggerHelper.LoggerRequest(request);
+            _logger.LoggerRequest(request);
 
             #region Validate
 
