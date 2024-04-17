@@ -184,12 +184,16 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                      EnumGender = x.Gender,
                                                      Birthday = x.Birthday,
                                                      Address = x.Address,
+                                                     SchoolId = x.Student!.SchoolId,
                                                      ParentName = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.FullName,
                                                      ParentPhone = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.PhoneNumber,
                                                      ParentEmail = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Email,
                                                      ParentGender = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Gender
                                                  }).FirstOrDefaultAsync(cancellationToken);
                 }
+
+                // lấy tên trường
+
 
                 List<OrderIntegrationModel> orderIntegrations = new List<OrderIntegrationModel>();
                 foreach (var order in orderItems)
@@ -222,19 +226,19 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 var leadsIntegration = new ClientsIntegrationModel
                 {
                     UserId = item,
-                    FullName = user.FullName,
-                    UserName = user.UserName,
-                    StudentEmail = user.StudentEmail,
-                    StudentPhone = user.StudentPhone,
-                    EnumGender = user.EnumGender,
-                    Birthday = user.Birthday,
-                    Address = user.Address,
-                    ParentName = user.ParentName,
-                    ParentPhone = user.ParentPhone,
-                    ParentEmail = user.ParentEmail,
-                    ParentGender = user.ParentGender,
+                    FullName = user?.FullName,
+                    UserName = user?.UserName,
+                    StudentEmail = user?.StudentEmail,
+                    StudentPhone = user?.StudentPhone,
+                    EnumGender = user?.EnumGender,
+                    Birthday = user?.Birthday,
+                    Address = user?.Address,
+                    ParentName = user?.ParentName,
+                    ParentPhone = user?.ParentPhone,
+                    ParentEmail = user?.ParentEmail,
+                    ParentGender = user?.ParentGender,
                     SchoolName = survey?.Name,
-                    PTLever = ptTestResult?.Lever,
+                    PTLevel = ptTestResult?.Level,
                     OrderIntegration = orderIntegrations
                 };
                 leadsIntegrations.Add(leadsIntegration);

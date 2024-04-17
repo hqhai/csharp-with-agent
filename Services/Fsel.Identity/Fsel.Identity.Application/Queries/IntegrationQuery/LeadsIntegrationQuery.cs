@@ -240,7 +240,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     Status = status,
                     StatusDetail = statusDetail,
                     SchoolName = survey?.Name,
-                    PTLever = ptTestResult?.Lever,
+                    PTLever = ptTestResult?.Level,
                     CourseLever = courseLever
                 };
                 leadsIntegrations.Add(leadsIntegration);

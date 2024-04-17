@@ -6,6 +6,6 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
     {
         public Guid UserId { get; set; }
         public string? Status { get; set; }
-        public string? Lever { get; set; }
+        public string? Level { get; set; }
     }
 }

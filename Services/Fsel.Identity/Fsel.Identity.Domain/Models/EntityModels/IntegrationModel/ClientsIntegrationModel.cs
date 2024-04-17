@@ -19,8 +19,9 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
         public string? ParentPhone { get; set; }
         public string? ParentEmail { get; set; }
         public EnumGender? ParentGender { get; set; }
+        public Guid? SchoolId { get; set; }
         public string? SchoolName { get; set; }
-        public string? PTLever { get; set; }
+        public string? PTLevel { get; set; }
         public IList<OrderIntegrationModel> OrderIntegration { get; set; } = new List<OrderIntegrationModel>();
     }
 
