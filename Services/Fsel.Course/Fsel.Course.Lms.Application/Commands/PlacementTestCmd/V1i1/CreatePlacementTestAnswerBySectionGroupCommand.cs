@@ -264,6 +264,7 @@ AppSetting appSetting)
             {
                 CurrentCourse = currentCourseHtml,
                 CourseInfos = coursesInfo,
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
             };
 
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);

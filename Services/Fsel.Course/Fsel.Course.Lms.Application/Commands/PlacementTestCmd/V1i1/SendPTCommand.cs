@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -25,10 +26,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     public class SendPTCommandHandler : IRequestHandler<SendPTCommand, MethodResult<bool>>
     {
         private readonly IMediator _mediator;
+        private readonly AppSetting _appSetting;
 
-        public SendPTCommandHandler(IMediator mediator)
+        public SendPTCommandHandler(IMediator mediator, AppSetting appSetting)
         {
             _mediator = mediator;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<bool>> Handle(SendPTCommand request, CancellationToken cancellationToken)
@@ -85,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             {
                 CurrentCourse = currentCourseHtml,
                 CourseInfos = coursesInfo,
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
             };
 
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
