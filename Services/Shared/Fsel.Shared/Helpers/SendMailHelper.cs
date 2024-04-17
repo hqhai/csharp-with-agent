@@ -100,11 +100,15 @@ namespace Fsel.Shared.Helpers
             return previousValue;
         }
 
-        public static IList<EnumCourseLevel> GetSuggestLevels(EnumCourseLevel currentValue, int age)
+        public static IList<EnumCourseLevel> GetSuggestLevels(EnumCourseLevel? currentValue, int age)
         {
             var suggestLevels = new List<EnumCourseLevel>();
             switch (currentValue)
             {
+                case null:
+                    suggestLevels.Add(EnumCourseLevel.A1);
+                    break;
+
                 case EnumCourseLevel.A1:
                     suggestLevels.Add(EnumCourseLevel.A2);
                     break;

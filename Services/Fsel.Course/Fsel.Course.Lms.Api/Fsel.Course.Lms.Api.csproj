@@ -38,6 +38,9 @@
     <None Update="Resources\MailTemplates\CourseInfo.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\MailTemplates\CoursePreA1.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\MailTemplates\LessonName.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
