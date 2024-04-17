@@ -34,6 +34,11 @@ namespace Fsel.Shared.Helpers
             return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
         }
 
+        public static EnumCourseLevel GetLevelAcaToLevelIELTS(this EnumCourseLevel courseLevel)
+        {
+            return s_levelMapping.FirstOrDefault(x => x.Value == courseLevel).Key;
+        }
+
         public static object GetEnumPlacementTestSkills()
         {
             var results = new List<object>();
@@ -211,6 +216,15 @@ namespace Fsel.Shared.Helpers
                 case EnumCourseLevel.C1:
                     return SendMailSetting.CourseC1Title;
 
+                case EnumCourseLevel.MS1:
+                    return SendMailSetting.CourseMS1Title;
+
+                case EnumCourseLevel.MS2:
+                    return SendMailSetting.CourseMS2Title;
+
+                case EnumCourseLevel.MS3:
+                    return SendMailSetting.CourseMS3Title;
+
                 default:
                     return string.Empty;
             }
@@ -246,6 +260,42 @@ namespace Fsel.Shared.Helpers
 
                 default:
                     return SendMailSetting.Mindset3;
+            }
+        }
+
+        public static string GetLevelPhoto(EnumCourseLevel courseLevel)
+        {
+            switch (courseLevel)
+            {
+                case EnumCourseLevel.A1:
+                    return SendMailSetting.A1Photo;
+
+                case EnumCourseLevel.A2:
+                    return SendMailSetting.A2Photo;
+
+                case EnumCourseLevel.B1:
+                    return SendMailSetting.B1Photo;
+
+                case EnumCourseLevel.B1Plus:
+                    return SendMailSetting.B1PlusPhoto;
+
+                case EnumCourseLevel.B2:
+                    return SendMailSetting.B2Photo;
+
+                case EnumCourseLevel.C1:
+                    return SendMailSetting.C1Photo;
+
+                case EnumCourseLevel.MS1:
+                    return SendMailSetting.MS1Photo;
+
+                case EnumCourseLevel.MS2:
+                    return SendMailSetting.MS2Photo;
+
+                case EnumCourseLevel.MS3:
+                    return SendMailSetting.MS3Photo;
+
+                default:
+                    return string.Empty;
             }
         }
     }

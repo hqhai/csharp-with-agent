@@ -12,7 +12,8 @@ using Fsel.Shared.Constants;
 
 namespace Fsel.Course.Lms.Api.Controllers.Cso
 {
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/cso/course")]
     [ApiController]
     public class CourseController : ControllerBase

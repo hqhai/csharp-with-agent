@@ -198,14 +198,14 @@ namespace Fsel.Shared.Helpers
 
         public static string ReplaceWord(this string? word)
         {
-            string pattern = "[‘’']";
+            string pattern = "[‘'’ʼ]";
             string replacement = "'";
             return word?.TrimHiddenChars().ToLower(CultureInfo.CurrentCulture).ReplaceWord(pattern, replacement) ?? string.Empty;
         }
 
         public static string TrimHiddenChars(this string? word)
         {
-            return word?.Trim(new char[] { ' ', '​', '\t', '.' }) ?? string.Empty;
+            return word?.Trim(new char[] { ' ', '​', '\t', '.', '\n', '\r' }) ?? string.Empty;
         }
 
         public static string ReplaceWord(this string? word, string pattern, string replacement)
