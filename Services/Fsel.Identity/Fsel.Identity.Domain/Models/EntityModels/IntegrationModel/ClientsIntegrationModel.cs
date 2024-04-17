@@ -20,7 +20,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
         public string? ParentEmail { get; set; }
         public EnumGender? ParentGender { get; set; }
         public Guid? SchoolId { get; set; }
-        public string? SchoolName { get; set; }
+        public Guid? LocationId { get; set; }
+        public DateTime? LastDate { get; set; }
         public string? PTLevel { get; set; }
         public IList<OrderIntegrationModel> OrderIntegration { get; set; } = new List<OrderIntegrationModel>();
     }

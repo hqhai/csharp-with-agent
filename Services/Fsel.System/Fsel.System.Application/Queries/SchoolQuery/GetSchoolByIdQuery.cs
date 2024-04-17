@@ -10,28 +10,28 @@ namespace Fsel.System.Application.Queries.SchoolQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetSchoolByIdQuery : IRequest<MethodResult<object>>
+    public class GetSchoolByIdsQuery : IRequest<MethodResult<IList<object>>>
     {
-        public Guid Id { get; set; }
+        public required IList<Guid> Ids { get; set; }
     }
 
-    public class GetSchoolByIdQueryHandler : IRequestHandler<GetSchoolByIdQuery, MethodResult<object>>
+    public class GetSchoolByIdsQueryHandler : IRequestHandler<GetSchoolByIdsQuery, MethodResult<IList<object>>>
     {
         private readonly ISchoolRepository _schoolRepository;
         private readonly IMapper _mapper;
 
-        public GetSchoolByIdQueryHandler(ISchoolRepository schoolRepository, IMapper mapper)
+        public GetSchoolByIdsQueryHandler(ISchoolRepository schoolRepository, IMapper mapper)
         {
             _schoolRepository = schoolRepository;
             _mapper = mapper;
         }
-        public async Task<MethodResult<object>> Handle(GetSchoolByIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<object>>> Handle(GetSchoolByIdsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<object>> methodResult = new MethodResult<IList<object>>();
 
             var schools = await _schoolRepository.Queryable
-                                                 .Where(x => x.Id == request.Id)
+                                                 .Where(x => request.Ids.Contains(x.Id))
                                                  .ToListAsync(cancellationToken);
             if (schools == null)
             {

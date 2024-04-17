@@ -8,12 +8,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Identity.Application.Services.InteractionService;
-    using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels.IntegrationModel;
@@ -32,17 +31,17 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
         private readonly IOrderService _orderService;
         private readonly IHumanRepository _humanRepository;
         private readonly ILmsCourseService _lmsCourseService;
-        private readonly IInteractionService _interactionService;
+        private readonly ISystemService _systemService;
 
         public LeadsIntegrationQueryHandler(IOrderService orderService,
                                             IHumanRepository humanRepository,
                                             ILmsCourseService lmsCourseService,
-                                            IInteractionService interactionService)
+                                            ISystemService systemService)
         {
             _orderService = orderService;
             _humanRepository = humanRepository;
             _lmsCourseService = lmsCourseService;
-            _interactionService = interactionService;
+            _systemService = systemService;
         }
         public async Task<MethodResult<PagingItemsModel<LeadsIntegrationModel>>> Handle(LeadsIntegrationQuery request, CancellationToken cancellationToken)
         {
@@ -99,27 +98,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var userPtTestIds = ptTestResults.Select(x => x.UserId).ToList();
             #endregion
 
-            #region Survey
-            var querySurvey = new GetSchollByQuestionSurveyQueryModel
-            {
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-            };
-            var schools = await _interactionService.GetSchoolByQuestion(querySurvey);
-            if (!schools.IsSuccessStatusCode)
-            {
-                methodResult.AddError(schools.Error);
-                return methodResult;
-            }
-            var schoolResults = schools.Content?.Result;
-            if (schoolResults == null)
-            {
-                methodResult.AddError(schools.Error);
-                return methodResult;
-            }
-            var userSchoolIds = schoolResults.Select(x => x.UserId).ToList();
-            #endregion
-
             #region Identity
             var users = await _humanRepository.Queryable
                                               .Include(x => x.User)
@@ -138,6 +116,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                   EnumGender = x.Gender,
                                                   Birthday = x.Birthday,
                                                   Address = x.Address,
+                                                  SchoolId = x.Student!.SchoolId,
                                                   ParentName = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.FullName,
                                                   ParentPhone = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.PhoneNumber,
                                                   ParentEmail = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Email,
@@ -154,20 +133,33 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             #region SetData
             // hợp list Id và lấy ra Id duy nhất
-            var listUserIds = userIdentityIds.Concat(userSchoolIds).Concat(userPtTestIds).Concat(userOrderIds).ToList();
+            var listUserIds = userIdentityIds.Concat(userPtTestIds).Concat(userOrderIds).ToList();
             var distinctUserIds = listUserIds.Distinct().ToList();
+
+            #region School
+            var schoolIds = users.Where(x => x.SchoolId.HasValue).Select(x => x.SchoolId!.Value).ToList();
+            var school = await _systemService.GetSchoolByIds(schoolIds);
+            var schoolResult = school.Content?.Result;
+            #endregion
+
+            #region LastTime
+            var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctUserIds);
+            var featureAccessTimeResult = featureAccessTime.Content?.Result;
+            #endregion
 
             // gán dữ liệu
             List<LeadsIntegrationModel> leadsIntegrations = new List<LeadsIntegrationModel>();
             foreach (var item in distinctUserIds)
             {
                 var user = users.FirstOrDefault(x => x.UserId == item);
-                var survey = schoolResults.FirstOrDefault(x => x.UserId == item);
+                var locationId = schoolResult?.FirstOrDefault(x => x.Id == user?.SchoolId)?.LocationId;
                 var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item);
                 var orderItems = orderResults.Where(x => x.UserId == item).ToList();
                 EnumIntegrationStatus status = EnumIntegrationStatus.Register;
-                var statusDetail = string.Empty;
+                var statusPT = string.Empty;
+                DateTime expireDate = default;
                 string courseLever = string.Empty;
+                var lastTime = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item)?.LastVisited;
                 if (orderItems.Count != 0)
                 {
                     foreach (var orderItem in orderItems)
@@ -175,7 +167,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         if (orderItem.IsTrial)
                         {
                             status = EnumIntegrationStatus.Trial;
-                            statusDetail = orderItem.ExpireDate.ToString();
+                            expireDate = orderItem.ExpireDate ?? default;
                             courseLever = orderItem.CourseName.ToString() ?? string.Empty;
                         }
                         else
@@ -189,11 +181,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     status = EnumIntegrationStatus.Placement;
                     if (ptTestResult.Status == "Done")
                     {
-                        statusDetail = "Done";
+                        statusPT = "Done";
                     }
                     else
                     {
-                        statusDetail = "Process";
+                        statusPT = "Process";
                     }
                 }
 
@@ -216,6 +208,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                      EnumGender = x.Gender,
                                                      Birthday = x.Birthday,
                                                      Address = x.Address,
+                                                     SchoolId = x.Student!.SchoolId,
                                                      ParentName = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.FullName,
                                                      ParentPhone = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.PhoneNumber,
                                                      ParentEmail = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Email,
@@ -226,22 +219,25 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 var leadsIntegration = new LeadsIntegrationModel
                 {
                     UserId = item,
-                    FullName = user.FullName,
-                    UserName = user.UserName,
-                    StudentEmail = user.StudentEmail,
-                    StudentPhone = user.StudentPhone,
-                    EnumGender = user.EnumGender,
-                    Birthday = user.Birthday,
-                    Address = user.Address,
-                    ParentName = user.ParentName,
-                    ParentPhone = user.ParentPhone,
-                    ParentEmail = user.ParentEmail,
-                    ParentGender = user.ParentGender,
+                    FullName = user?.FullName,
+                    UserName = user?.UserName,
+                    StudentEmail = user?.StudentEmail,
+                    StudentPhone = user?.StudentPhone,
+                    EnumGender = user?.EnumGender,
+                    Birthday = user?.Birthday,
+                    Address = user?.Address,
+                    ParentName = user?.ParentName,
+                    ParentPhone = user?.ParentPhone,
+                    ParentEmail = user?.ParentEmail,
+                    ParentGender = user?.ParentGender,
                     Status = status,
-                    StatusDetail = statusDetail,
-                    SchoolName = survey?.Name,
-                    PTLever = ptTestResult?.Level,
-                    CourseLever = courseLever
+                    StatusPT = statusPT,
+                    ExpireDate = expireDate == default ? null : expireDate,
+                    SchoolId = user?.SchoolId,
+                    LocationId = locationId,
+                    PTLevel = ptTestResult?.Level,
+                    CourseLever = courseLever,
+                    LastDate = lastTime
                 };
                 leadsIntegrations.Add(leadsIntegration);
             }
