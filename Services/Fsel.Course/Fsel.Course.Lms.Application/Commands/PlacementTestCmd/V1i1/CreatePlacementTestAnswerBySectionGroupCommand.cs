@@ -262,6 +262,7 @@ AppSetting appSetting)
 
             var param = new SendStudentPTTemplateModel
             {
+                FullName = student.Human?.FullName,
                 CurrentCourse = currentCourseHtml,
                 CourseInfos = coursesInfo,
                 ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
