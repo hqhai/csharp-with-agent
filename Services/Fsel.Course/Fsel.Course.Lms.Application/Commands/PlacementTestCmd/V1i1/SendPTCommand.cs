@@ -45,13 +45,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
         private async Task SendStudentPlacementTest(EnumCourseLevel courseLevel, string? email, int age, CancellationToken cancellationToken)
         {
-            var suggestLevel = SendMailHelper.GetPreviousEnumValue(courseLevel);
+            var currentLevel = SendMailHelper.GetPreviousEnumValue(courseLevel);
 
-            var currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(suggestLevel), cancellationToken);
+            var currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(currentLevel), cancellationToken);
 
             var courseInfoHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CourseInfo, cancellationToken);
 
-            var suggestLevels = SendMailHelper.GetSuggestLevels(suggestLevel, age);
+            var suggestLevels = SendMailHelper.GetSuggestLevels(currentLevel, age);
 
             var teachersHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeachersInFo, cancellationToken);
             var pathTeachersBios = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeacherBios);
