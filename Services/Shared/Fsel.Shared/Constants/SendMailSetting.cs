@@ -66,8 +66,8 @@ namespace Fsel.Shared.Constants
         public const string CourseMS2Title = ": Với trình độ này bạn có thể sử dụng ngôn ngữ khá thành thạo. Có thể sử dụng tốt trong các tình huống phức tạp và đặc biệt là trong các tình huống quen thuộc.";
         public const string CourseMS3Title = ": Với trình độ này bạn có thể hoàn toàn nắm vững khả năng sử dụng ngôn ngữ, nhưng đôi khi có những sự không chính xác, không phù hợp, không hiểu trong một số tình huồng. Sử dụng tốt ngôn ngữ phức tạp và hiểu những lí lẽ chuyên sâu.";
 
-        public const string A1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/A1Photo_1713325178.png";
-        public const string A2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/A2Photo_1713325201.png";
+        public const string A1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/A1Photo_1713352794.png";
+        public const string A2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/A2Photo_1713352809.png";
         public const string B1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B1Photo_1713325214.png";
         public const string B1PlusPhoto = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B1PlusPhoto_1713325230.png";
         public const string B2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B2Photo_1713325243.png";
