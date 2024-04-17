@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             var courseInfoHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CourseInfo, cancellationToken);
 
-            var suggestLevels = SendMailHelper.GetSuggestLevels(courseLevel, age);
+            var suggestLevels = SendMailHelper.GetSuggestLevels(suggestLevel, age);
 
             var teachersHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeachersInFo, cancellationToken);
             var pathTeachersBios = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeacherBios);
