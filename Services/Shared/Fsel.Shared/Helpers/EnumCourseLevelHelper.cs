@@ -230,10 +230,13 @@ namespace Fsel.Shared.Helpers
             }
         }
 
-        public static string GetCourseInfo(EnumCourseLevel courseLevel)
+        public static string GetCourseInfo(EnumCourseLevel? courseLevel)
         {
             switch (courseLevel)
             {
+                case null:
+                    return SendMailSetting.CoursePreA1;
+
                 case EnumCourseLevel.A1:
                     return SendMailSetting.CourseA1;
 

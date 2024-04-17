@@ -35,6 +35,7 @@ namespace Fsel.Shared.Constants
         public const string Skill = "Resources//MailTemplates//Skill.html";
         public const string CompareSkill = "Resources//MailTemplates//CompareSkill.html";
         public const string TeachersInFo = "Resources//MailTemplates//TeachersInfo.html";
+        public const string CoursePreA1 = "Resources//MailTemplates//CoursePreA1.html";
         public const string CourseA1 = "Resources//MailTemplates//CourseA1.html";
         public const string CourseA2 = "Resources//MailTemplates//CourseA2.html";
         public const string CourseB1 = "Resources//MailTemplates//CourseB1.html";
