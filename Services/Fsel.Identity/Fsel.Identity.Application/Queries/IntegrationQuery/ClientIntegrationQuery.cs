@@ -8,12 +8,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Identity.Application.Services.InteractionService;
-    using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels.IntegrationModel;
@@ -32,17 +31,17 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
         private readonly IOrderService _orderService;
         private readonly IHumanRepository _humanRepository;
         private readonly ILmsCourseService _lmsCourseService;
-        private readonly IInteractionService _interactionService;
+        private readonly ISystemService _systemService;
 
         public ClientIntegrationQueryHandler(IOrderService orderService,
                                             IHumanRepository humanRepository,
                                             ILmsCourseService lmsCourseService,
-                                            IInteractionService interactionService)
+                                            ISystemService systemService)
         {
             _orderService = orderService;
             _humanRepository = humanRepository;
             _lmsCourseService = lmsCourseService;
-            _interactionService = interactionService;
+            _systemService = systemService;
         }
         public async Task<MethodResult<PagingItemsModel<ClientsIntegrationModel>>> Handle(ClientIntegrationQuery request, CancellationToken cancellationToken)
         {
@@ -99,27 +98,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var userPtTestIds = ptTestResults.Select(x => x.UserId).ToList();
             #endregion
 
-            #region Survey
-            var querySurvey = new GetSchollByQuestionSurveyQueryModel
-            {
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-            };
-            var schools = await _interactionService.GetSchoolByQuestion(querySurvey);
-            if (!schools.IsSuccessStatusCode)
-            {
-                methodResult.AddError(schools.Error);
-                return methodResult;
-            }
-            var schoolResults = schools.Content?.Result;
-            if (schoolResults == null)
-            {
-                methodResult.AddError(schools.Error);
-                return methodResult;
-            }
-            var userSchoolIds = schoolResults.Select(x => x.UserId).ToList();
-            #endregion
-
             #region Identity
             var users = await _humanRepository.Queryable
                                               .Include(x => x.User)
@@ -138,6 +116,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                   EnumGender = x.Gender,
                                                   Birthday = x.Birthday,
                                                   Address = x.Address,
+                                                  SchoolId = x.Student!.SchoolId,
                                                   ParentName = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.FullName,
                                                   ParentPhone = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.PhoneNumber,
                                                   ParentEmail = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Email,
@@ -153,18 +132,30 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             #endregion
 
             #region SetData
-            // hợp list Id và lấy ra Id duy nhất
-            var listUserIds = userIdentityIds.Concat(userSchoolIds).Concat(userPtTestIds).Concat(userOrderIds).ToList();
+            // hợp list UserId và lấy ra UserId duy nhất
+            var listUserIds = userIdentityIds.Concat(userPtTestIds).Concat(userOrderIds).ToList();
             var distinctUserIds = listUserIds.Distinct().ToList();
+
+            #region School
+            var schoolIds = users.Where(x => x.SchoolId.HasValue).Select(x => x.SchoolId!.Value).ToList();
+            var school = await _systemService.GetSchoolByIds(schoolIds);
+            var schoolResult = school.Content?.Result;
+            #endregion
+
+            #region LastTime
+            var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctUserIds);
+            var featureAccessTimeResult = featureAccessTime.Content?.Result;
+            #endregion
 
             // gán dữ liệu
             List<ClientsIntegrationModel> leadsIntegrations = new List<ClientsIntegrationModel>();
             foreach (var item in distinctUserIds)
             {
                 var user = users.FirstOrDefault(x => x.UserId == item);
-                var survey = schoolResults.FirstOrDefault(x => x.UserId == item);
                 var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item);
                 var orderItems = orderResults.Where(x => x.UserId == item).ToList();
+                var locationId = schoolResult?.FirstOrDefault(x => x.Id == user?.SchoolId)?.LocationId;
+                var lastTime = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item)?.LastVisited;
                 if (user == null)
                 {
                     user = await _humanRepository.Queryable
@@ -174,7 +165,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                  .ThenInclude(x => x.Parent)
                                                  .ThenInclude(x => x!.Human)
                                                  .Where(x => x.UserId == item)
-                                                 .Select(x => new ClientsIntegrationModel
+                                                 .Select(x =>
+                                                 new ClientsIntegrationModel
                                                  {
                                                      UserId = x.UserId ?? default,
                                                      FullName = x.FullName,
@@ -191,9 +183,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                      ParentGender = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Gender
                                                  }).FirstOrDefaultAsync(cancellationToken);
                 }
-
-                // lấy tên trường
-
 
                 List<OrderIntegrationModel> orderIntegrations = new List<OrderIntegrationModel>();
                 foreach (var order in orderItems)
@@ -237,9 +226,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     ParentPhone = user?.ParentPhone,
                     ParentEmail = user?.ParentEmail,
                     ParentGender = user?.ParentGender,
-                    SchoolName = survey?.Name,
+                    LocationId = locationId,
+                    SchoolId = user?.SchoolId,
                     PTLevel = ptTestResult?.Level,
-                    OrderIntegration = orderIntegrations
+                    OrderIntegration = orderIntegrations,
+                    LastDate = lastTime
                 };
                 leadsIntegrations.Add(leadsIntegration);
             }
