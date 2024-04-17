@@ -74,5 +74,78 @@ namespace Fsel.Shared.Helpers
                 return (Green, SendMailSetting.Increase);
             }
         }
+
+        public static string GetInfoCourse(EnumCourseType currentValue)
+        {
+            if (currentValue == EnumCourseType.Academic)
+            {
+                return SendMailSetting.AcademicInfo;
+            }
+            else
+            {
+                return SendMailSetting.IELTInfo;
+            }
+        }
+
+        public static EnumCourseLevel GetPreviousEnumValue(EnumCourseLevel currentValue)
+        {
+            int enumCount = Enum.GetValues(typeof(EnumCourseLevel)).Length;
+            int currentValueIndex = (int)currentValue;
+            if (currentValueIndex == 0)
+            {
+                return currentValue;
+            }
+            int previousValueIndex = (currentValueIndex - 1) % enumCount;
+            EnumCourseLevel previousValue = (EnumCourseLevel)previousValueIndex;
+            return previousValue;
+        }
+
+        public static IList<EnumCourseLevel> GetSuggestLevels(EnumCourseLevel currentValue, int age)
+        {
+            var suggestLevels = new List<EnumCourseLevel>();
+            switch (currentValue)
+            {
+                case EnumCourseLevel.A1:
+                    suggestLevels.Add(EnumCourseLevel.A2);
+                    break;
+
+                case EnumCourseLevel.A2:
+                    suggestLevels.Add(EnumCourseLevel.B1);
+                    break;
+
+                case EnumCourseLevel.B1:
+                    if (age >= 14)
+                    {
+                        suggestLevels.Add(EnumCourseLevel.MS1);
+                    }
+                    suggestLevels.Add(EnumCourseLevel.B1Plus);
+                    break;
+
+                case EnumCourseLevel.B1Plus:
+                    if (age >= 14)
+                    {
+                        suggestLevels.Add(EnumCourseLevel.MS2);
+                    }
+                    suggestLevels.Add(EnumCourseLevel.B2);
+                    break;
+
+                case EnumCourseLevel.B2:
+                    if (age >= 14)
+                    {
+                        suggestLevels.Add(EnumCourseLevel.MS3);
+                    }
+                    suggestLevels.Add(EnumCourseLevel.C1);
+                    break;
+
+                case EnumCourseLevel.C1:
+                    if (age >= 14)
+                    {
+                        suggestLevels.Add(EnumCourseLevel.MS3);
+                    }
+                    suggestLevels.Add(EnumCourseLevel.C1);
+                    break;
+            }
+            return suggestLevels;
+        }
     }
 }
