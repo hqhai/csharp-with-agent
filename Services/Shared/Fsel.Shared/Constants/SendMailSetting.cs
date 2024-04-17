@@ -50,26 +50,29 @@ namespace Fsel.Shared.Constants
 
         public const string TeacherBios = "Resources//TeacherBios.json";
 
-        public const string CourseA1Title = "là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>";
+        public const string CourseA1Title = " là trình độ tiếng Anh Beginner/sơ cấp trong theo tiêu chuẩn của <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>";
 
-        public const string CourseA2Title = "là cấp độ Anh ngữ thứ hai trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể truyền đạt những nhu cầu đơn giản và cơ bản.";
+        public const string CourseA2Title = " là cấp độ Anh ngữ thứ hai trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể truyền đạt những nhu cầu đơn giản và cơ bản.";
 
-        public const string CourseB1Title = "là cấp độ Anh ngữ thứ ba trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên đã vượt qua mức cơ bản nhưng họ vẫn chưa thể làm việc hay học tập hoàn toàn bằng tiếng Anh.";
+        public const string CourseB1Title = " là cấp độ Anh ngữ thứ ba trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên đã vượt qua mức cơ bản nhưng họ vẫn chưa thể làm việc hay học tập hoàn toàn bằng tiếng Anh.";
 
-        public const string CourseB1PlusTitle = "cao hơn trình độ B1 trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên đã vượt qua mức cơ bản nhưng họ vẫn chưa thể làm việc hay học tập hoàn toàn bằng tiếng Anh.";
+        public const string CourseB1PlusTitle = " cao hơn trình độ B1 trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên đã vượt qua mức cơ bản nhưng họ vẫn chưa thể làm việc hay học tập hoàn toàn bằng tiếng Anh.";
 
-        public const string CourseB2Title = "là cấp độ Anh ngữ thứ tư trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể hoạt động độc lập trong nhiều môi trường học thuật và công việc bằng tiếng Anh, dù ở phạm vi sắc thái và độ chính xác hạn chế.";
+        public const string CourseB2Title = " là cấp độ Anh ngữ thứ tư trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể hoạt động độc lập trong nhiều môi trường học thuật và công việc bằng tiếng Anh, dù ở phạm vi sắc thái và độ chính xác hạn chế.";
 
-        public const string CourseC1Title = "là cấp độ Anh ngữ thứ năm trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể hoạt động độc lập với một độ chính xác cao trong nhiều chủ đề đa dạng và trong gần như mọi hoàn cảnh mà không cần chuẩn bị trước.";
+        public const string CourseC1Title = " là cấp độ Anh ngữ thứ năm trong <a href=\"https://www.efset.org/vi/cefr/\"> Khung tham chiếu chung Châu Âu (CEFR)</a>. Ở trình độ này, học viên có thể hoạt động độc lập với một độ chính xác cao trong nhiều chủ đề đa dạng và trong gần như mọi hoàn cảnh mà không cần chuẩn bị trước.";
+        public const string CourseMS1Title = ": Với trình độ này bạn có thể sử dụng một phần ngôn ngữ và nắm được trong phần lớn các tình huống mặc dù thường xuyên mắc lỗi. Có thể sử dụng tốt ngôn ngữ trong lĩnh vực riêng quen thuộc của mình.";
+        public const string CourseMS2Title = ": Với trình độ này bạn có thể sử dụng ngôn ngữ khá thành thạo. Có thể sử dụng tốt trong các tình huống phức tạp và đặc biệt là trong các tình huống quen thuộc.";
+        public const string CourseMS3Title = ": Với trình độ này bạn có thể hoàn toàn nắm vững khả năng sử dụng ngôn ngữ, nhưng đôi khi có những sự không chính xác, không phù hợp, không hiểu trong một số tình huồng. Sử dụng tốt ngôn ngữ phức tạp và hiểu những lí lẽ chuyên sâu.";
 
-        public const string A1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/A1Photo_1713257418.png";
-        public const string A2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/A2Photo_1713257432.png";
-        public const string B1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B1Photo_1713257450.png";
-        public const string B1PlusPhoto = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B1PlusPhoto_1713257462.png";
-        public const string B2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B2Photo_1713257474.png";
-        public const string C1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/C1Photo_1713257485.png";
-        public const string MS1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS1Photo_1713257496.png";
-        public const string MS2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS2Photo_1713257508.png";
-        public const string MS3Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS3Photo_1713257519.png";
+        public const string A1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/A1Photo_1713325178.png";
+        public const string A2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/A2Photo_1713325201.png";
+        public const string B1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B1Photo_1713325214.png";
+        public const string B1PlusPhoto = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B1PlusPhoto_1713325230.png";
+        public const string B2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/B2Photo_1713325243.png";
+        public const string C1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/C1Photo_1713325257.png";
+        public const string MS1Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS1Photo_1713325276.png";
+        public const string MS2Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS2Photo_1713325287.png";
+        public const string MS3Photo = "https://s3-sgn10.fptcloud.com/fsel-public/Images/MS3Photo_1713325299.png";
     }
 }

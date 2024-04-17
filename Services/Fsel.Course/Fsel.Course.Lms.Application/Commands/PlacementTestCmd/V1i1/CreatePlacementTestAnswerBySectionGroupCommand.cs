@@ -221,13 +221,13 @@ AppSetting appSetting)
 
         private async Task SendStudentPlacementTest(EnumCourseLevel courseLevel, StudentModel student, int age, CancellationToken cancellationToken)
         {
-            var suggestLevel = GetPreviousEnumValue(courseLevel);
+            var suggestLevel = SendMailHelper.GetPreviousEnumValue(courseLevel);
 
             var currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(suggestLevel), cancellationToken);
 
             var courseInfoHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CourseInfo, cancellationToken);
 
-            var suggestLevels = GetSuggestLevels(courseLevel, age);
+            var suggestLevels = SendMailHelper.GetSuggestLevels(courseLevel, age);
 
             var teachersHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeachersInFo, cancellationToken);
             var pathTeachersBios = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeacherBios);
@@ -240,99 +240,38 @@ AppSetting appSetting)
                 var teachers = listTeachersBios?.Where(p => p.TeacherLevels != null && p.TeacherLevels.Any(x => x == suggestLevels[i])).ToList();
                 var teacherInfo = string.Empty;
 
-                foreach (var item in teachers)
+                for (int j = 0; j < teachers?.Count; j++)
                 {
-                    var teacherInfoHtml = string.Format(CultureInfo.InvariantCulture, teachersHtml, suggestLevels[i], item.AvatarPath, item.FullName, item.Nationality, item.Certifications, item.Experience, item.Strength);
-                    teacherInfo += teacherInfoHtml;
+                    if (j == 0)
+                    {
+                        var teacherInfoHtml = string.Format(CultureInfo.InvariantCulture, teachersHtml, null, suggestLevels[i], teachers[j].AvatarPath, teachers[j].FullName, teachers[j].Nationality, teachers[j].Certifications, teachers[j].Experience);
+                        teacherInfo += teacherInfoHtml;
+                    }
+                    else
+                    {
+                        var teacherInfoHtml = string.Format(CultureInfo.InvariantCulture, teachersHtml, SendMailSetting.Display, suggestLevels[i], teachers[j].AvatarPath, teachers[j].FullName, teachers[j].Nationality, teachers[j].Certifications, teachers[j].Experience);
+                        teacherInfo += teacherInfoHtml;
+                    }
                 }
+                var courseType = EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i]);
 
-                var courseInfo = string.Format(CultureInfo.InvariantCulture, courseInfoHtml, i + 1, suggestLevels[i], suggestLevels[i], EnumCourseLevelHelper.GetCourseTitle(suggestLevels[i]), EnumCourseLevelHelper.GetLevelPhoto(suggestLevels[i]), EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i]), GetInfoCourse(EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i])), teacherInfo);
+                var courseInfo = string.Format(CultureInfo.InvariantCulture, courseInfoHtml, i + 1, suggestLevels[i], suggestLevels[i].GetDescription(), EnumCourseLevelHelper.GetCourseTitle(suggestLevels[i]), EnumCourseLevelHelper.GetLevelPhoto(suggestLevels[i]), courseType == EnumCourseType.Academic ? EnumCourseType.Academic.ToString() : EnumCourseType.Ielts.ToString().ToUpper(CultureInfo.CurrentCulture), SendMailHelper.GetInfoCourse(EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i])), teacherInfo);
+
+                coursesInfo += courseInfo;
             }
 
             var param = new SendStudentPTTemplateModel
             {
-                CurrentCourse = currentCourseHtml
+                CurrentCourse = currentCourseHtml,
+                CourseInfos = coursesInfo,
             };
 
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
             var sendResult = new MethodResult<bool>();
             if (!string.IsNullOrEmpty(student.Human?.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT }, cancellationToken).ConfigureAwait(false);
             }
-        }
-
-        public static string GetInfoCourse(EnumCourseType currentValue)
-        {
-            if (currentValue == EnumCourseType.Academic)
-            {
-                return SendMailSetting.AcademicInfo;
-            }
-            else
-            {
-                return SendMailSetting.IELTInfo;
-            }
-        }
-
-        public static EnumCourseLevel GetPreviousEnumValue(EnumCourseLevel currentValue)
-        {
-            int enumCount = Enum.GetValues(typeof(EnumCourseLevel)).Length;
-            int currentValueIndex = (int)currentValue;
-            if (currentValueIndex == 0)
-            {
-                return currentValue;
-            }
-            int previousValueIndex = (currentValueIndex - 1) % enumCount;
-            EnumCourseLevel previousValue = (EnumCourseLevel)previousValueIndex;
-            return previousValue;
-        }
-
-        public static IList<EnumCourseLevel> GetSuggestLevels(EnumCourseLevel currentValue, int age)
-        {
-            var suggestLevels = new List<EnumCourseLevel>();
-            switch (currentValue)
-            {
-                case EnumCourseLevel.A1:
-                    suggestLevels.Add(EnumCourseLevel.A2);
-                    break;
-
-                case EnumCourseLevel.A2:
-                    suggestLevels.Add(EnumCourseLevel.B1);
-                    break;
-
-                case EnumCourseLevel.B1:
-                    if (age >= 14)
-                    {
-                        suggestLevels.Add(EnumCourseLevel.MS1);
-                    }
-                    suggestLevels.Add(EnumCourseLevel.B1Plus);
-                    break;
-
-                case EnumCourseLevel.B1Plus:
-                    if (age >= 14)
-                    {
-                        suggestLevels.Add(EnumCourseLevel.MS2);
-                    }
-                    suggestLevels.Add(EnumCourseLevel.B2);
-                    break;
-
-                case EnumCourseLevel.B2:
-                    if (age >= 14)
-                    {
-                        suggestLevels.Add(EnumCourseLevel.MS3);
-                    }
-                    suggestLevels.Add(EnumCourseLevel.C1);
-                    break;
-
-                case EnumCourseLevel.C1:
-                    if (age >= 14)
-                    {
-                        suggestLevels.Add(EnumCourseLevel.MS3);
-                    }
-                    suggestLevels.Add(EnumCourseLevel.C1);
-                    break;
-            }
-            return suggestLevels;
         }
 
         private static PlacementTestResult GetPlacementTestResult(IList<SkillScores>? skillScores, PlacementTestResult placementTestResult)

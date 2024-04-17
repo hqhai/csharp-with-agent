@@ -217,13 +217,13 @@ namespace Fsel.Shared.Helpers
                     return SendMailSetting.CourseC1Title;
 
                 case EnumCourseLevel.MS1:
-                    return SendMailSetting.CourseC1Title;
+                    return SendMailSetting.CourseMS1Title;
 
                 case EnumCourseLevel.MS2:
-                    return SendMailSetting.CourseC1Title;
+                    return SendMailSetting.CourseMS2Title;
 
                 case EnumCourseLevel.MS3:
-                    return SendMailSetting.CourseC1Title;
+                    return SendMailSetting.CourseMS3Title;
 
                 default:
                     return string.Empty;
