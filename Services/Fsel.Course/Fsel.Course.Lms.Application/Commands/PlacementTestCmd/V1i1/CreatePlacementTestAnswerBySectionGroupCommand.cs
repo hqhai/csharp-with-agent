@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 {
+    using System;
     using System.Globalization;
     using System.IO;
     using System.Threading;
@@ -203,7 +204,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
                     if (isLockPT)
                     {
-                        await SendStudentPlacementTest(currentLevel ?? default, student, placementTestResult, cancellationToken);
+                        await SendStudentPlacementTest(currentLevel ?? default, student, age, cancellationToken);
                     }
                     return isLockPT;
                 }
@@ -211,63 +212,59 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             return default;
         }
 
-        private async Task SendStudentPlacementTest(EnumCourseLevel courseLevel, StudentModel student, PlacementTestResult placementTestResult, CancellationToken cancellationToken)
+        private async Task SendStudentPlacementTest(EnumCourseLevel courseLevel, StudentModel student, int age, CancellationToken cancellationToken)
         {
-            var skillScoresHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill, cancellationToken);
+            var suggestLevel = SendMailHelper.GetPreviousEnumValue(courseLevel);
 
-            var courseInfoHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(courseLevel), cancellationToken);
+            var currentCourseHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, EnumCourseLevelHelper.GetCourseInfo(suggestLevel), cancellationToken);
+
+            var courseInfoHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.CourseInfo, cancellationToken);
+
+            var suggestLevels = SendMailHelper.GetSuggestLevels(courseLevel, age);
 
             var teachersHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeachersInFo, cancellationToken);
-
             var pathTeachersBios = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.TeacherBios);
             var listTeachersBios = ConvertHelper.DeserializeFromFilePath<IList<CourseTeacherModel>>(pathTeachersBios);
 
-            var teachers = listTeachersBios?.Where(p => p.TeacherLevels != null && p.TeacherLevels.Any(x => x == courseLevel)).ToList();
-            var teacherInfo = string.Empty;
+            string coursesInfo = string.Empty;
 
-            for (int i = 0; i < teachers?.Count; i++)
+            for (int i = 0; i < suggestLevels.Count; i++)
             {
-                var teacher = string.Empty;
-                if (i > 0)
-                {
-                    teacher = string.Format(CultureInfo.InvariantCulture, teachersHtml, null, teachers[i].AvatarPath, teachers[i].FullName, teachers[i].Nationality, teachers[i].Deggree, teachers[i].Experience);
-                }
-                else
-                {
-                    teacher = string.Format(CultureInfo.InvariantCulture, teachersHtml, SendMailSetting.Display, teachers[i].AvatarPath, teachers[i].FullName, teachers[i].Nationality, teachers[i].Deggree, teachers[i].Experience);
-                }
-                teacherInfo += teacher;
-            }
+                var teachers = listTeachersBios?.Where(p => p.TeacherLevels != null && p.TeacherLevels.Any(x => x == suggestLevels[i])).ToList();
+                var teacherInfo = string.Empty;
 
-            var skillsScore = string.Empty;
-            if (placementTestResult.SkillScores != null)
-            {
-                foreach (var item in placementTestResult.SkillScores)
+                for (int j = 0; j < teachers?.Count; j++)
                 {
-                    var (color, skillName, icon) = SendMailHelper.ConvertEnum(item.Skill);
-                    var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, item.Percent, item.Percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - item.Percent, item.Percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, item.Percent + "%");
-                    skillsScore += html;
+                    if (j == 0)
+                    {
+                        var teacherInfoHtml = string.Format(CultureInfo.InvariantCulture, teachersHtml, null, suggestLevels[i], teachers[j].AvatarPath, teachers[j].FullName, teachers[j].Nationality, teachers[j].Certifications, teachers[j].Experience);
+                        teacherInfo += teacherInfoHtml;
+                    }
+                    else
+                    {
+                        var teacherInfoHtml = string.Format(CultureInfo.InvariantCulture, teachersHtml, SendMailSetting.Display, suggestLevels[i], teachers[j].AvatarPath, teachers[j].FullName, teachers[j].Nationality, teachers[j].Certifications, teachers[j].Experience);
+                        teacherInfo += teacherInfoHtml;
+                    }
                 }
+                var courseType = EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i]);
+
+                var courseInfo = string.Format(CultureInfo.InvariantCulture, courseInfoHtml, i + 1, suggestLevels[i], suggestLevels[i].GetDescription(), EnumCourseLevelHelper.GetCourseTitle(suggestLevels[i]), EnumCourseLevelHelper.GetLevelPhoto(suggestLevels[i]), courseType == EnumCourseType.Academic ? EnumCourseType.Academic.ToString() : EnumCourseType.Ielts.ToString().ToUpper(CultureInfo.CurrentCulture), SendMailHelper.GetInfoCourse(EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i])), teacherInfo);
+
+                coursesInfo += courseInfo;
             }
 
             var param = new SendStudentPTTemplateModel
             {
-                FullName = student.Human?.FullName,
-                CourseLevel = courseLevel.GetDescription(),
-                SkillScores = skillsScore,
-                CourseInfo = courseInfoHtml,
-                CourseTitle = EnumCourseLevelHelper.GetCourseTitle(courseLevel),
-                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
-                TeachersInfo = teacherInfo
+                CurrentCourse = currentCourseHtml,
+                CourseInfos = coursesInfo,
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
             };
-
-            param.CourseTitleDisplay = string.IsNullOrEmpty(param.CourseTitle) ? SendMailSetting.Display : null;
 
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
             var sendResult = new MethodResult<bool>();
             if (!string.IsNullOrEmpty(student.Human?.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT }, cancellationToken).ConfigureAwait(false);
             }
         }
 
