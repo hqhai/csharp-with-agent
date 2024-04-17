@@ -255,6 +255,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             var param = new SendStudentPTTemplateModel
             {
+                FullName = student.Human?.FullName,
                 CurrentCourse = currentCourseHtml,
                 CourseInfos = coursesInfo,
                 ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
