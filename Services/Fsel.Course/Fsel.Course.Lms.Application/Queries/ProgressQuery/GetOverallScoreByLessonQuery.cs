@@ -66,7 +66,10 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
                 return methodResult;
             }
-            var videoDuplicateIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Where(x => !x.IsDeleted).GroupBy(x => x.VideoId)
+
+            var listVideoIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Where(x => !x.IsDeleted).Select(x => x.VideoId).AsQueryable();
+
+            var videoDuplicateIds = listVideoIds.GroupBy(x => x)
                 .Select(x => new
                 {
                     Id = x.Key,

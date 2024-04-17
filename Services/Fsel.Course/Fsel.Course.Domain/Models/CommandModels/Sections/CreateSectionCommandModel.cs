@@ -21,7 +21,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
         public IList<CreateQuestionCommandModel>? Questions { get; set; }
         public IList<CreateSectionTimeCodeCommandModel>? SectionTimeCodes { get; set; }
 
-        public MockTestAISettingModel? MockTestAISetting { get; set; }
+        public IList<MockTestAISettingModel>? MockTestAISettings { get; set; }
 
     }
 
@@ -38,5 +38,21 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
         public double? SettingPresence { get; set; }
         public string? Task { get; set; }
         public IList<MockTestPromptModel>? Prompts { get; set; }
+
+        public IList<MockTestAICriteriaSettingModel>? MockTestAICriteriaSettings { get; set; }
+    }
+
+    public class MockTestAICriteriaSettingModel
+    {
+        public string? SystemRoleAlConfig { get; set; }
+
+        public string? PromptStr { get; set; }
+
+        public IList<MockTestPromptModel>? Prompts { get; set; }
+
+        public Guid? MockTestAISettingId { get; set; }
+
+        public EnumMockTestAIType CriteriaName { get; set; }
+
     }
 }

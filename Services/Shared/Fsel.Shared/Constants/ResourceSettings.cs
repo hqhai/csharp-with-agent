@@ -31,12 +31,16 @@ namespace Fsel.Shared.Constants
         public const string StudentTagName = "Resources//StudentTagName.json";
         public const string AvatarImage = "Resources//AvatarImage.json";
         public const string TokenConfig = "Resources//TokenConfig.json";
-        public const string PrivateKeyUrBox = "Resources//UrBox//private_key_rsa";
+        public const string PrivateKeyDevUrBox = "Resources//UrBox//Development//private_key_rsa";
+        public const string PrivateKeyProdUrBox = "Resources//UrBox//Production//private_key_rsa";
         public const string I18NCredentialsFilePath = "Resources//file-i18n.json";
 
         public const string BandScoreFileName = "Resources//BandScores.json";
         public const string LeaderBoardPercentFileName = "Resources//LeaderBoardScorePercentage.json";
         public const string Payoo = "Resources//Payoo.xml";
+        public const string IELTDescription = "Resources//IELTDescription.json";
+
+        public const string ChatbotUnitInfo = "Resources//Chatbots//UnitInfo.xml";
         public const string AppStore = "Resources//AppStore//PrivateKey.txt";
     }
 }

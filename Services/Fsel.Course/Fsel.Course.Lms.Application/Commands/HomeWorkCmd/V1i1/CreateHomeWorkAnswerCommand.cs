@@ -48,6 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly ISystemService _systemService;
         private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly IQuestionRepository _questionRepository;
+        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly ILogger<object> _logger;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
@@ -62,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             ISystemService systemService,
             FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
             IQuestionRepository questionRepository,
+            CreateTokenHistoryPublisher createTokenHistoryPublisher,
             ILogger<object> logger
             )
         {
@@ -77,6 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _systemService = systemService;
             _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
             _questionRepository = questionRepository;
+            _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _logger = logger;
         }
 
@@ -139,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 return methodResult;
             }
 
-            var methodHomeWork = await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, course.CourseType, cancellationToken);
+            var methodHomeWork = await UpdateHomeWorkResult(homeWorkResult, request.IsSubmit, course.CourseType, student, cancellationToken);
             if (!methodHomeWork.IsOK)
             {
                 methodResult.AddErrorBadRequest(methodHomeWork.ErrorMessages);
@@ -200,7 +203,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return methodResult;
         }
 
-        private async Task<long> GetToken(EnumSubmissionCount submissionCount, EnumCourseType courseType)
+        private async Task<long> GetToken(EnumSubmissionCount? submissionCount, EnumCourseType courseType)
         {
             var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
             {
@@ -225,7 +228,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return homeWorkAnswer;
         }
 
-        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, bool isSubmit, EnumCourseType courseType, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> UpdateHomeWorkResult(HomeWorkResult? homeWorkResult, bool isSubmit, EnumCourseType courseType, StudentModel student, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(homeWorkResult);
             var methodResult = new MethodResult<bool>();
@@ -259,6 +262,23 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     }
 
                     var tokensAchieved = await UpdateHomeWorkAnswers(homeWorkResult, isHomeWorkDone) * token;
+                    if (tokensAchieved > 0)
+                    {
+                        var tokenHistorys = new List<TokenHistoryQueueModel>
+                        {
+                            new TokenHistoryQueueModel
+                            {
+                                ObjectId = homeWorkResult.Id,
+                                VolatileToken = tokensAchieved,
+                                Feature = EnumTokenFeature.Learn,
+                                Mission = homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit ? EnumTokenMission.HomeworkFirstSubmit : EnumTokenMission.HomeworkSecondSubmit,
+                                Type = EnumTokenHistoryType.Recevived,
+                                UserId = student.Human?.UserId ?? default,
+                            }
+                        };
+                        await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
+                    }
+
                     homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
                 }
                 _homeWorkResultRepository.Update(homeWorkResult);
@@ -268,17 +288,17 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return methodResult;
         }
 
-        private async Task<HomeWorkResult> GetHomeWorkResult(HomeWorkResult homeWorkResult, dynamic homeWorkQuestionCount, bool isHomeWorkDone, int tokenNumber)
+        private async Task<HomeWorkResult> GetHomeWorkResult(HomeWorkResult homeWorkResult, dynamic homeWorkQuestionCount, bool isHomeWorkDone, int tokensAchieved)
         {
             homeWorkResult.CorrectCount = homeWorkQuestionCount.CorrectCount;
             homeWorkResult.CorrectTotal = homeWorkQuestionCount.CorrectTotal;
             if (homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
             {
-                homeWorkResult.TokenFirstTime = tokenNumber;
+                homeWorkResult.TokenFirstTime = tokensAchieved;
             }
             else
             {
-                homeWorkResult.TokenLastTime = tokenNumber;
+                homeWorkResult.TokenLastTime = tokensAchieved;
             }
             if (isHomeWorkDone)
             {
@@ -297,18 +317,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 CountQuestion = homeWorkQuestionCount.TotalAnswer,
                 TotalQuestion = homeWorkQuestionCount.TotalQuestion,
             };
-            await UpdateTokenByStudent(homeWorkResult, tokenNumber);
             homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
             return homeWorkResult;
-        }
-
-        private async Task UpdateTokenByStudent(HomeWorkResult homeWorkResult, long token)
-        {
-            await _userService.UpdateStudentByTokenAsync(new UpdateStudentByTokenModel
-            {
-                NumberOfToken = token,
-                StudentId = homeWorkResult.StudentId,
-            }).ConfigureAwait(false);
         }
 
         public async Task<MethodResult<(IList<Question>, HomeWorkResult)>> Validate(CreateHomeWorkAnswerCommand request)

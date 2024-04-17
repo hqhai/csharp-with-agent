@@ -15,6 +15,15 @@ namespace Fsel.Shared.Constants
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
 
+        public static class CreateAction
+        {
+            public const string TwoPeopleLike = "{0},{1}";
+            public const string ThreePeopleOrMoreLike = "{0} và {1} người khác";
+            public const int NoOneAction = 0;
+            public const int OnePeopleAction = 1;
+            public const int TwoPeopleAction = 2;
+        }
+
         public static class AcademicStudentResultRatio
         {
             public const double VideoRatio = 9;
@@ -30,6 +39,17 @@ namespace Fsel.Shared.Constants
             public const double VideoRatio = 20;
             public const double HomeWorkRatio = 48;
             public const double ClassForumRatio = 32;
+        }
+
+        public static class PromptNameTemplate
+        {
+            public const string ProgramName = "Program Name";
+            public const string CourseName = "Course Name";
+            public const string CEFRLevel = "Course CEFR Level";
+            public const string UnitTopic = "Unit Topic";
+            public const string UnitNumber = "Unit Number";
+            public const string GrammarTopicList = "Grammar Topic List";
+            public const string VocabularyLists = "Vocabulary Lists";
         }
     }
 }

@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.InAppPurchase;
     using Fsel.Ordering.Application.Services.InAppPurchase.Models;
@@ -60,6 +61,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
+            _logger.LogError(_appSetting.Services.AppStoreApiUrl ?? "AppStoreApiUrl");
+
             if (string.IsNullOrEmpty(request.TransactionId))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -70,8 +73,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var bundleId = _appSetting.PurchaseSettings?.AppStore?.BundleId;
             var keyId = _appSetting.PurchaseSettings?.AppStore?.KeyId;
             var audience = _appSetting.PurchaseSettings?.AppStore?.Audience;
-            var iat = ConvertToUnixTimestamp(DateTimeOffset.UtcNow);
-            var exp = ConvertToUnixTimestamp(DateTimeOffset.UtcNow.AddMinutes(60));
+            var iat = ConvertToUnixTimestamp(DateTime.UtcNow);
+            var exp = ConvertToUnixTimestamp(DateTime.UtcNow.AddMinutes(60));
 
             string privateKey = File.ReadAllText(ResourceSettings.AppStore);
 
@@ -93,11 +96,25 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 token = jwtBuilder.Encode();
             }
 
+            _logger.LogError(token);
+
+            var purchaseSetting = _appSetting.PurchaseSettings.Serialize();
+            if (purchaseSetting == "null")
+            {
+                _logger.LogError("PurchaseSettings");
+            }
+            else
+            {
+                _logger.LogError(purchaseSetting);
+            }
+
             var signedTransactionInfoResult = await _appStoreService.GetInfoTransaction(token, request.TransactionId);
 
             if (!signedTransactionInfoResult.IsSuccessStatusCode)
             {
                 _logger.LogError("Get info transaction not success");
+                var message = signedTransactionInfoResult.Error?.Message;
+                _logger.LogError(message);
                 methodResult.AddErrorBadRequest(signedTransactionInfoResult.Error?.Message);
                 methodResult.StatusCode = (int)signedTransactionInfoResult.StatusCode;
                 return methodResult;
@@ -120,26 +137,19 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            if (transactionInfo.TransactionReason != "PURCHASE")
-            {
-                _logger.LogError("Transaction in not PURCHASE");
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-                return methodResult;
-            }
-
             #region Check environment
 
-            if ((_hostEnvironment.IsDevelopment() || _hostEnvironment.IsStaging() || _hostEnvironment.IsEnvironment(Settings.Environments.Testing)) && transactionInfo.Environment != EnumAppStoreEnvironment.Sandbox)
-            {
-                _logger.LogError("Invalid Environment");
-                return methodResult;
-            }
+            //if ((_hostEnvironment.IsDevelopment() || _hostEnvironment.IsStaging() || _hostEnvironment.IsEnvironment(Settings.Environments.Testing)) && transactionInfo.Environment != EnumAppStoreEnvironment.Sandbox)
+            //{
+            //    _logger.LogError("Invalid Environment");
+            //    return methodResult;
+            //}
 
-            if (_hostEnvironment.IsProduction() && transactionInfo.Environment != EnumAppStoreEnvironment.Production)
-            {
-                _logger.LogError("Invalid Environment");
-                return methodResult;
-            }
+            //if (_hostEnvironment.IsProduction() && transactionInfo.Environment != EnumAppStoreEnvironment.Production)
+            //{
+            //    _logger.LogError("Invalid Environment");
+            //    return methodResult;
+            //}
 
             #endregion Check environment
 
@@ -202,11 +212,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             return methodResult;
         }
 
-        private static long ConvertToUnixTimestamp(DateTimeOffset dateTime)
+        private static long ConvertToUnixTimestamp(DateTime dateTime)
         {
-            DateTimeOffset epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-            TimeSpan timeDifference = dateTime - epoch;
+            TimeSpan timeDifference = dateTime.ToUniversalTime() - epoch;
 
             return (long)timeDifference.TotalSeconds;
         }

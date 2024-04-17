@@ -20,6 +20,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid CourseId { get; set; }
 
         public Guid UnitId { get; set; }
+        public Guid CurrentUnitId { get; set; }
 
         public EnumClassForumResultStatus Status { get; set; }
 
@@ -75,6 +76,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int UnitDisplayOrder { get; set; }
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
+
+        public bool IsViewed { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
 
         public IList<string>? FilePaths
         { get { return ClassForumResultFiles?.Where(x => !x.IsRetry).Select(x => x.FilePath ?? string.Empty).ToList(); } }
