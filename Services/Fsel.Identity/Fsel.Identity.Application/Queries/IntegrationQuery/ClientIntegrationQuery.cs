@@ -202,7 +202,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         StartDate = order.UpdatedDate ?? default,
                         EndDate = order.ExpireDate ?? default,
                         Program = courseName,
-                        CourseLever = order.CourseName.ToString(),
+                        CourseLevel = order.CourseName.ToString(),
                         CoursePackage = order.MonthNumber,
                         PaymentMethod = order.PaymentMethod ?? default,
                         DiscountPrice = order.DiscountPrice,

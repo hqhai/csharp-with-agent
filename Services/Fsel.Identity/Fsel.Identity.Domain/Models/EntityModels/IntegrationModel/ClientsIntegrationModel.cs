@@ -32,7 +32,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string? Program { get; set; }
-        public string? CourseLever { get; set; }
+        public string? CourseLevel { get; set; }
         public int CoursePackage { get; set; }
         public EnumPaymentMethodStatus PaymentMethod { get; set; }
         public decimal DiscountPrice { get; set; }
