@@ -1,4 +1,5 @@
 using System.Globalization;
+using Fsel.Core.Base.BaseModels;
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
 using Fsel.Shared.Enums;
@@ -9,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
-    public class InterationActionConsumer : IConsumer<InterationActionQueueModel>
+    public class InterationActionConsumer : Core.Base.Interfaces.IBaseConsumer<InterationActionQueueModel>
     {
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
@@ -20,9 +21,9 @@ namespace Fsel.Notification.Application.Queues.Consumers
             _notificationTypeRepository = notificationTypeRepository;
         }
 
-        public async Task Consume(ConsumeContext<InterationActionQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<InterationActionQueueModel>> context)
         {
-            var dataReceipt = context?.Message;
+            var dataReceipt = context?.Message?.Data;
 
             if (dataReceipt != null)
             {

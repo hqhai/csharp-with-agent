@@ -1,3 +1,4 @@
+using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class AIFeedBackConsumer : IConsumer<SubmitAIResponseModel>
+    public class AIFeedBackConsumer : Core.Base.Interfaces.IBaseConsumer<SubmitAIResponseModel>
     {
         private readonly IHubContext<ClassForumAIFeedBackHub> _classForumFeedBackHubContext;
         private readonly IQueueProvider _queueProvider;
@@ -19,11 +20,11 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             _queueProvider = queueProvider;
         }
 
-        public async Task Consume(ConsumeContext<SubmitAIResponseModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<SubmitAIResponseModel>> context)
         {
             if (context != null)
             {
-                var classForumResultId = context.Message.ClassForumResultId.ToString();
+                var classForumResultId = context.Message.Data?.ClassForumResultId.ToString();
                 await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, context.Message);
 
                 try

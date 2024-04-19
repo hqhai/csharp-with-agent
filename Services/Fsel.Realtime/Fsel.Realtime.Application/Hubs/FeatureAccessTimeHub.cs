@@ -1,38 +1,39 @@
 using Fsel.Core.Base;
+using Fsel.Core.Services.IpApiServices;
 using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Models.ShareModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 // Đảm bảo rằng bạn đã thêm namespace của ConnectionTracker
 
 namespace Fsel.Realtime.Application.Hubs
 {
+    [Authorize]
     public class FeatureAccessTimeHub : BaseHub
     {
         private readonly FeatureAccessTimePublisher _accessTimePublisher;
+        private readonly AuthContext _authContext;
 
-        public FeatureAccessTimeHub(FeatureAccessTimePublisher accessTimePublisher)
+        public FeatureAccessTimeHub(FeatureAccessTimePublisher accessTimePublisher, AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
         {
             _accessTimePublisher = accessTimePublisher;
+            _authContext = authContext;
         }
 
         public override async Task OnConnectedAsync()
         {
-
-            string userId = Context.GetHttpContext()?.Request.Query["UserId"].ToString()!;
-
-
-            if (!string.IsNullOrEmpty(userId))
-            {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
-                ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
-            }
-
             await base.OnConnectedAsync();
+
+
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
+            ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            Guid userId = new Guid(Context.GetHttpContext()?.Request.Query["UserId"].ToString()!);
+            await base.OnDisconnectedAsync(exception);
+
+            Guid userId = _authContext.CurrentUserId;
             string type = (Context.GetHttpContext()?.Request.Query["Type"].ToString()!);
             Guid objectId = new Guid(Context.GetHttpContext()?.Request.Query["ObjectId"].ToString()!);
             Guid courseId = new Guid(Context.GetHttpContext()?.Request.Query["CourseId"].ToString()!);
@@ -61,7 +62,6 @@ namespace Fsel.Realtime.Application.Hubs
 
                 await _accessTimePublisher.Publish(model, CancellationToken.None);
             }
-            await base.OnDisconnectedAsync(exception);
         }
     }
 }
