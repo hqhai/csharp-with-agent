@@ -30,7 +30,7 @@ namespace Fsel.Interaction.Api.Controllers
         [HttpPost("harmful-content-words")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> HarmfulContentWords([FromQuery] CheckHarmfulContentWordsQuery query)
+        public async Task<IActionResult> HarmfulContentWords([FromBody] CheckHarmfulContentWordsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -42,7 +42,7 @@ namespace Fsel.Interaction.Api.Controllers
         [HttpPost("harmful-content-image")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> HarmfulContentImage([FromQuery] CheckHarmfulContentImageQuery query)
+        public async Task<IActionResult> HarmfulContentImage([FromBody] CheckHarmfulContentImageQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
