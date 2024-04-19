@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.StudentCmd
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -122,7 +123,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         Human = new Human()
                         {
                             FullName = student.FullName,
-                            Birthday = student.DateOfBirth.ConvertDateTimeFormat(),
+                            Birthday = Convert.ToDateTime(student.DateOfBirth, CultureInfo.CurrentCulture),
                             Email = student.Email,
                             Student = new Student()
                             {
