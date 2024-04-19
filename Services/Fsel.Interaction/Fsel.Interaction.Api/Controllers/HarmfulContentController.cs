@@ -27,10 +27,34 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Check harmful content words
         /// </summary>
+        [HttpPost("harmful-content-words-body")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> HarmfulContentWords([FromBody] CheckHarmfulContentWordsQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check harmful content image
+        /// </summary>
+        [HttpPost("harmful-content-image-body")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> HarmfulContentImage([FromBody] CheckHarmfulContentImageQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check harmful content words
+        /// </summary>
         [HttpPost("harmful-content-words")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> HarmfulContentWords([FromQuery] CheckHarmfulContentWordsQuery query)
+        public async Task<IActionResult> HarmfulContentWordsMobile([FromQuery] CheckHarmfulContentWordsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -42,7 +66,7 @@ namespace Fsel.Interaction.Api.Controllers
         [HttpPost("harmful-content-image")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> HarmfulContentImage([FromQuery] CheckHarmfulContentImageQuery query)
+        public async Task<IActionResult> HarmfulContentImageMobile([FromQuery] CheckHarmfulContentImageQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
