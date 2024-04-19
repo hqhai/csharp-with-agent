@@ -158,7 +158,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 EnumIntegrationStatus status = EnumIntegrationStatus.Register;
                 var statusPT = string.Empty;
                 DateTime expireDate = default;
-                string courseLever = string.Empty;
+                string courseLevel = string.Empty;
                 var lastTime = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item)?.LastVisited;
                 if (orderItems.Count != 0)
                 {
@@ -168,11 +168,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         {
                             status = EnumIntegrationStatus.Trial;
                             expireDate = orderItem.ExpireDate ?? default;
-                            courseLever = orderItem.CourseName.ToString() ?? string.Empty;
+                            courseLevel = orderItem.CourseName.ToString() ?? string.Empty;
                         }
                         else
                         {
-                            courseLever = orderItem.CourseName.ToString() ?? string.Empty;
+                            courseLevel = orderItem.CourseName.ToString() ?? string.Empty;
                         }
                     }
                 }
@@ -236,7 +236,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     SchoolId = user?.SchoolId,
                     LocationId = locationId,
                     PTLevel = ptTestResult?.Level,
-                    CourseLever = courseLever,
+                    CourseLevel = courseLevel,
                     LastDate = lastTime
                 };
                 leadsIntegrations.Add(leadsIntegration);

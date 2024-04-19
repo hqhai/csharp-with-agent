@@ -20,7 +20,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
         public string? ParentEmail { get; set; }
         public EnumGender? ParentGender { get; set; }
         public EnumIntegrationStatus? Status { get; set; }
-        public string? CourseLever { get; set; }
+        public string? CourseLevel { get; set; }
         public string? PTLevel { get; set; }
         public DateTime? ExpireDate { get; set; }
         public string? StatusPT { get; set; }
