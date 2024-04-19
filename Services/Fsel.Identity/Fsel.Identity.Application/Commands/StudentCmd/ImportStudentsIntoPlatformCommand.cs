@@ -123,6 +123,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         {
                             FullName = student.FullName,
                             Birthday = student.DateOfBirth.ConvertDateTimeFormat(),
+                            Email = student.Email,
                             Student = new Student()
                             {
                                 CreatedByParent = false,
