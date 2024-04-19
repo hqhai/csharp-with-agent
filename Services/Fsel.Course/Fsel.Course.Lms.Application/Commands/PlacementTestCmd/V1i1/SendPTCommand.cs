@@ -78,18 +78,18 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 {
                     if (j == 0)
                     {
-                        var teacherInfoHtml = string.Format(CultureInfo.InvariantCulture, teachersHtml, null, suggestLevels[i], teachers[j].AvatarPath, teachers[j].FullName, teachers[j].Nationality, teachers[j].Certifications, teachers[j].Experience);
+                        var teacherInfoHtml = string.Format(CultureInfo.InvariantCulture, teachersHtml, null, suggestLevels[i] == EnumCourseLevel.B1Plus ? "B1+" : suggestLevels[i].GetDescription(), teachers[j].AvatarPath, teachers[j].FullName, teachers[j].Nationality, teachers[j].Certifications, teachers[j].Experience);
                         teacherInfo += teacherInfoHtml;
                     }
                     else
                     {
-                        var teacherInfoHtml = string.Format(CultureInfo.InvariantCulture, teachersHtml, SendMailSetting.Display, suggestLevels[i], teachers[j].AvatarPath, teachers[j].FullName, teachers[j].Nationality, teachers[j].Certifications, teachers[j].Experience);
+                        var teacherInfoHtml = string.Format(CultureInfo.InvariantCulture, teachersHtml, SendMailSetting.Display, suggestLevels[i] == EnumCourseLevel.B1Plus ? "B1+" : suggestLevels[i].GetDescription(), teachers[j].AvatarPath, teachers[j].FullName, teachers[j].Nationality, teachers[j].Certifications, teachers[j].Experience);
                         teacherInfo += teacherInfoHtml;
                     }
                 }
                 var courseType = EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i]);
 
-                var courseInfo = string.Format(CultureInfo.InvariantCulture, courseInfoHtml, i + 1, suggestLevels[i], suggestLevels[i].GetDescription(), EnumCourseLevelHelper.GetCourseTitle(suggestLevels[i]), EnumCourseLevelHelper.GetLevelPhoto(suggestLevels[i]), courseType == EnumCourseType.Academic ? EnumCourseType.Academic.ToString() : EnumCourseType.Ielts.ToString().ToUpper(CultureInfo.CurrentCulture), SendMailHelper.GetInfoCourse(EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i])), teacherInfo);
+                var courseInfo = string.Format(CultureInfo.InvariantCulture, courseInfoHtml, i + 1, suggestLevels[i] == EnumCourseLevel.B1Plus ? "B1+" : suggestLevels[i], suggestLevels[i].GetDescription(), EnumCourseLevelHelper.GetCourseTitle(suggestLevels[i]), EnumCourseLevelHelper.GetLevelPhoto(suggestLevels[i]), courseType == EnumCourseType.Academic ? EnumCourseType.Academic.ToString() : EnumCourseType.Ielts.ToString().ToUpper(CultureInfo.CurrentCulture), SendMailHelper.GetInfoCourse(EnumCourseLevelHelper.GetEnumCourseType(suggestLevels[i])), teacherInfo);
 
                 coursesInfo += courseInfo;
             }
