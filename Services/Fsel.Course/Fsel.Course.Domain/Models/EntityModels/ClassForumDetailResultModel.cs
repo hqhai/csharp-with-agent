@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System;
     using System.Text.Json.Serialization;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
@@ -38,6 +39,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double CorrectCount { get; set; }
         public double CorrectTotal { get; set; }
         public EnumSubmissionCount? SubmissionCount { get; set; }
+        public EnumClassForumResultStatus Status { get; set; }
 
         public Guid ClassForumResultId { get; set; }
 
