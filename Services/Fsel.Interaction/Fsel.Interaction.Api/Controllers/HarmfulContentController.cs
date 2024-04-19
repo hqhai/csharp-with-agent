@@ -26,9 +26,8 @@ namespace Fsel.Interaction.Api.Controllers
 
         /// <summary>
         /// Check harmful content words
-        /// Xóa -web khi xóa api HarmfulContentWordsMobile và HarmfulContentImageMobile
         /// </summary>
-        [HttpPost("harmful-content-words-web")]
+        [HttpPost("harmful-content-words-body")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> HarmfulContentWords([FromBody] CheckHarmfulContentWordsQuery query)
@@ -39,9 +38,8 @@ namespace Fsel.Interaction.Api.Controllers
 
         /// <summary>
         /// Check harmful content image
-        /// Xóa -web khi xóa api HarmfulContentWordsMobile và HarmfulContentImageMobile
         /// </summary>
-        [HttpPost("harmful-content-image-web")]
+        [HttpPost("harmful-content-image-body")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> HarmfulContentImage([FromBody] CheckHarmfulContentImageQuery query)
