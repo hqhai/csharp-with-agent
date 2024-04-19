@@ -163,6 +163,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 Human = new Human()
                                 {
                                     FullName = student.ParentEmail,
+                                    Email = student.ParentEmail,
                                     Parent = new Parent()
                                     {
                                         Occupation = "Parent",
