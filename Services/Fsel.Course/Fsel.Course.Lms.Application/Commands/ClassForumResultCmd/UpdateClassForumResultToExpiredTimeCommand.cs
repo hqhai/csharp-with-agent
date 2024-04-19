@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IClassForumDetailResultRepository _classforumDetailResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private const int MaxScoreClassForum = 2;
+        private const int MaxTagetScore = 1;
 
         public UpdateClassForumResultToExpiredTimeCommandHandler(IClassForumResultRepository classForumResultRepository, IClassForumDetailResultRepository classForumDetailResultRepository, NotificationMessagePublisher notificationMessagePublisher)
 
@@ -134,8 +135,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumDetailResult.GradingAlFeedback);
             if (classForumAIs != null && classForumAIs.Any() && classForumResult.CorrectCount == default)
             {
-                var correctCount = classForumAIs.Sum(x => x.Score);
-                var correctTotal = classForumAIs.Count * MaxScoreClassForum + targetScore;
+                var correctCount = classForumAIs.Sum(x => x.Score) + targetScore;
+                var correctTotal = classForumAIs.Count * MaxScoreClassForum + MaxTagetScore;
                 classForumResult.CorrectCount = correctCount;
                 classForumResult.Status = EnumClassForumResultStatus.Pending;
                 classForumResult.WordContent = classForumDetailResult.WordContent;
