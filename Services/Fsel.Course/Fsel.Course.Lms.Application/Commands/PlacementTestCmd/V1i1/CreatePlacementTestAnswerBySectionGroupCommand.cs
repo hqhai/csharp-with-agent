@@ -30,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class CreatePlacementTestAnswerBySectionGroupCommand : CreatePlacementTestAnswerBySectionGroupCommandModel, IRequest<MethodResult<PlacementTestResultModel>>
     {
@@ -51,21 +52,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly IMapper _mapper;
         private readonly ICourseRepository _courseRepository;
         private readonly AppSetting _appSetting;
+        private readonly ILogger<object> _logger;
 
-        public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository
-            , AuthContext authContext
-            , QuestionConverter questionConverter
-            , SectionGroupConverter sectionGroupConverter
-            , IUserService userService
-            , IMediator mediator
-            , IPlacementTestResultRepository placementTestResultRepository
-            , IPlacementTestAnswerRepository placementTestAnswerRepository
-            , ISectionGroupResultRepository sectionGroupResultRepository
-            , ISectionGroupRepository sectionGroupRepository
-            , IPlacementTestRepository placementTestRepository
-            , IMapper mapper,
-ICourseRepository courseRepository,
-AppSetting appSetting)
+        public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, QuestionConverter questionConverter, SectionGroupConverter sectionGroupConverter, IUserService userService, IMediator mediator, IPlacementTestResultRepository placementTestResultRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, ISectionGroupResultRepository sectionGroupResultRepository, ISectionGroupRepository sectionGroupRepository, IPlacementTestRepository placementTestRepository, IMapper mapper, ICourseRepository courseRepository, AppSetting appSetting, ILogger<object> logger)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -81,12 +70,16 @@ AppSetting appSetting)
             _mapper = mapper;
             _courseRepository = courseRepository;
             _appSetting = appSetting;
+            _logger = logger;
         }
 
         public async Task<MethodResult<PlacementTestResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PlacementTestResultModel>();
+
+            _logger.LoggerRequest(request);
+
             StudentModel? student;
             if (request.StudentId.HasValue)
             {

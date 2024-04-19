@@ -11,10 +11,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class CreateVideoTimeCodeResultCommand : IRequest<MethodResult<VideoTimeCodeResultModel>>
     {
@@ -32,14 +34,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
+        private readonly ILogger<object> _logger;
 
-        public CreateVideoTimeCodeResultCommandHandler(
-            IVideoResultRepository videoResultRepository
-            , IVideoTimeCodeRepository videoTimeCodeRepository
-            , IMapper mapper
-            , DateTimeConverter dateTimeConverter
-            , GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher
-            , IVideoTimeCodeResultRepository videoTimeCodeResultRepository)
+        public CreateVideoTimeCodeResultCommandHandler(IVideoResultRepository videoResultRepository, IVideoTimeCodeRepository videoTimeCodeRepository, IMapper mapper, DateTimeConverter dateTimeConverter, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, ILogger<object> logger)
         {
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeRepository = videoTimeCodeRepository;
@@ -47,12 +44,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             _dateTimeConverter = dateTimeConverter;
             _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
+            _logger = logger;
         }
 
         public async Task<MethodResult<VideoTimeCodeResultModel>> Handle(CreateVideoTimeCodeResultCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoTimeCodeResultModel> methodResult = new MethodResult<VideoTimeCodeResultModel>();
+
+            _logger.LoggerRequest(request);
+
             var videoResult = await _videoResultRepository.GetByIdAsync(request.VideoResultId);
             if (videoResult == null)
             {
