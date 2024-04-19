@@ -66,8 +66,8 @@ spec:
               number: 80
   tls:
   - hosts:
-    - fsel-cms-dev.fsel.edu.vn
-    secretName: fsel-cms-dev.fsel.edu.vn-wildcard
+    - fsel-cms-planet-defender-dev.fsel.edu.vn
+    secretName: fsel-cms-planet-defender-dev.fsel.edu.vn-wildcard
 
 status:
   loadBalancer:
