@@ -80,6 +80,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<StudentFeedback> StudentFeedbacks { get; set; }
         public DbSet<ClassForumResultRandom> ClassForumResultRandoms { get; set; }
         public DbSet<MockTestAISetting> MockTestAISettings { get; set; }
+        public DbSet<ClassForumDetailResult> ClassForumDetailResults { get; set; }
         public DbSet<MockTestAICriteriaSetting> MockTestAICriteriaSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -151,6 +152,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new MockTestAISettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestScoreEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestAICriteriaSettingTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumDetailResultTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
