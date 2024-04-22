@@ -10,7 +10,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using MassTransit;
     using MediatR;
 
-    public class CompleteTestWhenTimeOutConsumer : IConsumer<CompleteTestWhenTimeOutModel>
+    public class CompleteTestWhenTimeOutConsumer : Core.Base.Interfaces.IBaseConsumer<CompleteTestWhenTimeOutModel>
     {
         private readonly IMediator _mediator;
 
@@ -19,13 +19,13 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<CompleteTestWhenTimeOutModel> context)
+        public async Task Consume(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<CompleteTestWhenTimeOutModel>> context)
         {
             if (context == null)
             {
                 return;
             }
-            var messeger = context.Message;
+            var messeger = context.Message?.Data;
             switch (messeger.ObjectResultType)
             {
                 case nameof(MockTest):

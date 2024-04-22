@@ -7,7 +7,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using MediatR;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
 
-    public class RealTimeAIResponseConsumer : IConsumer<ClassForumAIResponseModel>
+    public class RealTimeAIResponseConsumer : Core.Base.Interfaces.IBaseConsumer<ClassForumAIResponseModel>
     {
         private readonly IMediator _mediator;
 
@@ -16,13 +16,13 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<ClassForumAIResponseModel> context)
+        public async Task Consume(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<ClassForumAIResponseModel>> context)
         {
             if (context == null)
             {
                 return;
             }
-            var data = context.Message;
+            var data = context.Message?.Data;
 
             await _mediator.Send(new SubmitClassforumAICommand
             {

@@ -7,7 +7,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using MediatR;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
 
-    public class AiFeedBackResponseConsumer : IConsumer<MockTestAnswerResponseModel>
+    public class AiFeedBackResponseConsumer : Core.Base.Interfaces.IBaseConsumer<MockTestAnswerResponseModel>
     {
         private readonly IMediator _mediator;
 
@@ -16,21 +16,24 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<MockTestAnswerResponseModel> context)
+        public async Task Consume(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<MockTestAnswerResponseModel>> context)
         {
             if (context == null)
             {
                 return;
             }
-            var data = context.Message;
+            var data = context.Message?.Data;
 
-            await _mediator.Send(new SubmitMockTestAnswerAICommand
+            if (data != null)
             {
-                SectionId = data.SectionId,
-                WordContent = data.WordContent,
-                MockTestResultId = data.MockTestResultId,
-                SectionGroupId = data.SectionGroupId
-            }).ConfigureAwait(false);
+                await _mediator.Send(new SubmitMockTestAnswerAICommand
+                {
+                    SectionId = data.SectionId,
+                    WordContent = data.WordContent,
+                    MockTestResultId = data.MockTestResultId,
+                    SectionGroupId = data.SectionGroupId
+                }).ConfigureAwait(false);
+            }
         }
     }
 }
