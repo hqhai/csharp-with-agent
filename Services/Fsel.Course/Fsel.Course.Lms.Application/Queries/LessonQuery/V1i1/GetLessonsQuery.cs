@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -129,10 +130,28 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                     Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished,
                     StudentId = studentId ?? default
                 }).ToList();
-                await _lessonResultRepository.AddList(lessonResults);
-                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                lessonResults = await CreateLessonResultsAsync(lessonResults, cancellationToken);
             }
-            return _mapper.Map<IList<LessonMockTestResultModel>>(lessonResults.OrderBy(x => x.CreatedDate).ToList());
+            return _mapper.Map<IList<LessonMockTestResultModel>>(lessonResults?.OrderBy(x => x.CreatedDate).ToList());
+        }
+
+        private async Task<List<LessonResult>> CreateLessonResultsAsync(List<LessonResult> lessonResults, CancellationToken cancellationToken)
+        {
+            if (!lessonResults.Any())
+            {
+                return lessonResults;
+            }
+            foreach (var lessonResult in lessonResults)
+            {
+                await CreateLessonResultAsync(lessonResult, cancellationToken);
+            }
+            return lessonResults;
+        }
+
+        private async Task CreateLessonResultAsync(LessonResult lessonResult, CancellationToken cancellationToken)
+        {
+            _lessonResultRepository.Add(lessonResult);
+            await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<LessonMockTestResultModel> UpdateMockTestResults(GetLessonsQuery request, Guid? studentId, Domain.Entities.Unit unit, Course course, CancellationToken cancellationToken)
