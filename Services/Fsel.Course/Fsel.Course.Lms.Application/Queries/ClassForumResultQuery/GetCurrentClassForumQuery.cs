@@ -101,6 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var classForumResult = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumDetailResults)
+                .ThenInclude(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum!.Id)
