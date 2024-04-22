@@ -41,6 +41,7 @@ namespace Fsel.Shared.Constants
                 public const string AIFeedBack = $"{KeyQueue}_AIFeedBack";
                 public const string FeatureAccessTime = $"{KeyQueue}_FeatureAccessTime";
 
+                public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
             }
         }
 
@@ -85,11 +86,13 @@ namespace Fsel.Shared.Constants
                 public const string UpdateOcCheckInClassForumResult = $"{KeyQueue}_UpdateOcCheckInClassForumResult";
                 public const string CompleteTestWhenTimeOut = $"{KeyQueue}_CompleteTestWhenTimeOut";
                 public const string SetTimeToCompleteTest = $"{KeyQueue}_SetTimeToCompleteTest";
+                public const string SetTimeClassForumDone = $"{KeyQueue}_SetTimeClassForumDone";
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
                 public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
                 public const string MockTestAnwserResponse = $"{KeyQueue}_MockTestAnwserResponse";
                 public const string WeeklyReport = $"{KeyQueue}_WeeklyReport";
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
+                public const string UpdateClassForumResultToExpiredTime = $"{KeyQueue}_UpdateClassForumResultToExpiredTime";
             }
         }
 
@@ -105,7 +108,6 @@ namespace Fsel.Shared.Constants
                 public const string SetCompleteApprovalPostTimeOut = $"{KeyQueue}_SetCompleteApprovalPostTimeOut";
                 public const string ReviewFsel = $"{KeyQueue}_ReviewFsel";
                 public const string NoticeAccessTime = $"{KeyQueue}_NoticeAccessTime";
-
             }
         }
 

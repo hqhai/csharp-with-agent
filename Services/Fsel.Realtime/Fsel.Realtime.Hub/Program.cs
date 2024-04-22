@@ -23,6 +23,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.LeaderBoard, typeof(LeaderBoardConsumer) },
     { QueueSettings.NotificationQueue.NameQueue.Notification, typeof(NotificationConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.AIFeedBack, typeof(AIFeedBackConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.MockTestWriting, typeof(MockTestAIFeedBackConsumer) },
 });
 
 var app = builder.Build();
@@ -32,5 +33,6 @@ app.UseHubs<NotificationHub>(RealtimeSettings.NotificationHub.Pattern);
 app.UseHubs<LeaderBoardHub>(RealtimeSettings.LeaderBoardHub.Pattern);
 
 app.UseHubs<ClassForumAIFeedBackHub>(RealtimeSettings.ClassForumAIFeedBackHub.Pattern);
+app.UseHubs<MockTestWritingHub>(RealtimeSettings.MockTestWritingAIFeedBackHub.Pattern);
 app.UseHubs<FeatureAccessTimeHub>(RealtimeSettings.FeatureAccessTimeHub.Pattern);
 app.Run();
