@@ -30,13 +30,15 @@ namespace Fsel.Notification.Domain.Model.EntityModels
             get { return _avatarPath.AddS3BaseUrl(); }
         }
 
-        public EnumNotificationContent Content { get; set; }
+        public  EnumNotificationContent Content { get; set; }
 
         public EnumNotificationType Type { get; set; }
 
         public IList<Guid>? UserIds { get; set; }
 
         public string? Icon { get; set; }
+
+        public NotificationsTypeModel? NotificationType { get; set; }
     }
 
 }
