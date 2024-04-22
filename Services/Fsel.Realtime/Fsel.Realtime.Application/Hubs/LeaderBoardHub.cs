@@ -4,10 +4,15 @@ namespace Fsel.Realtime.Application.Hubs
 {
     using Fsel.Core.Base;
     using Fsel.Core.Extensions;
+    using Fsel.Core.Services.IpApiServices;
     using Microsoft.AspNetCore.SignalR;
 
     public class LeaderBoardHub : BaseHub
     {
+        public LeaderBoardHub(AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        {
+        }
+
         public override async Task OnConnectedAsync()
         {
             string courseLevel = Context.GetHttpContext()?.Request.Query["CourseLevel"].ToString()!;

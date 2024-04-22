@@ -9,8 +9,7 @@
     <PackageReference Include="AWSSDK.S3" Version="3.7.103.51" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.5" />
     <PackageReference Include="JWT" Version="10.1.1" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.3" />
-    <PackageReference Include="Fsel.Core" Version="1.2.35" />
+    <PackageReference Include="Fsel.Core" Version="1.2.36" />
   </ItemGroup>
   <!-- Tests -->
   <ItemGroup Label="Tests Packages" Condition="'$(IsTestProject)' == 'true'">

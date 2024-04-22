@@ -4,10 +4,15 @@ namespace Fsel.Realtime.Application.Hubs
 {
     using Fsel.Core.Base;
     using Fsel.Core.Extensions;
+    using Fsel.Core.Services.IpApiServices;
     using Microsoft.AspNetCore.SignalR;
 
     public class ClassForumAIFeedBackHub : BaseHub
     {
+        public ClassForumAIFeedBackHub(AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        {
+        }
+
         public override async Task OnConnectedAsync()
         {
             string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
