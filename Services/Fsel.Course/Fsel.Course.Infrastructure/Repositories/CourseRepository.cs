@@ -97,7 +97,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.CourseUnitMockTests)
+                return await Queryable.Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
                                       .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
                                       .FirstOrDefaultAsync(x => x.Id == id);
             }

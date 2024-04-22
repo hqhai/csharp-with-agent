@@ -1,11 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Models.EntityModels
+namespace Fsel.Identity.Application.Services.OrderService.Model
 {
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class OrderSearchModel : BaseModel
+    public class OrderSearchModel
     {
         public string? FullName { get; set; }
         public string? Code { get; set; }
@@ -16,6 +15,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public Guid UserId { get; set; }
         public Guid CourseId { get; set; }
         public Guid PackageId { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         public DateTime? ExpireDate { get; set; }
         public bool IsTrial { get; set; }
         public int MonthNumber { get; set; }
