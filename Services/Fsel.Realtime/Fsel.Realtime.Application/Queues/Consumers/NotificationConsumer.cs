@@ -1,3 +1,4 @@
+using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class NotificationConsumer : IConsumer<NotificationQueueModel>
+    public class NotificationConsumer : Core.Base.Interfaces.IBaseConsumer<NotificationQueueModel>
     {
         private readonly IHubContext<NotificationHub> _notificationHubContext;
         private readonly IQueueProvider _queueProvider;
@@ -19,11 +20,11 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             _queueProvider = queueProvider;
         }
 
-        public async Task Consume(ConsumeContext<NotificationQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<NotificationQueueModel>> context)
         {
-            if (context != null && context!.Message!.UserIds != null)
+            if (context != null && context!.Message!.Data.UserIds != null)
             {
-                var userIds = context.Message.UserIds;
+                var userIds = context.Message.Data.UserIds;
                 await _notificationHubContext.GetGroups(userIds.Select(x => x.ToString()).ToList()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
 
                 userIds.Select(x => x.ToString()).ForEach(x =>

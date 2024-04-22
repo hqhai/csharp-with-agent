@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Fsel.Training.Application.Queues.Consumers
 {
-    public class UpdateClassLiveAssignmentConsumer : IConsumer<BaseQueueModel>
+    public class UpdateClassLiveAssignmentConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
@@ -14,7 +14,7 @@ namespace Fsel.Training.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
         {
             await _mediator.Send(new UpdateClassLiveAssignmentCommand()).ConfigureAwait(false);
         }

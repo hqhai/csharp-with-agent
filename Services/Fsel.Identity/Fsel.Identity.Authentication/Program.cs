@@ -22,7 +22,7 @@ builder.AddSwaggerGens(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
 builder.AddIdentity<User, Role, UserDbContext>();
-builder.AddAuthenticationIdentity(appSetting);
+builder.AddAuthenticationIdentity();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();

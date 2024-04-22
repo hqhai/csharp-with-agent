@@ -13,7 +13,9 @@ namespace Fsel.System.Infrastructure.Maps
         public FeatureAccessTimeProfile()
         {
             CreateMap<FeatureAccessTime, FeatureAccessTimeModel>().IgnoreAllNonExisting();
-            CreateMap<SaveFeatureAccessTimeCommandModel, FeatureAccessTime>().IgnoreAllNonExisting();
+            CreateMap<SaveFeatureAccessTimeCommandModel, FeatureAccessTime>()
+                    .ForMember(dest => dest.CreatedUserId, opt => opt.MapFrom(src => src.UserId))
+                    .IgnoreAllNonExisting();
         }
     }
 }

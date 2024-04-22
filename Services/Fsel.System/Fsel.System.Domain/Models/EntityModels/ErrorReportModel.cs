@@ -43,6 +43,6 @@ namespace Fsel.System.Domain.Models.EntityModels
         public string? UnitName { get; set; }
 
         public string? LessonName { get; set; }
-        public Guid? StudentId { get; set; }
+        public string? StudentCode { get; set; }
     }
 }

@@ -39,6 +39,8 @@ namespace Fsel.Shared.Constants
                 public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
                 public const string AIFeedBack = $"{KeyQueue}_AIFeedBack";
+                public const string FeatureAccessTime = $"{KeyQueue}_FeatureAccessTime";
+
                 public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
             }
         }
@@ -119,6 +121,7 @@ namespace Fsel.Shared.Constants
                 public const string InteractionAction = $"{KeyQueue}_InterationAction";
             }
         }
+
 
         public static class OrderingQueue
         {
