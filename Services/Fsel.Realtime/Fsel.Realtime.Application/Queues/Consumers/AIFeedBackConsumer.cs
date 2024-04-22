@@ -22,9 +22,9 @@ namespace Fsel.Realtime.Application.Queues.Consumers
 
         public async Task Consume(ConsumeContext<BaseQueueDataModel<SubmitAIResponseModel>> context)
         {
-            if (context != null)
+            if (context != null && context.Message.Data != null)
             {
-                var classForumResultId = context.Message.ClassForumDetailResultId.ToString();
+                var classForumResultId = context.Message.Data.ClassForumDetailResultId.ToString();
                 await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, context.Message);
 
                 try
