@@ -7,7 +7,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using MassTransit;
     using MediatR;
 
-    public class UpdateClassForumResultToExpiredTimeConsumer : IConsumer<BaseQueueModel>
+    public class UpdateClassForumResultToExpiredTimeConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
@@ -16,13 +16,14 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
         {
-            if (context == null || context.Message == null || context.Message.QueueId == null)
+            var queueId = context?.Message.Data?.QueueId;
+            if (context == null || queueId == null)
             {
                 return;
             }
-            await _mediator.Send(new UpdateClassForumResultToExpiredTimeCommand { ClassForumResultId = new Guid(context.Message.QueueId) }).ConfigureAwait(false);
+            await _mediator.Send(new UpdateClassForumResultToExpiredTimeCommand { ClassForumResultId = new Guid(queueId) }).ConfigureAwait(false);
         }
     }
 }

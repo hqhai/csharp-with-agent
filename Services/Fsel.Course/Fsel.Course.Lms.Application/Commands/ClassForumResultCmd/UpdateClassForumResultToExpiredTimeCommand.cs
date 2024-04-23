@@ -133,16 +133,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             ArgumentNullException.ThrowIfNull(classForumResult);
             var targetScore = GetTargetCount(classForumDetailResult, classForumResult);
             var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumDetailResult.GradingAlFeedback);
+
+            classForumResult.Status = EnumClassForumResultStatus.Pending;
+            classForumResult.WordContent = classForumDetailResult.WordContent;
+            classForumResult.WordCount = classForumDetailResult.WordCount;
+            classForumResult.Content = classForumDetailResult.Content;
+            classForumResult.SubmissionCount = classForumDetailResult.SubmissionCount;
+            classForumResult.GradingAlFeedback = classForumDetailResult.GradingAlFeedback;
             if (classForumAIs != null && classForumAIs.Any() && classForumResult.CorrectCount == default)
             {
                 var correctCount = classForumAIs.Sum(x => x.Score) + targetScore;
                 var correctTotal = classForumAIs.Count * MaxScoreClassForum + MaxTagetScore;
                 classForumResult.CorrectCount = correctCount;
-                classForumResult.Status = EnumClassForumResultStatus.Pending;
-                classForumResult.WordContent = classForumDetailResult.WordContent;
-                classForumResult.WordCount = classForumDetailResult.WordCount;
-                classForumResult.Content = classForumDetailResult.Content;
-                classForumResult.SubmissionCount = classForumDetailResult.SubmissionCount;
                 classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
                 classForumResult.CorrectTotal = correctTotal;
                 if (classForumResult.SkillScores != null && classForumResult.SkillScores.Any())
