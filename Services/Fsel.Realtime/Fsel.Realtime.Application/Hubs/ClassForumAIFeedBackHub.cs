@@ -10,7 +10,7 @@ namespace Fsel.Realtime.Application.Hubs
     {
         public override async Task OnConnectedAsync()
         {
-            string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
+            string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumDetailResultId"].ToString()!;
             if (!string.IsNullOrEmpty(classForumResultId))
             {
                 await Groups.AddGroupAsync(Context.ConnectionId, classForumResultId);
@@ -21,7 +21,7 @@ namespace Fsel.Realtime.Application.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
+            string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumDetailResultId"].ToString()!;
             if (!string.IsNullOrEmpty(classForumResultId))
             {
                 await Groups.RemoveGroupAsync(Context.ConnectionId, classForumResultId);

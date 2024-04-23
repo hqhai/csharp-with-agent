@@ -8,14 +8,14 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
-    public class ClassForumResult : Entity, ITokenResult, ISubmissionCount
+    public class ClassForumResult : Entity, ITokenResult
     {
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
 
         private string? _wordContent;
@@ -37,7 +37,7 @@ namespace Fsel.Course.Domain.Entities
 
         [NotMapped]
         public int? TimeCount
-        { get { return ClassForumResultFiles.Where(x => x.IsRetry == false).Select(p => p.TimeCount).Sum(); } }
+        { get { return ClassForumResultFiles.Select(p => p.TimeCount).Sum(); } }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
@@ -47,7 +47,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Trạng thái
         /// </summary>
-        public EnumClassForumResultStatus Status { get; set; }
+        public EnumClassForumResultStatus? Status { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid LessonResultId { get; set; }
@@ -68,12 +68,6 @@ namespace Fsel.Course.Domain.Entities
 
         public DateTime? GradingStartDate { get; set; }
 
-        public string? RetryContent { get; set; }
-
-        public string? RetryWordContent { get; set; }
-
-        public string? RetryGradingAlFeedBack { get; set; }
-
         public bool IsViewed { get; set; }
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
@@ -86,10 +80,51 @@ namespace Fsel.Course.Domain.Entities
         }
 
         public EnumSubmissionCount? SubmissionCount { get; set; }
+
+        /// <summary>
+        /// Số câu trả lời đúng của Student
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectCount { get; set; }
+
+        /// <summary>
+        /// Tổng số câu trả lời đúng
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectTotal { get; set; }
+
+        /// <summary>
+        /// Phần trăm câu trả lời đúng
+        /// </summary>
+        private double _percent;
+
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public virtual double Percent
+        {
+            get
+            {
+                return CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : _percent;
+            }
+            set { _percent = CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : value; }
+        }
+
+        public string? SkillScoresStr { get; set; }
+
+        [NotMapped]
+        public IList<SkillScores>? SkillScores
+        {
+            get
+            {
+                return Common.Helpers.ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr);
+            }
+            set { SkillScoresStr = Common.Helpers.ConvertHelper.Serialize(value); }
+        }
+
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
 
         public ICollection<ClassForumResultRandom> ClassForumResultRandoms { get; set; } = new List<ClassForumResultRandom>();
+        public ICollection<ClassForumDetailResult> ClassForumDetailResults { get; set; } = new List<ClassForumDetailResult>();
     }
 }

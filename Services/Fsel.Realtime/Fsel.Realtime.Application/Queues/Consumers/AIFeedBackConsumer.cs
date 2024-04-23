@@ -23,7 +23,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         {
             if (context != null)
             {
-                var classForumResultId = context.Message.ClassForumResultId.ToString();
+                var classForumResultId = context.Message.ClassForumDetailResultId.ToString();
                 await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, context.Message);
 
                 try

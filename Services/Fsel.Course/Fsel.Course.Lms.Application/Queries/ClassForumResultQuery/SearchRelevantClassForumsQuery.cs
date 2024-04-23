@@ -85,9 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.ClassForumId == classForum!.Id
-                && x.Status != EnumClassForumResultStatus.Draft
-                && x.Status != EnumClassForumResultStatus.Pending
-                && x.Status != EnumClassForumResultStatus.Denied
+                && x.Status == EnumClassForumResultStatus.Graded
                 && x.Id != request.ClassForumResultId
                 && classStudentIds!.Contains(x.StudentId))
                 .Select(x => new ClassForumResultModel
@@ -98,6 +96,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     CheckStartDate = x.CheckStartDate,
                     ClassForumId = x.ClassForumId,
                     Content = x.Content,
+                    CorrectCount = x.CorrectCount,
+                    CorrectTotal = x.CorrectTotal,
+                    SkillScores = x.SkillScores,
                     WordCount = x.WordCount,
                     WordContent = x.WordContent,
                     UpdatedUserId = x.UpdatedUserId,
@@ -105,9 +106,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     UpdatedDate = x.UpdatedDate,
                     TimeCount = x.TimeCount,
                     StudentId = x.StudentId,
-                    RetryWordContent = x.RetryWordContent,
-                    RetryGradingAlFeedBack = x.RetryGradingAlFeedBack,
-                    RetryContent = x.RetryContent,
                     LessonResultId = x.LessonResultId,
                     GradingStartDate = x.GradingStartDate,
                     CreatedDate = x.CreatedDate,

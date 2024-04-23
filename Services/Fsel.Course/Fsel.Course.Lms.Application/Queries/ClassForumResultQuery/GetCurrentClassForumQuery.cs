@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -99,6 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);
 
             var classForumResult = await _classForumResultRepository.Queryable
+                .Include(x => x.ClassForumDetailResults)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum!.Id)
@@ -109,6 +111,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             if (classForumResultModel != null)
             {
+                classForumResultModel.ClassForumDetailResults = classForumResult?.ClassForumDetailResults.Select(x =>
+                {
+                    x.Score = GetTargetCount(x, classForumResult);
+                    return _mapper.Map<ClassForumDetailResultModel>(x);
+                }).ToList();
+
                 classForumResultModel.IsTeacherFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultModel.Id && x.Type == EnumStudentFeedBackType.Teacher, cancellationToken);
                 classForumResultModel.IsAIFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultModel.Id && x.Type == EnumStudentFeedBackType.AI, cancellationToken);
 
@@ -142,6 +150,21 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             methodResult.Result = classForumByStudentModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static int GetTargetCount(ClassForumDetailResult classForumDetailResult, ClassForumResult classForumResult)
+        {
+            int targetScore = default;
+            var classForum = classForumResult.ClassForum;
+            if (classForum?.CourseSkill == EnumCourseSkill.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)
+            {
+                ++targetScore;
+            }
+            if (classForum?.CourseSkill == EnumCourseSkill.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
+            {
+                ++targetScore;
+            }
+            return targetScore;
         }
     }
 }
