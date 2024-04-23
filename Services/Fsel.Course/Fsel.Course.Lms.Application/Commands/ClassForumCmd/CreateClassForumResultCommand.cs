@@ -127,15 +127,21 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             }
             var studentId = student.Id;
             var classForumResult = await _classForumResultRepository.Queryable
-                    .Include(x => x.ClassForumDetailResults)
+                    .Include(x => x.ClassForumDetailResults.OrderBy(x => x.CreatedDate))
                     .ThenInclude(x => x.ClassForumResultFiles)
                     .Include(x => x.ClassForumResultFiles)
                     .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
 
+            var classForumDetailResultModels = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult!.Id).ToListAsync(cancellationToken);
+
+            if (classForumDetailResultModels.Count > 2)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
+                return methodResult;
+            }
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                List<ClassForumResultFile> classForumResultFiles = new List<ClassForumResultFile>();
                 if (classForumResult == null)
                 {
                     classForumResult = new ClassForumResult
@@ -162,7 +168,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
                     if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft)
                     {
-                        classForumResult = await GetClassForumResultToSubmissionCount(classForumResult, classForum, course.CourseType, cancellationToken);
+                        classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
                     }
 
                     classForumResult = _classForumResultRepository.Add(classForumResult);
@@ -182,37 +188,23 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
                     await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForum, request, cancellationToken);
                 }
-                else if (classForumResult != null && classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate <= classForumDetailResultAttemp1.ProcessDate!.Value.AddHours(2))
+                else if (classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate <= classForumDetailResultAttemp1.ProcessDate!.Value.AddHours(2))
                 {
-                    var classForumDetailResultModels = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult!.Id).ToListAsync(cancellationToken);
-
-                    if (classForumDetailResultModels.Count > 2)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
-                        return methodResult;
-                    }
-
                     var classForumDetailResult = new ClassForumDetailResult
                     {
                         Content = request.Content,
                         WordContent = request.WordContent,
                         Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
-                        ClassForumResultFiles = classForumResultFiles,
+                        ClassForumResultFiles = request.FilePaths?.Select(x => new ClassForumResultFile
+                        {
+                            FilePath = x
+                        }).ToList() ?? new List<ClassForumResultFile>(),
                         SubmissionCount = EnumSubmissionCount.SecondSubmit,
                         ProcessDate = DateTime.UtcNow,
                         ClassForumResultId = classForumResult.Id,
                     };
 
                     classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
-
-                    if (request.FilePaths != null)
-                    {
-                        classForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
-                        {
-                            FilePath = x,
-                            ClassForumDetailResultId = classForumDetailResult.Id
-                        }).ToList();
-                    }
 
                     _classForumDetailResultRepository.Add(classForumDetailResult);
                     await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -222,7 +214,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForum, request, cancellationToken);
                     }
                 }
-                else if (classForumDetailResult.Where(x => x.Id == request.ClassForumDetailResultId && x.Id == classForumResult!.Id).FirstOrDefault()?.Status == EnumClassForumResultStatus.Draft)
+                else if (classForumDetailResult.Where(x => x.Id == request.ClassForumDetailResultId && x.Id == classForumResult.Id).FirstOrDefault()?.Status == EnumClassForumResultStatus.Draft)
                 {
                     var classForumDetailResult = await _classForumDetailResultRepository.Queryable.Where(x => x.Id == request.ClassForumDetailResultId && x.Id == classForumResult!.Id).FirstOrDefaultAsync(cancellationToken);
                     _mapper.Map(request, classForumDetailResult);
@@ -236,7 +228,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         }).ToList();
                     }
 
-                    classForumResult = await GetClassForumResultToSubmissionCount(classForumResult!, classForum, course.CourseType, cancellationToken);
+                    classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
                     classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult);
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     if (request.IsSubmit)
@@ -250,21 +242,21 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     return methodResult;
                 }
 
-               /* //mặc định gửi cho tất cả CSO
-                IList<EnumRole> roles = new List<EnumRole>();
-                roles.Add(EnumRole.CSO);
+                /* //mặc định gửi cho tất cả CSO
+                 IList<EnumRole> roles = new List<EnumRole>();
+                 roles.Add(EnumRole.CSO);
 
-                NotificationSendingQueueModel model = new NotificationSendingQueueModel()
-                {
-                    ObjectId = classForumResult.Id,
-                    Roles = roles,
-                    Content = EnumNotificationContent.CreateClassForumResult,
-                    Type = EnumNotificationType.Text,
-                    SenderId = _authContext.CurrentUserId,
-                    PlatformCode = EnumPlatformCode.LMSAdmin
-                };
+                 NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+                 {
+                     ObjectId = classForumResult.Id,
+                     Roles = roles,
+                     Content = EnumNotificationContent.CreateClassForumResult,
+                     Type = EnumNotificationType.Text,
+                     SenderId = _authContext.CurrentUserId,
+                     PlatformCode = EnumPlatformCode.LMSAdmin
+                 };
 
-                await _notificationMessagePublisher.Publish(model, cancellationToken);*/
+                 await _notificationMessagePublisher.Publish(model, cancellationToken);*/
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
@@ -297,30 +289,25 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                : EnumTokenMission.ClassForumSpeakingAudio;
         }
 
-        private async Task<ClassForumResult> GetClassForumResultToSubmissionCount(ClassForumResult classForumResult, ClassForum classForum, EnumCourseType courseType, CancellationToken cancellationToken)
+        private async Task<int?> GetTokenAsync(ClassForum classForum, ClassForumResult classForumResult, EnumCourseType courseType)
         {
             var classForumDetailResult = classForumResult.ClassForumDetailResults.Where(x => x.ClassForumResultId == classForumResult.Id).FirstOrDefault();
-
-            var token = await GetToken(GetTokenMission(classForum, classForumDetailResult!), courseType);
-            classForumResult.TokenFirstTime = token;
-
-            return classForumResult;
-        }
-
-        private async Task<int> GetToken(EnumTokenMission tokenMission, EnumCourseType courseType)
-        {
-            var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+            if (classForumDetailResult != null && classForumDetailResult.Status == EnumClassForumResultStatus.Pending)
             {
-                Feature = EnumTokenFeature.Learn,
-                Mission = tokenMission,
-                CourseType = courseType
-            });
-            if (!tokenConfigs.IsSuccessStatusCode)
-            {
-                return default;
+                var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
+                {
+                    Feature = EnumTokenFeature.Learn,
+                    Mission = GetTokenMission(classForum, classForumDetailResult),
+                    CourseType = courseType
+                });
+                if (!tokenConfigs.IsSuccessStatusCode)
+                {
+                    return default;
+                }
+                var tokenConfig = tokenConfigs.Content?.Result;
+                return (int?)(tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
             }
-            var tokenConfig = tokenConfigs.Content?.Result;
-            return (int)(tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default);
+            return default;
         }
 
         private async Task<Guid> PublishAIClassForumResponseAsync(Guid classForumDetailResultId, ClassForum classForum, CreateClassForumResultCommand request, CancellationToken cancellationToken)
