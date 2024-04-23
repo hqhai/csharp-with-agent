@@ -47,15 +47,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                                                          .FirstOrDefaultAsync(x => x.Id == classForumResult.LessonResultId, cancellationToken);
             if (lessonResult != null)
             {
-                if (classForumResult.Status == EnumClassForumResultStatus.Pending)
-                {
-                    await UpdateHomeWorks(classForumResult, cancellationToken);
-                }
+                await UpdateHomeWorksAsync(classForumResult, cancellationToken);
                 await UpdateLessonResultAsync(lessonResult, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private async Task UpdateHomeWorks(ClassForumResult classForumResult, CancellationToken cancellationToken)
+        private async Task UpdateHomeWorksAsync(ClassForumResult classForumResult, CancellationToken cancellationToken)
         {
             var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == classForumResult.LessonResultId && x.Status == EnumResultStatus.Unfinished).ToListAsync(cancellationToken);
             if (homeWorkResults != null && homeWorkResults.Any())
