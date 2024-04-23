@@ -133,9 +133,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
 
+            var classForumDetailResultModels = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult!.Id).ToListAsync(cancellationToken);
+
+            if (classForumDetailResultModels.Count > 2)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
+                return methodResult;
+            }
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                List<ClassForumResultFile> classForumResultFiles = new List<ClassForumResultFile>();
                 if (classForumResult == null)
                 {
                     classForumResult = new ClassForumResult
@@ -184,35 +190,21 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 }
                 else if (classForumResult != null && classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate <= classForumDetailResultAttemp1.ProcessDate!.Value.AddHours(2))
                 {
-                    var classForumDetailResultModels = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult!.Id).ToListAsync(cancellationToken);
-
-                    if (classForumDetailResultModels.Count > 2)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
-                        return methodResult;
-                    }
-
                     var classForumDetailResult = new ClassForumDetailResult
                     {
                         Content = request.Content,
                         WordContent = request.WordContent,
                         Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
-                        ClassForumResultFiles = classForumResultFiles,
+                        ClassForumResultFiles = request.FilePaths?.Select(x => new ClassForumResultFile
+                        {
+                            FilePath = x
+                        }).ToList() ?? new List<ClassForumResultFile>(),
                         SubmissionCount = EnumSubmissionCount.SecondSubmit,
                         ProcessDate = DateTime.UtcNow,
                         ClassForumResultId = classForumResult.Id,
                     };
 
                     classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
-
-                    if (request.FilePaths != null)
-                    {
-                        classForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
-                        {
-                            FilePath = x,
-                            ClassForumDetailResultId = classForumDetailResult.Id
-                        }).ToList();
-                    }
 
                     _classForumDetailResultRepository.Add(classForumDetailResult);
                     await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -250,21 +242,21 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     return methodResult;
                 }
 
-               /* //mặc định gửi cho tất cả CSO
-                IList<EnumRole> roles = new List<EnumRole>();
-                roles.Add(EnumRole.CSO);
+                /* //mặc định gửi cho tất cả CSO
+                 IList<EnumRole> roles = new List<EnumRole>();
+                 roles.Add(EnumRole.CSO);
 
-                NotificationSendingQueueModel model = new NotificationSendingQueueModel()
-                {
-                    ObjectId = classForumResult.Id,
-                    Roles = roles,
-                    Content = EnumNotificationContent.CreateClassForumResult,
-                    Type = EnumNotificationType.Text,
-                    SenderId = _authContext.CurrentUserId,
-                    PlatformCode = EnumPlatformCode.LMSAdmin
-                };
+                 NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+                 {
+                     ObjectId = classForumResult.Id,
+                     Roles = roles,
+                     Content = EnumNotificationContent.CreateClassForumResult,
+                     Type = EnumNotificationType.Text,
+                     SenderId = _authContext.CurrentUserId,
+                     PlatformCode = EnumPlatformCode.LMSAdmin
+                 };
 
-                await _notificationMessagePublisher.Publish(model, cancellationToken);*/
+                 await _notificationMessagePublisher.Publish(model, cancellationToken);*/
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
