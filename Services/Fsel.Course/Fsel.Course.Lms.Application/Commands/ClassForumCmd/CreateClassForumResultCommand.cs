@@ -132,14 +132,17 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     .Include(x => x.ClassForumResultFiles)
                     .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
-
-            var classForumDetailResultModels = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult!.Id).ToListAsync(cancellationToken);
-
-            if (classForumDetailResultModels.Count > 2)
+            if (classForumResult != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
-                return methodResult;
+                var classForumDetailResultModels = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult!.Id).ToListAsync(cancellationToken);
+
+                if (classForumDetailResultModels.Count > 2)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
+                    return methodResult;
+                }
             }
+
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
                 if (classForumResult == null)
@@ -149,6 +152,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         StudentId = studentId,
                         LessonResultId = request.LessonResultId,
                         ClassForumId = classForum.Id,
+                        SubmissionCount = EnumSubmissionCount.FirstSubmit,
                     };
 
                     var classForumDetailResult = new ClassForumDetailResult
@@ -181,7 +185,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     //await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft)
+                    if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft && classForumResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
                     {
                         await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
                     }
@@ -228,12 +232,27 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         }).ToList();
                     }
 
-                    classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
                     classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult);
+                    await _classForumDetailResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                    classForumResult = _classForumResultRepository.Update(classForumResult);
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     if (request.IsSubmit)
                     {
                         await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForum, request, cancellationToken);
+                    }
+
+                    if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft && classForumResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
+                    {
+                        await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
+
+                        classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
+
+                        classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult);
+                        await _classForumDetailResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                        classForumResult = _classForumResultRepository.Update(classForumResult);
+                        await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
                 else
