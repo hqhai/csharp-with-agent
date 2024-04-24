@@ -365,8 +365,8 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 else
                 {
-                    var textQuestion = dataQuestion.To?.FirstOrDefault(x => x.Id == link.ToId)?.Content.TrimHiddenChars();
-                    var textAnswer = dataQuestion.To?.FirstOrDefault(x => x.Id == item.ToId)?.Content.TrimHiddenChars();
+                    var textQuestion = dataQuestion.To?.FirstOrDefault(x => x.Id == link.ToId)?.Content.ReplaceWord();
+                    var textAnswer = dataQuestion.To?.FirstOrDefault(x => x.Id == item.ToId)?.Content.ReplaceWord();
                     var isExact = dataQuestion.Link.Any(x => x.FromId == item.FromId && (item.ToId.HasValue && x.ToId == item.ToId))
                         || textAnswer == textQuestion;
 
