@@ -4,10 +4,12 @@ namespace Fsel.System.Application.Commands.GoogleSheets
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Shared.Constants;
     using Fsel.System.Domain.Models.CommandModels.GoogleSheets;
     using Fsel.System.Infrastructure.ValueSettings;
     using global::System;
+    using global::System.Globalization;
     using global::System.Threading.Tasks;
     using Google.Apis.Auth.OAuth2;
     using Google.Apis.Services;
@@ -45,7 +47,7 @@ namespace Fsel.System.Application.Commands.GoogleSheets
 
             var credentialsPath = ResourceSettings.I18NCredentialsFilePath;
 
-            var data = request.Model?.Select(item => new List<object> { item?.Email ?? string.Empty, item?.PhoneNumber ?? string.Empty, item?.FullName ?? string.Empty }).ToList();
+            var data = request.Model?.Select(item => new List<object> { item?.Email ?? string.Empty, item?.PhoneNumber ?? string.Empty, item?.FullName ?? string.Empty, DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam).ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture) }).ToList();
 
             GoogleCredential credential;
 
