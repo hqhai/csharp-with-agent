@@ -48,11 +48,19 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
                     var featureAccessTimeCheck = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == request.UserId && (x.ObjectId == request.ObjectId || x.EnumFeature == EnumFeature.Other) && x.EnumFeature == featureType, cancellationToken);
 
-                    if (featureAccessTimeCheck == null)
+                    if (featureAccessTimeCheck == null || !IsSameRangeHour(featureAccessTimeCheck))
+                    {
+                        AddNewFeatureAccessTime(request, seconds, time);
+                    }
+                    else if (featureAccessTimeCheck != null && request.LessonId == null && !IsSameRangeHour(featureAccessTimeCheck))
                     {
                         AddNewFeatureAccessTime(request, seconds, time);
                     }
                     else if (featureAccessTimeCheck != null && IsSameRangeHour(featureAccessTimeCheck))
+                    {
+                        UpdateExistingFeatureAccessTime(featureAccessTimeCheck, request, seconds, time);
+                    }
+                    else if (featureAccessTimeCheck != null)
                     {
                         UpdateExistingFeatureAccessTime(featureAccessTimeCheck, request, seconds, time);
                     }
@@ -72,7 +80,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
         private static EnumFeature ConvertType(string value)
         {
-            return Enum.TryParse<EnumFeature>(value, out EnumFeature result) ? result : EnumFeature.Other;
+            return Enum.TryParse(value, out EnumFeature result) ? result : EnumFeature.Other;
         }
 
         private void AddNewFeatureAccessTime(SaveFeatureAccessTimeCommand request, long accessTime, DateTime vistedTime)
