@@ -8,17 +8,17 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
     using Fsel.Shared.Constants;
     using MassTransit;
 
-    public class SetTimeToClassForumApprovalConsumer : IConsumer<BaseQueueModel>
+    public class SetTimeToClassForumApprovalConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
     {
         public SetTimeToClassForumApprovalConsumer()
         {
         }
 
-        public Task Consume(ConsumeContext<BaseQueueModel> context)
+        public Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
         {
             if (context != null)
             {
-                JobExtensions.SetScheduleJob<UpdateClassForumResultToExpiredTimeWorker, BaseQueueModel>(TimeSpan.FromHours(ValueSettings.DelayTwoHours), context.Message);
+                JobExtensions.SetScheduleJob<UpdateClassForumResultToExpiredTimeWorker, BaseQueueModel>(TimeSpan.FromHours(ValueSettings.DelayTwoHours), context.Message.Data);
             }
             return Task.CompletedTask;
         }

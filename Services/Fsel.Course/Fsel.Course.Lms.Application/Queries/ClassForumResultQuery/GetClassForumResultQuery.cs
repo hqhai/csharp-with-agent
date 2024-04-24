@@ -156,8 +156,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 }).ToList(),
             };
             var studentResult = await _userService.GetStudentByUserIdAsync(classForumResultModel.CreatedUserId);
-            var student = studentResult.Content?.Result;
-            classForumResultModel.CourseLevel = student!.CourseLevel;
+            var student = studentResult?.Content?.Result;
+            if (student?.CourseLevel != null)
+            {
+                classForumResultModel.CourseLevel = student.CourseLevel;
+            }
 
             List<Guid> classForumResultIds = new List<Guid>() { classForumResultModel.Id };
             var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResultIds, UserId = _authContext.CurrentUserId });
