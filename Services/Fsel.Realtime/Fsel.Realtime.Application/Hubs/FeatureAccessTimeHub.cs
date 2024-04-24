@@ -25,7 +25,7 @@ namespace Fsel.Realtime.Application.Hubs
             await base.OnConnectedAsync();
 
 
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
+            await Groups.AddToGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
         }
 
