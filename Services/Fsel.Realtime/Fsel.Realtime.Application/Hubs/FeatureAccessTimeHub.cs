@@ -35,33 +35,32 @@ namespace Fsel.Realtime.Application.Hubs
 
             Guid userId = _authContext.CurrentUserId;
             string type = (Context.GetHttpContext()?.Request.Query["Type"].ToString()!);
-            Guid objectId = new Guid(Context.GetHttpContext()?.Request.Query["ObjectId"].ToString()!);
-            Guid courseId = new Guid(Context.GetHttpContext()?.Request.Query["CourseId"].ToString()!);
-            Guid lessonId = new Guid(Context.GetHttpContext()?.Request.Query["LessonId"].ToString()!);
+            string lessonId = Context.GetHttpContext()?.Request.Query["LessonId"].ToString()!;
+            string unitId = Context.GetHttpContext()?.Request.Query["UnitId"].ToString()!;
+            string courseId = Context.GetHttpContext()?.Request.Query["CourseId"].ToString()!;
+            string objectId = Context.GetHttpContext()?.Request.Query["ObjectId"].ToString()!;
 
             // Ghi nhận thời điểm ngắt kết nối và tính toán thời gian kết nối
             var duration = ConnectionTracker.Instance.RecordConnectionEnd(Context.ConnectionId);
-            if (duration.HasValue)
+
+            TrackingTimeModel model = new TrackingTimeModel
             {
-                TrackingTimeModel model = new TrackingTimeModel
-                {
-                    UserId = userId,
-                    EnumFeature = type,
-                    ObjectId = objectId,
-                    UnitId = userId,
-                    LessonId = lessonId,
-                    CourseId = courseId,
-                    AccessTime = duration
-                };
+                UserId = userId,
+                EnumFeature = type,
+                ObjectId = string.IsNullOrEmpty(objectId) ? null : new Guid(objectId),
+                UnitId = string.IsNullOrEmpty(unitId) ? null : new Guid(unitId),
+                LessonId = string.IsNullOrEmpty(lessonId) ? null : new Guid(lessonId),
+                CourseId = string.IsNullOrEmpty(courseId) ? null : new Guid(courseId),
+                AccessTime = duration
+            };
 
 
-                if (!string.IsNullOrEmpty(userId.ToString()))
-                {
-                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId.ToString());
-                }
-
-                await _accessTimePublisher.Publish(model, CancellationToken.None);
+            if (!string.IsNullOrEmpty(userId.ToString()))
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId.ToString());
             }
+
+            await _accessTimePublisher.Publish(model, CancellationToken.None);
         }
     }
 }
