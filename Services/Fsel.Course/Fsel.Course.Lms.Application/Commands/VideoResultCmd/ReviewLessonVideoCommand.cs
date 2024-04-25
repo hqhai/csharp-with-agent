@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoResultModel> methodResult = new MethodResult<VideoResultModel>();
 
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken: cancellationToken);
+            var videoResult = await _videoResultRepository.Queryable.Include(x => x.LessonResult).FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken: cancellationToken);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 return methodResult;
             }
             var video = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
-                                                        .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
+                                                        .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done))
                                                         .FirstOrDefaultAsync(x => x.Id == videoResult.VideoId, cancellationToken: cancellationToken);
             if (video == null)
             {
