@@ -13,9 +13,10 @@
   //    $(this).val('')
   //  }
   //});
+
   $('#form-Register').on('submit', function (e) {
     $('.loading').removeClass('hidden');
-  })
+  });
 
   flatpickr("#Birthday", {
     position: "right",

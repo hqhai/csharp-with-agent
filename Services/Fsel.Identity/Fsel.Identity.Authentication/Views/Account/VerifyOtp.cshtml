@@ -17,7 +17,7 @@
     Vui lòng kiểm tra Email đăng ký của bạn và xác thực OTP
 </p>
 
-<form asp-route="VerifyOtp">
+<form id="form-VerifyOtp" asp-route="VerifyOtp">
     <input type="hidden" asp-for="ReturnUrl" />
     @Html.AntiForgeryToken()
 

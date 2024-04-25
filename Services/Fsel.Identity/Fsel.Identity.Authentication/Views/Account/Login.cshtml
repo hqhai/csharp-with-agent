@@ -12,7 +12,7 @@
 
 @if (Model.EnableLocalLogin)
 {
-    <form asp-route="Login">
+    <form id="form-Login" asp-route="Login">
         <input type="hidden" asp-for="ReturnUrl" />
         @Html.AntiForgeryToken()
 

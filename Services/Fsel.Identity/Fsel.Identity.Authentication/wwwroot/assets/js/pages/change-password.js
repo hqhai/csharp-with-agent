@@ -1,4 +1,7 @@
 (function ($) {
+  $('#form-ForgotPassword').on('submit', function (e) {
+    $('.loading').removeClass('hidden');
+  });
 
   const continueButton = $(".continue-btn");
   const steps = $(".section-survey");

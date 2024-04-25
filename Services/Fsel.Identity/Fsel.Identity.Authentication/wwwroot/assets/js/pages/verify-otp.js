@@ -1,4 +1,9 @@
 (function ($) {
+
+  $('#form-VerifyOtp').on('submit', function (e) {
+    $('.loading').removeClass('hidden');
+  });
+
   $(".number-item").keyup(function(event) {
       var currentInput = $(this);
       var index = $(".number-item").index(currentInput);

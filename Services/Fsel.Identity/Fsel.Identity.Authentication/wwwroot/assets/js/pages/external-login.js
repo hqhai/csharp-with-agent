@@ -3,7 +3,7 @@
   //  singleDatePicker: true,
   //  showDropdowns: true,
   //  minYear: 1901,
-  //  maxDate: moment(), 
+  //  maxDate: moment(),
   //  opens: "left",
   //  buttonClasses: "btn-sm",
   //})
@@ -13,6 +13,10 @@
   //    $(this).val('')
   //  }
   //});
+
+  $('#form-ExternalLogin').on('submit', function (e) {
+    $('.loading').removeClass('hidden');
+  });
 
   flatpickr("#Birthday", {
     position: "right",

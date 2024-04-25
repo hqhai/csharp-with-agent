@@ -1,4 +1,8 @@
 (function ($) {
+  $('#form-Login').on('submit', function (e) {
+    $('.loading').removeClass('hidden');
+  });
+
   const emailInput = $("#username");
   const passwordInput = $("#password");
   const loginButton = $("#loginButton");

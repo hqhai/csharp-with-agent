@@ -13,7 +13,7 @@
 }
 
 <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
-<form asp-action="ExternalLoginConfirmation">
+<form id="form-ExternalLogin" asp-action="ExternalLoginConfirmation">
     <input type="hidden" asp-for="ReturnUrl" />
     @Html.AntiForgeryToken()
 
