@@ -1,7 +1,34 @@
-﻿@if (ViewContext.ModelState.IsValid == false)
+@if (ViewContext.ModelState.IsValid == false)
 {
-    <div class="alert alert-danger">
+    @* <div class="alert alert-danger">
         <strong>Error</strong>
         <div asp-validation-summary="All" class="danger"></div>
+    </div> *@
+
+    @*
+    <div class="message-successfully" style="display: none">
+        <div class="message">
+            <i class="bx bx-check"></i>
+            <span> conect successfully</span>
+        </div>
+    </div>
+    <div class="message-error" style="display: none">
+        <div class="message">
+            <i class="bx bx-error"></i>
+            <span> conect successfully</span>
+        </div>
+    </div>
+    *@
+
+    <div class="message-error">
+        @foreach (var item in ViewContext.ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage))
+        {
+            <div class="message mt-3">
+                <i class="bx bx-error"></i>
+                <span>
+                    @item
+                </span>
+            </div>
+        }
     </div>
 }

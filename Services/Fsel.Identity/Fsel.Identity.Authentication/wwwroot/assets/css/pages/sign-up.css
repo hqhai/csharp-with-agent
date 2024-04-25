@@ -194,4 +194,3 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .cancelBtn:focus {
     outline: unset;
   }
-

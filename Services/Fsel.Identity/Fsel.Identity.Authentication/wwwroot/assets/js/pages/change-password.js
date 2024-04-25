@@ -1,32 +1,4 @@
 (function ($) {
-  //$('input[name="Birthday"]').daterangepicker({
-  //  singleDatePicker: true,
-  //  showDropdowns: true,
-  //  minYear: 1901,
-  //  maxDate: moment(),
-  //  opens: "left",
-  //  buttonClasses: "btn-sm",
-  //})
-  //.on("apply.daterangepicker", function (ev, picker) {
-  //  var selectedDate = picker.startDate.format("YYYY-MM-DD");
-  //  if (!picker.startDate.isValid() || !picker.endDate.isValid()) {
-  //    $(this).val('')
-  //  }
-  //});
-  $('#form-Register').on('submit', function (e) {
-    $('.loading').removeClass('hidden');
-  })
-
-  flatpickr("#Birthday", {
-    position: "right",
-
-    // Tuỳ chọn khác của datepicker
-  });
-  
-  $(document).on("click", ".available", function () {
-    $('input[name="Birthday"]').data("daterangepicker").hide();
-    $('input[name="Birthday"]').trigger("apply.daterangepicker");
-  });
 
   const continueButton = $(".continue-btn");
   const steps = $(".section-survey");
@@ -35,7 +7,7 @@
   let currentStep = 1;
   let isBack = false;
 
-  continueButton.on("click", function() {
+  continueButton.on("click", function () {
     if (currentStep < steps.length) {
       if (validateStep(currentStep)) {
         $(steps[currentStep - 1]).removeClass("active").addClass("hidden");
@@ -104,7 +76,7 @@
     }
   }
 
-  $("#backItem").on("click", function() {
+  $("#backItem").on("click", function () {
     validateStep(currentStep - 1);
     isBack === true;
     currentStep--;
@@ -346,7 +318,7 @@
     );
   }
 
-  policyCheckbox.on("change", function() {
+  policyCheckbox.on("change", function () {
     if (policyCheckbox.prop("checked")) {
       signUpButton.prop("disabled", false);
     } else {

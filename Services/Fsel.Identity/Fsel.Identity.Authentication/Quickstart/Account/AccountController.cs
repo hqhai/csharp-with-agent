@@ -53,6 +53,7 @@ using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using Fsel.Identity.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -78,6 +79,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly ILogger<AccountController> _logger;
         private readonly IParentRepository _parentRepository;
         private readonly IStudentRepository _studentRepository;
+        private readonly IUserOtpRepository _userOtpRepository;
 
         public AccountController(
             IIdentityServerInteractionService interaction,
@@ -91,7 +93,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             AppSetting appSetting,
             ILogger<AccountController> logger,
             IParentRepository parentRepository,
-            IStudentRepository studentRepository)
+            IStudentRepository studentRepository,
+            IUserOtpRepository userOtpRepository)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -109,6 +112,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             _logger = logger;
             _parentRepository = parentRepository;
             _studentRepository = studentRepository;
+            _userOtpRepository = userOtpRepository;
         }
 
         /// <summary>
@@ -155,7 +159,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     }
                     else
                     {
-                        var verify = await _userManager.VerifyUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName, request.Otp ?? string.Empty);
+                        var verify = await VerifyOtpAsync(user, request.Otp);
                         if (verify)
                         {
                             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -199,7 +203,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     }
                     else
                     {
-                        var verify = await _userManager.VerifyUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName, request.Otp ?? string.Empty);
+                        var verify = await VerifyOtpAsync(user, request.Otp);
                         if (verify)
                         {
                             TempData[nameof(ForgotPasswordModel)] = new ForgotPasswordModel
@@ -216,7 +220,26 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         }
                     }
                 }
+
+                var userOtp = await _userOtpRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == user.Id &&
+                    x.Status == EnumUserOtpStatus.New &&
+                    x.ExpiredTime >= DateTime.UtcNow &&
+                    x.Otp == request.Otp);
+
+                if (userOtp == null)
+                {
+                    ModelState.AddModelError(nameof(request.Otp), "Otp invalid");
+                }
+
+                if (DateTime.Compare(DateTime.UtcNow, userOtp.ExpiredTime) > 0)
+                {
+                    ModelState.AddModelError(nameof(request.Otp), "Otp expired");
+                }
+
+                userOtp.Status = EnumUserOtpStatus.Verified;
+                _userOtpRepository.Update(userOtp);
             }
+
 
             return View(request);
         }
@@ -352,15 +375,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     return View(request);
                 }
 
-                var otp = await _userManager.GenerateUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName);
-
-                var param = new
-                {
-                    OtpCode = otp,
-                    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
-                };
-                var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
-                var sendResult = await _mediator.Send(new SendOtpCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }).ConfigureAwait(false);
+                var sendResult = await SendOtpAsync(user);
                 if (!sendResult.IsOK)
                 {
                     ModelState.AddModelError(nameof(request.Email), "Failed to send OTP");
@@ -401,15 +416,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     return RedirectToAction(nameof(VerifyOtp));
                 }
             }
-
-            var otp = await _userManager.GenerateUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName);
-            var param = new
+            var sendResult = await SendOtpAsync(user);
+            if (!sendResult.IsOK)
             {
-                OtpCode = otp,
-                OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
-            };
-            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
-            var sendResult = await _mediator.Send(new SendOtpCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }).ConfigureAwait(false);
+                ModelState.AddModelError(nameof(user.Email), "Failed to send OTP");
+            }
 
             return RedirectToAction(nameof(VerifyOtp));
         }
@@ -468,15 +479,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                     }
 
-                    var otp = await _userManager.GenerateUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName);
-
-                    var param = new
-                    {
-                        OtpCode = otp,
-                        OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
-                    };
-                    var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
-                    var sendResult = await _mediator.Send(new SendOtpCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }).ConfigureAwait(false);
+                    var sendResult = await SendOtpAsync(user);
                     if (!sendResult.IsOK)
                     {
                         scope.Dispose();
@@ -494,6 +497,32 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             }
 
             return View(request);
+        }
+
+        private async Task<MethodResult<bool>> SendOtpAsync(User user)
+        {
+            //var otp = await _userManager.GenerateUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName);
+
+            var otpResult = await _mediator.Send(new CreateUserOtpCommand { UserId = user.Id }).ConfigureAwait(false);
+            var otp = otpResult?.Result;
+
+            var param = new
+            {
+                OtpCode = otp,
+                OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
+            };
+            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
+            var sendResult = await _mediator.Send(new SendOtpCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }).ConfigureAwait(false);
+
+            return sendResult;
+        }
+
+        private async Task<bool> VerifyOtpAsync(User user, string? otp)
+        {
+            //var verify = await _userManager.VerifyUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName, otp ?? string.Empty);
+
+            var otpResult = await _mediator.Send(new ConfirmUserOtpCommand { UserId = user.Id, Otp = otp }).ConfigureAwait(false);
+            return otpResult?.Result ?? false;
         }
 
         /// <summary>

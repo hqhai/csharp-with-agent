@@ -18,6 +18,7 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="~/assets/css/main.css" />
+    <link rel="stylesheet" href="~/assets/css/pages/common.css" />
     @RenderSection("styles", required: false)
 </head>
 <body>
@@ -39,6 +40,12 @@
 
         <div class="content">
             @RenderBody()
+        </div>
+    </div>
+
+    <div class="loading hidden" @* style="display: none !important" *@>
+        <div class="icon-loading">
+            <img src="/assets/gif/loading.gif" alt="" />
         </div>
     </div>
    
