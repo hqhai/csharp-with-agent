@@ -187,7 +187,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         }
                         else
                         {
-                            ModelState.AddModelError(nameof(request.Otp), "Otp invalid");
+                            ModelState.AddModelError(nameof(request.Otp), "OTP Invalid");
                         }
                     }
                 }
@@ -216,7 +216,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         }
                         else
                         {
-                            ModelState.AddModelError(nameof(request.Otp), "Otp invalid");
+                            ModelState.AddModelError(nameof(request.Otp), "OTP Invalid");
                         }
                     }
                 }

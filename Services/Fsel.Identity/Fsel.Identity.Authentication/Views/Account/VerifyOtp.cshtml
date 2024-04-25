@@ -21,88 +21,78 @@
     <input type="hidden" asp-for="ReturnUrl" />
     @Html.AntiForgeryToken()
 
-    <div class="number-list">
-        <input
-            @* onkeydown="moveToNext(event, this, 'otp-1', 'otp-2')"
-            onpaste="autoFill(event, this)" *@
-            class="number-item"
-            type="text"
-            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-            required
-            maxlength="1"
-            id="otp-1"
-            autocomplete="off"
-            name="otp-1"
-        />
-        <input
-            @* onkeydown="moveToNext(event, this, 'otp-1', 'otp-3')"
-            onpaste="autoFill(event, this)" *@
-            id="otp-2"
-            class="number-item"
-            type="text"
-            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-            required
-            maxlength="1"
-            name="otp-2"
-        />
-        <input
-            id="otp-3"
-            @* onkeydown="moveToNext(event, this, 'otp-2', 'otp-4')"
-            onpaste="autoFill(event, this)" *@
-            class="number-item"
-            type="text"
-            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-            required
-            maxlength="1"
-            autocomplete="off"
-            name="otp-3"
-        />
-        <input
-            id="otp-4"
-            @* onkeydown="moveToNext(event, this, 'otp-3', 'otp-5')"
-            onpaste="autoFill(event, this)" *@
-            class="number-item"
-            type="text"
-            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-            required
-            maxlength="1"
-            autocomplete="off"
-            name="otp-4"
-        />
-        <input
-            id="otp-5"
-            @* onkeydown="moveToNext(event, this, 'otp-4', 'otp-6')"
-            onpaste="autoFill(event, this)" *@
-            class="number-item"
-            type="text"
-            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-            required
-            maxlength="1"
-            autocomplete="off"
-            name="otp-5"
-        />
-        <input
-            id="otp-6"
-            @* onkeydown="moveToNext(event, this, 'otp-5', null)"
-            onpaste="autoFill(event, this)" *@
-            class="number-item"
-            type="text"
-            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-            required
-            maxlength="1"
-            autocomplete="off"
-            name="otp-6"
-        />
-    </div>
     <div>
-        <input type="hidden"
-                name="Otp"
-                id="otp"
-                placeholder=" "
-                autocomplete="off"
-                required
-                asp-for="Otp" />
-        @Html.ValidationMessageFor(model => model.Otp, "", new { @class = "text-danger" })
+        <div class="number-list">
+            <input @* onkeydown="moveToNext(event, this, 'otp-1', 'otp-2')"
+                   onpaste="autoFill(event, this)" *@
+                   class="number-item"
+                   type="text"
+                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                   required
+                   maxlength="1"
+                   id="otp-1"
+                   autocomplete="off"
+                   name="otp-1" />
+            <input @* onkeydown="moveToNext(event, this, 'otp-1', 'otp-3')"
+                   onpaste="autoFill(event, this)" *@
+                   id="otp-2"
+                   class="number-item"
+                   type="text"
+                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                   required
+                   maxlength="1"
+                   name="otp-2" />
+            <input id="otp-3"
+            @* onkeydown="moveToNext(event, this, 'otp-2', 'otp-4')"
+                   onpaste="autoFill(event, this)" *@
+                   class="number-item"
+                   type="text"
+                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                   required
+                   maxlength="1"
+                   autocomplete="off"
+                   name="otp-3" />
+            <input id="otp-4"
+            @* onkeydown="moveToNext(event, this, 'otp-3', 'otp-5')"
+                   onpaste="autoFill(event, this)" *@
+                   class="number-item"
+                   type="text"
+                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                   required
+                   maxlength="1"
+                   autocomplete="off"
+                   name="otp-4" />
+            <input id="otp-5"
+            @* onkeydown="moveToNext(event, this, 'otp-4', 'otp-6')"
+                   onpaste="autoFill(event, this)" *@
+                   class="number-item"
+                   type="text"
+                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                   required
+                   maxlength="1"
+                   autocomplete="off"
+                   name="otp-5" />
+            <input id="otp-6"
+            @* onkeydown="moveToNext(event, this, 'otp-5', null)"
+                   onpaste="autoFill(event, this)" *@
+                   class="number-item"
+                   type="text"
+                   onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                   required
+                   maxlength="1"
+                   autocomplete="off"
+                   name="otp-6" />
+        </div>
+        <div class="mt-2">
+            <input type="hidden"
+                   name="Otp"
+                   id="otp"
+                   placeholder=" "
+                   autocomplete="off"
+                   required
+                   asp-for="Otp" />
+            @Html.ValidationMessageFor(model => model.Otp, "", new { @class = "text-danger" })
+        </div>
     </div>
     <button type="submit" class="btn">Verify</button>
 </form>
@@ -112,7 +102,7 @@
     <a href="/Account/ResendOtp">Resend OTP</a>
 </div>
 
-<partial class="mt-3" name="_ValidationSummary" />
+@* <partial class="mt-3" name="_ValidationSummary" /> *@
 
 @section scripts {
     @{

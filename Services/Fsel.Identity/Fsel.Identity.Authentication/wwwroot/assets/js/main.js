@@ -16,4 +16,8 @@
     $("#languageContainer .language").html(currentHtml);
   });
 
+  setTimeout(function () {
+    $(".message-error").hide();
+  }, 3000);
+
 }(jQuery));	
