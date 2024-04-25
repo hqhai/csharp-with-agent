@@ -12,6 +12,7 @@ namespace Fsel.Shared.Constants
         }
 
         public const int DelayOneMinute = 1;
+        public const int DelayTenMinutes = 10;
         public const int DelayTwoHours = 2;
         public const int DelayWorkerSecond = 60;
         public const int AmountTrialDays = 14;
