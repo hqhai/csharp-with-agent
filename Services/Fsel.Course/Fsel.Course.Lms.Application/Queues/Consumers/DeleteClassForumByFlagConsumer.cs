@@ -8,7 +8,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using MassTransit;
     using MediatR;
 
-    public class DeleteClassForumByFlagConsumer : IConsumer<DeleteClassForumByFlagQueueModel>
+    public class DeleteClassForumByFlagConsumer : Core.Base.Interfaces.IBaseConsumer<DeleteClassForumByFlagQueueModel>
     {
         private readonly IMediator _mediator;
 
@@ -17,13 +17,13 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<DeleteClassForumByFlagQueueModel> context)
+        public async Task Consume(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<DeleteClassForumByFlagQueueModel>> context)
         {
             if (context == null)
             {
                 return;
             }
-            var data = context.Message;
+            var data = context.Message?.Data;
 
             var classForum = new DeleteClassForumByFlagCommand
             {

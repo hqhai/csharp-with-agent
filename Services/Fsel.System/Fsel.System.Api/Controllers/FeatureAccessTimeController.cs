@@ -18,7 +18,8 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Domain.IRepositories;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/feature-access-time")]
     [ApiController]
     public class FeatureAccessTimeController : BaseController
@@ -109,6 +110,17 @@ namespace Fsel.System.Api.Controllers
         }
 
 
+        /// <summary>
+        /// Get feature access business
+        /// </summary>
+        [HttpPost("get-feature-access-time-by-userIds")]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeBusinessModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetFeatureAccessTimeByUserId([FromBody] IList<Guid> userIds)
+        {
+            var queryResult = await _mediator.Send(new GetFeatureAccessTimeByUserIdQuery { UserIds = userIds }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
 
 
     }

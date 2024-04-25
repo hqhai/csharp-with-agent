@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -18,9 +19,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
 
     public class GetSectionBySectionGroupIdQuery : IRequest<MethodResult<SectionGroupDtoModel>>
     {
@@ -41,8 +44,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly ILogger<object> _logger;
 
-        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, IMockTestScoreRepository mockTestScoreRepository, DateTimeConverter dateTimeConverter, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository)
+        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, IMockTestScoreRepository mockTestScoreRepository, DateTimeConverter dateTimeConverter, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository, ILogger<object> logger)
         {
             _sectionRepository = sectionRepository;
             _mockTestScoreRepository = mockTestScoreRepository;
@@ -55,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             _userService = userService;
             _mapper = mapper;
             _sectionGroupRepository = sectionGroupRepository;
+            _logger = logger;
         }
 
         public async Task<MethodResult<SectionGroupDtoModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
@@ -109,6 +114,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
+                _logger.LoggerRequest(request);
+
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking)

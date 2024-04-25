@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Fsel.System.Application.Queues.Consumers
 {
-    public class NoticeAccessFeatureConsumer : IConsumer<BaseQueueModel>
+    public class NoticeAccessFeatureConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
@@ -15,7 +15,7 @@ namespace Fsel.System.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
         {
             if (context != null)
             {
