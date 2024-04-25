@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -51,21 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly ILogger<object> _logger;
 
-        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
-            QuestionConverter questionConverter,
-            IHomeWorkAnswerRepository homeWorkAnswerRepository,
-            IHomeWorkRepository homeWorkRepository,
-            IMediator mediator,
-            IUserService userService,
-            AuthContext authContext,
-            ICourseRepository courseRepository,
-            ILessonResultRepository lessonResultRepository,
-            ISystemService systemService,
-            FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
-            IQuestionRepository questionRepository,
-            CreateTokenHistoryPublisher createTokenHistoryPublisher,
-            ILogger<object> logger
-            )
+        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _questionConverter = questionConverter;
@@ -87,6 +72,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<HomeWorkModel>();
+            _logger.LoggerRequest(request);
+
             if (request.Answers == null || !request.Answers.Any())
             {
                 if (request.IsSubmit)
@@ -99,7 +86,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 }
                 return methodResult;
             }
-            _logger.LogError(ConvertHelper.Serialize(request));
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
