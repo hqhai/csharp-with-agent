@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Fsel.Identity.Application.Queues.Consumers
 {
-    public class UpdateTrialStudentStatusConsumer : IConsumer<BaseQueueModel>
+    public class UpdateTrialStudentStatusConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
@@ -17,7 +17,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
         {
             await _mediator.Send(new UpdateExpireTrialStudentCommand()).ConfigureAwait(false);
         }

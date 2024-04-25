@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Fsel.Ordering.Application.Queues.Consumers
 {
-    public class NoticePaymentConsumer : IConsumer<BaseQueueModel>
+    public class NoticePaymentConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
@@ -14,9 +14,9 @@ namespace Fsel.Ordering.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
         {
-            var message = context?.Message;
+            var message = context?.Message?.Data;
             if (message == null)
             {
                 return;

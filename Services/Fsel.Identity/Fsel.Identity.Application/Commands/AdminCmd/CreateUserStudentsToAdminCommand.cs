@@ -5,23 +5,25 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.Models.CommandModels.Admins;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Net.Http.Headers;
 
-    public class CreateUserStudentsToAdminCommand : IRequest<MethodResult<IList<UserModel>>>
+    public class CreateUserStudentsToAdminCommand : CreateUserStudentsToAdminCommandModel, IRequest<MethodResult<IList<UserModel>>>
     {
-        public IList<string>? Emails { get; set; }
-        public Guid CourseId { get; set; }
     }
 
     public class CreateUserStudentsToAdminCommandHandler : IRequestHandler<CreateUserStudentsToAdminCommand, MethodResult<IList<UserModel>>>
     {
         private readonly IMediator _mediator;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CreateUserStudentsToAdminCommandHandler(IMediator mediator)
+        public CreateUserStudentsToAdminCommandHandler(IMediator mediator, IHttpContextAccessor httpContextAccessor)
         {
             _mediator = mediator;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<MethodResult<IList<UserModel>>> Handle(CreateUserStudentsToAdminCommand request, CancellationToken cancellationToken)
@@ -33,10 +35,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Emails));
                 return methodResult;
             }
+            var tokenAdmin = _httpContextAccessor.HttpContext?.Request.Headers[HeaderNames.Authorization].ToString();
             var listUser = new List<UserModel>();
             foreach (var email in request.Emails)
             {
-                var userResult = await _mediator.Send(new CreateUserStudentToAdminCommand { CourseId = request.CourseId, Email = email }, cancellationToken);
+                var userResult = await _mediator.Send(new CreateUserStudentToAdminCommand { CourseId = request.CourseId, Email = email, IsTrialRegistration = request.IsTrialRegistration }, cancellationToken);
                 if (!userResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(userResult.ErrorMessages);
@@ -45,6 +48,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 if (userResult.Result != null)
                 {
                     listUser.Add(userResult.Result);
+                }
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = tokenAdmin;
                 }
             }
             methodResult.Result = listUser;

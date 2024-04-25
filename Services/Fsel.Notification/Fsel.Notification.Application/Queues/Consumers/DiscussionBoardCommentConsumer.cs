@@ -1,3 +1,4 @@
+using Fsel.Core.Base.BaseModels;
 using Fsel.Notification.Application.Commands;
 using Fsel.Shared.Models.ShareModels;
 using MassTransit;
@@ -5,7 +6,7 @@ using MediatR;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
-    public class DiscussionBoardCommentConsumer : IConsumer<DiscussionBoardQueueModel>
+    public class DiscussionBoardCommentConsumer : Core.Base.Interfaces.IBaseConsumer<DiscussionBoardQueueModel>
     {
         private readonly IMediator _mediator;
 
@@ -14,9 +15,9 @@ namespace Fsel.Notification.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<DiscussionBoardQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<DiscussionBoardQueueModel>> context)
         {
-            var dataReceipt = context?.Message;
+            var dataReceipt = context?.Message?.Data;
 
             if (dataReceipt != null)
             {

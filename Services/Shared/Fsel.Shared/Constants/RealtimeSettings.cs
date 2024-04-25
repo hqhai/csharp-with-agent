@@ -48,5 +48,14 @@ namespace Fsel.Shared.Constants
                 public const string MockTestWritingAIFeedBack = $"MockTestWritingAIFeedBack";
             }
         }
+
+        public static class FeatureAccessTimeHub
+        {
+            public const string Pattern = $"/feature-access-time";
+            public static class Methods
+            {
+                public const string FeatureAccessTime = $"FeatureAccessTime";
+            }
+        }
     }
 }
