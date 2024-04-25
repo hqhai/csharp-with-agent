@@ -124,11 +124,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             if (skillScores != null && skillScores.Any())
             {
+                var correctCount = skillScores.Sum(x => x.CorrectCount);
+                var correctTotal = skillScores.Sum(x => x.TotalCount);
                 return new BaseScoreResultModule
                 {
-                    CorrectCount = skillScores.Sum(x => x.CorrectCount),
-                    CorrectTotal = skillScores.Sum(x => x.TotalCount),
-                    Percent = NumberHelper.ConvertRound((skillScores.Sum(x => x.CorrectCount) / skillScores.Sum(x => x.TotalCount)) * percentAchieved),
+                    CorrectCount = correctCount,
+                    CorrectTotal = correctTotal,
+                    Percent = correctTotal > 0 ? NumberHelper.ConvertRound((correctCount / correctTotal) * percentAchieved) : default,
                     SkillScores = skillScores
                 };
             }
