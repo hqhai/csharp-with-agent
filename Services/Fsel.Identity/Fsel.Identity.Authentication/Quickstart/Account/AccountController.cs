@@ -220,26 +220,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         }
                     }
                 }
-
-                var userOtp = await _userOtpRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == user.Id &&
-                    x.Status == EnumUserOtpStatus.New &&
-                    x.ExpiredTime >= DateTime.UtcNow &&
-                    x.Otp == request.Otp);
-
-                if (userOtp == null)
-                {
-                    ModelState.AddModelError(nameof(request.Otp), "Otp invalid");
-                }
-
-                if (DateTime.Compare(DateTime.UtcNow, userOtp.ExpiredTime) > 0)
-                {
-                    ModelState.AddModelError(nameof(request.Otp), "Otp expired");
-                }
-
-                userOtp.Status = EnumUserOtpStatus.Verified;
-                _userOtpRepository.Update(userOtp);
             }
-
 
             return View(request);
         }

@@ -8,13 +8,13 @@
     @*
     <div class="message-successfully" style="display: none">
         <div class="message">
-            <i class="bx bx-check"></i>
+            <i class="fa fa-check"></i>
             <span> conect successfully</span>
         </div>
     </div>
     <div class="message-error" style="display: none">
         <div class="message">
-            <i class="bx bx-error"></i>
+            <i class="fa fa-times-circle"></i>
             <span> conect successfully</span>
         </div>
     </div>
@@ -24,7 +24,7 @@
         @foreach (var item in ViewContext.ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage))
         {
             <div class="message mt-3">
-                <i class="bx bx-error"></i>
+                <i class="fa fa-times-circle"></i>
                 <span>
                     @item
                 </span>

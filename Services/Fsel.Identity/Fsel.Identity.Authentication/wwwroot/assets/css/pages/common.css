@@ -46,6 +46,7 @@
     display: flex;
     align-items: center;
     border: 1px solid green;
+    padding: 0px 15px;
   }
 
   .message-error .message {
@@ -58,6 +59,7 @@
     display: flex;
     align-items: center;
     border: 1px solid rgb(226, 86, 86);
+    padding: 0px 15px;
   }
 
     .message-error .message i {
@@ -70,9 +72,7 @@
 
   .message-successfully .message span,
   .message-error .message span {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    margin-right: 15px;
+    margin-left: 10px;
     line-height: 17px;
   }
 
