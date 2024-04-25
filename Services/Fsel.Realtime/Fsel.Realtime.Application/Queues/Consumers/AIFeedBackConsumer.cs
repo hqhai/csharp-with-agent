@@ -1,3 +1,4 @@
+using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
@@ -9,18 +10,18 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class AIFeedBackConsumer : Core.Base.Interfaces.IBaseConsumer<SubmitAIResponseModel>
+    public class AIFeedBackConsumer : BaseConsumer<SubmitAIResponseModel>
     {
         private readonly IHubContext<ClassForumAIFeedBackHub> _classForumFeedBackHubContext;
         private readonly IQueueProvider _queueProvider;
 
-        public AIFeedBackConsumer(IHubContext<ClassForumAIFeedBackHub> classForumAIFeedBackHubContext, IQueueProvider queueProvider)
+        public AIFeedBackConsumer(IHubContext<ClassForumAIFeedBackHub> classForumAIFeedBackHubContext, IQueueProvider queueProvider, AuthContext authContext) : base(authContext)
         {
             _classForumFeedBackHubContext = classForumAIFeedBackHubContext;
             _queueProvider = queueProvider;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueDataModel<SubmitAIResponseModel>> context)
+        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<SubmitAIResponseModel>> context)
         {
             if (context != null && context.Message.Data != null)
             {

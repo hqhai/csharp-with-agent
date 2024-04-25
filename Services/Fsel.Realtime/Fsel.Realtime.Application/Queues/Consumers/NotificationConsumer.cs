@@ -11,18 +11,18 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class NotificationConsumer : BaseConsumer<NotificationQueueModel>, Core.Base.Interfaces.IBaseConsumer<NotificationQueueModel>
+    public class NotificationConsumer : BaseConsumer<NotificationQueueModel>
     {
         private readonly IHubContext<NotificationHub> _notificationHubContext;
         private readonly IQueueProvider _queueProvider;
 
-        public NotificationConsumer(IHubContext<NotificationHub> notificationHubContext, IQueueProvider queueProvider, AuthContext authContext) : base(authContext) 
+        public NotificationConsumer(IHubContext<NotificationHub> notificationHubContext, IQueueProvider queueProvider, AuthContext authContext) : base(authContext)
         {
             _notificationHubContext = notificationHubContext;
             _queueProvider = queueProvider;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueDataModel<NotificationQueueModel>> context)
+        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<NotificationQueueModel>> context)
         {
             if (context != null && context!.Message!.Data.UserIds != null)
             {

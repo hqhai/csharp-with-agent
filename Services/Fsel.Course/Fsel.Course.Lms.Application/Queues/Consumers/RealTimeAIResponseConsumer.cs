@@ -6,17 +6,18 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using MassTransit;
     using MediatR;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
+    using Fsel.Core.Base;
 
-    public class RealTimeAIResponseConsumer : Core.Base.Interfaces.IBaseConsumer<ClassForumAIResponseModel>
+    public class RealTimeAIResponseConsumer : BaseConsumer<ClassForumAIResponseModel>
     {
         private readonly IMediator _mediator;
 
-        public RealTimeAIResponseConsumer(IMediator mediator)
+        public RealTimeAIResponseConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<ClassForumAIResponseModel>> context)
+        public override async Task ConsumeQueue(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<ClassForumAIResponseModel>> context)
         {
             if (context == null)
             {

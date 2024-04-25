@@ -2,6 +2,7 @@
 
 namespace Fsel.Hangfire.Application.Queues.Consumers
 {
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Hangfire.Application.Workers;
@@ -9,13 +10,13 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
     using Fsel.Shared.Models.ShareModels;
     using MassTransit;
 
-    public class SetTimeToCompleteTestConsumer : Core.Base.Interfaces.IBaseConsumer<SetTimeToCompleteTestModel>
+    public class SetTimeToCompleteTestConsumer : BaseConsumer<SetTimeToCompleteTestModel>
     {
-        public SetTimeToCompleteTestConsumer()
+        public SetTimeToCompleteTestConsumer(AuthContext authContext) : base(authContext)
         {
         }
 
-        public Task Consume(ConsumeContext<BaseQueueDataModel<SetTimeToCompleteTestModel>> context)
+        public override Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<SetTimeToCompleteTestModel>> context)
         {
             if (context != null)
             {

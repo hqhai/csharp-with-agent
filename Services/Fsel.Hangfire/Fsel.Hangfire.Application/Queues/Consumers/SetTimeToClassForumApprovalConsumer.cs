@@ -3,6 +3,7 @@
 namespace Fsel.Hangfire.Application.Queues.Consumers
 {
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Hangfire.Application.Workers;
@@ -10,16 +11,16 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
     using MassTransit;
     using Microsoft.Extensions.Hosting;
 
-    public class SetTimeToClassForumApprovalConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
+    public class SetTimeToClassForumApprovalConsumer : BaseConsumer<BaseQueueModel>
     {
         private readonly IHostEnvironment _environment;
 
-        public SetTimeToClassForumApprovalConsumer(IHostEnvironment environment)
+        public SetTimeToClassForumApprovalConsumer(IHostEnvironment environment, AuthContext authContext) : base(authContext)
         {
             _environment = environment;
         }
 
-        public Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
+        public override Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
         {
             if (context != null)
             {

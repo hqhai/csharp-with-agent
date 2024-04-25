@@ -2,19 +2,20 @@
 
 namespace Fsel.Hangfire.Application.Queues.Consumers
 {
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Hangfire.Application.Workers;
     using Fsel.Shared.Models.ShareModels;
     using MassTransit;
 
-    public class SetTimeToReviewFselConsumer : Core.Base.Interfaces.IBaseConsumer<NotificationSendingQueueModel>
+    public class SetTimeToReviewFselConsumer : BaseConsumer<NotificationSendingQueueModel>
     {
-        public SetTimeToReviewFselConsumer()
+        public SetTimeToReviewFselConsumer(AuthContext authContext) : base(authContext)
         {
         }
 
-        public Task Consume(ConsumeContext<BaseQueueDataModel<NotificationSendingQueueModel>> context)
+        public override Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<NotificationSendingQueueModel>> context)
         {
             if (context != null)
             {

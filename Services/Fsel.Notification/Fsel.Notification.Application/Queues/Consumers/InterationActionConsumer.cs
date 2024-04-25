@@ -1,4 +1,5 @@
 using System.Globalization;
+using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
@@ -10,18 +11,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
-    public class InterationActionConsumer : Core.Base.Interfaces.IBaseConsumer<InterationActionQueueModel>
+    public class InterationActionConsumer : BaseConsumer<InterationActionQueueModel>
     {
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
 
-        public InterationActionConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository)
+        public InterationActionConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueDataModel<InterationActionQueueModel>> context)
+        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<InterationActionQueueModel>> context)
         {
             var dataReceipt = context?.Message?.Data;
 

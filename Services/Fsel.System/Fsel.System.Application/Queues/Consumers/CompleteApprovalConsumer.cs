@@ -1,3 +1,4 @@
+using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Shared.Models.ShareModels;
 using Fsel.System.Application.Commands.ApprovalLogCmd;
@@ -6,16 +7,16 @@ using MediatR;
 
 namespace Fsel.System.Application.Queues.Consumers
 {
-    public class CompleteApprovalConsumer : Core.Base.Interfaces.IBaseConsumer<SetTimeCompleteApprovalModel>
+    public class CompleteApprovalConsumer : BaseConsumer<SetTimeCompleteApprovalModel>
     {
         private readonly IMediator _mediator;
 
-        public CompleteApprovalConsumer(IMediator mediator)
+        public CompleteApprovalConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueDataModel<SetTimeCompleteApprovalModel>> context)
+        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<SetTimeCompleteApprovalModel>> context)
         {
             if (context != null)
             {

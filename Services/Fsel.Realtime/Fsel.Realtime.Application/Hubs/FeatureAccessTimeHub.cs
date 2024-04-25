@@ -20,19 +20,15 @@ namespace Fsel.Realtime.Application.Hubs
             _authContext = authContext;
         }
 
-        public override async Task OnConnectedAsync()
+        public override async Task OnConnectedHubAsync()
         {
-            await base.OnConnectedAsync();
-
-
             await Groups.AddToGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
         }
 
-        public override async Task OnDisconnectedAsync(Exception? exception)
-        {
-            await base.OnDisconnectedAsync(exception);
 
+        public override async Task OnDisconnectedHubAsync(Exception? exception)
+        {
             Guid userId = _authContext.CurrentUserId;
             string type = (Context.GetHttpContext()?.Request.Query["Type"].ToString()!);
             string lessonId = Context.GetHttpContext()?.Request.Query["LessonId"].ToString()!;

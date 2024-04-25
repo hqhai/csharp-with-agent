@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Lms.Application.Commands.SectionGroupCmd;
@@ -10,16 +11,16 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using MassTransit;
     using MediatR;
 
-    public class CompleteTestWhenTimeOutConsumer : Core.Base.Interfaces.IBaseConsumer<CompleteTestWhenTimeOutModel>
+    public class CompleteTestWhenTimeOutConsumer : BaseConsumer<CompleteTestWhenTimeOutModel>
     {
         private readonly IMediator _mediator;
 
-        public CompleteTestWhenTimeOutConsumer(IMediator mediator)
+        public CompleteTestWhenTimeOutConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<CompleteTestWhenTimeOutModel>> context)
+        public override async Task ConsumeQueue(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<CompleteTestWhenTimeOutModel>> context)
         {
             if (context == null)
             {

@@ -4,21 +4,22 @@ namespace Fsel.Identity.Application.Queues.Consumers
 {
     using System;
     using System.Threading.Tasks;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.StudentCmd;
     using MassTransit;
     using MediatR;
 
-    public class DeleteGuestStudentConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
+    public class DeleteGuestStudentConsumer : BaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public DeleteGuestStudentConsumer(IMediator mediator)
+        public DeleteGuestStudentConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
+        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
         {
             if (context == null)
             {

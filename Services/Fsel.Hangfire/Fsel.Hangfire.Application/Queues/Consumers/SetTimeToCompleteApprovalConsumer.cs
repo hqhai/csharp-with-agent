@@ -2,6 +2,7 @@
 
 namespace Fsel.Hangfire.Application.Queues.Consumers
 {
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Hangfire.Application.Workers;
@@ -9,13 +10,13 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
     using Fsel.Shared.Models.ShareModels;
     using MassTransit;
 
-    public class SetTimeToCompleteApprovalConsumer : Core.Base.Interfaces.IBaseConsumer<SetTimeCompleteApprovalModel>
+    public class SetTimeToCompleteApprovalConsumer : BaseConsumer<SetTimeCompleteApprovalModel>
     {
-        public SetTimeToCompleteApprovalConsumer()
+        public SetTimeToCompleteApprovalConsumer(AuthContext authContext) : base(authContext)
         {
         }
 
-        public Task Consume(ConsumeContext<BaseQueueDataModel<SetTimeCompleteApprovalModel>> context)
+        public override Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<SetTimeCompleteApprovalModel>> context)
         {
             if (context != null)
             {

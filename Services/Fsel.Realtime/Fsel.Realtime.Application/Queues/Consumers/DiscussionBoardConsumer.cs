@@ -1,3 +1,4 @@
+using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Realtime.Application.Hubs;
@@ -8,18 +9,18 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class DiscussionBoardConsumer : IBaseConsumer<DiscussionBoardQueueModel>
+    public class DiscussionBoardConsumer : BaseConsumer<DiscussionBoardQueueModel>
     {
         private readonly IHubContext<DiscussionBoardHub> _discussionBoardHubContext;
         private readonly IQueueProvider _queueProvider;
 
-        public DiscussionBoardConsumer(IHubContext<DiscussionBoardHub> discussionBoardHubContext, IQueueProvider queueProvider)
+        public DiscussionBoardConsumer(IHubContext<DiscussionBoardHub> discussionBoardHubContext, IQueueProvider queueProvider, AuthContext authContext) : base(authContext)
         {
             _discussionBoardHubContext = discussionBoardHubContext;
             _queueProvider = queueProvider;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueDataModel<DiscussionBoardQueueModel>> context)
+        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<DiscussionBoardQueueModel>> context)
         {
             if (context != null)
             {
