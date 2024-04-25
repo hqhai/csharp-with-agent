@@ -82,10 +82,14 @@ namespace Fsel.System.Application.Commands.SendMail
                 email = email.Where(p => p.IsValidEmail()).ToList();
                 if (email.Count > 0)
                 {
-                    model.ToEmails = email;
+                    foreach (var item in email)
+                    {
+                        model.ToEmails = new[] { item };
+                        await _senderService.SendEmailAsync(model);
+                    }
                 }
             }
-            await _senderService.SendEmailAsync(model);
+
             return methodResult;
         }
     }
