@@ -2,23 +2,35 @@
 
 namespace Fsel.Hangfire.Application.Queues.Consumers
 {
+    using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Hangfire.Application.Workers;
     using Fsel.Shared.Constants;
     using MassTransit;
+    using Microsoft.Extensions.Hosting;
 
     public class SetTimeToClassForumApprovalConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
     {
-        public SetTimeToClassForumApprovalConsumer()
+        private readonly IHostEnvironment _environment;
+
+        public SetTimeToClassForumApprovalConsumer(IHostEnvironment environment)
         {
+            _environment = environment;
         }
 
         public Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
         {
             if (context != null)
             {
-                JobExtensions.SetScheduleJob<UpdateClassForumResultToExpiredTimeWorker, BaseQueueModel>(TimeSpan.FromHours(ValueSettings.DelayTwoHours), context.Message.Data);
+                if (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing) || _environment.IsStaging())
+                {
+                    JobExtensions.SetScheduleJob<UpdateClassForumResultToExpiredTimeWorker, BaseQueueModel>(TimeSpan.FromMinutes(ValueSettings.DelayTenMinutes), context.Message.Data);
+                }
+                else if (_environment.IsProduction())
+                {
+                    JobExtensions.SetScheduleJob<UpdateClassForumResultToExpiredTimeWorker, BaseQueueModel>(TimeSpan.FromHours(ValueSettings.DelayTwoHours), context.Message.Data);
+                }
             }
             return Task.CompletedTask;
         }
