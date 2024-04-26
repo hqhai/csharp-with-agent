@@ -40,9 +40,19 @@ namespace Fsel.Identity.Application.Commands.UserOtpCmd
                 return methodResult;
             }
 
-            var userOtp = await _userOtpRepository.Queryable.FirstOrDefaultAsync(x => (x.UserId == request.UserId || x.VerifyId == request.VerifyId) && x.Status == EnumUserOtpStatus.New && x.ExpiredTime < DateTime.UtcNow, cancellationToken);
+            var userOtp = await _userOtpRepository.Queryable
+                .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                .FirstOrDefaultAsync(x => x.UserId == request.UserId || x.VerifyId == request.VerifyId, cancellationToken);
             var otp = GenerateHelper.GetOtp();
-            if (userOtp == null)
+            if (userOtp != null && userOtp.Status == EnumUserOtpStatus.New)
+            {
+                userOtp.UserId = request.UserId;
+                userOtp.VerifyId = request.VerifyId;
+                userOtp.Otp = otp;
+                userOtp.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
+                _userOtpRepository.Update(userOtp);
+            }
+            else
             {
                 userOtp = new UserOtp
                 {
@@ -53,14 +63,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCmd
                     ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime)
                 };
                 _userOtpRepository.Add(userOtp);
-            }
-            else
-            {
-                userOtp.UserId = request.UserId;
-                userOtp.VerifyId = request.VerifyId;
-                userOtp.Otp = otp;
-                userOtp.ExpiredTime = DateTime.UtcNow.AddMinutes(_appSetting!.Otp!.StepTime);
-                _userOtpRepository.Update(userOtp);
             }
             await _userOtpRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

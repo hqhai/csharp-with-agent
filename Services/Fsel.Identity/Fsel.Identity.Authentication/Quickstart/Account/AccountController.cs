@@ -54,6 +54,10 @@ using System.Net.Http.Headers;
 using Fsel.Identity.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Fsel.Common.Constants;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -677,11 +681,25 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout(LogoutInputModel model)
         {
+            ArgumentNullException.ThrowIfNull(model);
+
             // build a model so the logged out page knows what to display
             var vm = await BuildLoggedOutViewModelAsync(model.LogoutId);
 
-            if (User?.Identity.IsAuthenticated == true)
+            if (User?.Identity?.IsAuthenticated == true)
             {
+                //await HttpContext.SignOutAsync(IdentityServerConstants.DefaultCheckSessionCookieName);
+                //await HttpContext.SignOutAsync(IdentityServerConstants.DefaultCookieAuthenticationScheme);
+                //await HttpContext.SignOutAsync(JwtBearerDefaults.AuthenticationScheme);
+                //await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                //await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
+                //await HttpContext.SignOutAsync(Settings.OpenId);
+
+                foreach (var cookie in Request.Cookies.Keys)
+                {
+                    Response.Cookies.Delete(cookie);
+                }
+
                 await _signInManager.SignOutAsync(); //signout Identity
 
                 // delete local authentication cookie
@@ -697,7 +715,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 // build a return URL so the upstream provider will redirect back
                 // to us after the user has logged out. this allows us to then
                 // complete our single sign-out processing.
-                string url = Url.Action("Logout", new { logoutId = vm.LogoutId });
+                var url = Url.Action("Logout", new { logoutId = vm.LogoutId });
 
                 // this triggers a redirect to the external provider for sign-out
                 return SignOut(new AuthenticationProperties { RedirectUri = url }, vm.ExternalAuthenticationScheme);
@@ -948,13 +966,13 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             var vm = new LoggedOutViewModel
             {
                 AutomaticRedirectAfterSignOut = AccountOptions.AutomaticRedirectAfterSignOut,
-                PostLogoutRedirectUri = logout?.PostLogoutRedirectUri,
-                ClientName = string.IsNullOrEmpty(logout?.ClientName) ? logout?.ClientId : logout?.ClientName,
-                SignOutIframeUrl = logout?.SignOutIFrameUrl,
+                PostLogoutRedirectUri = logout?.PostLogoutRedirectUri ?? string.Empty,
+                ClientName = (string.IsNullOrEmpty(logout?.ClientName) ? logout?.ClientId : logout?.ClientName) ?? string.Empty,
+                SignOutIframeUrl = logout?.SignOutIFrameUrl ?? string.Empty,
                 LogoutId = logoutId
             };
 
-            if (User?.Identity.IsAuthenticated == true)
+            if (User?.Identity?.IsAuthenticated == true)
             {
                 var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
                 if (idp != null && idp != IdentityServerConstants.LocalIdentityProvider)
