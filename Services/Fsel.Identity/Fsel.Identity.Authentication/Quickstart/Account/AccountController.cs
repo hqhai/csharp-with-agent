@@ -71,6 +71,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
     public class AccountController : BaseController
     {
         //private readonly TestUserStore _users;
+        protected IUserSession UserSession { get; private set; }
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
@@ -86,6 +87,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IUserOtpRepository _userOtpRepository;
 
         public AccountController(
+            IUserSession userSession,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
@@ -104,6 +106,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
             //_users = users ?? new TestUserStore(TestUsers.Users);
 
+            UserSession = userSession;
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
@@ -695,10 +698,12 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 //await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
                 //await HttpContext.SignOutAsync(Settings.OpenId);
 
-                foreach (var cookie in Request.Cookies.Keys)
-                {
-                    Response.Cookies.Delete(cookie);
-                }
+                //foreach (var cookie in Request.Cookies.Keys)
+                //{
+                //    Response.Cookies.Delete(cookie);
+                //}
+
+                await UserSession.RemoveSessionIdCookieAsync();
 
                 await _signInManager.SignOutAsync(); //signout Identity
 
