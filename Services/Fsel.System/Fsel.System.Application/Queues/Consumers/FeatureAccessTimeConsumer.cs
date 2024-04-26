@@ -1,6 +1,5 @@
 using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Core.Base.Managers;
 using Fsel.Shared.Models.ShareModels;
 using Fsel.System.Application.Commands.FeatureAccessTimeCmd;
 using MassTransit;
@@ -8,7 +7,7 @@ using MediatR;
 
 namespace Fsel.System.Application.Queues.Consumers
 {
-    public class FeatureAccessTimeConsumer : BaseConsumer<TrackingTimeModel>, Core.Base.Interfaces.IBaseConsumer<TrackingTimeModel>
+    public class FeatureAccessTimeConsumer : BaseConsumer<TrackingTimeModel>
     {
         private readonly IMediator _mediator;
 
@@ -17,13 +16,10 @@ namespace Fsel.System.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task Consume(ConsumeContext<BaseQueueDataModel<TrackingTimeModel>> context)
+        public override async Task ConsumeQueue(TrackingTimeModel? message)
         {
-            await base.Consume(context);
-
-            if (context != null)
+            if (message != null)
             {
-                var message = context.Message?.Data;
                 await _mediator.Send(new SaveFeatureAccessTimeCommand
                 {
                     UserId = message.UserId,

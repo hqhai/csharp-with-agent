@@ -3,21 +3,22 @@
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
     using System.Threading.Tasks;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Commands.WeeklyReportCommand;
     using MassTransit;
     using MediatR;
 
-    public class WeeklyReportConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
+    public class WeeklyReportConsumer : BaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public WeeklyReportConsumer(IMediator mediator)
+        public WeeklyReportConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<BaseQueueModel>> context)
+        public override async Task ConsumeQueue(BaseQueueModel? message)
         {
             await _mediator.Send(new WeeklyReportCommand()).ConfigureAwait(false);
         }
