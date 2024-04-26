@@ -2,24 +2,25 @@
 
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using MassTransit;
     using MediatR;
 
-    public class UpdateClassForumResultToExpiredTimeConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
+    public class UpdateClassForumResultToExpiredTimeConsumer : BaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public UpdateClassForumResultToExpiredTimeConsumer(IMediator mediator)
+        public UpdateClassForumResultToExpiredTimeConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
+        public override async Task ConsumeQueue(BaseQueueModel? message)
         {
-            var queueId = context?.Message.Data?.QueueId;
-            if (context == null || queueId == null)
+            var queueId = message?.QueueId;
+            if (queueId == null)
             {
                 return;
             }

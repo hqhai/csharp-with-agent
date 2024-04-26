@@ -13,10 +13,8 @@ namespace Fsel.Realtime.Application.Hubs
         {
         }
 
-        public override async Task OnConnectedAsync()
+        public override async Task OnConnectedHubAsync()
         {
-            await base.OnConnectedAsync();
-
             string courseLevel = Context.GetHttpContext()?.Request.Query["CourseLevel"].ToString()!;
             if (!string.IsNullOrEmpty(courseLevel))
             {
@@ -24,10 +22,8 @@ namespace Fsel.Realtime.Application.Hubs
             }
         }
 
-        public override async Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedHubAsync(Exception? exception)
         {
-            await base.OnDisconnectedAsync(exception);
-
             string courseLevel = Context.GetHttpContext()?.Request.Query["CourseLevel"].ToString()!;
             if (!string.IsNullOrEmpty(courseLevel))
             {

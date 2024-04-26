@@ -1,23 +1,21 @@
-using Fsel.Core.Base.BaseModels;
+using Fsel.Core.Base;
 using Fsel.Ordering.Application.Commands.OrderCmds;
 using Fsel.Shared.Models.ShareModels;
-using MassTransit;
 using MediatR;
 
 namespace Fsel.Ordering.Application.Queues.Consumers
 {
-    public class CreateOrderConsumer : Core.Base.Interfaces.IBaseConsumer<CreateOrderQueueModel>
+    public class CreateOrderConsumer : BaseConsumer<CreateOrderQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public CreateOrderConsumer(IMediator mediator)
+        public CreateOrderConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueDataModel<CreateOrderQueueModel>> context)
+        public override async Task ConsumeQueue(CreateOrderQueueModel? message)
         {
-            var message = context?.Message?.Data;
             if (message == null)
             {
                 return;

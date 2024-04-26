@@ -13,10 +13,8 @@ namespace Fsel.Realtime.Application.Hubs
         {
         }
 
-        public override async Task OnConnectedAsync()
+        public override async Task OnConnectedHubAsync()
         {
-            await base.OnConnectedAsync();
-
             string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
             if (!string.IsNullOrEmpty(classForumResultId))
             {
@@ -24,10 +22,8 @@ namespace Fsel.Realtime.Application.Hubs
             }
         }
 
-        public override async Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedHubAsync(Exception? exception)
         {
-            await base.OnDisconnectedAsync(exception);
-
             string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
             if (!string.IsNullOrEmpty(classForumResultId))
             {

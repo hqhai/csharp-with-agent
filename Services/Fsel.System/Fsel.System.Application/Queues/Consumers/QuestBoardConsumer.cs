@@ -1,3 +1,4 @@
+using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Shared.Models.ShareModels;
 using Fsel.System.Application.Commands.QuestBoardStudentCmd;
@@ -6,26 +7,26 @@ using MediatR;
 
 namespace Fsel.System.Application.Queues.Consumers
 {
-    public class QuestBoardConsumer : Core.Base.Interfaces.IBaseConsumer<QuestBoardQueueModel>
+    public class QuestBoardConsumer : BaseConsumer<QuestBoardQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public QuestBoardConsumer(IMediator mediator)
+        public QuestBoardConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueDataModel<QuestBoardQueueModel>> context)
+        public override async Task ConsumeQueue(QuestBoardQueueModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
                 await _mediator.Send(new QuestBoardStudentCommand
                 {
-                    AchievedPoints = context.Message.Data.AchievedPoint,
-                    StudentId = context.Message.Data.StudentId,
-                    Categories = context.Message.Data.Categories,
-                    ObjectId = context.Message.Data.ObjectId,
-                    CourseId = context.Message.Data.CourseId,
+                    AchievedPoints = message.AchievedPoint,
+                    StudentId = message.StudentId,
+                    Categories = message.Categories,
+                    ObjectId = message.ObjectId,
+                    CourseId = message.CourseId,
                 }).ConfigureAwait(false);
             }
         }

@@ -30,13 +30,14 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("send-mails-marketing")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendMailsMarketing([FromQuery] string? emailTest, [FromQuery] string subject, IFormFile file)
+        public async Task<IActionResult> SendMailsMarketing([FromQuery] string? emailTest, [FromQuery] string subject, IFormFile fileTemplate, IList<IFormFile>? attachments)
         {
-            var commandResult = await _mediator.Send(new SendMailsMarketingCommand()
+            var commandResult = await _mediator.Send(new SendMailsMarketingCommand
             {
                 EmailTest = emailTest,
                 Subject = subject,
-                Template = file
+                Template = fileTemplate,
+                Attachments = attachments
             }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }

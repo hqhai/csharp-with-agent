@@ -3,37 +3,32 @@
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
     using Fsel.Course.Lms.Application.Commands.AiCmd;
-    using MassTransit;
     using MediatR;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
+    using Fsel.Core.Base;
 
-    public class AiFeedBackResponseConsumer : Core.Base.Interfaces.IBaseConsumer<MockTestAnswerResponseModel>
+    public class AiFeedBackResponseConsumer : BaseConsumer<MockTestAnswerResponseModel>
     {
         private readonly IMediator _mediator;
 
-        public AiFeedBackResponseConsumer(IMediator mediator)
+        public AiFeedBackResponseConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<MockTestAnswerResponseModel>> context)
+        public override async Task ConsumeQueue(MockTestAnswerResponseModel? message)
         {
-            if (context == null)
+            if (message == null)
             {
                 return;
             }
-            var data = context.Message?.Data;
-
-            if (data != null)
+            await _mediator.Send(new SubmitMockTestAnswerAICommand
             {
-                await _mediator.Send(new SubmitMockTestAnswerAICommand
-                {
-                    SectionId = data.SectionId,
-                    WordContent = data.WordContent,
-                    MockTestResultId = data.MockTestResultId,
-                    SectionGroupId = data.SectionGroupId
-                }).ConfigureAwait(false);
-            }
+                SectionId = message.SectionId,
+                WordContent = message.WordContent,
+                MockTestResultId = message.MockTestResultId,
+                SectionGroupId = message.SectionGroupId
+            }).ConfigureAwait(false);
         }
     }
 }

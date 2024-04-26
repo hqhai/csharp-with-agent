@@ -9,15 +9,18 @@ namespace Fsel.System.Application.Commands.SendMail
     using Fsel.System.Application.Services.GoogleSheetServices;
     using Fsel.System.Application.Services.SenderServices;
     using Fsel.System.Infrastructure.ValueSettings;
+    using global::System.IO;
     using global::System.Text;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Refit;
 
     public class SendMailsMarketingCommand : IRequest<MethodResult<bool>>
     {
         public string? EmailTest { get; set; }
         public IFormFile? Template { get; set; }
         public string? Subject { get; set; }
+        public IList<IFormFile>? Attachments { get; set; }
     }
 
     public class SendMailsMarketingCommandHandler : IRequestHandler<SendMailsMarketingCommand, MethodResult<bool>>
@@ -62,15 +65,37 @@ namespace Fsel.System.Application.Commands.SendMail
                     }
                 }
             }
+
+            if (request.Attachments == null || !request.Attachments.Any())
+            {
+                methodResult.AddErrorBadRequest("No attachments provided.");
+                return methodResult;
+            }
+
             var model = new SendEmailCommandModel()
             {
                 Subject = request.Subject,
-                Content = fileContent
+                Content = fileContent,
+                Attachments = request.Attachments
             };
 
             if (!string.IsNullOrEmpty(request.EmailTest))
             {
-                model.ToEmails = new[] { request.EmailTest };
+                model.ToEmails.Add(request.EmailTest);
+
+                IList<StreamPart> streamParts = new List<StreamPart>();
+                foreach (var file in request.Attachments)
+                {
+                    var stream = file.OpenReadStream();
+                    var streamPart = new StreamPart(stream, file.FileName, file.ContentType);
+                    streamParts.Add(streamPart);
+                }
+                var result = await _senderService.SendEmailWithAttachments(model.ToEmails, model.BccEmails, model.CcEmails, model.Subject, model.Content, streamParts);
+                if (!result.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(result.Error);
+                    return methodResult;
+                }
             }
             else
             {
@@ -84,8 +109,21 @@ namespace Fsel.System.Application.Commands.SendMail
                 {
                     foreach (var item in email)
                     {
-                        model.ToEmails = new[] { item };
-                        await _senderService.SendEmailAsync(model);
+                        IList<StreamPart> streamParts = new List<StreamPart>();
+                        foreach (var file in request.Attachments)
+                        {
+                            var stream = file.OpenReadStream();
+                            var streamPart = new StreamPart(stream, file.FileName, file.ContentType);
+                            streamParts.Add(streamPart);
+                        }
+
+                        model.ToEmails = new List<string> { item };
+                        var result = await _senderService.SendEmailWithAttachments(model.ToEmails, model.BccEmails, model.CcEmails, model.Subject, model.Content, streamParts);
+                        if (!result.IsSuccessStatusCode)
+                        {
+                            methodResult.AddError(result.Error);
+                            return methodResult;
+                        }
                     }
                 }
             }
