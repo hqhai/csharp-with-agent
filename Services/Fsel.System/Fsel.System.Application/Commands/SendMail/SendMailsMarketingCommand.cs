@@ -13,7 +13,6 @@ namespace Fsel.System.Application.Commands.SendMail
     using global::System.Text;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Nest;
     using Refit;
 
     public class SendMailsMarketingCommand : IRequest<MethodResult<bool>>
