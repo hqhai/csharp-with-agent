@@ -17,10 +17,10 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
+        public override async Task ConsumeQueue(BaseQueueModel? message)
         {
-            var queueId = context?.Message.Data?.QueueId;
-            if (context == null || queueId == null)
+            var queueId = message?.QueueId;
+            if (queueId == null)
             {
                 return;
             }

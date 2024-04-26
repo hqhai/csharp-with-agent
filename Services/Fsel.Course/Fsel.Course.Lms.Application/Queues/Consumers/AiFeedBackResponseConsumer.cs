@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
     using Fsel.Course.Lms.Application.Commands.AiCmd;
-    using MassTransit;
     using MediatR;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Core.Base;
@@ -17,24 +16,19 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<MockTestAnswerResponseModel>> context)
+        public override async Task ConsumeQueue(MockTestAnswerResponseModel? message)
         {
-            if (context == null)
+            if (message == null)
             {
                 return;
             }
-            var data = context.Message?.Data;
-
-            if (data != null)
+            await _mediator.Send(new SubmitMockTestAnswerAICommand
             {
-                await _mediator.Send(new SubmitMockTestAnswerAICommand
-                {
-                    SectionId = data.SectionId,
-                    WordContent = data.WordContent,
-                    MockTestResultId = data.MockTestResultId,
-                    SectionGroupId = data.SectionGroupId
-                }).ConfigureAwait(false);
-            }
+                SectionId = message.SectionId,
+                WordContent = message.WordContent,
+                MockTestResultId = message.MockTestResultId,
+                SectionGroupId = message.SectionGroupId
+            }).ConfigureAwait(false);
         }
     }
 }

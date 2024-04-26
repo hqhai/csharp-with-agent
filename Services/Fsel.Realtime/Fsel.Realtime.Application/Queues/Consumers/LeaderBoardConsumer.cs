@@ -21,16 +21,16 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             _queueProvider = queueProvider;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<LeaderBoardQueueModel>> context)
+        public override async Task ConsumeQueue(LeaderBoardQueueModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
-                var courseLevel = context.Message.Data.CourseLevel.ToString();
-                await _leaderBoardHubContext.GetGroup(courseLevel!).SendAsync(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, context.Message);
+                var courseLevel = message.CourseLevel.ToString();
+                await _leaderBoardHubContext.GetGroup(courseLevel!).SendAsync(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, message);
 
                 try
                 {
-                    _queueProvider.Publish(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, courseLevel, context.Message);
+                    _queueProvider.Publish(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, courseLevel, message);
                 }
                 catch { }
             }

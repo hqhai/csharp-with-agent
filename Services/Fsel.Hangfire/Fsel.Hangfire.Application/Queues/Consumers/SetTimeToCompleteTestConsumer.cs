@@ -16,11 +16,11 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
         {
         }
 
-        public override Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<SetTimeToCompleteTestModel>> context)
+        public override Task ConsumeQueue(SetTimeToCompleteTestModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
-                JobExtensions.SetScheduleJob<CompleteTestWhenTimeOutWorker, SetTimeToCompleteTestModel>(TimeSpan.FromSeconds(context.Message.Data.ExecutionTime + ValueSettings.DelayWorkerSecond), context.Message.Data);
+                JobExtensions.SetScheduleJob<CompleteTestWhenTimeOutWorker, SetTimeToCompleteTestModel>(TimeSpan.FromSeconds(message.ExecutionTime + ValueSettings.DelayWorkerSecond), message);
             }
             return Task.CompletedTask;
         }

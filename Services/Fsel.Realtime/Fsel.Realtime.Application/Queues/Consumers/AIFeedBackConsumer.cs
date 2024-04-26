@@ -1,5 +1,4 @@
 using Fsel.Core.Base;
-using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
@@ -21,16 +20,16 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             _queueProvider = queueProvider;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<SubmitAIResponseModel>> context)
+        public override async Task ConsumeQueue(SubmitAIResponseModel? message)
         {
-            if (context != null && context.Message.Data != null)
+            if (message != null)
             {
-                var classForumResultId = context.Message.Data.ClassForumDetailResultId.ToString();
-                await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, context.Message);
+                var classForumResultId = message.ClassForumDetailResultId.ToString();
+                await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, message);
 
                 try
                 {
-                    _queueProvider.Publish(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, classForumResultId, context.Message);
+                    _queueProvider.Publish(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, classForumResultId, message);
                 }
                 catch { }
             }

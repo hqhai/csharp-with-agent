@@ -3,11 +3,9 @@
 namespace Fsel.Hangfire.Application.Queues.Consumers
 {
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Hangfire.Application.Workers;
     using Fsel.Shared.Models.ShareModels;
-    using MassTransit;
 
     public class SetTimeToReviewFselConsumer : BaseConsumer<NotificationSendingQueueModel>
     {
@@ -15,11 +13,11 @@ namespace Fsel.Hangfire.Application.Queues.Consumers
         {
         }
 
-        public override Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<NotificationSendingQueueModel>> context)
+        public override Task ConsumeQueue(NotificationSendingQueueModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
-                JobExtensions.SetScheduleJob<ReviewFselWorker, NotificationSendingQueueModel>(TimeSpan.FromDays(30), context.Message?.Data);
+                JobExtensions.SetScheduleJob<ReviewFselWorker, NotificationSendingQueueModel>(TimeSpan.FromDays(30), message);
             }
             return Task.CompletedTask;
         }

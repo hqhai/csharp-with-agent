@@ -16,13 +16,10 @@ namespace Fsel.System.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<TrackingTimeModel>> context)
+        public override async Task ConsumeQueue(TrackingTimeModel? message)
         {
-            await base.Consume(context);
-
-            if (context != null)
+            if (message != null)
             {
-                var message = context.Message?.Data;
                 await _mediator.Send(new SaveFeatureAccessTimeCommand
                 {
                     UserId = message.UserId,

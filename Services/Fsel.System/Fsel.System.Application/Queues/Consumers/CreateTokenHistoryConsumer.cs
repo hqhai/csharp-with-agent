@@ -19,16 +19,15 @@ namespace Fsel.System.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<TokenHistoryQueuesModel>> context)
+        public override async Task ConsumeQueue(TokenHistoryQueuesModel? message)
         {
-            var message = context?.Message;
             if (message == null)
             {
                 return;
             }
             await _mediator.Send(new CreateTokenHistoryCommand
             {
-                TokenHistorys = message.Data?.TokenHistories
+                TokenHistorys = message.TokenHistories
             }).ConfigureAwait(false);
         }
     }

@@ -16,17 +16,17 @@ namespace Fsel.System.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<QuestBoardQueueModel>> context)
+        public override async Task ConsumeQueue(QuestBoardQueueModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
                 await _mediator.Send(new QuestBoardStudentCommand
                 {
-                    AchievedPoints = context.Message.Data.AchievedPoint,
-                    StudentId = context.Message.Data.StudentId,
-                    Categories = context.Message.Data.Categories,
-                    ObjectId = context.Message.Data.ObjectId,
-                    CourseId = context.Message.Data.CourseId,
+                    AchievedPoints = message.AchievedPoint,
+                    StudentId = message.StudentId,
+                    Categories = message.Categories,
+                    ObjectId = message.ObjectId,
+                    CourseId = message.CourseId,
                 }).ConfigureAwait(false);
             }
         }

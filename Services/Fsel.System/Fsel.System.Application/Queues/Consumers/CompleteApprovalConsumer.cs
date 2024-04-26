@@ -16,16 +16,16 @@ namespace Fsel.System.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<SetTimeCompleteApprovalModel>> context)
+        public override async Task ConsumeQueue(SetTimeCompleteApprovalModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
                 {
                     await _mediator.Send(new CreateApprovalLogCommand
                     {
-                        ObjectId = context.Message.Data.ObjectId,
-                        StartDate = context.Message.Data.StartDate,
-                        ApprovalType = context.Message.Data.ApprovalType,
+                        ObjectId = message.ObjectId,
+                        StartDate = message.StartDate,
+                        ApprovalType = message.ApprovalType,
                     }).ConfigureAwait(false);
                 }
             }

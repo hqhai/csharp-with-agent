@@ -18,7 +18,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<BaseQueueModel>> context)
+        public override async Task ConsumeQueue(BaseQueueModel? message)
         {
             await _mediator.Send(new WeeklyReportCommand()).ConfigureAwait(false);
         }

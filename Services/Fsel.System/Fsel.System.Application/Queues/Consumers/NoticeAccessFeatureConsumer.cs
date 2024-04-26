@@ -15,9 +15,9 @@ namespace Fsel.System.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
+        public override async Task ConsumeQueue(BaseQueueModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
                 await _mediator.Send(new NoticeFeatureAccessCommand()).ConfigureAwait(false);
             }

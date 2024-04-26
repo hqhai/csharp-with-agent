@@ -15,7 +15,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
+        public override async Task ConsumeQueue(BaseQueueModel? message)
         {
             await _mediator.Send(new SyncStudentShieldEveryDayCommand()).ConfigureAwait(false);
         }

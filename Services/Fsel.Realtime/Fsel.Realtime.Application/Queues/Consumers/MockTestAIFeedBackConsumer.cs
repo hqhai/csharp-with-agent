@@ -18,12 +18,12 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             _classForumFeedBackHubContext = classForumAIFeedBackHubContext;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<SubmitMockTestResponseModel>> context)
+        public override async Task ConsumeQueue(SubmitMockTestResponseModel? message)
         {
-            if (context != null)
+            if (message != null)
             {
-                var mockTestResultId = context.Message.Data?.MockTestResultId.ToString();
-                await _classForumFeedBackHubContext.GetGroup(mockTestResultId!).SendAsync(RealtimeSettings.MockTestWritingAIFeedBackHub.Methods.MockTestWritingAIFeedBack, context.Message);
+                var mockTestResultId = message?.MockTestResultId.ToString();
+                await _classForumFeedBackHubContext.GetGroup(mockTestResultId!).SendAsync(RealtimeSettings.MockTestWritingAIFeedBackHub.Methods.MockTestWritingAIFeedBack, message);
             }
         }
     }

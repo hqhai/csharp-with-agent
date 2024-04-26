@@ -1,8 +1,6 @@
 using Fsel.Core.Base;
-using Fsel.Core.Base.BaseModels;
 using Fsel.Ordering.Application.Commands.OrderCmds;
 using Fsel.Shared.Models.ShareModels;
-using MassTransit;
 using MediatR;
 
 namespace Fsel.Ordering.Application.Queues.Consumers
@@ -16,9 +14,8 @@ namespace Fsel.Ordering.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<CreateOrderQueueModel>> context)
+        public override async Task ConsumeQueue(CreateOrderQueueModel? message)
         {
-            var message = context?.Message?.Data;
             if (message == null)
             {
                 return;

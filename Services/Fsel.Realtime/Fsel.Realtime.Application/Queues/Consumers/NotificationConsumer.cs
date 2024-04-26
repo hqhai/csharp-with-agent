@@ -22,12 +22,12 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             _queueProvider = queueProvider;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<NotificationQueueModel>> context)
+        public override async Task ConsumeQueue(NotificationQueueModel? message)
         {
-            if (context != null && context!.Message!.Data.UserIds != null)
+            if (message != null && message.UserIds != null)
             {
-                var userIds = context.Message.Data.UserIds;
-                await _notificationHubContext.GetGroups(userIds.Select(x => x.ToString()).ToList()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message.Data);
+                var userIds = message.UserIds;
+                await _notificationHubContext.GetGroups(userIds.Select(x => x.ToString()).ToList()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, message);
             }
         }
     }

@@ -16,9 +16,9 @@ namespace Fsel.Notification.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ConsumeContext<BaseQueueDataModel<DiscussionBoardQueueModel>> context)
+        public override async Task ConsumeQueue(DiscussionBoardQueueModel? message)
         {
-            var dataReceipt = context?.Message?.Data;
+            var dataReceipt = message;
 
             if (dataReceipt != null)
             {
