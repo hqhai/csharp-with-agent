@@ -245,11 +245,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 if (classForumResultFromUnit1ToNow.Where(p => p.ClassForum != null).Any(p => p.ClassForum!.CourseSkill == item))
                 {
-                    var classForumScores = classForumResultFromUnit1ToNow.Where(p => p.ClassForum != null && p.ClassForum.CourseSkill == item).SelectMany(p => p.ClassForumScores);
+                    var classForumResults = classForumResultFromUnit1ToNow.Where(p => p.ClassForum != null && p.ClassForum.CourseSkill == item);
 
-                    var totalScore = classForumScores.Sum(p => p.Score);
-
-                    var percent = (int)(totalScore * 100) / (classForumScores.Count() * 9);
+                    var percent = (int)classForumResults.Average(p => p.Percent);
 
                     var html = string.Format(CultureInfo.InvariantCulture, skillHtml, icon, skillName, percent, percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - percent, percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, percent + "%");
 
