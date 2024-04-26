@@ -13,6 +13,7 @@ namespace Fsel.System.Application.Commands.SendMail
     using global::System.Text;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Nest;
     using Refit;
 
     public class SendMailsMarketingCommand : IRequest<MethodResult<bool>>
@@ -82,6 +83,20 @@ namespace Fsel.System.Application.Commands.SendMail
             if (!string.IsNullOrEmpty(request.EmailTest))
             {
                 model.ToEmails.Add(request.EmailTest);
+
+                IList<StreamPart> streamParts = new List<StreamPart>();
+                foreach (var file in request.Attachments)
+                {
+                    var stream = file.OpenReadStream();
+                    var streamPart = new StreamPart(stream, file.FileName, file.ContentType);
+                    streamParts.Add(streamPart);
+                }
+                var result = await _senderService.SendEmailWithAttachments(model.ToEmails, model.BccEmails, model.CcEmails, model.Subject, model.Content, streamParts);
+                if (!result.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(result.Error);
+                    return methodResult;
+                }
             }
             else
             {
