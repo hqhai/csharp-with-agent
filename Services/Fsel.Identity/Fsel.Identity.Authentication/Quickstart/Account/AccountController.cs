@@ -691,6 +691,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
             if (User?.Identity?.IsAuthenticated == true)
             {
+                _logger.LogError($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")} - Start Logout");
+
                 //await HttpContext.SignOutAsync(IdentityServerConstants.DefaultCheckSessionCookieName);
                 //await HttpContext.SignOutAsync(IdentityServerConstants.DefaultCookieAuthenticationScheme);
                 //await HttpContext.SignOutAsync(JwtBearerDefaults.AuthenticationScheme);
