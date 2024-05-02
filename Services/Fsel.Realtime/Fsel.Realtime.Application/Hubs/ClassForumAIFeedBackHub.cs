@@ -5,8 +5,10 @@ namespace Fsel.Realtime.Application.Hubs
     using Fsel.Core.Base;
     using Fsel.Core.Extensions;
     using Fsel.Core.Services.IpApiServices;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.SignalR;
 
+    [Authorize]
     public class ClassForumAIFeedBackHub : BaseHub
     {
         public ClassForumAIFeedBackHub(AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
@@ -15,7 +17,7 @@ namespace Fsel.Realtime.Application.Hubs
 
         public override async Task OnConnectedHubAsync()
         {
-            string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
+            string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumDetailResultId"].ToString()!;
             if (!string.IsNullOrEmpty(classForumResultId))
             {
                 await Groups.AddGroupAsync(Context.ConnectionId, classForumResultId);
@@ -24,7 +26,7 @@ namespace Fsel.Realtime.Application.Hubs
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
         {
-            string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumResultId"].ToString()!;
+            string classForumResultId = Context.GetHttpContext()?.Request.Query["ClassForumDetailResultId"].ToString()!;
             if (!string.IsNullOrEmpty(classForumResultId))
             {
                 await Groups.RemoveGroupAsync(Context.ConnectionId, classForumResultId);
