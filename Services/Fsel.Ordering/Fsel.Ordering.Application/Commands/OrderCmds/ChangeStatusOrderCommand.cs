@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
+    using Fsel.Ordering.Application.Services.SenderService;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Application.Services.UserService;
@@ -16,6 +17,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Ordering.Infrastructure.ValueSettings;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -36,6 +39,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly AuthContext _authContext;
         private readonly ILmsCourseService _courseService;
+        private readonly ISenderServices _senderServices;
+        private readonly AppSetting _appSetting;
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -44,7 +49,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , ILmsCourseService lmsCourseService
             , NotificationMessagePublisher notificationMessagePublisher
             , AuthContext authContext
-            , ILmsCourseService courseService)
+            , ILmsCourseService courseService,
+ISenderServices senderServices,
+AppSetting appSetting)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -54,6 +61,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _notificationMessagePublisher = notificationMessagePublisher;
             _authContext = authContext;
             _courseService = courseService;
+            _senderServices = senderServices;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -74,12 +83,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-            var student = await _userService.GetStudentByUserIdAsync(order.UserId);
-            if (!student.IsSuccessStatusCode)
+            var studentResult = await _userService.GetStudentByUserIdAsync(order.UserId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
+            var student = studentResult.Content?.Result;
 
             var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { order.CourseId });
             if (!courseResults.IsSuccessStatusCode)
@@ -117,9 +127,24 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         methodResult.AddError(addStudentIntoClassResult.Error);
                         return methodResult;
                     }
+
                     allowOpenNextUnit = true;
 
                     order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
+
+                    if (!string.IsNullOrEmpty(student?.Human?.Email))
+                    {
+                        await _senderServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
+                        {
+                            ToEmails = new List<string> { student.Human.Email },
+                            Subject = SenderSettings.PaymentApproval,
+                            Template = EnumSenderTemplate.PaymentApproval,
+                            Params = new
+                            {
+                                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                            }
+                        });
+                    }
 
                     await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
                     {
