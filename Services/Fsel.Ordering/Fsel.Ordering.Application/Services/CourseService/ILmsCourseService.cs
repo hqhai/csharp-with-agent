@@ -21,5 +21,7 @@ namespace Fsel.Ordering.Application.Services.CourseService
 
         [Get("/v1/admin/course/{id}")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByIdAsync([FromRoute] Guid id);
+        [Post("/v1/integration/integration-course")]
+        Task<IApiResponse<MethodResult<IList<CourseResultModel>>>> GetCourseResultsByUserIds([FromBody] IList<Guid> userIds);
     }
 }

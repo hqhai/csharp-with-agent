@@ -68,14 +68,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var studentIds = request.StudentIds;
 
             #region validate
+
             if (studentIds == null || studentIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentIds));
                 return methodResult;
             }
-            #endregion
+
+            #endregion validate
 
             #region Progress
+
             var classStudentResults = await _trainingService.GetListClassBySpecificStudentIdsAsync(new GetClassListBySpecificStudentIdsModel { StudentIds = request.StudentIds });
 
             var classStudentResultsContent = classStudentResults?.Content?.Result;
@@ -123,13 +126,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     courseProgress.Add(courseStudentProgress);
                 }
             }
-            #endregion
+
+            #endregion Progress
 
             #region Video
+
             var videoResults = CompetitionAverageScores(_videoResultRepository, videoLessonRatio, studentIds, EnumLearnType.Video);
-            #endregion
+
+            #endregion Video
 
             #region UnitsTest
+
             var videoResultCompetition = _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && studentIds.Contains(x.StudentId));
             var unitTestGroupByStudentId = request.CourseType == EnumCourseType.Ielts ? new List<StudentCompetitionAverageScore>() : videoResultCompetition
                 .GroupBy(vr => vr.StudentId)
@@ -148,9 +155,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         LearnType = EnumLearnType.UnitTests
                     };
                 }).ToList();
-            #endregion
+
+            #endregion UnitsTest
 
             #region SkillsTest
+
             var skillTestGroupByStudentId = request.CourseType == EnumCourseType.Ielts ? new List<StudentCompetitionAverageScore>() : videoResultCompetition
                 .GroupBy(vr => vr.StudentId)
                 .AsEnumerable()
@@ -169,13 +178,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     };
                 }).ToList();
 
-            #endregion
+            #endregion SkillsTest
 
             #region HomeWork
+
             var homeWorkResults = CompetitionAverageScores(_homeWorkResultRepository, homeWorkRatio, studentIds, EnumLearnType.HomeWork);
-            #endregion
+
+            #endregion HomeWork
 
             #region ClassForum
+
             var classForumResultQuery = _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).Where(x => studentIds.Contains(x.StudentId) && x.ClassForum != null).Select(x =>
             new
             {
@@ -199,10 +211,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                          })
                      .ToList();
 
-
-            #endregion
+            #endregion ClassForum
 
             #region FinalTest
+
             var finalResults = request.CourseType == EnumCourseType.Ielts ? new List<StudentCompetitionAverageScore>() : CompetitionAverageScores(_finalTestResultRepository, ValueSettings.AcademicStudentResultRatio.FinalTestRatio, studentIds, EnumLearnType.FinalTest);
 
             List<List<StudentCompetitionAverageScore>> allResults = new List<List<StudentCompetitionAverageScore>>
@@ -218,7 +230,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             List<StudentCompetitionOverallModel> overallResults = new List<StudentCompetitionOverallModel>();
 
             overallResults = CalculateOverallOfAcademicStudent(studentIds, allResults);
-            #endregion
+
+            #endregion FinalTest
 
             #region Result
 
@@ -234,16 +247,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                               ContentCompleted = progress.ContentCompleted,
                               TotalScore = NumberHelper.RoundNumberDouble(overall.TotalScore)
                           }).ToList();
-            #endregion
+
+            #endregion Result
 
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-
-
         #region Caculatator
+
         private static double CountOverralUnitSkillTest(List<string>? listStr, EnumTimeCodeType timCodeType)
         {
             double overallScore = 0;
@@ -352,10 +365,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return joinedList;
         }
 
-        #endregion
-
+        #endregion Caculatator
 
         #region QueryResult
+
         private static List<StudentCompetitionAverageScore> CompetitionAverageScores<T>(IRepository<T> repository, double ratioResult, IList<Guid>? studentIds, EnumLearnType learnType)
             where T : BaseResult
         {
@@ -396,10 +409,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return query;
         }
 
-
-
-        #endregion
+        #endregion QueryResult
     }
-
 }
-

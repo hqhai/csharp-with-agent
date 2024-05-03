@@ -139,6 +139,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (!isSendEmail)
                 return;
             MockTestResult? mockTestResult = default;
+            string? mockTestId = string.Empty;
             if (course.CourseType == EnumCourseType.Ielts && isSendEmail)
             {
                 var skillMockTestResults = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(x => x.UnitId.HasValue && listUnitId.Contains(x.UnitId.Value) && x.CourseId == course.Id && x.StudentId == studentId && x.Status == EnumResultStatus.Done).ToListAsync(cancellationToken);
@@ -159,6 +160,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     return;
                 }
+
+                mockTestId = mockTestResult.MockTestId.ToString();
             }
 
             var videoResult = await _videoResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).OrderBy(p => p.CreatedDate).ToListAsync(cancellationToken);
@@ -293,7 +296,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 SkillTest = skillTestHtml,
                 CourseType = course.CourseType,
                 Percent = percentUnit.ToString(CultureInfo.CurrentCulture),
-                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkMockTestReport!, mockTestId, course.Id, userId)
             };
 
             if (course.CourseType == EnumCourseType.Ielts && mockTestResult != null)
@@ -338,7 +342,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
             var listClassForumResult = await _classForumResultRepository.Queryable.Where(p => lessonResultIds.Contains(p.LessonResultId)).ToListAsync(cancellationToken);
-            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded);
+            var isSendEmail = lessonResultIds.Count == listClassForumResult.Count && !listClassForumResult.Any(p => p.Status != EnumClassForumResultStatus.Graded && p.Status != EnumClassForumResultStatus.Denied);
 
             if (course.CourseType == EnumCourseType.Ielts && isSendEmail)
             {

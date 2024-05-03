@@ -52,28 +52,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IQuestionRepository _questionRepository;
-        private readonly ILogger<object> _logger;
         private readonly QuestionConverter _questionConverter;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
+        private readonly ILogger<object> _logger;
 
-        public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(
-             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
-            , IVideoResultRepository videoResultRepository
-            , IExerciseRepository exerciseRepository
-            , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
-            , IVideoTimeCodeRepository videoTimeCodeRepository
-            , VideoConverter videoConverter
-            , IUserService userService
-            , ISystemService systemService
-            , AuthContext authContext
-            , IMediator mediator
-            , ICourseRepository courseRepository
-            , ILessonResultRepository lessonResultRepository
-            , DateTimeConverter dateTimeConverter
-            , IQuestionRepository questionRepository
-            , QuestionConverter questionConverter
-            , CreateTokenHistoryPublisher createTokenHistoryPublisher
-            , ILogger<object> logger)
+        public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository, IVideoResultRepository videoResultRepository, IExerciseRepository exerciseRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoTimeCodeRepository videoTimeCodeRepository, VideoConverter videoConverter, IUserService userService, ISystemService systemService, AuthContext authContext, IMediator mediator, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, QuestionConverter questionConverter, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoResultRepository = videoResultRepository;
@@ -89,15 +72,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _lessonResultRepository = lessonResultRepository;
             _dateTimeConverter = dateTimeConverter;
             _questionRepository = questionRepository;
-            _logger = logger;
             _questionConverter = questionConverter;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
+            _logger = logger;
         }
 
         public async Task<MethodResult<VideoTimeCodeModel>> Handle(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VideoTimeCodeModel>();
+
+            _logger.LoggerRequest(request);
+
             StudentModel? student;
             if (request.StudentId.HasValue)
             {
@@ -124,7 +110,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-
             var method = await HandleAnswerAsync(request, cancellationToken);
             if (!method.IsOK)
             {
