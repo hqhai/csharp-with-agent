@@ -20,6 +20,7 @@ namespace Fsel.Shared.Enums
         WeeklyReport4,
         StudentCompletePT,
         SendMailMidCourseAcademic,
-        SendMailMidCourseIELT
+        SendMailMidCourseIELT,
+        PaymentApproval
     }
 }
