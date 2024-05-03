@@ -666,15 +666,16 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         {
             // build a model so the logout page knows what to display
             var vm = await BuildLogoutViewModelAsync(logoutId);
+            return await Logout(vm);
 
-            if (vm.ShowLogoutPrompt == false)
-            {
-                // if the request for logout was properly authenticated from IdentityServer, then
-                // we don't need to show the prompt and can just log the user out directly.
-                return await Logout(vm);
-            }
+            //if (vm.ShowLogoutPrompt == false)
+            //{
+            //    // if the request for logout was properly authenticated from IdentityServer, then
+            //    // we don't need to show the prompt and can just log the user out directly.
+            //    return await Logout(vm);
+            //}
 
-            return View(vm);
+            //return View(vm);
         }
 
         /// <summary>
@@ -691,8 +692,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
             if (User?.Identity?.IsAuthenticated == true)
             {
-                _logger.LogError($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")} - Start Logout");
-
                 //await HttpContext.SignOutAsync(IdentityServerConstants.DefaultCheckSessionCookieName);
                 //await HttpContext.SignOutAsync(IdentityServerConstants.DefaultCookieAuthenticationScheme);
                 //await HttpContext.SignOutAsync(JwtBearerDefaults.AuthenticationScheme);
@@ -722,7 +721,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 // build a return URL so the upstream provider will redirect back
                 // to us after the user has logged out. this allows us to then
                 // complete our single sign-out processing.
-                var url = Url.Action("Logout", new { logoutId = vm.LogoutId });
+                var url = Url.Action(nameof(Logout), new { logoutId = vm.LogoutId });
 
                 // this triggers a redirect to the external provider for sign-out
                 return SignOut(new AuthenticationProperties { RedirectUri = url }, vm.ExternalAuthenticationScheme);
