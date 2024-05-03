@@ -15,6 +15,7 @@ using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.SenderService;
+using Fsel.Course.Lms.Application.Services.StorageServices;
 using Fsel.Course.Lms.Application.Services.SystemService;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
@@ -147,6 +148,7 @@ builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiU
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
+builder.AddRefitClients(typeof(IStorageServices), appSetting?.Services?.StorageApiUrl);
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
     httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);

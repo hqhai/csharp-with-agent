@@ -12,6 +12,8 @@ using Fsel.Storage.Domain.Enums;
 using Fsel.Storage.Application.Services.AmazonS3Services;
 using Fsel.Storage.Domain.Models.EntityModels;
 using Fsel.Shared.Attributes;
+using Fsel.Storage.Application.Command.ChatbotCmd;
+using MediatR;
 
 namespace Fsel.Storage.Api.Controllers
 {
@@ -24,12 +26,15 @@ namespace Fsel.Storage.Api.Controllers
         private readonly IDeepgramProvider _deepgramProvider;
         private readonly ICognitiveProvider _cognitiveProvider;
         private readonly IAmazonS3Service _amazonS3Service;
+        private readonly IMediator _mediator;
 
-        public TranscriptController(IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider, IAmazonS3Service amazonS3Service)
+
+        public TranscriptController(IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider, IAmazonS3Service amazonS3Service, IMediator mediator)
         {
             _deepgramProvider = deepgramProvider;
             _cognitiveProvider = cognitiveProvider;
             _amazonS3Service = amazonS3Service;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -74,16 +79,15 @@ namespace Fsel.Storage.Api.Controllers
         }
 
         /// <summary>
-        /// Get Transcription
+        /// Get Chatbot-Speech
         /// </summary>
-        [HttpPost("speech")]
+        [HttpPost("chatbot-speech")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> PostSpeech([FromBody] UrlRequestModel request)
+        public async Task<IActionResult> PostSpeech([FromBody] CreateChatbotAudioCommand cmd)
         {
-            MethodResult<string> result = new MethodResult<string>();
-            result.Result = await _cognitiveProvider.GetTranscriptionAsync(request?.Url ?? string.Empty);
-            return result.GetActionResult();
+            MethodResult<string> queryResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
