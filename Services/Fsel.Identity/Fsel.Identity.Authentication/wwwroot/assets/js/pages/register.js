@@ -15,7 +15,11 @@
   //});
 
   $('#form-Register').on('submit', function (e) {
-    $('.loading').removeClass('hidden');
+    e.preventDefault();
+    if (this.checkValidity()) {
+      $('.loading').removeClass('hidden');
+      this.submit();
+    }
   });
 
   flatpickr("#Birthday", {

@@ -86,6 +86,98 @@ namespace Fsel.Authentication.Infrastructure.Configs
                 },
                 new Client
                 {
+                    ClientId = "app.fsel.angular.lcms",
+
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
+
+                    ClientSecrets =
+                    {
+                        new Secret("app.fsel.angular.lcms_secret".Sha256())
+                    },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Phone,
+                        IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
+                    },
+
+                    RequireClientSecret = false,
+                    RequirePkce = true,
+                    RequireConsent = false,
+                    RedirectUris =
+                    {
+                        "https://localhost:4300",
+                        "http://localhost:4300",
+                        "http://test1_lcms.fsel.edu.vn",
+                        "https://test1_lcms.fsel.edu.vn"
+                    },
+                    PostLogoutRedirectUris =
+                    {
+                        "https://localhost:4300",
+                        "http://localhost:4300",
+                        "http://test1_lcms.fsel.edu.vn",
+                        "https://test1test1_lcms_lms.fsel.edu.vn"
+                    },
+
+                    AllowOfflineAccess = true,
+                    AllowAccessTokensViaBrowser = true,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    AlwaysIncludeUserClaimsInIdToken = true,
+                },
+                new Client
+                {
+                    ClientId = "app.fsel.angular.lmsadmin",
+
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
+
+                    ClientSecrets =
+                    {
+                        new Secret("app.fsel.angular.lmsadmin_secret".Sha256())
+                    },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Phone,
+                        IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
+                    },
+
+                    RequireClientSecret = false,
+                    RequirePkce = true,
+                    RequireConsent = false,
+                    RedirectUris =
+                    {
+                        "https://localhost:4200",
+                        "http://localhost:4200",
+                        "http://test1_lmsadmin.fsel.edu.vn",
+                        "https://test1_lmsadmin.fsel.edu.vn"
+                    },
+                    PostLogoutRedirectUris =
+                    {
+                        "https://localhost:4200",
+                        "http://localhost:4200",
+                        "http://test1_lmsadmin.fsel.edu.vn",
+                        "https://test1_lmsadmin.fsel.edu.vn"
+                    },
+
+                    AllowOfflineAccess = true,
+                    AllowAccessTokensViaBrowser = true,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    AlwaysIncludeUserClaimsInIdToken = true,
+                },
+                new Client
+                {
                     ClientId = "app.fsel.flutter",
                     AllowedGrantTypes = GrantTypes.Code,
 

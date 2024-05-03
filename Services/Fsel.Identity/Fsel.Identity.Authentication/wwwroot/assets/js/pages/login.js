@@ -1,6 +1,10 @@
 (function ($) {
   $('#form-Login').on('submit', function (e) {
-    $('.loading').removeClass('hidden');
+    e.preventDefault();
+    if (this.checkValidity()) {
+      $('.loading').removeClass('hidden');
+      this.submit();
+    }
   });
 
   const emailInput = $("#username");
