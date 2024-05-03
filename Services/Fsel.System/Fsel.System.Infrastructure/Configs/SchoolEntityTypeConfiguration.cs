@@ -32,6 +32,12 @@ namespace Fsel.System.Infrastructure.Configs
                    .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(e => e.IsActive).HasDefaultValue(true);
+
+            builder.Property(l => l.Name)
+               .IsRequired()
+               .HasMaxLength(250)
+               .IsUnicode(false) // Ensure Unicode is set to false
+               .UseCollation("SQL_Latin1_General_CP1_CI_AI"); // Set the collation
         }
     }
 }
