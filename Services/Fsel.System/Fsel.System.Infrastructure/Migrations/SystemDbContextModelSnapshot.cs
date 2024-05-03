@@ -1280,10 +1280,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(250)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(250)")
+                        .HasColumnType("nvarchar(250)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AI");
 
                     b.Property<Guid?>("ParentId")
@@ -2171,10 +2169,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(250)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(250)")
+                        .HasColumnType("nvarchar(250)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AI");
 
                     b.Property<string>("Phone")

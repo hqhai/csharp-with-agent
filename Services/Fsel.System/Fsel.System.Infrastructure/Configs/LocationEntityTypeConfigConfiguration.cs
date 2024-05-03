@@ -3,6 +3,7 @@
 namespace Fsel.System.Infrastructure.Configs
 {
     using Fsel.Common.Helpers;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using global::System;
@@ -24,10 +25,7 @@ namespace Fsel.System.Infrastructure.Configs
             builder.Property(e => e.IsActive).HasDefaultValue(true);
 
             builder.Property(l => l.Name)
-               .IsRequired()
-               .HasMaxLength(250)
-               .IsUnicode(false) // Ensure Unicode is set to false
-               .UseCollation("SQL_Latin1_General_CP1_CI_AI"); // Set the collation
+               .UseCollation(CollationSetting.SQLLatin1GeneralCP1CIAI); // Set the collation
         }
     }
 }

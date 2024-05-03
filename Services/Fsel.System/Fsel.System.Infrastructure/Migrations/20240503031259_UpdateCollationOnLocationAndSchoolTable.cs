@@ -13,11 +13,9 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
                 table: "Schools",
-                type: "varchar(250)",
-                unicode: false,
+                type: "nvarchar(250)",
                 maxLength: 250,
-                nullable: false,
-                defaultValue: "",
+                nullable: true,
                 collation: "SQL_Latin1_General_CP1_CI_AI",
                 oldClrType: typeof(string),
                 oldType: "nvarchar(250)",
@@ -27,11 +25,9 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
                 table: "Locations",
-                type: "varchar(250)",
-                unicode: false,
+                type: "nvarchar(250)",
                 maxLength: 250,
-                nullable: false,
-                defaultValue: "",
+                nullable: true,
                 collation: "SQL_Latin1_General_CP1_CI_AI",
                 oldClrType: typeof(string),
                 oldType: "nvarchar(250)",
@@ -49,9 +45,9 @@ namespace Fsel.System.Infrastructure.Migrations
                 maxLength: 250,
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "varchar(250)",
-                oldUnicode: false,
+                oldType: "nvarchar(250)",
                 oldMaxLength: 250,
+                oldNullable: true,
                 oldCollation: "SQL_Latin1_General_CP1_CI_AI");
 
             migrationBuilder.AlterColumn<string>(
@@ -61,9 +57,9 @@ namespace Fsel.System.Infrastructure.Migrations
                 maxLength: 250,
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "varchar(250)",
-                oldUnicode: false,
+                oldType: "nvarchar(250)",
                 oldMaxLength: 250,
+                oldNullable: true,
                 oldCollation: "SQL_Latin1_General_CP1_CI_AI");
         }
     }

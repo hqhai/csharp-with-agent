@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20240503023030_UpdateCollationOnLocationAndSchoolTable")]
+    [Migration("20240503031259_UpdateCollationOnLocationAndSchoolTable")]
     partial class UpdateCollationOnLocationAndSchoolTable
     {
         /// <inheritdoc />
@@ -1283,10 +1283,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(250)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(250)")
+                        .HasColumnType("nvarchar(250)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AI");
 
                     b.Property<Guid?>("ParentId")
@@ -2174,10 +2172,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(250)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(250)")
+                        .HasColumnType("nvarchar(250)")
                         .UseCollation("SQL_Latin1_General_CP1_CI_AI");
 
                     b.Property<string>("Phone")
