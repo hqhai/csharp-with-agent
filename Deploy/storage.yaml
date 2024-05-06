@@ -18,6 +18,13 @@ spec:
         ports:
         - containerPort: 80
         - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
       imagePullSecrets:
         - name: dev-image-secret
 
