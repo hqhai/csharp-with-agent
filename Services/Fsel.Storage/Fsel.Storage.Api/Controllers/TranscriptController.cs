@@ -89,5 +89,18 @@ namespace Fsel.Storage.Api.Controllers
             MethodResult<string> queryResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Transcription
+        /// </summary>
+        [HttpPost("speech")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> PostSpeech([FromBody] UrlRequestModel request)
+        {
+            MethodResult<string> result = new MethodResult<string>();
+            result.Result = await _cognitiveProvider.GetTranscriptionAsync(request?.Url ?? string.Empty);
+            return result.GetActionResult();
+        }
     }
 }
