@@ -81,7 +81,7 @@ namespace Fsel.Storage.Api.Controllers
         /// <summary>
         /// Get Chatbot-Speech
         /// </summary>
-        [HttpPost("chatbot-speech")]
+        [HttpPost("text-to-speech")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> PostSpeech([FromBody] CreateChatbotAudioCommand cmd)

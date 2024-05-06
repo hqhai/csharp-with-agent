@@ -7,8 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\CommandModels\ChatBot\**" />
+    <EmbeddedResource Remove="Models\CommandModels\ChatBot\**" />
+    <None Remove="Models\CommandModels\ChatBot\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Constants\" />
-    <Folder Include="Models\CommandModels\ChatBot\" />
     <Folder Include="Models\CommandModels\Classes\" />
     <Folder Include="Models\CommandModels\PlacementTestResults\" />
     <Folder Include="Models\QueryModels\VideoTimeCodeResults\" />
