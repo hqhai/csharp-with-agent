@@ -40,6 +40,8 @@ namespace Fsel.Shared.Constants
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
                 public const string AIFeedBack = $"{KeyQueue}_AIFeedBack";
                 public const string FeatureAccessTime = $"{KeyQueue}_FeatureAccessTime";
+                public const string ChatBot = $"{KeyQueue}_ChatBot";
+                public const string ChatBotRealTime = $"{KeyQueue}_ChatBotRealTime";
 
                 public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
             }
