@@ -3,6 +3,7 @@
 namespace Fsel.Realtime.Application.Hubs
 {
     using Fsel.Core.Base;
+    using Fsel.Core.Extensions;
     using Fsel.Core.Services.IpApiServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
@@ -18,12 +19,12 @@ namespace Fsel.Realtime.Application.Hubs
 
         public override async Task OnConnectedHubAsync()
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
+            await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
         }
         public override async Task OnDisconnectedHubAsync(Exception? exception)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
+            await Groups.RemoveGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
 
         }
 
