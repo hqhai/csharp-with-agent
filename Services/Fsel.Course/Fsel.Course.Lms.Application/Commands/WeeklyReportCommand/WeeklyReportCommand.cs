@@ -208,7 +208,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         .Where(p => p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.UpdatedDate.Value.Date < currentDate.Date)
                         .Where(x => x.ClassForumResults.Any(x => x.Status == EnumClassForumResultStatus.Graded))
                         .OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
-                    int index = 1;
 
                     if (lessonResultsDone.Count > 0)
                     {
@@ -246,7 +245,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                 var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, ls.Percent, ls.Percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - ls.Percent, ls.Percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, ls.Percent + "%");
                                 unitName += html;
                             }
-                            index++;
                         }
                         weeklyReport.IsLessonDone = SendMailSetting.Display;
                     }

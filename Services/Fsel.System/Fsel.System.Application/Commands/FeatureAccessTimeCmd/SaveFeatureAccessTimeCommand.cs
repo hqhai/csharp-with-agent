@@ -57,11 +57,11 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
                     }
                     else if (featureAccessTimeCheck != null && IsSameRangeHour(featureAccessTimeCheck))
                     {
-                        UpdateExistingFeatureAccessTime(featureAccessTimeCheck, request, seconds, time);
+                        UpdateExistingFeatureAccessTime(featureAccessTimeCheck, request, seconds);
                     }
                     else if (featureAccessTimeCheck != null)
                     {
-                        UpdateExistingFeatureAccessTime(featureAccessTimeCheck, request, seconds, time);
+                        UpdateExistingFeatureAccessTime(featureAccessTimeCheck, request, seconds);
                     }
                 }
 
@@ -87,20 +87,21 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
             var featureAccessTime = _mapper.Map<FeatureAccessTime>(request);
             featureAccessTime.Visit = 1;
-            featureAccessTime.LastVisited = vistedTime;
+            featureAccessTime.LastVisited = DateTime.UtcNow;
             featureAccessTime.AccessTime = accessTime;
             featureAccessTime.EnumFeature = ConvertType(request.Type!);
             _featureAccessTimes.Add(featureAccessTime);
         }
 
-        private void UpdateExistingFeatureAccessTime(FeatureAccessTime featureAccessTime, SaveFeatureAccessTimeCommand request, long accessTime, DateTime vistedTime)
+        private void UpdateExistingFeatureAccessTime(FeatureAccessTime featureAccessTime, SaveFeatureAccessTimeCommand request, long accessTime)
         {
             if (request.AccessTime == null)
             {
                 featureAccessTime.Visit += 1;
             }
-            featureAccessTime.LastVisited = vistedTime;
             featureAccessTime.AccessTime += accessTime;
+            featureAccessTime.LastVisited = DateTime.UtcNow;
+            ;
             featureAccessTime.EnumFeature = ConvertType(request.Type!);
             _featureAccessTimesUpdate.Add(featureAccessTime);
         }
