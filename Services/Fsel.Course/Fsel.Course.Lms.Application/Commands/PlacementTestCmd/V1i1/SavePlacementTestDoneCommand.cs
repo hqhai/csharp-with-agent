@@ -1,0 +1,113 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
+{
+    using System.Threading;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
+    using MediatR;
+    using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Helpers.IeltsScoreHelper;
+
+    public class SavePlacementTestDoneCommand : IRequest<MethodResult<bool>>
+    {
+        public EnumCourseLevel CourseLevel { get; set; }
+        public Guid StudentId { get; set; }
+    }
+
+    public class SavePlacementTestDoneCommandHandler : IRequestHandler<SavePlacementTestDoneCommand, MethodResult<bool>>
+    {
+        private readonly IPlacementTestResultRepository _placementTestResultRepository;
+        private readonly IUserService _userService;
+        private readonly IPlacementTestRepository _placementTestRepository;
+
+        public SavePlacementTestDoneCommandHandler(IPlacementTestResultRepository placementTestResultRepository, IUserService userService, IPlacementTestRepository placementTestRepository)
+        {
+            _placementTestResultRepository = placementTestResultRepository;
+            _userService = userService;
+            _placementTestRepository = placementTestRepository;
+        }
+
+        public async Task<MethodResult<bool>> Handle(SavePlacementTestDoneCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<bool>();
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
+            if (!studentResults.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                return methodResult;
+            }
+            var student = studentResults.Content?.Result?.FirstOrDefault();
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            var startingLevel = student.CourseLevel.GetPlacementTestLevelByCourseLevel();
+            await SavePlacementTestDoneAsync(student, request.CourseLevel, startingLevel, cancellationToken);
+            return methodResult;
+        }
+
+        private async Task SavePlacementTestDoneAsync(StudentModel student, EnumCourseLevel desiredLevel, EnumPlacementTestLevel startingLevel, CancellationToken cancellationToken)
+        {
+            int age = DateTimeHelper.GetYearOld(student.User?.Birthday);
+            var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
+                                                                          .OrderByDescending(x => x.CreatedDate)
+                                                                          .FirstOrDefaultAsync(cancellationToken);
+            if (placementTestResultDone != null)
+            {
+                var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, GetInitialAge(startingLevel, age));
+                if (isLock)
+                {
+                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel { Id = student?.UserId ?? default, Level = levelNext ?? default });
+                    return;
+                }
+                if (levelNext.HasValue)
+                {
+                    await AddPlacementTestResultAndGetPlacementTest(desiredLevel, startingLevel, levelNext.Value.GetPlacementTestLevelByCourseLevel(), student.Id, cancellationToken);
+                }
+            }
+            else
+            {
+                await AddPlacementTestResultAndGetPlacementTest(desiredLevel, startingLevel, startingLevel, student.Id, cancellationToken);
+            }
+            await SavePlacementTestDoneAsync(student, desiredLevel, startingLevel, cancellationToken);
+        }
+
+        private async Task AddPlacementTestResultAndGetPlacementTest(EnumCourseLevel desiredLevel, EnumPlacementTestLevel startingLevel, EnumPlacementTestLevel level, Guid studentId, CancellationToken cancellationToken)
+        {
+            Random random = new Random();
+            var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Level == level).FirstOrDefaultAsync(cancellationToken);
+            var placementTestQuery = _placementTestRepository.Queryable;
+            if (placementTestResult == null)
+            {
+                var placementTests = await placementTestQuery.Where(x => x.Level == level && x.IsActive).ToListAsync(cancellationToken);
+                var placementTest = placementTests.OrderBy(x => random.Next()).FirstOrDefault();
+                if (placementTest != null)
+                {
+                    var correctValue = PlacementTestHelper.GetCorrectCountToLevel(desiredLevel, startingLevel.GetCourseLevelByPlacementTestLevel(), level);
+                    placementTestResult = new PlacementTestResult
+                    {
+                        Level = placementTest.Level,
+                        PlacementTestId = placementTest.Id,
+                        StudentId = studentId,
+                        Status = EnumResultStatus.Done,
+                        CorrectCount = correctValue.Item1,
+                        CorrectTotal = correctValue.Item2,
+                    };
+                    _placementTestResultRepository.Add(placementTestResult);
+                    await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+            }
+        }
+    }
+}

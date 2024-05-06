@@ -24,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
     public class GetCourseQuery : IRequest<MethodResult<CourseModel>>
     {
+        public Guid? UserId { get; set; }
     }
 
     public class GetCourseQueryHandler : IRequestHandler<GetCourseQuery, MethodResult<CourseModel>>
@@ -71,8 +72,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
         public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<CourseModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var userId = request.UserId ?? _authContext.CurrentUserId;
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -80,6 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
             var student = studentResult?.Content?.Result;
             var studentId = student?.Id;
+
             var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
             if (!classResult.IsSuccessStatusCode)
             {
@@ -93,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = _authContext.CurrentUserId });
+            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = userId });
             if (!orderResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));

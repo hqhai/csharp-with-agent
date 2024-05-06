@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using AutoMapper;
+using Fsel.Authentication.Infrastructure.Configs;
 using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Queues.Publishers;
@@ -10,6 +11,7 @@ using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Application.Services.SenderService;
 using Fsel.Identity.Application.Services.SystemService;
 using Fsel.Identity.Application.Services.TrainingService;
+using Fsel.Identity.Application.Services.UserProfileService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
@@ -17,14 +19,12 @@ using Fsel.Identity.Infrastructure.Providers;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using IdentityServer4.EntityFramework.Mappers;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.EntityFrameworkCore;
-using Fsel.Authentication.Infrastructure.Configs;
-using Fsel.Identity.Application.Services.UserProfileService;
-using IdentityServer4.Services;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(UserDbContext).Assembly.GetName().Name;

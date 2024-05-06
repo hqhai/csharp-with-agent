@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -26,18 +27,24 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         private readonly IUserService _userService;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IOrderService _orderService;
+        private readonly ICourseRepository _courseRepository;
+        private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
 
         public SettingStudentCheckQueryHandler(IUserService userService,
             IPlacementTestResultRepository placementTestResultRepository,
             IOrderService orderService,
+            ICourseRepository courseRepository,
+            IMapper mapper,
             ITrainingService trainingService,
             AuthContext authContext)
         {
             _userService = userService;
             _placementTestResultRepository = placementTestResultRepository;
             _orderService = orderService;
+            _courseRepository = courseRepository;
+            _mapper = mapper;
             _trainingService = trainingService;
             _authContext = authContext;
         }
@@ -99,6 +106,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                     methodResult.StatusCode = StatusCodes.Status200OK;
                     methodResult.Result = settingStudentModel;
                     return methodResult;
+                }
+                var course = await _courseRepository.GetByIdAsync(@class.CourseId);
+                if (course != null)
+                {
+                    settingStudentModel.Course = _mapper.Map<CourseModel>(course);
                 }
             }
 

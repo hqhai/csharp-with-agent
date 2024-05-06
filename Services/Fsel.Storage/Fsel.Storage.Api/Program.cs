@@ -1,8 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
 using Fsel.Storage.Application.Services.AmazonS3Services;
+using Fsel.Storage.Application.Services.OpenAIServices;
 using Fsel.Storage.Infrastructure.ValueSettings;
+using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +14,14 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
-
+builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
+{
+    httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
+    if (!string.IsNullOrEmpty(appSetting?.OpenAiConfig?.ApiKey))
+    {
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {appSetting?.OpenAiConfig?.ApiKey}");
+    }
+});
 builder.Services.AddScoped<IAmazonS3Service, AmazonS3Service>();
 
 var app = builder.Build();

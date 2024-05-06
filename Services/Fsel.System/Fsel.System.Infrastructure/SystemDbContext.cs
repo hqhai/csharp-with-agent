@@ -3,6 +3,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Shared.Constants;
 using Fsel.System.Domain.Entities;
+using Fsel.System.Domain.Entities.ChatBot;
 using Fsel.System.Domain.Entities.Chatbots;
 using Fsel.System.Domain.Entities.Configs;
 using Fsel.System.Infrastructure.Configs;
@@ -45,6 +46,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new ChatbotTokenConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ErrorReportEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TokenHistoryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ChatBotEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -72,6 +74,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<ChatbotConfig> ChatbotConfigs { get; set; }
         public DbSet<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; }
         public DbSet<ChatbotTokenConfigs> ChatbotTokenConfigs { get; set; }
+        public DbSet<ChatBot> ChatBots { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
