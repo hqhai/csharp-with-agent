@@ -4,7 +4,6 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;

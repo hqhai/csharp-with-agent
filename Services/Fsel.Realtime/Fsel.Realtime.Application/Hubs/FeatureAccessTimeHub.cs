@@ -1,4 +1,5 @@
 using Fsel.Core.Base;
+using Fsel.Core.Extensions;
 using Fsel.Core.Services.IpApiServices;
 using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Models.ShareModels;
@@ -22,7 +23,7 @@ namespace Fsel.Realtime.Application.Hubs
 
         public override async Task OnConnectedHubAsync()
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
+            await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
         }
 
@@ -53,7 +54,7 @@ namespace Fsel.Realtime.Application.Hubs
 
             if (!string.IsNullOrEmpty(userId.ToString()))
             {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId.ToString());
+                await Groups.RemoveGroupAsync(Context.ConnectionId, userId.ToString());
             }
 
             await _accessTimePublisher.Publish(model, CancellationToken.None);

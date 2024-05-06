@@ -1,19 +1,23 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
 using Fsel.Shared.Constants;
 using Fsel.System.Application.Queues.Consumers;
 using Fsel.System.Application.Queues.Publisher;
+using Fsel.System.Application.Services.AIServices;
 using Fsel.System.Application.Services.CourseServices;
 using Fsel.System.Application.Services.DictionaryServices;
 using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.SenderServices;
+using Fsel.System.Application.Services.StorageServices;
 using Fsel.System.Application.Services.UserServices;
 using Fsel.System.Domain.IRepositories;
 using Fsel.System.Infrastructure;
 using Fsel.System.Infrastructure.Common;
 using Fsel.System.Infrastructure.Repositories;
 using Fsel.System.Infrastructure.ValueSettings;
+using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,16 +51,26 @@ builder.Services.AddScoped<ISchoolRepository, SchoolRepository>();
 builder.Services.AddScoped<IChatbotConfigRepository, ChatbotConfigRepository>();
 builder.Services.AddScoped<IErrorReportRepository, ErrorReportRepository>();
 builder.Services.AddScoped<ITokenHistoryRepository, TokenHistoryRepository>();
+builder.Services.AddScoped<IChatBotRepository, ChatBotRepository>();
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
+builder.Services.AddScoped<ChatBotPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(IDictionaryService), appSetting?.Services?.DictionaryApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
-
+builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
+builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
+{
+    httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
+    if (!string.IsNullOrEmpty(appSetting?.OpenAiConfig?.ApiKey))
+    {
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {appSetting?.OpenAiConfig?.ApiKey}");
+    }
+});
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
@@ -66,6 +80,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
     { QueueSettings.UserQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.FeatureAccessTime, typeof(FeatureAccessTimeConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.ChatBot, typeof(ChatBotConsumer) },
 });
 
 var app = builder.Build();
