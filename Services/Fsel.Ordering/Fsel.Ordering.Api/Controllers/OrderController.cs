@@ -111,5 +111,16 @@ namespace Fsel.Ordering.Api.Controllers
             return commandResult.GetActionResult();
         }
 
+        /// <summary>
+        /// Search Course
+        /// </summary>
+        [HttpGet("get-order-by-status")]
+        [ProducesResponseType(typeof(MethodResult<IList<OrderSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOrderByStatus([FromQuery] GetOrderByStatusQuery query)
+        {
+            MethodResult<IList<OrderSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

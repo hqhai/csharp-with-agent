@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Services.OrderService
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Identity.Application.Services.OrderService.CommandModels;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
@@ -24,5 +25,10 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Put("/v1/admin/order/change-status-order")]
         Task<IApiResponse<MethodResult<bool>>> ChangeStatusOrder([Body] ChangeStatusOrderCommandModel command);
+
+        [Post("/v1/admin/order/create-order-for-student")]
+        Task<IApiResponse<MethodResult<OrderModel>>> CreateOrderForStudentAsync([Body] CreateOrderByUserIdCommandModel command);
+        [Get("/v1/order/get-order-by-status")]
+        Task<IApiResponse<MethodResult<IList<OrderSearchModel>>>> GetOrderByStatusAsync([FromQuery] GetOrderByStatusQueryModel query);
     }
 }

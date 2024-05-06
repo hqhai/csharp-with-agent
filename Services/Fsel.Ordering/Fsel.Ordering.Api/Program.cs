@@ -17,6 +17,7 @@ using Fsel.Ordering.Infrastructure.Repositories;
 using Fsel.Ordering.Infrastructure.ValueSettings;
 using Refit;
 using Fsel.Shared.Constants;
+using Fsel.Ordering.Application.Services.SenderService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +52,7 @@ builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApi
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUrBoxService), appSetting?.Services?.UrBoxApiUrl);
 builder.AddRefitClients(typeof(IPayooService), appSetting?.Services?.PayooApiUrl);
+builder.AddRefitClients(typeof(ISenderServices), appSetting?.Services?.SenderApiUrl);
 //builder.AddRefitClients(typeof(IAppStoreService), appSetting?.Services?.AppStoreApiUrl);
 builder.Services.AddRefitClient<IAppStoreService>().ConfigureHttpClient(x =>
 {

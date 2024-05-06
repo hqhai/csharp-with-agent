@@ -30,14 +30,16 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     public class GetVideoTimeCodeRankingQueryHandler : IRequestHandler<GetVideoTimeCodeRankingQuery, MethodResult<IList<TestResultRankingModel>>>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
 
-        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoResultRepository videoResultRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
+        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, ILessonResultRepository lessonResultRepository, IVideoResultRepository videoResultRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
+            _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
             _mapper = mapper;
             _userService = userService;
@@ -63,16 +65,28 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
         private async Task<MethodResult<IList<TestResultRankingModel>>> GetRankingToTimeCode(MethodResult<IList<TestResultRankingModel>> methodResult, Guid videoTimeCodeResultId, CancellationToken cancellationToken)
         {
             List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
-            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode).FirstOrDefaultAsync(x => x.Id == videoTimeCodeResultId, cancellationToken);
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.VideoTimeCode).FirstOrDefaultAsync(x => x.Id == videoTimeCodeResultId, cancellationToken);
             if (videoTimeCodeResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeResult));
+                return methodResult;
+            }
+            if (videoTimeCodeResult.VideoResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeResult.VideoResult));
                 return methodResult;
             }
             if (videoTimeCodeResult.VideoTimeCode?.TimeCodeType == EnumTimeCodeType.Standalone)
             {
                 return methodResult;
             }
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(videoTimeCodeResult.VideoResult.LessonResultId);
+            if (lessonResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
+                return methodResult;
+            }
+
             var students = await GetStudents(videoTimeCodeResult.StudentId);
             if (students == null)
             {
@@ -80,7 +94,10 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 return methodResult;
             }
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
-                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && students.Select(x => x.Id).Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                            .Include(x => x.VideoResult)
+                            .ThenInclude(x => x.LessonResult)
+                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && students.Select(x => x.Id).Contains(x.StudentId))
+                            .Where(x => x.Status == EnumResultStatus.Done && x.VideoResult!.LessonResult!.UnitId == lessonResult.UnitId)
                             .ToListAsync(cancellationToken);
 
             foreach (var item in students)
@@ -123,14 +140,19 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumTimeCodeType.Standalone));
                 return methodResult;
             }
-
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(lessonResultId);
+            if (lessonResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
+                return methodResult;
+            }
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultId, cancellationToken);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-            var students = await GetStudents(videoResult.StudentId);
+            var students = await GetStudents(lessonResult.StudentId);
             if (students == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
@@ -139,7 +161,10 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             foreach (var item in students)
             {
                 var videoTimeCodeResultStudent = await _videoTimeCodeResultRepository.Queryable
-                                        .Where(x => x.VideoTimeCode != null && x.VideoTimeCode.VideoId == videoResult.VideoId && x.VideoTimeCode.TimeCodeType == type && x.StudentId == item.Id && x.Status == EnumResultStatus.Done)
+                                        .Include(x => x.VideoResult)
+                                        .ThenInclude(x => x!.LessonResult)
+                                        .Where(x => x.VideoTimeCode != null && x.VideoTimeCode.VideoId == videoResult.VideoId && x.VideoTimeCode.TimeCodeType == type)
+                                        .Where(x => x.StudentId == item.Id && x.Status == EnumResultStatus.Done && x.VideoResult!.LessonResult!.UnitId == lessonResult.UnitId)
                                         .GroupBy(x => x.StudentId)
                                         .Select(x => new TestResultRankingModel
                                         {
@@ -162,6 +187,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 videoTimeCodeResultStudent.AvatarPath = item?.User?.AvatarPath;
                 testResultRankings.Add(videoTimeCodeResultStudent);
             }
+
             methodResult.Result = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
