@@ -23,7 +23,13 @@ namespace Fsel.Realtime.Application.Hubs
         public override async Task OnConnectedHubAsync()
         {
             await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
-            ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
+
+            var startTime = Context.GetHttpContext()?.Request.Query["IsStartTime"].ToString();
+            bool isStartTime = bool.Parse(string.IsNullOrEmpty(startTime) ? "true" : startTime);
+            if (isStartTime)
+            {
+                ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
+            }
         }
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
