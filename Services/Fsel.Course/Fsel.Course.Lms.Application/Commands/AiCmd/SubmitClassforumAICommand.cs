@@ -65,7 +65,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
             {
                 GradingAlFeedback = aIResponse,
-                ClassForumDetailResultId = request.ClassForumDetailResultId,
+                ClassForumResultId = request.ClassForumResultId,
+                EnumSubmissionCount = request.SubmissionCount
             }, cancellationToken);
 
             if (!string.IsNullOrEmpty(aIResponse))
