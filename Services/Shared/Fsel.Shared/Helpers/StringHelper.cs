@@ -212,5 +212,30 @@ namespace Fsel.Shared.Helpers
         {
             return Regex.Replace(word ?? string.Empty, pattern, replacement);
         }
+
+        public static (string?, string?) ParseFullName(string? fullName)
+        {
+            if (string.IsNullOrEmpty(fullName))
+            {
+                return default;
+            }
+
+            string[] nameParts = fullName.Split(new char[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+
+            string firstName = "";
+            string lastName = "";
+
+            if (nameParts.Length >= 1)
+            {
+                firstName = nameParts[0];
+            }
+
+            if (nameParts.Length == 2)
+            {
+                lastName = nameParts[1];
+            }
+
+            return (firstName, lastName);
+        }
     }
 }
