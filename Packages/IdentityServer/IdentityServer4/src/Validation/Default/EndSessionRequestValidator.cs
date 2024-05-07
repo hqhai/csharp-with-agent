@@ -113,10 +113,11 @@ namespace IdentityServer4.Validation
             };
 
             var idTokenHint = parameters.Get(OidcConstants.EndSessionRequest.IdTokenHint);
+            var idClient = parameters.Get(OidcConstants.AuthorizeRequest.ClientId);
             if (idTokenHint.IsPresent())
             {
                 // validate id_token - no need to validate token life time
-                var tokenValidationResult = await TokenValidator.ValidateIdentityTokenAsync(idTokenHint, null, false);
+                var tokenValidationResult = await TokenValidator.ValidateIdentityTokenAsync(idTokenHint, idClient, false);
                 if (tokenValidationResult.IsError)
                 {
                     return Invalid("Error validating id token hint", validatedRequest);

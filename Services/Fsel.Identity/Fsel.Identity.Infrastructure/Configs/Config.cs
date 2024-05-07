@@ -251,6 +251,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         new Secret("test.fsel.password_secret".Sha256())
                     },
 
+                    PostLogoutRedirectUris = { "https://localhost:4400" },
+
                     AllowedScopes =
                     {
                         IdentityServerConstants.StandardScopes.OfflineAccess,
