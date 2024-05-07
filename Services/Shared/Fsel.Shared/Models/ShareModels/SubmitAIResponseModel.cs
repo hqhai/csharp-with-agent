@@ -5,7 +5,8 @@ namespace Fsel.Shared.Models.ShareModels
     public class SubmitAIResponseModel
     {
         public string? GradingAlFeedback { get; set; }
-        public Guid? ClassForumDetailResultId { get; set; }
+        public Guid? ClassForumResultId { get; set; }
+        public int DisplayOrder { get; set; }
     }
 
     public class SubmitMockTestResponseModel

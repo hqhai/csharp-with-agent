@@ -24,7 +24,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         {
             if (message != null)
             {
-                var classForumResultId = message.ClassForumDetailResultId.ToString();
+                var classForumResultId = message.ClassForumResultId.ToString() + "_" + message.DisplayOrder;
                 await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, message);
 
                 try
