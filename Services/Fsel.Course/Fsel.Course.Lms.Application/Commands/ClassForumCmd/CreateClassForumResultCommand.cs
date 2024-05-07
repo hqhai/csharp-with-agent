@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Course.Domain.IEntities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -347,6 +348,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     SettingWordMaxLength = classForum.SettingWordMaxLength,
                     SystemRoleAlConfig = classForum.SystemRoleAlConfig,
                     DisplayOrder = displayOrder,
+                    SubmissionCount = displayOrder == Display_Order_First ? EnumSubmissionCount.FirstSubmit : EnumSubmissionCount.SecondSubmit
                 }, cancellationToken);
             }
             return classForumDetailResultId;

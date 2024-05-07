@@ -37,7 +37,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 SettingModel = message.SettingModel,
                 WordContent = message.WordContent,
                 IsRetry = message.IsRetry,
-                DisplayOrder = message.DisplayOrder,
+                SubmissionCount = message.SubmissionCount,
             }).ConfigureAwait(false);
         }
     }

@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 GradingAlFeedback = aIResponse,
                 ClassForumResultId = request.ClassForumResultId,
-                DisplayOrder = request.DisplayOrder
+                EnumSubmissionCount = request.SubmissionCount
             }, cancellationToken);
 
             if (!string.IsNullOrEmpty(aIResponse))

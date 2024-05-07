@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
 {
     using Fsel.Course.Domain.Models.CommandModels.Ais;
+    using Fsel.Shared.Enums;
 
     public class ClassForumAIResponseModel : SubmitAICommandModel
     {
@@ -14,6 +15,8 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
         public bool? IsRetry { get; set; } = false;
 
         public int DisplayOrder { get; set; }
+
+        public EnumSubmissionCount SubmissionCount { get; set; }
     }
 
     public class MockTestAnswerResponseModel : SubmitAICommandModel
