@@ -112,15 +112,15 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     RequireConsent = false,
                     RedirectUris =
                     {
-                        "https://localhost:4300",
-                        "http://localhost:4300",
+                        "https://localhost:4200",
+                        "http://localhost:4200",
                         "http://test1_lcms.fsel.edu.vn",
                         "https://test1_lcms.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
-                        "https://localhost:4300",
-                        "http://localhost:4300",
+                        "https://localhost:4200",
+                        "http://localhost:4200",
                         "http://test1_lcms.fsel.edu.vn",
                         "https://test1test1_lcms_lms.fsel.edu.vn"
                     },
@@ -158,15 +158,15 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     RequireConsent = false,
                     RedirectUris =
                     {
-                        "https://localhost:4200",
-                        "http://localhost:4200",
+                        "https://localhost:4300",
+                        "http://localhost:4300",
                         "http://test1_lmsadmin.fsel.edu.vn",
                         "https://test1_lmsadmin.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
-                        "https://localhost:4200",
-                        "http://localhost:4200",
+                        "https://localhost:4300",
+                        "http://localhost:4300",
                         "http://test1_lmsadmin.fsel.edu.vn",
                         "https://test1_lmsadmin.fsel.edu.vn"
                     },
@@ -251,7 +251,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         new Secret("test.fsel.password_secret".Sha256())
                     },
 
-                    PostLogoutRedirectUris = { "https://localhost:4400" },
+                    PostLogoutRedirectUris = { "https://localhost:4400", "https://identityserver4.readthedocs.io/en/latest/endpoints/endsession.html" },
 
                     AllowedScopes =
                     {
