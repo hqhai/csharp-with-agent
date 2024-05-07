@@ -5,9 +5,7 @@ namespace Fsel.Shared.Helpers
     using System.Diagnostics;
     using System.Globalization;
     using System.Text.RegularExpressions;
-    using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Enums;
-    using Microsoft.AspNetCore.Http;
 
     public static class MediaHelper
     {
@@ -34,7 +32,6 @@ namespace Fsel.Shared.Helpers
 
                 using (Process process = new Process { StartInfo = psi })
                 {
-
                     process.Start();
 
                     string output = process.StandardError.ReadToEnd();
@@ -66,15 +63,6 @@ namespace Fsel.Shared.Helpers
                 Console.WriteLine($"MediaHelper.GetMediaDurationAsync: {ex}");
                 return null;
             }
-        }
-
-        public static async Task<int?> GetMediaDurationAsync(IFormFile mediaFile, ISystemFileProvider systemFileProvider)
-        {
-            ArgumentNullException.ThrowIfNull(systemFileProvider);
-            var path = await systemFileProvider.SaveFile(mediaFile);
-            var result = GetMediaDurationAsync(path);
-            systemFileProvider.DeleteFiles(path);
-            return result;
         }
 
         public static EnumMediaType? GetMediaType(string? mediaUrl)
