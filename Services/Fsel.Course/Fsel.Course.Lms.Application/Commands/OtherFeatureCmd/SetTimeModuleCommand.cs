@@ -78,12 +78,9 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         private static double GetWorkingTime(double workingTime, double accessTime, double executionTime)
         {
             workingTime += accessTime;
-            if (executionTime != default)
+            if (executionTime != default && workingTime >= executionTime)
             {
-                if (workingTime >= executionTime)
-                {
-                    workingTime = executionTime;
-                }
+                workingTime = executionTime;
             }
             return workingTime;
         }

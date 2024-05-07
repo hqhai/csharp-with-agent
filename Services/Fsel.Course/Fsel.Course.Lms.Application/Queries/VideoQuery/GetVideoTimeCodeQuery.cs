@@ -74,8 +74,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-            await UpdateWorkingTimeToTimeCodeTest(videoResult);
-
             var video = await _videoRepository.Queryable.Include(i => i.VideoTimeCodes)
                                     .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                     .ThenInclude(x => x.Exercise)
@@ -98,21 +96,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             methodResult.Result = videoModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private async Task UpdateWorkingTimeToTimeCodeTest(VideoResult videoResult)
-        {
-            var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode)
-                .Where(x => x.VideoResultId == videoResult.Id && x.VideoTimeCode != null && x.VideoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone && x.Status == EnumResultStatus.Process).ToListAsync();
-            foreach (var item in videoTimeCodeResults)
-            {
-                if (item.VideoTimeCode != null && item.VideoTimeCode.ExecutionTime != default)
-                {
-                    item.WorkingTime = _dateTimeConverter.GetWorkingTime(item.WorkingTime, item.VideoTimeCode.ExecutionTime, item);
-                }
-            }
-            _videoTimeCodeResultRepository.UpdateList(videoTimeCodeResults);
-            await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
         }
     }
 }

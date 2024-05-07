@@ -123,25 +123,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var updateVideoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var skillScores = new List<SkillScores>();
 
-            double workingTime = 0;
-
-            if (videoTimeCodeResult.Status == EnumResultStatus.New)
-            {
-                workingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
-            }
-            else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
-            {
-                workingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
-            }
-            var isMandatoryAnswer = videoTimeCode.ExecutionTime == 0 || (workingTime <= videoTimeCode.ExecutionTime && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone);
-
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
                 var exercise = question?.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                 var exerciseId = exercise?.Id ?? default;
                 var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCodeId, videoResult.Id, question?.Id, exerciseId);
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, true, answer?.Answer, videoTimeCodeResult.Status == EnumResultStatus.Process, isMandatoryAnswer);
+                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, true, answer?.Answer, videoTimeCodeResult.Status == EnumResultStatus.Process, false);
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
@@ -198,14 +186,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     //{
                     //    await DoQuestBoard((Guid)courseId, cancellationToken);
                     //}
-                }
-                if (videoTimeCodeResult.Status == EnumResultStatus.New)
-                {
-                    videoTimeCodeResult.WorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.WorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
-                }
-                else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
-                {
-                    videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, videoTimeCode.ExecutionTime, videoTimeCodeResult);
                 }
                 if (videoTimeCodeAnswers.Any())
                 {

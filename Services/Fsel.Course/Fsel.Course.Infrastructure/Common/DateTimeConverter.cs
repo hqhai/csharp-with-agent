@@ -3,8 +3,6 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using Fsel.Core.Entities;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Helpers;
 
     public class DateTimeConverter
@@ -26,24 +24,6 @@ namespace Fsel.Course.Infrastructure.Common
             return workingTime;
         }
 
-        public double GetWorkingTime(double executionTime, DateTime inputDate)
-        {
-            double workingTime = default;
-            if (executionTime != default)
-            {
-                workingTime = GetWorkingTime(inputDate, DateTime.UtcNow, executionTime);
-                if (workingTime >= executionTime)
-                {
-                    workingTime = executionTime;
-                }
-            }
-            else
-            {
-                workingTime = DateTimeHelper.GetSecondBetweenDate(inputDate, DateTime.UtcNow);
-            }
-            return workingTime;
-        }
-
         public double GetWorkingTime(DateTime inputDate, DateTime outputDate, double executionTime)
         {
             var sectionBetweenDate = DateTimeHelper.GetSecondBetweenDate(inputDate, outputDate);
@@ -58,16 +38,6 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(entity);
             return entity.UpdatedDate ?? entity.CreatedDate;
-        }
-
-        public double GetRemainingTime(BaseResult baseResult, double executionTime)
-        {
-            ArgumentNullException.ThrowIfNull(baseResult);
-            if (baseResult.Status == EnumResultStatus.Done && baseResult.UpdatedDate.HasValue)
-            {
-                return executionTime - GetWorkingTime(baseResult.CreatedDate, baseResult.UpdatedDate.Value, executionTime);
-            }
-            return executionTime - GetWorkingTime(baseResult.CreatedDate, DateTime.UtcNow, executionTime);
         }
 
         public double GetRemainingTime(double executionTime, double workingTime)
