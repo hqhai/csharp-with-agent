@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             {
                 UserAIConfig = message.UserAIConfig,
                 ClassForumResultId = message.ClassForumResultId,
+                ClassForumDetailResultId = message.ClassForumDetailResultId,
                 SystemRoleAlConfig = message.SystemRoleAlConfig,
                 SettingWordMaxLength = message.SettingWordMaxLength,
                 SettingTopP = message.SettingTopP,

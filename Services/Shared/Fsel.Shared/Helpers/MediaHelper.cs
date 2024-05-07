@@ -35,8 +35,6 @@ namespace Fsel.Shared.Helpers
                 using (Process process = new Process { StartInfo = psi })
                 {
 
-                    return null;
-
                     process.Start();
 
                     string output = process.StandardError.ReadToEnd();

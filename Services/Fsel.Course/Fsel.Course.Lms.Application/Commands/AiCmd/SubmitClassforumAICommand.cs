@@ -39,7 +39,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         public async Task<bool> Handle(SubmitClassforumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumResultId);
+            var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
             var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
             var aIResponse = await _mediator.Send(new SubmitAICommand
             {
@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             if (!string.IsNullOrEmpty(aIResponse))
             {
-                var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).FirstOrDefault(x => x.Id == request.ClassForumResultId);
+                var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
                 if (classForumDetailResultOwner != null)
                 {

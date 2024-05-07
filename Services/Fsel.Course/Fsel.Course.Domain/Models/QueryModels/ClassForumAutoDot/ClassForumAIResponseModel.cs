@@ -8,6 +8,8 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
     {
         public Guid ClassForumResultId { get; set; }
 
+        public Guid ClassForumDetailResultId { get; set; }
+
         public string? WordContent { get; set; }
         public bool? IsRetry { get; set; } = false;
 
