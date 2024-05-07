@@ -15,6 +15,7 @@ builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.Services.AddScoped<FeatureAccessTimePublisher>();
+builder.Services.AddScoped<SetTimeModulePublisher>();
 builder.Services.AddScoped<ChatBotPublisher>();
 
 builder.AddMassTransit(appSetting,
@@ -37,5 +38,6 @@ app.UseHubs<LeaderBoardHub>(RealtimeSettings.LeaderBoardHub.Pattern);
 app.UseHubs<ClassForumAIFeedBackHub>(RealtimeSettings.ClassForumAIFeedBackHub.Pattern);
 app.UseHubs<MockTestWritingHub>(RealtimeSettings.MockTestWritingAIFeedBackHub.Pattern);
 app.UseHubs<FeatureAccessTimeHub>(RealtimeSettings.FeatureAccessTimeHub.Pattern);
+app.UseHubs<SetTimeModuleHub>(RealtimeSettings.SetTimeModuleHub.Pattern);
 app.UseHubs<ChatBotHub>(RealtimeSettings.ChatBotHub.Pattern);
 app.Run();
