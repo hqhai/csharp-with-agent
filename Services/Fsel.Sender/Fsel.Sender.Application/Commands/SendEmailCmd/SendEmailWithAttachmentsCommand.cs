@@ -54,7 +54,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         {
             var message = new MimeMessage();
 
-            message.From.Add(new MailboxAddress(string.Empty, appSetting.Aws?.From));
+            message.From.Add(new MailboxAddress(string.Empty, appSetting.Smtp?.From));
 
             model.ToEmails.ForEach(email =>
             {
@@ -78,7 +78,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
 
         private static async Task SendEmails(SendEmailCommandModel model, AppSetting appSetting)
         {
-            using (var client = new AmazonSimpleEmailServiceClient(appSetting.Aws?.AwsAccessKeyId, appSetting.Aws?.AwsSecretAccessKey, RegionEndpoint.APSoutheast1))
+            using (var client = new AmazonSimpleEmailServiceClient(appSetting.Smtp?.AwsAccessKeyId, appSetting.Smtp?.AwsSecretAccessKey, RegionEndpoint.APSoutheast1))
             {
                 var sendRequest = new SendRawEmailRequest { RawMessage = new RawMessage(GetMessageStream(model, appSetting)) };
                 try

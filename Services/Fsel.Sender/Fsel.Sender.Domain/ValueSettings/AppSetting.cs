@@ -6,11 +6,11 @@ namespace Fsel.Sender.Domain.ValueSettings
 
     public class AppSetting : BaseAppSetting
     {
-        public Aws? Aws { get; set; }
         public Smtp? Smtp { get; set; }
+        public SmtpGoogle? SmtpGoogle { get; set; }
     }
 
-    public class Aws
+    public class Smtp
     {
         public string? From { get; set; }
         public string? SmtpServer { get; set; }
@@ -21,7 +21,7 @@ namespace Fsel.Sender.Domain.ValueSettings
         public string? AwsSecretAccessKey { get; set; }
     }
 
-    public class Smtp
+    public class SmtpGoogle
     {
         public string? From { get; set; }
         public string? SmtpServer { get; set; }

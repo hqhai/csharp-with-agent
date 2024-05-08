@@ -61,7 +61,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         {
             var emailRequest = new SendEmailRequest
             {
-                Source = _appSetting?.Aws?.From,
+                Source = _appSetting?.Smtp?.From,
                 Destination = new Destination
                 {
                     BccAddresses = message.BccEmails?.Where(x => x.IsValidEmail()).ToList(),

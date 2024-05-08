@@ -62,7 +62,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         private MimeMessage CreateEmailMessage(SendEmailModel message)
         {
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress(SenderSettings.HostName, _appSetting?.Smtp?.From ?? string.Empty));
+            emailMessage.From.Add(new MailboxAddress(SenderSettings.HostName, _appSetting?.SmtpGoogle?.From ?? string.Empty));
 
             if (message.ToEmails != null)
             {
@@ -100,9 +100,9 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 try
                 {
                     client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                    await client.ConnectAsync(_appSetting?.Smtp?.SmtpServer ?? string.Empty, _appSetting?.Smtp?.Port ?? 0, true);
+                    await client.ConnectAsync(_appSetting?.SmtpGoogle?.SmtpServer ?? string.Empty, _appSetting?.SmtpGoogle?.Port ?? 0, true);
                     client.AuthenticationMechanisms.Remove("XOAUTH2");
-                    await client.AuthenticateAsync(_appSetting?.Smtp?.Username ?? string.Empty, _appSetting?.Smtp?.Password ?? string.Empty);
+                    await client.AuthenticateAsync(_appSetting?.SmtpGoogle?.Username ?? string.Empty, _appSetting?.SmtpGoogle?.Password ?? string.Empty);
                     await client.SendAsync(mailMessage);
                 }
                 catch (Exception)
