@@ -16,12 +16,12 @@ namespace Fsel.Course.Infrastructure.Common
     public class SectionGroupConverter
     {
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
-        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly LinQHelper _linQHelper;
         private readonly ISectionRepository _sectionRepository;
@@ -31,15 +31,15 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Clean Code
 
-        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, IStudentFeedbackRepository studentFeedbackRepository, AnswerTypeConverter answerTypeConverter, ISectionQuestionRepository sectionQuestionRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
+        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, DateTimeConverter dateTimeConverter, IStudentFeedbackRepository studentFeedbackRepository, AnswerTypeConverter answerTypeConverter, ISectionQuestionRepository sectionQuestionRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
         {
             _sectionGroupResultRepository = sectionGroupResultRepository;
+            _dateTimeConverter = dateTimeConverter;
             _studentFeedbackRepository = studentFeedbackRepository;
             _answerTypeConverter = answerTypeConverter;
             _sectionQuestionRepository = sectionQuestionRepository;
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
-            _dateTimeConverter = dateTimeConverter;
             _questionRepository = questionRepository;
             _linQHelper = linQHelper;
             _sectionRepository = sectionRepository;
@@ -430,9 +430,8 @@ namespace Fsel.Course.Infrastructure.Common
         private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
         {
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
-            var remainingTime = sectionGroup.ExecutionTime - sectionGroupResult.WorkingTime;
             sectionGroupResultDto.IsFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == sectionGroupResult.Id);
-            sectionGroupResultDto.RemainingTime = remainingTime > 0 ? remainingTime : default;
+            sectionGroupResultDto.RemainingTime = _dateTimeConverter.GetRemainingTime(sectionGroup.ExecutionTime, sectionGroupResult.WorkingTime);
             return sectionGroupResultDto;
         }
 

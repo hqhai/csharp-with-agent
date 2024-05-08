@@ -9,8 +9,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -30,28 +28,22 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         private readonly IVideoRepository _videoRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly AuthContext _authContext;
-        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly VideoConverter _videoConverter;
         private readonly IMapper _mapper;
-        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IUserService _userService;
 
         public GetVideoTimeCodeQueryHandler(IVideoRepository videoRepository,
             IVideoResultRepository videoResultRepository,
             AuthContext authContext,
-            IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
             VideoConverter videoConverter,
             IMapper mapper,
-            DateTimeConverter dateTimeConverter,
             IUserService userService)
         {
             _videoRepository = videoRepository;
             _videoResultRepository = videoResultRepository;
             _authContext = authContext;
-            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _videoConverter = videoConverter;
             _mapper = mapper;
-            _dateTimeConverter = dateTimeConverter;
             _userService = userService;
         }
 

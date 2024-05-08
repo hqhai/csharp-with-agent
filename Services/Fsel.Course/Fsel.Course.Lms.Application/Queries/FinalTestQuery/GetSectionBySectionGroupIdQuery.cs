@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 {
     using System.Threading;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -14,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -30,29 +28,21 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 
     public class GetSectionBySectionGroupIdQueryHandler : IRequestHandler<GetSectionBySectionGroupIdQuery, MethodResult<SectionGroupDtoModel>>
     {
-        private readonly ISectionRepository _sectionRepository;
-        private readonly DateTimeConverter _dateTimeConverter;
-        private readonly GetTimeToCompleteTestPublisher _getTimeToCompleteTestPublisher;
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private readonly IMapper _mapper;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ILogger<object> _logger;
 
-        public GetSectionBySectionGroupIdQueryHandler(ISectionRepository sectionRepository, DateTimeConverter dateTimeConverter, GetTimeToCompleteTestPublisher getTimeToCompleteTestPublisher, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IFinalTestResultRepository finalTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISectionGroupRepository sectionGroupRepository, ILogger<object> logger)
+        public GetSectionBySectionGroupIdQueryHandler(SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, IFinalTestResultRepository finalTestResultRepository, AuthContext authContext, IUserService userService, ISectionGroupRepository sectionGroupRepository, ILogger<object> logger)
         {
-            _sectionRepository = sectionRepository;
-            _dateTimeConverter = dateTimeConverter;
-            _getTimeToCompleteTestPublisher = getTimeToCompleteTestPublisher;
             _sectionGroupConverter = sectionGroupConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
             _authContext = authContext;
             _userService = userService;
-            _mapper = mapper;
             _sectionGroupRepository = sectionGroupRepository;
             _logger = logger;
         }

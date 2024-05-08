@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -16,11 +17,13 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     public class SetTimeModuleCommandHandler : IRequestHandler<SetTimeModuleCommand, bool>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
 
-        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, ISectionGroupResultRepository sectionGroupResultRepository)
+        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
+            _dateTimeConverter = dateTimeConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
         }
 
@@ -49,19 +52,29 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         private async Task UpdateVideoTimeCodeAsync(SetTimeModuleCommand request)
         {
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
-            if (videoTimeCodeResult != null && videoTimeCodeResult.VideoTimeCode != null)
+            var videoTimeCode = videoTimeCodeResult?.VideoTimeCode;
+            if (videoTimeCodeResult == null || videoTimeCode == null)
             {
-                if (videoTimeCodeResult.Status == EnumResultStatus.New || videoTimeCodeResult.VideoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+                return;
+            }
+            if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+            {
+                videoTimeCodeResult.WorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
+            }
+            else
+            {
+                if (videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
-                    videoTimeCodeResult.WorkingTime = GetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCodeResult.VideoTimeCode.ExecutionTime);
+                    videoTimeCodeResult.WorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
                 else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
                 {
-                    videoTimeCodeResult.RetryWorkingTime = GetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCodeResult.VideoTimeCode.ExecutionTime);
+                    videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
-                _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
-                await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
+
+            _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
+            await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
         private async Task UpdateSectionGroupResultAsync(SetTimeModuleCommand request)
@@ -69,20 +82,10 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
             if (sectionGroupResult != null && sectionGroupResult.SectionGroup != null)
             {
-                sectionGroupResult.WorkingTime = GetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
+                sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
                 _sectionGroupResultRepository.Update(sectionGroupResult);
                 await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
-        }
-
-        private static double GetWorkingTime(double workingTime, double accessTime, double executionTime)
-        {
-            workingTime += accessTime;
-            if (executionTime != default && workingTime >= executionTime)
-            {
-                workingTime = executionTime;
-            }
-            return workingTime;
         }
     }
 }

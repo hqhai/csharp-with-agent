@@ -33,13 +33,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly QuestionConverter _questionConverter;
-        private readonly DateTimeConverter _dateTimeConverter;
         private readonly VideoConverter _videoConverter;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
-
         private readonly IQuestionRepository _questionRepository;
-
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
 
@@ -47,7 +44,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , IVideoResultRepository videoResultRepository
             , QuestionConverter questionConverter
-            , DateTimeConverter dateTimeConverter
             , VideoConverter videoConverter
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
             , IQuestionRepository questionRepository,
@@ -58,7 +54,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoResultRepository = videoResultRepository;
             _questionConverter = questionConverter;
-            _dateTimeConverter = dateTimeConverter;
             _videoConverter = videoConverter;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _questionRepository = questionRepository;
