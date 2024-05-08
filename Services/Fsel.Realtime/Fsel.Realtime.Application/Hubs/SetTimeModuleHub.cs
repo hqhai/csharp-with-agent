@@ -55,8 +55,10 @@ namespace Fsel.Realtime.Application.Hubs
             await Task.CompletedTask;
         }
 
-        public async Task StopTime(string type, string objectId)
+        public async Task StopTime()
         {
+            string type = (Context.GetHttpContext()?.Request.Query["Type"].ToString()!);
+            string objectId = Context.GetHttpContext()?.Request.Query["ObjectId"].ToString()!;
             await DisConnectAsync(type, objectId);
         }
 
