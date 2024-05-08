@@ -117,7 +117,8 @@ namespace IdentityServer4.Validation
             if (idTokenHint.IsPresent())
             {
                 // validate id_token - no need to validate token life time
-                var tokenValidationResult = await TokenValidator.ValidateIdentityTokenAsync(idTokenHint, idClient, false);
+                //var tokenValidationResult = await TokenValidator.ValidateIdentityTokenAsync(idTokenHint, idClient, false);
+                var tokenValidationResult = await TokenValidator.ValidateIdentityTokenAsync(idTokenHint, null, false);
                 if (tokenValidationResult.IsError)
                 {
                     return Invalid("Error validating id token hint", validatedRequest);
