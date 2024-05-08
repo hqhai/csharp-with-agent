@@ -29,7 +29,7 @@ namespace Fsel.Sender.Application.Services
         {
             _appSetting = appSetting;
             _logger = logger;
-            _amazonSimpleEmailService = new AmazonSimpleEmailServiceClient(_appSetting?.Smtp?.AwsAccessKeyId, _appSetting?.Smtp?.AwsSecretAccessKey, region: Amazon.RegionEndpoint.APSoutheast1);
+            _amazonSimpleEmailService = new AmazonSimpleEmailServiceClient(_appSetting?.Aws?.AwsAccessKeyId, _appSetting?.Aws?.AwsSecretAccessKey, region: Amazon.RegionEndpoint.APSoutheast1);
         }
 
         // snippet-start:[SES.dotnetv3.ListIdentitiesAsync]

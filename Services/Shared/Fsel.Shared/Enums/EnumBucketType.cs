@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Storage.Domain.Enums
+namespace Fsel.Shared.Enums
 {
     using System.ComponentModel;
 
@@ -8,6 +8,7 @@ namespace Fsel.Storage.Domain.Enums
     {
         [Description("fsel")]
         Fsel,
+
         [Description("fsel-public")]
         FselPublic
     }
