@@ -4,6 +4,7 @@ using System.Net;
 using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
@@ -23,11 +24,27 @@ namespace Fsel.Course.Lms.Api.Controllers
     {
         private readonly IMediator _mediator;
         private readonly IQueueProvider _queueProvider;
+        private readonly ILogger<TestController> _logger;
 
-        public TestController(IMediator mediator, IQueueProvider queueProvider)
+        public TestController(IMediator mediator, IQueueProvider queueProvider, ILogger<TestController> logger)
         {
             _mediator = mediator;
             _queueProvider = queueProvider;
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// Search Course
+        /// </summary>
+        [HttpGet("get-curl")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        public IActionResult GetCurl()
+        {
+            _logger.LogError(Request.HttpContext.ToCurl());
+            MethodResult<string> queryResult = new MethodResult<string> { Result = nameof(Search) };
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -80,10 +97,29 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> UpdateModuleProcess([FromQuery] UpdateModuleProcessCommand command)
+        public async Task<IActionResult> UpdateModuleProcess([FromBody] UpdateModuleProcessCommand command)
         {
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Delete Video Time Code Answers
+        /// </summary>
+        [HttpPost("queue-test/{queueName}/{queueTopic}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public IActionResult QueueTest([FromRoute] string queueName, [FromRoute] string queueTopic, [FromBody] QueueTestModel data)
+        {
+            _queueProvider.Publish(queueName, queueTopic, data?.Data);
+
+            MethodResult<bool> queryResult = new MethodResult<bool>();
+            return queryResult.GetActionResult();
+        }
+    }
+
+    public class QueueTestModel
+    {
+        public object? Data { get; set; }
     }
 }

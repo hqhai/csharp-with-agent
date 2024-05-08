@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.InteractionService.Models;
@@ -28,15 +29,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Net.Http.Headers;
 
     public class CreateUserStudentToAdminCommand : IRequest<MethodResult<UserModel>>
     {
         public string? Email { get; set; }
+        public bool IsTrialRegistration { get; set; }
         public Guid CourseId { get; set; }
     }
 
     public class CreateUserStudentToAdminCommandHandler : IRequestHandler<CreateUserStudentToAdminCommand, MethodResult<UserModel>>
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
@@ -48,10 +52,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly IPlatformRepository _platformRepository;
         private const string DefaultPassword = "Admin@123";
         private const string RoleStudent = nameof(Student);
-        private const int TotalUserDateNow = 50;
+        private const int TotalUserDateNow = 2100;
+        private const int MinAgeYoung = 14;
+        private const int MaxAgeChildren = 13;
 
-        public CreateUserStudentToAdminCommandHandler(IMediator mediator, IMapper mapper, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
+        public CreateUserStudentToAdminCommandHandler(IHttpContextAccessor httpContextAccessor, IMediator mediator, IMapper mapper, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
         {
+            _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
             _mapper = mapper;
             _authContext = authContext;
@@ -93,7 +100,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var isIELST = course.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts;
 
             #endregion Get Course
 
@@ -140,7 +146,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 return methodResult;
             }
-            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = GetBirthdayOfStudent(isIELST) }, cancellationToken);
+            var tokenResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken);
+            if (tokenResult.Result?.AccessToken != null && _httpContextAccessor.HttpContext != null)
+            {
+                _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = "Bearer " + tokenResult.Result?.AccessToken;
+            }
+
+            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = GetBirthdayToCourseLevel(course.CourseLevel) }, cancellationToken);
             if (!updateCode.IsOK)
             {
                 methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
@@ -161,7 +173,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
             });
             await _lmsCourseService.SavePlacementTestDoneAsync(new SavePlacementTestDoneCommandModel { CourseLevel = GetCourseLevel(course.CourseLevel), StudentId = student?.Id ?? default });
-            var orderResult = await SaveOrderAsync(user, course);
+            var orderResult = await SaveOrderAsync(user, course, request.IsTrialRegistration);
             if (!orderResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(orderResult.ErrorMessages);
@@ -193,7 +205,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
         }
 
-        private async Task<VoidMethodResult> SaveOrderAsync(User user, CourseModel course)
+        private async Task<VoidMethodResult> SaveOrderAsync(User user, CourseModel course, bool isTrialRegistration)
         {
             var methodResult = new VoidMethodResult();
             var packagesResult = await _orderService.GetPackages();
@@ -217,6 +229,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
                 CourseId = course.Id,
                 PackageId = package.Id,
+                IsTrialRegistration = isTrialRegistration
             });
             if (!createOrderResult.IsSuccessStatusCode)
             {
@@ -251,9 +264,24 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             return user;
         }
 
-        private static DateTime GetBirthdayOfStudent(bool isIELST)
+        private static DateTime GetBirthdayToCourseLevel(EnumCourseLevel courseLevel)
         {
-            return new DateTime(isIELST ? 2000 : 2014, 1, 1);
+            int yearOld = default;
+            switch (courseLevel)
+            {
+                case EnumCourseLevel.MS1:
+                case EnumCourseLevel.MS2:
+                case EnumCourseLevel.MS3:
+                case EnumCourseLevel.C1:
+                case EnumCourseLevel.B2:
+                    yearOld = MinAgeYoung;
+                    break;
+
+                default:
+                    yearOld = MaxAgeChildren;
+                    break;
+            }
+            return new DateTime(DateTime.UtcNow.AddYears(-yearOld).Year, 1, 1);
         }
     }
 }

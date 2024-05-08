@@ -9,7 +9,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
     using MassTransit;
     using MediatR;
 
-    public class DeleteGuestStudentConsumer : IConsumer<BaseQueueModel>
+    public class DeleteGuestStudentConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
@@ -18,7 +18,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<BaseQueueModel>> context)
         {
             if (context == null)
             {
@@ -28,7 +28,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
 
             var classForum = new DeleteGuestStudentByUserIdCommand
             {
-                Id = Guid.Parse(data.QueueId!),
+                Id = Guid.Parse(data.Data.QueueId!),
             };
             await _mediator.Send(classForum).ConfigureAwait(false);
         }

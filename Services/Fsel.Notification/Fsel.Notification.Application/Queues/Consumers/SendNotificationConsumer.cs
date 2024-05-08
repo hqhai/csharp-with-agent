@@ -1,5 +1,6 @@
 using System.Globalization;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base.BaseModels;
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
 using Fsel.Notification.Infrastructure.ValueSettings;
@@ -11,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
-    public class SendNotificationConsumer : IConsumer<NotificationSendingQueueModel>
+    public class SendNotificationConsumer : Core.Base.Interfaces.IBaseConsumer<NotificationSendingQueueModel>
     {
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
@@ -24,9 +25,9 @@ namespace Fsel.Notification.Application.Queues.Consumers
             _appSetting = appSetting;
         }
 
-        public async Task Consume(ConsumeContext<NotificationSendingQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<NotificationSendingQueueModel>> context)
         {
-            var dataReceipt = context?.Message;
+            var dataReceipt = context?.Message?.Data;
 
             if (dataReceipt != null)
             {

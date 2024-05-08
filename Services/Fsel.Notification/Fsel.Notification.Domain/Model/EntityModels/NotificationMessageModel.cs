@@ -37,6 +37,8 @@ namespace Fsel.Notification.Domain.Model.EntityModels
         public IList<Guid>? UserIds { get; set; }
 
         public string? Icon { get; set; }
+
+        public NotificationsTypeModel? NotificationType { get; set; }
     }
 
 }

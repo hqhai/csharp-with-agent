@@ -1,3 +1,4 @@
+using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class LeaderBoardConsumer : IConsumer<LeaderBoardQueueModel>
+    public class LeaderBoardConsumer : Core.Base.Interfaces.IBaseConsumer<LeaderBoardQueueModel>
     {
         private readonly IHubContext<LeaderBoardHub> _leaderBoardHubContext;
         private readonly IQueueProvider _queueProvider;
@@ -19,11 +20,11 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             _queueProvider = queueProvider;
         }
 
-        public async Task Consume(ConsumeContext<LeaderBoardQueueModel> context)
+        public async Task Consume(ConsumeContext<BaseQueueDataModel<LeaderBoardQueueModel>> context)
         {
             if (context != null)
             {
-                var courseLevel = context.Message.CourseLevel.ToString();
+                var courseLevel = context.Message.Data.CourseLevel.ToString();
                 await _leaderBoardHubContext.GetGroup(courseLevel!).SendAsync(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, context.Message);
 
                 try

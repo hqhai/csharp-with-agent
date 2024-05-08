@@ -8,7 +8,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using MassTransit;
     using MediatR;
 
-    public class WeeklyReportConsumer : IConsumer<BaseQueueModel>
+    public class WeeklyReportConsumer : Core.Base.Interfaces.IBaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
@@ -17,7 +17,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<BaseQueueModel> context)
+        public async Task Consume(ConsumeContext<Core.Base.BaseModels.BaseQueueDataModel<BaseQueueModel>> context)
         {
             await _mediator.Send(new WeeklyReportCommand()).ConfigureAwait(false);
         }
