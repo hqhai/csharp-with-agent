@@ -4,10 +4,10 @@ namespace Fsel.Storage.Application.Command.ChatbotCmd
 {
     using System.Threading;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Enums;
     using Fsel.Storage.Application.Services.AmazonS3Services;
     using Fsel.Storage.Application.Services.OpenAIServices;
     using Fsel.Storage.Application.Services.OpenAIServices.Models;
-    using Fsel.Storage.Domain.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -24,7 +24,6 @@ namespace Fsel.Storage.Application.Command.ChatbotCmd
     {
         private readonly IOpenAIService _openAIService;
         private readonly IAmazonS3Service _amazonS3Service;
-
 
         public CreateChatbotAudioCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service)
         {
