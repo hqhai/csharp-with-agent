@@ -42,7 +42,7 @@ namespace Fsel.Shared.Constants
                 public const string FeatureAccessTime = $"{KeyQueue}_FeatureAccessTime";
                 public const string ChatBot = $"{KeyQueue}_ChatBot";
                 public const string ChatBotRealTime = $"{KeyQueue}_ChatBotRealTime";
-
+                public const string SetTimeModule = $"{KeyQueue}_SetTimeModule";
                 public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
             }
         }
@@ -123,7 +123,6 @@ namespace Fsel.Shared.Constants
                 public const string InteractionAction = $"{KeyQueue}_InterationAction";
             }
         }
-
 
         public static class OrderingQueue
         {
