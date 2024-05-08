@@ -48,16 +48,9 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("send-mails-pre-interview")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendMailPreInterview([FromQuery] string name, [FromQuery] string email, IFormFile video, IFormFile lesson, IFormFile activity)
+        public async Task<IActionResult> SendMailPreInterview([FromForm] SendMailPreInterviewCommand command)
         {
-            var commandResult = await _mediator.Send(new SendMailPreInterviewCommand
-            {
-                Name = name,
-                Email = email,
-                Video = video,
-                Lesson = lesson,
-                Activity = activity
-            }).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
