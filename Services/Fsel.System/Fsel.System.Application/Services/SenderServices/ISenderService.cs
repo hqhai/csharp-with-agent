@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Services.SenderServices
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Http;
     using Refit;
 
@@ -14,6 +15,9 @@ namespace Fsel.System.Application.Services.SenderServices
         [Multipart]
         [Post("/v1/send-email/send-with-attachments")]
         Task<IApiResponse<MethodResult<bool>>> SendEmailWithAttachments([Query] IList<string> toEmails, [Query] IList<string>? bccEmails, [Query] IList<string>? ccEmails, [Query] string? subject, [Query] string? content, [AliasAs("attachments")] IList<StreamPart>? attachments);
+
+        [Post("/v1/send-email/send-mail-using-smtp")]
+        Task<IApiResponse<MethodResult<bool>>> SendEmailUsingSMTP([Body] SendEmailCommandModel command);
     }
 
     public class SendEmailCommandModel
@@ -35,5 +39,11 @@ namespace Fsel.System.Application.Services.SenderServices
 
         [AliasAs("Files")]
         public IList<IFormFile>? Attachments { get; set; }
+    }
+
+    public class SendEmailByTemplateCommandModel : SendEmailCommandModel
+    {
+        public EnumSenderTemplate? Template { get; set; }
+        public object? Params { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-namespace Fsel.Storage.Domain.Enums
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Shared.Enums
 {
     public enum EnumFolderType
     {
