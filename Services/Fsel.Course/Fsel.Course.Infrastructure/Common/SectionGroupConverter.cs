@@ -431,7 +431,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == sectionGroupResult.Id);
-            sectionGroupResultDto.RemainingTime = _dateTimeConverter.GetRemainingTime(sectionGroup.ExecutionTime, sectionGroupResult.WorkingTime);
+            sectionGroupResultDto.RemainingTime = _dateTimeConverter.SetRemainingTime(sectionGroup.ExecutionTime, sectionGroupResult.WorkingTime);
             return sectionGroupResultDto;
         }
 

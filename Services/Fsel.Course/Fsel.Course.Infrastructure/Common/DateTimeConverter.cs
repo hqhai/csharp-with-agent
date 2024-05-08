@@ -4,7 +4,7 @@ namespace Fsel.Course.Infrastructure.Common
 {
     public class DateTimeConverter
     {
-        public double GetRemainingTime(double executionTime, double workingTime)
+        public double SetRemainingTime(double executionTime, double workingTime)
         {
             var remainingTime = executionTime - workingTime;
             return remainingTime > 0 ? remainingTime : default;
