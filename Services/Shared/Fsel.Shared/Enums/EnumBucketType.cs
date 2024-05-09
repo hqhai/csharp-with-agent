@@ -10,6 +10,9 @@ namespace Fsel.Shared.Enums
         Fsel,
 
         [Description("fsel-public")]
-        FselPublic
+        FselPublic,
+
+        [Description("recruitment")]
+        Recruitment
     }
 }
