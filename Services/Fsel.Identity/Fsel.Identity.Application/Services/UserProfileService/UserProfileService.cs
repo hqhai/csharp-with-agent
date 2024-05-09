@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Services.UserProfileService
 {
     using System;
+    using System.Data;
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Threading.Tasks;

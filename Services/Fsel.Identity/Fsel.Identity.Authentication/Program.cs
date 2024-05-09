@@ -4,6 +4,7 @@ using AutoMapper;
 using Fsel.Authentication.Infrastructure.Configs;
 using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
+using Fsel.Identity.Application.Events;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
@@ -44,7 +45,8 @@ builder.AddIdentity<User, Role, UserDbContext>().AddTotpProvider();
 builder.Services.AddIdentityServer(options =>
 {
     options.Authentication.CookieSameSiteMode = SameSiteMode.None;
-    options.EmitStaticAudienceClaim = true;
+    options.EmitStaticAudienceClaim = false;
+    options.Events.RaiseSuccessEvents = true;
 })
 .AddInMemoryApiScopes(Config.ApiScopes)
 .AddInMemoryIdentityResources(Config.IdentityResources)
@@ -174,12 +176,15 @@ builder.Services.AddScoped<IUserPlatformRepository, UserPlatformRepository>();
 builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepository>();
 builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>();
 builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
+
+// Event
+builder.Services.AddTransient<IEventSink, TokenIssuedEventHandler>();
 
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
-builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
 builder.Services.AddScoped<QuestBoardPublisher>();
 
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);

@@ -12,6 +12,15 @@ spec:
       labels:
         app: system-dev
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-staging
       containers:
       - name: system-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/system:auth-openid-...............
@@ -46,40 +55,3 @@ spec:
     name: https
   selector:
     app: system-dev
-
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: system-dev
-  annotations:
-#    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-#    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-#    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-#    nginx.ingress.kubernetes.io/x-forwarded-proto: "https"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,systemorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
-spec:
-  ingressClassName: nginx-public
-  rules:
-  - host: fsel-system-dev.fsel.edu.vn
-    http:
-      paths:
-      - path: /
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: system-dev
-            port:
-              number: 80
-  tls:
-  - hosts:
-    - fsel-system-dev.fsel.edu.vn
-    secretName: fsel-system-dev.fsel.edu.vn-wildcard
-
-status:
-  loadBalancer:
-    ingress:
-    - hostname: 103.22.218.217.nip.io

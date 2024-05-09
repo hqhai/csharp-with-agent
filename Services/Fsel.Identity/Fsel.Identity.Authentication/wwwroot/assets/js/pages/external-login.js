@@ -15,10 +15,8 @@
   //});
 
   $('#form-ExternalLogin').on('submit', function (e) {
-    e.preventDefault();
     if (this.checkValidity()) {
       $('.loading').removeClass('hidden');
-      this.submit();
     }
   });
 

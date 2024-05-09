@@ -229,6 +229,10 @@ namespace IdentityServer4.Services
             {
                 token.Audiences.Add(string.Format(IdentityServerConstants.AccessTokenAudience, issuer.EnsureTrailingSlash()));
             }
+            else
+            {
+                token.Audiences.Add(request.ValidatedRequest.Client.ClientId);
+            }
 
             // add cnf if present
             if (request.ValidatedRequest.Confirmation.IsPresent())

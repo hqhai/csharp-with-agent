@@ -498,7 +498,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginInputModel model, string button)
+        public async Task<IActionResult> Login(LoginInputModel model/*, string button*/)
         {
             ArgumentNullException.ThrowIfNull(model);
 
@@ -508,32 +508,32 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             // check if we are in the context of an authorization request
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
 
-            // the user clicked the "cancel" button
-            if (button != "login")
-            {
-                if (context != null)
-                {
-                    // if the user cancels, send a result back into IdentityServer as if they
-                    // denied the consent (even if this client does not require consent).
-                    // this will send back an access denied OIDC error response to the client.
-                    await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
+            //// the user clicked the "cancel" button
+            //if (button != "login")
+            //{
+            //    if (context != null)
+            //    {
+            //        // if the user cancels, send a result back into IdentityServer as if they 
+            //        // denied the consent (even if this client does not require consent).
+            //        // this will send back an access denied OIDC error response to the client.
+            //        await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
 
-                    // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                    if (context.IsNativeClient())
-                    {
-                        // The client is native, so this change in how to
-                        // return the response is for better UX for the end user.
-                        return this.LoadingPage("Redirect", model.ReturnUrl ?? string.Empty);
-                    }
+            //        // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+            //        if (context.IsNativeClient())
+            //        {
+            //            // The client is native, so this change in how to
+            //            // return the response is for better UX for the end user.
+            //            return this.LoadingPage("Redirect", model.ReturnUrl ?? string.Empty);
+            //        }
 
-                    return Redirect(model.ReturnUrl ?? string.Empty);
-                }
-                else
-                {
-                    // since we don't have a valid context, then we just go back to the home page
-                    return Redirect("~/");
-                }
-            }
+            //        return Redirect(model.ReturnUrl ?? string.Empty);
+            //    }
+            //    else
+            //    {
+            //        // since we don't have a valid context, then we just go back to the home page
+            //        return Redirect("~/");
+            //    }
+            //}
 
             _logger.LogWarning("ModelState.IsValid: " + ModelState.IsValid);
 
@@ -624,16 +624,16 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         {
             // build a model so the logout page knows what to display
             var vm = await BuildLogoutViewModelAsync(logoutId);
-            //return await Logout(vm);
+            return await Logout(vm);
 
-            if (vm.ShowLogoutPrompt == false)
-            {
-                // if the request for logout was properly authenticated from IdentityServer, then
-                // we don't need to show the prompt and can just log the user out directly.
-                return await Logout(vm);
-            }
+            //if (vm.ShowLogoutPrompt == false)
+            //{
+            //    // if the request for logout was properly authenticated from IdentityServer, then
+            //    // we don't need to show the prompt and can just log the user out directly.
+            //    return await Logout(vm);
+            //}
 
-            return View(vm);
+            //return View(vm);
         }
 
         /// <summary>

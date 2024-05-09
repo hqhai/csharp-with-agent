@@ -1,9 +1,7 @@
 (function ($) {
   $('#form-Login').on('submit', function (e) {
-    e.preventDefault();
     if (this.checkValidity()) {
       $('.loading').removeClass('hidden');
-      this.submit();
     }
   });
 
