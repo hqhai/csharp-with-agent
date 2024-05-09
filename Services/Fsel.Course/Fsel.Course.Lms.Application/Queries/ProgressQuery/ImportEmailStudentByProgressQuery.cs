@@ -76,6 +76,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => studentIds.Contains(x.Id) && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.Done).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             var mockTestResults = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).Where(x => studentIds.Contains(x.Id) && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.Done).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Where(x => studentIds.Contains(x.Id) && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.Done).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var finalTestResults = await _finalTestResultRepository.Queryable.Include(x => x.FinalTest).Where(x => studentIds.Contains(x.Id) && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.Done).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
 
             foreach (var courseResult in courseResults)
             {
