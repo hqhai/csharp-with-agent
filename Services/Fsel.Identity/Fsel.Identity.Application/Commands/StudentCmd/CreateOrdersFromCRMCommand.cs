@@ -52,35 +52,35 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
-            if (request.UsersInfo.Any(p => string.IsNullOrEmpty(p.Email) && string.IsNullOrEmpty(p.PhoneNumber)))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-                return methodResult;
-            }
+            //if (request.UsersInfo.Any(p => string.IsNullOrEmpty(p.Email) && string.IsNullOrEmpty(p.PhoneNumber)))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+            //    return methodResult;
+            //}
 
-            if (request.UsersInfo.Any(p => !string.IsNullOrEmpty(p.Email) && !p.Email.IsValidEmail()))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-                return methodResult;
-            }
+            //if (request.UsersInfo.Any(p => !string.IsNullOrEmpty(p.Email) && !p.Email.IsValidEmail()))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+            //    return methodResult;
+            //}
 
-            if (request.UsersInfo.Any(p => !string.IsNullOrEmpty(p.PhoneNumber) && !p.PhoneNumber.IsValidPhoneNumber()))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-                return methodResult;
-            }
+            //if (request.UsersInfo.Any(p => !string.IsNullOrEmpty(p.PhoneNumber) && !p.PhoneNumber.IsValidPhoneNumber()))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+            //    return methodResult;
+            //}
 
-            if (request.UsersInfo.Any(p => (!string.IsNullOrEmpty(p.FatherEmail) && !p.FatherEmail.IsValidEmail()) || (!string.IsNullOrEmpty(p.MotherEmail) && !p.MotherEmail.IsValidEmail())))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-                return methodResult;
-            }
+            //if (request.UsersInfo.Any(p => (!string.IsNullOrEmpty(p.FatherEmail) && !p.FatherEmail.IsValidEmail()) || (!string.IsNullOrEmpty(p.MotherEmail) && !p.MotherEmail.IsValidEmail())))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+            //    return methodResult;
+            //}
 
-            if (request.UsersInfo.Any(p => (!string.IsNullOrEmpty(p.FatherPhoneNumber) && !p.FatherPhoneNumber.IsValidPhoneNumber()) || (!string.IsNullOrEmpty(p.MotherPhoneNumber) && !p.MotherPhoneNumber.IsValidPhoneNumber())))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-                return methodResult;
-            }
+            //if (request.UsersInfo.Any(p => (!string.IsNullOrEmpty(p.FatherPhoneNumber) && !p.FatherPhoneNumber.IsValidPhoneNumber()) || (!string.IsNullOrEmpty(p.MotherPhoneNumber) && !p.MotherPhoneNumber.IsValidPhoneNumber())))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+            //    return methodResult;
+            //}
 
             var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
             if (platform == null)
@@ -94,18 +94,31 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             foreach (var item in request.UsersInfo)
             {
                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                var user = await _userManager.Users.Include(p => p.Student).ThenInclude(x => x.ParentStudents).FirstOrDefaultAsync(p => p.UserName.ToLower() == item.Email.ToLower() || p.Email.ToLower() == item.Email.ToLower(), cancellationToken);
+
+                User? user = new User();
+
+                if (!string.IsNullOrEmpty(item.Email))
+                {
+                    user = await _userManager.Users.Include(p => p.Student).ThenInclude(x => x.ParentStudents).FirstOrDefaultAsync(p => p.UserName.ToLower() == item.Email.ToLower() || p.Email.ToLower() == item.Email.ToLower(), cancellationToken);
+                }
+                else if (!string.IsNullOrEmpty(item.PhoneNumber))
+                {
+                    user = await _userManager.Users.Include(p => p.Student).ThenInclude(x => x.ParentStudents).FirstOrDefaultAsync(p => p.PhoneNumber == item.PhoneNumber, cancellationToken);
+                }
+
                 if (user == null)
                 {
                     user = new User()
                     {
-                        UserName = item.Email,
-                        Email = item.Email,
+                        UserName = !string.IsNullOrEmpty(item.Email) ? item.Email : item.PhoneNumber,
+                        Email = !string.IsNullOrEmpty(item.Email) ? item.Email : null,
                         FirstName = item.FirstName,
                         LastName = item.LastName,
                         EmailConfirmed = true,
                         Birthday = item.Birthday,
                         Gender = item.Gender,
+                        PhoneNumber = item.PhoneNumber,
+                        PhoneNumberConfirmed = true,
                         Student = new Student()
                         {
                             CreatedByParent = false,
