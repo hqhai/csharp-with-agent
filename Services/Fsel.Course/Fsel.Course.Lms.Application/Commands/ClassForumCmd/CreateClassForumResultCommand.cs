@@ -239,13 +239,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult);
                     await _classForumDetailResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                    bool isFirstTime = await _classForumDetailResultRepository.Queryable.AnyAsync(x => x.ClassForumResultId == classForumResult!.Id, cancellationToken);
+                    bool hasFirstTime = await _classForumDetailResultRepository.Queryable.AnyAsync(x => x.ClassForumResultId == classForumResult!.Id, cancellationToken);
 
-                    int displayOrder = isFirstTime ? Display_Order_First : Display_Order_Second;
-
-                    if (request.IsSubmit)
+                    if (request.IsSubmit && hasFirstTime)
                     {
-                        await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForumResult.Id, classForum, request, displayOrder, cancellationToken);
+                        await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForumResult.Id, classForum, request, Display_Order_Second, cancellationToken);
+                    }
+                    else if (request.IsSubmit && !hasFirstTime)
+                    {
+                        await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForumResult.Id, classForum, request, Display_Order_First, cancellationToken);
                     }
 
                     if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft && classForumResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
