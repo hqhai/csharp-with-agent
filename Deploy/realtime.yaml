@@ -12,6 +12,15 @@ spec:
       labels:
         app: realtime-dev
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-staging
       containers:
       - name: realtime-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/realtime:auth-openid-...............

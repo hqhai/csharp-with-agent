@@ -12,6 +12,15 @@ spec:
       labels:
         app: cms-dev
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-staging
       containers:
       - name: cms-dev
         image: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender:auth-openid-...............
@@ -46,39 +55,3 @@ spec:
     name: https
   selector:
     app: cms-dev
-
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: cms-dev
-  annotations:
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
-#    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
-spec:
-  ingressClassName: nginx-public
-  rules:
-  - host: fsel-cms-dev.fsel.edu.vn
-    http:
-      paths:
-      - path: /
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: cms-dev
-            port:
-              number: 80
-  tls:
-  - hosts:
-    - fsel-cms-planet-defender-dev.fsel.edu.vn
-    secretName: fsel-cms-planet-defender-dev.fsel.edu.vn-wildcard
-
-status:
-  loadBalancer:
-    ingress:
-    - hostname: 103.22.218.217.nip.io
-
-
