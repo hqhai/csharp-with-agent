@@ -62,7 +62,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         private MimeMessage CreateEmailMessage(SendEmailModel message)
         {
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress(SenderSettings.HostName, _appSetting?.SmtpGoogle?.From ?? string.Empty));
+            emailMessage.From.Add(new MailboxAddress(SenderSettings.HostNameCareers, _appSetting?.SmtpGoogle?.From ?? string.Empty));
 
             if (message.ToEmails != null)
             {

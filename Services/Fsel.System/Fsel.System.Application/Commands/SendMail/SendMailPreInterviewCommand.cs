@@ -30,7 +30,7 @@ namespace Fsel.System.Application.Commands.SendMail
         private const string TemplateForRecruitment = "<!doctype html>\r\n<html>\r\n<body style=\"font-family: Arial, Helvetica, sans-serif;\">\r\n  You have received a pre-interview task submission.<br>\r\n  Role: Five-Star in-School teacher<br>\r\n  Name: {0} <br>\r\n  Email: {1} <br>\r\n  Task 1 - Video introduction: {2} <br>\r\n  Task 2 - Lesson plan evaluation: {3} <br>\r\n  Task 3 - Activity setup: {4} <br>\r\n</body>\r\n</html>\r\n";
         private const string TemplateForCustomer = "<!doctype html>\r\n<html>\r\n<body style=\"font-family:Arial, Helvetica, sans-serif;\">\r\n  Thank you for submitting your pre-interview tasks for the role of Five-Star in-School teacher. We will review your tasks, and get back to you soon.\r\n<br><br>Best regards,<br>\r\nAtlantic Five-Star English\r\n</body>\r\n</html>\r\n";
 
-        private const string MailRecruitment = "huukhoa@atlantic.edu.vn";
+        private const string MailRecruitment = "recruitment@atlantic.edu.vn";
 
         public SendMailPreInterviewCommandHandler(IStorageService storageService, ISenderService senderService)
         {
