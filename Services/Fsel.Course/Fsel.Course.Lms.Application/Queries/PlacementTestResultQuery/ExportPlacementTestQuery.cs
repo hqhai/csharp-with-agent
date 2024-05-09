@@ -11,7 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -29,13 +29,16 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     public class ExportPlacementTestQueryHandler : IRequestHandler<ExportPlacementTestQuery, MethodResult<Stream>>
     {
         private readonly IUserService _userService;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
 
         public ExportPlacementTestQueryHandler(
             IUserService userService,
+            ICourseResultRepository courseResultRepository,
             IPlacementTestResultRepository placementTestResultRepository)
         {
             _userService = userService;
+            _courseResultRepository = courseResultRepository;
             _placementTestResultRepository = placementTestResultRepository;
         }
 
@@ -49,22 +52,36 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 .Select(x => x.OrderByDescending(x => x.UpdatedDate).FirstOrDefault())
                 .ToListAsync(cancellationToken);
             placementTestResults = placementTestResults.Where(x => x!.UpdatedDate.HasValue && x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date).ToList();
+            var studentIds = placementTestResults.Select(x => x.StudentId).ToList();
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
+            if (!studentResults.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                return methodResult;
+            }
+            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).ToListAsync(cancellationToken);
+
+            var students = studentResults.Content?.Result;
             foreach (var item in placementTestResults)
             {
                 if (item != null)
                 {
-                    var studentResult = await _userService.GetStudentByUserIdAsync(item.CreatedUserId);
-                    var student = studentResult.Content?.Result;
+                    var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                     if (student != null)
                     {
                         var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == item.StudentId).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                         int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
                         var (levelCompleted, isLock) = item.Level.GetLevelInScore(item.Percent, IeltsScoreHelper.GetInitialAge(placementTestResult?.Level, age));
+                        var courseResult = courseResults.FirstOrDefault(x => x.StudentId == item.StudentId);
                         placementTestResultExports.Add(new PlacementTestResultExportModel
                         {
+                            Name = student.Human?.FullName,
+                            Birthday = student.Human?.Birthday,
+                            Email = student.Human?.Email,
                             CurrentLevel = student.CourseLevel,
                             LevelCompleted = levelCompleted,
-                            Name = item.CreatedFullName,
+                            Percent = item.Percent,
+                            CourseName = courseResult?.Course?.Name,
                             UpdatedDate = item.UpdatedDate.HasValue ? item.UpdatedDate.Value.Date : null,
                         });
                     }

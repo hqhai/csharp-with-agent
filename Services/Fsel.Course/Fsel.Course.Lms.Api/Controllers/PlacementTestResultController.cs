@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Export Class
+        /// Export PlacementTest
         /// </summary>
         [HttpGet("export")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
