@@ -5,6 +5,7 @@ using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Models.ShareModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+
 // Đảm bảo rằng bạn đã thêm namespace của ConnectionTracker
 
 namespace Fsel.Realtime.Application.Hubs
@@ -26,7 +27,6 @@ namespace Fsel.Realtime.Application.Hubs
             await Groups.AddGroupAsync(Context.ConnectionId, _authContext.CurrentUserId.ToString());
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
         }
-
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
         {
@@ -50,7 +50,6 @@ namespace Fsel.Realtime.Application.Hubs
                 CourseId = string.IsNullOrEmpty(courseId) ? null : new Guid(courseId),
                 AccessTime = duration
             };
-
 
             if (!string.IsNullOrEmpty(userId.ToString()))
             {

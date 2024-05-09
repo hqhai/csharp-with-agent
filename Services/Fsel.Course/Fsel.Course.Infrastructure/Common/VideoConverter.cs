@@ -469,7 +469,7 @@ namespace Fsel.Course.Infrastructure.Common
                         remainingTime = videoTimeCodeResult.RetryWorkingTime == default ? videoTimeCodeResult.WorkingTime : videoTimeCodeResult.RetryWorkingTime;
                     }
                 }
-                videoTimeCodeResult.RemainingTime = _dateTimeConverter.GetRemainingTime(videoTimeCode.ExecutionTime, remainingTime);
+                videoTimeCodeResult.RemainingTime = _dateTimeConverter.SetRemainingTime(videoTimeCode.ExecutionTime, remainingTime);
             }
             return videoTimeCodeResult;
         }
