@@ -40,7 +40,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             { EnumFolderType.Fsis, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (1 GB)
             { EnumFolderType.AG, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
             { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
-            { EnumFolderType.Files, ByteSize.FromMegabytes(6).Bytes }, //maximum file size (6 MB)
+            { EnumFolderType.Files, ByteSize.FromGigabytes(5).Bytes }, //maximum file size (5 GB)
             { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes }, //maximum question size (6 MB)
             { EnumFolderType.Images, ByteSize.FromMegabytes(500).Bytes } //maximum image size (500 MB)
         };
