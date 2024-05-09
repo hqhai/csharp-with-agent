@@ -118,13 +118,14 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 OverallScoreReportSkills = mockTest.MockTestResults.Select(x => new OverallScoreReportSkillModel
                 {
                     Id = x.Id,
-                    Percent = (x.SkillScores?.Count ?? default) / TotalSkillFullMockTest,
+                    Percent = NumberHelper.GetPercent((x.SkillScores?.Count ?? default), TotalSkillFullMockTest),
                     Score = NumberHelper.RoundNumberDouble(x.SkillScores?.Average(x => x.Scores) ?? default),
                     SkillScores = GetTestSkillScores(x, mockTest),
                     Status = x.Status
                 }).ToList(),
                 Percent = NumberHelper.GetPercent(mockTest.MockTestResults.SelectMany(x => x.SectionGroupResults).Count(x => x.Status == EnumResultStatus.Done), TotalSkillFullMockTest),
             };
+
             return mockTestDto;
         }
 
