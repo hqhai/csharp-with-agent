@@ -17,9 +17,10 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public Guid StudentId { get; set; }
 
+
         public EnumChatBotStatus Status { get; set; }
 
-        public IList<ChatBotMessage>? Content { get; set; }
+        public IList<ChatBotMessage>? Conversations { get; set; }
 
         public ChatBotMessage? LastestAnswer { get; set; }
 

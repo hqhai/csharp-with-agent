@@ -4,18 +4,22 @@ namespace Fsel.System.Application.Commands.Chatbots
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Queues.Publisher;
     using Fsel.System.Application.Services.StorageServices;
     using Fsel.System.Application.Services.StorageServices.Models;
     using Fsel.System.Domain.Entities.ChatBot;
+    using Fsel.System.Domain.Entities.Chatbots;
+    using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.ChatBot;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Text.RegularExpressions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SaveChatBotMessageCommand : SaveChatBotMessageModel, IRequest<MethodResult<ChatBotModel>>
     {
@@ -29,12 +33,13 @@ namespace Fsel.System.Application.Commands.Chatbots
 
         private readonly IMapper _mapper;
         private readonly IChatBotRepository _chatBotRepository;
+        private readonly IChatbotConfigRepository _chatbotConfigRepository;
         private readonly IStorageService _storageService;
         private readonly ChatBotPublisher _chatBotPublisher;
         private readonly IMediator _mediator;
         private const int Number_Of_Config = 2;
 
-        public SaveChatBotMessageCommandHandler(IMapper mapper, IChatBotRepository chatBotRepository, IStorageService storageService, ChatBotPublisher chatBotPublisher, IMediator mediator)
+        public SaveChatBotMessageCommandHandler(IMapper mapper, IChatBotRepository chatBotRepository, IStorageService storageService, ChatBotPublisher chatBotPublisher, IMediator mediator, IChatbotConfigRepository chatbotConfigRepository)
         {
             _mapper = mapper;
             _chatBotRepository = chatBotRepository;
@@ -42,6 +47,7 @@ namespace Fsel.System.Application.Commands.Chatbots
             _storageService = storageService;
             _chatBotPublisher = chatBotPublisher;
             _mediator = mediator;
+            _chatbotConfigRepository = chatbotConfigRepository;
         }
 
         public async Task<MethodResult<ChatBotModel>> Handle(SaveChatBotMessageCommand request, CancellationToken cancellationToken)
@@ -54,18 +60,41 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             if (chatbotMessage == null)
             {
+                methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
+            }
+
+            var chatbotConfig = _chatbotConfigRepository.Queryable.Include(x => x.ChatbotSkillConfigs).Include(x => x.ChatbotTokenConfigs).FirstOrDefault(x => x.UnitId == chatbotMessage.UnitId);
+
+            if (chatbotConfig == null)
+            {
+                methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            double tokenRatio = (float)chatbotMessage.RemainToken / GetSkillToken(chatbotMessage.Skill, chatbotConfig);
+
+
+            // Khi token còn dưới 20% so với số lượng token ban đầu
+            if (tokenRatio < 0.2)
+            {
+                methodResult.AddError(nameof(EnumOutOfAIToken.TheNumberOfTokensHasReachedTheLimit));
+                return methodResult;
+            }
+            else if (tokenRatio == 0.8)
+            {
+                chatbotMessage.Status = EnumChatBotStatus.Done;
             }
 
             ///Bổ sung câu hỏi của học sinh vào đoạn hội thoại
             ChatbotResponseModel newQuestion = CompletionElement("user", request.Content);
-            var chatBotMessageModel = _mapper.Map<IList<ChatBotMessageModel>>(chatbotMessage.Content);
+            var chatBotMessageModel = _mapper.Map<IList<ChatBotMessageModel>>(chatbotMessage.Conversations);
             chatBotMessageModel.Add(newQuestion);
 
             // Tìm câu trả lời
             var response = await _mediator.Send(new SubmitAICommand
             {
-                MaxToken = 1000,
+                MaxToken = chatbotMessage.RemainToken,
                 ChatBotMessages = chatBotMessageModel,
             }, cancellationToken);
 
@@ -85,13 +114,21 @@ namespace Fsel.System.Application.Commands.Chatbots
             ChatBot chatBot = new ChatBot();
             await _chatBotRepository.ExecuteTransactionAsync(async () =>
             {
-                chatbotMessage.Content = _mapper.Map<List<ChatBotMessage>>(chatBotResponse);
+                chatbotMessage.Conversations = _mapper.Map<List<ChatBotMessage>>(chatBotResponse);
                 chatbotMessage.LastestAnswer = _mapper.Map<ChatBotMessage>(newMessage);
 
+                // Sử dụng regex để tìm các từ và dấu câu
+                MatchCollection matches = Regex.Matches(response ?? string.Empty, @"\b\w+\b");
+
+                // Đếm số token
+                int tokenCount = matches.Count;
+                chatbotMessage.RemainToken = chatbotMessage.RemainToken - tokenCount;
+
+                //Câp nhật xuống database
                 _chatBotRepository.Update(chatbotMessage);
                 await _chatBotRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                chatbotMessage.Content = RemoveFirstTwoElements(chatbotMessage.Content);
+                chatbotMessage.Conversations = RemoveFirstTwoElements(chatbotMessage.Conversations);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ChatBotModel>(chatbotMessage);
                 return methodResult;
@@ -102,7 +139,7 @@ namespace Fsel.System.Application.Commands.Chatbots
             return methodResult;
         }
 
-
+        #region Func
         /// <summary>
         /// Bỏ đi các phần tử config ở đầu mảng
         /// </summary>
@@ -168,6 +205,13 @@ namespace Fsel.System.Application.Commands.Chatbots
             await _chatBotPublisher.Publish(model, cancellationToken);
         }
 
+        /// <summary>
+        /// Khởi tạo mẫu câu message để chat với gpt
+        /// </summary>
+        /// <param name="role"></param>
+        /// <param name="content"></param>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         private static ChatbotResponseModel CompletionElement(string? role, string? content, string? filePath = null)
         {
             return new ChatbotResponseModel
@@ -204,5 +248,40 @@ namespace Fsel.System.Application.Commands.Chatbots
                 return string.Empty;
             }
         }
+
+
+        /// <summary>
+        /// Lấy số lượng token theo skill
+        /// </summary>
+        /// <param name="skill"></param>
+        /// <param name="chatbotConfig"></param>
+        /// <returns></returns>
+        public static int GetSkillToken(EnumCourseSkill skill, ChatbotConfig chatbotConfig)
+        {
+            int token = 0;
+            switch (skill)
+            {
+                case (EnumCourseSkill.Vocabulary):
+                    token = chatbotConfig?.ChatbotTokenConfigs?.VocabularyToken ?? default;
+                    break;
+                case (EnumCourseSkill.Grammar):
+                    token = chatbotConfig?.ChatbotTokenConfigs?.GrammarToken ?? default;
+                    break;
+                case (EnumCourseSkill.Listening):
+                    token = chatbotConfig?.ChatbotTokenConfigs?.ListeningToken ?? default;
+                    break;
+                case (EnumCourseSkill.Reading):
+                    token = chatbotConfig?.ChatbotTokenConfigs?.ReadingToken ?? default;
+                    break;
+                case (EnumCourseSkill.Writing):
+                    token = chatbotConfig?.ChatbotTokenConfigs?.WritingToken ?? default;
+                    break;
+                case (EnumCourseSkill.Speaking):
+                    token = chatbotConfig?.ChatbotTokenConfigs?.SpeakingToken ?? default;
+                    break;
+            }
+            return token;
+        }
+        #endregion
     }
 }

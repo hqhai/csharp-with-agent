@@ -27,7 +27,7 @@ namespace Fsel.System.Domain.Entities.ChatBot
 
 
         [NotMapped]
-        public IList<ChatBotMessage>? Content
+        public IList<ChatBotMessage>? Conversations
         {
             get
             {
