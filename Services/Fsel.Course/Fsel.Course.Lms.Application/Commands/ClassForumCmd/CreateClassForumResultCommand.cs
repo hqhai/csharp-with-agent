@@ -239,9 +239,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult);
                     await _classForumDetailResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                    bool isFirstTime = await _classForumDetailResultRepository.Queryable.AnyAsync(x => x.ClassForumResultId == classForumResult!.Id, cancellationToken);
+                    bool isExistsFirstTime = await _classForumDetailResultRepository.Queryable.AnyAsync(x => x.ClassForumResultId == classForumResult!.Id, cancellationToken);
 
-                    int displayOrder = isFirstTime ? Display_Order_First : Display_Order_Second;
+                    int displayOrder = !isExistsFirstTime ? Display_Order_First : Display_Order_Second;
 
                     if (request.IsSubmit)
                     {
