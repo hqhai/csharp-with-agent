@@ -30,13 +30,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IOrderService _orderService;
         private readonly IPlatformRepository _platformRepository;
         private readonly UserManager<User> _userManager;
+        private readonly IUserRepository _userRepository;
 
-        public CreateOrdersFromCRMCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService)
+        public CreateOrdersFromCRMCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IUserRepository userRepository)
         {
             _userManager = userManager;
             _orderService = orderService;
             _platformRepository = platformRepository;
             _interactionService = interactionService;
+            _userRepository = userRepository;
         }
 
         public async Task<VoidMethodResult> Handle(CreateOrdersFromCRMCommand request, CancellationToken cancellationToken)
@@ -92,14 +94,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             foreach (var item in request.UsersInfo)
             {
                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                var user = await _userManager.Users.FirstOrDefaultAsync(p => p.UserName.ToLower() == item.Email.ToLower() || p.Email.ToLower() == item.Email.ToLower(), cancellationToken);
-                if (user != null)
+                var user = await _userManager.Users.Include(p => p.Student).ThenInclude(x => x.ParentStudents).FirstOrDefaultAsync(p => p.UserName.ToLower() == item.Email.ToLower() || p.Email.ToLower() == item.Email.ToLower(), cancellationToken);
+                if (user == null)
                 {
                     user = new User()
                     {
                         UserName = item.Email,
                         Email = item.Email,
-                        PhoneNumber = item.Email,
                         FirstName = item.FirstName,
                         LastName = item.LastName,
                         EmailConfirmed = true,
@@ -120,6 +121,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                               }
                         }
                     };
+
+                    await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
 
                     if (!user.IsValid())
                     {
@@ -177,7 +180,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         }
                     });
                 }
-
+                usersInfo.Add(new CreateOrdersFromCRMModel
+                {
+                    UserId = user.Id,
+                    FullName = user.FirstName + " " + user.LastName,
+                    Email = user.Email,
+                    StudentCode = user.Code,
+                    DiscountPercent = item.DiscountPercent,
+                    PackageCode = item.PackageCode
+                });
                 var createOrdersResult = await _orderService.CreateOrdersFromCRM(new CreateOrdersFromCRMModels()
                 {
                     UsersInfo = usersInfo
@@ -190,49 +201,51 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         {
             var parent = await _userManager.Users.Include(p => p.Parent).FirstOrDefaultAsync(p => p.UserName.ToLower() == parentEmail.ToLower() || p.Email.ToLower() == parentEmail.ToLower(), cancellationToken);
 
-            var parseFullName = Shared.Helpers.StringHelper.ParseFullName(parentName);
-
-            parent = new User()
+            if (parent == null)
             {
-                UserName = parentEmail,
-                Email = parentEmail,
-                FirstName = !string.IsNullOrEmpty(parseFullName.Item1) ? parseFullName.Item1 : parentName?.Split('@').LastOrDefault(),
-                LastName = !string.IsNullOrEmpty(parseFullName.Item2) ? parseFullName.Item2 : parentName?.Split('@').LastOrDefault(),
-                EmailConfirmed = true,
-                Parent = new Parent()
+                var parseFullName = Shared.Helpers.StringHelper.ParseFullName(parentName);
+                parent = new User()
                 {
-                    Occupation = "Parent",
-                },
-                UserPlatforms = new List<UserPlatform>()
+                    UserName = parentEmail,
+                    Email = parentEmail,
+                    FirstName = !string.IsNullOrEmpty(parseFullName.Item1) ? parseFullName.Item1 : parentName?.Split('@').LastOrDefault(),
+                    LastName = !string.IsNullOrEmpty(parseFullName.Item2) ? parseFullName.Item2 : parentName?.Split('@').LastOrDefault(),
+                    EmailConfirmed = true,
+                    Parent = new Parent()
+                    {
+                        Occupation = "Parent",
+                    },
+                    UserPlatforms = new List<UserPlatform>()
                                 {
                                     new UserPlatform()
                                     {
                                         PlatformId = platform.Id
                                     }
                                 }
-            };
+                };
 
-            if (!parent.IsValid())
-            {
-                return null;
+                await _userRepository.GenerateUserDataAsync(parent, EnumRoleRegister.Parent);
+
+                if (!parent.IsValid())
+                {
+                    return null;
+                }
+
+                identityResult = await _userManager.CreateAsync(parent, password);
+                if (!identityResult.Succeeded)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
+                    return null;
+                }
+                await _userManager.AddToRoleAsync(parent, EnumRole.Parent.ToString());
             }
-
-            identityResult = await _userManager.CreateAsync(parent, password);
-            if (!identityResult.Succeeded)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate));
-                return null;
-            }
-            await _userManager.AddToRoleAsync(parent, EnumRole.Parent.ToString());
-
-            if (parent.Parent != null)
+            if (parent.Parent != null && !user.Student.ParentStudents.Any(p => p.ParentId == parent.Parent.Id))
             {
                 user.Student?.ParentStudents.Add(new ParentStudent
                 {
                     ParentId = parent.Parent.Id,
                 });
             }
-
             return parent;
         }
     }

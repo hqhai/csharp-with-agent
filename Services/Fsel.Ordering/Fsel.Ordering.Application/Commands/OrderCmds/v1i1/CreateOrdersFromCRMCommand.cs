@@ -49,7 +49,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             foreach (var item in request.UsersInfo)
             {
                 var package = packages.First(p => p.Code == item.PackageCode);
-                var order = AddDataIntoOrder(item, package);
+
+                var isHaveOrderTrial = await _orderRepository.Queryable.AnyAsync(p => p.IsTrial && p.Status == EnumOrderStatus.Payment && p.UserId == item.UserId, cancellationToken);
+
+                var order = AddDataIntoOrder(item, package, isHaveOrderTrial);
                 orders.Add(order);
             }
 
@@ -64,7 +67,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             return methodResult;
         }
 
-        private static Order AddDataIntoOrder(CreateOrdersFromCRMCommandModel userInfo, Package package)
+        private static Order AddDataIntoOrder(CreateOrdersFromCRMCommandModel userInfo, Package package, bool isAddExpireDate = false)
         {
             var order = new Order();
             order.FullName = userInfo.FullName;
@@ -78,6 +81,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.PaymentMethod = EnumPaymentMethodStatus.Card;
+            order.ExpireDate = isAddExpireDate ? DateTime.UtcNow.AddMonths(package.MonthNumber) : null;
             order.OrderTransactions = new List<OrderTransaction>()
             {
                 new OrderTransaction()

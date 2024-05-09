@@ -76,8 +76,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-            var order = await _orderRepository.Queryable.Where(p => p.Status == EnumOrderStatus.Payment && p.IsTrial).OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-            if (order == null)
+            var order = await _orderRepository.Queryable.Include(ot => ot.OrderTransactions).Where(p => p.Status == EnumOrderStatus.Payment && p.IsTrial && p.ExpireDate == null).OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+            if (order == null || order.OrderTransactions.FirstOrDefault()?.RequestBodyStr != "CRM")
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
