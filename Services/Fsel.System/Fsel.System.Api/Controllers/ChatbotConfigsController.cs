@@ -62,6 +62,15 @@ namespace Fsel.System.Api.Controllers
             return commandResult.GetActionResult();
         }
 
+        [HttpPost("message")]
+        [ProducesResponseType(typeof(MethodResult<ChatBotModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SaveChatBotMessage([FromBody] SaveChatBotMessageCommand cmd)
+        {
+            MethodResult<ChatBotModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
         /// <summary>
         /// Lưu ChatbotConfig
         /// </summary>
@@ -110,12 +119,12 @@ namespace Fsel.System.Api.Controllers
         /// </summary>
         /// <param name="unitId"></param>
         /// <returns></returns>
-        [HttpGet("chatBotId")]
-        [ProducesResponseType(typeof(MethodResult<ChatBotModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("list-chat-bot")]
+        [ProducesResponseType(typeof(MethodResult<IList<ChatBotModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetChatBotModel([FromRoute] Guid? chatBotId)
+        public async Task<IActionResult> GetChatBotModel([FromQuery] GetChatBotQuery query)
         {
-            MethodResult<ChatBotModel> commandResult = await _mediator.Send(new GetChatBotQuery { ChatBotId = chatBotId }).ConfigureAwait(false);
+            MethodResult<IList<ChatBotModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

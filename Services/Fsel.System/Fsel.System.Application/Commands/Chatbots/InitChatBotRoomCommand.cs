@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.Chatbots
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities.ChatBot;
@@ -41,11 +42,18 @@ namespace Fsel.System.Application.Commands.Chatbots
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ChatBotModel>();
 
-            var chatbotConfig = _chatBotConfigRepository!.Queryable.Include(x => x.ChatbotSkillConfigs).Include(x => x.ChatbotTokenConfigs).FirstOrDefault(x => x.UnitId == request.UnitId && x.Status == EnumChatbotConfigStatus.Completed);
+            var chatbotConfig = _chatBotConfigRepository.Queryable.Include(x => x.ChatbotSkillConfigs).Include(x => x.ChatbotTokenConfigs).FirstOrDefault(x => x.UnitId == request.UnitId && x.Status == EnumChatbotConfigStatus.Completed);
             var chatbotMessage = _chatBotRepository.Queryable.FirstOrDefault(x => x.UnitId == request.UnitId && x.StudentId == request.StudentId && x.Skill == request.Skill);
 
             string initSystemRole = ReadingSystemUserConfig(request.Skill);
-            var chatBotSkill = chatbotConfig!.ChatbotSkillConfigs.FirstOrDefault(x => x.Skill == request.Skill);
+
+            if (chatbotConfig == null)
+            {
+                methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            var chatBotSkill = chatbotConfig.ChatbotSkillConfigs.FirstOrDefault(x => x.Skill == request.Skill);
 
             string initUserRole = ReadingSystemUserConfig(request.Skill, chatBotSkill!.AiConfig);
 
@@ -53,7 +61,7 @@ namespace Fsel.System.Application.Commands.Chatbots
             if (chatbotMessage != null)
             {
                 methodResult.Result = _mapper.Map<ChatBotModel>(chatbotMessage);
-                methodResult.Result.Content = RemoveFirstTwoElements(methodResult.Result.Content!);
+                methodResult.Result.Conversations = RemoveFirstTwoElements(methodResult.Result.Conversations!);
                 return methodResult;
             }
             #endregion
@@ -82,15 +90,16 @@ namespace Fsel.System.Application.Commands.Chatbots
             {
                 //Mapping
                 chatBot = _mapper.Map<ChatBot>(request);
-                chatBot.Content = _mapper.Map<List<ChatBotMessage>>(initConversation);
+                chatBot.Conversations = _mapper.Map<List<ChatBotMessage>>(initConversation);
                 chatBot.LastestAnswer = _mapper.Map<ChatBotMessage>(newMessage);
+                chatBot.RemainToken = GetSkillToken(request.Skill, chatbotConfig);
 
                 //Save
                 _chatBotRepository.Add(chatBot);
                 await _chatBotRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ChatBotModel>(chatBot);
-                methodResult.Result.Content = RemoveFirstTwoElements(methodResult.Result.Content!);
+                methodResult.Result.Conversations = RemoveFirstTwoElements(methodResult.Result.Conversations!);
                 return methodResult;
             });
             #endregion
