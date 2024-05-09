@@ -122,7 +122,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://localhost:4200",
                         "http://localhost:4200",
                         "http://test1_lcms.fsel.edu.vn",
-                        "https://test1test1_lcms_lms.fsel.edu.vn"
+                        "https://test1_lcms.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
