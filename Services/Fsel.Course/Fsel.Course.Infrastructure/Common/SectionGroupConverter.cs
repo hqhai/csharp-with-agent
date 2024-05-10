@@ -401,7 +401,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var sectionGroupResult = x.SectionGroupResults.FirstOrDefault();
                 if (sectionGroupResult != null)
                 {
-                    sectionGroup.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult, x);
+                    sectionGroup.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult);
                 }
                 sectionGroupModels.Add(sectionGroup);
             };
@@ -435,12 +435,10 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Code Chưa Clearn
 
-        private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
+        private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult)
         {
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
-            var remainingTime = sectionGroup.ExecutionTime - sectionGroupResult.WorkingTime;
             sectionGroupResultDto.IsFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == sectionGroupResult.Id);
-            sectionGroupResultDto.RemainingTime = remainingTime > 0 ? remainingTime : default;
             return sectionGroupResultDto;
         }
 
@@ -452,7 +450,7 @@ namespace Fsel.Course.Infrastructure.Common
             var isSectionGroupResultDone = sectionGroupResult.Status == EnumResultStatus.Done;
             var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
             sectonGroupDetail.TotalQuestion = totalCount;
-            sectonGroupDetail.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult, sectionGroup);
+            sectonGroupDetail.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult);
             if (sectionGroupResult.MockTestResultId.HasValue)
             {
                 sectonGroupDetail.Sections = sections.Select(x => GetSectionByMockTest(x, sectionGroup.CourseSkill, isSectionGroupResultDone)).ToList();
