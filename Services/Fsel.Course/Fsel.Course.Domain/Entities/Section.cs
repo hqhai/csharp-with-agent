@@ -3,10 +3,8 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
-    using Fsel.Shared.Helpers;
 
     public class Section : Entity
     {
@@ -35,15 +33,6 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SubFilePath { get; set; }
-
-        private int? _timeCount;
-
-        [NotMapped]
-        public int? TimeCount
-        {
-            get { return _timeCount == null ? MediaHelper.GetMediaDurationAsync(VideoFilePath) : _timeCount; }
-            set { _timeCount = value; }
-        }
 
         public int DisplayOrder { get; set; }
 

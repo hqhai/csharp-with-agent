@@ -90,11 +90,9 @@ namespace Fsel.Course.Infrastructure.Common
                     sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
                 }
             }
-            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroupResult.MockTestResultId.HasValue)
             {
-                var workingTime = 60;
-                var sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).Where(s => s.SectionGroupId == sectionGroup.Id).ToListAsync();
-                sectionGroupResult.WorkingTime = (double)(sections.Sum(x => x.TimeCount) ?? default) + sections.SelectMany(x => x.SectionTimeCodes).Count() * workingTime;
+                sectionGroupResult.WorkingTime = (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalSeconds;
             }
 
             _sectionGroupResultRepository.Update(sectionGroupResult);
