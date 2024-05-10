@@ -387,18 +387,25 @@ namespace Fsel.Course.Infrastructure.Common
 
         #endregion Clean Code
 
-        public IList<SectionGroupModel> GetSectionGroups(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
+        public async Task<IList<SectionGroupModel>> GetSectionGroupsAsync(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
         {
             ArgumentNullException.ThrowIfNull(sectionGroups);
             var indexProcess = GetIndexProcess(sectionGroups, objectResultId, objectResultType);
-            return sectionGroups.Select(x =>
+            var sectionGroupModels = new List<SectionGroupModel>();
+            sectionGroups = sectionGroups.OrderBy(x => x.CourseSkill).ToList();
+            foreach (var x in sectionGroups)
             {
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
                 sectionGroup.Status = GetResultStatus(indexProcess, index);
-                sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
-                return sectionGroup;
-            }).ToList();
+                var sectionGroupResult = x.SectionGroupResults.FirstOrDefault();
+                if (sectionGroupResult != null)
+                {
+                    sectionGroup.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult, x);
+                }
+                sectionGroupModels.Add(sectionGroup);
+            };
+            return sectionGroupModels;
         }
 
         private static EnumResultStatus GetResultStatus(int? indexProcess, int index)
