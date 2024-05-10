@@ -111,14 +111,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     user = new User()
                     {
                         UserName = !string.IsNullOrEmpty(item.Email) ? item.Email : item.PhoneNumber,
-                        Email = !string.IsNullOrEmpty(item.Email) ? item.Email : null,
+                        Email = item.Email,
+                        EmailConfirmed = !string.IsNullOrEmpty(item.Email),
                         FirstName = item.FirstName,
                         LastName = item.LastName,
-                        EmailConfirmed = true,
                         Birthday = item.Birthday,
                         Gender = item.Gender,
                         PhoneNumber = item.PhoneNumber,
-                        PhoneNumberConfirmed = true,
+                        PhoneNumberConfirmed = !string.IsNullOrEmpty(item.PhoneNumber),
                         Student = new Student()
                         {
                             CreatedByParent = false,
@@ -143,10 +143,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         return methodResult;
                     }
 
-                    var passwordGeneratorHelper = new PasswordGeneratorHelper(6, 10, 1, 1, 1, 1);
+                    var passwordGeneratorHelper = new PasswordGeneratorHelper(8, 10, 1, 1, 1, 1);
                     var password = passwordGeneratorHelper.Generate();
 
-                    identityStudentResult = await _userManager.CreateAsync(user, password);
+                    identityStudentResult = await _userManager.CreateAsync(user, "Admin@123");
                     if (!identityStudentResult.Succeeded)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(item.Email), item.Email);
