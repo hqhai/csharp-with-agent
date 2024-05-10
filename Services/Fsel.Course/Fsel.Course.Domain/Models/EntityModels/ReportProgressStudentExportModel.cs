@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class ReportProgressStudentExportModel
     {
         [EpplusTableColumn(Header = "FullName")]
-        public string? Name { get; set; }
+        public string? FullName { get; set; }
 
         [EpplusTableColumn(Header = "Birthday", NumberFormat = "dd/MM/yyyy")]
         public DateTime? Birthday { get; set; }
@@ -23,7 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? UnitName { get; set; }
 
         [EpplusTableColumn(Header = "Unit Status")]
-        public EnumResultStatus UnitStatus { get; set; }
+        public EnumResultStatus? UnitStatus { get; set; }
 
         [EpplusTableColumn(Header = "Lesson Name")]
         public string? LessonName { get; set; }

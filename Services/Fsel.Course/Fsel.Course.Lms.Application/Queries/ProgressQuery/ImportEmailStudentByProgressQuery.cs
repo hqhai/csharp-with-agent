@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 return methodResult;
             }
-            var listEmail = new List<ImportStudentEmailModel>();
+            var listEmailData = new List<ImportStudentEmailModel>();
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
@@ -64,8 +64,10 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
-            listEmail = result.Datas.ToList();
-            var studentResultToEmail = await _userService.GetStudentByEmailsAsync(listEmail.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList());
+            listEmailData = result.Datas.ToList();
+            var emails = listEmailData.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList();
+
+            var studentResultToEmail = await _userService.GetStudentByEmailsAsync(emails);
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
@@ -74,43 +76,49 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var students = studentResultToEmail.Content?.Result?.ToList();
             var studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
 
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => studentIds.Contains(x.StudentId) && x.Status != EnumResultStatus.Unfinished)
-                                                                                        .OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
-
-            foreach (var courseResult in courseResults)
+            if (students != null && students.Any())
             {
-                var student = students?.FirstOrDefault(x => x.Id == courseResult.StudentId);
-                var reportProgress = new ReportProgressStudentExportModel
-                {
-                    Name = student?.Human?.FullName,
-                    Birthday = student?.Human?.Birthday,
-                    Email = student?.Human?.Email,
-                    CourseName = courseResult.Course?.Name,
-                };
+                var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+                var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => studentIds.Contains(x.StudentId) && x.Status != EnumResultStatus.Unfinished)
+                                                                                            .OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
 
-                var courseType = courseResult.Course?.CourseType;
-                var unitResult = unitResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId);
-                if (unitResult != null)
+                foreach (var student in students)
                 {
-                    reportProgress.UnitName = unitResult.Unit?.Name;
-                    reportProgress.UnitStatus = unitResult.Status;
-
-                    var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Lesson)
-                                                .Where(x => studentIds.Contains(x.StudentId) && x.Status != EnumResultStatus.Unfinished)
-                                                .Where(x => x.CourseId == courseResult.CourseId && x.UnitId == unitResult.UnitId)
-                                                .OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-                    if (lessonResult != null)
+                    var courseResult = courseResults?.FirstOrDefault(x => x.StudentId == student.Id);
+                    var reportProgress = new ReportProgressStudentExportModel
                     {
-                        reportProgress.LessonName = lessonResult.Lesson?.Name;
-                        reportProgress.LessonStatus = lessonResult.Status;
+                        FullName = student?.Human?.FullName,
+                        Birthday = student?.Human?.Birthday,
+                        Email = student?.Human?.Email,
+                        CourseName = courseResult?.Course?.Name,
+                    };
+                    if (courseResult != null)
+                    {
+                        var courseType = courseResult.Course?.CourseType;
+                        var unitResult = unitResults.Where(x => x.StudentId == courseResult.StudentId).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+                        if (unitResult != null)
+                        {
+                            reportProgress.UnitName = unitResult.Unit?.Name;
+                            reportProgress.UnitStatus = unitResult.Status;
 
-                        await SetReportProgress(lessonResult, reportProgress);
+                            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Lesson)
+                                                        .Where(x => x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
+                                                        .Where(x => x.CourseId == courseResult.CourseId && x.UnitId == unitResult.UnitId)
+                                                        .OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                            if (lessonResult != null)
+                            {
+                                reportProgress.LessonName = lessonResult.Lesson?.Name;
+                                reportProgress.LessonStatus = lessonResult.Status;
+                                reportProgress.UpdatedDate = lessonResult.UpdatedDate ?? lessonResult.CreatedDate;
+                                await SetReportProgress(lessonResult, reportProgress);
+                            }
+                        }
                     }
+                    reportStudents.Add(reportProgress);
                 }
-                reportStudents.Add(reportProgress);
             }
-            methodResult.Result = reportStudents.ExportExcel();
+
+            methodResult.Result = reportStudents.OrderBy(x => emails.IndexOf(x.Email)).ToList().ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
