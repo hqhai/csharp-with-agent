@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -81,12 +82,28 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             foreach (var courseResult in courseResults)
             {
+                var courseType = courseResult.Course?.CourseType;
                 var unitResult = unitResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId);
                 if (unitResult != null)
                 {
+                    var lessonResult = lessonResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId && x.CourseId == courseResult.CourseId);
+                    if (lessonResult != null)
+                    {
+                    }
+                    else if (courseType == EnumCourseType.Ielts)
+                    {
+                        var mockTestResult = mockTestResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId && x.CourseId == courseResult.CourseId);
+                    }
+                    break;
+                }
+
+                if (courseType == EnumCourseType.Academic)
+                {
+                    var finalTestResult = finalTestResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId);
                 }
                 else
                 {
+                    var mockTestResult = mockTestResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId);
                 }
             }
 
