@@ -1009,7 +1009,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("b223125a-a4e1-4e10-b4dd-cfcd747d74c5"),
-                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\",\"school\":\"Other\"}",
+                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\",\"educationLevel\":\"Other\",\"school\":\"Other\"}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1442,7 +1442,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("365375de-db86-4167-bbe8-e5a3ca2c154e"),
-                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\",\"school\":\"Other\"}",
+                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\",\"educationLevel\":\"Other\",\"school\":\"Other\"}",
                             CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1455,7 +1455,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("4393a6a5-ff24-4d2d-b468-4b2c17ae0063"),
-                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\",\"school\":\"Other\"}",
+                            AnswerStr = "{\"country\":\"Other\",\"province\":\"Other\",\"district\":\"Other\",\"educationLevel\":\"Other\",\"school\":\"Other\"}",
                             CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),

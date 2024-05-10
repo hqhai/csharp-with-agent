@@ -376,6 +376,7 @@
       "country": "Other",
       "province": "Other",
       "district": "Other",
+      "educationLevel": "Other",
       "school": "Other"
     },
     "translations": [
@@ -390,6 +391,7 @@
           "country": "Other",
           "province": "Other",
           "district": "Other",
+          "educationLevel": "Other",
           "school": "Other"
         }
       },
@@ -404,6 +406,7 @@
           "country": "Other",
           "province": "Other",
           "district": "Other",
+          "educationLevel": "Other",
           "school": "Other"
         }
       }
