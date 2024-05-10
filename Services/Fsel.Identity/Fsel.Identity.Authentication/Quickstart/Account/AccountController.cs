@@ -49,7 +49,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
         private readonly SignInManager<User> _signInManager;
-        private readonly Core.Base.Managers.UserManager<User> _userManager;
+        private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
@@ -65,7 +65,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             IAuthenticationSchemeProvider schemeProvider,
             IEventService events,
             SignInManager<User> signInManager,
-            Core.Base.Managers.UserManager<User> userManager,
+            UserManager<User> userManager,
             IMediator mediator,
             IMapper mapper,
             AppSetting appSetting,
