@@ -6,6 +6,7 @@ using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Events;
 using Fsel.Identity.Application.Queues.Publishers;
+using Fsel.Identity.Application.Services;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.OrderService;
@@ -25,6 +26,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

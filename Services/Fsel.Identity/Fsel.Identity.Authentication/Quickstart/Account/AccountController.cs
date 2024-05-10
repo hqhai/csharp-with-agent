@@ -5,14 +5,8 @@
 using AutoMapper;
 using Fsel.Identity.Application.Commands.SenderCmd;
 using Fsel.Identity.Application.Commands.UserOtpCmd;
-using Fsel.Identity.Domain.Constants;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Enums;
-using Fsel.Identity.Domain.Models;
-using Fsel.Identity.Domain.Enums;
-using Fsel.Identity.Infrastructure.Providers;
 using Fsel.Identity.Infrastructure.ValueSettings;
-using Fsel.Identity.Authentication.Quickstart.Account;
 using Fsel.Identity.Authentication.Quickstart.Base;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
@@ -20,44 +14,22 @@ using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
-using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
-using IdentityServer4.Test;
-using MassTransit.RabbitMqTransport;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-
-//using Microsoft.AspNetCore.Identity;
-
-
 //using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System;
 using System.Globalization;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Transactions;
-using static IdentityServer4.Models.IdentityResources;
-using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Models.CommandModels.Quickstarts;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
-using Newtonsoft.Json.Linq;
-using System.Net.Http.Headers;
 using Fsel.Identity.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
-using Fsel.Identity.Domain.Enums.ErrorCodes;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Fsel.Common.Constants;
+using Fsel.Core.Base.Managers;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -804,7 +776,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
             request.Email = externalLogin.Email;
             var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
-            IdentityResult result;
+            Microsoft.AspNetCore.Identity.IdentityResult result;
 
             if (user != null)
             {
