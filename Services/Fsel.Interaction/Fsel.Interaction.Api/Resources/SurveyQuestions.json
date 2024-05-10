@@ -412,7 +412,7 @@
   {
     "id": "2BE9A620-143D-41F6-815B-2038C21A7B23",
     "createdDate": "2023-07-21",
-    "question": "Xác định độ tuổi và giới tính",
+    "question": "Giới tính của bạn",
     "description": "addd",
     "icon": "time.png",
     "displayOrder": 5,
@@ -441,7 +441,7 @@
         "id": "b695a761-d0fa-4162-97c3-68403e9a8326",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "2BE9A620-143D-41F6-815B-2038C21A7B23",
-        "question": "Xác định độ tuổi và giới tính",
+        "question": "Giới tính của bạn",
         "language": "vi-VN",
         "description": "addd",
         "answers": {
@@ -466,7 +466,7 @@
         "id": "e343b238-f2fc-418a-a171-6cce3d90d2a1",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "2BE9A620-143D-41F6-815B-2038C21A7B23",
-        "question": "age and gender",
+        "question": "Your Gender",
         "language": "en-US",
         "description": "addd",
         "answers": {
