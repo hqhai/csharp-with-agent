@@ -1,14 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Api.Controllers
+namespace Fsel.Storage.Api.Controllers
 {
+    using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.System.Application.Commands.SendMail;
-    using global::System.Net;
+    using Fsel.Storage.Application.Command.SendMails;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -26,22 +26,16 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// Send Mails Marketing
+        /// Send Mails pre interview
         /// </summary>
-        [HttpPost("send-mails-marketing")]
         [DisableRequestSizeLimit]
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+        [HttpPost("send-mails-pre-interview")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendMailsMarketing([FromQuery] string? emailTest, [FromQuery] string subject, IFormFile fileTemplate, IList<IFormFile>? attachments)
+        public async Task<IActionResult> SendMailPreInterview([FromForm] SendMailPreInterviewCommand command)
         {
-            var commandResult = await _mediator.Send(new SendMailsMarketingCommand
-            {
-                EmailTest = emailTest,
-                Subject = subject,
-                Template = fileTemplate,
-                Attachments = attachments
-            }).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

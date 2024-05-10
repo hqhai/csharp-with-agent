@@ -8,6 +8,11 @@ namespace Fsel.Storage.Infrastructure.ValueSettings
     {
         public new StorageConfig? StorageConfig { get; set; }
         public OpenAiConfig? OpenAiConfig { get; set; }
+        public new Services? Services { get; set; }
+    }
+
+    public class Services : BaseServices
+    {
     }
 
     public class OpenAiConfig
