@@ -391,18 +391,25 @@ namespace Fsel.Course.Infrastructure.Common
 
         #endregion Clean Code
 
-        public IList<SectionGroupModel> GetSectionGroups(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
+        public async Task<IList<SectionGroupModel>> GetSectionGroupsAsync(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
         {
             ArgumentNullException.ThrowIfNull(sectionGroups);
             var indexProcess = GetIndexProcess(sectionGroups, objectResultId, objectResultType);
-            return sectionGroups.Select(x =>
+            var sectionGroupModels = new List<SectionGroupModel>();
+            sectionGroups = sectionGroups.OrderBy(x => x.CourseSkill).ToList();
+            foreach (var x in sectionGroups)
             {
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
                 sectionGroup.Status = GetResultStatus(indexProcess, index);
-                sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
-                return sectionGroup;
-            }).ToList();
+                var sectionGroupResult = x.SectionGroupResults.FirstOrDefault();
+                if (sectionGroupResult != null)
+                {
+                    sectionGroup.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult);
+                }
+                sectionGroupModels.Add(sectionGroup);
+            };
+            return sectionGroupModels;
         }
 
         private static EnumResultStatus GetResultStatus(int? indexProcess, int index)
@@ -432,11 +439,10 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Code Chưa Clearn
 
-        private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
+        private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult)
         {
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == sectionGroupResult.Id);
-            sectionGroupResultDto.RemainingTime = _dateTimeConverter.SetRemainingTime(sectionGroup.ExecutionTime, sectionGroupResult.WorkingTime);
             return sectionGroupResultDto;
         }
 
@@ -448,7 +454,7 @@ namespace Fsel.Course.Infrastructure.Common
             var isSectionGroupResultDone = sectionGroupResult.Status == EnumResultStatus.Done;
             var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
             sectonGroupDetail.TotalQuestion = totalCount;
-            sectonGroupDetail.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult, sectionGroup);
+            sectonGroupDetail.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult);
             if (sectionGroupResult.MockTestResultId.HasValue)
             {
                 sectonGroupDetail.Sections = sections.Select(x => GetSectionByMockTest(x, sectionGroup.CourseSkill, isSectionGroupResultDone)).ToList();
