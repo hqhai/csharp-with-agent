@@ -90,6 +90,13 @@ namespace Fsel.Course.Infrastructure.Common
                     sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
                 }
             }
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
+            {
+                var workingTime = 60;
+                var sections = await _sectionRepository.Queryable.Include(x => x.SectionTimeCodes).Where(s => s.SectionGroupId == sectionGroup.Id).ToListAsync();
+                sectionGroupResult.WorkingTime = (double)(sections.Sum(x => x.TimeCount) ?? default) + sections.SelectMany(x => x.SectionTimeCodes).Count() * workingTime;
+            }
+
             _sectionGroupResultRepository.Update(sectionGroupResult);
             await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             return sectionGroupResult;
