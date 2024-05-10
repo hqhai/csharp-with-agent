@@ -6,11 +6,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Common.Helpers;
     using Fsel.Common.Models.Excels;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -25,23 +25,23 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly IUserService _userService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IFinalTestResultRepository _finalTestResultRepository;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
 
         public ImportEmailStudentByProgressQueryHandler(
             IUserService userService,
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
-            IFinalTestResultRepository finalTestResultRepository,
-            IMockTestResultRepository mockTestResultRepository,
+            IVideoResultRepository videoResultRepository,
+            IClassForumResultRepository classForumResultRepository,
             ICourseResultRepository courseResultRepository)
         {
             _userService = userService;
             _unitResultRepository = unitResultRepository;
             _lessonResultRepository = lessonResultRepository;
-            _finalTestResultRepository = finalTestResultRepository;
-            _mockTestResultRepository = mockTestResultRepository;
+            _videoResultRepository = videoResultRepository;
+            _classForumResultRepository = classForumResultRepository;
             _courseResultRepository = courseResultRepository;
         }
 
@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();
-            var reportStudemt = new List<ReportProgressStudentExportModel>();
+            var reportStudents = new List<ReportProgressStudentExportModel>();
 
             if (request.FormFile == null)
             {
@@ -74,41 +74,56 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var students = studentResultToEmail.Content?.Result?.ToList();
             var studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
 
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => studentIds.Contains(x.Id) && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.Done).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-            var mockTestResults = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).Where(x => studentIds.Contains(x.Id) && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.Done).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Where(x => studentIds.Contains(x.Id) && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.Done).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-            var finalTestResults = await _finalTestResultRepository.Queryable.Include(x => x.FinalTest).Where(x => studentIds.Contains(x.Id) && x.Status != EnumResultStatus.Unfinished && x.Status != EnumResultStatus.Done).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => studentIds.Contains(x.StudentId) && x.Status != EnumResultStatus.Unfinished)
+                                                                                        .OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
 
             foreach (var courseResult in courseResults)
             {
+                var student = students?.FirstOrDefault(x => x.Id == courseResult.StudentId);
+                var reportProgress = new ReportProgressStudentExportModel
+                {
+                    Name = student?.Human?.FullName,
+                    Birthday = student?.Human?.Birthday,
+                    Email = student?.Human?.Email,
+                    CourseName = courseResult.Course?.Name,
+                };
+
                 var courseType = courseResult.Course?.CourseType;
                 var unitResult = unitResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId);
                 if (unitResult != null)
                 {
-                    var lessonResult = lessonResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId && x.CourseId == courseResult.CourseId);
+                    reportProgress.UnitName = unitResult.Unit?.Name;
+                    reportProgress.UnitStatus = unitResult.Status;
+
+                    var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Lesson)
+                                                .Where(x => studentIds.Contains(x.StudentId) && x.Status != EnumResultStatus.Unfinished)
+                                                .Where(x => x.CourseId == courseResult.CourseId && x.UnitId == unitResult.UnitId)
+                                                .OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                     if (lessonResult != null)
                     {
-                    }
-                    else if (courseType == EnumCourseType.Ielts)
-                    {
-                        var mockTestResult = mockTestResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId && x.CourseId == courseResult.CourseId);
-                    }
-                    break;
-                }
+                        reportProgress.LessonName = lessonResult.Lesson?.Name;
+                        reportProgress.LessonStatus = lessonResult.Status;
 
-                if (courseType == EnumCourseType.Academic)
-                {
-                    var finalTestResult = finalTestResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId);
+                        await SetReportProgress(lessonResult, reportProgress);
+                    }
                 }
-                else
-                {
-                    var mockTestResult = mockTestResults.FirstOrDefault(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId);
-                }
+                reportStudents.Add(reportProgress);
             }
-
+            methodResult.Result = reportStudents.ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<ReportProgressStudentExportModel> SetReportProgress(LessonResult lessonResult, ReportProgressStudentExportModel reportProgressStudentExport)
+        {
+            var videoResult = await _videoResultRepository.Queryable.Include(x => x.Video).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id);
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id);
+
+            reportProgressStudentExport.VideoStatus = videoResult?.Status;
+            reportProgressStudentExport.ClassForumStatus = classForumResult?.Status;
+            reportProgressStudentExport.HomeWorkStatus = classForumResult != null ? EnumResultStatus.Process : null;
+            return reportProgressStudentExport;
         }
     }
 }
