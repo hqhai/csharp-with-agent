@@ -134,7 +134,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                     #region create account parents
 
-                    if ((!string.IsNullOrEmpty(item.FatherEmail) || !string.IsNullOrEmpty(item.FatherPhoneNumber)) && !userName.Item2)
+                    if ((!string.IsNullOrEmpty(item.FatherEmail) || !string.IsNullOrEmpty(item.FatherPhoneNumber)) && userName.Item2 != 2)
                     {
                         var identityFatherResult = new Microsoft.AspNetCore.Identity.IdentityResult();
                         var fatherPassword = passwordGeneratorHelper.Generate();
@@ -145,7 +145,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         }
                     }
 
-                    if ((!string.IsNullOrEmpty(item.MotherEmail) || !string.IsNullOrEmpty(item.MotherPhoneNumber)) && !userName.Item2)
+                    if ((!string.IsNullOrEmpty(item.MotherEmail) || !string.IsNullOrEmpty(item.MotherPhoneNumber)) && userName.Item2 != 3)
                     {
                         var identityMotherResult = new Microsoft.AspNetCore.Identity.IdentityResult();
                         var motherPassword = passwordGeneratorHelper.Generate();
@@ -183,11 +183,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     DiscountPercent = item.DiscountPercent,
                     PackageCode = item.PackageCode
                 });
-                var createOrdersResult = await _orderService.CreateOrdersFromCRM(new CreateOrdersFromCRMModels()
-                {
-                    UsersInfo = usersInfo
-                });
             }
+            var createOrdersResult = await _orderService.CreateOrdersFromCRM(new CreateOrdersFromCRMModels()
+            {
+                UsersInfo = usersInfo
+            });
             return methodResult;
         }
 
@@ -200,33 +200,33 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             return isValidEmail ? value.IsValidEmail() : value.IsValidPhoneNumber();
         }
 
-        private static (string?, bool) GetUserName(CreateOrdersFromCRMCommandModel model)
+        private static (string?, int) GetUserName(CreateOrdersFromCRMCommandModel model)
         {
             if (!string.IsNullOrEmpty(model.Email))
             {
-                return (model.Email, true);
+                return (model.Email, 1);
             }
             else if (!string.IsNullOrEmpty(model.PhoneNumber))
             {
-                return (model.PhoneNumber, true);
+                return (model.PhoneNumber, 1);
             }
             else if (!string.IsNullOrEmpty(model.FatherEmail))
             {
-                return (model.FatherEmail, false);
+                return (model.FatherEmail, 2);
             }
             else if (!string.IsNullOrEmpty(model.FatherPhoneNumber))
             {
-                return (model.FatherPhoneNumber, false);
+                return (model.FatherPhoneNumber, 2);
             }
             else if (!string.IsNullOrEmpty(model.MotherEmail))
             {
-                return (model.MotherEmail, false);
+                return (model.MotherEmail, 3);
             }
             else if (!string.IsNullOrEmpty(model.MotherPhoneNumber))
             {
-                return (model.MotherPhoneNumber, false);
+                return (model.MotherPhoneNumber, 3);
             }
-            return (null, false);
+            return (null, 0);
         }
 
         private async Task<User?> CreateAccountParent(User user, string? parentEmail, string? parentName, string? parentPhoneNumber, Platform platform, string password, Microsoft.AspNetCore.Identity.IdentityResult? identityResult, VoidMethodResult methodResult, bool isFather, CancellationToken cancellationToken)
