@@ -52,35 +52,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
-            //if (request.UsersInfo.Any(p => string.IsNullOrEmpty(p.Email) && string.IsNullOrEmpty(p.PhoneNumber)))
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-            //    return methodResult;
-            //}
+            if (request.UsersInfo.Any(p => string.IsNullOrEmpty(GetUserName(p).Item1)))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+                return methodResult;
+            }
 
-            //if (request.UsersInfo.Any(p => !string.IsNullOrEmpty(p.Email) && !p.Email.IsValidEmail()))
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-            //    return methodResult;
-            //}
-
-            //if (request.UsersInfo.Any(p => !string.IsNullOrEmpty(p.PhoneNumber) && !p.PhoneNumber.IsValidPhoneNumber()))
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-            //    return methodResult;
-            //}
-
-            //if (request.UsersInfo.Any(p => (!string.IsNullOrEmpty(p.FatherEmail) && !p.FatherEmail.IsValidEmail()) || (!string.IsNullOrEmpty(p.MotherEmail) && !p.MotherEmail.IsValidEmail())))
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-            //    return methodResult;
-            //}
-
-            //if (request.UsersInfo.Any(p => (!string.IsNullOrEmpty(p.FatherPhoneNumber) && !p.FatherPhoneNumber.IsValidPhoneNumber()) || (!string.IsNullOrEmpty(p.MotherPhoneNumber) && !p.MotherPhoneNumber.IsValidPhoneNumber())))
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
-            //    return methodResult;
-            //}
+            if (request.UsersInfo.Any(p => !CheckValueFormat(p.Email, true) || !CheckValueFormat(p.PhoneNumber, false) || !CheckValueFormat(p.FatherPhoneNumber, false) || !CheckValueFormat(p.FatherEmail, true) || !CheckValueFormat(p.MotherPhoneNumber, false) || !CheckValueFormat(p.MotherEmail, true)))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                return methodResult;
+            }
 
             var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
             if (platform == null)
@@ -97,14 +79,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 User? user = new User();
 
-                if (!string.IsNullOrEmpty(item.Email))
-                {
-                    user = await _userManager.Users.Include(p => p.Student).ThenInclude(x => x.ParentStudents).FirstOrDefaultAsync(p => p.UserName.ToLower() == item.Email.ToLower() || p.Email.ToLower() == item.Email.ToLower(), cancellationToken);
-                }
-                else if (!string.IsNullOrEmpty(item.PhoneNumber))
-                {
-                    user = await _userManager.Users.Include(p => p.Student).ThenInclude(x => x.ParentStudents).FirstOrDefaultAsync(p => p.PhoneNumber == item.PhoneNumber, cancellationToken);
-                }
+                var userName = GetUserName(item);
+
+                user = await _userManager.Users.Include(p => p.Student).ThenInclude(x => x.ParentStudents).FirstOrDefaultAsync(p => p.UserName.ToLower() == userName.Item1.ToLower() || p.Email.ToLower() == userName.Item1.ToLower() || p.PhoneNumber.ToLower() == userName.Item1.ToLower(), cancellationToken);
 
                 if (user == null)
                 {
@@ -146,7 +123,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     var passwordGeneratorHelper = new PasswordGeneratorHelper(8, 10, 1, 1, 1, 1);
                     var password = passwordGeneratorHelper.Generate();
 
-                    identityStudentResult = await _userManager.CreateAsync(user, "Admin@123");
+                    identityStudentResult = await _userManager.CreateAsync(user, password);
                     if (!identityStudentResult.Succeeded)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(item.Email), item.Email);
@@ -155,22 +132,24 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                     await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
-                    if (!string.IsNullOrEmpty(item.FatherEmail))
+                    #region create account parents
+
+                    if ((!string.IsNullOrEmpty(item.FatherEmail) || !string.IsNullOrEmpty(item.FatherPhoneNumber)) && !userName.Item2)
                     {
                         var identityFatherResult = new Microsoft.AspNetCore.Identity.IdentityResult();
                         var fatherPassword = passwordGeneratorHelper.Generate();
-                        var father = await CreateAccountParent(user, item.FatherEmail, item.FatherName, platform, fatherPassword, identityFatherResult, methodResult, cancellationToken);
+                        var father = await CreateAccountParent(user, item.FatherEmail, item.FatherName, item.FatherPhoneNumber, platform, fatherPassword, identityFatherResult, methodResult, true, cancellationToken);
                         if (father == null)
                         {
                             return methodResult;
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(item.MotherEmail))
+                    if ((!string.IsNullOrEmpty(item.MotherEmail) || !string.IsNullOrEmpty(item.MotherPhoneNumber)) && !userName.Item2)
                     {
                         var identityMotherResult = new Microsoft.AspNetCore.Identity.IdentityResult();
                         var motherPassword = passwordGeneratorHelper.Generate();
-                        var mother = await CreateAccountParent(user, item.MotherEmail, item.MotherName, platform, motherPassword, identityMotherResult, methodResult, cancellationToken);
+                        var mother = await CreateAccountParent(user, item.MotherEmail, item.MotherName, item.MotherPhoneNumber, platform, motherPassword, identityMotherResult, methodResult, false, cancellationToken);
                         if (mother == null)
                         {
                             return methodResult;
@@ -178,6 +157,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     }
 
                     await _userManager.UpdateAsync(user);
+
+                    #endregion create account parents
 
                     var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
                     {
@@ -210,20 +191,63 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             return methodResult;
         }
 
-        private async Task<User?> CreateAccountParent(User user, string? parentEmail, string? parentName, Platform platform, string password, Microsoft.AspNetCore.Identity.IdentityResult? identityResult, VoidMethodResult methodResult, CancellationToken cancellationToken)
+        private static bool CheckValueFormat(string? value, bool isValidEmail)
         {
-            var parent = await _userManager.Users.Include(p => p.Parent).FirstOrDefaultAsync(p => p.UserName.ToLower() == parentEmail.ToLower() || p.Email.ToLower() == parentEmail.ToLower(), cancellationToken);
+            if (string.IsNullOrEmpty(value))
+            {
+                return true;
+            }
+            return isValidEmail ? value.IsValidEmail() : value.IsValidPhoneNumber();
+        }
+
+        private static (string?, bool) GetUserName(CreateOrdersFromCRMCommandModel model)
+        {
+            if (!string.IsNullOrEmpty(model.Email))
+            {
+                return (model.Email, true);
+            }
+            else if (!string.IsNullOrEmpty(model.PhoneNumber))
+            {
+                return (model.PhoneNumber, true);
+            }
+            else if (!string.IsNullOrEmpty(model.FatherEmail))
+            {
+                return (model.FatherEmail, false);
+            }
+            else if (!string.IsNullOrEmpty(model.FatherPhoneNumber))
+            {
+                return (model.FatherPhoneNumber, false);
+            }
+            else if (!string.IsNullOrEmpty(model.MotherEmail))
+            {
+                return (model.MotherEmail, false);
+            }
+            else if (!string.IsNullOrEmpty(model.MotherPhoneNumber))
+            {
+                return (model.MotherPhoneNumber, false);
+            }
+            return (null, false);
+        }
+
+        private async Task<User?> CreateAccountParent(User user, string? parentEmail, string? parentName, string? parentPhoneNumber, Platform platform, string password, Microsoft.AspNetCore.Identity.IdentityResult? identityResult, VoidMethodResult methodResult, bool isFather, CancellationToken cancellationToken)
+        {
+            var userName = !string.IsNullOrEmpty(parentEmail) ? parentEmail : parentPhoneNumber;
+            var parent = await _userManager.Users.Include(p => p.Parent).FirstOrDefaultAsync(p => p.UserName.ToLower() == userName.ToLower() || p.PhoneNumber.ToLower() == userName.ToLower() || p.Email.ToLower() == userName.ToLower(), cancellationToken);
 
             if (parent == null)
             {
                 var parseFullName = Shared.Helpers.StringHelper.ParseFullName(parentName);
+
                 parent = new User()
                 {
-                    UserName = parentEmail,
+                    UserName = userName,
                     Email = parentEmail,
-                    FirstName = !string.IsNullOrEmpty(parseFullName.Item1) ? parseFullName.Item1 : parentName?.Split('@').LastOrDefault(),
-                    LastName = !string.IsNullOrEmpty(parseFullName.Item2) ? parseFullName.Item2 : parentName?.Split('@').LastOrDefault(),
-                    EmailConfirmed = true,
+                    FirstName = !string.IsNullOrEmpty(parseFullName.Item1) ? parseFullName.Item1 : userName,
+                    LastName = !string.IsNullOrEmpty(parseFullName.Item2) ? parseFullName.Item2 : string.Empty,
+                    EmailConfirmed = !string.IsNullOrEmpty(parentEmail),
+                    PhoneNumber = parentPhoneNumber,
+                    PhoneNumberConfirmed = !string.IsNullOrEmpty(parentPhoneNumber),
+                    Gender = isFather ? Domain.Enums.EnumGender.Male : Domain.Enums.EnumGender.Female,
                     Parent = new Parent()
                     {
                         Occupation = "Parent",
