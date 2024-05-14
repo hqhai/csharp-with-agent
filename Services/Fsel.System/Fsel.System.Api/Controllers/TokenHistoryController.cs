@@ -13,6 +13,7 @@ namespace Fsel.System.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/token-history")]
     [ApiController]
     public class TokenHistoryController : ControllerBase
