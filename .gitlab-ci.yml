@@ -1037,7 +1037,7 @@ build-prod-cms-planetdefender:
     - sed -i "s/$IMAGE_NAME:........../$IMAGE_NAME:$TAG/g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
 
-deploy-test-auth
+deploy-test-auth:
   stage: deploy
   tags:
   - atlantic-k8s
@@ -1989,7 +1989,7 @@ deploy-test-identity:
     NAMESPACES: fsel-testing
   extends: ".deploy-service"
   needs:
-    - job: build-test-user
+    - job: build-test-identity
   only:
     changes:
     - Services/Fsel.Identity/**/*
@@ -2013,7 +2013,7 @@ deploy-staging-identity:
     NAMESPACES: fsel-staging
   extends: ".deploy-service"
   needs:
-    - job: build-staging-user
+    - job: build-staging-identity
   only:
     changes:
     - Services/Fsel.Identity/**/*
@@ -2037,7 +2037,7 @@ deploy-prod-identity:
     NAMESPACES: fsel-production
   extends: ".deploy-service"
   needs:
-    - job: build-prod-user
+    - job: build-prod-identity
   only:
     changes:
     - Services/Fsel.Identity/**/*
