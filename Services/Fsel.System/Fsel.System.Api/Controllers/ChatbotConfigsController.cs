@@ -127,5 +127,19 @@ namespace Fsel.System.Api.Controllers
             MethodResult<IList<ChatBotModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// lấy chatbot theo chatbotid
+        /// </summary>
+        /// <param name="unitId"></param>
+        /// <returns></returns>
+        [HttpGet("chat-bot-message/{chatbotId}")]
+        [ProducesResponseType(typeof(MethodResult<ChatBotModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetChatBotById([FromRoute] Guid chatbotId)
+        {
+            MethodResult<ChatBotModel> commandResult = await _mediator.Send(new GetChatBotByIdQuery { ChatbotId = chatbotId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

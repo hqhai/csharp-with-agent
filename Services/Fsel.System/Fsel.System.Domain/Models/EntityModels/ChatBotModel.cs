@@ -26,5 +26,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public ChatBotMessage? LastestQuestion { get; set; }
 
+        public double ProgressRatio { get; set; }
+
     }
 }
