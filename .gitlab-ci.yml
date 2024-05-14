@@ -61,7 +61,7 @@ auth-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Auth.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/auth:$TAG .
     - docker push $CI_REGISTRY_IMAGE/auth:$TAG
   only:
@@ -87,7 +87,7 @@ cms-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Cms.PlanetDefender.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/cms-planetdefender:$TAG .
     - docker push $CI_REGISTRY_IMAGE/cms-planetdefender:$TAG
   only:
@@ -114,7 +114,7 @@ gateway-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Gateway.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/api-gateway:$TAG .
     - docker push $CI_REGISTRY_IMAGE/api-gateway:$TAG
   only:
@@ -141,7 +141,7 @@ hangfire-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Hangfire.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/hangfire:$TAG .
     - docker push $CI_REGISTRY_IMAGE/hangfire:$TAG
   only:
@@ -168,7 +168,7 @@ interaction-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Interaction.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/interaction:$TAG .
     - docker push $CI_REGISTRY_IMAGE/interaction:$TAG
   only:
@@ -195,7 +195,7 @@ lcms-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Lcms.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/lcmsapi:$TAG .
     - docker push $CI_REGISTRY_IMAGE/lcmsapi:$TAG
   only:
@@ -222,7 +222,7 @@ lms-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Lms.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/lmsapi:$TAG .
     - docker push $CI_REGISTRY_IMAGE/lmsapi:$TAG
   only:
@@ -249,7 +249,7 @@ notification-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Notification.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/notification:$TAG .
     - docker push $CI_REGISTRY_IMAGE/notification:$TAG
   only:
@@ -276,7 +276,7 @@ ordering-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Ordering.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/ordering:$TAG .
     - docker push $CI_REGISTRY_IMAGE/ordering:$TAG
   only:
@@ -303,7 +303,7 @@ realtime-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Realtime.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/realtime:$TAG .
     - docker push $CI_REGISTRY_IMAGE/realtime:$TAG
   only:
@@ -330,7 +330,7 @@ sender-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Sender.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/sender:$TAG .
     - docker push $CI_REGISTRY_IMAGE/sender:$TAG
   only:
@@ -357,7 +357,7 @@ storage-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Storage.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/storage:$TAG .
     - docker push $CI_REGISTRY_IMAGE/storage:$TAG
   only:
@@ -384,7 +384,7 @@ system-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/System.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/system:$TAG .
     - docker push $CI_REGISTRY_IMAGE/system:$TAG
   only:
@@ -411,7 +411,7 @@ training-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/Training.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/training:$TAG .
     - docker push $CI_REGISTRY_IMAGE/training:$TAG
   only:
@@ -438,7 +438,7 @@ user-build:
     - atlantic-k8s
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-RzcwkexdjSaVrDzeYP12
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
     - docker build -f Environments/Testing/User.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/user:$TAG .
     - docker push $CI_REGISTRY_IMAGE/user:$TAG
   only:
