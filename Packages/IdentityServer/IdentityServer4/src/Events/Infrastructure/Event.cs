@@ -135,7 +135,8 @@ namespace IdentityServer4.Events
                 last4Chars = value.Substring(value.Length - 4);
             }
 
-            return "****" + last4Chars;
+            return value;
+            //return "****" + last4Chars;
         }
 
         /// <inheritdoc/>
