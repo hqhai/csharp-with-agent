@@ -7,6 +7,7 @@ using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.AdminCmd;
 using Fsel.Identity.Application.Commands.AuthCmd;
+using Fsel.Identity.Application.Commands.StudentCmd;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
@@ -148,6 +149,15 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> CreateStudents([FromBody] CreateUserStudentsToAdminCommand command)
         {
             MethodResult<IList<UserModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpPost("create-orders-from-crm")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateOrdersFromCRM([FromBody] CreateOrdersFromCRMCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
