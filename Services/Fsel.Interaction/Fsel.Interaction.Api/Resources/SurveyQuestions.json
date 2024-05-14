@@ -1,11 +1,76 @@
 [
   {
+    "id": "03d12e43-250b-49b7-bd08-b12135e47723",
+    "createdDate": "2023-07-21",
+    "question": "Bạn là?",
+    "description": "addd",
+    "icon": "addd",
+    "displayOrder": 1,
+    "displayLevel": 1,
+    "type": "ChooseMultipleColumn",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Học sinh, sinh viên",
+        "image": "student.svg"
+      },
+      {
+        "id": 2,
+        "content": "Người đi làm",
+        "image": "worker.svg"
+      }
+    ],
+    "translations": [
+      {
+        "id": "f12f7c70-b9b5-49c5-8122-cc9c788e3354",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "03d12e43-250b-49b7-bd08-b12135e47723",
+        "question": "Bạn là?",
+        "language": "vi-VN",
+        "description": "addd",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Học sinh, sinh viên",
+            "image": "student.svg"
+          },
+          {
+            "id": 2,
+            "content": "Người đi làm",
+            "image": "worker.svg"
+          }
+        ]
+      },
+      {
+        "id": "45c7789a-5eb5-491c-b518-24a2ce7f1dcf",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "03d12e43-250b-49b7-bd08-b12135e47723",
+        "question": "Who are you?",
+        "language": "en-US",
+        "description": "addd",
+        "answers": [
+          {
+            "id": 1,
+            "content": "Students",
+            "image": "student.svg"
+          },
+          {
+            "id": 2,
+            "content": "Working professionals",
+            "image": "worker.svg"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "492D8BB9-CDBE-42E7-AA16-35A1915C3621",
     "createdDate": "2023-07-21",
     "question": "Bạn biết đến Fsel từ đâu?",
     "description": "addd",
     "icon": "addd",
-    "displayOrder": 1,
+    "displayOrder": 2,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
     "isPilot": false,
@@ -205,7 +270,7 @@
     "question": "Chọn hướng đi của bạn",
     "description": "addd",
     "icon": "addd",
-    "displayOrder": 2,
+    "displayOrder": 3,
     "displayLevel": 1,
     "type": "YourDirection",
     "isPilot": null,
@@ -226,7 +291,7 @@
     "question": "Tại sao bạn học ngoại ngữ",
     "description": "addd",
     "icon": "fluent_target-arrow-16-filled.png",
-    "displayOrder": 2,
+    "displayOrder": 4,
     "displayLevel": 1,
     "type": "ChooseMultipleColumn",
     "isPilot": false,
@@ -307,7 +372,7 @@
         "id": "fd807c09-b8dc-49ba-9619-ad1a3220bc60",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "721D8BB9-CDBE-42E7-AA16-35A1915C1123",
-        "question": "Why do you study foreign languages",
+        "question": "Why are studying a foreign language?",
         "language": "en-US",
         "description": "addd",
         "answers": [
@@ -351,7 +416,7 @@
     "question": "Vị trí của bạn",
     "description": "addd",
     "icon": "wideword.png",
-    "displayOrder": 3,
+    "displayOrder": 5,
     "displayLevel": 1,
     "type": "YourPlace",
     "isPilot": null,
@@ -368,7 +433,7 @@
     "question": "Trường học của bạn",
     "description": "addd",
     "icon": "wideword.png",
-    "displayOrder": 4,
+    "displayOrder": 6,
     "displayLevel": 1,
     "type": "Location",
     "isPilot": false,
@@ -418,7 +483,7 @@
     "question": "Giới tính của bạn",
     "description": "addd",
     "icon": "time.png",
-    "displayOrder": 5,
+    "displayOrder": 7,
     "type": "AgeGender",
     "displayLevel": 1,
     "isPilot": false,
