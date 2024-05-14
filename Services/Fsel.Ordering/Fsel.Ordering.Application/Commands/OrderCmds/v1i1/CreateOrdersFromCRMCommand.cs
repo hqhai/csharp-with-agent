@@ -53,6 +53,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 var isHaveOrderTrial = await _orderRepository.Queryable.AnyAsync(p => p.IsTrial && p.Status == EnumOrderStatus.Payment && p.UserId == item.UserId, cancellationToken);
 
                 var order = AddDataIntoOrder(item, package, isHaveOrderTrial);
+                if (!order.IsValid())
+                {
+                    methodResult.AddError(order.ErrorMessages);
+                    return methodResult;
+                }
                 orders.Add(order);
             }
 

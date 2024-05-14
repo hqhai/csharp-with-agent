@@ -87,15 +87,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     user = new User()
                     {
-                        UserName = !string.IsNullOrEmpty(item.Email) ? item.Email : item.PhoneNumber,
-                        Email = item.Email,
-                        EmailConfirmed = !string.IsNullOrEmpty(item.Email),
+                        UserName = userName.Item1,
+                        Email = userName.Item1.IsValidEmail() ? userName.Item1 : null,
+                        EmailConfirmed = userName.Item1.IsValidEmail(),
                         FirstName = item.FirstName,
                         LastName = item.LastName,
                         Birthday = item.Birthday,
                         Gender = item.Gender,
-                        PhoneNumber = item.PhoneNumber,
-                        PhoneNumberConfirmed = !string.IsNullOrEmpty(item.PhoneNumber),
+                        PhoneNumber = userName.Item1.IsValidPhoneNumber() ? userName.Item1 : null,
+                        PhoneNumberConfirmed = userName.Item1.IsValidPhoneNumber(),
                         Student = new Student()
                         {
                             CreatedByParent = false,
@@ -178,7 +178,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     UserId = user.Id,
                     FullName = user.FirstName + " " + user.LastName,
-                    Email = user.Email,
+                    Email = user.UserName,
                     StudentCode = user.Code,
                     DiscountPercent = item.DiscountPercent,
                     PackageCode = item.PackageCode
@@ -188,6 +188,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 UsersInfo = usersInfo
             });
+            if (!createOrdersResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(createOrdersResult.Error);
+                return methodResult;
+            }
             return methodResult;
         }
 
@@ -282,6 +287,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     ParentId = parent.Parent.Id,
                 });
+                await _userManager.UpdateAsync(user);
             }
             return parent;
         }
