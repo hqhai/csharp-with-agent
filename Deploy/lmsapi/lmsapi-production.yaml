@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lmsapi-production
+spec:
+  selector:
+    matchLabels:
+      app: lmsapi-production
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: lmsapi-production
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-prod
+      containers:
+      - name: lmsapi-production
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi:..........
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /app/appsettings.Production.json
+          name: lmsapi-appsettings-production
+          subPath: appsettings.Production.json
+      imagePullSecrets:
+        - name: gitlab-fsel-secret
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: lmsapi-appsettings-production
+        name: lmsapi-appsettings-production
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lmsapi-production
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: lmsapi-production
+
+

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: training-staging
+spec:
+  selector:
+    matchLabels:
+      app: training-staging
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: training-staging
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-staging
+      containers:
+      - name: training-staging
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/training:..........
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /app/appsettings.Staging.json
+          name: training-api-appsettings-staging
+          subPath: appsettings.Staging.json
+      imagePullSecrets:
+        - name: gitlab-fsel-secret
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: training-api-appsettings-staging
+        name: training-api-appsettings-staging
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: training-staging
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: training-staging
+
+

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-planet-defender-testing
+spec:
+  selector:
+    matchLabels:
+      app: cms-planet-defender-testing
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cms-planet-defender-testing
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-staging
+      containers:
+      - name: cms-planet-defender-testing
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender:..........
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /app/appsettings.Testing.json
+          name: cms-planetdefender-appsettings-testing
+          subPath: appsettings.Testing.json
+      imagePullSecrets:
+        - name: gitlab-fsel-secret
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: cms-planetdefender-appsettings-testing
+        name: cms-planetdefender-appsettings-testing
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cms-planet-defender-testing
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: cms-planet-defender-testing
+
+

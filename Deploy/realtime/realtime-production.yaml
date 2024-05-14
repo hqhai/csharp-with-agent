@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: realtime-production
+spec:
+  selector:
+    matchLabels:
+      app: realtime-production
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: realtime-production
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-prod
+      containers:
+      - name: realtime-production
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/realtime:..........
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /app/appsettings.Production.json
+          name: realtime-appsettings-production
+          subPath: appsettings.Production.json
+      imagePullSecrets:
+        - name: gitlab-fsel-secret
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: realtime-appsettings-production
+        name: realtime-appsettings-production
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: realtime-production
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: realtime-production
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: realtime-production-main
+  labels:
+    app.name: realtime-production
+  annotations:
+    nginx.ingress.kubernetes.io/client-body-buffer-size: 1024M
+    nginx.ingress.kubernetes.io/cors-allow-headers: DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata,transaction-name,access-control-allow-origin
+    nginx.ingress.kubernetes.io/cors-allow-origin: '*'
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx-public
+  rules:
+  - host: fsel-realtime-api.fsel.edu.vn
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: realtime-production
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - fsel-realtime-api.fsel.edu.vn
+    secretName: fsel-edu-vn-tls-wildcard
+
+
+
