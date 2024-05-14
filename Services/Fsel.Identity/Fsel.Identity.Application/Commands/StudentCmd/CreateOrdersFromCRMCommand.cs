@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Application.Services.OrderService;
@@ -16,6 +17,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
+    using Fsel.Identity.Infrastructure.ValueSettings;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -31,14 +34,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IPlatformRepository _platformRepository;
         private readonly UserManager<User> _userManager;
         private readonly IUserRepository _userRepository;
+        private readonly IMediator _mediator;
+        private readonly AppSetting _appSetting;
 
-        public CreateOrdersFromCRMCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IUserRepository userRepository)
+        public CreateOrdersFromCRMCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IUserRepository userRepository, IMediator mediator, AppSetting appSetting)
         {
             _userManager = userManager;
             _orderService = orderService;
             _platformRepository = platformRepository;
             _interactionService = interactionService;
             _userRepository = userRepository;
+            _mediator = mediator;
+            _appSetting = appSetting;
         }
 
         public async Task<VoidMethodResult> Handle(CreateOrdersFromCRMCommand request, CancellationToken cancellationToken)
@@ -173,6 +180,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 }
                         }
                     });
+                    if (user.UserName.IsValidEmail() && !string.IsNullOrEmpty(user.UserName))
+                    {
+                        var param = new
+                        {
+                            UserName = user.UserName,
+                            Password = password,
+                            ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                        };
+                        await SendMail(user.UserName, param, cancellationToken);
+                    }
                 }
                 usersInfo.Add(new CreateOrdersFromCRMModel
                 {
@@ -194,6 +211,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
             return methodResult;
+        }
+
+        private async Task SendMail(string email, object param, CancellationToken cancellationToken)
+        {
+            await _mediator.Send(new SenderCommand
+            {
+                Email = email,
+                Subject = SenderSettings.CreateAccountFromCRM,
+                Params = param,
+                Template = EnumSenderTemplate.CreateAccountFromCRM,
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         private static bool CheckValueFormat(string? value, bool isValidEmail)

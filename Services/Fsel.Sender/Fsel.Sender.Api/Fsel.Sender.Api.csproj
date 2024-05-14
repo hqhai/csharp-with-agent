@@ -25,6 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Resources\CreateAccountFromCRM.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\PaymentApproval.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

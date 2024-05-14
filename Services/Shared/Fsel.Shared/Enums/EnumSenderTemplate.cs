@@ -21,6 +21,7 @@ namespace Fsel.Shared.Enums
         StudentCompletePT,
         SendMailMidCourseAcademic,
         SendMailMidCourseIELT,
-        PaymentApproval
+        PaymentApproval,
+        CreateAccountFromCRM
     }
 }
