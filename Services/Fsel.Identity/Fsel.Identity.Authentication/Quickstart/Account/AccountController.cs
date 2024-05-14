@@ -1,7 +1,6 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-
 using AutoMapper;
 using Fsel.Identity.Application.Commands.SenderCmd;
 using Fsel.Identity.Application.Commands.UserOtpCmd;
@@ -19,6 +18,7 @@ using IdentityServer4.Stores;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+
 //using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
@@ -44,6 +44,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
     {
         //private readonly TestUserStore _users;
         protected IUserSession UserSession { get; private set; }
+
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
@@ -57,6 +58,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IParentRepository _parentRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IUserOtpRepository _userOtpRepository;
+        private readonly IUserRepository _userRepository;
 
         public AccountController(
             IUserSession userSession,
@@ -72,7 +74,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             ILogger<AccountController> logger,
             IParentRepository parentRepository,
             IStudentRepository studentRepository,
-            IUserOtpRepository userOtpRepository)
+            IUserOtpRepository userOtpRepository,
+            IUserRepository userRepository)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -92,6 +95,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             _parentRepository = parentRepository;
             _studentRepository = studentRepository;
             _userOtpRepository = userOtpRepository;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -146,7 +150,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                             _mapper.Map(userRegisterModel, user);
                             user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, userRegisterModel.Password);
-                            user = await GenerateUserDataAsync(user, EnumRoleRegister.Student);
+                            user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
                             result = await _userManager.UpdateAsync(user);
 
                             if (result.Succeeded)
@@ -202,51 +206,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             }
 
             return View(request);
-        }
-
-        private async Task<User> GenerateUserDataAsync(User user, EnumRoleRegister role)
-        {
-            var currentDate = DateTime.UtcNow;
-            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
-
-            if (role == EnumRoleRegister.Student)
-            {
-                var stt = await _studentRepository.Queryable.CountAsync();
-                var lastDigitOfYear = currentDate.Year % 10;
-                var lastOfBirthDay = user.Birthday!.Value.Year % 100;
-
-                user.Code = $"HN_{weekNumber}{lastDigitOfYear}{lastOfBirthDay}{stt:000}";
-                if (await _studentRepository.Queryable.Include(x => x.User).AnyAsync(x => x!.User!.Code == user.Code))
-                {
-                    user.Code = $"HN_{weekNumber}{lastDigitOfYear}{2}{lastOfBirthDay}{stt:000}";
-                }
-
-                var level = EnumCourseLevel.A2;
-                int age = Shared.Helpers.DateTimeHelper.GetYearOld(user.Birthday);
-                if (age >= 14)
-                {
-                    level = EnumCourseLevel.B1;
-                }
-
-                user.Student = new Student
-                {
-                    UserId = user.Id,
-                    CreatedByParent = false,
-                    Occupation = nameof(Student),
-                    CourseLevel = level
-                };
-            }
-            else if (role == EnumRoleRegister.Parent)
-            {
-                var stt = await _parentRepository.Queryable.CountAsync();
-                user.Parent = new Parent
-                {
-                    UserId = user.Id,
-                };
-                user.Code = $"PH_{weekNumber}{stt:0000}";
-            }
-
-            return user;
         }
 
         public IActionResult Success(string? message = null)
@@ -385,7 +344,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             return RedirectToAction(nameof(VerifyOtp));
         }
 
-
         /// <summary>
         /// Registration for sample user login
         /// </summary>
@@ -436,7 +394,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             });
                             return View(request);
                         }
-
                     }
 
                     var sendResult = await SendOtpAsync(user);
@@ -526,7 +483,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             //{
             //    if (context != null)
             //    {
-            //        // if the user cancels, send a result back into IdentityServer as if they 
+            //        // if the user cancels, send a result back into IdentityServer as if they
             //        // denied the consent (even if this client does not require consent).
             //        // this will send back an access denied OIDC error response to the client.
             //        await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
@@ -565,7 +522,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
                         await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id.ToString(), user.UserName, clientId: context?.Client.ClientId));
 
-                        // only set explicit expiration here if user chooses "remember me". 
+                        // only set explicit expiration here if user chooses "remember me".
                         // otherwise we rely upon expiration configured in cookie middleware.
                         AuthenticationProperties? props = null;
                         if (AccountOptions.AllowRememberLogin && model.RememberLogin)
@@ -628,7 +585,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
             return View(vm);
         }
-
 
         /// <summary>
         /// Show logout page
@@ -703,7 +659,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             //return View("LoggedOut", vm);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string? returnUrl = null)
@@ -712,7 +667,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
-
 
         [HttpGet]
         public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null)
@@ -801,7 +755,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         EmailConfirmed = true,
                     };
 
-                    user = await GenerateUserDataAsync(user, EnumRoleRegister.Student);
+                    user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
                     result = await _userManager.CreateAsync(user);
                     result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
 
@@ -829,13 +783,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             return View(nameof(ExternalLoginConfirmation), request);
         }
 
-
         [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
         }
-
 
         [HttpGet]
         public IActionResult Error()
@@ -846,6 +798,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         /*****************************************/
         /* helper APIs for the AccountController */
         /*****************************************/
+
         private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
