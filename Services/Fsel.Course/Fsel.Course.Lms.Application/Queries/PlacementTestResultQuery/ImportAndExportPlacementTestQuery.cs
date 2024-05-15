@@ -4,36 +4,31 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Common.Models.Excels;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ExportPlacementTestQuery : IRequest<MethodResult<Stream>>
+    public class ImportAndExportPlacementTestQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
-        [Required]
-        public DateTime StartDate { get; set; }
-
-        [Required]
-        public DateTime EndDate { get; set; }
     }
 
-    public class ExportPlacementTestQueryHandler : IRequestHandler<ExportPlacementTestQuery, MethodResult<Stream>>
+    public class ImportAndExportPlacementTestQueryHandler : IRequestHandler<ImportAndExportPlacementTestQuery, MethodResult<Stream>>
     {
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
 
-        public ExportPlacementTestQueryHandler(
+        public ImportAndExportPlacementTestQueryHandler(
             IUserService userService,
             ICourseResultRepository courseResultRepository,
             IPlacementTestResultRepository placementTestResultRepository)
@@ -43,34 +38,39 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _placementTestResultRepository = placementTestResultRepository;
         }
 
-        public async Task<MethodResult<Stream>> Handle(ExportPlacementTestQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<Stream>> Handle(ImportAndExportPlacementTestQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();
-
+            if (request.FormFile == null)
+            {
+                return methodResult;
+            }
             var listEmail = new List<ImportStudentEmailModel>();
-            var students = new List<StudentModel>();
-            var studentIds = new List<Guid>();
-
             var placementTestResultExports = new List<PlacementTestResultExportModel>();
+            var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentEmailModel x, IList<ImportStudentEmailModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
+            {
+                if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
+                }
+                return await Task.FromResult(errors.Count == 0);
+            });
+            listEmail = result.Datas.ToList();
+            var studentResultToEmail = await _userService.GetStudentByEmailsAsync(listEmail.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).ToList());
+            if (!studentResultToEmail.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                return methodResult;
+            }
+            var students = studentResultToEmail.Content?.Result?.ToList();
+            var studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
+
             var placementTestResults = await _placementTestResultRepository.Queryable
+                                            .Where(x => x != null && studentIds.Contains(x.StudentId))
                                             .GroupBy(x => x.StudentId)
                                             .Select(x => x.OrderByDescending(x => x.UpdatedDate).FirstOrDefault())
                                             .ToListAsync(cancellationToken);
-
-            placementTestResults = placementTestResults.Where(x => x != null && x.UpdatedDate.HasValue && x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date).ToList();
-            if (placementTestResults.Any())
-            {
-                studentIds = placementTestResults.Select(x => x.StudentId).ToList();
-                var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
-                if (!studentResults.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
-                    return methodResult;
-                }
-                students = studentResults.Content?.Result?.ToList();
-            }
-
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId)).ToListAsync(cancellationToken);
             foreach (var item in placementTestResults)
             {
