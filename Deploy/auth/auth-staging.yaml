@@ -38,9 +38,12 @@ spec:
         - mountPath: /app/appsettings.Staging.json
           name: auth-appsettings-staging
           subPath: appsettings.Staging.json
-
       imagePullSecrets:
         - name: gitlab-fsel-secret
+      tolerations:
+      - effect: NoSchedule
+        key: appnodes-staging
+        operator: Exists
       volumes:
       - configMap:
           defaultMode: 420

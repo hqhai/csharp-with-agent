@@ -40,6 +40,10 @@ spec:
           subPath: appsettings.Testing.json
       imagePullSecrets:
         - name: gitlab-fsel-secret
+      tolerations:
+      - effect: NoSchedule
+        key: appnodes-staging
+        operator: Exists
       volumes:
       - configMap:
           defaultMode: 420

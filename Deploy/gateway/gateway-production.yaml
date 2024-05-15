@@ -36,6 +36,10 @@ spec:
             memory: 50Mi
       imagePullSecrets:
         - name: gitlab-fsel-secret
+      tolerations:
+      - effect: NoSchedule
+        key: appnodes-prod
+        operator: Exists
 
 ---
 apiVersion: v1

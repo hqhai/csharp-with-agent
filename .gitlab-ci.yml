@@ -1034,7 +1034,7 @@ build-prod-cms-planetdefender:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
 
 deploy-test-auth:
@@ -1045,7 +1045,7 @@ deploy-test-auth:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -1069,7 +1069,7 @@ deploy-staging-auth:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -1093,7 +1093,7 @@ deploy-prod-auth:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
@@ -1117,7 +1117,7 @@ deploy-test-gateway:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
@@ -1141,7 +1141,7 @@ deploy-staging-gateway:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
@@ -1165,7 +1165,7 @@ deploy-prod-gateway:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
@@ -1189,7 +1189,7 @@ deploy-test-hangfire:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
@@ -1213,7 +1213,7 @@ deploy-staging-hangfire:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
@@ -1237,7 +1237,7 @@ deploy-prod-hangfire:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
@@ -1261,7 +1261,7 @@ deploy-test-interaction:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
@@ -1285,7 +1285,7 @@ deploy-staging-interaction:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
@@ -1309,7 +1309,7 @@ deploy-prod-interaction:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
@@ -1333,7 +1333,7 @@ deploy-test-lcmsapi:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
@@ -1357,7 +1357,7 @@ deploy-staging-lcmsapi:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
@@ -1381,7 +1381,7 @@ deploy-prod-lcmsapi:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
@@ -1405,7 +1405,7 @@ deploy-test-lmsapi:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
@@ -1429,7 +1429,7 @@ deploy-staging-lmsapi:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
@@ -1453,7 +1453,7 @@ deploy-prod-lmsapi:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
@@ -1477,7 +1477,7 @@ deploy-test-notification:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
@@ -1501,7 +1501,7 @@ deploy-staging-notification:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
@@ -1525,7 +1525,7 @@ deploy-prod-notification:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
@@ -1549,7 +1549,7 @@ deploy-test-ordering:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
@@ -1573,7 +1573,7 @@ deploy-staging-ordering:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
@@ -1597,7 +1597,7 @@ deploy-prod-ordering:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
@@ -1621,7 +1621,7 @@ deploy-test-realtime:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
@@ -1645,7 +1645,7 @@ deploy-staging-realtime:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
@@ -1669,7 +1669,7 @@ deploy-prod-realtime:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
@@ -1693,7 +1693,7 @@ deploy-test-sender:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
@@ -1717,7 +1717,7 @@ deploy-staging-sender:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
@@ -1741,7 +1741,7 @@ deploy-prod-sender:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
@@ -1765,7 +1765,7 @@ deploy-test-storage:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
@@ -1789,7 +1789,7 @@ deploy-staging-storage:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
@@ -1813,7 +1813,7 @@ deploy-prod-storage:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
@@ -1837,7 +1837,7 @@ deploy-test-system:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
@@ -1861,7 +1861,7 @@ deploy-staging-system:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
@@ -1885,7 +1885,7 @@ deploy-prod-system:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
@@ -1909,7 +1909,7 @@ deploy-test-training:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
@@ -1933,7 +1933,7 @@ deploy-staging-training:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
@@ -1957,7 +1957,7 @@ deploy-prod-training:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
@@ -1981,7 +1981,7 @@ deploy-test-identity:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
@@ -2005,7 +2005,7 @@ deploy-staging-identity:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
@@ -2029,7 +2029,7 @@ deploy-prod-identity:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
@@ -2053,7 +2053,7 @@ deploy-test-cms-planetdefender:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
@@ -2077,7 +2077,7 @@ deploy-staging-cms-planetdefender:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
@@ -2101,7 +2101,7 @@ deploy-prod-cms-planetdefender:
     max: 2
   image: bitnami/kubectl
   script:
-    - sed -i "s|$IMAGE_NAME:........../|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
     - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
@@ -2116,3 +2116,4 @@ deploy-prod-cms-planetdefender:
     - Services/Shared/**/*
     refs:
     - main
+
