@@ -1,3 +1,4 @@
+using Amazon.Runtime.Internal.Util;
 using Fsel.Core.Base;
 using Fsel.Core.Extensions;
 using Fsel.Core.Services.IpApiServices;
@@ -5,6 +6,7 @@ using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Models.ShareModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 // Đảm bảo rằng bạn đã thêm namespace của ConnectionTracker
 
@@ -15,11 +17,13 @@ namespace Fsel.Realtime.Application.Hubs
     {
         private readonly FeatureAccessTimePublisher _accessTimePublisher;
         private readonly AuthContext _authContext;
+        private readonly ILogger<FeatureAccessTimeHub> _logger;
 
-        public FeatureAccessTimeHub(FeatureAccessTimePublisher accessTimePublisher, AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        public FeatureAccessTimeHub(FeatureAccessTimePublisher accessTimePublisher, AuthContext authContext, IIpApiService ipApiService, ILogger<FeatureAccessTimeHub> logger) : base(authContext, ipApiService)
         {
             _accessTimePublisher = accessTimePublisher;
             _authContext = authContext;
+            _logger = logger;
         }
 
         public override async Task OnConnectedHubAsync()
@@ -39,6 +43,7 @@ namespace Fsel.Realtime.Application.Hubs
 
             // Ghi nhận thời điểm ngắt kết nối và tính toán thời gian kết nối
             var duration = ConnectionTracker.Instance.RecordConnectionEnd(Context.ConnectionId);
+            _logger.LogInformation("FeatureAccessTimeHub:" + duration);
 
             TrackingTimeModel model = new TrackingTimeModel
             {
