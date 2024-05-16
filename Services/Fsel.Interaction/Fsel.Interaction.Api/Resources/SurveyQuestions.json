@@ -35,12 +35,14 @@
           {
             "id": 1,
             "content": "Học sinh, sinh viên",
-            "image": "student.svg"
+            "image": "student.svg",
+            "referenceQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5"
           },
           {
             "id": 2,
             "content": "Người đi làm",
-            "image": "worker.svg"
+            "image": "worker.svg",
+            "referenceQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5"
           }
         ]
       },
@@ -55,12 +57,14 @@
           {
             "id": 1,
             "content": "Students",
-            "image": "student.svg"
+            "image": "student.svg",
+            "referenceQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5"
           },
           {
             "id": 2,
             "content": "Working professionals",
-            "image": "worker.svg"
+            "image": "worker.svg",
+            "referenceQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5"
           }
         ]
       }
