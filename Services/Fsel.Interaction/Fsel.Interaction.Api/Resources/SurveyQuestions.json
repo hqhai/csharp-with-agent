@@ -42,7 +42,7 @@
             "id": 2,
             "content": "Người đi làm",
             "image": "worker.svg",
-            "referenceQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5"
+            "referenceQuestionId": "35a71ae7-49c1-4878-a1db-edcd2834f1cd"
           }
         ]
       },
@@ -64,7 +64,7 @@
             "id": 2,
             "content": "Working professionals",
             "image": "worker.svg",
-            "referenceQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5"
+            "referenceQuestionId": "35a71ae7-49c1-4878-a1db-edcd2834f1cd"
           }
         ]
       }
@@ -93,7 +93,7 @@
       },
       {
         "id": 3,
-        "content": "Youtube",
+        "content": "YouTube",
         "image": "youtube-icon.svg"
       },
       {
@@ -113,7 +113,7 @@
       },
       {
         "id": 7,
-        "content": "Tivi",
+        "content": "TV",
         "image": "tv-icon.svg"
       },
       {
@@ -158,7 +158,7 @@
           },
           {
             "id": 3,
-            "content": "Youtube",
+            "content": "YouTube",
             "image": "youtube-icon.svg"
           },
           {
@@ -178,7 +178,7 @@
           },
           {
             "id": 7,
-            "content": "Tivi",
+            "content": "TV",
             "image": "tv-icon.svg"
           },
           {
@@ -207,7 +207,7 @@
         "id": "619b48dd-e305-4a8c-858d-fcbbdc980239",
         "createdDate": "2023-10-17",
         "surveyQuestionId": "492D8BB9-CDBE-42E7-AA16-35A1915C3621",
-        "question": "How did you know fsel? ",
+        "question": "How do you know FSEL?",
         "language": "en-US",
         "description": "addd",
         "answers": [
@@ -223,7 +223,7 @@
           },
           {
             "id": 3,
-            "content": "Youtube",
+            "content": "YouTube",
             "image": "youtube-icon.svg"
           },
           {
@@ -243,7 +243,7 @@
           },
           {
             "id": 7,
-            "content": "Tivi",
+            "content": "TV",
             "image": "tv-icon.svg"
           },
           {
