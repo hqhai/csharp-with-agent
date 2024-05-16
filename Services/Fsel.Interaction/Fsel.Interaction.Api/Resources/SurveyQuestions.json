@@ -13,12 +13,14 @@
       {
         "id": 1,
         "content": "Học sinh, sinh viên",
-        "image": "student.svg"
+        "image": "student.svg",
+        "referenceQuestionId": "b223125a-a4e1-4e10-b4dd-cfcd747d74c5"
       },
       {
         "id": 2,
         "content": "Người đi làm",
-        "image": "worker.svg"
+        "image": "worker.svg",
+        "referenceQuestionId": "35a71ae7-49c1-4878-a1db-edcd2834f1cd"
       }
     ],
     "translations": [
@@ -473,6 +475,50 @@
           "district": "Other",
           "educationLevel": "Other",
           "school": "Other"
+        }
+      }
+    ]
+  },
+  {
+    "id": "35a71ae7-49c1-4878-a1db-edcd2834f1cd",
+    "createdDate": "2023-07-21",
+    "question": "Vị trí của bạn?",
+    "description": "addd",
+    "icon": "wideword.png",
+    "displayOrder": 6,
+    "displayLevel": 1,
+    "type": "Location",
+    "isPilot": false,
+    "answers": {
+      "country": "Other",
+      "province": "Other",
+      "district": "Other"
+    },
+    "translations": [
+      {
+        "id": "b606fff3-5363-4d82-a798-7059e9323321",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "35a71ae7-49c1-4878-a1db-edcd2834f1cd",
+        "question": "Vị trí của bạn?",
+        "language": "vi-VN",
+        "description": "addd",
+        "answers": {
+          "country": "Other",
+          "province": "Other",
+          "district": "Other"
+        }
+      },
+      {
+        "id": "d9343200-7b1b-475c-8330-a8d3e1a09be4",
+        "createdDate": "2023-10-17",
+        "surveyQuestionId": "35a71ae7-49c1-4878-a1db-edcd2834f1cd",
+        "question": "Your position?",
+        "language": "en-US",
+        "description": "addd",
+        "answers": {
+          "country": "Other",
+          "province": "Other",
+          "district": "Other"
         }
       }
     ]
