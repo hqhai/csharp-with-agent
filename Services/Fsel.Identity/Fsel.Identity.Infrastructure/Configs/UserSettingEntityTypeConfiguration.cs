@@ -10,6 +10,7 @@ namespace Fsel.Identity.Infrastructure.Configs
     public class UserSettingEntityTypeConfiguration : IEntityTypeConfiguration<UserSetting>
     {
         public void Configure(EntityTypeBuilder<UserSetting> builder)
+
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.HasOne(a => a.User)

@@ -5,7 +5,7 @@
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateTable_UserSetting_AddColumn_NotifiEmail : Migration
+    public partial class UpdateTableUserSettings_AddColumn_NotifiEmail : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,7 +15,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 table: "UserSettings",
                 type: "bit",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: true);
         }
 
         /// <inheritdoc />

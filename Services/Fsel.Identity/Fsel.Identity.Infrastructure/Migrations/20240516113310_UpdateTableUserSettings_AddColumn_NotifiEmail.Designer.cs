@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20240515085801_UpdateTable_UserSetting_AddColumn_NotifiEmail")]
-    partial class UpdateTable_UserSetting_AddColumn_NotifiEmail
+    [Migration("20240516113310_UpdateTableUserSettings_AddColumn_NotifiEmail")]
+    partial class UpdateTableUserSettings_AddColumn_NotifiEmail
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1563,7 +1563,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<bool>("NotifiEmail")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<bool>("NotifiFeedBack")
                         .HasColumnType("bit");
