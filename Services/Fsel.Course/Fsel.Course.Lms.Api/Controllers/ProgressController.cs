@@ -256,5 +256,20 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<IList<CompetitionStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Report Student
+        /// </summary>
+        [HttpPost("export-report-student")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Export([FromQuery] ImportEmailStudentByProgressQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "report_student_export.xlsx");
+        }
     }
 }
