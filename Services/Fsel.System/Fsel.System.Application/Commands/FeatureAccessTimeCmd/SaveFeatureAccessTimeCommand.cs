@@ -95,10 +95,8 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
         private void UpdateExistingFeatureAccessTime(FeatureAccessTime featureAccessTime, SaveFeatureAccessTimeCommand request, long accessTime)
         {
-            if (request.AccessTime == null)
-            {
-                featureAccessTime.Visit += 1;
-            }
+
+            featureAccessTime.Visit += 1;
             featureAccessTime.AccessTime += accessTime;
             featureAccessTime.LastVisited = DateTime.UtcNow;
             ;
