@@ -78,5 +78,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/user/get-by-student-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
+
+        [Get("/v1/admin/user/token/{id}")]
+        Task<IApiResponse<MethodResult<TokenModel>>> GetJWTAsync([FromRoute] Guid id);
     }
 }
