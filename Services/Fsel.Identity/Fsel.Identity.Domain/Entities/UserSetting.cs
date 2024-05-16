@@ -18,6 +18,8 @@ namespace Fsel.Identity.Domain.Entities
 
         public bool NotifiForum { get; set; }
 
+        public bool NotifiEmail { get; set; }
+
         /// <summary>
         /// Tên ngôn ngữ
         /// </summary>
