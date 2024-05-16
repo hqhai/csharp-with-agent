@@ -22,14 +22,10 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
     public class SurveyQuestionTranslationModel : BaseModel, ITranslationObject
     {
         public string? Language { get; set; }
-
         public string? Question { get; set; }
         public string? Description { get; set; }
-        public string? Icon { get; set; }
-        public float DisplayOrder { get; set; }
-        public int DisplayLevel { get; set; }
-        public EnumSurveyQuestion Type { get; set; }
         public object? Answers { get; set; }
+        public Guid SurveyQuestionId { get; set; }
         public IList<CustomerSurveyModel>? CustomerSurveys { get; set; }
     }
 }
