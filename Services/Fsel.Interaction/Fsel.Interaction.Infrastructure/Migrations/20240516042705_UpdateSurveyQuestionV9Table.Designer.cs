@@ -4,6 +4,7 @@ using Fsel.Interaction.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Interaction.Infrastructure.Migrations
 {
     [DbContext(typeof(InteractionDbContext))]
-    partial class InteractionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240516042705_UpdateSurveyQuestionV9Table")]
+    partial class UpdateSurveyQuestionV9Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1546,7 +1549,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Description = "addd",
                             IsDeleted = false,
                             Language = "en-US",
-                            Question = "Your location?",
+                            Question = "Your position?",
                             SurveyQuestionId = new Guid("35a71ae7-49c1-4878-a1db-edcd2834f1cd")
                         },
                         new

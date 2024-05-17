@@ -73,6 +73,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/v1/student/get-student-by-email")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByEmailAsync([FromQuery] string email);
 
+        [Post("/v1/student/get-student-by-emails")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByEmailsAsync([FromBody] IList<string> emails);
+
         [Get("/v1/user/get-by-student-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
 

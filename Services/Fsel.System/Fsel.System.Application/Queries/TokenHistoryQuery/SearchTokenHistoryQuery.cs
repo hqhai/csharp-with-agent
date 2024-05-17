@@ -71,6 +71,7 @@ namespace Fsel.System.Application.Queries.TokenHistoryQuery
 
             var tokenHistoryQuery = tokenHistorys.Where(x => x.UserId == userId)
                             .GroupBy(x => x.CreatedDate.Date)
+                            .OrderByDescending(x => x.Key)
                             .Select(x => new TokenHistoryListModel
                             {
                                 Date = x.Key,
