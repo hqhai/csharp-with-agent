@@ -12,6 +12,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.UserSettings
 
         public bool NotifiForum { get; set; }
 
+        public bool NotifiEmail { get; set; }
+
         public string? Language { get; set; }
 
     }
