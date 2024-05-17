@@ -15,6 +15,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/package")]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     [ApiController]
     public class PackageController : ControllerBase
     {
