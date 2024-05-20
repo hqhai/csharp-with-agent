@@ -462,7 +462,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             {
                 _languageContext.CurrentCountryInfo = RegionHelper.GetCountry(vm.UiLocales);
             }
-            HttpContext.SetCookie(Settings.RequestHeader.AcceptLanguage, vm.UiLocales);
+            HttpContext.SetCookie(Settings.RequestHeader.AcceptLanguage, _languageContext.CurrentCountryInfo?.CultureCode);
             HttpContext.SetCookie(Settings.RequestHeader.OSName, vm.OSName);
             HttpContext.SetCookie(Settings.RequestHeader.DeviceId, vm.DeviceId);
             HttpContext.SetCookie(Settings.RequestHeader.DeviceName, vm.DeviceName);
