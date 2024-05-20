@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -63,18 +64,18 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             }
             else
             {
-                if (videoTimeCodeResult.Status == EnumResultStatus.New)
+                if (request.SubmissionCount == EnumSubmissionCount.FirstSubmit || videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
                     videoTimeCodeResult.WorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
-                else if (videoTimeCodeResult.Status == EnumResultStatus.Process)
+                else if (request.SubmissionCount == EnumSubmissionCount.SecondSubmit || videoTimeCodeResult.Status == EnumResultStatus.Process)
                 {
                     videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
             }
 
             _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
-            await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync();
         }
 
         private async Task UpdateSectionGroupResultAsync(SetTimeModuleCommand request)
@@ -84,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
                 _sectionGroupResultRepository.Update(sectionGroupResult);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync();
             }
         }
     }

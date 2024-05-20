@@ -11,15 +11,22 @@ namespace Fsel.Realtime.Application.Hubs
         public static ConnectionTracker Instance => s_instance.Value;
 
         private readonly ConcurrentDictionary<string, DateTime> _connectionTimes;
+        private readonly ConcurrentDictionary<string, string> _connectionUsers;
 
         private ConnectionTracker()
         {
             _connectionTimes = new ConcurrentDictionary<string, DateTime>();
+            _connectionUsers = new ConcurrentDictionary<string, string>();
         }
 
         public void RecordConnectionStart(string connectionId)
         {
             _connectionTimes.TryAdd(connectionId, DateTime.UtcNow);
+        }
+
+        public void RecordConnectionStartUser(string connectionId, string userId)
+        {
+            _connectionUsers.TryAdd(userId, connectionId);
         }
 
         public long? RecordConnectionEnd(string connectionId)
@@ -31,6 +38,16 @@ namespace Fsel.Realtime.Application.Hubs
                 return (long)duration.TotalSeconds;
             }
 
+            return null;
+        }
+
+        public string? RecordConnectionEndUser(string userId)
+        {
+            string? connectionId;
+            if (_connectionUsers.TryRemove(userId, out connectionId))
+            {
+                return connectionId;
+            }
             return null;
         }
     }
