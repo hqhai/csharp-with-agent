@@ -30,6 +30,9 @@ using Fsel.Shared.Enums;
 using Fsel.Identity.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using Fsel.Core.Base.Managers;
+using Microsoft.Net.Http.Headers;
+using Fsel.Common.Constants;
+using PhoneNumbers;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -59,6 +62,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IStudentRepository _studentRepository;
         private readonly IUserOtpRepository _userOtpRepository;
         private readonly IUserRepository _userRepository;
+        private readonly Fsel.Core.Base.LanguageContext _languageContext;
 
         public AccountController(
             IUserSession userSession,
@@ -75,7 +79,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             IParentRepository parentRepository,
             IStudentRepository studentRepository,
             IUserOtpRepository userOtpRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            Fsel.Core.Base.LanguageContext languageContext)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -96,6 +101,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             _studentRepository = studentRepository;
             _userOtpRepository = userOtpRepository;
             _userRepository = userRepository;
+            _languageContext = languageContext;
         }
 
         /// <summary>
@@ -450,8 +456,13 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         {
             returnUrl ??= GetFromTempData(nameof(LoginInputModel.ReturnUrl))?.ToString();
 
-            // build a model so we know what to show on the login page
+            // build a model so we know what to show on the login page  
             var vm = await BuildLoginViewModelAsync(returnUrl ?? string.Empty);
+            _languageContext.CurrentCountryInfo = RegionHelper.GetCountry(vm.UiLocales);
+            HttpContext.SetCookie(Settings.RequestHeader.AcceptLanguage, vm.UiLocales);
+            HttpContext.SetCookie(Settings.RequestHeader.OSName, vm.OSName);
+            HttpContext.SetCookie(Settings.RequestHeader.DeviceId, vm.DeviceId);
+            HttpContext.SetCookie(Settings.RequestHeader.DeviceName, vm.DeviceName);
 
             if (vm.IsExternalLoginOnly)
             {
@@ -802,21 +813,27 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+
+            var vm = new LoginViewModel
+            {
+                ReturnUrl = returnUrl,
+                Username = context?.LoginHint,
+                UiLocales = context?.UiLocales,
+                OSName = context?.Parameters[Settings.RequestHeader.OSName],
+                DeviceId = context?.Parameters[Settings.RequestHeader.DeviceId],
+                DeviceName = context?.Parameters[Settings.RequestHeader.DeviceName],
+            };
+
             if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
             {
                 var local = context.IdP == IdentityServerConstants.LocalIdentityProvider;
 
                 // this is meant to short circuit the UI and only trigger the one external IdP
-                var vm = new LoginViewModel
-                {
-                    EnableLocalLogin = local,
-                    ReturnUrl = returnUrl,
-                    Username = context?.LoginHint,
-                };
+                vm.EnableLocalLogin = local;
 
                 if (!local)
                 {
-                    vm.ExternalProviders = new[] { new ExternalProvider { AuthenticationScheme = context.IdP } };
+                    vm.ExternalProviders = new[] { new ExternalProvider { AuthenticationScheme = context!.IdP } };
                 }
 
                 return vm;
@@ -847,14 +864,10 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 }
             }
 
-            return new LoginViewModel
-            {
-                AllowRememberLogin = AccountOptions.AllowRememberLogin,
-                EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin,
-                ReturnUrl = returnUrl,
-                Username = context?.LoginHint,
-                ExternalProviders = providers.ToArray()
-            };
+            vm.AllowRememberLogin = AccountOptions.AllowRememberLogin;
+            vm.EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin;
+            vm.ExternalProviders = providers.ToArray();
+            return vm;
         }
 
         private async Task<LoginViewModel> BuildLoginViewModelAsync(LoginInputModel model)

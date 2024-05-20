@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Models.CommandModels.Admins;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -51,7 +52,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
                 if (_httpContextAccessor.HttpContext != null)
                 {
-                    _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = tokenAdmin;
+                    _httpContextAccessor.HttpContext.SetHeader(HeaderNames.Authorization, tokenAdmin);
                 }
             }
             methodResult.Result = listUser;

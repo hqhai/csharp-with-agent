@@ -4,6 +4,7 @@ using AutoMapper;
 using Fsel.Authentication.Infrastructure.Configs;
 using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
+using Fsel.Core.Middlewares;
 using Fsel.Identity.Application.Events;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services;
