@@ -458,7 +458,10 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
             // build a model so we know what to show on the login page  
             var vm = await BuildLoginViewModelAsync(returnUrl ?? string.Empty);
-            _languageContext.CurrentCountryInfo = RegionHelper.GetCountry(vm.UiLocales);
+            if (!string.IsNullOrEmpty(vm.UiLocales))
+            {
+                _languageContext.CurrentCountryInfo = RegionHelper.GetCountry(vm.UiLocales);
+            }
             HttpContext.SetCookie(Settings.RequestHeader.AcceptLanguage, vm.UiLocales);
             HttpContext.SetCookie(Settings.RequestHeader.OSName, vm.OSName);
             HttpContext.SetCookie(Settings.RequestHeader.DeviceId, vm.DeviceId);
