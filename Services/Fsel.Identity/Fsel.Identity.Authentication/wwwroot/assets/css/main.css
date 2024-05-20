@@ -459,7 +459,7 @@ input {
   border-bottom-right-radius: 0;
 }
 .language-container.show .language-dropdown {
-  display: flex;
+  display: block;
 }
 
 .language {
@@ -499,7 +499,7 @@ input {
   right: 0;
   left: 0;
   top: 100%;
-  height: 100%;
+  /*height: 100%;*/
   border-radius: 0px 0px 10px 10px;
   background: var(--FSEL_LMS-Sys-surface-container, #2E3C60);
   backdrop-filter: blur(40px);
@@ -515,6 +515,7 @@ input {
   user-select: none;
   cursor: pointer;
   width: 100%;
+  padding: 10px 0px;
 }
 
 .or-separate {

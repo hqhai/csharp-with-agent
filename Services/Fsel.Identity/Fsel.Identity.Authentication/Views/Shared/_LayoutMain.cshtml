@@ -31,18 +31,7 @@
     @* <partial name="_Nav" /> *@
 
     <div class="container">
-        <div class="language-container" id="languageContainer">
-            <div class="language">
-                <span class="language_name">Eng</span>
-                <img src="/assets/icons/eng-icon.svg" alt="" class="language_image" />
-            </div>
-            <div id="languageDropdown" class="language-dropdown">
-                <div class="language-dropdown-item">
-                    <span class="language_name">Vn</span>
-                    <img src="/assets/icons/vn-icon.svg" alt="" class="language_image" />
-                </div>
-            </div>
-        </div>
+        @await Component.InvokeAsync("Languages")
 
         <div class="content">
             @RenderBody()
