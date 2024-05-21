@@ -146,7 +146,7 @@ hangfire-build:
     - docker push $CI_REGISTRY_IMAGE/hangfire:$TAG
   only:
     changes:
-      - Services/Fsel.Gateway/**/*
+      - Services/Fsel.Hangfire/**/*
 
 hangfire-deploy:
   stage: hangfire-deploy
