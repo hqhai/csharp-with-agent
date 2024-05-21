@@ -16,12 +16,12 @@ namespace Fsel.Course.Infrastructure.Common
     public class SectionGroupConverter
     {
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
-        private readonly DateTimeConverter _dateTimeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly LinQHelper _linQHelper;
         private readonly ISectionRepository _sectionRepository;
@@ -31,15 +31,15 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Clean Code
 
-        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, IStudentFeedbackRepository studentFeedbackRepository, AnswerTypeConverter answerTypeConverter, ISectionQuestionRepository sectionQuestionRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, DateTimeConverter dateTimeConverter, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
+        public SectionGroupConverter(ISectionGroupResultRepository sectionGroupResultRepository, DateTimeConverter dateTimeConverter, IStudentFeedbackRepository studentFeedbackRepository, AnswerTypeConverter answerTypeConverter, ISectionQuestionRepository sectionQuestionRepository, QuestionTypeConverter questionTypeConverter, IMapper mapper, IQuestionRepository questionRepository, LinQHelper linQHelper, ISectionRepository sectionRepository, IFinalTestAnswerRepository finalTestAnswerRepository, IPlacementTestAnswerRepository placementTestAnswerRepository, IMockTestAnswerRepository mockTestAnswerRepository)
         {
             _sectionGroupResultRepository = sectionGroupResultRepository;
+            _dateTimeConverter = dateTimeConverter;
             _studentFeedbackRepository = studentFeedbackRepository;
             _answerTypeConverter = answerTypeConverter;
             _sectionQuestionRepository = sectionQuestionRepository;
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
-            _dateTimeConverter = dateTimeConverter;
             _questionRepository = questionRepository;
             _linQHelper = linQHelper;
             _sectionRepository = sectionRepository;
@@ -79,7 +79,6 @@ namespace Fsel.Course.Infrastructure.Common
             sectionGroupResult.CorrectTotal = (int)skillScore.TotalCount;
             sectionGroupResult.Status = EnumResultStatus.Done;
             sectionGroupResult.HighestStreak = await GetHighestStreak(sectionGroupResult, sectionGroup);
-            sectionGroupResult.WorkingTime = _dateTimeConverter.GetWorkingTime(sectionGroup.ExecutionTime, sectionGroupResult.CreatedDate);
             if (sectionGroup.CourseSkill != EnumCourseSkill.Writing)
             {
                 if (sectionGroupResult.SkillScores != null && sectionGroupResult.SkillScores.Any())
@@ -91,6 +90,11 @@ namespace Fsel.Course.Infrastructure.Common
                     sectionGroupResult.SkillScores = new List<SkillScores> { skillScore };
                 }
             }
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroupResult.MockTestResultId.HasValue)
+            {
+                sectionGroupResult.WorkingTime = (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalSeconds;
+            }
+
             _sectionGroupResultRepository.Update(sectionGroupResult);
             await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             return sectionGroupResult;
@@ -387,18 +391,25 @@ namespace Fsel.Course.Infrastructure.Common
 
         #endregion Clean Code
 
-        public IList<SectionGroupModel> GetSectionGroups(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
+        public async Task<IList<SectionGroupModel>> GetSectionGroupsAsync(IList<SectionGroup>? sectionGroups, Guid objectResultId, string? objectResultType)
         {
             ArgumentNullException.ThrowIfNull(sectionGroups);
             var indexProcess = GetIndexProcess(sectionGroups, objectResultId, objectResultType);
-            return sectionGroups.Select(x =>
+            var sectionGroupModels = new List<SectionGroupModel>();
+            sectionGroups = sectionGroups.OrderBy(x => x.CourseSkill).ToList();
+            foreach (var x in sectionGroups)
             {
                 var index = sectionGroups.IndexOf(x);
                 var sectionGroup = _mapper.Map<SectionGroupModel>(x);
                 sectionGroup.Status = GetResultStatus(indexProcess, index);
-                sectionGroup.SectionGroupResult = _mapper.Map<SectionGroupResultModel>(x.SectionGroupResults.FirstOrDefault());
-                return sectionGroup;
-            }).ToList();
+                var sectionGroupResult = x.SectionGroupResults.FirstOrDefault();
+                if (sectionGroupResult != null)
+                {
+                    sectionGroup.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult);
+                }
+                sectionGroupModels.Add(sectionGroup);
+            };
+            return sectionGroupModels;
         }
 
         private static EnumResultStatus GetResultStatus(int? indexProcess, int index)
@@ -428,12 +439,10 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Code Chưa Clearn
 
-        private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup)
+        private async Task<SectionGroupResultModel> GetSectionGroupResult(SectionGroupResult sectionGroupResult)
         {
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
-            var remainingTime = sectionGroup.ExecutionTime - sectionGroupResult.WorkingTime;
             sectionGroupResultDto.IsFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == sectionGroupResult.Id);
-            sectionGroupResultDto.RemainingTime = remainingTime > 0 ? remainingTime : default;
             return sectionGroupResultDto;
         }
 
@@ -445,7 +454,7 @@ namespace Fsel.Course.Infrastructure.Common
             var isSectionGroupResultDone = sectionGroupResult.Status == EnumResultStatus.Done;
             var sectonGroupDetail = _mapper.Map<SectionGroupDtoModel>(sectionGroup);
             sectonGroupDetail.TotalQuestion = totalCount;
-            sectonGroupDetail.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult, sectionGroup);
+            sectonGroupDetail.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult);
             if (sectionGroupResult.MockTestResultId.HasValue)
             {
                 sectonGroupDetail.Sections = sections.Select(x => GetSectionByMockTest(x, sectionGroup.CourseSkill, isSectionGroupResultDone)).ToList();

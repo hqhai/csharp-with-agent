@@ -5,6 +5,7 @@ namespace Fsel.System.Api.Controllers
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Commands.SendMail;
     using global::System.Net;
@@ -28,6 +29,8 @@ namespace Fsel.System.Api.Controllers
         /// Send Mails Marketing
         /// </summary>
         [HttpPost("send-mails-marketing")]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SendMailsMarketing([FromQuery] string? emailTest, [FromQuery] string subject, IFormFile fileTemplate, IList<IFormFile>? attachments)

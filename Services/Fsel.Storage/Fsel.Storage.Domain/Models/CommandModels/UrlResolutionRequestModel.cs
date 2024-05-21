@@ -2,7 +2,7 @@
 
 namespace Fsel.Storage.Domain.Models.CommandModels
 {
-    using Fsel.Storage.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class UrlResolutionRequestModel : UrlRequestModel
     {

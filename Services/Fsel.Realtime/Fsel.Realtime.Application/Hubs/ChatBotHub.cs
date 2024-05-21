@@ -37,7 +37,6 @@ namespace Fsel.Realtime.Application.Hubs
 
         public async Task SendMessage(Config config, string customValue)
         {
-
             ChatBotSendingMessageModel model = new ChatBotSendingMessageModel
             {
                 ChatbotId = config?.ChatBotId,

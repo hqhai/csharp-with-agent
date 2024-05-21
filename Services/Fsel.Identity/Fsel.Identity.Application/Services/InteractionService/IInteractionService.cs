@@ -19,5 +19,8 @@ namespace Fsel.Identity.Application.Services.InteractionService
 
         [Post("/v1/customerSurvey")]
         Task<IApiResponse<MethodResult<IList<CustomerSurveyModel>>>> CreateSurvey([FromBody] CreateCustomerSurveyCommandModel model);
+
+        [Delete("/admin/student/delete-student/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
     }
 }

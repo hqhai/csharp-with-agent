@@ -34,5 +34,8 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Post("/v1.1/order/create-orders-from-crm")]
         Task<IApiResponse<MethodResult<bool>>> CreateOrdersFromCRM([Body] CreateOrdersFromCRMModels command);
+
+        [Delete("/v1/admin/order/delete-student/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
     }
 }

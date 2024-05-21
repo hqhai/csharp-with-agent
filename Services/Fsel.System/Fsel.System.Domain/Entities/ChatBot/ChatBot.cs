@@ -27,7 +27,7 @@ namespace Fsel.System.Domain.Entities.ChatBot
 
 
         [NotMapped]
-        public IList<ChatBotMessage>? Content
+        public IList<ChatBotMessage>? Conversations
         {
             get
             {
@@ -41,7 +41,7 @@ namespace Fsel.System.Domain.Entities.ChatBot
         {
             get
             {
-                return ConvertHelper.Deserialize<ChatBotMessage>(ContentStr);
+                return ConvertHelper.Deserialize<ChatBotMessage>(LastestAnswerStr);
             }
             set { LastestAnswerStr = ConvertHelper.Serialize(value); }
         }
@@ -51,7 +51,7 @@ namespace Fsel.System.Domain.Entities.ChatBot
         {
             get
             {
-                return ConvertHelper.Deserialize<ChatBotMessage>(ContentStr);
+                return ConvertHelper.Deserialize<ChatBotMessage>(LastestQuestionStr);
             }
             set { LastestQuestionStr = ConvertHelper.Serialize(value); }
         }

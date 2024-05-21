@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: system-production
+spec:
+  selector:
+    matchLabels:
+      app: system-production
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: system-production
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-prod
+      containers:
+      - name: system-production
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/system:..........
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /app/appsettings.Production.json
+          name: system-appsettings-production
+          subPath: appsettings.Production.json
+      imagePullSecrets:
+        - name: gitlab-fsel-secret
+      tolerations:
+      - effect: NoSchedule
+        key: appnodes-prod
+        operator: Exists
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: system-appsettings-production
+        name: system-appsettings-production
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: system-production
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: system-production
+
+
