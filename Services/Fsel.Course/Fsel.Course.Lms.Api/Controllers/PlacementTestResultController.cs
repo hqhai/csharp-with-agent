@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Export Class
+        /// Export PlacementTest
         /// </summary>
         [HttpGet("export")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -79,6 +79,21 @@ namespace Fsel.Course.Lms.Api.Controllers
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "placementTest_export.xlsx");
+        }
+
+        /// <summary>
+        /// Export PlacementTest
+        /// </summary>
+        [HttpPost("import-export")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ImportAndExport([FromForm] ImportAndExportPlacementTestQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "placementTest_File_export.xlsx");
         }
 
         /// <summary>
