@@ -90,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
                 {
-                    ClassForumDetailResultId = classForumResult.Id,
+                    ClassForumResultId = classForumResult.Id,
                     WordContent = wordContent,
                     UserAIConfig = classForum.UserAlConfig,
                     SettingModel = classForum.SettingModel,
@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     SettingTopP = classForum.SettingTopP,
                     SettingWordMaxLength = classForum.SettingWordMaxLength,
                     SystemRoleAlConfig = classForum.SystemRoleAlConfig,
-                    IsRetry = true
+                    IsRetry = true,
                 }, cancellationToken);
             }
         }
