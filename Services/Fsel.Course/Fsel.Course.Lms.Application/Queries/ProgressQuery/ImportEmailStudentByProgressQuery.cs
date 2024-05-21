@@ -87,9 +87,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     var courseResult = courseResults?.FirstOrDefault(x => x.StudentId == student.Id);
                     var reportProgress = new ReportProgressStudentExportModel
                     {
-                        FullName = student?.Human?.FullName,
-                        Birthday = student?.Human?.Birthday,
-                        Email = student?.Human?.Email,
+                        FullName = student.User?.FullName,
+                        Birthday = student.User?.Birthday,
+                        Email = student.User?.Email,
                         CourseName = courseResult?.Course?.Name,
                     };
                     if (courseResult != null)

@@ -80,14 +80,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     if (student != null)
                     {
                         var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == item.StudentId).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-                        int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                        int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
                         var (levelCompleted, isLock) = item.Level.GetLevelInScore(item.Percent, IeltsScoreHelper.GetInitialAge(placementTestResult?.Level, age));
                         var courseResult = courseResults.FirstOrDefault(x => x.StudentId == item.StudentId);
                         placementTestResultExports.Add(new PlacementTestResultExportModel
                         {
-                            Name = student.Human?.FullName,
-                            Birthday = student.Human?.Birthday,
-                            Email = student.Human?.Email,
+                            Name = student.User?.FullName,
+                            Birthday = student.User?.Birthday,
+                            Email = student.User?.Email,
                             CurrentLevel = student.CourseLevel,
                             LevelCompleted = levelCompleted,
                             Percent = item.Percent,

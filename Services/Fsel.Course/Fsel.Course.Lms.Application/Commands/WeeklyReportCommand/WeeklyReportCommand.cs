@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             if (request.StudentIds == null || request.StudentIds.Count == 0)
             {
-                var studentResults = await _userService.ExecuteListQueryAsync(new BaseQueryModel { IncludePaths = new List<string>() { "Human", "ParentStudents.Parent.Human" } });
+                var studentResults = await _userService.ExecuteListQueryAsync(new BaseQueryModel { IncludePaths = new List<string>() { "Human", "ParentStudents.Parent" } });
                 students = studentResults.Content?.Result?.ToList();
             }
             else
@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             UserSettingQuery query = new UserSettingQuery
             {
-                UserIds = students!.Select(x => x.Human!.UserId).ToList(),
+                UserIds = students!.Select(x => x?.UserId).ToList(),
             };
 
             //Lấy những học sinh bật thông báo Gửi Email hàng tuần
@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 return methodResult;
             }
             //filter những học sinh bật thông báo email.
-            students = students.Where(x => studentFilterResult.Contains(x.Human!.UserId)).ToList();
+            students = students.Where(x => studentFilterResult.Contains(x!.UserId)).ToList();
 
 
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;

@@ -15,6 +15,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums.ErrorCodes;
 
     public class ExportPlacementTestQuery : IRequest<MethodResult<Stream>>
     {
@@ -83,9 +85,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                         var courseResult = courseResults.FirstOrDefault(x => x.StudentId == item.StudentId);
                         placementTestResultExports.Add(new PlacementTestResultExportModel
                         {
-                            Name = student.Human?.FullName,
-                            Birthday = student.Human?.Birthday,
-                            Email = student.Human?.Email,
+                            Name = student.User?.FullName,
+                            Birthday = student.User?.Birthday,
+                            Email = student.User?.Email,
                             CurrentLevel = student.CourseLevel,
                             LevelCompleted = levelCompleted,
                             Percent = item.Percent,

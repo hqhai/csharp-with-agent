@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCmd
             var methodResult = new MethodResult<UserOtp>();
             var userOtpCode = await _userOtpCodeRepository.Queryable
                                    .FirstOrDefaultAsync(x => x.Status == EnumUserOtpStatus.New && !x.IsDeleted && x.Otp == request.Otp, cancellationToken);
-            if (!string.IsNullOrEmpty(request.Email) && request.Otp == _otpDefault && && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
+            if (!string.IsNullOrEmpty(request.Email) && request.Otp == _otpDefault && (_environment.IsDevelopment() || _environment.IsEnvironment(Settings.Environments.Testing)))
             {
                 if (!request.Email.IsValidEmail())
                 {
