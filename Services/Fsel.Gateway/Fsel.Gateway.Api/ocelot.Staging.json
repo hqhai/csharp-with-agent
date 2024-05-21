@@ -11,20 +11,6 @@
     "Limit": 100
   },
   "Routes": [
-    // Auth Service
-    {
-      "SwaggerKey": "auth",
-      "UpstreamPathTemplate": "/auth-gateway/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
-      "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "auth-staging.fsel-staging.svc",
-          "Port": 80
-        }
-      ]
-    },
     // User Service
     {
       "SwaggerKey": "user",
@@ -200,21 +186,6 @@
     }
   ],
   "SwaggerEndPoints": [
-    {
-      "Key": "auth",
-      "Config": [
-        {
-          "Name": "Auths API",
-          "Version": "v1",
-          "Url": "http://auth-staging.fsel-staging.svc/swagger/v1/swagger.json"
-        },
-        {
-          "Name": "Auths API",
-          "Version": "v1.1",
-          "Url": "http://auth-staging.fsel-staging.svc/swagger/v1.1/swagger.json"
-        }
-      ]
-    },
     {
       "Key": "user",
       "Config": [
