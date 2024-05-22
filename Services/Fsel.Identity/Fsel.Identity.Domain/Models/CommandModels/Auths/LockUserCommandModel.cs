@@ -4,7 +4,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 {
     using Fsel.Identity.Domain.Models.CommandModels.Students;
 
-    public class UserLockCommandModel : CreateOrdersFromCRMCommandModel
+    public class LockUserCommandModel : CreateOrdersFromCRMCommandModel
     {
         public bool IsLock { get; set; }
     }
