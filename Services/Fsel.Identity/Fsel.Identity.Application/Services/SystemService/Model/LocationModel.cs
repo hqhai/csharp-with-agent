@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models.EntityModels
+namespace Fsel.Identity.Application.Services.SystemService.Model
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
@@ -14,5 +14,6 @@ namespace Fsel.System.Domain.Models.EntityModels
         public Guid? ParentId { get; set; }
         public string? Name { get; set; }
         public string? LocationName { get; set; }
+        public string? LongPath { get; set; }
     }
 }

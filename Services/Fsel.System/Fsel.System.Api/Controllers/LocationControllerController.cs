@@ -3,12 +3,14 @@
 namespace Fsel.System.Api.Controllers
 {
     using Asp.Versioning;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Queries.LocationQuery;
+    using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
@@ -21,10 +23,12 @@ namespace Fsel.System.Api.Controllers
     public class LocationControllerController : BaseController
     {
         private readonly IMediator _mediator;
+        private readonly ILocationRepository _locationRepository;
 
-        public LocationControllerController(IMediator mediator)
+        public LocationControllerController(IMediator mediator, ILocationRepository locationRepository)
         {
             _mediator = mediator;
+            _locationRepository = locationRepository;
         }
 
         /// <summary>
@@ -37,6 +41,18 @@ namespace Fsel.System.Api.Controllers
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get locations
+        /// </summary>
+        [HttpPost("execute-list-query")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LocationModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExecuteListQuery([FromQuery] GetLocationsQuery query)
+        {
+            var result = await _locationRepository.GetListResultAsync<LocationModel>(query);
+            return result.GetActionResult();
         }
     }
 }

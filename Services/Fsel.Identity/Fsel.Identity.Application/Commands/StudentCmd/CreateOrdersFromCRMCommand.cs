@@ -2,17 +2,20 @@
 
 namespace Fsel.Identity.Application.Commands.StudentCmd
 {
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
@@ -36,8 +39,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IUserRepository _userRepository;
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
+        private readonly ISystemService _systemService;
 
-        public CreateOrdersFromCRMCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IUserRepository userRepository, IMediator mediator, AppSetting appSetting)
+        public CreateOrdersFromCRMCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, IInteractionService interactionService, IUserRepository userRepository, IMediator mediator, AppSetting appSetting, ISystemService systemService)
         {
             _userManager = userManager;
             _orderService = orderService;
@@ -46,6 +50,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _userRepository = userRepository;
             _mediator = mediator;
             _appSetting = appSetting;
+            _systemService = systemService;
         }
 
         public async Task<VoidMethodResult> Handle(CreateOrdersFromCRMCommand request, CancellationToken cancellationToken)
@@ -65,6 +70,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
+            if (request.UsersInfo.Any(p => p.Package != 1 && p.Package != 6 && p.Package != 12))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                return methodResult;
+            }
+
             if (request.UsersInfo.Any(p => !CheckValueFormat(p.Email, true) || !CheckValueFormat(p.PhoneNumber, false) || !CheckValueFormat(p.FatherPhoneNumber, false) || !CheckValueFormat(p.FatherEmail, true) || !CheckValueFormat(p.MotherPhoneNumber, false) || !CheckValueFormat(p.MotherEmail, true)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
@@ -77,6 +88,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest("Platform null");
                 return methodResult;
             }
+
+            var schoolResults = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel());
+            var schools = schoolResults.Content?.Result;
 
             var usersInfo = new List<CreateOrdersFromCRMModel>();
 
@@ -92,6 +106,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 if (user == null)
                 {
+                    Guid? schoolId = null;
+                    string? schoolName = string.Empty;
+                    if (!string.IsNullOrEmpty(item.LongPath))
+                    {
+                        var school = GetSchool(item.LongPath, schools);
+                        schoolId = school.Item1;
+                        schoolName = school.Item2;
+                    }
+
                     user = new User()
                     {
                         UserName = userName.Item1,
@@ -108,7 +131,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             CreatedByParent = false,
                             Occupation = "Student",
                             CourseLevel = EnumCourseLevel.A1,
-                            School = item.SchoolCode,
+                            School = schoolName,
+                            SchoolId = schoolId,
                         },
                         UserPlatforms = new List<UserPlatform>()
                         {
@@ -198,7 +222,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     Email = user.UserName,
                     StudentCode = user.Code,
                     DiscountPercent = item.DiscountPercent,
-                    PackageCode = item.PackageCode
+                    PackageCode = GetPackage(item.Package)
                 });
             }
             var createOrdersResult = await _orderService.CreateOrdersFromCRM(new CreateOrdersFromCRMModels()
@@ -211,6 +235,21 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
             return methodResult;
+        }
+
+        private static (Guid?, string?) GetSchool(string longPath, IList<Application.Services.SystemService.Model.SchoolModel>? schools)
+        {
+            var listLocation = SplitString(longPath);
+            var paths = listLocation.Skip(listLocation.Length - 2).Select(x => x.Trim());
+            var shortPath = string.Join("/", paths);
+            var school = schools?.Where(x => !string.IsNullOrEmpty(x.LongPath) && x.LongPath.Contains(shortPath, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+            return (school?.Id, school?.Name);
+        }
+
+        private static string[] SplitString(string input)
+        {
+            string[] words = input.Split('/');
+            return words;
         }
 
         private async Task SendMail(string email, object param, CancellationToken cancellationToken)
@@ -231,6 +270,22 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return true;
             }
             return isValidEmail ? value.IsValidEmail() : value.IsValidPhoneNumber();
+        }
+
+        private static EnumPackageCode GetPackage(int package)
+        {
+            if (package == 1)
+            {
+                return EnumPackageCode.BASIC;
+            }
+            else if (package == 6)
+            {
+                return EnumPackageCode.STANDARD;
+            }
+            else
+            {
+                return EnumPackageCode.PREMIUM;
+            }
         }
 
         private static (string?, int) GetUserName(CreateOrdersFromCRMCommandModel model)

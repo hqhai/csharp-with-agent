@@ -26,8 +26,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
         public string? FatherEmail { get; set; }
         public string? FatherPhoneNumber { get; set; }
         public string? Address { get; set; }
+        public string? LongPath { get; set; }
         public int? DiscountPercent { get; set; }
-        public string? SchoolCode { get; set; }
-        public EnumPackageCode PackageCode { get; set; }
+        public int Package { get; set; }
     }
 }
