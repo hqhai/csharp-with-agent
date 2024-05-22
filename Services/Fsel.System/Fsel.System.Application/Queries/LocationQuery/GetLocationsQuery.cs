@@ -39,6 +39,7 @@ namespace Fsel.System.Application.Queries.LocationQuery
                 Name = p.Name,
                 ParentId = p.ParentId,
                 CreatedDate = p.CreatedDate,
+                LocationName = p.LocationName,
             });
 
             if (!string.IsNullOrEmpty(request.Keyword))

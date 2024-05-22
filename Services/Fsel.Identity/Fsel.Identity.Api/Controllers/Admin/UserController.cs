@@ -161,10 +161,10 @@ namespace Fsel.Identity.Api.Controllers.Admin
             return commandResult.GetActionResult();
         }
 
-        [HttpPost("user-lock")]
+        [HttpPost("lock-user")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UserLock([FromBody] UserLockCommand command)
+        public async Task<IActionResult> LockUser([FromBody] LockUserCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

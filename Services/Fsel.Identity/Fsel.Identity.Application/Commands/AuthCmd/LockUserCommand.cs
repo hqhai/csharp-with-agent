@@ -12,20 +12,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using MediatR;
 
-    public class UserLockCommand : UserLockCommandModel, IRequest<MethodResult<bool>>
+    public class LockUserCommand : LockUserCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class UserLockCommandHandler : IRequestHandler<UserLockCommand, MethodResult<bool>>
+    public class LockUserCommandHandler : IRequestHandler<LockUserCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
 
-        public UserLockCommandHandler(UserManager<User> userManager)
+        public LockUserCommandHandler(UserManager<User> userManager)
         {
             _userManager = userManager;
         }
 
-        public async Task<MethodResult<bool>> Handle(UserLockCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(LockUserCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
