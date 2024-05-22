@@ -126,6 +126,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                         Gender = item.Gender,
                         PhoneNumber = userName.Item1.IsValidPhoneNumber() ? userName.Item1 : null,
                         PhoneNumberConfirmed = userName.Item1.IsValidPhoneNumber(),
+                        Address = item.Address,
                         Student = new Student()
                         {
                             CreatedByParent = false,
