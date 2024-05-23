@@ -22,7 +22,8 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? School { get; set; }
 
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public EnumCourseLevel? SurveyLevel { get; set; }
 
         public bool CreatedByParent { get; set; }
         public long NumberOfToken { get; set; }

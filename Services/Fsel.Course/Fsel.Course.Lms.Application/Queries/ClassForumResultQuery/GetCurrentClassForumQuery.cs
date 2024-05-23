@@ -17,9 +17,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Course.Lms.Application.Services.NotificationServices;
     using Fsel.Course.Lms.Application.Services.NotificationServices.Models;
-    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -36,7 +36,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUserService _userService;
-        private readonly ITrainingService _trainingService;
         private readonly INotificationService _notificationService;
         private readonly IInteractionService _interactionService;
         private readonly AuthContext _authContext;
@@ -47,7 +46,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             IClassForumRepository classForumRepository,
             ILessonResultRepository lessonResultRepository,
             IUserService userService,
-            ITrainingService trainingService,
             INotificationService notificationService,
             IInteractionService interactionService,
             AuthContext authContext,
@@ -58,7 +56,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _classForumRepository = classForumRepository;
             _lessonResultRepository = lessonResultRepository;
             _userService = userService;
-            _trainingService = trainingService;
             _notificationService = notificationService;
             _interactionService = interactionService;
             _authContext = authContext;
@@ -71,23 +68,19 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             MethodResult<ClassForumByStudentModel> methodResult = new MethodResult<ClassForumByStudentModel>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var student = studentResult?.Content?.Result;
-
-            if (studentResult == null || student == null)
+            var student = studentResult.Content?.Result;
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
-
-            var isLessonResult = await _lessonResultRepository.AnyAsync(request.LessonResultId);
-            if (!isLessonResult)
+            if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isLessonResult));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
-
             if (lessonResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
@@ -95,26 +88,30 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
 
             var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).Where(x => x.LessonId == lessonResult.LessonId).FirstOrDefaultAsync(cancellationToken);
-
+            if (classForum == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
+                return methodResult;
+            }
             var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);
 
             var classForumResult = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum!.Id)
+                .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum.Id)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             classForumByStudentModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);
             var classForumResultModel = classForumByStudentModel.ClassForumResultCurrentStudent;
 
-            if (classForumResultModel != null)
+            if (classForumResultModel != null && classForumResult != null)
             {
                 classForumResultModel.IsTeacherFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultModel.Id && x.Type == EnumStudentFeedBackType.Teacher, cancellationToken);
                 classForumResultModel.IsAIFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultModel.Id && x.Type == EnumStudentFeedBackType.AI, cancellationToken);
 
                 IList<Guid> classForumResultIds = new List<Guid>()
                 {
-                    classForumResult!.Id
+                    classForumResult.Id
                 };
                 var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResultIds.ToList(), UserId = _authContext.CurrentUserId });
                 var actions = actionsResult.Content?.Result;

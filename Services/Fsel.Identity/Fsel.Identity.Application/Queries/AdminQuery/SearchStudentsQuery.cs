@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Application.Queries.AdminQuery
 {
-    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;

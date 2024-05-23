@@ -20,5 +20,8 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid UnitId { get; set; }
+
+        public CourseResult? CourseResult { get; set; }
+        public Guid? CourseResultId { get; set; }
     }
 }

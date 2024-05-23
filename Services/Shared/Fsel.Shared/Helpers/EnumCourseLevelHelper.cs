@@ -29,6 +29,11 @@ namespace Fsel.Shared.Helpers
                 { EnumCourseLevel.C1, EnumCourseLevel.MS3 }
             };
 
+        public static EnumCourseType GetEnumCourseType(this EnumCourseLevel? courseLevel)
+        {
+            return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
+        }
+
         public static EnumCourseType GetEnumCourseType(this EnumCourseLevel courseLevel)
         {
             return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;

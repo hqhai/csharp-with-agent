@@ -52,7 +52,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var startingLevel = student.CourseLevel.GetPlacementTestLevelByCourseLevel();
+            if (!student.CourseLevel.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseLevel));
+                return methodResult;
+            }
+
+            var startingLevel = student.CourseLevel.Value.GetPlacementTestLevelByCourseLevel();
             await SavePlacementTestDoneAsync(student, request.CourseLevel, startingLevel, cancellationToken);
             return methodResult;
         }

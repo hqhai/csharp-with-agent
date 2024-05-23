@@ -62,12 +62,21 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            var studentId = student?.Id ?? default;
-            int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
-            var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            if (!student.CourseLevel.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseLevel));
+                return methodResult;
+            }
+            int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+            var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                           .OrderByDescending(x => x.CreatedDate)
                                                                           .FirstOrDefaultAsync(cancellationToken);
-            var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == studentId).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+            var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == student.Id).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
 
             if (placementTestResultDone != null)
             {
@@ -78,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     return methodResult;
                 }
             }
-            var (placementTest, placementTestResult) = await AddPlacementTestResultAndGetPlacementTest(student!.CourseLevel.GetPlacementTestLevelByCourseLevel(), studentId, cancellationToken);
+            var (placementTest, placementTestResult) = await AddPlacementTestResultAndGetPlacementTest(student.CourseLevel.Value.GetPlacementTestLevelByCourseLevel(), student.Id, cancellationToken);
             if (placementTest == null || placementTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));

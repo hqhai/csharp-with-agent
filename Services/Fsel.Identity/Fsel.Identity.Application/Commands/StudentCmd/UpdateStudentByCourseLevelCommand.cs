@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
             student.CourseLevel = request.Level;
-
+            student.SurveyLevel = request.Level;
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
                 student = _studentRepository.Update(student);

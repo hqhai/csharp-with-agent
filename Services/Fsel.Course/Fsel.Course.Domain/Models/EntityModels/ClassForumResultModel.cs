@@ -51,18 +51,16 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? GradingAlFeedback { get; set; }
 
         private string? _avatarPath;
+
         public string? AvatarPath
         {
             set { _avatarPath = value; }
             get { return _avatarPath.AddS3BaseUrl(); }
         }
 
-        public EnumCourseLevel CourseLevel { get; set; }
-
+        public EnumCourseLevel? CourseLevel { get; set; }
         public Guid? CheckCsoId { get; set; }
-
         public DateTime? CheckStartDate { get; set; }
-
         public DateTime? GradingStartDate { get; set; }
         public string? RetryContent { get; set; }
         public string? RetryWordContent { get; set; }
