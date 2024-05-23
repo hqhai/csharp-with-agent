@@ -68,7 +68,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             if (await _orderRepository.Queryable.AnyAsync(x => x.Status == EnumOrderStatus.Payment && x.IsTrial && x.UserId == _authContext.CurrentUserId, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
                 return methodResult;
             }
 
