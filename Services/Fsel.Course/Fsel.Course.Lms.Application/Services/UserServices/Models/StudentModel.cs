@@ -13,7 +13,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public string? School { get; set; }
         public string? ParentEmail { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
-        public EnumCourseLevel? SurveyLevel { get; set; }
+        public EnumCourseLevel? BaseCourseLevel { get; set; }
         public Guid? PackageId { get; set; }
         public Guid? ClassId { get; set; }
         public double NumberOfToken { get; set; }

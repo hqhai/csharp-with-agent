@@ -9,7 +9,7 @@ namespace Fsel.Interaction.Application.Services.UserServices.Models
     public class StudentModel : BaseModel
     {
         public EnumCourseLevel? CourseLevel { get; set; }
-        public EnumCourseLevel? SurveyLevel { get; set; }
+        public EnumCourseLevel? BaseCourseLevel { get; set; }
         public Guid? ClassId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }

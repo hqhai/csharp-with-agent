@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, GetInitialAge(startingLevel, age));
                 if (isLock)
                 {
-                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel { Id = student.Human?.UserId ?? default, Level = levelNext ?? default });
+                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel { Id = student.Human?.UserId ?? default, CourseLevel = levelNext ?? default, BaseCourseLevel = levelNext ?? default });
                     return;
                 }
                 if (levelNext.HasValue)

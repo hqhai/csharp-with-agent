@@ -20,7 +20,7 @@ namespace Fsel.Identity.Infrastructure.Configs
                      v => v.ToString(),
                      v => v.EnumParse<EnumCourseLevel>());
 
-            builder.Property(e => e.SurveyLevel)
+            builder.Property(e => e.BaseCourseLevel)
                  .HasMaxLength(100)
                  .HasConversion(
                      v => v.ToString(),

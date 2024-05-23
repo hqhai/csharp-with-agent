@@ -58,7 +58,7 @@ namespace Fsel.Course.Domain.Entities
         public bool IsArchive { get; set; }
 
         public Guid? ParentCourseId { get; set; }
-        public bool IsPriority { get; set; } = true;
+        public int Priority { get; set; }
 
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
         public ICollection<CourseTeacher> CourseTeachers { get; set; } = new List<CourseTeacher>();

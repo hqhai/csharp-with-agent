@@ -12,7 +12,7 @@ namespace Fsel.Ordering.Application.Services.UserService.Models
         public string? Occupation { get; set; }
         public string? School { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
-        public EnumCourseLevel? SurveyLevel { get; set; }
+        public EnumCourseLevel? BaseCourseLevel { get; set; }
         public Guid? ClassId { get; set; }
         public long NumberOfToken { get; set; }
         public Guid? ProvinceId { get; set; }

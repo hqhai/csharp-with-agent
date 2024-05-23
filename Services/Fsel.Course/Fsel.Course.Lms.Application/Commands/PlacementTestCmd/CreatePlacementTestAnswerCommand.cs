@@ -109,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(isLock));
                     return methodResult;
                 }
-                if (levelNext != student.SurveyLevel)
+                if (levelNext != student.BaseCourseLevel)
                 {
                     methodResult.AddErrorBadRequest(nameof(levelNext));
                     return methodResult;
@@ -214,7 +214,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 var updateStudent = new UpdateStudentByLevelModel
                 {
                     Id = _authContext.CurrentUserId,
-                    Level = currentLevel.Value
+                    CourseLevel = currentLevel.Value,
+                    BaseCourseLevel = currentLevel.Value
                 };
                 var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
                 if (!isCheckResult.IsSuccessStatusCode)

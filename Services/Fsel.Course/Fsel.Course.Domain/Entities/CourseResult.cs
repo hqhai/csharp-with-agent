@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Enums;
 
     public class CourseResult : BaseScoreResult
     {
@@ -12,5 +13,6 @@ namespace Fsel.Course.Domain.Entities
 
         public Course? Course { get; set; }
         public Guid CourseId { get; set; }
+        public EnumWorkingStatus WorkingStatus { get; set; }
     }
 }

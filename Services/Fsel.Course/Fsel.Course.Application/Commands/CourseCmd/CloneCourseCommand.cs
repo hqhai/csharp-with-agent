@@ -48,9 +48,10 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(courseClone.ErrorMessages);
                 return methodResult;
             }
-            courseClone.Code = course.Code + "_" + await _courseRepository.Queryable.Where(x => x.ParentCourseId.HasValue && x.ParentCourseId == course.Id).CountAsync(cancellationToken);
+            var priority = await _courseRepository.Queryable.Where(x => x.ParentCourseId.HasValue && x.ParentCourseId == course.Id).CountAsync(cancellationToken);
+            courseClone.Code = course.Code + "_" + priority;
             courseClone.ParentCourseId = course.Id;
-            courseClone.IsPriority = false;
+            courseClone.Priority = priority;
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
                 courseClone = _courseRepository.Add(courseClone);

@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            var isCheckLevel = student.SurveyLevel.HasValue && request.Level.IsCheckCourseLevel(student.SurveyLevel.Value);
+            var isCheckLevel = student.BaseCourseLevel.HasValue && request.Level.IsCheckCourseLevel(student.BaseCourseLevel.Value);
             if (!isCheckLevel)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.YouChoseTheWrongLevel), nameof(isCheckLevel));
