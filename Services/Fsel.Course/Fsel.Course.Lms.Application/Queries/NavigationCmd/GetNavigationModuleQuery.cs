@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
 
                     if ((course.CourseType == EnumCourseType.Academic || (skillMockTestResult != null && skillMockTestResult.Status == EnumResultStatus.Done)) && courseUnitMockTest != null)
                     {
-                        moduleNavigation = await GetModuleNavigationModelAsync(courseUnitMockTests, courseUnitMockTest, student.Id);
+                        moduleNavigation = await GetModuleNavigationModelAsync(courseUnitMockTests, courseUnitMockTest, lessonResult);
                     }
                     else if (skillMockTestResult != null && skillMockTestResult.Status == EnumResultStatus.New && courseUnitMockTest != null)
                     {
@@ -163,12 +163,12 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
             return false;
         }
 
-        private async Task<ModuleNavigationModel> GetModuleNavigationModelAsync(IList<CourseUnitMockTest> courseUnitMockTests, CourseUnitMockTest courseUnitMockTest, Guid studentId)
+        private async Task<ModuleNavigationModel> GetModuleNavigationModelAsync(IList<CourseUnitMockTest> courseUnitMockTests, CourseUnitMockTest courseUnitMockTest, LessonResult lessonResult)
         {
             var courseUnitMockTestNext = courseUnitMockTests[courseUnitMockTests.IndexOf(courseUnitMockTest) + 1];
-            if (courseUnitMockTestNext != null && await IsDoneModuleAsync(courseUnitMockTestNext, studentId))
+            if (courseUnitMockTestNext != null && await IsDoneModuleAsync(courseUnitMockTestNext, lessonResult.StudentId))
             {
-                return await GetModuleNavigationModelAsync(courseUnitMockTests, courseUnitMockTestNext, studentId);
+                return await GetModuleNavigationModelAsync(courseUnitMockTests, courseUnitMockTestNext, lessonResult);
             }
             if (courseUnitMockTestNext != null)
             {
@@ -181,6 +181,7 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
                 Type = GetTypeModule(courseUnitMockTest),
                 DisplayOrder = courseUnitMockTest.DisplayOrder,
                 CourseSkills = await GetCourseSkillToMockTests(courseUnitMockTest),
+                CurrentLessonId = lessonResult.LessonId
             };
         }
 
