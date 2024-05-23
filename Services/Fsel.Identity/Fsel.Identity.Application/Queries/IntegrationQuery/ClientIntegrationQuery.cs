@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
@@ -32,16 +33,19 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
         private readonly IHumanRepository _humanRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ISystemService _systemService;
+        private readonly IMapper _mapper;
 
         public ClientIntegrationQueryHandler(IOrderService orderService,
                                             IHumanRepository humanRepository,
                                             ILmsCourseService lmsCourseService,
-                                            ISystemService systemService)
+                                            ISystemService systemService,
+                                            IMapper mapper)
         {
             _orderService = orderService;
             _humanRepository = humanRepository;
             _lmsCourseService = lmsCourseService;
             _systemService = systemService;
+            _mapper = mapper;
         }
         public async Task<MethodResult<PagingItemsModel<ClientsIntegrationModel>>> Handle(ClientIntegrationQuery request, CancellationToken cancellationToken)
         {
@@ -55,7 +59,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
-            #region Order
+            // lấy order
             var queryOrder = new GetOrderByStatusQueryModel
             {
                 StartDate = request.StartDate,
@@ -75,9 +79,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
             var userOrderIds = orderResults.Select(x => x.UserId).ToList();
-            #endregion
 
-            #region PTTestResult
+            // lấy pt
             var queryPtTest = new GetPTTestModel
             {
                 StartDate = request.StartDate,
@@ -96,9 +99,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
             var userPtTestIds = ptTestResults.Select(x => x.UserId).ToList();
-            #endregion
 
-            #region Identity
+            // lấy user
             var users = await _humanRepository.Queryable
                                               .Include(x => x.User)
                                               .Include(x => x.Student)
@@ -106,95 +108,45 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                               .ThenInclude(x => x.Parent)
                                               .ThenInclude(x => x!.Human)
                                               .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
-                                              .Select(x => new ClientsIntegrationModel
-                                              {
-                                                  UserId = x.UserId ?? default,
-                                                  FullName = x.FullName,
-                                                  UserName = x.User!.UserName,
-                                                  StudentEmail = x.Email,
-                                                  StudentPhone = x.PhoneNumber,
-                                                  EnumGender = x.Gender,
-                                                  Birthday = x.Birthday,
-                                                  Address = x.Address,
-                                                  SchoolId = x.Student!.SchoolId,
-                                                  ParentName = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.FullName,
-                                                  ParentPhone = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.PhoneNumber,
-                                                  ParentEmail = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Email,
-                                                  ParentGender = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Gender
-                                              })
                                               .ToListAsync(cancellationToken);
             if (users == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(users));
                 return methodResult;
             }
-            var userIdentityIds = users.Select(x => x.UserId).ToList();
-            #endregion
+            var userIdentityIds = users.Select(x => x.UserId ?? Guid.Empty).ToList();
 
-            #region SetData
-            // hợp list UserId và lấy ra UserId duy nhất
-            var listUserIds = userIdentityIds.Concat(userPtTestIds).Concat(userOrderIds).ToList();
-            var distinctUserIds = listUserIds.Distinct().ToList();
+            // Hợp nhất UserId
+            var userIds = userIdentityIds.Concat(userPtTestIds).Concat(userOrderIds).ToList();
+            var distinctUserIds = userIds.Distinct().ToList();
 
-            #region School
-            var schoolIds = users.Where(x => x.SchoolId.HasValue).Select(x => x.SchoolId!.Value).ToList();
+            // Thông tin trường học
+            var schoolIds = users.Where(x => x.Student != null && x.Student.SchoolId.HasValue).Select(x => x.Student?.SchoolId ?? Guid.Empty).ToList();
             var school = await _systemService.GetSchoolByIds(schoolIds);
             var schoolResult = school.Content?.Result;
-            #endregion
 
-            #region LastTime
+            // Lấy ra lần đăng nhập cuối cùng
             var featureAccessTime = await _systemService.GetFeatureAccessTimeByUserIds(distinctUserIds);
             var featureAccessTimeResult = featureAccessTime.Content?.Result;
-            #endregion
 
-            // gán dữ liệu
-            List<ClientsIntegrationModel> leadsIntegrations = new List<ClientsIntegrationModel>();
-            foreach (var item in distinctUserIds)
+            #region Trả dữ liệu
+            List<ClientsIntegrationModel> clientsIntegrations = new List<ClientsIntegrationModel>();
+            clientsIntegrations = _mapper.Map<List<ClientsIntegrationModel>>(users);
+
+            clientsIntegrations.ForEach(item =>
             {
-                var user = users.FirstOrDefault(x => x.UserId == item);
-                var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item);
-                var orderItems = orderResults.Where(x => x.UserId == item).ToList();
-                var locationId = schoolResult?.FirstOrDefault(x => x.Id == user?.SchoolId)?.LocationId;
-                var lastTime = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item)?.LastVisited;
-                if (user == null)
-                {
-                    user = await _humanRepository.Queryable
-                                                 .Include(x => x.User)
-                                                 .Include(x => x.Student)
-                                                 .ThenInclude(x => x!.ParentStudents)
-                                                 .ThenInclude(x => x.Parent)
-                                                 .ThenInclude(x => x!.Human)
-                                                 .Where(x => x.UserId == item)
-                                                 .Select(x =>
-                                                 new ClientsIntegrationModel
-                                                 {
-                                                     UserId = x.UserId ?? default,
-                                                     FullName = x.FullName,
-                                                     UserName = x.User!.UserName,
-                                                     StudentEmail = x.Email,
-                                                     StudentPhone = x.PhoneNumber,
-                                                     EnumGender = x.Gender,
-                                                     Birthday = x.Birthday,
-                                                     Address = x.Address,
-                                                     SchoolId = x.Student!.SchoolId,
-                                                     ParentName = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.FullName,
-                                                     ParentPhone = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.PhoneNumber,
-                                                     ParentEmail = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Email,
-                                                     ParentGender = x.Student!.ParentStudents.Select(x => x.Parent).FirstOrDefault()!.Human!.Gender
-                                                 }).FirstOrDefaultAsync(cancellationToken);
-                }
+                item.LongPathSchool = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.LongPath;
+                item.LongPathLocation = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.Location?.LongPath;
+                item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
+                item.PTLevel = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId)?.Level;
 
                 List<OrderIntegrationModel> orderIntegrations = new List<OrderIntegrationModel>();
-                foreach (var order in orderItems)
+                foreach (var order in orderResults.Where(x => x.UserId == item.UserId).ToList())
                 {
-                    var courseName = string.Empty;
+                    var courseName = EnumCourseType.Ielts.ToString();
                     if (order.CourseName != null && (int)order.CourseName <= 5)
                     {
                         courseName = EnumCourseType.Academic.ToString();
-                    }
-                    else
-                    {
-                        courseName = EnumCourseType.Ielts.ToString();
                     }
                     var orderIntegration = new OrderIntegrationModel
                     {
@@ -212,32 +164,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     orderIntegrations.Add(orderIntegration);
                 }
 
-                var leadsIntegration = new ClientsIntegrationModel
-                {
-                    UserId = item,
-                    FullName = user?.FullName,
-                    UserName = user?.UserName,
-                    StudentEmail = user?.StudentEmail,
-                    StudentPhone = user?.StudentPhone,
-                    EnumGender = user?.EnumGender,
-                    Birthday = user?.Birthday,
-                    Address = user?.Address,
-                    ParentName = user?.ParentName,
-                    ParentPhone = user?.ParentPhone,
-                    ParentEmail = user?.ParentEmail,
-                    ParentGender = user?.ParentGender,
-                    LocationId = locationId,
-                    SchoolId = user?.SchoolId,
-                    PTLevel = ptTestResult?.Level,
-                    OrderIntegration = orderIntegrations,
-                    LastDate = lastTime
-                };
-                leadsIntegrations.Add(leadsIntegration);
-            }
-            #endregion 
+                item.OrderIntegration = orderIntegrations;
+            });
+            #endregion
 
-            int totalItem = leadsIntegrations.Count;
-            var lists = leadsIntegrations
+            int totalItem = clientsIntegrations.Count;
+            var lists = clientsIntegrations
                     .ApplySortAndPaging(request)
                     .ToList();
 
