@@ -110,7 +110,8 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
                             UnitId = skillMockTestResult.UnitId,
                             ObjectId = skillMockTestResult.MockTestId,
                             DisplayOrder = unitLessons.Count + 1,
-                            CourseSkills = await GetCourseSkillToMockTests(courseUnitMockTest, skillMockTestResult)
+                            CourseSkills = await GetCourseSkillToMockTests(courseUnitMockTest, skillMockTestResult),
+                            CurrentLessonId = lessonResult.LessonId
                         };
                     }
                 }
@@ -128,7 +129,8 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
                             CourseId = lessonResultNext.CourseId,
                             UnitId = lessonResultNext.UnitId,
                             ObjectId = lessonNext.LessonId,
-                            DisplayOrder = lessonNext.DisplayOrder
+                            DisplayOrder = lessonNext.DisplayOrder,
+                            CurrentLessonId = lessonResult.LessonId
                         };
                     }
                 }
