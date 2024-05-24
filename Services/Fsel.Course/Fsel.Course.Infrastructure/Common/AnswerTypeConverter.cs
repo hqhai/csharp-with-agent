@@ -670,24 +670,19 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.MatchingType2:
                     return new MatchingTypeAnswer();
 
-                case EnumQuestionType.ShortAnswerWordBase:
-                    return new ShortAnswerWordBaseAnswer();
-
-                case EnumQuestionType.ShortAnswerWordCount:
-                    return new ShortAnswerWordCountBaseAnswer();
-
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
                     return new GapFillAnswer();
 
-                case EnumQuestionType.DragAndDropSentenceOrder:
-                    return new DragAndDropSentenceOrderAnswer();
-
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     return new MultipleOptionSentenceCompletionAnswer();
 
+                case EnumQuestionType.ShortAnswerWordCount:
+                case EnumQuestionType.ShortAnswerWordBase:
+                case EnumQuestionType.DragAndDropSentenceOrder:
+                case EnumQuestionType.DragAndDropListSentenceOrder:
                 case EnumQuestionType.ExercisePreparation:
                     return default;
 
