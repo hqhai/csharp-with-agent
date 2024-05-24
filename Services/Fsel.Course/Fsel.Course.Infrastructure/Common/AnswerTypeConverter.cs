@@ -680,9 +680,15 @@ namespace Fsel.Course.Infrastructure.Common
                     return new MultipleOptionSentenceCompletionAnswer();
 
                 case EnumQuestionType.ShortAnswerWordCount:
+                    return new ShortAnswerWordCountBaseAnswer();
+
                 case EnumQuestionType.ShortAnswerWordBase:
+                    return new ShortAnswerWordBaseAnswer();
+
                 case EnumQuestionType.DragAndDropSentenceOrder:
                 case EnumQuestionType.DragAndDropListSentenceOrder:
+                    return new DragAndDropSentenceOrderAnswer();
+
                 case EnumQuestionType.ExercisePreparation:
                     return default;
 
