@@ -5,8 +5,10 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,8 +25,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         private readonly IMapper _mapper;
 
         public CloneCourseCommandHandler(ICourseRepository courseRepository
-            , IMapper mapper
-            )
+            , IMapper mapper)
         {
             _courseRepository = courseRepository;
             _mapper = mapper;
@@ -36,18 +37,38 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var methodResult = new MethodResult<CourseModel>();
 
             var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseTeachers).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
+            if (course != null && course.Status != EnumCourseStatus.Active)
+            {
+                course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseTeachers).Where(x => x.CourseLevel == course.CourseLevel && x.Status == EnumCourseStatus.Active)
+                    .OrderByDescending(x => x.CreatedDate)
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-
             var courseClone = _mapper.Map<EntityCourse>(course);
-            if (courseClone.IsValid())
+            if (!courseClone.IsValid())
             {
                 methodResult.AddErrorBadRequest(courseClone.ErrorMessages);
                 return methodResult;
             }
+            courseClone.CourseTeachers = course.CourseTeachers.Select(x =>
+            {
+                var courseTeacher = _mapper.Map<CourseTeacher>(x);
+                courseTeacher.CourseId = courseClone.Id;
+                return courseTeacher;
+            }).ToList();
+
+            courseClone.CourseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).Select(x =>
+            {
+                var courseUnitMockTest = _mapper.Map<CourseUnitMockTest>(x);
+                courseUnitMockTest.CourseId = courseClone.Id;
+                return courseUnitMockTest;
+            }).ToList();
+
             var priority = await _courseRepository.Queryable.Where(x => x.ParentCourseId.HasValue && x.ParentCourseId == course.Id).CountAsync(cancellationToken);
             courseClone.Code = course.Code + "_" + priority;
             courseClone.ParentCourseId = course.Id;
