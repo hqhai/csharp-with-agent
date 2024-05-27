@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Hosting;
 
     public class UpdateModuleProcessCommand : IRequest<MethodResult<bool>>
     {
@@ -39,8 +40,9 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
         private readonly IUserService _userService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IHostEnvironment _environment;
 
-        public UpdateModuleProcessCommandHandler(IMediator mediator, IVideoTimeCodeRepository videoTimeCodeRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, IFinalTestResultRepository finalTestResultRepository, IUserService userService, IUnitResultRepository unitResultRepository, IMockTestResultRepository mockTestResultRepository)
+        public UpdateModuleProcessCommandHandler(IMediator mediator, IVideoTimeCodeRepository videoTimeCodeRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, IFinalTestResultRepository finalTestResultRepository, IUserService userService, IUnitResultRepository unitResultRepository, IMockTestResultRepository mockTestResultRepository, IHostEnvironment environment = null)
         {
             _mediator = mediator;
             _videoTimeCodeRepository = videoTimeCodeRepository;
@@ -51,12 +53,19 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             _userService = userService;
             _unitResultRepository = unitResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
+            _environment = environment;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateModuleProcessCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+            if (_environment.IsProduction())
+            {
+                methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
+                return methodResult;
+            }
+
             if (string.IsNullOrEmpty(request.Type))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Type));
