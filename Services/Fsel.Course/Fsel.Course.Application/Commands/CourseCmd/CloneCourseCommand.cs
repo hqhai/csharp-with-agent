@@ -39,12 +39,12 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseTeachers).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
             if (course != null && course.Status != EnumCourseStatus.Active)
             {
-                course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseTeachers).Where(x => x.CourseLevel == course.CourseLevel && x.Status == EnumCourseStatus.Active)
+                course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseTeachers).Where(x => x.CourseLevel == course.CourseLevel && x.Status == EnumCourseStatus.Active && !x.ParentCourseId.HasValue)
                     .OrderByDescending(x => x.CreatedDate)
                     .FirstOrDefaultAsync(cancellationToken);
             }
 
-            if (course == null)
+            if (course == null || !course.ParentCourseId.HasValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;

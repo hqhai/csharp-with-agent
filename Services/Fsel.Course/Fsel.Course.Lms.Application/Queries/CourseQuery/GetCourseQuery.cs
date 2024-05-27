@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -14,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
@@ -31,6 +33,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IUserService _userService;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IMapper _mapper;
         private readonly IUnitRepository _unitRepository;
         private readonly IMockTestRepository _mockTestRepository;
@@ -47,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             IOrderService orderService,
             ICourseRepository courseRepository,
             IUserService userService,
+            ICourseResultRepository courseResultRepository,
             IMapper mapper,
             IUnitRepository unitRepository,
             IMockTestRepository mockTestRepository,
@@ -58,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         {
             _courseRepository = courseRepository;
             _userService = userService;
+            _courseResultRepository = courseResultRepository;
             _mapper = mapper;
             _unitRepository = unitRepository;
             _mockTestRepository = mockTestRepository;
@@ -74,6 +79,54 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<CourseModel>();
+
+            var method = await Validate(request);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+            var (student, @class) = method.Result;
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
+
+            var course = await _courseRepository.Queryable
+                             .Include(x => x.CourseResults.Where(x => x.StudentId == student.Id && x.CourseId == @class.CourseId))
+                             .Include(x => x.CourseUnitMockTests)
+                             .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
+
+            if (course == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+            await UpdateCourse(course, student.Id, cancellationToken);
+
+            var courseModel = await GetCourseAsync(course.Id, student.Id, @class.Code);
+            if (courseModel == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseModel.CourseTeachers?.Select(x => x.TeacherId).ToList() });
+            var teachers = teachersResult?.Content?.Result;
+            if (teachersResult != null && teachersResult.IsSuccessStatusCode && teachers != null && courseModel.CourseTeachers != null)
+            {
+                foreach (var item in courseModel.CourseTeachers)
+                {
+                    var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
+                    item.FullName = teacher?.Human?.FullName;
+                }
+            }
+
+            methodResult.Result = courseModel;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        private async Task<MethodResult<(StudentModel, ClassModel)>> Validate(GetCourseQuery request)
+        {
+            var methodResult = new MethodResult<(StudentModel, ClassModel)>();
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
             var studentResult = await _userService.GetStudentByUserIdAsync(userId);
@@ -83,9 +136,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            var studentId = student?.Id;
-
-            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                return methodResult;
+            }
+            var classResult = await _trainingService.GetClassByStudentId(student.Id);
             if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
@@ -110,38 +166,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var course = await _courseRepository.Queryable
-                             .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
-                             .Include(x => x.CourseUnitMockTests)
-                             .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
-
-            if (course == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
-            await UpdateCourse(course, studentId, cancellationToken);
-
-            var courseModel = await GetCourseAsync(course.Id, studentId, @class.Code);
-            if (courseModel == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseModel.CourseTeachers?.Select(x => x.TeacherId).ToList() });
-            var teachers = teachersResult?.Content?.Result;
-            if (teachersResult != null && teachersResult.IsSuccessStatusCode && teachers != null && courseModel.CourseTeachers != null)
-            {
-                foreach (var item in courseModel.CourseTeachers)
-                {
-                    var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
-                    item.FullName = teacher?.Human?.FullName;
-                }
-            }
-
-            methodResult.Result = courseModel;
-            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = (student, @class);
             return methodResult;
         }
 
