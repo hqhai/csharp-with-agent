@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Hosting;
 
     public class CreateUserStudentsToAdminCommand : CreateUserStudentsToAdminCommandModel, IRequest<MethodResult<IList<UserModel>>>
     {
@@ -17,16 +18,24 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class CreateUserStudentsToAdminCommandHandler : IRequestHandler<CreateUserStudentsToAdminCommand, MethodResult<IList<UserModel>>>
     {
         private readonly IMediator _mediator;
+        private readonly IHostEnvironment _environment;
 
-        public CreateUserStudentsToAdminCommandHandler(IMediator mediator)
+        public CreateUserStudentsToAdminCommandHandler(IMediator mediator, IHostEnvironment environment)
         {
             _mediator = mediator;
+            _environment = environment;
         }
 
         public async Task<MethodResult<IList<UserModel>>> Handle(CreateUserStudentsToAdminCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<UserModel>>();
+            if (_environment.IsProduction())
+            {
+                methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
+                return methodResult;
+            }
+
             if (request.Emails == null || !request.Emails.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Emails));
