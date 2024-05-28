@@ -144,15 +144,34 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, }
                         };
 
-                        #region DoQuestBoard
+                        #region Do QuestBoard
 
-                        //if (_authContext.CurrentUserId != postOwner!.CreatedUserId)
-                        //{
-                        //    await DoMainQuest(classForumResult!.CourseId, comment.Id, cancellationToken);
-                        //    await DoDailyQuest(classForumResult!.CourseId, comment.Id, cancellationToken);
-                        //}
+                        var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                        if (studentResult.IsSuccessStatusCode)
+                        {
+                            var student = studentResult.Content?.Result;
+                            var classForumResultsOfStudentResult = await _courseService.ExecuteListClassForumResultQueryAsync(new BaseQueryModel
+                            {
+                                Filters = new List<GenericFilterModel>
+                                            {
+                                                new GenericFilterModel
+                                                {
+                                                    Property = "StudentId",
+                                                    Value = student!.Id,
+                                                    Operator = Common.Enums.EnumFilterOperator.Equal
+                                                }
+                                            },
+                                IncludePaths = new List<string> { "LessonResult" }
+                            });
+                            var classForumResultsOfStudent = classForumResultsOfStudentResult.Content?.Result;
+                            var classForumResultOfStudent = classForumResultsOfStudent?.OrderByDescending(p => p.CreatedDate).FirstOrDefault();
+                            if (classForumResultOfStudent?.Id == postOwner?.Id)
+                            {
+                                await DoQuestBoard(student.Id, cancellationToken);
+                            }
+                        }
 
-                        #endregion DoQuestBoard
+                        #endregion Do QuestBoard
 
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
 
@@ -210,35 +229,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         };
 
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
-
-                        #region Do QuestBoard
-
-                        var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-                        if (studentResult.IsSuccessStatusCode)
-                        {
-                            var student = studentResult.Content?.Result;
-                            var classForumResultsOfStudentResult = await _courseService.ExecuteListClassForumResultQueryAsync(new BaseQueryModel
-                            {
-                                Filters = new List<GenericFilterModel>
-                                            {
-                                                new GenericFilterModel
-                                                {
-                                                    Property = "StudentId",
-                                                    Value = student!.Id,
-                                                    Operator = Common.Enums.EnumFilterOperator.Equal
-                                                }
-                                            },
-                                IncludePaths = new List<string> { "LessonResult" }
-                            });
-                            var classForumResultsOfStudent = classForumResultsOfStudentResult.Content?.Result;
-                            var classForumResultOfStudent = classForumResultsOfStudent?.OrderByDescending(p => p.CreatedDate).FirstOrDefault();
-                            if (classForumResultOfStudent?.Id == classForumResultOfCommentOwner?.Id)
-                            {
-                                await DoQuestBoard(student.Id, cancellationToken);
-                            }
-                        }
-
-                        #endregion Do QuestBoard
 
                         break;
                 }
