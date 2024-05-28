@@ -39,6 +39,10 @@ namespace Fsel.Shared.Constants
                 public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
                 public const string AIFeedBack = $"{KeyQueue}_AIFeedBack";
+                public const string FeatureAccessTime = $"{KeyQueue}_FeatureAccessTime";
+                public const string ChatBot = $"{KeyQueue}_ChatBot";
+                public const string ChatBotRealTime = $"{KeyQueue}_ChatBotRealTime";
+                public const string SetTimeModule = $"{KeyQueue}_SetTimeModule";
                 public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
             }
         }
@@ -84,11 +88,13 @@ namespace Fsel.Shared.Constants
                 public const string UpdateOcCheckInClassForumResult = $"{KeyQueue}_UpdateOcCheckInClassForumResult";
                 public const string CompleteTestWhenTimeOut = $"{KeyQueue}_CompleteTestWhenTimeOut";
                 public const string SetTimeToCompleteTest = $"{KeyQueue}_SetTimeToCompleteTest";
+                public const string SetTimeClassForumDone = $"{KeyQueue}_SetTimeClassForumDone";
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
                 public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
                 public const string MockTestAnwserResponse = $"{KeyQueue}_MockTestAnwserResponse";
                 public const string WeeklyReport = $"{KeyQueue}_WeeklyReport";
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
+                public const string UpdateClassForumResultToExpiredTime = $"{KeyQueue}_UpdateClassForumResultToExpiredTime";
                 public const string DoQuestBoard = $"{KeyQueue}_DoQuestBoard";
             }
         }

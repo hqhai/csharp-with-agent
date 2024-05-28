@@ -9,7 +9,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i1
         public EnumCourseLevel? CourseLevel { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
-        public EnumPaymentMethodStatus PaymentMethod { get; set; }
+        public EnumPaymentMethodStatus? PaymentMethod { get; set; }
         public Guid? PackageId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }

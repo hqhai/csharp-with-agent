@@ -3,6 +3,7 @@
 namespace Fsel.System.Infrastructure.Configs
 {
     using Fsel.Common.Helpers;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
     using global::System;
@@ -22,6 +23,9 @@ namespace Fsel.System.Infrastructure.Configs
             builder.HasOne(l => l.Parent).WithMany(l => l.Children).HasForeignKey(l => l.ParentId).OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(e => e.IsActive).HasDefaultValue(true);
+
+            builder.Property(l => l.Name)
+               .UseCollation(CollationSetting.SQLLatin1GeneralCP1CIAI); // Set the collation
         }
     }
 }
