@@ -62,7 +62,7 @@ auth-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Auth.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/auth:$TAG .
+    - docker build -f Environments/Development/Auth.Development.Dockerfile -t $CI_REGISTRY_IMAGE/auth:$TAG .
     - docker push $CI_REGISTRY_IMAGE/auth:$TAG
   only:
     changes:
@@ -88,7 +88,7 @@ cms-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Cms.PlanetDefender.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/cms-planetdefender:$TAG .
+    - docker build -f Environments/Development/Cms.PlanetDefender.Development.Dockerfile -t $CI_REGISTRY_IMAGE/cms-planetdefender:$TAG .
     - docker push $CI_REGISTRY_IMAGE/cms-planetdefender:$TAG
   only:
     changes:
@@ -115,7 +115,7 @@ gateway-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Gateway.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/api-gateway:$TAG .
+    - docker build -f Environments/Development/Gateway.Development.Dockerfile -t $CI_REGISTRY_IMAGE/api-gateway:$TAG .
     - docker push $CI_REGISTRY_IMAGE/api-gateway:$TAG
   only:
     changes:
@@ -142,7 +142,7 @@ hangfire-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Hangfire.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/hangfire:$TAG .
+    - docker build -f Environments/Development/Hangfire.Development.Dockerfile -t $CI_REGISTRY_IMAGE/hangfire:$TAG .
     - docker push $CI_REGISTRY_IMAGE/hangfire:$TAG
   only:
     changes:
@@ -169,7 +169,7 @@ interaction-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Interaction.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/interaction:$TAG .
+    - docker build -f Environments/Development/Interaction.Development.Dockerfile -t $CI_REGISTRY_IMAGE/interaction:$TAG .
     - docker push $CI_REGISTRY_IMAGE/interaction:$TAG
   only:
     changes:
@@ -196,7 +196,7 @@ lcms-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Lcms.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/lcmsapi:$TAG .
+    - docker build -f Environments/Development/Lcms.Development.Dockerfile -t $CI_REGISTRY_IMAGE/lcmsapi:$TAG .
     - docker push $CI_REGISTRY_IMAGE/lcmsapi:$TAG
   only:
     changes:
@@ -223,7 +223,7 @@ lms-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Lms.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/lmsapi:$TAG .
+    - docker build -f Environments/Development/Lms.Development.Dockerfile -t $CI_REGISTRY_IMAGE/lmsapi:$TAG .
     - docker push $CI_REGISTRY_IMAGE/lmsapi:$TAG
   only:
     changes:
@@ -250,7 +250,7 @@ notification-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Notification.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/notification:$TAG .
+    - docker build -f Environments/Development/Notification.Development.Dockerfile -t $CI_REGISTRY_IMAGE/notification:$TAG .
     - docker push $CI_REGISTRY_IMAGE/notification:$TAG
   only:
     changes:
@@ -277,7 +277,7 @@ ordering-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Ordering.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/ordering:$TAG .
+    - docker build -f Environments/Development/Ordering.Development.Dockerfile -t $CI_REGISTRY_IMAGE/ordering:$TAG .
     - docker push $CI_REGISTRY_IMAGE/ordering:$TAG
   only:
     changes:
@@ -304,7 +304,7 @@ realtime-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Realtime.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/realtime:$TAG .
+    - docker build -f Environments/Development/Realtime.Development.Dockerfile -t $CI_REGISTRY_IMAGE/realtime:$TAG .
     - docker push $CI_REGISTRY_IMAGE/realtime:$TAG
   only:
     changes:
@@ -331,7 +331,7 @@ sender-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Sender.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/sender:$TAG .
+    - docker build -f Environments/Development/Sender.Development.Dockerfile -t $CI_REGISTRY_IMAGE/sender:$TAG .
     - docker push $CI_REGISTRY_IMAGE/sender:$TAG
   only:
     changes:
@@ -358,7 +358,7 @@ storage-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Storage.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/storage:$TAG .
+    - docker build -f Environments/Development/Storage.Development.Dockerfile -t $CI_REGISTRY_IMAGE/storage:$TAG .
     - docker push $CI_REGISTRY_IMAGE/storage:$TAG
   only:
     changes:
@@ -385,7 +385,7 @@ system-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/System.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/system:$TAG .
+    - docker build -f Environments/Development/System.Development.Dockerfile -t $CI_REGISTRY_IMAGE/system:$TAG .
     - docker push $CI_REGISTRY_IMAGE/system:$TAG
   only:
     changes:
@@ -412,7 +412,7 @@ training-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/Training.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/training:$TAG .
+    - docker build -f Environments/Development/Training.Development.Dockerfile -t $CI_REGISTRY_IMAGE/training:$TAG .
     - docker push $CI_REGISTRY_IMAGE/training:$TAG
   only:
     changes:
@@ -439,7 +439,7 @@ user-build:
   script:
     - echo $CI_REGISTRY_IMAGE
     - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f Environments/Testing/User.Testing.Dockerfile -t $CI_REGISTRY_IMAGE/user:$TAG .
+    - docker build -f Environments/Development/User.Development.Dockerfile -t $CI_REGISTRY_IMAGE/user:$TAG .
     - docker push $CI_REGISTRY_IMAGE/user:$TAG
   only:
     changes:
