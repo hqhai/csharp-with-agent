@@ -8,8 +8,10 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
+using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Models;
 using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -25,12 +27,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         private readonly IMediator _mediator;
         private readonly IQueueProvider _queueProvider;
         private readonly ILogger<TestController> _logger;
+        private readonly QueueSocketTestPublisher _queueSocketTestPublisher;
 
-        public TestController(IMediator mediator, IQueueProvider queueProvider, ILogger<TestController> logger)
+        public TestController(IMediator mediator, IQueueProvider queueProvider, ILogger<TestController> logger, QueueSocketTestPublisher queueSocketTestPublisher)
         {
             _mediator = mediator;
             _queueProvider = queueProvider;
             _logger = logger;
+            _queueSocketTestPublisher = queueSocketTestPublisher;
         }
 
         /// <summary>
@@ -106,6 +110,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Delete Video Time Code Answers
         /// </summary>
+        [HttpPost("queue-socket-test")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> QueueSocketTest([FromBody] QueueTestModel data)
+        {
+            MethodResult<bool> queryResult = new MethodResult<bool>();
+            await _queueSocketTestPublisher.Publish(data, CancellationToken.None);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete Video Time Code Answers
+        /// </summary>
         [HttpPost("queue-test/{queueName}/{queueTopic}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -116,10 +133,5 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<bool> queryResult = new MethodResult<bool>();
             return queryResult.GetActionResult();
         }
-    }
-
-    public class QueueTestModel
-    {
-        public object? Data { get; set; }
     }
 }
