@@ -255,25 +255,5 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 Value = 1
             }, cancellationToken);
         }
-
-        private async Task<List<Guid>> GetListPostOwner(IList<Guid> objectIds)
-        {
-            var classForumResultResult = await _courseService.ExecuteListClassForumResultQueryAsync(new BaseQueryModel
-            {
-                Filters = new List<GenericFilterModel>
-                 {
-                     new GenericFilterModel
-                     {
-                         Property = nameof(ClassForumResultModel.Id),
-                         Value = objectIds,
-                         Operator = Common.Enums.EnumFilterOperator.In
-                     }
-                 }
-            });
-
-            var result = classForumResultResult?.Content?.Result?.Select(x => x.CreatedUserId).Distinct().ToList() ?? new List<Guid>();
-
-            return result;
-        }
     }
 }
