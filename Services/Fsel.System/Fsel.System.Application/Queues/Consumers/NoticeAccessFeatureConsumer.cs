@@ -1,6 +1,5 @@
 using Fsel.Core.Base.BaseModels;
 using Fsel.System.Application.Commands.NoticeAccessFeatureCmd;
-using Fsel.System.Application.Commands.QuestBoardStudentCmd;
 using MassTransit;
 using MediatR;
 

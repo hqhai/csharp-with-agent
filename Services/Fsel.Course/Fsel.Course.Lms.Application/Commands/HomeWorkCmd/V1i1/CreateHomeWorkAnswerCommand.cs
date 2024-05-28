@@ -49,8 +49,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly IQuestionRepository _questionRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly ILogger<object> _logger;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger)
+        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger, QuestBoardPublisher questionBoardPublisher)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _questionConverter = questionConverter;
@@ -66,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _questionRepository = questionRepository;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _logger = logger;
+            _questBoardPublisher = questionBoardPublisher;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
@@ -304,7 +306,30 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 TotalQuestion = homeWorkQuestionCount.TotalQuestion,
             };
             homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
+
+            #region Do QuestBoard
+
+            await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.BeginnerQuests, EnumQuestBoardCategory.CompleteHomeworkFirst, CancellationToken.None);
+            await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.LearningQuests, EnumQuestBoardCategory.TheMysteryOfTheStars, CancellationToken.None);
+            if (homeWorkResult.Percent > 50)
+            {
+                await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.LearningQuests, EnumQuestBoardCategory.ConqueringAsteroids, CancellationToken.None);
+            }
+
+            #endregion Do QuestBoard
+
             return homeWorkResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardType type, EnumQuestBoardCategory category, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = type,
+                Category = category,
+                Value = 1
+            }, cancellationToken);
         }
 
         public async Task<MethodResult<(IList<Question>, HomeWorkResult)>> Validate(CreateHomeWorkAnswerCommand request)

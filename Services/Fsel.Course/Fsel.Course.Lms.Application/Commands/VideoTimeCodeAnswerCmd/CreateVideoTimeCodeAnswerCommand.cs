@@ -194,10 +194,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 if (videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest)
                 {
                     var courseId = videoResult.LessonResult?.CourseId;
-                    //if (courseId != null)
-                    //{
-                    //    await DoQuestBoard((Guid)courseId, cancellationToken);
-                    //}
                 }
                 if (videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
@@ -296,27 +292,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var exercise = questions?.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).FirstOrDefault();
             var videoTimeCode = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
             return (questions, videoTimeCode);
-        }
-
-        private async Task DoQuestBoard(Guid courseId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneHomeworkMiniProject };
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id;
-
-            //Chỉ bài finaltest đầu tiên hoàn thành của khóa mới được tính là hoàn thành nhiệm vụ
-            bool checkFirstTimeDoneUnit = _videoTimeCodeResultRepository.Queryable.Any(v => v.Status == EnumResultStatus.Done);
-
-            if (!checkFirstTimeDoneUnit)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    CourseId = courseId
-                }, cancellationToken);
-            }
         }
     }
 }

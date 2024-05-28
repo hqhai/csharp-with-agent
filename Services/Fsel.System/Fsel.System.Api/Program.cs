@@ -30,7 +30,8 @@ builder.Services.AddScoped<ITeachingCostRepository, TeachingCostRepository>();
 builder.Services.AddScoped<IReferralDiscountConfigRepository, ReferralDiscountConfigRepository>();
 builder.Services.AddScoped<ILogActionRepository, LogActionRepository>();
 builder.Services.AddScoped<IQuestBoardRepository, QuestBoardRepository>();
-builder.Services.AddScoped<IQuestBoardConfigRepository, QuestBoardConfigRepository>();
+builder.Services.AddScoped<IQuestBoardOverallRepository, QuestBoardOverallRepository>();
+builder.Services.AddScoped<IQuestBoardOverallStudentRepository, QuestBoardOverallStudentRepository>();
 builder.Services.AddScoped<IFeatureAccessTimeRepository, FeatureAccessTimeRepository>();
 builder.Services.AddScoped<IQuestBoardStudentRepository, QuestBoardStudentRepository>();
 builder.Services.AddScoped<IGameTopicRepository, GameTopicRepository>();
@@ -58,11 +59,11 @@ builder.AddRefitClients(typeof(IDictionaryService), appSetting?.Services?.Dictio
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardFinishConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(QuestBoardConsumer) },
     { QueueSettings.SystemQueue.NameQueue.CompleteApprovalPostTimeOut, typeof(CompleteApprovalConsumer) },
     { QueueSettings.LmsQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
-    { QueueSettings.UserQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) }
+    { QueueSettings.UserQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.DoQuestBoard, typeof(CreateTokenHistoryConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) }
 });
 
 var app = builder.Build();

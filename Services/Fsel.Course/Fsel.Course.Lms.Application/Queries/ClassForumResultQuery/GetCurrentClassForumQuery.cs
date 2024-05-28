@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Course.Lms.Application.Services.NotificationServices;
@@ -20,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -41,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IInteractionService _interactionService;
         private readonly AuthContext _authContext;
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
         public GetCurrentClassForumQueryHandler(IMapper mapper,
             IClassForumResultRepository classForumResultRepository,
@@ -51,7 +54,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             INotificationService notificationService,
             IInteractionService interactionService,
             AuthContext authContext,
-            IStudentFeedbackRepository studentFeedbackRepository)
+            IStudentFeedbackRepository studentFeedbackRepository,
+            QuestBoardPublisher questBoardPublisher)
         {
             _mapper = mapper;
             _classForumResultRepository = classForumResultRepository;
@@ -63,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _interactionService = interactionService;
             _authContext = authContext;
             _studentFeedbackRepository = studentFeedbackRepository;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<ClassForumByStudentModel>> Handle(GetCurrentClassForumQuery request, CancellationToken cancellationToken)
@@ -141,7 +146,28 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             methodResult.Result = classForumByStudentModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
+
+            #region Do QuestBoard
+
+            if (classForumResult != null && classForumResult.Status == EnumClassForumResultStatus.Graded)
+            {
+                await DoQuestBoard(student.Id, EnumQuestBoardCategory.MessagesFromAI, cancellationToken);
+            }
+
+            #endregion Do QuestBoard
+
             return methodResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardCategory category, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.LearningQuests,
+                Category = category,
+                Value = 1
+            }, cancellationToken);
         }
     }
 }

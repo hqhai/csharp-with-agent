@@ -4,8 +4,7 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumQuestBoardStudentStatus
     {
-        Process,
-        Done,
-        Achieved
+        NotReceived,
+        Received
     }
 }

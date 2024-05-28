@@ -44,8 +44,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly SubmitClassForumGradingPublisher _submitClassForumGradingPublisher;
         private readonly ISystemService _systemService;
+        private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, SubmitClassForumGradingPublisher submitClassForumGradingPublisher)
+        public CreateClassForumResultCommandHandler(IMapper mapper, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, ISystemService systemService, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, QuestBoardPublisher questBoardPublisher)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -58,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _notificationMessagePublisher = notificationMessagePublisher;
             _systemService = systemService;
             _submitClassForumGradingPublisher = submitClassForumGradingPublisher;
+            _questBoardPublisher = questBoardPublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -227,7 +229,26 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 };
                 await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken);
             }
+
+            #region Do QuestBoard
+
+            await DoQuestBoard(studentId, EnumQuestBoardType.BeginnerQuests, EnumQuestBoardCategory.CompleteTheFirstClassForum, cancellationToken);
+            await DoQuestBoard(studentId, EnumQuestBoardType.LearningQuests, EnumQuestBoardCategory.SharedRocketLaunch, cancellationToken);
+
+            #endregion Do QuestBoard
+
             return methodResult;
+        }
+
+        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardType type, EnumQuestBoardCategory category, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = type,
+                Category = category,
+                Value = 1
+            }, cancellationToken);
         }
 
         private static EnumTokenMission GetTokenMission(ClassForum classForum, ClassForumResult classForumResult)

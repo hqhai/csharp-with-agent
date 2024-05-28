@@ -3,9 +3,9 @@
 namespace Fsel.System.Domain.IRepositories
 {
     using Fsel.Core.Base.Interfaces;
-    using Fsel.System.Domain.Entities;
+    using Fsel.System.Domain.Entities.QuestBoards;
 
-    public interface IQuestBoardConfigRepository : IRepository<QuestBoardConfig>
+    public interface IQuestBoardOverallRepository : IRepository<QuestBoardOverall>
     {
     }
 }
