@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Net.Http.Headers;
+    using Microsoft.Extensions.Hosting;
 
     public class UpdateModuleProcessCommand : IRequest<MethodResult<bool>>
     {
@@ -43,8 +44,9 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
         private readonly IUserService _userService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IHostEnvironment _environment;
 
-        public UpdateModuleProcessCommandHandler(IHttpContextAccessor httpContextAccessor, AuthContext authContext, IMediator mediator, IVideoTimeCodeRepository videoTimeCodeRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, IFinalTestResultRepository finalTestResultRepository, IUserService userService, IUnitResultRepository unitResultRepository, IMockTestResultRepository mockTestResultRepository)
+        public UpdateModuleProcessCommandHandler(IHttpContextAccessor httpContextAccessor, AuthContext authContext, IMediator mediator, IVideoTimeCodeRepository videoTimeCodeRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, IFinalTestResultRepository finalTestResultRepository, IUserService userService, IUnitResultRepository unitResultRepository, IMockTestResultRepository mockTestResultRepository, IHostEnvironment environment = null)
         {
             _httpContextAccessor = httpContextAccessor;
             _authContext = authContext;
@@ -57,12 +59,19 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             _userService = userService;
             _unitResultRepository = unitResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
+            _environment = environment;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateModuleProcessCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+            if (_environment.IsProduction())
+            {
+                methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
+                return methodResult;
+            }
+
             if (string.IsNullOrEmpty(request.Type))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Type));

@@ -30,6 +30,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Net.Http.Headers;
+    using Microsoft.Extensions.Hosting;
 
     public class CreateUserStudentToAdminCommand : IRequest<MethodResult<UserModel>>
     {
@@ -50,13 +51,15 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IInteractionService _interactionService;
         private readonly IPlatformRepository _platformRepository;
+        private readonly IHostEnvironment _environment;
+
         private const string DefaultPassword = "Admin@123";
         private const string RoleStudent = nameof(Student);
         private const int TotalUserDateNow = 2100;
         private const int MinAgeYoung = 14;
         private const int MaxAgeChildren = 13;
 
-        public CreateUserStudentToAdminCommandHandler(IHttpContextAccessor httpContextAccessor, IMediator mediator, IMapper mapper, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
+        public CreateUserStudentToAdminCommandHandler(IHttpContextAccessor httpContextAccessor, IMediator mediator, IMapper mapper, AuthContext authContext, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository, IHostEnvironment environment = null)
         {
             _httpContextAccessor = httpContextAccessor;
             _mediator = mediator;
@@ -68,12 +71,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _lmsCourseService = lmsCourseService;
             _interactionService = interactionService;
             _platformRepository = platformRepository;
+            _environment = environment;
         }
 
         public async Task<MethodResult<UserModel>> Handle(CreateUserStudentToAdminCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
+            if (_environment.IsProduction())
+            {
+                methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
+                return methodResult;
+            }
             if (string.IsNullOrEmpty(request.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
