@@ -20,6 +20,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     {
         private readonly IMediator _mediator;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHostEnvironment _environment;
 
         public CreateUserStudentsToAdminCommandHandler(IMediator mediator, IHttpContextAccessor httpContextAccessor, IHostEnvironment environment)
         {
