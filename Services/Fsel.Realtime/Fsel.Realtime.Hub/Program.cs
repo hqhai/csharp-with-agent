@@ -27,7 +27,6 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.AIFeedBack, typeof(AIFeedBackConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestWriting, typeof(MockTestAIFeedBackConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.ChatBotRealTime, typeof(ChatBotConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.QueueSocketTest, typeof(QueueSocketTestConsumer) },
 });
 
 var app = builder.Build();
@@ -41,5 +40,4 @@ app.UseHubs<MockTestWritingHub>(RealtimeSettings.MockTestWritingAIFeedBackHub.Pa
 app.UseHubs<FeatureAccessTimeHub>(RealtimeSettings.FeatureAccessTimeHub.Pattern);
 app.UseHubs<SetTimeModuleHub>(RealtimeSettings.SetTimeModuleHub.Pattern);
 app.UseHubs<ChatBotHub>(RealtimeSettings.ChatBotHub.Pattern);
-app.UseHubs<TestHub>("/test");
 app.Run();
