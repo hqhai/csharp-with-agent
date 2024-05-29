@@ -71,19 +71,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Clone a Course
-        /// </summary>
-        [HttpPost("{id}")]
-        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [ApiVersion(ApiSettings.APIVersion1)]
-        public async Task<IActionResult> CloneCourse([FromRoute] Guid id)
-        {
-            MethodResult<CourseModel> commandResult = await _mediator.Send(new CloneCourseCommand { CourseId = id }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Delete a Course
         /// </summary>
         [HttpDelete("{id}")]

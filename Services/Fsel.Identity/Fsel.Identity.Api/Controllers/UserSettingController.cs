@@ -13,7 +13,8 @@ namespace Fsel.Identity.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/user-setting")]
     [ApiController]
     public class UserSettingController : ControllerBase

@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 {
-    using System.Linq.Dynamic.Core;
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -23,41 +22,39 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ActiveCourseResultCommand : IRequest<MethodResult<CourseResultModel>>
+    public class RetakeCourseResultCommand : IRequest<MethodResult<CourseResultModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
     }
 
-    public class ActiveCourseResultCommandHandler : IRequestHandler<ActiveCourseResultCommand, MethodResult<CourseResultModel>>
+    public class RetakeCourseResultCommandHandler : IRequestHandler<RetakeCourseResultCommand, MethodResult<CourseResultModel>>
     {
         private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly ICourseRepository _courseRepository;
+        private readonly IMediator _mediator;
         private readonly IUserService _userService;
+        private readonly ICourseRepository _courseRepository;
         private readonly ICourseResultRepository _courseResultRepository;
-        private const int MinPercentOverall = 67;
-        private const int MaxLearnAgain = 3;
 
-        public ActiveCourseResultCommandHandler(IMapper mapper
+        public RetakeCourseResultCommandHandler(IMapper mapper
             , ITrainingService trainingService
             , AuthContext authContext
-            , IMockTestResultRepository mockTestResultRepository
-            , ICourseRepository courseRepository
+            , IMediator mediator
             , IUserService userService
+            , ICourseRepository courseRepository
             , ICourseResultRepository courseResultRepository)
         {
             _mapper = mapper;
             _trainingService = trainingService;
             _authContext = authContext;
-            _mockTestResultRepository = mockTestResultRepository;
-            _courseRepository = courseRepository;
+            _mediator = mediator;
             _userService = userService;
+            _courseRepository = courseRepository;
             _courseResultRepository = courseResultRepository;
         }
 
-        public async Task<MethodResult<CourseResultModel>> Handle(ActiveCourseResultCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CourseResultModel>> Handle(RetakeCourseResultCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseResultModel> methodResult = new MethodResult<CourseResultModel>();
@@ -74,60 +71,24 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-
-            var isUsedCourse = await _courseResultRepository.Queryable.AnyAsync(x => x.StudentId == student.Id, cancellationToken);
-            if (!isUsedCourse)
+            var isUsedCourseDone = await _courseResultRepository.Queryable.AnyAsync(x => x.StudentId == student.Id && x.Status == EnumResultStatus.Done, cancellationToken);
+            if (!isUsedCourseDone)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isUsedCourse));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isUsedCourseDone));
                 return methodResult;
             }
-            if (!await IsUsedLevel(student, request.CourseLevel, cancellationToken))
+
+            if (!student.CourseLevel.CheckLevelByPass(request.CourseLevel, isUsedCourseDone))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.CourseLevel));
                 return methodResult;
             }
 
-            var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course)
-                                                .Where(x => x.Course != null && x.Course.CourseLevel == request.CourseLevel)
-                                                .FirstOrDefaultAsync(x => x.WorkingStatus != EnumWorkingStatus.NotWorking && x.StudentId == student.Id, cancellationToken);
-            Course? course = default;
-            if (courseResult == null)
-            {
-                course = await GetCourseAsync(request.CourseLevel);
-                if (course == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
-                    return methodResult;
-                }
-                courseResult = new CourseResult
-                {
-                    CourseId = course.Id,
-                    StudentId = student.Id,
-                    Status = EnumResultStatus.New,
-                    WorkingStatus = EnumWorkingStatus.Active
-                };
-                _courseResultRepository.Add(courseResult);
-            }
-            else
-            {
-                course = courseResult.Course;
-                courseResult.WorkingStatus = EnumWorkingStatus.Active;
-                _courseResultRepository.Update(courseResult);
-            }
+            var course = await GetCourseAsync(request.CourseLevel);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
-            }
-
-            await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            var courseResultActive = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.WorkingStatus == EnumWorkingStatus.Active && x.Id != courseResult.Id, cancellationToken);
-            if (courseResultActive != null)
-            {
-                courseResultActive.WorkingStatus = EnumWorkingStatus.InActive;
-                _courseResultRepository.Update(courseResultActive);
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             var classResult = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel
@@ -148,12 +109,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             return methodResult;
         }
 
-        private async Task<bool> IsUsedLevel(StudentModel student, EnumCourseLevel courseLevel, CancellationToken cancellationToken)
-        {
-            var isDoneCourse = await _courseResultRepository.Queryable.AnyAsync(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id, cancellationToken);
-            return student.CourseLevel.CheckLevelByPass(courseLevel, isDoneCourse);
-        }
-
         private async Task<Course?> GetCourseAsync(EnumCourseLevel courseLevel)
         {
             var course = await _courseRepository.Queryable.Where(x => x.Status == EnumCourseStatus.Active && x.CourseLevel == courseLevel)
@@ -166,6 +121,38 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                                                       .OrderByDescending(x => x.UpdatedDate)
                                                       .ThenByDescending(x => x.CreatedDate)
                                                       .FirstOrDefaultAsync();
+            }
+
+            return course;
+        }
+
+        private async Task<Course?> GetAndCreateCourseResultAsync(Course course, StudentModel student, CancellationToken cancellationToken)
+        {
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == course.Id && x.StudentId == student.Id, cancellationToken);
+            if (courseResult == null)
+            {
+                courseResult = new CourseResult
+                {
+                    CourseId = course.Id,
+                    StudentId = student.Id,
+                    Status = EnumResultStatus.New,
+                    WorkingStatus = EnumWorkingStatus.Active
+                };
+                _courseResultRepository.Add(courseResult);
+            }
+            else
+            {
+                var courseResults = await _courseResultRepository.Queryable.Where(x => x.StudentId == student.Id).ToListAsync(cancellationToken);
+                var courses = await _courseRepository.Queryable.Where(x => x.ParentCourseId == course.Id && !courseResults.Any(y => y.CourseId == x.Id)).OrderBy(x => x.Priority).ToListAsync(cancellationToken);
+            }
+
+            await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            var courseResultActive = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.WorkingStatus == EnumWorkingStatus.Active && x.Id != courseResult.Id, cancellationToken);
+            if (courseResultActive != null)
+            {
+                courseResultActive.WorkingStatus = EnumWorkingStatus.InActive;
+                _courseResultRepository.Update(courseResultActive);
+                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             return course;
         }

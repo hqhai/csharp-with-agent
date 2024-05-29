@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Domain.Models.CommandModels.Classes
+namespace Fsel.Course.Lms.Application.Services.TrainingServices.CommandModels
 {
     using Fsel.Shared.Enums;
 

@@ -6,7 +6,9 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
@@ -27,18 +29,21 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
 
         public RegisterClassCommandHandler(IClassRepository classRepository,
             IClassStudentRepository classStudentRepository,
             IUserService userService,
             IMapper mapper,
+            AuthContext authContext,
             IMediator mediator)
         {
             _classRepository = classRepository;
             _classStudentRepository = classStudentRepository;
             _userService = userService;
             _mapper = mapper;
+            _authContext = authContext;
             _mediator = mediator;
         }
 
@@ -46,33 +51,37 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
             var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
             var code = codeResult.Result;
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                var classActive = await _classRepository.Queryable.Where(p => p.CourseId == request.CourseId).Include(x => x.ClassStudents).FirstOrDefaultAsync(cancellationToken);
+                var classActive = await _classRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == request.CourseId, cancellationToken);
                 if (classActive == null)
                 {
                     classActive = await CreateClassAsync(code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
                 }
-                //else
-                //{
-                //    var code = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
-                //    classActive = await CreateClassAsync(code.Result, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays).ConfigureAwait(false);
-                //}
-                var student = await _userService.GetStudentByUserIdAsync(request.UserId ?? default);
-                if (student == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                    return methodResult;
-                }
-                var studentId = student?.Content?.Result?.Id;
-
-                var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ClassId == classActive.Id, cancellationToken);
+                var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken);
                 if (classStudent == null)
                 {
-                    await UpdateClassAsync(classActive, studentId ?? default);
+                    await CreateClassStudentAsync(classActive, student.Id);
+                }
+                else if (classStudent.ClassId != classActive.Id)
+                {
+                    await UpdateClassStudentAsync(classStudent, classActive);
                 }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
@@ -100,7 +109,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             return newClass;
         }
 
-        private async Task<Class> UpdateClassAsync(Class classToUpdate, Guid studentId)
+        private async Task<Class> CreateClassStudentAsync(Class classToUpdate, Guid studentId)
         {
             try
             {
@@ -108,6 +117,20 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 _classRepository.Update(classToUpdate);
                 await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 return classToUpdate;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while updating the class object.", ex);
+            }
+        }
+
+        private async Task UpdateClassStudentAsync(ClassStudent classStudent, Class classActive)
+        {
+            try
+            {
+                classStudent.ClassId = classActive.Id;
+                _classStudentRepository.Update(classStudent);
+                await _classStudentRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {

@@ -78,5 +78,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/user/get-by-student-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
+
+        [Get("/v1/user-course-setting")]
+        Task<IApiResponse<MethodResult<IList<UserCourseSettingModel>>>> GetUserCourseSettingsAsync();
     }
 }

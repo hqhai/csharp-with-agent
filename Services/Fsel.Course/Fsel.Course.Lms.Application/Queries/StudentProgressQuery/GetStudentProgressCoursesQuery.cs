@@ -120,16 +120,19 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         courseStudentProgress.TimeSpent = featureAccessTime?.AccessTime ?? default;
                         courseStudentProgress.Visit = featureAccessTime?.Visit ?? default;
                     }
+                    var package = packages?.FirstOrDefault(x => x.Id == student.PackageId);
+                    if (package != null)
+                    {
+                        courseStudentProgress.PackageId = package.Id;
+                        courseStudentProgress.PackageCode = package.Code;
+                    }
                     var @class = @classes.FirstOrDefault(x => x.CourseId == item.Id);
                     if (@class != null)
                     {
                         courseStudentProgress.ClassId = @class.Id;
                         courseStudentProgress.CodeClass = @class.Code;
-                        var package = packages?.FirstOrDefault(x => x.Id == @class.PackageId);
                         courseStudentProgress.StartDate = @class.StartDate;
                         courseStudentProgress.EndDate = @class.EndDate;
-                        courseStudentProgress.PackageId = @class.PackageId;
-                        courseStudentProgress.PackageCode = package?.Code ?? default;
                     }
                     courseProgress.Add(courseStudentProgress);
                 }

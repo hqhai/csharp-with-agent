@@ -2,10 +2,9 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumWorkingStatus
+    public enum EnumUserCourseType
     {
-        Active,
-        InActive,
-        NotWorking
+        ChangeLevel,
+        ResetAndLearnAgain
     }
 }

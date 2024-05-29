@@ -5,6 +5,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Services.CourseServices;
@@ -47,7 +48,11 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 return methodResult;
             }
             var student = studentResult.Content?.Result;
-
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
             var courseResult = await _courseService.GetCourseByIdAsync(request.CourseId);
             if (!courseResult.IsSuccessStatusCode)
             {
@@ -55,14 +60,18 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 return methodResult;
             }
             var course = courseResult.Content?.Result;
-
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
             var @class = await _classRepository.Queryable.Include(x => x.ClassStudents).FirstOrDefaultAsync(p => p.CourseId == request.CourseId, cancellationToken);
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
                 if (@class == null)
                 {
-                    var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = course?.Code, CourseLevel = course?.CourseLevel }, cancellationToken).ConfigureAwait(false);
+                    var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = course.Code, CourseLevel = course.CourseLevel }, cancellationToken).ConfigureAwait(false);
                     var code = codeResult.Result;
                     var newClass = new Class
                     {
@@ -73,16 +82,16 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                         PackageId = request.PackageId,
                         ClassStudents = new List<ClassStudent>()
                     {
-                        new ClassStudent() { StudentId = student!.Id, IsActive = true }
+                        new ClassStudent() { StudentId = student.Id, IsActive = true }
                     }
                     };
                     @class = _classRepository.Add(newClass);
                 }
                 else
                 {
-                    if (!@class.ClassStudents.Any(p => p.StudentId == student!.Id))
+                    if (!@class.ClassStudents.Any(p => p.StudentId == student.Id))
                     {
-                        @class.ClassStudents.Add(new ClassStudent() { StudentId = student!.Id, IsActive = true });
+                        @class.ClassStudents.Add(new ClassStudent() { StudentId = student.Id, IsActive = true });
                     }
                     @class.Status = EnumClassStatus.Active;
                     _classRepository.Update(@class);
@@ -90,12 +99,12 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
 
                 await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel()
+                var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel
                 {
-                    StudentId = student!.Id,
+                    StudentId = student.Id,
                     ClassId = @class.Id,
                     PackageId = @class.PackageId,
-                    CourseLevel = course!.CourseLevel,
+                    CourseLevel = course.CourseLevel,
                     NumberOfShield = request.NumberOfShield,
                 });
                 if (!updateStudentResult.IsSuccessStatusCode)

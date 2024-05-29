@@ -102,10 +102,6 @@ builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRa
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
 builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
 
-builder.Services.AddScoped<QuestBoardPublisher>();
-builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
-builder.Services.AddScoped<CreateTokenHistoryPublisher>();
-
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();
@@ -123,6 +119,9 @@ builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
 
 // Publisher
+builder.Services.AddScoped<QuestBoardPublisher>();
+builder.Services.AddScoped<SaveUserCourseSettingPublisher>();
+builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<FinishOneFinalTestPublisher>();
 builder.Services.AddScoped<FinishOneHomeWorkPublisher>();
 builder.Services.AddScoped<FinishOneLessonPublisher>();
@@ -131,13 +130,11 @@ builder.Services.AddScoped<FinishOneUnitPublisher>();
 builder.Services.AddScoped<FinishOneUnitTestPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateOrderPublisher>();
-builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<GetTimeToCompleteTestPublisher>();
 builder.Services.AddScoped<SubmitAIResponsePublisher>();
 builder.Services.AddScoped<SubmitClassForumGradingPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<SubmitMockTestCriteriaPublisher>();
-builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

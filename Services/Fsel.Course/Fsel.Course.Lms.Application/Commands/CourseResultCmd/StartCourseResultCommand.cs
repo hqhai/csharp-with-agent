@@ -1,13 +1,19 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Microsoft.EntityFrameworkCore;
+
 namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -19,12 +25,18 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     public class StartCourseResultCommandHandler : IRequestHandler<StartCourseResultCommand, MethodResult<CourseResultModel>>
     {
         private readonly IMapper _mapper;
+        private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
+        private readonly AuthContext _authContext;
         private readonly ICourseResultRepository _courseResultRepository;
 
         public StartCourseResultCommandHandler(IMapper mapper
+            , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
+            , AuthContext authContext
             , ICourseResultRepository courseResultRepository)
         {
             _mapper = mapper;
+            _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
+            _authContext = authContext;
             _courseResultRepository = courseResultRepository;
         }
 
@@ -33,14 +45,28 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseResultModel> methodResult = new MethodResult<CourseResultModel>();
 
-            var courseResult = await _courseResultRepository.GetByIdAsync(request.CourseResultId);
+            var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course).FirstOrDefaultAsync(x => x.Id == request.CourseResultId, cancellationToken);
             if (courseResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
                 return methodResult;
             }
+
+            if (courseResult.Course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult.Course));
+                return methodResult;
+            }
             if (courseResult.Status == EnumResultStatus.New)
             {
+                await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+                {
+                    CourseLevel = courseResult.Course.CourseLevel,
+                    IsDeduction = true,
+                    Type = EnumUserCourseType.ResetAndLearnAgain,
+                    UserId = _authContext.CurrentUserId
+                }, cancellationToken).ConfigureAwait(false);
+
                 courseResult.Status = EnumResultStatus.Process;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

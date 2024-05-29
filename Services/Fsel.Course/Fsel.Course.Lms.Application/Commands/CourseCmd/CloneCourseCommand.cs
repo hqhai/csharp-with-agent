@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Commands.CourseCmd
+namespace Fsel.Course.Lms.Application.Commands.CourseCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;

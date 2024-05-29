@@ -41,14 +41,12 @@ namespace Fsel.Identity.Domain.Entities
             set { BeginnerGuideStr = ConvertHelper.Serialize(value); }
         }
 
+        public Guid? CourseId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
-
         public Human? Human { get; set; }
-
         public Guid HumanId { get; set; }
-
         public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
         public ICollection<StudentDailyStreak> StudentDailyStreaks { get; set; } = new List<StudentDailyStreak>();
     }
