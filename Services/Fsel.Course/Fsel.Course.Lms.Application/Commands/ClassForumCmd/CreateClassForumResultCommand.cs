@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         public const int Display_Order_Second = 1;
         private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeClassForumDonePublisher setTimeClassForumDonePublisher, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, QuestBoardPublisher questBoardPublisher)
+        public CreateClassForumResultCommandHandler(IMapper mapper, CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, NotificationMessagePublisher notificationMessagePublisher, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeClassForumDonePublisher setTimeClassForumDonePublisher, QuestBoardPublisher questBoardPublisher)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -296,7 +296,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         ObjectId = classForumResult.Id,
                         VolatileToken = classForumResult.TokenFirstTime!.Value,
                         Feature = EnumTokenFeature.Learn,
-                        Mission = GetTokenMission(classForum,classForumDetailResultFirstSubmit),
+                        Mission = GetTokenMission(classForum,classForumResult),
                         Type = EnumTokenHistoryType.Recevived,
                         UserId = student.Human?.UserId ?? default,
                     }
@@ -328,7 +328,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private static EnumTokenMission GetTokenMission(ClassForum classForum, ClassForumResult classForumResult)
         {
             return classForum.CourseSkill == EnumCourseSkill.Writing ? EnumTokenMission.ClassForumWriting
-               : classForumDetailResult.MediaType == EnumMediaType.Video ? EnumTokenMission.ClassForumSpeakingVideo
+               : classForumResult.MediaType == EnumMediaType.Video ? EnumTokenMission.ClassForumSpeakingVideo
                : EnumTokenMission.ClassForumSpeakingAudio;
         }
 
@@ -340,7 +340,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
                 {
                     Feature = EnumTokenFeature.Learn,
-                    Mission = GetTokenMission(classForum, classForumDetailResult),
+                    Mission = GetTokenMission(classForum, classForumResult),
                     CourseType = courseType
                 });
                 if (!tokenConfigs.IsSuccessStatusCode)
