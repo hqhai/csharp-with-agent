@@ -34,6 +34,10 @@ spec:
           requests:
             cpu: 30m
             memory: 50Mi
+      tolerations:
+      - effect: NoSchedule
+        key: appnodes-staging
+        operator: Exists
       imagePullSecrets:
         - name: dev-image-secret
 
