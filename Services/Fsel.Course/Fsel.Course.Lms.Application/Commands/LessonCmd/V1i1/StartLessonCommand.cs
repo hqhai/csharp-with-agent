@@ -136,6 +136,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
         {
             if (unitResult.Status == EnumResultStatus.New)
             {
+                unitResult.ProcessDate = DateTime.UtcNow;
                 unitResult.Status = EnumResultStatus.Process;
                 _unitResultRepository.Update(unitResult);
                 await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -155,6 +156,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
                     UserId = _authContext.CurrentUserId
                 }, cancellationToken).ConfigureAwait(false);
 
+                courseResult.ProcessDate = DateTime.UtcNow;
                 courseResult.Status = EnumResultStatus.Process;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

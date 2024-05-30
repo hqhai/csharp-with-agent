@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Linq;
     using System.Threading;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -39,6 +38,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly IMockTestResultRepository _mockTestResultRepository;
         protected readonly IHomeWorkResultRepository _homeWorkResultRepository;
         protected readonly IUserService _userService;
+        protected readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         protected readonly IMediator _mediator;
         protected readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         protected readonly AppSetting _appSetting;
@@ -61,6 +61,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ICourseUnitMockTestRepository courseUnitMockTestRepository,
             IMediator mediator,
             IUserService userService,
+            SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
             IVideoResultRepository videoResultRepository,
             IClassForumResultRepository classForumResultRepository,
             IUnitResultRepository unitResultRepository,
@@ -85,6 +86,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _homeWorkResultRepository = homeWorkResultRepository;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _userService = userService;
+            _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _mediator = mediator;
             _appSetting = appSetting;
             _systemService = systemService;
@@ -451,10 +453,22 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     //var userId = courseResult.CreatedUserId;
                     //await DoQuestBoard(courseId, userId, cancellationToken);
 
+                    if (courseResult.Status != EnumResultStatus.Done)
+                    {
+                        await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
+                        await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+                        {
+                            CourseLevel = course.CourseLevel,
+                            IsDeduction = true,
+                            Type = EnumUserCourseType.ResetAndLearnAgain,
+                            UserId = courseResult.CreatedUserId
+                        }, cancellationToken).ConfigureAwait(false);
+                        courseResult.CompletionDate = DateTime.UtcNow;
+                    }
+
                     courseResult.Status = EnumResultStatus.Done;
                     _courseResultRepository.Update(courseResult);
                     await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
                 }
             }
         }

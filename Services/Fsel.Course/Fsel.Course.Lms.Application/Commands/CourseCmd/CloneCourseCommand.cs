@@ -70,6 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             }).ToList();
 
             var priority = await _courseRepository.Queryable.Where(x => x.ParentCourseId.HasValue && x.ParentCourseId == course.Id).CountAsync(cancellationToken);
+            courseClone.Status = EnumCourseStatus.Clone;
             courseClone.Code = course.Code + "_" + priority;
             courseClone.ParentCourseId = course.Id;
             courseClone.Priority = priority;

@@ -132,6 +132,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     CourseResultId = courseResult.Id,
                     CourseId = courseResult.CourseId,
                     Percent = courseResult.Percent,
+                    ProcessDate = courseResult.ProcessDate,
+                    CompletionDate = courseResult.CompletionDate,
                     CourseLevel = courseResult.Course?.CourseLevel,
                     CourseType = courseResult.Course?.CourseType,
                     WorkingStatus = courseResult.WorkingStatus,

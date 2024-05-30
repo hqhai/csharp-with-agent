@@ -67,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                     UserId = _authContext.CurrentUserId
                 }, cancellationToken).ConfigureAwait(false);
 
+                courseResult.ProcessDate = DateTime.UtcNow;
                 courseResult.Status = EnumResultStatus.Process;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

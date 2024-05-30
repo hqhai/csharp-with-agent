@@ -89,7 +89,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             #region Pilot
 
-            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { UserId = request.UserId, Code = request.CodeCourse, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = package.Id, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
+            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { UserId = request.UserId, CourseId = request.CourseId, PackageId = package.Id, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
 
             #endregion Pilot
 

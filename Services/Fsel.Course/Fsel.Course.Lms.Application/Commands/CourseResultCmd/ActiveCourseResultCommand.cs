@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -19,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -33,26 +35,24 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ICourseRepository _courseRepository;
+        private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
-        private const int MinPercentOverall = 67;
-        private const int MaxLearnAgain = 3;
 
         public ActiveCourseResultCommandHandler(IMapper mapper
             , ITrainingService trainingService
             , AuthContext authContext
-            , IMockTestResultRepository mockTestResultRepository
             , ICourseRepository courseRepository
+            , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
             , IUserService userService
             , ICourseResultRepository courseResultRepository)
         {
             _mapper = mapper;
             _trainingService = trainingService;
             _authContext = authContext;
-            _mockTestResultRepository = mockTestResultRepository;
             _courseRepository = courseRepository;
+            _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _userService = userService;
             _courseResultRepository = courseResultRepository;
         }
@@ -81,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isUsedCourse));
                 return methodResult;
             }
+
             if (!await IsUsedLevel(student, request.CourseLevel, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.CourseLevel));
@@ -130,11 +131,17 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
+            await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+            {
+                CourseLevel = request.CourseLevel,
+                IsDeduction = true,
+                Type = EnumUserCourseType.ChangeLevel,
+                UserId = _authContext.CurrentUserId
+            }, cancellationToken).ConfigureAwait(false);
+
             var classResult = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel
             {
-                Code = course.Code,
                 CourseId = course.Id,
-                CourseLevel = course.CourseLevel,
                 UserId = _authContext.CurrentUserId,
             });
             if (!classResult.IsSuccessStatusCode)

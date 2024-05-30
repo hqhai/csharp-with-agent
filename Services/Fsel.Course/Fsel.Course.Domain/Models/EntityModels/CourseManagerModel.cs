@@ -3,14 +3,17 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
 
-    public class CourseManagerModel
+    public class CourseManagerModel : IModuleLifeCycle
     {
         public Guid CourseResultId { get; set; }
         public EnumResultStatus Status { get; set; }
         public double Percent { get; set; }
         public EnumWorkingStatus WorkingStatus { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
 
         public Guid CourseId { get; set; }
         public string? CodeCourse { get; set; }

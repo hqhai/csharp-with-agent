@@ -10,7 +10,9 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Training.Application.Queries.ClassQuery;
+    using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.Classes;
@@ -29,6 +31,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ICourseService _courseService;
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
 
@@ -36,6 +39,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             IClassStudentRepository classStudentRepository,
             IUserService userService,
             IMapper mapper,
+            ICourseService courseService,
             AuthContext authContext,
             IMediator mediator)
         {
@@ -43,6 +47,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             _classStudentRepository = classStudentRepository;
             _userService = userService;
             _mapper = mapper;
+            _courseService = courseService;
             _authContext = authContext;
             _mediator = mediator;
         }
@@ -64,7 +69,20 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 return methodResult;
             }
 
-            var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
+            var courseResult = await _courseService.GetCourseByIdAsync(request.CourseId);
+            if (!courseResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+            var course = courseResult.Content?.Result;
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
+
+            var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = course.Code, CourseLevel = course.CourseLevel }, cancellationToken).ConfigureAwait(false);
             var code = codeResult.Result;
 
             await _classRepository.ExecuteTransactionAsync(async () =>
@@ -83,8 +101,14 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 {
                     await UpdateClassStudentAsync(classStudent, classActive);
                 }
+                var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel
+                {
+                    StudentId = student.Id,
+                    ClassId = classActive.Id,
+                    CourseLevel = course.CourseLevel
+                });
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<ClassModel>(classActive);
                 return methodResult;
             });
