@@ -51,7 +51,7 @@ namespace Fsel.Realtime.Application.Hubs
         public async Task StartTime()
         {
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
-            await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, "StartTime");
+            await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "StartTime" });
             await Task.CompletedTask;
         }
 
@@ -61,7 +61,12 @@ namespace Fsel.Realtime.Application.Hubs
             string objectId = Context.GetHttpContext()?.Request.Query["ObjectId"].ToString()!;
             await DisConnectAsync(type, objectId);
 
-            await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, "StopTime");
+            await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "StopTime" });
+        }
+
+        public async Task GetTime()
+        {
+            await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "GetTime", WorkingTime = ConnectionTracker.Instance.GetTimeValue(Context.ConnectionId) });
         }
 
         public async Task DisConnectAsync(string type, string objectId)
