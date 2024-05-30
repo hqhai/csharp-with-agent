@@ -13,6 +13,8 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid HomeWorkQuestionId { get; set; }
-        public Guid? HomeWorkResultId { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid HomeWorkResultId { get; set; }
     }
 }

@@ -10,7 +10,7 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid? ClassId { get; set; }
 
-        public Guid? ClassForumResultId { get; set; }
+        public Guid ClassForumResultId { get; set; }
 
         public ClassForum? ClassForum { get; set; }
 
