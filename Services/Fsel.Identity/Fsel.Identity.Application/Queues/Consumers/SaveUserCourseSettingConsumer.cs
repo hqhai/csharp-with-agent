@@ -6,7 +6,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
     using Fsel.Identity.Application.Commands.UserCourseSettingCmd;
     using Fsel.Shared.Models.ShareModels;
     using MassTransit;
-    using MassTransit.Mediator;
+    using MediatR;
 
     public class SaveUserCourseSettingConsumer : IConsumer<SaveUserCourseSettingQueueModel>
     {
