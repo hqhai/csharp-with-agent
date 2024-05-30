@@ -64,6 +64,8 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
 
             var questBoards = await _questBoardRepository.Queryable.Where(p => p.IsActive).ProjectTo<QuestBoardModel>(_mapper.ConfigurationProvider).OrderBy(p => p.Name).ToListAsync(cancellationToken);
 
+            questBoards = questBoards.Where(p => p.IsActive).ToList();
+
             beginnerQuests.QuestBoardModels = questBoards.Where(p => p.Type == EnumQuestBoardType.BeginnerQuests).ToList();
             learningQuests.QuestBoardModels = questBoards.Where(p => p.Type == EnumQuestBoardType.LearningQuests).ToList();
 
