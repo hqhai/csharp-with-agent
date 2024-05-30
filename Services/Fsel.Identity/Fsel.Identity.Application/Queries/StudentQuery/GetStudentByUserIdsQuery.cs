@@ -50,6 +50,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                                             CourseLevel = x.CourseLevel,
                                             CreatedDate = x.CreatedDate,
                                             School = x.School,
+                                            SchoolId = x.SchoolId,
                                             Human = _mapper.Map<HumanProfileModel>(x.Human)
                                         }).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);

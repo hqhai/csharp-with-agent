@@ -48,6 +48,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 PackageId = p.PackageId,
                 Occupation = p.Occupation,
                 School = p.School,
+                SchoolId = p.SchoolId,
                 CourseLevel = p.CourseLevel,
                 ClassId = p.ClassId,
             }).Where(i => i.Human != null && humans.Contains(i.Human.Id)).ToListAsync(cancellationToken);
