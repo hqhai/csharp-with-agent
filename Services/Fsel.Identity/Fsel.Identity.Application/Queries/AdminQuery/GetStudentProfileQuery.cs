@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                                               .ThenInclude(x => x!.Human)
                                               .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
                 student = userView?.Human?.Student;
-                if (student?.School == null)
+                if (student?.SchoolId != null)
                 {
                     var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
                     {

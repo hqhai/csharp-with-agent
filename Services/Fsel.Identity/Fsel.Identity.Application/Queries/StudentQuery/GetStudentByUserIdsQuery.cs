@@ -72,7 +72,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             foreach (var student in students)
             {
-                if (student.School == null)
+                if (student.SchoolId != null)
                 {
                     student.School = schoolResults.Content?.Result?.Where(x => x.Id == student.SchoolId).FirstOrDefault()?.Name;
                 }

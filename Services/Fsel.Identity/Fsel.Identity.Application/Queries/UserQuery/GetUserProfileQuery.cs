@@ -138,7 +138,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             return methodResult;
                         }
 
-                        if (student.School == null)
+                        if (student.SchoolId != null)
                         {
                             var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
                             {

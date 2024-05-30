@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var student = await _studentRepository.Queryable
                                         .Include(i => i.Human)
                                         .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == request.Id, cancellationToken);
-            if (student?.School == null)
+            if (student?.SchoolId != null)
             {
                 var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
                 {
