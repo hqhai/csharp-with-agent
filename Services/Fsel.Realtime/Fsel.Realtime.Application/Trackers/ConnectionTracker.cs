@@ -50,5 +50,16 @@ namespace Fsel.Realtime.Application.Hubs
             }
             return null;
         }
+
+        public long? GetTimeValue(string connectionId)
+        {
+            DateTime startTime;
+            if (_connectionTimes.TryGetValue(connectionId, out startTime))
+            {
+                TimeSpan duration = DateTime.UtcNow - startTime;
+                return (long)duration.TotalSeconds;
+            }
+            return null;
+        }
     }
 }

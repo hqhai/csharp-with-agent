@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
                 return methodResult;
             }
             var lessonResult = await GetLessonResultAsync(course.Id, student.Id, cancellationToken);
-            if (lessonResult == null)
+            if (lessonResult == null || lessonResult.Status != EnumResultStatus.Done)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
 
                     if ((course.CourseType == EnumCourseType.Academic || (skillMockTestResult != null && skillMockTestResult.Status == EnumResultStatus.Done)) && courseUnitMockTest != null)
                     {
-                        moduleNavigation = await GetModuleNavigationModelAsync(courseUnitMockTests, courseUnitMockTest, student.Id);
+                        moduleNavigation = await GetModuleNavigationModelAsync(courseUnitMockTests, courseUnitMockTest, lessonResult);
                     }
                     else if (skillMockTestResult != null && skillMockTestResult.Status == EnumResultStatus.New && courseUnitMockTest != null)
                     {
@@ -110,7 +110,8 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
                             UnitId = skillMockTestResult.UnitId,
                             ObjectId = skillMockTestResult.MockTestId,
                             DisplayOrder = unitLessons.Count + 1,
-                            CourseSkills = await GetCourseSkillToMockTests(courseUnitMockTest, skillMockTestResult)
+                            CourseSkills = await GetCourseSkillToMockTests(courseUnitMockTest, skillMockTestResult),
+                            CurrentLessonId = lessonResult.LessonId
                         };
                     }
                 }
@@ -128,7 +129,8 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
                             CourseId = lessonResultNext.CourseId,
                             UnitId = lessonResultNext.UnitId,
                             ObjectId = lessonNext.LessonId,
-                            DisplayOrder = lessonNext.DisplayOrder
+                            DisplayOrder = lessonNext.DisplayOrder,
+                            CurrentLessonId = lessonResult.LessonId
                         };
                     }
                 }
@@ -141,9 +143,19 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
         private async Task<LessonResult?> GetLessonResultAsync(Guid courseId, Guid studentId, CancellationToken cancellationToken)
         {
             var lessonResult = await _lessonResultRepository.Queryable
-                                                   .Where(x => x.CourseId == courseId && x.Status == EnumResultStatus.Done && x.StudentId == studentId)
-                                                   .OrderByDescending(x => x.CreatedDate)
+                                                   .Where(x => x.CourseId == courseId && x.StudentId == studentId)
+                                                   .OrderByDescending(x => x.UpdatedDate)
+                                                   .ThenByDescending(x => x.CreatedDate)
                                                    .FirstOrDefaultAsync(cancellationToken);
+
+            if (lessonResult != null && lessonResult.Status == EnumResultStatus.New)
+            {
+                lessonResult = await _lessonResultRepository.Queryable
+                                   .Where(x => x.CourseId == courseId && x.Status == EnumResultStatus.Done && x.StudentId == studentId)
+                                   .OrderByDescending(x => x.CreatedDate)
+                                   .FirstOrDefaultAsync(cancellationToken);
+            }
+
             return lessonResult;
         }
 
@@ -161,12 +173,12 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
             return false;
         }
 
-        private async Task<ModuleNavigationModel> GetModuleNavigationModelAsync(IList<CourseUnitMockTest> courseUnitMockTests, CourseUnitMockTest courseUnitMockTest, Guid studentId)
+        private async Task<ModuleNavigationModel> GetModuleNavigationModelAsync(IList<CourseUnitMockTest> courseUnitMockTests, CourseUnitMockTest courseUnitMockTest, LessonResult lessonResult)
         {
             var courseUnitMockTestNext = courseUnitMockTests[courseUnitMockTests.IndexOf(courseUnitMockTest) + 1];
-            if (courseUnitMockTestNext != null && await IsDoneModuleAsync(courseUnitMockTestNext, studentId))
+            if (courseUnitMockTestNext != null && await IsDoneModuleAsync(courseUnitMockTestNext, lessonResult.StudentId))
             {
-                return await GetModuleNavigationModelAsync(courseUnitMockTests, courseUnitMockTestNext, studentId);
+                return await GetModuleNavigationModelAsync(courseUnitMockTests, courseUnitMockTestNext, lessonResult);
             }
             if (courseUnitMockTestNext != null)
             {
@@ -179,6 +191,7 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
                 Type = GetTypeModule(courseUnitMockTest),
                 DisplayOrder = courseUnitMockTest.DisplayOrder,
                 CourseSkills = await GetCourseSkillToMockTests(courseUnitMockTest),
+                CurrentLessonId = lessonResult.LessonId
             };
         }
 

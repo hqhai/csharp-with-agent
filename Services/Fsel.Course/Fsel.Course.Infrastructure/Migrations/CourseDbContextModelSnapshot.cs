@@ -3102,6 +3102,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("SectionTimeCodeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("SpeechTextAnswer")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)

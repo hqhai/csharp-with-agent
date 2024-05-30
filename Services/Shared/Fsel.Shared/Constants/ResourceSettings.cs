@@ -57,5 +57,19 @@ namespace Fsel.Shared.Constants
         public const string SpeakingRole = "Resources//Chatbots//Role//SpeakingRole.txt";
         public const string ReadingRole = "Resources//Chatbots//Role//ReadingRole.txt";
         public const string WritingRole = "Resources//Chatbots//Role//WritingRole.txt";
+
+
+
+        public const string SpeakingGrammarRole = "Resources//SpeakingAiConfig//Role//GrammarRangeRole.txt";
+        public const string SpeakingFluencyRole = "Resources//SpeakingAiConfig//Role//FluencyRole.txt";
+        public const string SpeakingLexicalRole = "Resources//SpeakingAiConfig//Role//LexicalResourceRole.txt";
+
+
+        public const string SpeakingGrammar = "Resources//SpeakingAiConfig//GrammarRangeConfig.txt";
+        public const string SpeakingFluency = "Resources//SpeakingAiConfig//FluencyConfig.txt";
+        public const string SpeakingLexical = "Resources//SpeakingAiConfig//LexicalResourceConfig.txt";
+
+
+
     }
 }

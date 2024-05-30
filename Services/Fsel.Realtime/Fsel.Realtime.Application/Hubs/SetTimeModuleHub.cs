@@ -75,7 +75,7 @@ namespace Fsel.Realtime.Application.Hubs
             var userId = _authContext.CurrentUserId.ToString();
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
             ConnectionTracker.Instance.RecordConnectionStartUser(Context.ConnectionId, userId);
-            await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, "StartTime");
+            await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "StartTime" });
             await Task.CompletedTask;
         }
 
@@ -88,7 +88,12 @@ namespace Fsel.Realtime.Application.Hubs
             ConnectionTracker.Instance.RecordConnectionEndUser(userId);
 
             await DisConnectAsync(type, objectId);
-            await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, "StopTime");
+            await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "StopTime" });
+        }
+
+        public async Task GetTime()
+        {
+            await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "GetTime", WorkingTime = ConnectionTracker.Instance.GetTimeValue(Context.ConnectionId) });
         }
 
         public async Task DisConnectAsync(string type, string objectId, string? connectionId = null, EnumSubmissionCount? submissionCount = default)
