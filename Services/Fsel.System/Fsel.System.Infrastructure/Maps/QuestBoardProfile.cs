@@ -12,6 +12,7 @@ namespace Fsel.System.Infrastructure.Maps
         public QuestBoardProfile()
         {
             CreateMap<QuestBoard, QuestBoardModel>().IgnoreAllNonExisting();
+            CreateMap<QuestBoardStudent, QuestBoardStudentModel>().IgnoreAllNonExisting();
         }
     }
 }

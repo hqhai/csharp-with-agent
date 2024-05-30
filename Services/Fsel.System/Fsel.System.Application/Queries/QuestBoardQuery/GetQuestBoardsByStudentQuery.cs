@@ -2,6 +2,8 @@
 
 namespace Fsel.System.Application.Queries.QuestBoardQuery
 {
+    using AutoMapper;
+    using AutoMapper.QueryableExtensions;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -27,8 +29,9 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
         private readonly IUserService _userService;
         private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
         private readonly IQuestBoardOverallStudentRepository _questBoardOverallStudentRepository;
+        private readonly IMapper _mapper;
 
-        public GetQuestBoardsByStudentQueryHandler(IQuestBoardRepository questBoardRepository, AuthContext authContext, IQuestBoardOverallRepository questBoardOverallRepository, IUserService userService, IQuestBoardStudentRepository questBoardStudentRepository, IQuestBoardOverallStudentRepository questBoardOverallStudentRepository)
+        public GetQuestBoardsByStudentQueryHandler(IQuestBoardRepository questBoardRepository, AuthContext authContext, IQuestBoardOverallRepository questBoardOverallRepository, IUserService userService, IQuestBoardStudentRepository questBoardStudentRepository, IQuestBoardOverallStudentRepository questBoardOverallStudentRepository, IMapper mapper)
         {
             _questBoardRepository = questBoardRepository;
             _authContext = authContext;
@@ -36,6 +39,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
             _userService = userService;
             _questBoardStudentRepository = questBoardStudentRepository;
             _questBoardOverallStudentRepository = questBoardOverallStudentRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<IList<DashboardQuestBoardModel>>> Handle(GetQuestBoardsByStudentQuery request, CancellationToken cancellationToken)
@@ -54,32 +58,46 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
             var model = new List<DashboardQuestBoardModel>();
 
             var beginnerQuests = new DashboardQuestBoardModel();
+            beginnerQuests.Type = EnumQuestBoardType.BeginnerQuests;
             var learningQuests = new DashboardQuestBoardModel();
+            learningQuests.Type = EnumQuestBoardType.LearningQuests;
 
-            var questBoards = await _questBoardRepository.Queryable.Include(p => p.QuestBoardStudents.Where(x => x.StudentId == student!.Id)).Where(p => p.IsActive).Select(p => new QuestBoardModel
-            {
-                Id = p.Id,
-                Type = p.Type,
-                Name = p.Name,
-                Description = p.Description,
-                ImagePath = p.ImagePath,
-                Category = p.Category,
-                TargetValue = p.TargetValue,
-                Token = p.Token,
-                Energy = p.Energy,
-                RepeatType = p.RepeatType,
-                IsActive = p.IsActive,
-                Status = p.QuestBoardStudents.Count == 0 ? EnumQuestBoardStudentStatus.NotReceived : p.QuestBoardStudents.First().Status,
-            }).OrderBy(p => p.Name).ToListAsync(cancellationToken);
+            var questBoards = await _questBoardRepository.Queryable.Where(p => p.IsActive).ProjectTo<QuestBoardModel>(_mapper.ConfigurationProvider).OrderBy(p => p.Name).ToListAsync(cancellationToken);
 
             beginnerQuests.QuestBoardModels = questBoards.Where(p => p.Type == EnumQuestBoardType.BeginnerQuests).ToList();
             learningQuests.QuestBoardModels = questBoards.Where(p => p.Type == EnumQuestBoardType.LearningQuests).ToList();
+
+            var weekDays = Shared.Helpers.DateTimeHelper.GetWeekDays(DateTime.UtcNow).OrderBy(p => p).ToList();
+            var monDay = weekDays.First();
+            var sunDay = weekDays.Last();
+
+            var questBoardStudents = questBoards.Where(p => p.QuestBoardStudents != null && p.QuestBoardStudents.Count > 0).SelectMany(p => p.QuestBoardStudents!).Where(p => p.StudentId == student!.Id);
+
+            beginnerQuests.QuestBoardModels.ForEach(p =>
+            {
+                var questBoardStudent = questBoardStudents.FirstOrDefault(x => x.QuestBoardId == p.Id);
+                p.Status = questBoardStudent == null ? EnumQuestBoardStudentStatus.NotReceived : questBoardStudent.Status;
+            });
+
+            learningQuests.QuestBoardModels.ForEach(p =>
+            {
+                if (p.RepeatType == EnumRepeatType.Day)
+                {
+                    var questBoardStudent = questBoardStudents.FirstOrDefault(x => x.QuestBoardId == p.Id && x.CreatedDate?.Date == DateTime.UtcNow.Date);
+                    p.Status = questBoardStudent == null ? EnumQuestBoardStudentStatus.NotReceived : questBoardStudent.Status;
+                }
+                else
+                {
+                    var questBoardStudent = questBoardStudents.FirstOrDefault(x => x.QuestBoardId == p.Id && x.CreatedDate?.Date >= monDay.Date && x.CreatedDate?.Date <= sunDay.Date);
+                    p.Status = questBoardStudent == null ? EnumQuestBoardStudentStatus.NotReceived : questBoardStudent.Status;
+                }
+            });
 
             var beginnerQuestBoardIds = questBoards.Where(p => p.Type == EnumQuestBoardType.BeginnerQuests).Select(x => x.Id).ToList();
             var learningQuestBoardIds = questBoards.Where(p => p.Type == EnumQuestBoardType.LearningQuests).Select(x => x.Id).ToList();
 
             await GetBeginnerQuestBoardOverall(model, beginnerQuests, student!, beginnerQuestBoardIds, cancellationToken);
-            await GetLearningQuestBoardOverall(model, learningQuests, student!, beginnerQuestBoardIds, methodResult, cancellationToken);
+            await GetLearningQuestBoardOverall(model, learningQuests, student!, methodResult, cancellationToken);
 
             methodResult.Result = model;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -88,23 +106,26 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
 
         private async Task GetBeginnerQuestBoardOverall(IList<DashboardQuestBoardModel> models, DashboardQuestBoardModel beginnerQuests, StudentModel student, List<Guid> beginnerQuestBoardIds, CancellationToken cancellationToken)
         {
-            var questBoardOveralls = await _questBoardOverallRepository.Queryable.Include(p => p.QuestBoardOverallStudents.Where(x => x.StudentId == student!.Id)).Where(p => p.Type == EnumQuestBoardType.BeginnerQuests).OrderBy(x => x.TargetValue).Select(p => new QuestBoardOverallModel
+            var questBoardOveralls = await _questBoardOverallRepository.Queryable.Include(p => p.QuestBoardOverallStudents).Where(p => p.Type == EnumQuestBoardType.BeginnerQuests).OrderBy(x => x.TargetValue).ToListAsync(cancellationToken);
+
+            var questBoardStudents = await _questBoardStudentRepository.Queryable.Where(p => p.StudentId == student!.Id && beginnerQuestBoardIds.Contains(p.QuestBoardId)).ToListAsync(cancellationToken);
+
+            var questBoardOverallStudents = questBoardOveralls.Where(p => p.QuestBoardOverallStudents != null && p.QuestBoardOverallStudents.Count > 0).SelectMany(p => p.QuestBoardOverallStudents).Where(p => p.StudentId == student.Id).ToList();
+
+            beginnerQuests.CurrentValue = questBoardOverallStudents.Count == 0 ? 0 : questBoardOverallStudents.Max(p => p.CurrentValue);
+
+            beginnerQuests.QuestBoardOveralls = questBoardOveralls.Select(p => new QuestBoardOverallModel
             {
                 Id = p.Id,
                 Type = p.Type,
                 TargetValue = p.TargetValue,
                 Token = p.Token,
                 Status = p.QuestBoardOverallStudents.Count == 0 ? EnumQuestBoardOverallStudentStatus.NotReceived : p.QuestBoardOverallStudents.First().Status,
-            }).ToListAsync(cancellationToken);
-
-            var questBoardStudents = await _questBoardStudentRepository.Queryable.Where(p => p.StudentId == student!.Id && beginnerQuestBoardIds.Contains(p.QuestBoardId)).ToListAsync(cancellationToken);
-
-            beginnerQuests.CurrentValue = questBoardStudents.Count;
-            beginnerQuests.QuestBoardOveralls = questBoardOveralls;
+            }).ToList();
             models.Add(beginnerQuests);
         }
 
-        private async Task<MethodResult<IList<DashboardQuestBoardModel>>> GetLearningQuestBoardOverall(IList<DashboardQuestBoardModel> models, DashboardQuestBoardModel learningQuests, StudentModel student, List<Guid> learningQuestBoardIds, MethodResult<IList<DashboardQuestBoardModel>> methodResult, CancellationToken cancellationToken)
+        private async Task<MethodResult<IList<DashboardQuestBoardModel>>> GetLearningQuestBoardOverall(IList<DashboardQuestBoardModel> models, DashboardQuestBoardModel learningQuests, StudentModel student, MethodResult<IList<DashboardQuestBoardModel>> methodResult, CancellationToken cancellationToken)
         {
             var questBoardOverall = await _questBoardOverallRepository.Queryable.FirstOrDefaultAsync(p => p.Type == EnumQuestBoardType.LearningQuests, cancellationToken);
             if (questBoardOverall == null)
@@ -126,11 +147,11 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
             }
             else
             {
-                var days = Shared.Helpers.DateTimeHelper.GetWeekDays(DateTime.UtcNow).OrderBy(p => p).ToList();
-                var monDay = days.First();
-                var sunDay = days.Last();
+                var weekDays = Shared.Helpers.DateTimeHelper.GetWeekDays(DateTime.UtcNow).OrderBy(p => p).ToList();
+                var monDay = weekDays.First();
+                var sunDay = weekDays.Last();
 
-                questBoardOverallStudent = await _questBoardOverallStudentRepository.Queryable.Include(p => p.QuestBoardOverall).FirstOrDefaultAsync(p => p.StudentId == student!.Id && p.QuestBoardOverallId == questBoardOverall.Id && p.CreatedDate >= monDay && p.CreatedDate <= sunDay, cancellationToken);
+                questBoardOverallStudent = await _questBoardOverallStudentRepository.Queryable.Include(p => p.QuestBoardOverall).FirstOrDefaultAsync(p => p.StudentId == student!.Id && p.QuestBoardOverallId == questBoardOverall.Id && p.CreatedDate.Date >= monDay.Date && p.CreatedDate.Date <= sunDay.Date, cancellationToken);
 
                 var questBoardOverallModel = new QuestBoardOverallModel
                 {
@@ -142,9 +163,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
                 learningQuests.QuestBoardOveralls?.Add(questBoardOverallModel);
             }
 
-            var questBoardStudents = await _questBoardStudentRepository.Queryable.Where(p => p.StudentId == student!.Id && learningQuestBoardIds.Contains(p.QuestBoardId) && p.Status == EnumQuestBoardStudentStatus.Received).ToListAsync(cancellationToken);
-
-            learningQuests.CurrentValue = questBoardStudents.Sum(p => p.Energy) ?? 0;
+            learningQuests.CurrentValue = questBoardOverallStudent?.CurrentValue ?? 0;
             models.Add(learningQuests);
             return methodResult;
         }

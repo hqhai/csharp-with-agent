@@ -19,15 +19,11 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
     {
         private readonly IQuestBoardRepository _questBoardRepository;
         private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
-        private readonly IQuestBoardOverallRepository _questBoardOverallRepository;
-        private readonly IQuestBoardOverallStudentRepository _questBoardOverallStudentRepository;
 
-        public DoQuestBoardCommandHandler(IQuestBoardRepository questBoardRepository, IQuestBoardStudentRepository questBoardStudentRepository, IQuestBoardOverallRepository questBoardOverallRepository, IQuestBoardOverallStudentRepository questBoardOverallStudentRepository)
+        public DoQuestBoardCommandHandler(IQuestBoardRepository questBoardRepository, IQuestBoardStudentRepository questBoardStudentRepository)
         {
             _questBoardRepository = questBoardRepository;
             _questBoardStudentRepository = questBoardStudentRepository;
-            _questBoardOverallRepository = questBoardOverallRepository;
-            _questBoardOverallStudentRepository = questBoardOverallStudentRepository;
         }
 
         public async Task<MethodResult<VoidMethodResult>> Handle(DoQuestBoardCommand request, CancellationToken cancellationToken)
@@ -48,7 +44,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
         private async Task DoBeginnerQuests(DoQuestBoardCommandModel request, MethodResult<VoidMethodResult> methodResult, CancellationToken cancellationToken)
         {
             var questBoard = await _questBoardRepository.Queryable.FirstOrDefaultAsync(p => p.Type == request.Type && p.Category == request.Category, cancellationToken);
-            if (questBoard != null)
+            if (questBoard != null && questBoard.IsActive)
             {
                 var questBoardStudent = await _questBoardStudentRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == request.StudentID && p.QuestBoardId == questBoard.Id, cancellationToken);
                 if (questBoardStudent == null)
@@ -64,52 +60,9 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                             Status = EnumQuestBoardStudentStatus.NotReceived
                         });
                         await _questBoardStudentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                        var questBoards = await _questBoardRepository.Queryable.Where(p => p.Type == request.Type).ToListAsync(cancellationToken);
-                        var questBoardIds = questBoards.Select(p => p.Id).ToList();
-                        var questBoardStudents = await _questBoardStudentRepository.Queryable.Where(p => p.StudentId == request.StudentID && questBoardIds.Contains(p.QuestBoardId)).ToListAsync(cancellationToken);
-
-                        if (questBoardStudents.Count <= 2)
-                        {
-                            await DoQuestBoardOverallBeginnerQuests(request, questBoardStudents, 2, cancellationToken);
-                        }
-                        else if (questBoardStudents.Count <= 4)
-                        {
-                            await DoQuestBoardOverallBeginnerQuests(request, questBoardStudents, 4, cancellationToken);
-                        }
-                        else if (questBoardStudents.Count <= 6)
-                        {
-                            await DoQuestBoardOverallBeginnerQuests(request, questBoardStudents, 6, cancellationToken);
-                        }
-
                         return methodResult;
                     });
                 }
-            }
-        }
-
-        private async Task DoQuestBoardOverallBeginnerQuests(DoQuestBoardCommandModel request, List<QuestBoardStudent>? questBoardStudents, int targetValue, CancellationToken cancellationToken)
-        {
-            var questBoardOverall = await _questBoardOverallRepository.Queryable.FirstOrDefaultAsync(p => p.Type == EnumQuestBoardType.BeginnerQuests && p.TargetValue == targetValue, cancellationToken);
-            if (questBoardOverall != null)
-            {
-                var questBoardOverallStudent = await _questBoardOverallStudentRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == request.StudentID && p.QuestBoardOverallId == questBoardOverall.Id, cancellationToken);
-                if (questBoardOverallStudent == null)
-                {
-                    _questBoardOverallStudentRepository.Add(new QuestBoardOverallStudent()
-                    {
-                        QuestBoardOverallId = questBoardOverall.Id,
-                        StudentId = request.StudentID,
-                        CurrentValue = questBoardStudents == null ? 0 : questBoardStudents.Count,
-                        Token = questBoardOverall.Token,
-                        Status = EnumQuestBoardOverallStudentStatus.NotReceived
-                    });
-                }
-                else
-                {
-                    questBoardOverallStudent.CurrentValue = questBoardStudents == null ? 0 : questBoardStudents.Count;
-                }
-                await _questBoardOverallStudentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -118,11 +71,11 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             var questBoards = await _questBoardRepository.Queryable.Where(p => p.Type == request.Type).ToListAsync(cancellationToken);
             var questBoard = questBoards.FirstOrDefault(p => p.Category == request.Category);
 
-            var days = Shared.Helpers.DateTimeHelper.GetWeekDays(DateTime.UtcNow).OrderBy(p => p).ToList();
-            var monDay = days.First();
-            var sunDay = days.Last();
+            var weekDays = Shared.Helpers.DateTimeHelper.GetWeekDays(DateTime.UtcNow).OrderBy(p => p).ToList();
+            var monDay = weekDays.First();
+            var sunDay = weekDays.Last();
 
-            if (questBoard != null)
+            if (questBoard != null && questBoard.IsActive)
             {
                 var learningQuest = new QuestBoardStudent();
                 if (questBoard.RepeatType == EnumRepeatType.Day)
@@ -133,8 +86,6 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 {
                     learningQuest = await _questBoardStudentRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == request.StudentID && p.QuestBoardId == questBoard.Id && p.CreatedDate.Date >= monDay.Date && p.CreatedDate.Date <= sunDay.Date, cancellationToken);
                 }
-
-                var questBoardIds = questBoards.Select(p => p.Id).ToList();
 
                 if (learningQuest == null)
                 {
@@ -150,9 +101,6 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                             Status = EnumQuestBoardStudentStatus.NotReceived
                         });
                         await _questBoardStudentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                        await DoQuestBoardOverallLearningQuests(request, questBoardIds, monDay, sunDay, cancellationToken);
-
                         return methodResult;
                     });
                 }
@@ -163,42 +111,9 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                         learningQuest.CurrentValue += request.Value;
                         learningQuest.CurrentValue = learningQuest.CurrentValue > questBoard.TargetValue ? questBoard.TargetValue : learningQuest.CurrentValue;
                         await _questBoardStudentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                        await DoQuestBoardOverallLearningQuests(request, questBoardIds, monDay, sunDay, cancellationToken);
-
                         return methodResult;
                     });
                 }
-            }
-        }
-
-        private async Task DoQuestBoardOverallLearningQuests(DoQuestBoardCommandModel request, List<Guid> questBoardIds, DateTime monDay, DateTime sunDay, CancellationToken cancellationToken)
-        {
-            var questBoardOverall = await _questBoardOverallRepository.Queryable.FirstOrDefaultAsync(p => p.Type == EnumQuestBoardType.LearningQuests, cancellationToken);
-            if (questBoardOverall != null)
-            {
-                var questBoardOverallStudent = await _questBoardOverallStudentRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == request.StudentID && p.QuestBoardOverallId == questBoardOverall.Id && p.CreatedDate.Date >= monDay.Date && p.CreatedDate.Date <= sunDay.Date, cancellationToken);
-
-                var questBoardStudents = await _questBoardStudentRepository.Queryable.Where(p => questBoardIds.Contains(p.QuestBoardId) && p.StudentId == request.StudentID && p.Status == EnumQuestBoardStudentStatus.Received).ToListAsync(cancellationToken);
-
-                var totalEnergy = questBoardStudents.Sum(p => p.Energy);
-
-                if (questBoardOverallStudent == null)
-                {
-                    _questBoardOverallStudentRepository.Add(new QuestBoardOverallStudent()
-                    {
-                        QuestBoardOverallId = questBoardOverall.Id,
-                        StudentId = request.StudentID,
-                        CurrentValue = totalEnergy ?? 0,
-                        Token = questBoardOverall.Token,
-                        Status = EnumQuestBoardOverallStudentStatus.NotReceived
-                    });
-                }
-                else
-                {
-                    questBoardOverallStudent.CurrentValue = totalEnergy ?? 0;
-                }
-                await _questBoardOverallStudentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

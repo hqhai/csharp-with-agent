@@ -108,7 +108,7 @@
     "token": 2,
     "energy": 2,
     "repeatType": "Day",
-    "IsActive": true,
+    "IsActive": false,
     "createdDate": "2024-05-24"
   },
   {
@@ -136,7 +136,7 @@
     "token": 2,
     "energy": 2,
     "repeatType": "Day",
-    "IsActive": true,
+    "IsActive": false,
     "createdDate": "2024-05-24"
   },
   {
@@ -150,7 +150,7 @@
     "token": 2,
     "energy": 2,
     "repeatType": "Day",
-    "IsActive": true,
+    "IsActive": false,
     "createdDate": "2024-05-24"
   },
   {
@@ -164,7 +164,7 @@
     "token": 2,
     "energy": 2,
     "repeatType": "Day",
-    "IsActive": true,
+    "IsActive": false,
     "createdDate": "2024-05-24"
   },
   {
@@ -178,7 +178,7 @@
     "token": 2,
     "energy": 2,
     "repeatType": "Day",
-    "IsActive": true,
+    "IsActive": false,
     "createdDate": "2024-05-24"
   },
   {
@@ -206,7 +206,7 @@
     "token": 2,
     "energy": 2,
     "repeatType": "Day",
-    "IsActive": true,
+    "IsActive": false,
     "createdDate": "2024-05-24"
   },
   {
@@ -220,7 +220,7 @@
     "token": 2,
     "energy": 2,
     "repeatType": "Day",
-    "IsActive": true,
+    "IsActive": false,
     "createdDate": "2024-05-24"
   },
   {
@@ -230,7 +230,7 @@
     "description": "Thời gian truy cập tính năng 'Học' đạt 120 phút",
     "ImagePath": "",
     "category": "LearningSpaceship",
-    "targetValue": 1,
+    "targetValue": 120,
     "token": 5,
     "energy": 20,
     "repeatType": "Week",
@@ -244,7 +244,7 @@
     "description": "Hoàn thành 20 câu hỏi trong Video bài học",
     "ImagePath": "",
     "category": "JourneyOfKnowledge",
-    "targetValue": 120,
+    "targetValue": 20,
     "token": 5,
     "energy": 20,
     "repeatType": "Week",
@@ -258,7 +258,7 @@
     "description": "Xem phản hồi của AI cho bài đăng Class Forum của bạn",
     "ImagePath": "",
     "category": "MessagesFromAI",
-    "targetValue": 20,
+    "targetValue": 1,
     "token": 5,
     "energy": 20,
     "repeatType": "Week",
@@ -272,7 +272,7 @@
     "description": "Hoàn thành 7 lần Focus Mode",
     "ImagePath": "",
     "category": "InfinityFocusMode",
-    "targetValue": 1,
+    "targetValue": 7,
     "token": 5,
     "energy": 20,
     "repeatType": "Week",

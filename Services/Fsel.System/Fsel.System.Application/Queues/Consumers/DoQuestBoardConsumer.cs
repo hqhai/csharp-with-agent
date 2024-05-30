@@ -2,25 +2,24 @@
 
 namespace Fsel.System.Application.Queues.Consumers
 {
+    using Fsel.Core.Base;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Commands.QuestBoardCmd;
-    using Fsel.System.Domain.Models.CommandModels.QuestBoards;
     using global::System.Threading.Tasks;
     using MassTransit;
     using MediatR;
 
-    public class DoQuestBoardConsumer : IConsumer<QuestBoardQueueModel>
+    public class DoQuestBoardConsumer : BaseConsumer<QuestBoardQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public DoQuestBoardConsumer(IMediator mediator)
+        public DoQuestBoardConsumer(IMediator mediator, AuthContext authContext) : base(authContext)
         {
             _mediator = mediator;
         }
 
-        public async Task Consume(ConsumeContext<QuestBoardQueueModel> context)
+        public override async Task ConsumeQueue(QuestBoardQueueModel? message)
         {
-            var message = context?.Message;
             if (message == null)
             {
                 return;
