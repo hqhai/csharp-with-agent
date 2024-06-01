@@ -1,52 +1,1771 @@
-include:
-  - project: 'ci-templates/build-docker-images'
-    ref: master
-    file: '/general.yml'
-  - project: 'ci-templates/build-docker-images'
-    ref: master
-    file: '/build-image-gitlab-registry.yml'
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/auth-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/gateway-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/hangfire-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/interaction-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/lcms-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/lms-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/notification-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/ordering-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/realtime-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/sender-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/storage-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/system-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/training-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/user-api.yaml
-  - project: 'ci-templates/gitlab-ci-projects'
-    ref: master
-    file: fsel/api/cms-planetdefender.yaml
+variables:
+  DOCKER_TLS_CERTDIR: ''
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2375
+  GIT_STRATEGY: clone
+
+image: mirror.gcr.io/library/docker:stable
+
+services:
+- name: mirror.gcr.io/library/docker:stable-dind
+  alias: docker
+
+before_script:
+  - export CURRENT_TIME=$(date +"%d%m%y")
+  - export TAG=$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA-$CURRENT_TIME
+  - export IMAGE_VALUES=$CI_COMMIT_SHORT_SHA-$CURRENT_TIME
+  - echo $TAG
+
+stages:
+- build-image
+- deploy
+
+".build-image-gitlab-registry":
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+
+build-test-auth:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    DOCKERFILE: "./Environments/Testing/Auth.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-auth:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    DOCKERFILE: "./Environments/Staging/Auth.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-auth:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    DOCKERFILE: "./Environments/Production/Auth.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-gateway:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
+    DOCKERFILE: "./Environments/Testing/Gateway.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-gateway:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  tags:
+  - atlantic-k8s
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
+    DOCKERFILE: "./Environments/Staging/Gateway.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-gateway:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
+    DOCKERFILE: "./Environments/Production/Gateway.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  tags:
+  - atlantic-k8s
+  only:
+    changes:
+    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-hangfire:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
+    DOCKERFILE: "./Environments/Testing/Hangfire.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Hangfire/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-hangfire:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
+    DOCKERFILE: "./Environments/Staging/Hangfire.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Hangfire/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-hangfire:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
+    DOCKERFILE: "./Environments/Production/Hangfire.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Hangfire/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-interaction:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
+    DOCKERFILE: "./Environments/Testing/Interaction.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Interaction/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-interaction:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
+    DOCKERFILE: "./Environments/Staging/Interaction.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Interaction/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-interaction:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
+    DOCKERFILE: "./Environments/Production/Interaction.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Interaction/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-lcmsapi:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
+    DOCKERFILE: "./Environments/Testing/Lcms.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-lcmsapi:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
+    DOCKERFILE: "./Environments/Staging/Lcms.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-lcmsapi:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
+    DOCKERFILE: "./Environments/Production/Lcms.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-lmsapi:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
+    DOCKERFILE: "./Environments/Testing/Lms.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-lmsapi:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
+    DOCKERFILE: "./Environments/Staging/Lms.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-lmsapi:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
+    DOCKERFILE: "./Environments/Production/Lms.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-notification:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
+    DOCKERFILE: "./Environments/Testing/Notification.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Notification/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-notification:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
+    DOCKERFILE: "./Environments/Staging/Notification.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Notification/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-notification:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
+    DOCKERFILE: "./Environments/Production/Notification.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Notification/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-ordering:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
+    DOCKERFILE: "./Environments/Testing/Ordering.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Ordering/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-ordering:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
+    DOCKERFILE: "./Environments/Staging/Ordering.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Ordering/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-ordering:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
+    DOCKERFILE: "./Environments/Production/Ordering.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Ordering/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-realtime:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
+    DOCKERFILE: "./Environments/Testing/Realtime.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Realtime/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-realtime:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
+    DOCKERFILE: "./Environments/Staging/Realtime.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Realtime/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-realtime:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
+    DOCKERFILE: "./Environments/Production/Realtime.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Realtime/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-sender:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
+    DOCKERFILE: "./Environments/Testing/Sender.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Sender/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-sender:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
+    DOCKERFILE: "./Environments/Staging/Sender.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Sender/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-sender:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
+    DOCKERFILE: "./Environments/Production/Sender.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Sender/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-storage:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
+    DOCKERFILE: "./Environments/Testing/Storage.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Storage/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-storage:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
+    DOCKERFILE: "./Environments/Staging/Storage.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Storage/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-storage:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
+    DOCKERFILE: "./Environments/Production/Storage.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Storage/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-system:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
+    DOCKERFILE: "./Environments/Testing/System.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.System/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-system:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
+    DOCKERFILE: "./Environments/Staging/System.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.System/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-system:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
+    DOCKERFILE: "./Environments/Production/System.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.System/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-training:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
+    DOCKERFILE: "./Environments/Testing/Training.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Training/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-training:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
+    DOCKERFILE: "./Environments/Staging/Training.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Training/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-training:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
+    DOCKERFILE: "./Environments/Production/Training.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Training/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-identity:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
+    DOCKERFILE: "./Environments/Testing/User.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-identity:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
+    DOCKERFILE: "./Environments/Staging/User.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-identity:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
+    DOCKERFILE: "./Environments/Production/User.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+build-test-cms-planetdefender:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
+    DOCKERFILE: "./Environments/Testing/Cms.PlanetDefender.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Cms.PlanetDefender/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+build-staging-cms-planetdefender:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
+    DOCKERFILE: "./Environments/Staging/Cms.PlanetDefender.Staging.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Cms.PlanetDefender/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+build-prod-cms-planetdefender:
+  stage: build-image
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
+    DOCKERFILE: "./Environments/Production/Cms.PlanetDefender.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Cms.PlanetDefender/**/*
+    - Services/Shared/**/*
+    refs:
+    - main
+
+".deploy-service":
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+
+deploy-test-auth:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    DEPLOY: ./Deploy/auth/auth-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-auth
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-auth:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    DEPLOY: ./Deploy/auth/auth-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-auth
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-gateway:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
+    DEPLOY: ./Deploy/gateway/gateway-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-gateway
+  only:
+    changes:
+    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-gateway:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
+    DEPLOY: ./Deploy/gateway/gateway-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-gateway
+  only:
+    changes:
+    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+
+deploy-test-hangfire:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
+    DEPLOY: ./Deploy/hangfire/hangfire-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-hangfire
+  only:
+    changes:
+    - Services/Fsel.Hangfire/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-hangfire:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
+    DEPLOY: ./Deploy/hangfire/hangfire-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-hangfire
+  only:
+    changes:
+    - Services/Fsel.Hangfire/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-interaction:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
+    DEPLOY: ./Deploy/interaction/interaction-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-interaction
+  only:
+    changes:
+    - Services/Fsel.Interaction/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-interaction:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
+    DEPLOY: ./Deploy/interaction/interaction-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-interaction
+  only:
+    changes:
+    - Services/Fsel.Interaction/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-lcmsapi:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
+    DEPLOY: ./Deploy/lcmsapi/lcmsapi-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-lcmsapi
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-lcmsapi:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
+    DEPLOY: ./Deploy/lcmsapi/lcmsapi-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-lcmsapi
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-lmsapi:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
+    DEPLOY: ./Deploy/lmsapi/lmsapi-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-lmsapi
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-lmsapi:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
+    DEPLOY: ./Deploy/lmsapi/lmsapi-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-lmsapi
+  only:
+    changes:
+    - Services/Fsel.Course/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-notification:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
+    DEPLOY: ./Deploy/notification/notification-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-notification
+  only:
+    changes:
+    - Services/Fsel.Notification/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-notification:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
+    DEPLOY: ./Deploy/notification/notification-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-notification
+  only:
+    changes:
+    - Services/Fsel.Notification/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-ordering:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
+    DEPLOY: ./Deploy/ordering/ordering-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-ordering
+  only:
+    changes:
+    - Services/Fsel.Ordering/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-ordering:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
+    DEPLOY: ./Deploy/ordering/ordering-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-ordering
+  only:
+    changes:
+    - Services/Fsel.Ordering/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+deploy-test-realtime:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
+    DEPLOY: ./Deploy/realtime/realtime-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-realtime
+  only:
+    changes:
+    - Services/Fsel.Realtime/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-realtime:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
+    DEPLOY: ./Deploy/realtime/realtime-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-realtime
+  only:
+    changes:
+    - Services/Fsel.Realtime/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-sender:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
+    DEPLOY: ./Deploy/sender/sender-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-sender
+  only:
+    changes:
+    - Services/Fsel.Sender/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-sender:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
+    DEPLOY: ./Deploy/sender/sender-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-sender
+  only:
+    changes:
+    - Services/Fsel.Sender/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-storage:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
+    DEPLOY: ./Deploy/storage/storage-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-storage
+  only:
+    changes:
+    - Services/Fsel.Storage/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-storage:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
+    DEPLOY: ./Deploy/storage/storage-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-storage
+  only:
+    changes:
+    - Services/Fsel.Storage/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-system:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
+    DEPLOY: ./Deploy/system/system-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-system
+  only:
+    changes:
+    - Services/Fsel.System/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-system:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
+    DEPLOY: ./Deploy/system/system-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-system
+  only:
+    changes:
+    - Services/Fsel.System/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-training:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
+    DEPLOY: ./Deploy/training/training-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-training
+  only:
+    changes:
+    - Services/Fsel.Training/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-training:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
+    DEPLOY: ./Deploy/training/training-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-training
+  only:
+    changes:
+    - Services/Fsel.Training/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+
+deploy-test-identity:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
+    DEPLOY: ./Deploy/user/user-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-identity
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-identity:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
+    DEPLOY: ./Deploy/user/user-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-identity
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
+
+deploy-test-cms-planetdefender:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
+    DEPLOY: ./Deploy/cms/cms-testing.yaml
+    NAMESPACES: fsel-testing
+  extends: ".deploy-service"
+  needs:
+    - job: build-test-cms-planetdefender
+  only:
+    changes:
+    - Services/Fsel.Cms.PlanetDefender/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing
+
+deploy-staging-cms-planetdefender:
+  stage: deploy
+  tags:
+  - atlantic-k8s
+  retry:
+    max: 2
+  image: bitnami/kubectl
+  script:
+    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
+    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
+    DEPLOY: ./Deploy/cms/cms-staging.yaml
+    NAMESPACES: fsel-staging
+  extends: ".deploy-service"
+  needs:
+    - job: build-staging-cms-planetdefender
+  only:
+    changes:
+    - Services/Fsel.Cms.PlanetDefender/**/*
+    - Services/Shared/**/*
+    refs:
+    - staging
