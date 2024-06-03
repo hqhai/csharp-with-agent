@@ -61,7 +61,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                         .ThenInclude(x => x.CourseUnitMockTests)
                                                                         .ThenInclude(x => x.Course)
                                                                         .Include(x => x.MockTestScores)
-                                                                        .Where(x => x.Status == EnumResultStatus.Done && !x.MockTestScores.Any() && (x.GradingTeacherId == null || x.GradingTeacherId == teacherId))
+                                                                         //.Where(x => x.Status == EnumResultStatus.Done && !x.MockTestScores.Any && (x.GradingTeacherId == null || x.GradingTeacherId == teacherId))
+                                                                         .Where(x => x.Status == EnumResultStatus.Done && x.MockTestScores.Count < 4 && (x.GradingTeacherId == null || x.GradingTeacherId == teacherId))  // sử dụng cho phiên bản chấm điểm bằng teacher và AI
                                                                         .AsNoTracking()
                                                                         .Select(x => new MockTestResultSearchModel
                                                                         {
