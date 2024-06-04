@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
+    using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
@@ -51,9 +52,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly ISpeakingAIService _speakingAIService;
+        private readonly ISpeakingEvaluationAIService _evaluationAIService;
         private readonly ILogger<object> _logger;
 
-        public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, IUserService userService, QuestionConverter questionConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestResultRepository mockTestResultRepository, ISectionRepository sectionRepository, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, ISectionTimeCodeRepository sectionTimeCodeRepository, ISectionGroupRepository sectionGroupRepository, SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher, IMediator mediator, IMapper mapper, ILogger<object> logger, ISpeakingAIService speakingAIService)
+        public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository, AuthContext authContext, IUserService userService, QuestionConverter questionConverter, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestResultRepository mockTestResultRepository, ISectionRepository sectionRepository, SectionGroupConverter sectionGroupConverter, ISectionGroupResultRepository sectionGroupResultRepository, ISectionTimeCodeRepository sectionTimeCodeRepository, ISectionGroupRepository sectionGroupRepository, SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher, IMediator mediator, IMapper mapper, ILogger<object> logger, ISpeakingAIService speakingAIService, ISpeakingEvaluationAIService evaluationAIService)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -71,6 +73,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _mapper = mapper;
             _logger = logger;
             _speakingAIService = speakingAIService;
+            _evaluationAIService = evaluationAIService;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -360,11 +363,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, section.Id);
-                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer));
+                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0));
                     }
                     else
                     {
-                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer));
+                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0));
                     }
                 }
             }
@@ -411,11 +414,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, null, sectionTimeCode.Id);
-                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, request.Answers.Select(x => x.Answer).FirstOrDefault(), request.Answers.Select(x => x.SpeechTextAnswer).FirstOrDefault()));
+                        double pronScore = await _evaluationAIService.EvaluationSpeaking(request.Answers.FirstOrDefault()?.Answer?.ToString() ?? default);
+                        createMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, request.Answers.Select(x => x.Answer).FirstOrDefault(), request.Answers.Select(x => x.SpeechTextAnswer).FirstOrDefault(), pronScore));
                     }
                     else
                     {
-                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, request.Answers.Select(x => x.Answer).FirstOrDefault(), request.Answers.Select(x => x.SpeechTextAnswer).FirstOrDefault()));
+                        double pronScore = await _evaluationAIService.EvaluationSpeaking(request.Answers.FirstOrDefault()?.Answer?.ToString() ?? default);
+                        updateMockTestAnswers.Add(GetMockTestAnswer(mockTestAnswer, request.Answers.Select(x => x.Answer).FirstOrDefault(), request.Answers.Select(x => x.SpeechTextAnswer).FirstOrDefault(), pronScore));
                     }
                 }
             }
@@ -450,17 +455,20 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, Question questionItem, bool isAnswered, string? speechText, int correctCount = default)
         {
-            mockTestAnswer = GetMockTestAnswer(mockTestAnswer, answer, speechText, correctCount);
+            mockTestAnswer = GetMockTestAnswer(mockTestAnswer, answer, speechText, 0, correctCount);
             mockTestAnswer.IsCorrect = isAnswered ? (questionItem == null || questionItem.CorrectTotal == correctCount) : null;
             return mockTestAnswer;
         }
 
-        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, string? speechText, int correctCount = default)
+        private static MockTestAnswer GetMockTestAnswer(MockTestAnswer mockTestAnswer, object? answer, string? speechText, double pronsScore, int correctCount = default)
         {
             mockTestAnswer.Answer = answer;
             mockTestAnswer.SpeechTextAnswer = speechText;
+            mockTestAnswer.PronunciationScore = pronsScore;
             mockTestAnswer.CorrectCount = correctCount;
             return mockTestAnswer;
         }
+
+
     }
 }
