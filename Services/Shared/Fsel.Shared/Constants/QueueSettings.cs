@@ -44,6 +44,7 @@ namespace Fsel.Shared.Constants
                 public const string ChatBotRealTime = $"{KeyQueue}_ChatBotRealTime";
                 public const string SetTimeModule = $"{KeyQueue}_SetTimeModule";
                 public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
+                public const string MockTestSpeaking = $"{KeyQueue}_MockTestSpeaking";
             }
         }
 
