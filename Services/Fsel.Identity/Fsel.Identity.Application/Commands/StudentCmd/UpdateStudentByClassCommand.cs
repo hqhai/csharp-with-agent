@@ -42,6 +42,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             student.CourseLevel = request.CourseLevel;
             student.ClassId = request.ClassId;
+            student.CourseId = request.CourseId;
             if (request.PackageId.HasValue)
             {
                 student.PackageId = request.PackageId.Value;

@@ -2,6 +2,8 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using System.Collections;
+    using System.Collections.Generic;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Constants;
@@ -136,23 +138,25 @@ namespace Fsel.Shared.Helpers
             return GetEnumCourseLevels(courseType).Select(x => x.ToString()).ToList();
         }
 
-        public static bool CheckLevelByPass(this EnumCourseLevel? courseLevelStudent, EnumCourseLevel courseLevelChoose, bool isDoneCourse)
+        public static bool CheckLevelByPass(this EnumCourseLevel? courseLevelStudent, EnumCourseLevel courseLevelChoose, bool? isDoneCourse)
         {
             var courseType = courseLevelChoose.GetEnumCourseType();
             var datas = courseType.GetListCourseLevels(courseLevelStudent ?? default, isDoneCourse);
-            if (datas != null && datas is IList<object> courseLevels)
+            if (datas != null && datas is IList list)
             {
-                return courseLevels.Any(x => x.GetPropValue<EnumCourseLevel>("CourseLevel") == courseLevelChoose);
+                var objects = list.Cast<object>().ToList();
+                return objects.Any(x => x.GetPropValue<EnumCourseLevel>("CourseLevel") == courseLevelChoose);
             }
             return false;
         }
 
-        public static object? GetListCourseLevels(this EnumCourseType courseType, EnumCourseLevel courseLevel, bool isCourseDone = false)
+        public static object? GetListCourseLevels(this EnumCourseType courseType, EnumCourseLevel courseLevel, bool? isCourseDoneAndAchieveGrade = null)
         {
             int index = (int)s_courseTypeLevel.FirstOrDefault(x => x.Key == courseLevel.GetEnumCourseType() && x.Value == courseLevel).Value;
 
             var relevantLevels = s_courseTypeLevel
-                .Where((x, i) => isCourseDone ? (i <= index + 2) : (i >= index - 1 && i <= index + 1) && x.Key == courseLevel.GetEnumCourseType())
+                .Where((x, i) => isCourseDoneAndAchieveGrade.HasValue ? isCourseDoneAndAchieveGrade.Value ? (i >= index && i <= index + 2) : (i >= index && i <= index + 1) : (i >= index - 1 && i <= index + 1))
+                .Where(x => x.Key == courseLevel.GetEnumCourseType())
                 .ToList();
 
             if (relevantLevels == null || !relevantLevels.Any())

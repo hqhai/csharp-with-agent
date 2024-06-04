@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -31,6 +32,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     public class GetManageCoursesQueryHandler : IRequestHandler<GetManageCoursesQuery, MethodResult<IList<CourseManagerModel>>>
     {
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ChangeCourseHelper _changeCourseHelper;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
@@ -42,11 +46,13 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
         private const int MaxPercentOverall = 67;
-        private const int MaxUnitDoneToStop = 3;
 
-        public GetManageCoursesQueryHandler(ICourseResultRepository courseResultRepository, IUnitRepository unitRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, IMockTestResultRepository mockTestResultRepository, IFinalTestResultRepository finalTestResultRepository, ICourseRepository courseRepository, AuthContext authContext, IMapper mapper, IUserService userService, ISystemService systemService)
+        public GetManageCoursesQueryHandler(ICourseResultRepository courseResultRepository, ChangeCourseHelper changeCourseHelper, ICourseUnitMockTestRepository courseUnitMockTestRepository, ISectionGroupRepository sectionGroupRepository, IUnitRepository unitRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, IMockTestResultRepository mockTestResultRepository, IFinalTestResultRepository finalTestResultRepository, ICourseRepository courseRepository, AuthContext authContext, IMapper mapper, IUserService userService, ISystemService systemService)
         {
             _courseResultRepository = courseResultRepository;
+            _changeCourseHelper = changeCourseHelper;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _sectionGroupRepository = sectionGroupRepository;
             _unitRepository = unitRepository;
             _unitResultRepository = unitResultRepository;
             _lessonResultRepository = lessonResultRepository;
@@ -69,7 +75,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.WorkingStatus));
                 return methodResult;
             }
-
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -96,8 +101,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(userCourseSettingResults));
                 return methodResult;
             }
-            var userCourseSettings = userCourseSettingResults?.Content?.Result;
 
+            var userCourseSettings = userCourseSettingResults?.Content?.Result;
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => x.StudentId == student.Id && x.WorkingStatus == request.WorkingStatus).OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.UpdatedDate).ToListAsync(cancellationToken);
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
@@ -108,6 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 }).ToList(),
                 UserId = _authContext.CurrentUserId
             });
+
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));
@@ -115,7 +121,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             }
 
             var featureAccessTimes = featureAccessTimeResults.Content?.Result?.ToList();
-            var isChangeLevelAllCourse = await CheckChangeLevelAllCourseAsync(student);
+            var isChangeLevelAllCourse = await _changeCourseHelper.CheckChangeLevelAllCourseAsync(student.Id);
 
             foreach (var courseResult in courseResults)
             {
@@ -130,7 +136,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 var courseManager = new CourseManagerModel
                 {
                     CourseResultId = courseResult.Id,
+                    Status = courseResult.Status,
                     CourseId = courseResult.CourseId,
+                    CodeCourse = courseResult.Course?.Code,
                     Percent = courseResult.Percent,
                     ProcessDate = courseResult.ProcessDate,
                     CompletionDate = courseResult.CompletionDate,
@@ -140,16 +148,25 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     ProgressPercent = NumberHelper.GetPercent(currentProgress, progress),
                     TimeSpent = featureAccessTime?.AccessTime ?? default
                 };
-                await SetProgressModuleAsync(courseManager, courseResult);
+                if (courseResult.Status == EnumResultStatus.Done)
+                {
+                    courseManager.Type = nameof(Course);
+                    courseManager.ObjectId = courseResult.CourseId;
+                }
+                else
+                {
+                    await SetProgressModuleAsync(courseManager, courseResult);
+                }
+
                 var userCourseSettingLevel = userCourseSettings?.FirstOrDefault(x => x.Type == EnumUserCourseType.ResetAndLearnAgain && x.CourseLevel == courseResult.Course?.CourseLevel);
                 var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.Type == EnumUserCourseType.ChangeLevel);
-                if (userCourseSettingLevel != null)
-                {
-                    courseManager.IsChangeLevel = userCourseSettingLevel.Value > 0;
-                }
                 if (userCourseSetting != null)
                 {
-                    courseManager.IsResetCourse = userCourseSetting.Value > 0;
+                    courseManager.IsChangeLevel = userCourseSetting.Value > 0;
+                }
+                if (userCourseSettingLevel != null)
+                {
+                    courseManager.IsResetCourse = userCourseSettingLevel.Value > 0;
                 }
 
                 courseManager.IsCheckPercentColor = await IsColorToPercentAsync(courseResult);
@@ -164,28 +181,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         private async Task SetHideCourseOnCourse(CourseManagerModel courseManager, CourseResult courseResult, StudentModel student, bool isChangeLevelAllCourse)
         {
             var isCourseDone = await _courseResultRepository.Queryable.AnyAsync(x => x.StudentId == student.Id && x.Status == EnumResultStatus.Done);
-            courseManager.IsHideCourse = student.BaseCourseLevel.CheckLevelByPass(courseResult.Course?.CourseLevel ?? default, isCourseDone);
+            var isStudentsAchieveScore = await _changeCourseHelper.IsStudentsAchieveScoresAsync(student.Id, student.BaseCourseLevel);
+            courseManager.IsHiddenCourseLevel = !student.BaseCourseLevel.CheckLevelByPass(courseResult.Course?.CourseLevel ?? default, isStudentsAchieveScore);
             if (isChangeLevelAllCourse)
             {
-                courseManager.IsHideCourse = isChangeLevelAllCourse;
+                courseManager.IsHiddenCourseLevel = isChangeLevelAllCourse;
             }
-        }
-
-        private async Task<bool> CheckChangeLevelAllCourseAsync(StudentModel student)
-        {
-            var courseResultActive = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.WorkingStatus == EnumWorkingStatus.Active);
-            if (courseResultActive != null)
-            {
-                var groupUnitResultStatus = await _unitResultRepository.Queryable.Where(x => x.CourseId == courseResultActive.CourseId && x.StudentId == courseResultActive.StudentId).GroupBy(x => x.Status)
-                    .Select(x => new
-                    {
-                        StatusResult = x.Key,
-                        NumberOfStatus = x.Count(),
-                    }).ToListAsync();
-                return (groupUnitResultStatus.Any(x => x.StatusResult == EnumResultStatus.Done && x.NumberOfStatus >= MaxUnitDoneToStop - 1) && groupUnitResultStatus.Any(x => x.StatusResult == EnumResultStatus.Process)) ||
-                    groupUnitResultStatus.Any(x => x.StatusResult == EnumResultStatus.Done && x.NumberOfStatus >= MaxUnitDoneToStop);
-            }
-            return false;
         }
 
         private async Task<bool?> IsColorToPercentAsync(CourseResult courseResult)
@@ -195,7 +196,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 return default;
             }
             var isCheckPercentColor = courseResult.Percent > MaxPercentOverall;
-
             if (courseResult.Course != null && courseResult.Course.CourseType == EnumCourseType.Ielts)
             {
                 var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId && !x.UnitId.HasValue)
@@ -203,13 +203,18 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                                                .OrderByDescending(x => x.CreatedDate)
                                                .ThenByDescending(x => x.UpdatedDate)
                                                .FirstOrDefaultAsync();
-
-                var score = mockTestResult?.SkillScores != null && mockTestResult.SkillScores.Any() ? NumberHelper.RoundNumberDouble(mockTestResult.SkillScores.Average(x => x.Scores), false) : default;
+                var score = _changeCourseHelper.GetBandScore(mockTestResult?.SkillScores);
                 var (isScorePassed, targetBandScore) = courseResult.Course.CourseLevel.CheckScoreColor(score);
                 isCheckPercentColor = isCheckPercentColor && isScorePassed;
             }
 
             return isCheckPercentColor;
+        }
+
+        private async Task<EnumCourseSkill?> GetCourseSkillMockTest(Guid mockTestId)
+        {
+            var sectionGroup = await _sectionGroupRepository.Queryable.Where(x => x.MockTestSections.Any(x => x.MockTestId == mockTestId)).FirstOrDefaultAsync();
+            return sectionGroup?.CourseSkill;
         }
 
         private async Task SetProgressModuleAsync(CourseManagerModel courseManager, CourseResult courseResult)
@@ -243,8 +248,10 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     courseManager.LessonDisplayOrder = lessonResults.Count(x => x.Status == EnumResultStatus.Done) + 1;
                     if (lessonResults.All(x => x.Status == EnumResultStatus.Done) && unit.UnitSkillMockTests.Any())
                     {
+                        var skillMockTestId = unit.UnitSkillMockTests.Select(x => x.MockTestId).FirstOrDefault();
                         courseManager.LessonType = nameof(EnumMockTestType.SkillMockTest);
-                        courseManager.ObjectLessonId = unit.UnitSkillMockTests.Select(x => x.MockTestId).FirstOrDefault();
+                        courseManager.ObjectLessonId = skillMockTestId;
+                        courseManager.CourseSkill = await GetCourseSkillMockTest(skillMockTestId);
                     }
                     else
                     {

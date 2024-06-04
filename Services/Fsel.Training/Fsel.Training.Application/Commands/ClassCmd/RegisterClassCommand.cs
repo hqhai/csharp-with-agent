@@ -9,8 +9,11 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.Training.Application.Queries.ClassQuery;
+    using Fsel.Training.Application.Queues.Publishers;
     using Fsel.Training.Application.Services.CourseServices;
+    using Fsel.Training.Application.Services.CourseServices.Models;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Entities;
@@ -31,6 +34,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly ICourseService _courseService;
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
@@ -39,6 +43,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             IClassStudentRepository classStudentRepository,
             IUserService userService,
             IMapper mapper,
+            SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
             ICourseService courseService,
             AuthContext authContext,
             IMediator mediator)
@@ -47,6 +52,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             _classStudentRepository = classStudentRepository;
             _userService = userService;
             _mapper = mapper;
+            _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _courseService = courseService;
             _authContext = authContext;
             _mediator = mediator;
@@ -92,20 +98,23 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 {
                     classActive = await CreateClassAsync(code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
                 }
-                var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken);
+                var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.ClassId == classActive.Id, cancellationToken);
                 if (classStudent == null)
                 {
                     await CreateClassStudentAsync(classActive, student.Id);
                 }
-                else if (classStudent.ClassId != classActive.Id)
+                else
                 {
-                    await UpdateClassStudentAsync(classStudent, classActive);
+                    await UpdateActiveClassStudentAsync(classStudent);
                 }
+                await InActiveClassStudent(classActive, student.Id);
+                await SaveCourseSettingAsync(course, request.UserId, cancellationToken);
                 var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel
                 {
                     StudentId = student.Id,
                     ClassId = classActive.Id,
-                    CourseLevel = course.CourseLevel
+                    CourseLevel = course.CourseLevel,
+                    CourseId = classActive.CourseId
                 });
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -137,7 +146,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         {
             try
             {
-                classToUpdate.ClassStudents.Add(new ClassStudent { StudentId = studentId });
+                classToUpdate.ClassStudents.Add(new ClassStudent { StudentId = studentId, IsActive = true });
                 _classRepository.Update(classToUpdate);
                 await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 return classToUpdate;
@@ -148,11 +157,22 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             }
         }
 
-        private async Task UpdateClassStudentAsync(ClassStudent classStudent, Class classActive)
+        private async Task InActiveClassStudent(Class classToUpdate, Guid studentId)
+        {
+            var classStudent = await _classStudentRepository.Queryable.Where(x => x.StudentId == studentId && x.IsActive && x.ClassId != classToUpdate.Id)
+                                                            .FirstOrDefaultAsync();
+            if (classStudent == null)
+            {
+                return;
+            }
+            await UpdateActiveClassStudentAsync(classStudent, false);
+        }
+
+        private async Task UpdateActiveClassStudentAsync(ClassStudent classStudent, bool isActive = true)
         {
             try
             {
-                classStudent.ClassId = classActive.Id;
+                classStudent.IsActive = isActive;
                 _classStudentRepository.Update(classStudent);
                 await _classStudentRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             }
@@ -160,6 +180,22 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             {
                 throw new Exception("An error occurred while updating the class object.", ex);
             }
+        }
+
+        private async Task SaveCourseSettingAsync(CourseModel course, Guid? userId, CancellationToken cancellationToken)
+        {
+            await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+            {
+                CourseLevel = course.CourseLevel,
+                Type = EnumUserCourseType.ResetAndLearnAgain,
+                UserId = userId ?? _authContext.CurrentUserId
+            }, cancellationToken).ConfigureAwait(false);
+
+            await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+            {
+                Type = EnumUserCourseType.ChangeLevel,
+                UserId = userId ?? _authContext.CurrentUserId
+            }, cancellationToken).ConfigureAwait(false);
         }
     }
 }

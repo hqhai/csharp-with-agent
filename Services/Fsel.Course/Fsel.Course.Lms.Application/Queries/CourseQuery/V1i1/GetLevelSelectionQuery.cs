@@ -2,15 +2,16 @@
 
 namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
 {
+    using System.Linq.Dynamic.Core;
+    using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -26,18 +27,17 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     public class GetLevelSelectionQueryHandler : IRequestHandler<GetLevelSelectionQuery, MethodResult<IList<LevelDtoModel>>>
     {
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ChangeCourseHelper _changeCourseHelper;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private readonly IUnitResultRepository _unitResultRepository;
-        private const int MaxLearnAgain = 3;
-        private const int MaxUnitDoneToStop = 3;
+        private const int MinLearnAgain = 0;
 
-        public GetLevelSelectionQueryHandler(ICourseResultRepository courseResultRepository, AuthContext authContext, IUserService userService, IUnitResultRepository unitResultRepository)
+        public GetLevelSelectionQueryHandler(ICourseResultRepository courseResultRepository, ChangeCourseHelper changeCourseHelper, AuthContext authContext, IUserService userService)
         {
             _courseResultRepository = courseResultRepository;
+            _changeCourseHelper = changeCourseHelper;
             _authContext = authContext;
             _userService = userService;
-            _unitResultRepository = unitResultRepository;
         }
 
         public async Task<MethodResult<IList<LevelDtoModel>>> Handle(GetLevelSelectionQuery request, CancellationToken cancellationToken)
@@ -64,29 +64,33 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
-
             var student = studentResult?.Content?.Result;
-            if (student == null)
+            if (student == null || !student.BaseCourseLevel.HasValue)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            if (!student.BaseCourseLevel.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.BaseCourseLevel));
                 return methodResult;
             }
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => x.StudentId == student.Id && x.WorkingStatus != EnumWorkingStatus.NotWorking).ToListAsync(cancellationToken);
-            var isDoneCourse = await _courseResultRepository.Queryable.AnyAsync(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id, cancellationToken);
-            var levelDtos = ConvertHelper.Deserialize<List<LevelDtoModel>>(request.CourseType.GetListCourseLevels(student.CourseLevel ?? default, isDoneCourse));
+            var isChangeLevelStudent = await _changeCourseHelper.CheckChangeLevelAllCourseAsync(student.Id);
+            var isStudentsAchieveScore = await _changeCourseHelper.IsStudentsAchieveScoresAsync(student.Id, student.BaseCourseLevel);
+            var levelDtos = ConvertHelper.Deserialize<List<LevelDtoModel>>(request.CourseType.GetListCourseLevels(student.BaseCourseLevel.Value, isStudentsAchieveScore));
             if (levelDtos != null && levelDtos.Any())
             {
                 foreach (var item in levelDtos)
                 {
                     var courseResultLevel = courseResults.FirstOrDefault(x => x.Course != null && x.Course.CourseLevel == item.CourseLevel);
                     var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.CourseLevel == item.CourseLevel && x.Type == EnumUserCourseType.ResetAndLearnAgain);
-                    item.IsResetCourse = true;
                     if (userCourseSetting != null)
                     {
-                        item.IsResetCourse = userCourseSetting.Value > MaxLearnAgain;
+                        item.IsResetCourse = userCourseSetting.Value > MinLearnAgain;
                     }
                     item.IsUsedLevel = courseResultLevel?.WorkingStatus == EnumWorkingStatus.Active;
-                    item.IsHighCourseLevel = item.IsUsedLevel || await CheckChangeLevelAllCourseAsync(student);
+                    item.IsHiddenCourseLevel = isChangeLevelStudent;
                     item.Status = courseResultLevel?.Status;
                 }
             }
@@ -94,23 +98,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             methodResult.Result = levelDtos;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private async Task<bool> CheckChangeLevelAllCourseAsync(StudentModel student)
-        {
-            var courseResultActive = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.WorkingStatus == EnumWorkingStatus.Active);
-            if (courseResultActive != null)
-            {
-                var groupUnitResultStatus = await _unitResultRepository.Queryable.Where(x => x.CourseId == courseResultActive.CourseId && x.StudentId == courseResultActive.StudentId).GroupBy(x => x.Status)
-                    .Select(x => new
-                    {
-                        StatusResult = x.Key,
-                        NumberOfStatus = x.Count(),
-                    }).ToListAsync();
-                return (groupUnitResultStatus.Any(x => x.StatusResult == EnumResultStatus.Done && x.NumberOfStatus >= MaxUnitDoneToStop - 1) && groupUnitResultStatus.Any(x => x.StatusResult == EnumResultStatus.Process)) ||
-                    groupUnitResultStatus.Any(x => x.StatusResult == EnumResultStatus.Done && x.NumberOfStatus >= MaxUnitDoneToStop);
-            }
-            return false;
         }
     }
 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20240524063714_Update_Course_And_CourseResult")]
+    [Migration("20240603062242_Update_Course_And_CourseResult")]
     partial class Update_Course_And_CourseResult
     {
         /// <inheritdoc />
@@ -632,6 +632,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
@@ -674,6 +677,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<DateTime?>("ProcessDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
@@ -4552,6 +4558,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
@@ -4597,6 +4606,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<DateTime?>("ProcessDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");

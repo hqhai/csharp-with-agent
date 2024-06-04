@@ -12,6 +12,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumResultStatus? Status { get; set; }
         public bool? IsResetCourse { get; set; }
         public bool IsUsedLevel { get; set; }
-        public bool IsHighCourseLevel { get; set; } = true;
+        public bool IsHiddenCourseLevel { get; set; } = true;
     }
 }

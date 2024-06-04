@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Commands.CourseCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
@@ -36,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
+        private readonly ChangeCourseHelper _changeCourseHelper;
         private readonly IUserService _userService;
         private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly ICourseRepository _courseRepository;
@@ -45,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             , ITrainingService trainingService
             , AuthContext authContext
             , IMediator mediator
+            , ChangeCourseHelper changeCourseHelper
             , IUserService userService
             , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
             , ICourseRepository courseRepository
@@ -54,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             _trainingService = trainingService;
             _authContext = authContext;
             _mediator = mediator;
+            _changeCourseHelper = changeCourseHelper;
             _userService = userService;
             _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _courseRepository = courseRepository;
@@ -83,8 +87,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isUsedCourseDone));
                 return methodResult;
             }
-
-            if (!student.CourseLevel.CheckLevelByPass(request.CourseLevel, isUsedCourseDone))
+            var isStudentsAchieveScore = await _changeCourseHelper.IsStudentsAchieveScoresAsync(student.Id, student.BaseCourseLevel);
+            if (!student.CourseLevel.CheckLevelByPass(request.CourseLevel, isStudentsAchieveScore))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.CourseLevel));
                 return methodResult;
@@ -106,7 +110,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 
             await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
             {
-                CourseLevel = request.CourseLevel,
                 IsDeduction = true,
                 Type = EnumUserCourseType.ChangeLevel,
                 UserId = _authContext.CurrentUserId

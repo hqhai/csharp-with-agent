@@ -17,6 +17,7 @@ namespace Fsel.Identity.Application.Commands.UserCourseSettingCmd
         public EnumUserCourseType Type { get; set; }
         public bool IsDeduction { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
+        public bool IsCreate { get; set; }
         public Guid UserId { get; set; }
     }
 
@@ -43,13 +44,13 @@ namespace Fsel.Identity.Application.Commands.UserCourseSettingCmd
                 userCourseSetting = new UserCourseSetting
                 {
                     CourseLevel = request.CourseLevel,
-                    Value = request.IsDeduction ? MaxValue - 1 : MaxValue,
+                    Value = MaxValue,
                     Type = request.Type,
                     UserId = request.UserId
                 };
                 _userCourseSettingRepository.Add(userCourseSetting);
             }
-            else
+            else if (!request.IsCreate)
             {
                 userCourseSetting.Value = request.IsDeduction ? --userCourseSetting.Value : MaxValue;
                 _userCourseSettingRepository.Update(userCourseSetting);

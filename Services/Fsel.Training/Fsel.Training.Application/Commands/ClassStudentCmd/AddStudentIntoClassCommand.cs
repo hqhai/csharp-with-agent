@@ -106,6 +106,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                     PackageId = @class.PackageId,
                     CourseLevel = course.CourseLevel,
                     NumberOfShield = request.NumberOfShield,
+                    CourseId = @class.CourseId
                 });
                 if (!updateStudentResult.IsSuccessStatusCode)
                 {

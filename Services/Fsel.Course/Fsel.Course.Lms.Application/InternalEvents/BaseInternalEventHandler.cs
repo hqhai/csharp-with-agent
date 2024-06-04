@@ -459,10 +459,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
                         {
                             CourseLevel = course.CourseLevel,
-                            IsDeduction = true,
                             Type = EnumUserCourseType.ResetAndLearnAgain,
                             UserId = courseResult.CreatedUserId
                         }, cancellationToken).ConfigureAwait(false);
+
+                        await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+                        {
+                            Type = EnumUserCourseType.ChangeLevel,
+                            UserId = courseResult.CreatedUserId
+                        }, cancellationToken).ConfigureAwait(false);
+
                         courseResult.CompletionDate = DateTime.UtcNow;
                     }
 

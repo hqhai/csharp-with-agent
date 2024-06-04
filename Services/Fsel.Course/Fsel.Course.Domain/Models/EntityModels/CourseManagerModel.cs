@@ -29,10 +29,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? ObjectLessonId { get; set; }
         public string? LessonType { get; set; }
         public int? LessonDisplayOrder { get; set; }
+        public EnumCourseSkill? CourseSkill { get; set; }
 
         public double ProgressPercent { get; set; }
         public bool? IsCheckPercentColor { get; set; }
-        public bool IsHideCourse { get; set; }
+        public bool IsHiddenCourseLevel { get; set; }
         public bool IsChangeLevel { get; set; } = true;
         public bool IsResetCourse { get; set; } = true;
     }

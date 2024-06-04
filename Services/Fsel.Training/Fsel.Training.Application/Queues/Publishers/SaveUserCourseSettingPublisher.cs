@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queues.Publishers
+namespace Fsel.Training.Application.Queues.Publishers
 {
     using System.Threading.Tasks;
     using Fsel.Core.Base.Interfaces;

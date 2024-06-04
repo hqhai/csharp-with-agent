@@ -629,6 +629,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
@@ -671,6 +674,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<DateTime?>("ProcessDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
@@ -4549,6 +4555,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
@@ -4594,6 +4603,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<DateTime?>("ProcessDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
