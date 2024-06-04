@@ -67,5 +67,7 @@ namespace Fsel.Course.Domain.Entities
         public string? GradingAlFeedback { get; set; }
 
         public string? SpeechTextAnswer { get; set; }
+
+        public double? PronunciationScore { get; set; }
     }
 }
