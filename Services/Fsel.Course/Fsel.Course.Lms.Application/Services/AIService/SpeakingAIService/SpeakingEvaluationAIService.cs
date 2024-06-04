@@ -31,11 +31,9 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             // Creates an instance of a speech config with specified subscription key and service region.
             var config = SpeechConfig.FromSubscription(_appSetting.AzureAiConfig?.SecondApiKey, _appSetting.AzureAiConfig?.Location);
 
-
             string language = "en-US";
             string topic = "Introduce yourself";
             //url = "https://s3-sgn10.fptcloud.com/fsel-public/Videos/What_is_your_name_1716804591.mp3";
-
 
             // Download the file
             var localPath = _systemFileProvider.TransformFileFromUrl(url, ".wav");
@@ -178,9 +176,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             return wavFilePath;
         }
-
     }
-
 
     public class PronunciationAssessment
     {
