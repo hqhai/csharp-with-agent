@@ -14,6 +14,7 @@ namespace Fsel.Ordering.Infrastructure.Maps
         {
             CreateMap<Package, PackageModel>().IgnoreAllNonExisting();
             CreateMap<SavePackageCommandModel, Package>().IgnoreAllNonExisting();
+            CreateMap<PackageTranslation, PackageTranslationModel>().IgnoreAllNonExisting();
         }
     }
 }
