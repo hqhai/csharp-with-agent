@@ -11,12 +11,13 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -25,89 +26,167 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         private readonly IMediator _mediator;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMockTestScoreRepository _mockTestScoreRepository;
-        private readonly IMapper _mapper;
+        private readonly IProsodyScoreRepository _prosodyScoreRepository;
+        private readonly SubmitAiSpeakingAnswerPublisher _submitAiSpeakingAnswerPublisher;
 
-        public SpeakingAIService(IMediator mediator, IMockTestResultRepository mockTestResultRepository, IMockTestScoreRepository mockTestScoreRepository, IMapper mapper)
+        public SpeakingAIService(IMediator mediator, IMockTestResultRepository mockTestResultRepository, IMockTestScoreRepository mockTestScoreRepository, IProsodyScoreRepository prosodyScoreRepository, SubmitAiSpeakingAnswerPublisher submitAiSpeakingAnswerPublisher)
         {
             _mediator = mediator;
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestScoreRepository = mockTestScoreRepository;
-            _mapper = mapper;
+            _prosodyScoreRepository = prosodyScoreRepository;
+            _submitAiSpeakingAnswerPublisher = submitAiSpeakingAnswerPublisher;
         }
 
+        #region Handle
 
+
+        /// <summary>
+        /// Chấm điểm speaking bằng AI
+        /// </summary>
+        /// <param name="mockTestResultId"></param>
+        /// <param name="sectionGroupId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<bool> EvaluationSpeakingAI(Guid mockTestResultId, Guid sectionGroupId, CancellationToken cancellationToken)
         {
-            List<MockTestScore> mockTestScores = new List<MockTestScore>();
-
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            var mockTestResult = _mockTestResultRepository.Queryable.Include(x => x.MockTestAnswers).ThenInclude(x => x.SectionTimeCode).Where(x => x.Id == mockTestResultId).FirstOrDefault();
+            var mockTestResult = _mockTestResultRepository.Queryable
+                .Include(x => x.MockTestAnswers)
+                .ThenInclude(x => x.SectionTimeCode)
+                .FirstOrDefault(x => x.Id == mockTestResultId);
 
-            List<EnumMockTestScoreCriteria> criteria = new List<EnumMockTestScoreCriteria> { EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy, EnumMockTestScoreCriteria.LexicalResource, EnumMockTestScoreCriteria.FluencyAndCoherence };
-
-            //Validate
             if (mockTestResult == null)
             {
                 return false;
             }
 
-            // Build Dynamic Config 
-            IList<string> questionArray = new List<string>();
-            IList<string> answerArray = new List<string>();
-            foreach (var item in mockTestResult.MockTestAnswers)
-            {
-                questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
-                answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
-            }
+            var (questionArray, answerArray, averagePronScore) = ExtractQuestionAnswerAndPronunciationScores(mockTestResult);
 
+            var scoreRanges = _prosodyScoreRepository.Queryable.ToList();
+            (long bandScore, string feedBack) = GetBandScore(averagePronScore, scoreRanges);
 
-            //Handler Data
+            List<MockTestScore> mockTestScores = new List<MockTestScore>
+                                                        {
+                                                            CreateMockTestScore(EnumMockTestScoreCriteria.Pronunciation, bandScore, feedBack ?? string.Empty, sectionGroupId, mockTestResultId)
+                                                        };
+
+            var criteria = new List<EnumMockTestScoreCriteria>
+                                {
+                                    EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy,
+                                    EnumMockTestScoreCriteria.LexicalResource,
+                                    EnumMockTestScoreCriteria.FluencyAndCoherence
+                                };
+
             foreach (var item in criteria)
             {
-                string userAiConfig = CustomAnswerConfigToSendGPT(questionArray, answerArray, item);
-
-                var aIResponse = await _mediator.Send(new SubmitAICommand
-                {
-                    SystemRoleAlConfig = GetConfigByType(item, true),
-                    UserAIConfig = userAiConfig,
-                    SettingModel = "gpt-4o",
-                    SettingTemperature = 1,
-                    SettingFrequecy = 0,
-                    SettingWordMaxLength = 1000,
-                    SettingPresence = 0,
-                    SettingTopP = 1
-                }, cancellationToken).ConfigureAwait(false);
-                aIResponse = RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+                var aIResponse = await GetAIResponse(item, questionArray, answerArray, cancellationToken);
                 var responseModel = ConvertHelper.Deserialize<AIEvaluationOutputModel>(aIResponse);
 
                 if (long.TryParse(responseModel!.BandScore, out long bandScoreValue))
                 {
-                    MockTestScore mockTestScoreModel = new MockTestScore()
-                    {
-                        Criteria = item,
-                        Score = bandScoreValue,
-                        FeedBack = responseModel!.BandDescriptorText,
-                        SectionGroupId = sectionGroupId,
-                        MockTestResultId = mockTestResultId
-                    };
-
-                    mockTestScores.Add(mockTestScoreModel);
+                    mockTestScores.Add(CreateMockTestScore(item, bandScoreValue, responseModel.BandDescriptorText ?? string.Empty, sectionGroupId, mockTestResultId));
                 }
             }
 
+            await SendToWebSocket(mockTestScores, cancellationToken);
 
-            await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _mockTestScoreRepository.AddList(mockTestScores);
-                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                return methodResult;
-
-
-            });
+            await SaveMockTestScoresToDatabase(mockTestScores, cancellationToken);
 
             return methodResult.Result;
         }
 
+        /// <summary>
+        /// Tạo question, answer và averageScore tương ứng
+        /// </summary>
+        /// <param name="mockTestResult"></param>
+        /// <returns></returns>
+        private static (IList<string> questionArray, IList<string> answerArray, double averagePronScore) ExtractQuestionAnswerAndPronunciationScores(MockTestResult mockTestResult)
+        {
+            IList<string> questionArray = new List<string>();
+            IList<string> answerArray = new List<string>();
+            double? pronScore = 0;
+            int count = 0;
+
+            foreach (var item in mockTestResult.MockTestAnswers)
+            {
+                questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
+                answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
+                pronScore += item?.PronunciationScore;
+                count++;
+            }
+
+            double averagePronScore = count > 0 ? (double)pronScore / count : 0;
+            return (questionArray, answerArray, averagePronScore);
+        }
+
+
+        /// <summary>
+        /// Tạo model mocktestscore tương ứng
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <param name="score"></param>
+        /// <param name="feedback"></param>
+        /// <param name="sectionGroupId"></param>
+        /// <param name="mockTestResultId"></param>
+        /// <returns></returns>
+        private static MockTestScore CreateMockTestScore(EnumMockTestScoreCriteria criteria, long score, string feedback, Guid sectionGroupId, Guid mockTestResultId)
+        {
+            return new MockTestScore
+            {
+                Criteria = criteria,
+                Score = score,
+                FeedBack = feedback,
+                SectionGroupId = sectionGroupId,
+                MockTestResultId = mockTestResultId
+            };
+        }
+
+
+        /// <summary>
+        /// Lấy dữ liệu AI
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="questionArray"></param>
+        /// <param name="answerArray"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task<string> GetAIResponse(EnumMockTestScoreCriteria item, IList<string> questionArray, IList<string> answerArray, CancellationToken cancellationToken)
+        {
+            string userAiConfig = CustomAnswerConfigToSendGPT(questionArray, answerArray, item);
+
+            var aIResponse = await _mediator.Send(new SubmitAICommand
+            {
+                SystemRoleAlConfig = GetConfigByType(item, true),
+                UserAIConfig = userAiConfig,
+                SettingModel = "gpt-4o",
+                SettingTemperature = 1,
+                SettingFrequecy = 0,
+                SettingWordMaxLength = 1000,
+                SettingPresence = 0,
+                SettingTopP = 1
+            }, cancellationToken).ConfigureAwait(false);
+
+            return RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+        }
+
+        /// <summary>
+        /// Lưu xuống db
+        /// </summary>
+        /// <param name="mockTestScores"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task SaveMockTestScoresToDatabase(List<MockTestScore> mockTestScores, CancellationToken cancellationToken)
+        {
+            await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _mockTestScoreRepository.AddList(mockTestScores);
+                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return new MethodResult<bool>();
+            });
+        }
+        #endregion
+        #region Func
         /// <summary>
         /// Hàm loại bỏ MarkDown của chatgpt trả về
         /// </summary>
@@ -122,8 +201,57 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             return cleanedJson;
         }
 
+
         /// <summary>
-        /// config answer , question.
+        /// Gửi kết quả đển websocket
+        /// </summary>
+        /// <param name="scores"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task SendToWebSocket(List<MockTestScore> scores, CancellationToken cancellationToken)
+        {
+            foreach (var score in scores)
+            {
+
+                SubmitAiSpeakingResponseModel model = new SubmitAiSpeakingResponseModel()
+                {
+                    CriteriaName = score.Criteria.ToString(),
+                    BandScore = score.Score,
+                    BandDescriptionText = score.FeedBack,
+                    MockTestResultId = score.MockTestResultId,
+                };
+                await _submitAiSpeakingAnswerPublisher.Publish(model, cancellationToken);
+
+            }
+
+        }
+
+        /// <summary>
+        /// Lấy giá trị BandScore theo khoảng.
+        /// </summary>
+        /// <param name="averagePronScore"></param>
+        /// <param name="scoreRanges"></param>
+        /// <returns></returns>
+        public static (long bandScore, string? comment) GetBandScore(double averagePronScore, List<ProsodyScore>? scoreRanges)
+        {
+
+            if (scoreRanges == null || scoreRanges.Count == 0)
+            {
+                return (0, string.Empty);
+            }
+
+            foreach (var range in scoreRanges)
+            {
+                if (averagePronScore >= range.MinScore && averagePronScore <= range.MaxScore)
+                {
+                    return ((long)range.BandScore, range.BandComment);
+                }
+            }
+            return (0, string.Empty); // Hoặc giá trị mặc định nếu không tìm thấy khoảng phù hợp
+        }
+
+        /// <summary>
+        /// config answer , question. để tạo thành prompt gửi cho chatgpt
         /// </summary>
         /// <param name="answer"></param>
         /// <returns></returns>
@@ -157,6 +285,13 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             return result;
         }
 
+
+        /// <summary>
+        /// Lấy config của AI Speaking theo tiêu chí
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <param name="isUserConfig"></param>
+        /// <returns></returns>
         private static string GetConfigByType(EnumMockTestScoreCriteria criteria, bool isUserConfig)
         {
             string result = string.Empty;
@@ -237,5 +372,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             return words;
         }
+
+        #endregion
     }
 }
