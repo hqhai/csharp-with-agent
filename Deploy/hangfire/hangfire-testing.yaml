@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hangfire-testing
+spec:
+  selector:
+    matchLabels:
+      app: hangfire-testing
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: hangfire-testing
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-staging
+      containers:
+      - name: hangfire-testing
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire:..........
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /app/appsettings.Testing.json
+          name: hangfire-appsettings-testing
+          subPath: appsettings.Testing.json
+      imagePullSecrets:
+        - name: gitlab-fsel-secret
+      tolerations:
+      - effect: NoSchedule
+        key: appnodes-staging
+        operator: Exists
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: hangfire-appsettings-testing
+        name: hangfire-appsettings-testing
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hangfire-testing
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: hangfire-testing
+
+

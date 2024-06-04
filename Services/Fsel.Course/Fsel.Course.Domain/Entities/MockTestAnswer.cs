@@ -65,5 +65,9 @@ namespace Fsel.Course.Domain.Entities
         public Guid? SectionGroupResultId { get; set; }
 
         public string? GradingAlFeedback { get; set; }
+
+        public string? SpeechTextAnswer { get; set; }
+
+        public double? PronunciationScore { get; set; }
     }
 }

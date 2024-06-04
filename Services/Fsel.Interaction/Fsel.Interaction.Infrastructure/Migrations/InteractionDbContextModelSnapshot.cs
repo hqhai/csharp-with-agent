@@ -1546,7 +1546,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Description = "addd",
                             IsDeleted = false,
                             Language = "en-US",
-                            Question = "Your position?",
+                            Question = "Your location?",
                             SurveyQuestionId = new Guid("35a71ae7-49c1-4878-a1db-edcd2834f1cd")
                         },
                         new
