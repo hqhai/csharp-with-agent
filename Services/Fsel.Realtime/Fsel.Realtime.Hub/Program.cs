@@ -22,6 +22,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.NotificationQueue.NameQueue.Notification, typeof(NotificationConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.AIFeedBack, typeof(AIFeedBackConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestWriting, typeof(MockTestAIFeedBackConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.ChatBotRealTime, typeof(ChatBotConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.MockTestSpeaking, typeof(MockTestAISpeakingConsumer) },
 });
 
 var app = builder.Build();
@@ -31,4 +33,8 @@ app.UseHubs<NotificationHub>(RealtimeSettings.NotificationHub.Pattern);
 app.UseHubs<LeaderBoardHub>(RealtimeSettings.LeaderBoardHub.Pattern);
 app.UseHubs<ClassForumAIFeedBackHub>(RealtimeSettings.ClassForumAIFeedBackHub.Pattern);
 app.UseHubs<MockTestWritingHub>(RealtimeSettings.MockTestWritingAIFeedBackHub.Pattern);
+app.UseHubs<MockTestSpeakingHub>(RealtimeSettings.MockTestSpeakingAIFeedBackHub.Pattern);
+app.UseHubs<FeatureAccessTimeHub>(RealtimeSettings.FeatureAccessTimeHub.Pattern);
+app.UseHubs<SetTimeModuleHub>(RealtimeSettings.SetTimeModuleHub.Pattern);
+app.UseHubs<ChatBotHub>(RealtimeSettings.ChatBotHub.Pattern);
 app.Run();

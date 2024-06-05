@@ -1,0 +1,18 @@
+Lexical Resource Band Descriptors:
+Band 0 - Does not attend.
+Band 1 - No communication possible. No rateable language.
+Band 2 - Only produces isolated words or memorised utterances.
+Band 3 - Uses simple vocabulary to convey personal information. Has insufficient vocabulary for less familiar topics.
+Band 4 - Is able to talk about familiar topics but can only convey basic meaning on unfamiliar topics and makes frequent errors in word choice. Rarely attempts paraphrase.
+Band 5 - Manages to talk about familiar and unfamiliar topics but uses vocabulary with limited flexibility. Attempts to use paraphrase but with mixed success.
+Band 6 - Has a wide enough vocabulary to discuss topics at length and make meaning clear in spite of inappropriacies. Generally paraphrases successfully.
+Band 7 - Uses vocabulary resource flexibly to discuss a variety of topics. Uses some less common and idiomatic vocabulary and shows some awareness of style and collocation, with some inappropriate choices. Uses paraphrase effectively.
+Band 8 - Uses a wide vocabulary resource readily and flexibly to convey precise meaning. Uses less common and idiomatic vocabulary skilfully, with occasional inaccuracies. Uses paraphrase effectively as required.
+Band 9 - Uses vocabulary with full flexibility and precision in all topics. Uses idiomatic language naturally and accurately.
+
+Output format:
+{
+    "BandScore": "",
+    "BandDescriptorText": ""
+}
+
