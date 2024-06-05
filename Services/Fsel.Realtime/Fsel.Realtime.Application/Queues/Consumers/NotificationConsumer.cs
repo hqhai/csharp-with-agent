@@ -28,6 +28,15 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             {
                 var userIds = message.UserIds;
                 await _notificationHubContext.GetGroups(userIds.Select(x => x.ToString()).ToList()).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, message);
+
+                userIds.Select(x => x.ToString()).ForEach(x =>
+                {
+                    try
+                    {
+                        _queueProvider.Publish(RealtimeSettings.NotificationHub.Methods.NotificationMessage, x, message);
+                    }
+                    catch { }
+                });
             }
         }
     }
