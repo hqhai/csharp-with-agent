@@ -111,7 +111,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 return methodResult;
             }
-            var mockTestAnswers = new List<MockTestAnswer>();
             var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).FirstOrDefaultAsync(x => x.Id == request.MockTestResultId, cancellationToken);
             if (mockTestResult == null || mockTestResult.MockTest == null)
             {
@@ -227,6 +226,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
+        }
+
+        private async Task SendToChatGpt(Guid sectionId, Guid sectionGroupId, Guid mockTestResultId, string? answer, CancellationToken cancellationToken)
+        {
+            await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
+            {
+                SectionId = sectionId,
+                SectionGroupId = sectionGroupId,
+                MockTestResultId = mockTestResultId,
+                WordContent = (answer == "null" || string.IsNullOrEmpty(answer)) ? string.Empty : answer,
+            }, cancellationToken);
         }
 
         private static MockTestResult GetMockTestResult(IList<SectionGroupResult>? sectionGroupResults, MockTestResult mockTestResult)
