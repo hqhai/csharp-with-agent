@@ -4,11 +4,16 @@ namespace Fsel.Realtime.Application.Hubs
 {
     using Fsel.Core.Base;
     using Fsel.Core.Extensions;
+    using Fsel.Core.Services.IpApiServices;
     using Microsoft.AspNetCore.SignalR;
 
     public class MockTestWritingHub : BaseHub
     {
-        public override async Task OnConnectedAsync()
+        public MockTestWritingHub(AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        {
+        }
+
+        public override async Task OnConnectedHubAsync()
         {
             string mockTestCriteria = Context.GetHttpContext()?.Request.Query["MockTestResultId"].ToString()!;
             if (!string.IsNullOrEmpty(mockTestCriteria))
@@ -19,7 +24,7 @@ namespace Fsel.Realtime.Application.Hubs
             await base.OnConnectedAsync();
         }
 
-        public override async Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedHubAsync(Exception? exception)
         {
             string mockTestCriteria = Context.GetHttpContext()?.Request.Query["MockTestResultId"].ToString()!;
             if (!string.IsNullOrEmpty(mockTestCriteria))
