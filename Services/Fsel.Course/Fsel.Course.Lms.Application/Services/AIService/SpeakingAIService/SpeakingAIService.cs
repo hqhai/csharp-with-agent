@@ -112,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             {
                 questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
                 answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
-                pronScore += item?.PronunciationScore;
+                pronScore += item?.PronunciationScore ?? default;
                 count++;
             }
 
