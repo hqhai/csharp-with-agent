@@ -152,7 +152,6 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new MockTestAISettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestScoreEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestAICriteriaSettingTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ClassForumDetailResultTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ProsodyScoreEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);

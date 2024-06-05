@@ -104,7 +104,6 @@ builder.Services.AddScoped<IMockTestScoreRepository, MockTestScoreRepository>();
 builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRandomRepository>();
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
 builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
-builder.Services.AddScoped<IClassForumDetailResultRepository, ClassForumDetailResultRepository>();
 builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
 builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
 builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
