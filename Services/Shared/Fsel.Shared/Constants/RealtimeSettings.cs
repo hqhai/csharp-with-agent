@@ -48,5 +48,45 @@ namespace Fsel.Shared.Constants
                 public const string MockTestWritingAIFeedBack = $"MockTestWritingAIFeedBack";
             }
         }
+
+        public static class MockTestSpeakingAIFeedBackHub
+        {
+            public const string Pattern = $"/mock-test-speaking";
+
+            public static class Methods
+            {
+                public const string MockTestSpeakingAIFeedBack = $"MockTestSpeakingAIFeedBack";
+            }
+        }
+
+        public static class SetTimeModuleHub
+        {
+            public const string Pattern = $"/set-time-module";
+
+            public static class Methods
+            {
+                public const string SetTimeModule = $"SetTimeModule";
+            }
+        }
+
+        public static class FeatureAccessTimeHub
+        {
+            public const string Pattern = $"/feature-access-time";
+
+            public static class Methods
+            {
+                public const string FeatureAccessTime = $"FeatureAccessTime";
+            }
+        }
+
+        public static class ChatBotHub
+        {
+            public const string Pattern = $"/chat-bot";
+
+            public static class Methods
+            {
+                public const string ChatBot = $"ChatBot";
+            }
+        }
     }
 }
