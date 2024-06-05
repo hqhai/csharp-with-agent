@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         {
             IList<string> questionArray = new List<string>();
             IList<string> answerArray = new List<string>();
-            double? pronScore = 0;
+            double pronScore = 0;
             int count = 0;
 
             foreach (var item in mockTestResult.MockTestAnswers)
