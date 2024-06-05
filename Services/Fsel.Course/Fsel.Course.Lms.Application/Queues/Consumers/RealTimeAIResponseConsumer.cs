@@ -27,7 +27,6 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             await _mediator.Send(new SubmitClassforumAICommand
             {
                 UserAIConfig = message.UserAIConfig,
-                ClassForumDetailResultId = message.ClassForumDetailResultId,
                 SystemRoleAlConfig = message.SystemRoleAlConfig,
                 SettingWordMaxLength = message.SettingWordMaxLength,
                 SettingTopP = message.SettingTopP,
