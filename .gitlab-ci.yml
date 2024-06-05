@@ -1085,29 +1085,6 @@ deploy-staging-auth:
     refs:
     - staging
 
-deploy-prod-auth:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
-    DEPLOY: ./Deploy/auth/auth-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-auth
-  only:
-    changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-gateway:
   stage: deploy
@@ -1157,29 +1134,7 @@ deploy-staging-gateway:
     refs:
     - staging
 
-deploy-prod-gateway:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
-    DEPLOY: ./Deploy/gateway/gateway-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-gateway
-  only:
-    changes:
-    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
+
 
 deploy-test-hangfire:
   stage: deploy
@@ -1229,29 +1184,6 @@ deploy-staging-hangfire:
     refs:
     - staging
 
-deploy-prod-hangfire:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
-    DEPLOY: ./Deploy/hangfire/hangfire-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-hangfire
-  only:
-    changes:
-    - Services/Fsel.Hangfire/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-interaction:
   stage: deploy
@@ -1301,29 +1233,6 @@ deploy-staging-interaction:
     refs:
     - staging
 
-deploy-prod-interaction:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
-    DEPLOY: ./Deploy/interaction/interaction-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-interaction
-  only:
-    changes:
-    - Services/Fsel.Interaction/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-lcmsapi:
   stage: deploy
@@ -1373,29 +1282,6 @@ deploy-staging-lcmsapi:
     refs:
     - staging
 
-deploy-prod-lcmsapi:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
-    DEPLOY: ./Deploy/lcmsapi/lcmsapi-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-lcmsapi
-  only:
-    changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-lmsapi:
   stage: deploy
@@ -1445,29 +1331,6 @@ deploy-staging-lmsapi:
     refs:
     - staging
 
-deploy-prod-lmsapi:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
-    DEPLOY: ./Deploy/lmsapi/lmsapi-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-lmsapi
-  only:
-    changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-notification:
   stage: deploy
@@ -1517,29 +1380,6 @@ deploy-staging-notification:
     refs:
     - staging
 
-deploy-prod-notification:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
-    DEPLOY: ./Deploy/notification/notification-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-notification
-  only:
-    changes:
-    - Services/Fsel.Notification/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-ordering:
   stage: deploy
@@ -1589,30 +1429,6 @@ deploy-staging-ordering:
     refs:
     - staging
 
-deploy-prod-ordering:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
-    DEPLOY: ./Deploy/ordering/ordering-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-ordering
-  only:
-    changes:
-    - Services/Fsel.Ordering/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
-
 deploy-test-realtime:
   stage: deploy
   tags:
@@ -1661,29 +1477,6 @@ deploy-staging-realtime:
     refs:
     - staging
 
-deploy-prod-realtime:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
-    DEPLOY: ./Deploy/realtime/realtime-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-realtime
-  only:
-    changes:
-    - Services/Fsel.Realtime/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-sender:
   stage: deploy
@@ -1733,29 +1526,6 @@ deploy-staging-sender:
     refs:
     - staging
 
-deploy-prod-sender:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
-    DEPLOY: ./Deploy/sender/sender-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-sender
-  only:
-    changes:
-    - Services/Fsel.Sender/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-storage:
   stage: deploy
@@ -1805,29 +1575,6 @@ deploy-staging-storage:
     refs:
     - staging
 
-deploy-prod-storage:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
-    DEPLOY: ./Deploy/storage/storage-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-storage
-  only:
-    changes:
-    - Services/Fsel.Storage/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-system:
   stage: deploy
@@ -1877,29 +1624,6 @@ deploy-staging-system:
     refs:
     - staging
 
-deploy-prod-system:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
-    DEPLOY: ./Deploy/system/system-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-system
-  only:
-    changes:
-    - Services/Fsel.System/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-training:
   stage: deploy
@@ -1949,29 +1673,6 @@ deploy-staging-training:
     refs:
     - staging
 
-deploy-prod-training:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
-    DEPLOY: ./Deploy/training/training-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-training
-  only:
-    changes:
-    - Services/Fsel.Training/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
 
 deploy-test-identity:
   stage: deploy
@@ -2021,30 +1722,6 @@ deploy-staging-identity:
     refs:
     - staging
 
-deploy-prod-identity:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
-    DEPLOY: ./Deploy/user/user-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-identity
-  only:
-    changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
-
 deploy-test-cms-planetdefender:
   stage: deploy
   tags:
@@ -2092,28 +1769,3 @@ deploy-staging-cms-planetdefender:
     - Services/Shared/**/*
     refs:
     - staging
-
-deploy-prod-cms-planetdefender:
-  stage: deploy
-  tags:
-  - atlantic-k8s
-  retry:
-    max: 2
-  image: bitnami/kubectl
-  script:
-    - sed -i "s|$IMAGE_NAME:..........|$IMAGE_NAME:$TAG|g" $DEPLOY
-    - kubectl apply -f $DEPLOY --kubeconfig=Deploy/config -n $NAMESPACES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
-    DEPLOY: ./Deploy/cms/cms-production.yaml
-    NAMESPACES: fsel-production
-  extends: ".deploy-service"
-  needs:
-    - job: build-prod-cms-planetdefender
-  only:
-    changes:
-    - Services/Fsel.Cms.PlanetDefender/**/*
-    - Services/Shared/**/*
-    refs:
-    - main
-
