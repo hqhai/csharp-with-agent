@@ -118,7 +118,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 }
             }
 
-            methodResult.Result = reportStudents.OrderBy(x => emails.IndexOf(x.Email)).ToList().ExportExcel();
+            methodResult.Result = reportStudents.OrderBy(x => emails.IndexOf(x.Email!)).ToList().ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -130,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             reportProgressStudentExport.VideoStatus = videoResult?.Status;
             reportProgressStudentExport.ClassForumStatus = classForumResult?.Status;
-            reportProgressStudentExport.HomeWorkStatus = classForumResult != null ? EnumResultStatus.Process : null;
+            reportProgressStudentExport.HomeWorkStatus = classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft ? EnumResultStatus.Process : null;
             return reportProgressStudentExport;
         }
     }

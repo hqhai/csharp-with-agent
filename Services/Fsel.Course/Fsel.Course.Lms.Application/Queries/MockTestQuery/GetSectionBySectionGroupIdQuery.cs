@@ -100,9 +100,18 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             if (sectionGroupResult == null)
             {
                 _logger.LoggerRequest(request);
-
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+
+                //if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking)
+                //{
+                //    await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
+                //    {
+                //        ExecutionTime = sectionGroup.ExecutionTime,
+                //        ObjectResultId = sectionGroupResult.Id,
+                //        ObjectResultType = nameof(MockTest)
+                //    }, CancellationToken.None).ConfigureAwait(false);
+                //}
             }
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
