@@ -108,6 +108,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             double pronScore = 0;
             int count = 0;
 
+            mockTestResult.MockTestAnswers = mockTestResult.MockTestAnswers.Where(x => x.SectionGroupResult?.SkillScores?.FirstOrDefault()?.Skill == EnumCourseSkill.Speaking).ToList();
+
             foreach (var item in mockTestResult.MockTestAnswers)
             {
                 questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
