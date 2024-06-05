@@ -26,14 +26,14 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             _systemFileProvider = systemFileProvider;
         }
 
-        public async Task<double> EvaluationSpeaking(string url)
+        public async Task<double> EvaluationSpeaking(string? question, string url)
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             var config = SpeechConfig.FromSubscription(_appSetting.AzureAiConfig?.SecondApiKey, _appSetting.AzureAiConfig?.Location);
 
 
             string language = "en-US";
-            string topic = "Introduce yourself";
+            string topic = question ?? string.Empty;
             //url = "https://s3-sgn10.fptcloud.com/fsel-public/Videos/What_is_your_name_1716804591.mp3";
 
 
