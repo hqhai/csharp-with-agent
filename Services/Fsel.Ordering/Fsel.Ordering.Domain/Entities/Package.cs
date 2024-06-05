@@ -8,7 +8,7 @@ namespace Fsel.Ordering.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
 
-    public class Package : Entity
+    public class Package : Entity, IMultiLingualObject<PackageTranslation>
     {
         /// <summary>
         /// Code
@@ -41,6 +41,9 @@ namespace Fsel.Ordering.Domain.Entities
         [Range(0, double.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double MonthBonusNumber { get; set; }
 
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? IncentivesWhenPurchasing { get; set; }
+
         public EnumPackageSuggest? Suggest { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
@@ -56,7 +59,9 @@ namespace Fsel.Ordering.Domain.Entities
         public string? IncentivesWhenPurchasing { get; set; }
 
         public Guid PackageId { get; set; }
+
         public Package? Package { get; set; }
+
         public string? Language { get; set; }
     }
 }

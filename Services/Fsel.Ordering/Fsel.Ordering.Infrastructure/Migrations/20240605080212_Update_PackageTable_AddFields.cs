@@ -13,9 +13,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+            migrationBuilder.RenameColumn(
                 name: "DescriptionStr",
-                table: "Packages");
+                table: "Packages",
+                newName: "IncentivesWhenPurchasing");
 
             migrationBuilder.AddColumn<double>(
                 name: "MonthBonusNumber",
@@ -73,12 +74,12 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 columns: new[] { "Id", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "IncentivesWhenPurchasing", "IsDeleted", "Language", "PackageId", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
                 values: new object[,]
                 {
-                    { new Guid("5f1edb1d-ca8b-4006-b13f-797ffea98973"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Faire don des droits d'auteur des Éditions de l'Université de Cambridge", false, "fr", new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"), null, null, null },
+                    { new Guid("5f1edb1d-ca8b-4006-b13f-797ffea98973"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Faire don des droits d'auteur des Éditions de l'Université de Cambridge", false, "fr-FR", new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"), null, null, null },
                     { new Guid("81c2c7d2-9b05-485c-9659-e7f8896955a8"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Tặng phí bản quyền của NXB Đại học Cambridge", false, "vi-VN", new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"), null, null, null },
-                    { new Guid("86f466db-ff5a-4aa7-846d-52e25ab1f38f"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Faire don des droits d'auteur des Éditions de l'Université de Cambridge", false, "fr", new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"), null, null, null },
+                    { new Guid("86f466db-ff5a-4aa7-846d-52e25ab1f38f"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Faire don des droits d'auteur des Éditions de l'Université de Cambridge", false, "fr-FR", new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"), null, null, null },
                     { new Guid("b8a900bd-269a-410c-b8bd-22cc32623a38"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Free copyright fee from Cambridge University Press", false, "en-US", new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"), null, null, null },
                     { new Guid("bb9cdf82-74aa-456b-9f8b-ac4902a908cf"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Free copyright fee from Cambridge University Press", false, "en-US", new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"), null, null, null },
-                    { new Guid("cc63e0ed-c6ed-480a-9f32-4952d296ef29"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Faire don des droits d'auteur des Éditions de l'Université de Cambridge", false, "fr", new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"), null, null, null },
+                    { new Guid("cc63e0ed-c6ed-480a-9f32-4952d296ef29"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Faire don des droits d'auteur des Éditions de l'Université de Cambridge", false, "fr-FR", new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"), null, null, null },
                     { new Guid("dc09719c-78d6-45a3-bd11-1ee9b3fe8814"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Tặng phí bản quyền của NXB Đại học Cambridge", false, "vi-VN", new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"), null, null, null },
                     { new Guid("ec9b607c-055e-43f6-a705-f8a0258b4136"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Free copyright fee from Cambridge University Press", false, "en-US", new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"), null, null, null },
                     { new Guid("edb73176-e5bd-4e13-9954-7eacf5968bb8"), new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "Tặng phí bản quyền của NXB Đại học Cambridge", false, "vi-VN", new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"), null, null, null }
@@ -88,22 +89,22 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 table: "Packages",
                 keyColumn: "Id",
                 keyValue: new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
-                columns: new[] { "CreatedDate", "MonthBonusNumber", "Price", "PriceMonth", "Suggest" },
-                values: new object[] { new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), 0.0, 500000m, 500000m, null });
+                columns: new[] { "CreatedDate", "IncentivesWhenPurchasing", "MonthBonusNumber", "Price", "PriceMonth", "Suggest" },
+                values: new object[] { new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "Tặng phí bản quyền của NXB Đại học Cambridge", 0.0, 500000m, 500000m, null });
 
             migrationBuilder.UpdateData(
                 table: "Packages",
                 keyColumn: "Id",
                 keyValue: new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
-                columns: new[] { "Code", "CreatedDate", "MonthBonusNumber", "Price", "PriceMonth", "Suggest" },
-                values: new object[] { "PREMIUM", new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), 3.0, 3600000m, 240000m, "Recommend" });
+                columns: new[] { "Code", "CreatedDate", "IncentivesWhenPurchasing", "MonthBonusNumber", "Price", "PriceMonth", "Suggest" },
+                values: new object[] { "PREMIUM", new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "Tặng phí bản quyền của NXB Đại học Cambridge", 3.0, 3600000m, 240000m, "Recommend" });
 
             migrationBuilder.UpdateData(
                 table: "Packages",
                 keyColumn: "Id",
                 keyValue: new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
-                columns: new[] { "Code", "CreatedDate", "MonthBonusNumber", "Price", "PriceMonth", "Suggest" },
-                values: new object[] { "STANDARD", new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), 1.5, 2400000m, 320000m, "BestSeller" });
+                columns: new[] { "Code", "CreatedDate", "IncentivesWhenPurchasing", "MonthBonusNumber", "Price", "PriceMonth", "Suggest" },
+                values: new object[] { "STANDARD", new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "Tặng phí bản quyền của NXB Đại học Cambridge", 1.5, 2400000m, 320000m, "BestSeller" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PackageTranslations_PackageId",
@@ -129,12 +130,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 name: "Suggest",
                 table: "Packages");
 
-            migrationBuilder.AddColumn<string>(
-                name: "DescriptionStr",
+            migrationBuilder.RenameColumn(
+                name: "IncentivesWhenPurchasing",
                 table: "Packages",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
+                newName: "DescriptionStr");
 
             migrationBuilder.UpdateData(
                 table: "Packages",

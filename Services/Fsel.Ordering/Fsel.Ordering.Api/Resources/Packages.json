@@ -7,6 +7,7 @@
     "priceMonth": 500000,
     "monthNumber": 1,
     "monthBonusNumber": 0,
+    "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
     "createdDate": "2024-06-04",
     "translations": [
       {
@@ -28,7 +29,7 @@
         "createdDate": "2024-06-04",
         "packageId": "42d7ddb2-9f36-4f86-badc-67dc16bb722b",
         "incentivesWhenPurchasing": "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
-        "language": "fr"
+        "language": "fr-FR"
       }
     ]
   },
@@ -40,6 +41,7 @@
     "priceMonth": 320000,
     "monthNumber": 6,
     "monthBonusNumber": 1.5,
+    "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
     "suggest": "BestSeller",
     "createdDate": "2024-06-04",
     "translations": [
@@ -62,7 +64,7 @@
         "createdDate": "2024-06-04",
         "packageId": "daa6fc87-6461-49d4-b3a5-c9e4cc30bc59",
         "incentivesWhenPurchasing": "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
-        "language": "fr"
+        "language": "fr-FR"
       }
     ]
   },
@@ -74,6 +76,7 @@
     "priceMonth": 240000,
     "monthNumber": 12,
     "monthBonusNumber": 3,
+    "incentivesWhenPurchasing": "Tặng phí bản quyền của NXB Đại học Cambridge",
     "suggest": "Recommend",
     "createdDate": "2024-06-04",
     "translations": [
@@ -96,7 +99,7 @@
         "createdDate": "2024-06-04",
         "packageId": "d13ee4ab-785a-425c-bd70-b74b61df42eb",
         "incentivesWhenPurchasing": "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
-        "language": "fr"
+        "language": "fr-FR"
       }
     ]
   }

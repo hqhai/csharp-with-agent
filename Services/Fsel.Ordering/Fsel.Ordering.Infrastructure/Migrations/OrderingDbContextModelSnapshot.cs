@@ -262,6 +262,10 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("IncentivesWhenPurchasing")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -312,6 +316,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
                             IsDeleted = false,
                             MonthBonusNumber = 0.0,
                             MonthNumber = 1,
@@ -326,6 +331,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
                             IsDeleted = false,
                             MonthBonusNumber = 1.5,
                             MonthNumber = 6,
@@ -341,6 +347,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
                             IsDeleted = false,
                             MonthBonusNumber = 3.0,
                             MonthNumber = 12,
@@ -449,7 +456,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IncentivesWhenPurchasing = "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
                             IsDeleted = false,
-                            Language = "fr",
+                            Language = "fr-FR",
                             PackageId = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b")
                         },
                         new
@@ -482,7 +489,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IncentivesWhenPurchasing = "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
                             IsDeleted = false,
-                            Language = "fr",
+                            Language = "fr-FR",
                             PackageId = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59")
                         },
                         new
@@ -515,7 +522,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IncentivesWhenPurchasing = "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
                             IsDeleted = false,
-                            Language = "fr",
+                            Language = "fr-FR",
                             PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb")
                         });
                 });

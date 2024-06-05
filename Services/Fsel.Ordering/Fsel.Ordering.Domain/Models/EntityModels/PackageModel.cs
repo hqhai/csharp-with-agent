@@ -13,7 +13,8 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public decimal PriceMonth { get; set; }
         public int MonthNumber { get; set; }
         public double MonthBonusNumber { get; set; }
+        public string? IncentivesWhenPurchasing { get; set; }
         public EnumPackageSuggest? Suggest { get; set; }
-        public IList<PackageTranslationModel>? Translations { get; set; }
+        //public IList<PackageTranslationModel>? Translations { get; set; }
     }
 }
