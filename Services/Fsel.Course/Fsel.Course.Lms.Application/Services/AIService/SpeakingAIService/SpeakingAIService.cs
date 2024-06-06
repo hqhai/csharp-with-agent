@@ -147,20 +147,25 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         {
             IList<string> questionArray = new List<string>();
             IList<string> answerArray = new List<string>();
-            double? pronScore = 0;
+            double pronScore = 0;
             int count = 0;
 
             mockTestResult.MockTestAnswers = mockTestResult.MockTestAnswers.Where(x => x.SectionGroupResult?.SkillScores?.FirstOrDefault()?.Skill == EnumCourseSkill.Speaking).ToList();
 
             foreach (var item in mockTestResult.MockTestAnswers)
             {
+
                 questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
                 answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
-                pronScore += item?.PronunciationScore ?? default;
-                count++;
+                pronScore += item != null && item.PronunciationScore.HasValue ? item.PronunciationScore.Value : 0;
+
+                if (item != null && item.PronunciationScore.HasValue && item.PronunciationScore.Value != 0)
+                {
+                    count++;
+                }
             }
 
-            double averagePronScore = count > 0 ? (double)pronScore / count : 0;
+            double averagePronScore = NumberHelper.RoundNumberDouble(count > 0 ? (double)pronScore / count : 0);
             return (questionArray, answerArray, averagePronScore, count);
         }
 
