@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         {
             IList<string> questionArray = new List<string>();
             IList<string> answerArray = new List<string>();
-            double? pronScore = 0;
+            double pronScore = 0;
             int count = 0;
 
             mockTestResult.MockTestAnswers = mockTestResult.MockTestAnswers.Where(x => x.SectionGroupResult?.SkillScores?.FirstOrDefault()?.Skill == EnumCourseSkill.Speaking).ToList();
@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             {
                 questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
                 answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
-                pronScore += item?.PronunciationScore ?? default;
+                pronScore += item != null && item.PronunciationScore.HasValue ? item.PronunciationScore.Value : 0;
                 count++;
             }
 
