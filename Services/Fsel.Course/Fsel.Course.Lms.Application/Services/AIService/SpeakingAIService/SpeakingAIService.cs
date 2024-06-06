@@ -154,13 +154,18 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             foreach (var item in mockTestResult.MockTestAnswers)
             {
+
                 questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
                 answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
                 pronScore += item != null && item.PronunciationScore.HasValue ? item.PronunciationScore.Value : 0;
-                count++;
+
+                if (item != null && item.PronunciationScore.HasValue && item.PronunciationScore.Value != 0)
+                {
+                    count++;
+                }
             }
 
-            double averagePronScore = count > 0 ? (double)pronScore / count : 0;
+            double averagePronScore = NumberHelper.RoundNumberDouble(count > 0 ? (double)pronScore / count : 0);
             return (questionArray, answerArray, averagePronScore, count);
         }
 
