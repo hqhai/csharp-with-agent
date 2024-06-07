@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.AuthCmd
+namespace Fsel.Identity.Application.Commands.LandingPages
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -8,10 +8,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Services.InteractionService;
+    using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.CommandModels.Auths;
+    using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -25,17 +27,19 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly IPlatformRepository _platformRepository;
+        private readonly IInteractionService _interactionService;
 
-        public CreateAccountFromLandingPageCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository)
+        public CreateAccountFromLandingPageCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IInteractionService interactionService)
         {
             _userManager = userManager;
             _platformRepository = platformRepository;
+            _interactionService = interactionService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateAccountFromLandingPageCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
 
             if (string.IsNullOrEmpty(request.FullName) || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.PhoneNumber) || string.IsNullOrEmpty(request.Password))
             {
@@ -116,6 +120,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
             await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+
+            var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
+            {
+                Email = user.Email,
+                UserId = user.Id,
+                Answers = new List<CreateSurveyCommandModel>
+                {
+                    new CreateSurveyCommandModel
+                    {
+                        Id = Guid.Parse("492D8BB9-CDBE-42E7-AA16-35A1915C3621"),
+                        Answer = new { Id = 1,Content = "Google",Image = "gmail-icon.svg"},
+                    }
+                }
+            });
 
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
