@@ -10,13 +10,16 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -28,14 +31,18 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         private readonly IMockTestScoreRepository _mockTestScoreRepository;
         private readonly IProsodyScoreRepository _prosodyScoreRepository;
         private readonly SubmitAiSpeakingAnswerPublisher _submitAiSpeakingAnswerPublisher;
+        private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
 
-        public SpeakingAIService(IMediator mediator, IMockTestResultRepository mockTestResultRepository, IMockTestScoreRepository mockTestScoreRepository, IProsodyScoreRepository prosodyScoreRepository, SubmitAiSpeakingAnswerPublisher submitAiSpeakingAnswerPublisher)
+        public SpeakingAIService(IMediator mediator, IMockTestResultRepository mockTestResultRepository, IMockTestScoreRepository mockTestScoreRepository, IProsodyScoreRepository prosodyScoreRepository, SubmitAiSpeakingAnswerPublisher submitAiSpeakingAnswerPublisher, ISectionGroupRepository sectionGroupRepository, ISectionGroupResultRepository sectionGroupResultRepository)
         {
             _mediator = mediator;
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestScoreRepository = mockTestScoreRepository;
             _prosodyScoreRepository = prosodyScoreRepository;
             _submitAiSpeakingAnswerPublisher = submitAiSpeakingAnswerPublisher;
+            _sectionGroupRepository = sectionGroupRepository;
+            _sectionGroupResultRepository = sectionGroupResultRepository;
         }
 
         #region Handle
@@ -61,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 return false;
             }
 
-            var (questionArray, answerArray, averagePronScore) = ExtractQuestionAnswerAndPronunciationScores(mockTestResult);
+            var (questionArray, answerArray, averagePronScore, count) = ExtractQuestionAnswerAndPronunciationScores(mockTestResult);
 
             var scoreRanges = _prosodyScoreRepository.Queryable.ToList();
             (long bandScore, string feedBack) = GetBandScore(averagePronScore, scoreRanges);
@@ -76,7 +83,18 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                                     EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy,
                                     EnumMockTestScoreCriteria.LexicalResource,
                                     EnumMockTestScoreCriteria.FluencyAndCoherence
-                                };
+            };
+
+            var sectionGroup = await _sectionGroupRepository.Queryable.Where(x => x.Id == sectionGroupId).FirstOrDefaultAsync(cancellationToken);
+
+            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == sectionGroupId && x.MockTestResultId == mockTestResultId).FirstOrDefault();
+
+            if (sectionGroupResult == null)
+            {
+                methodResult.Result = false;
+                return methodResult.Result;
+            }
+            //IList<SkillScores> skillScores = new List<SkillScores>();
 
             foreach (var item in criteria)
             {
@@ -89,9 +107,34 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 }
             }
 
+            var score = mockTestScores.Sum(x => x.Score);
+            if (sectionGroupResult.SkillScores == null)
+            {
+                methodResult.Result = false;
+                return methodResult.Result;
+            }
+
+            var skillScores = new List<SkillScores>();
+            foreach (var skillScore in sectionGroupResult.SkillScores)
+            {
+                if (skillScore.Skill == sectionGroup?.CourseSkill)
+                {
+                    skillScore.CorrectCount = score;
+                    skillScore.TotalCount = 36;
+                    skillScore.Skill = EnumCourseSkill.Speaking;
+                    skillScore.Scores = NumberHelper.RoundNumberDouble((double)score / 4); // sửa sau
+                }
+                skillScores.Add(skillScore);
+            }
+            sectionGroupResult.SkillScores = skillScores;
+            sectionGroupResult.CorrectCount += (int)score;
+
             await SendToWebSocket(mockTestScores, cancellationToken);
 
             await SaveMockTestScoresToDatabase(mockTestScores, cancellationToken);
+
+            //save skillscores
+            await SaveSectionGroupResultToDatabase(sectionGroupResult, cancellationToken);
 
             return methodResult.Result;
         }
@@ -101,7 +144,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// </summary>
         /// <param name="mockTestResult"></param>
         /// <returns></returns>
-        private static (IList<string> questionArray, IList<string> answerArray, double averagePronScore) ExtractQuestionAnswerAndPronunciationScores(MockTestResult mockTestResult)
+        private static (IList<string> questionArray, IList<string> answerArray, double averagePronScore, int count) ExtractQuestionAnswerAndPronunciationScores(MockTestResult mockTestResult)
         {
             IList<string> questionArray = new List<string>();
             IList<string> answerArray = new List<string>();
@@ -112,14 +155,19 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             foreach (var item in mockTestResult.MockTestAnswers)
             {
+
                 questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
                 answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
                 pronScore += item != null && item.PronunciationScore.HasValue ? item.PronunciationScore.Value : 0;
-                count++;
+
+                if (item != null && item.PronunciationScore.HasValue && item.PronunciationScore.Value != 0)
+                {
+                    count++;
+                }
             }
 
-            double averagePronScore = count > 0 ? (double)pronScore / count : 0;
-            return (questionArray, answerArray, averagePronScore);
+            double averagePronScore = NumberHelper.RoundNumberDouble(count > 0 ? (double)pronScore / count : 0);
+            return (questionArray, answerArray, averagePronScore, count);
         }
 
 
@@ -183,10 +231,25 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>
             {
                 await _mockTestScoreRepository.AddList(mockTestScores);
-                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _mockTestScoreRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return new MethodResult<bool>();
             });
         }
+
+        private async Task SaveSectionGroupResultToDatabase(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
+        {
+            _sectionGroupResultRepository.Update(sectionGroupResult);
+
+            await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            //await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>
+            //{
+            //return new MethodResult<bool>();
+
+            //});
+        }
+
+
         #endregion
         #region Func
         /// <summary>
