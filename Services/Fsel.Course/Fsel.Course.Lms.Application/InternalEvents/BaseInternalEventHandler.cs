@@ -129,7 +129,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var videoResults = await _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
             if (videoResults != null && videoResults.Any())
             {
-                skillScores = videoResults.SelectMany(x => x.VideoSkillScores!).Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
+                skillScores = videoResults.Where(x => x.VideoSkillScores != null && x.VideoSkillScores.Any()).SelectMany(x => x.VideoSkillScores!)
+                    .Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (courseType == EnumCourseType.Academic)
                 {
                     return (skillScores, GetDoublePercent(skillScores, PercentVideoAcademic));
@@ -153,10 +154,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var classForumResults = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).Where(x => x.Status == EnumClassForumResultStatus.Graded && lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
+            var classForumResults = await _classForumResultRepository.Queryable.Where(x => x.Status.HasValue).Where(x => lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
             if (classForumResults != null && classForumResults.Any())
             {
-                skillScores = classForumResults.Select(x => GetSkillScores(x)).ToList().GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
+                skillScores = classForumResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
+                                               .SelectMany(x => x.SkillScores!)
+                                               .GroupBy(x => x.Skill)
+                                               .Select(x => GetSkillScore(x))
+                                               .ToList();
                 if (courseType != null && courseType == EnumCourseType.Academic)
                 {
                     return (skillScores, GetDoublePercent(skillScores, PercentClassForumAcademic));

@@ -40,7 +40,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             { EnumFolderType.Fsis, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (1 GB)
             { EnumFolderType.AG, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
             { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
-            { EnumFolderType.Files, ByteSize.FromMegabytes(6).Bytes }, //maximum file size (6 MB)
+            { EnumFolderType.Files, ByteSize.FromGigabytes(5).Bytes }, //maximum file size (5 GB)
             { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes }, //maximum question size (6 MB)
             { EnumFolderType.Images, ByteSize.FromMegabytes(500).Bytes } //maximum image size (500 MB)
         };
@@ -371,9 +371,11 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             // Generate M3U8 playlists with multiple quality options for each video
             var qualities = new[]
             {
+                new { Name = "240p", Resolution = "426x240", Bitrate = "300k" },
                 new { Name = "360p", Resolution = "640x360", Bitrate = "400k" },
                 new { Name = "480p", Resolution = "854x480", Bitrate = "800k" },
-                new { Name = "720p", Resolution = "1280x720", Bitrate = "1500k" }
+                new { Name = "720p", Resolution = "1280x720", Bitrate = "1500k" },
+                new { Name = "1080p", Resolution = "1920x1080", Bitrate = "3000k" }
                 // Add more quality options as needed
             };
 
@@ -382,7 +384,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             foreach (var quality in qualities)
             {
                 string outputM3U8 = Path.Combine(rootFolderPath, $"{quality.Name}.m3u8");
-                string ffmpegArgs = $"-i \"{inputPath}\" -c:v libx264 -preset ultrafast -b:v {quality.Bitrate} -vf \"scale={quality.Resolution}\" -c:a aac -b:a 128k -hls_time 120 -hls_list_size 0 -f hls \"{outputM3U8}\"";
+                string ffmpegArgs = $"-i \"{inputPath}\" -c:v libx264 -preset ultrafast -b:v {quality.Bitrate} -vf \"scale={quality.Resolution}\" -c:a aac -b:a 128k -hls_time 10 -hls_list_size 0 -f hls \"{outputM3U8}\"";
 
                 await FfmpegStart(ffmpegArgs);
             }

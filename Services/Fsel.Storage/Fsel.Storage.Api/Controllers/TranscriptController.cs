@@ -1,17 +1,19 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
-using Fsel.Shared.Constants;
-using Fsel.Storage.Domain.Models.CommandModels;
-using Fsel.Storage.Domain.Enums;
-using Fsel.Storage.Application.Services.AmazonS3Services;
-using Fsel.Storage.Domain.Models.EntityModels;
 using Fsel.Shared.Attributes;
+using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
+using Fsel.Storage.Application.Command.ChatbotCmd;
+using Fsel.Storage.Application.Services.AmazonS3Services;
+using Fsel.Storage.Domain.Models.CommandModels;
+using Fsel.Storage.Domain.Models.EntityModels;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Storage.Api.Controllers
 {
@@ -24,12 +26,14 @@ namespace Fsel.Storage.Api.Controllers
         private readonly IDeepgramProvider _deepgramProvider;
         private readonly ICognitiveProvider _cognitiveProvider;
         private readonly IAmazonS3Service _amazonS3Service;
+        private readonly IMediator _mediator;
 
-        public TranscriptController(IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider, IAmazonS3Service amazonS3Service)
+        public TranscriptController(IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider, IAmazonS3Service amazonS3Service, IMediator mediator)
         {
             _deepgramProvider = deepgramProvider;
             _cognitiveProvider = cognitiveProvider;
             _amazonS3Service = amazonS3Service;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -71,6 +75,18 @@ namespace Fsel.Storage.Api.Controllers
                 Content = await _deepgramProvider.GetTranscriptionAsync(file)
             };
             return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Chatbot-Speech
+        /// </summary>
+        [HttpPost("text-to-speech")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> PostSpeech([FromBody] CreateChatbotAudioCommand cmd)
+        {
+            MethodResult<string> queryResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
