@@ -62,7 +62,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
             var learningQuests = new DashboardQuestBoardModel();
             learningQuests.Type = EnumQuestBoardType.LearningQuests;
 
-            var questBoards = await _questBoardRepository.Queryable.Where(p => p.IsActive).ProjectTo<QuestBoardModel>(_mapper.ConfigurationProvider).OrderBy(p => p.Name).ToListAsync(cancellationToken);
+            var questBoards = await _questBoardRepository.Queryable.Include(p => p.QuestBoardStudents).Where(p => p.IsActive).ProjectTo<QuestBoardModel>(_mapper.ConfigurationProvider).OrderBy(p => p.Name).ToListAsync(cancellationToken);
 
             questBoards = questBoards.Where(p => p.IsActive).ToList();
 
@@ -73,25 +73,31 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
             var monDay = weekDays.First();
             var sunDay = weekDays.Last();
 
-            var questBoardStudents = questBoards.Where(p => p.QuestBoardStudents != null && p.QuestBoardStudents.Count > 0).SelectMany(p => p.QuestBoardStudents!).Where(p => p.StudentId == student!.Id);
+            var questBoardStudents = await _questBoardStudentRepository.Queryable.Where(p => questBoards.Select(x => x.Id).Contains(p.QuestBoardId) && p.StudentId == student!.Id).ToListAsync(cancellationToken);
 
             beginnerQuests.QuestBoardModels.ForEach(p =>
             {
                 var questBoardStudent = questBoardStudents.FirstOrDefault(x => x.QuestBoardId == p.Id);
                 p.Status = questBoardStudent == null ? EnumQuestBoardStudentStatus.NotReceived : questBoardStudent.Status;
+                p.CurrentValue = questBoardStudent == null ? 0 : questBoardStudent.CurrentValue;
+                p.IsFinish = questBoardStudent != null && (p.CurrentValue >= p.TargetValue);
             });
 
             learningQuests.QuestBoardModels.ForEach(p =>
             {
                 if (p.RepeatType == EnumRepeatType.Day)
                 {
-                    var questBoardStudent = questBoardStudents.FirstOrDefault(x => x.QuestBoardId == p.Id && x.CreatedDate?.Date == DateTime.UtcNow.Date);
+                    var questBoardStudent = questBoardStudents.FirstOrDefault(x => x.QuestBoardId == p.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
                     p.Status = questBoardStudent == null ? EnumQuestBoardStudentStatus.NotReceived : questBoardStudent.Status;
+                    p.CurrentValue = questBoardStudent == null ? 0 : questBoardStudent.CurrentValue;
+                    p.IsFinish = questBoardStudent != null && (p.CurrentValue >= p.TargetValue);
                 }
                 else
                 {
-                    var questBoardStudent = questBoardStudents.FirstOrDefault(x => x.QuestBoardId == p.Id && x.CreatedDate?.Date >= monDay.Date && x.CreatedDate?.Date <= sunDay.Date);
+                    var questBoardStudent = questBoardStudents.FirstOrDefault(x => x.QuestBoardId == p.Id && x.CreatedDate.Date >= monDay.Date && x.CreatedDate.Date <= sunDay.Date);
                     p.Status = questBoardStudent == null ? EnumQuestBoardStudentStatus.NotReceived : questBoardStudent.Status;
+                    p.CurrentValue = questBoardStudent == null ? 0 : questBoardStudent.CurrentValue;
+                    p.IsFinish = questBoardStudent != null && (p.CurrentValue >= p.TargetValue);
                 }
             });
 
