@@ -21,13 +21,13 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, new QuestBoardStudentQueueModel
-            {
-                ObjectId = request.CourseId,
-                StudentId = request.StudentId,
-                QuestBoardType = EnumQuestBoardType.MainQuests,
-                QuestBoardCategory = EnumQuestBoardCategory.FinishOneLevelPass
-            }, cancellationToken);
+            //await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, new QuestBoardStudentQueueModel
+            //{
+            //    ObjectId = request.CourseId,
+            //    StudentId = request.StudentId,
+            //    QuestBoardType = EnumQuestBoardType.MainQuests,
+            //    QuestBoardCategory = EnumQuestBoardCategory.FinishOneLevelPass
+            //}, cancellationToken);
         }
     }
 }

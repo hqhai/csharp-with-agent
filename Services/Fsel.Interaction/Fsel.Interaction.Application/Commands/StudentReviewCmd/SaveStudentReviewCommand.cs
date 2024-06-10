@@ -185,22 +185,5 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
             });
             return methodResult;
         }
-
-        public async Task DoQuestBoard(Guid? studentId, CancellationToken cancellationToken)
-        {
-            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
-            var courseId = classResult.Content?.Result?.CourseId;
-            if (studentId != null && courseId != null)
-            {
-                IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.RateAndComment };
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    CourseId = (Guid)courseId
-                }, cancellationToken);
-            }
-        }
     }
 }
