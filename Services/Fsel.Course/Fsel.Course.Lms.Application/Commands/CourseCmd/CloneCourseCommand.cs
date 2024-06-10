@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                     .FirstOrDefaultAsync(cancellationToken);
             }
 
-            if (course == null || !course.ParentCourseId.HasValue)
+            if (course == null || course.ParentCourseId.HasValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;

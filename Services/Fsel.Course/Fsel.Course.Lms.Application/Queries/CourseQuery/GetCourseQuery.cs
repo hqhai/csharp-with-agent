@@ -86,8 +86,13 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
+
             var (student, @class) = method.Result;
-            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
+            if (@class == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
 
             var course = await _courseRepository.Queryable
                              .Include(x => x.CourseResults.Where(x => x.StudentId == student.Id && x.CourseId == @class.CourseId))
@@ -154,14 +159,14 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = userId });
+            var orderResult = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { UserId = userId });
             if (!orderResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
                 return methodResult;
             }
-            var status = orderResult?.Content?.Result ?? default;
-            if (status != EnumOrderStatus.Payment)
+            var status = orderResult?.Content?.Result;
+            if (!status.HasValue || status.Value != EnumOrderStatus.Payment)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;

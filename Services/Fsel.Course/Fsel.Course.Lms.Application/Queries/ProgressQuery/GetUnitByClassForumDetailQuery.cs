@@ -18,24 +18,28 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
     public class GetUnitByClassForumDetailQuery : IRequest<MethodResult<IList<ClassForumScoreModel>>>
     {
+        public Guid LessonResultId { get; set; }
         public Guid ClassForumId { get; set; }
     }
 
     public class GetUnitByClassForumDetailQueryHandler : IRequestHandler<GetUnitByClassForumDetailQuery, MethodResult<IList<ClassForumScoreModel>>>
     {
         private readonly AuthContext _authContext;
-        private readonly IClassForumRepository _classForumRepository;
         private readonly IMapper _mapper;
+        private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUserService _userService;
 
         public GetUnitByClassForumDetailQueryHandler(AuthContext authContext
-            , IClassForumRepository classForumRepository
             , IMapper mapper
+            , IClassForumResultRepository classForumResultRepository
+            , ILessonResultRepository lessonResultRepository
             , IUserService userService)
         {
             _authContext = authContext;
-            _classForumRepository = classForumRepository;
             _mapper = mapper;
+            _classForumResultRepository = classForumResultRepository;
+            _lessonResultRepository = lessonResultRepository;
             _userService = userService;
         }
 
@@ -49,20 +53,27 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
-            var studentId = studentResult?.Content?.Result?.Id;
-
-            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                     .ThenInclude(x => x.ClassForumScores)
-                                                     .Where(x => x.Id == request.ClassForumId)
-                                                     .FirstOrDefaultAsync(x => x.Id == request.ClassForumId, cancellationToken);
-            if (classForum == null)
+            var student = studentResult?.Content?.Result;
+            if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var classForumScores = classForum.ClassForumResults.FirstOrDefault()?.ClassForumScores.OrderBy(x => x.Criteria).ToList();
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
+            if (lessonResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
+                return methodResult;
+            }
+
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.ClassForumId == request.ClassForumId, cancellationToken);
+            if (classForumResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
+                return methodResult;
+            }
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumScores ?? default);
+            methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumResult.ClassForumScores.OrderBy(x => x.Criteria));
             return methodResult;
         }
     }

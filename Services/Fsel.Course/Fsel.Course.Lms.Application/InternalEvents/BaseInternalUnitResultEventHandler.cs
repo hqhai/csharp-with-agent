@@ -661,8 +661,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         private async Task SendStudentCompleteUnit(Guid studentId, SendStudentCompleteUnitModel model, EnumCourseType courseType, CancellationToken cancellationToken)
         {
-            var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
-            var student = studentResult.Content?.Result?.FirstOrDefault();
+            var studentResult = await _userService.GetUserByStudentId(studentId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                return;
+            }
+            var student = studentResult.Content?.Result;
             model.FullName = student?.Human?.FullName;
 
             await _mediator.Send(new SenderCommand
@@ -677,8 +681,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         private async Task SendStudentCompleteMidCourse(Guid studentId, SendStudentCompleteMidCourseModel model, CancellationToken cancellationToken)
         {
-            var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
-            var student = studentResult.Content?.Result?.FirstOrDefault();
+            var studentResult = await _userService.GetUserByStudentId(studentId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                return;
+            }
+            var student = studentResult.Content?.Result;
             model.FullName = student?.Human?.FullName;
 
             await _mediator.Send(new SenderCommand

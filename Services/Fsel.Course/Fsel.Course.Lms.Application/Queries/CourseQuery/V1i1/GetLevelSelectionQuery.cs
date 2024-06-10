@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            if (student == null || !student.BaseCourseLevel.HasValue)
+            if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
@@ -88,6 +88,10 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     if (userCourseSetting != null)
                     {
                         item.IsResetCourse = userCourseSetting.Value > MinLearnAgain;
+                    }
+                    else
+                    {
+                        item.IsResetCourse = courseResultLevel != null ? true : null;
                     }
                     item.IsUsedLevel = courseResultLevel?.WorkingStatus == EnumWorkingStatus.Active;
                     item.IsHiddenCourseLevel = isChangeLevelStudent;

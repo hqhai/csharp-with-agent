@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         return false;
                     }
 
-                    var aIResponse = await SendChatGPT(aiConfig, item.SystemRoleAlConfig! ,userAiConfig, cancellationToken);
+                    var aIResponse = await SendChatGPT(aiConfig, item.SystemRoleAlConfig!, userAiConfig, cancellationToken);
 
                     resultDictionary[item.Prompts![0].Type] = aIResponse!;
 
@@ -106,7 +106,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         return false;
                     }
 
-                    var aIResponse = await SendChatGPT(aiConfig, aiConfig.SystemRoleAlConfig,userAiConfig, cancellationToken);
+                    var aIResponse = await SendChatGPT(aiConfig, aiConfig.SystemRoleAlConfig, userAiConfig, cancellationToken);
 
                     resultDictionary[item.Type] = aIResponse!;
 
@@ -137,24 +137,13 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 return true;
             }
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { mockTestResult.StudentId });
-            if (!studentResults.IsSuccessStatusCode)
-            {
-                return true;
-            }
-            var student = studentResults.Content?.Result?.FirstOrDefault();
-            if (student == null)
-            {
-                return true;
-            }
 
             bool checkSkillMockTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
 
             (double averageScore, double totalScore) = CalculateOverallAverage(taskResponse!, coherence!, lexicalResource!, grammaticalRange!);
 
-            var skillScore = sectionGroupResult!.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
-
-            var skillScores = sectionGroupResult!.SkillScores?.ToList() ?? new List<SkillScores>();
+            var skillScore = sectionGroupResult.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
+            var skillScores = sectionGroupResult.SkillScores?.ToList() ?? new List<SkillScores>();
 
             if (skillScore == null)
             {
@@ -263,7 +252,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             return NumberHelper.RoundNumberDouble((average + firstScore * 2) / 3);
         }
 
-        private async Task<string> SendChatGPT(MockTestAISetting aiConfig,string systemRole,string userAiConfig, CancellationToken cancellationToken)
+        private async Task<string> SendChatGPT(MockTestAISetting aiConfig, string systemRole, string userAiConfig, CancellationToken cancellationToken)
         {
             string aIResponse = "";
             if (string.IsNullOrEmpty(userAiConfig))

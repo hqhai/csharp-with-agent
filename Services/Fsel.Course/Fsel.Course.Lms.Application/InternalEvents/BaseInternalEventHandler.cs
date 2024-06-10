@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Globalization;
     using System.Linq;
     using System.Threading;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -20,6 +21,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
     using Fsel.Shared.Models.ShareModels;
@@ -481,8 +483,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         private async Task SendStudentCompleteCourse(Guid studentId, Guid courseId, CourseResult courseResult, CancellationToken cancellationToken)
         {
-            var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
-            var student = studentResult.Content?.Result?.FirstOrDefault();
+            var studentResult = await _userService.GetUserByStudentId(courseResult.StudentId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                return;
+            }
+            var student = studentResult.Content?.Result;
             var course = await _courseRepository.GetByIdAsync(courseId);
             var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = courseId, UserId = courseResult.CreatedUserId });
             var featureAccessTime = featureAccessTimeResult.Content?.Result;

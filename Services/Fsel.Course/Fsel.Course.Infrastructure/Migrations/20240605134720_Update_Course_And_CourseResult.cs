@@ -48,12 +48,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                 type: "datetime2",
                 nullable: true);
 
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<string>(
                 name: "WorkingStatus",
                 table: "CourseResults",
-                type: "int",
+                type: "nvarchar(100)",
+                maxLength: 100,
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
         }
 
         /// <inheritdoc />

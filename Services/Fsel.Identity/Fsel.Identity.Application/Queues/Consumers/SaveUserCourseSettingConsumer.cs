@@ -29,6 +29,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
             {
                 UserId = message.UserId,
                 Type = message.Type,
+                IsCreate = message.IsCreate,
                 CourseLevel = message.CourseLevel,
                 IsDeduction = message.IsDeduction
             }).ConfigureAwait(false);

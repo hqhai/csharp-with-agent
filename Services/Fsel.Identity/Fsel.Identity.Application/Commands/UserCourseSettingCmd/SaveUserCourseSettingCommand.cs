@@ -7,18 +7,13 @@ namespace Fsel.Identity.Application.Commands.UserCourseSettingCmd
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SaveUserCourseSettingCommand : IRequest<MethodResult<UserCourseSettingModel>>
+    public class SaveUserCourseSettingCommand : SaveUserCourseSettingQueueModel, IRequest<MethodResult<UserCourseSettingModel>>
     {
-        public EnumUserCourseType Type { get; set; }
-        public bool IsDeduction { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
-        public bool IsCreate { get; set; }
-        public Guid UserId { get; set; }
     }
 
     public class SaveUserCourseSettingCommandHandler : IRequestHandler<SaveUserCourseSettingCommand, MethodResult<UserCourseSettingModel>>
@@ -53,6 +48,10 @@ namespace Fsel.Identity.Application.Commands.UserCourseSettingCmd
             else if (!request.IsCreate)
             {
                 userCourseSetting.Value = request.IsDeduction ? --userCourseSetting.Value : MaxValue;
+                if (userCourseSetting.Value < 0)
+                {
+                    userCourseSetting.Value = 0;
+                }
                 _userCourseSettingRepository.Update(userCourseSetting);
             }
             await _userCourseSettingRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

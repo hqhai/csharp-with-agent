@@ -26,12 +26,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ActiveCourseResultCommand : IRequest<MethodResult<CourseResultModel>>
+    public class ChangeCourseLevelCommand : IRequest<MethodResult<CourseResultModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
     }
 
-    public class ActiveCourseResultCommandHandler : IRequestHandler<ActiveCourseResultCommand, MethodResult<CourseResultModel>>
+    public class ChangeCourseLevelCommandHandler : IRequestHandler<ChangeCourseLevelCommand, MethodResult<CourseResultModel>>
     {
         private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
 
-        public ActiveCourseResultCommandHandler(IMapper mapper
+        public ChangeCourseLevelCommandHandler(IMapper mapper
             , ITrainingService trainingService
             , AuthContext authContext
             , ChangeCourseHelper changeCourseHelper
@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             _courseResultRepository = courseResultRepository;
         }
 
-        public async Task<MethodResult<CourseResultModel>> Handle(ActiveCourseResultCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CourseResultModel>> Handle(ChangeCourseLevelCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseResultModel> methodResult = new MethodResult<CourseResultModel>();
@@ -78,7 +78,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-
+            if (student.CourseLevel == request.CourseLevel)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.CourseLevel));
+                return methodResult;
+            }
             var userCourseSettingsResult = await _userService.GetUserCourseSettingsAsync();
             if (!userCourseSettingsResult.IsSuccessStatusCode)
             {
@@ -86,15 +90,10 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 return methodResult;
             }
             var userCourseSettings = userCourseSettingsResult.Content?.Result;
-            if (userCourseSettings == null || !userCourseSettings.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userCourseSettings));
-                return methodResult;
-            }
-            var userCourseSetting = userCourseSettings.FirstOrDefault(x => x.Type == EnumUserCourseType.ChangeLevel);
+            var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.Type == EnumUserCourseType.ChangeLevel);
             if (userCourseSetting != null && userCourseSetting.Value <= 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userCourseSetting));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(userCourseSetting));
                 return methodResult;
             }
 
@@ -130,7 +129,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                     Status = EnumResultStatus.New,
                     WorkingStatus = EnumWorkingStatus.Active
                 };
-
                 _courseResultRepository.Add(courseResult);
             }
             else
@@ -152,21 +150,13 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 
             await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            var courseResultActive = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.WorkingStatus == EnumWorkingStatus.Active && x.Id != courseResult.Id, cancellationToken);
+            var courseResultActive = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.WorkingStatus == EnumWorkingStatus.Active && x.Id != courseResult.Id && x.StudentId == student.Id, cancellationToken);
             if (courseResultActive != null)
             {
                 courseResultActive.WorkingStatus = EnumWorkingStatus.InActive;
                 _courseResultRepository.Update(courseResultActive);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-
-            await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
-            {
-                CourseLevel = request.CourseLevel,
-                IsDeduction = true,
-                Type = EnumUserCourseType.ChangeLevel,
-                UserId = _authContext.CurrentUserId
-            }, cancellationToken).ConfigureAwait(false);
 
             var classResult = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel
             {
@@ -178,7 +168,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classResult));
                 return methodResult;
             }
-
+            await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+            {
+                IsDeduction = true,
+                Type = EnumUserCourseType.ChangeLevel,
+                UserId = _authContext.CurrentUserId
+            }, cancellationToken).ConfigureAwait(false);
             methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -187,7 +182,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private async Task<bool> IsUsedLevel(StudentModel student, EnumCourseLevel courseLevel)
         {
             var iStudentsAchieveScore = await _changeCourseHelper.IsStudentsAchieveScoresAsync(student.Id, student.BaseCourseLevel);
-            return student.CourseLevel.CheckLevelByPass(courseLevel, iStudentsAchieveScore);
+            return student.BaseCourseLevel.CheckLevelByPass(courseLevel, iStudentsAchieveScore);
         }
 
         private async Task<Course?> GetCourseAsync(EnumCourseLevel courseLevel)

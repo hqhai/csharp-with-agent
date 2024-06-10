@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20240603062242_Update_Course_And_CourseResult")]
+    [Migration("20240605134720_Update_Course_And_CourseResult")]
     partial class Update_Course_And_CourseResult
     {
         /// <inheritdoc />
@@ -705,8 +705,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<int>("WorkingStatus")
-                        .HasColumnType("int");
+                    b.Property<string>("WorkingStatus")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 

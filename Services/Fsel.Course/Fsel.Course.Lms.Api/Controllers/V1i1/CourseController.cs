@@ -56,10 +56,10 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// <summary>
         /// Active Manage Courses
         /// </summary>
-        [HttpPost("active-course")]
+        [HttpPost("change-course-level")]
         [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ActiveCourse([FromBody] ActiveCourseResultCommand command)
+        public async Task<IActionResult> ChangeCourseLevel([FromBody] ChangeCourseLevelCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

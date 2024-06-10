@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using System.Linq.Dynamic.Core;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -46,22 +47,26 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UnitStudentProgressModel> methodResult = new MethodResult<UnitStudentProgressModel>();
             UnitStudentProgressModel unitProgress = new UnitStudentProgressModel();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
+            var studentResults = await _userService.GetUserByStudentId(request.StudentId);
             if (!studentResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
                 return methodResult;
             }
-
-            var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var userId = student?.Human?.UserId;
+            var student = studentResults?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+            var userId = student.Human?.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var unit = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == request.StudentId && x.UnitId == request.UnitId))
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == request.StudentId && x.UnitId == request.UnitId && x.CourseId == request.CourseId))
                                                          .Include(x => x.UnitLessons)
                                                          .Include(x => x.UnitSkillMockTests)
                                                          .FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);

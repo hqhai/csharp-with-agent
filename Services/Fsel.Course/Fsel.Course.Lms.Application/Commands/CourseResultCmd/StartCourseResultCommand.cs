@@ -67,13 +67,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                     UserId = _authContext.CurrentUserId
                 }, cancellationToken).ConfigureAwait(false);
 
-                await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
-                {
-                    Type = EnumUserCourseType.ChangeLevel,
-                    IsDeduction = true,
-                    UserId = _authContext.CurrentUserId
-                }, cancellationToken).ConfigureAwait(false);
-
                 courseResult.ProcessDate = DateTime.UtcNow;
                 courseResult.Status = EnumResultStatus.Process;
                 _courseResultRepository.Update(courseResult);

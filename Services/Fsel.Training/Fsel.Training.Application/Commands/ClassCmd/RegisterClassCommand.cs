@@ -109,6 +109,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 }
                 await InActiveClassStudent(classActive, student.Id);
                 await SaveCourseSettingAsync(course, request.UserId, cancellationToken);
+
                 var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel
                 {
                     StudentId = student.Id,
@@ -188,12 +189,14 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             {
                 CourseLevel = course.CourseLevel,
                 Type = EnumUserCourseType.ResetAndLearnAgain,
+                IsCreate = true,
                 UserId = userId ?? _authContext.CurrentUserId
             }, cancellationToken).ConfigureAwait(false);
 
             await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
             {
                 Type = EnumUserCourseType.ChangeLevel,
+                IsCreate = true,
                 UserId = userId ?? _authContext.CurrentUserId
             }, cancellationToken).ConfigureAwait(false);
         }

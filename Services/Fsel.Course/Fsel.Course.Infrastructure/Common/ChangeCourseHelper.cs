@@ -31,6 +31,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             var courseResult = await _courseResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
                                                                       .Where(x => x.Course != null && x.Course.CourseLevel == baseCourseLevel)
+                                                                      .OrderByDescending(x => x.CreatedDate)
                                                                       .FirstOrDefaultAsync();
             bool? isStudentsAchieveScores;
             if (courseResult != null && courseResult.Status == EnumResultStatus.Done)
