@@ -1,16 +1,19 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Entities
+namespace Fsel.System.Domain.Entities.QuestBoards
 {
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
     using global::System.ComponentModel.DataAnnotations;
-    using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class QuestBoard : Entity
     {
+        /// <summary>
+        /// Loại nhiệm vụ
+        /// </summary>
+        public EnumQuestBoardType Type { get; set; }
+
         /// <summary>
         /// Tên nhiệm vụ
         /// </summary>
@@ -31,34 +34,24 @@ namespace Fsel.System.Domain.Entities
         public string? ImagePath { get; set; }
 
         /// <summary>
-        /// Loại nhiệm vụ
-        /// </summary>
-        public EnumQuestBoardType Type { get; set; }
-
-        /// <summary>
         /// Danh mục nhiệm vụ
         /// </summary>
         public EnumQuestBoardCategory Category { get; set; }
 
         /// <summary>
-        /// Ngày băt đầu
+        /// Giá trị mục tiêu
         /// </summary>
-        public DateTime StartDate { get; set; }
+        public int TargetValue { get; set; }
 
         /// <summary>
-        /// Ngày kết thúc
+        /// Coin nhận được khi hoàn thành
         /// </summary>
-        public DateTime? EndDate { get; set; }
+        public int Token { get; set; }
 
         /// <summary>
-        /// Tổng số sao đạt được
+        /// Năng lượng nhận được khi hoàn thành
         /// </summary>
-        public int NumberOfStars { get; set; }
-
-        /// <summary>
-        /// Check nhiệm vụ không thời hạn
-        /// </summary>
-        public bool IsLifeTime { get; set; }
+        public int? Energy { get; set; }
 
         /// <summary>
         /// Lặp lại theo
@@ -66,36 +59,9 @@ namespace Fsel.System.Domain.Entities
         public EnumRepeatType? RepeatType { get; set; }
 
         /// <summary>
-        /// Loại Package
-        /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? PackageIdsStr { get; set; }
-
-        [NotMapped]
-        public IList<Guid>? PackageIds
-        {
-            get
-            {
-                var a = ConvertHelper.Deserialize<IList<Guid>>(PackageIdsStr);
-                return a;
-            }
-            set { PackageIdsStr = ConvertHelper.Serialize(value); }
-        }
-
-        /// <summary>
-        /// Yêu cầu bắt buộc
-        /// </summary>
-        public bool IsRequired { get; set; }
-
-        /// <summary>
         /// Bật tắt nhiệm vụ
         /// </summary>
         public bool IsActive { get; set; }
-
-        /// <summary>
-        /// Nhiệm vụ phụ thuộc
-        /// </summary>
-        public Guid? DependentId { get; set; }
 
         public ICollection<QuestBoardStudent> QuestBoardStudents { get; set; } = new List<QuestBoardStudent>();
     }

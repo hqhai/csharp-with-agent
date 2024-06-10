@@ -22,7 +22,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -502,27 +501,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Params = sendStudentCompleteCourseModel,
                 Template = course?.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
             }, cancellationToken).ConfigureAwait(false);
-        }
-
-        private async Task DoQuestBoard(Guid courseId, Guid userId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneLesson };
-            var student = await _userService.GetStudentByUserIdAsync(userId);
-            var studentId = student?.Content?.Result?.Id;
-
-            //Chỉ bài finaltest đầu tiên hoàn thành của khóa mới được tính là hoàn thành nhiệm vụ
-            bool checkFirstCourseResult = _courseResultRepository.Queryable.Any(c => c.CourseId == courseId && c.Status == EnumResultStatus.Done);
-
-            if (!checkFirstCourseResult)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    CourseId = courseId
-                }, cancellationToken);
-            }
         }
 
         private async Task UpdateStudentTrialRegistration(EnumTrialRegistrationStatus status, Guid userId)
