@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
-    using Fsel.Course.Domain.IEntities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -75,8 +74,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
 
             // Check từ khoá cấm
-            var listForbiddenWordResultContent = await _systemService.CheckContainForbiddenWord(request.Content);
-            var listForbiddenWordResultWordContent = await _systemService.CheckContainForbiddenWord(request.WordContent);
+            var listForbiddenWordResultContent = await _systemService.CheckContainForbiddenWord(request.Content ?? string.Empty);
+            var listForbiddenWordResultWordContent = await _systemService.CheckContainForbiddenWord(request.WordContent ?? string.Empty);
             var containsForbiddenWord = (listForbiddenWordResultContent.Content?.Result ?? Enumerable.Empty<string>())
              .Concat(listForbiddenWordResultWordContent.Content?.Result ?? Enumerable.Empty<string>()).Distinct()
              .ToList();
@@ -100,6 +99,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+            var studentId = student.Id;
+
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
             if (lessonResult == null)
             {
@@ -121,7 +122,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 return methodResult;
             }
 
-            var studentId = student.Id;
             var classForumResult = await _classForumResultRepository.Queryable
                     .Include(x => x.ClassForumDetailResults.OrderBy(x => x.CreatedDate))
                     .ThenInclude(x => x.ClassForumResultFiles)
@@ -129,19 +129,17 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
 
-            var classForumDetailResult = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResultFiles).AsQueryable();
+            var query = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResultFiles);
 
-            var classForumDetailResultAttemp1 = classForumDetailResult.Where(x => x.SubmissionCount == EnumSubmissionCount.FirstSubmit && classForumResult != null && x.Status == EnumClassForumResultStatus.Pending && x.ClassForumResultId == classForumResult.Id).FirstOrDefault();
-
-            if (classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate >= DateTime.UtcNow.AddHours(2))
+            var classForumDetailResultAttemp1 = await query.Where(x => x.SubmissionCount == EnumSubmissionCount.FirstSubmit && classForumResult != null && x.ClassForumResultId == classForumResult.Id).FirstOrDefaultAsync(cancellationToken);
+            if (classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate.HasValue && classForumDetailResultAttemp1.ProcessDate.Value.AddHours(2) <= DateTime.UtcNow)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
             if (classForumResult != null)
             {
-                var classForumDetailResultModels = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult!.Id).ToListAsync(cancellationToken);
-
+                var classForumDetailResultModels = await _classForumDetailResultRepository.Queryable.Where(x => x.ClassForumResultId == classForumResult.Id).ToListAsync(cancellationToken);
                 if (classForumDetailResultModels.Count > 2)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
@@ -190,7 +188,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     {
                         await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
-                    //await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
                     if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft && classForumResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
                     {
                         await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
@@ -198,7 +196,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
                     await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForumResult.Id, classForum, request, Display_Order_First, cancellationToken);
                 }
-                else if (classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate <= classForumDetailResultAttemp1.ProcessDate!.Value.AddHours(2))
+                else if (classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate.HasValue && classForumDetailResultAttemp1.ProcessDate.Value.AddHours(2) > DateTime.UtcNow)
                 {
                     var classForumDetailResult = new ClassForumDetailResult
                     {
@@ -224,7 +222,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         await PublishAIClassForumResponseAsync(classForumDetailResult.Id, classForumResult.Id, classForum, request, Display_Order_Second, cancellationToken);
                     }
                 }
-                else if (classForumDetailResult.Where(x => x.Id == request.ClassForumDetailResultId && x.ClassForumResultId == classForumResult.Id).FirstOrDefault()?.Status == EnumClassForumResultStatus.Draft)
+                else if (query.Where(x => x.Id == request.ClassForumDetailResultId && x.ClassForumResultId == classForumResult.Id).FirstOrDefault()?.Status == EnumClassForumResultStatus.Draft)
                 {
                     var classForumDetailResult = await _classForumDetailResultRepository.Queryable.Where(x => x.Id == request.ClassForumDetailResultId && x.ClassForumResultId == classForumResult!.Id).FirstOrDefaultAsync(cancellationToken);
                     _mapper.Map(request, classForumDetailResult);
@@ -286,7 +284,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 return methodResult;
             });
 
-            var classForumDetailResultFirstSubmit = classForumDetailResult.Where(x => x.ClassForumResultId == classForumResult!.Id && x.SubmissionCount == EnumSubmissionCount.FirstSubmit).FirstOrDefault();
+            var classForumDetailResultFirstSubmit = query.Where(x => x.ClassForumResultId == classForumResult!.Id && x.SubmissionCount == EnumSubmissionCount.FirstSubmit).FirstOrDefault();
             if (classForumResult != null && classForumDetailResultFirstSubmit?.Status == EnumClassForumResultStatus.Pending)
             {
                 var tokenHistorys = new List<TokenHistoryQueueModel>
