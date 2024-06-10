@@ -16,6 +16,7 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.Services.AddScoped<FeatureAccessTimePublisher>();
 builder.Services.AddScoped<SetTimeModulePublisher>();
+builder.Services.AddScoped<GetTimeModulePublisher>();
 builder.Services.AddScoped<ChatBotPublisher>();
 
 builder.AddMassTransit(appSetting,
@@ -28,6 +29,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.MockTestWriting, typeof(MockTestAIFeedBackConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.ChatBotRealTime, typeof(ChatBotConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestSpeaking, typeof(MockTestAISpeakingConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
 });
 
 var app = builder.Build();
