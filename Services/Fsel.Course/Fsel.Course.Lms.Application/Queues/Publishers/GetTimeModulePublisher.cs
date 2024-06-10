@@ -15,13 +15,12 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(GetTimeModuleModel request, CancellationToken cancellationToken)
+        public async Task Publish(GetTimeModuleModel? request, CancellationToken cancellationToken)
         {
             if (request == null)
             {
                 return;
             }
-
             await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, request, cancellationToken);
         }
     }

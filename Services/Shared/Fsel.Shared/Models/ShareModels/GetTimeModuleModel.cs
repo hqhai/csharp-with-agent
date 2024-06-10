@@ -6,5 +6,6 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public Guid UserId { get; set; }
         public double RemainingTime { get; set; }
+        public double WorkingTime { get; set; }
     }
 }

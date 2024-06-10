@@ -23,7 +23,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         {
             if (message != null)
             {
-                await _setTimeModuleHub.GetGroup(message.UserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "GetRemainingTime", RemainingTime = message.RemainingTime });
+                await _setTimeModuleHub.GetGroup(message.UserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "GetTime", WorkingTime = message.WorkingTime, RemainingTime = message.RemainingTime });
             }
         }
     }

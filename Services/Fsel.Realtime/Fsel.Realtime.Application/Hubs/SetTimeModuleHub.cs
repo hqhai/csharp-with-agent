@@ -63,7 +63,7 @@ namespace Fsel.Realtime.Application.Hubs
             await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "StopTime" });
         }
 
-        public async Task GetRemainingTime()
+        public async Task GetTime()
         {
             string type = Context.GetHttpContext()?.Request.Query["Type"].ToString() ?? string.Empty;
             string objectId = Context.GetHttpContext()?.Request.Query["ObjectId"].ToString() ?? string.Empty;

@@ -40,23 +40,23 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             switch (request.Type)
             {
                 case nameof(Video):
-                    (getTimeModule.RemainingTime, getTimeModule.UserId) = await GetVideoTimeCodeAsync(request);
+                    getTimeModule = await GetVideoTimeCodeAsync(request);
                     break;
 
                 case nameof(PlacementTest):
                 case nameof(FinalTest):
                 case nameof(MockTest):
-                    (getTimeModule.RemainingTime, getTimeModule.UserId) = await GetSectionGroupResultAsync(request);
+                    getTimeModule = await GetSectionGroupResultAsync(request);
                     break;
 
                 default:
                     break;
             }
             await _getTimeModulePublisher.Publish(getTimeModule, cancellationToken).ConfigureAwait(false);
-            return getTimeModule;
+            return getTimeModule ?? new GetTimeModuleModel();
         }
 
-        private async Task<(double, Guid)> GetVideoTimeCodeAsync(GetTimeModuleQuery request)
+        private async Task<GetTimeModuleModel?> GetVideoTimeCodeAsync(GetTimeModuleQuery request)
         {
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
             var videoTimeCode = videoTimeCodeResult?.VideoTimeCode;
@@ -64,7 +64,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             {
                 return default;
             }
-            double workingTime = default;
+            (double workingTime, double remainingTime) = (default, default);
             if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 workingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
@@ -80,17 +80,30 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     workingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
             }
-            return (workingTime, videoTimeCodeResult.CreatedUserId);
+            remainingTime = videoTimeCode.ExecutionTime - workingTime > 0 ? videoTimeCode.ExecutionTime - workingTime : default;
+            return new GetTimeModuleModel
+            {
+                WorkingTime = workingTime,
+                RemainingTime = remainingTime,
+                UserId = videoTimeCodeResult.CreatedUserId
+            };
         }
 
-        private async Task<(double, Guid)> GetSectionGroupResultAsync(GetTimeModuleQuery request)
+        private async Task<GetTimeModuleModel?> GetSectionGroupResultAsync(GetTimeModuleQuery request)
         {
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
-            if (sectionGroupResult == null || sectionGroupResult.SectionGroup == null)
+            var sectionGroup = sectionGroupResult?.SectionGroup;
+            if (sectionGroupResult == null || sectionGroup == null)
             {
                 return default;
             }
-            return (_dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime), sectionGroupResult.CreatedUserId);
+            var workingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroup.ExecutionTime);
+            return new GetTimeModuleModel
+            {
+                WorkingTime = workingTime,
+                RemainingTime = sectionGroup.ExecutionTime - workingTime > 0 ? sectionGroup.ExecutionTime - workingTime : default,
+                UserId = sectionGroupResult.CreatedUserId
+            };
         }
     }
 }
