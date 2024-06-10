@@ -19,6 +19,10 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public int TargetValue { get; set; }
 
+        public int CurrentValue { get; set; }
+
+        public bool IsFinish { get; set; }
+
         public int Token { get; set; }
 
         public int? Energy { get; set; }
@@ -28,6 +32,5 @@ namespace Fsel.System.Domain.Models.EntityModels
         public bool IsActive { get; set; }
 
         public EnumQuestBoardStudentStatus? Status { get; set; }
-        public IList<QuestBoardStudentModel>? QuestBoardStudents { get; set; }
     }
 }
