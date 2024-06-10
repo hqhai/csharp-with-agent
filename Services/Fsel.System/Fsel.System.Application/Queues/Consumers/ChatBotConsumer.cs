@@ -20,7 +20,7 @@ namespace Fsel.System.Application.Queues.Consumers
             {
                 await _mediator.Send(new SaveChatBotMessageCommand
                 {
-                    Content = message.Message,
+                    Content = message.Content,
                     ChatBotId = message.ChatbotId
                 }).ConfigureAwait(false);
             }
