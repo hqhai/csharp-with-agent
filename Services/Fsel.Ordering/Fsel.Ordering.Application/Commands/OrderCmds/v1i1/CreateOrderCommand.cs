@@ -85,6 +85,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 var orderPayment = await _orderRepository.Queryable.Where(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                 courseId = orderPayment?.CourseId;
+                request.CourseLevel = student?.CourseLevel;
             }
             else
             {
@@ -148,7 +149,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel.Value, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
+            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel!.Value, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
 
             string code = codeSend.Result?.Code ?? string.Empty;
 

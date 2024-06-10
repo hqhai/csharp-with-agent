@@ -189,7 +189,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
                 await _interactionActionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                await DoDailyQuest(action.Id, cancellationToken);
+                //await DoDailyQuest(action.Id, cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
@@ -197,36 +197,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             });
 
             return methodResult;
-        }
-
-        public async Task DoDailyQuest(Guid interationId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnNewLessonOfTwoClassMate };
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentResult = student?.Content?.Result;
-            var isInteractDiscussionBoard = _interactionActionRepository.Queryable.Any(c => c.CreatedUserId == _authContext.CurrentUserId &&
-                                                                          c.Type == EnumInteractionActionType.Like &&
-                                                                          c.BusinessType == EnumInteractionType.DiscussionBoard &&
-                                                                          c.CreatedDate.Date == DateTime.UtcNow.Date &&
-                                                                          c.CreatedDate.Month == DateTime.UtcNow.Month &&
-                                                                          c.CreatedDate.Year == DateTime.UtcNow.Year);
-
-            var studentClassInfo = await _trainingService.GetClassByStudentId(studentResult!.Id);
-            var courseId = studentClassInfo?.Content?.Result?.CourseId;
-
-            if (isInteractDiscussionBoard && studentResult != null && courseId != null)
-            {
-                QuestBoardQueueModel questBoardModel = new QuestBoardQueueModel()
-                {
-                    StudentId = studentResult.Id,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    ObjectId = interationId,
-                    CourseId = (Guid)courseId!,
-                };
-
-                await _questBoardPublisher.Publish(questBoardModel, cancellationToken);
-            }
         }
 
         /// <summary>
@@ -244,10 +214,8 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
             var response = await _courseService.GetClassForumResultByIdAsync(id) ?? default;
 
-
             return response?.Content?.Result ?? new ClassForumResultModel();
         }
-
 
         /// <summary>
         /// Kiểm tra xem ObjectId truyền vào có phải là ClassForum hay không
@@ -272,7 +240,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             return isClassForum;
         }
 
-
         /// <summary>
         /// Lấy tham số để truyền vào link, message
         /// </summary>
@@ -293,7 +260,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
             return (paramsLink, ownerObjectId);
         }
-
 
         /// <summary>
         /// Custom lại Message khi một tài khoản like bài viết, comment của một tài khoản khác.
@@ -321,27 +287,20 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             {
                 case ValueSettings.CreateAction.NoOneAction:
                     break;
+
                 case ValueSettings.CreateAction.OnePeopleAction:
                     result = userActionRecently;
                     break;
+
                 case ValueSettings.CreateAction.TwoPeopleAction:
                     result = ValueSettings.CreateAction.TwoPeopleLike.Format(userActionRecently, listNameUserLiked[0]);
                     break;
+
                 default:
                     result = ValueSettings.CreateAction.ThreePeopleOrMoreLike.Format(userActionRecently, listNameUserLiked.Count);
                     break;
             }
             return result;
         }
-
-        public async Task<bool> DiscussionBoardNotification()
-        {
-
-
-
-
-            return true;
-        }
-
     }
 }

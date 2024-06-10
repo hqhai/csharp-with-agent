@@ -2,16 +2,15 @@
 
 namespace Fsel.System.Infrastructure.Configs
 {
-    using Fsel.System.Domain.Entities;
-    using Microsoft.EntityFrameworkCore.Metadata.Builders;
-    using Microsoft.EntityFrameworkCore;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
-    using Fsel.Common.Enums;
+    using Fsel.System.Domain.Entities.QuestBoards;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class QuestBoardConfigConfigConfiguration : IEntityTypeConfiguration<QuestBoardConfig>
+    public class QuestBoardConfigConfiguration : IEntityTypeConfiguration<QuestBoard>
     {
-        public void Configure(EntityTypeBuilder<QuestBoardConfig> builder)
+        public void Configure(EntityTypeBuilder<QuestBoard> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Type)
@@ -26,17 +25,11 @@ namespace Fsel.System.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumQuestBoardCategory>());
 
-            builder.Property(e => e.DisplayType)
+            builder.Property(e => e.RepeatType)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumDisplayType>());
-
-            builder.Property(e => e.Operator)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumFilterOperator>());
+                    v => v.EnumParse<EnumRepeatType>());
         }
     }
 }
