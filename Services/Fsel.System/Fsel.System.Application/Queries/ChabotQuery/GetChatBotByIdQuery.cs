@@ -57,7 +57,7 @@ namespace Fsel.System.Application.Queries.ChabotQuery
 
             ChatBotModel chatBotModel = new ChatBotModel();
             chatBotModel = _mapper.Map<ChatBotModel>(chatbotMessage);
-            chatBotModel.ProgressRatio = tokenRatio;
+            chatBotModel.ProgressRatio = Math.Round(tokenRatio, 2);
 
             methodResult.Result = chatBotModel;
             methodResult.StatusCode = StatusCodes.Status201Created;

@@ -4,10 +4,13 @@ namespace Fsel.System.Application.Queries.ChabotQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetChatBotQuery : IRequest<MethodResult<IList<ChatBotModel>>>
     {
@@ -20,10 +23,12 @@ namespace Fsel.System.Application.Queries.ChabotQuery
 
         private readonly IMapper _mapper;
         private readonly IChatBotRepository _chatBotRepository;
-        public GetChatBotQueryHandler(IMapper mapper, IChatBotRepository chatBotRepository)
+        private readonly IChatbotConfigRepository _chatBotConfigRepository;
+        public GetChatBotQueryHandler(IMapper mapper, IChatBotRepository chatBotRepository, IChatbotConfigRepository chatBotConfigRepository)
         {
             _mapper = mapper;
             _chatBotRepository = chatBotRepository;
+            _chatBotConfigRepository = chatBotConfigRepository;
         }
 
         public async Task<MethodResult<IList<ChatBotModel>>> Handle(GetChatBotQuery request, CancellationToken cancellationToken)
@@ -33,9 +38,53 @@ namespace Fsel.System.Application.Queries.ChabotQuery
 
             var chatbotMessage = _chatBotRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.StudentId == request.StudentId);
 
-            methodResult.Result = _mapper.Map<IList<ChatBotModel>>(chatbotMessage);
+            var chatBotTokenConfigs = _chatBotConfigRepository.Queryable.Include(x => x.ChatbotTokenConfigs).FirstOrDefault(x => x.UnitId == request.UnitId)?.ChatbotTokenConfigs;
+
+            var result = _mapper.Map<IList<ChatBotModel>>(chatbotMessage);
+
+            foreach (var item in result)
+            {
+
+                item.ProgressRatio = Math.Round((float)item.RemainToken / GetChatBotToken(item.Skill, chatBotTokenConfigs),2);
+            }
+
+            methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status201Created;
             return methodResult;
         }
+
+
+        /// <summary>
+        /// </summary>
+        /// <param name="skill"></param>
+        /// <param name="chatbotToken"></param>
+        /// <returns></returns>
+        public static int GetChatBotToken(EnumCourseSkill skill, ChatbotTokenConfigs? chatbotToken)
+        {
+            int result = 0;
+            switch (skill)
+            {
+                case EnumCourseSkill.Vocabulary:
+                    result = chatbotToken?.VocabularyToken ?? 0;
+                    break;
+                case EnumCourseSkill.Grammar:
+                    result = chatbotToken?.GrammarToken ?? 0;
+                    break;
+                case EnumCourseSkill.Listening:
+                    result = chatbotToken?.ListeningToken ?? 0;
+                    break;
+                case EnumCourseSkill.Writing:
+                    result = chatbotToken?.WritingToken ?? 0;
+                    break;
+                case EnumCourseSkill.Reading:
+                    result = chatbotToken?.ReadingToken ?? 0;
+                    break;
+                case EnumCourseSkill.Speaking:
+                    result = chatbotToken?.SpeakingToken ?? 0;
+                    break;
+            }
+            return result;
+        }
+
     }
 }
