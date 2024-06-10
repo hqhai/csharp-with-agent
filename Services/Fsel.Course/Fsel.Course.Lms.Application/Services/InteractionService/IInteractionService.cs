@@ -18,8 +18,10 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
         [Get("/v1/review/student-reviews")]
         Task<IApiResponse<MethodResult<IList<StudentReviewModel>>>> GetStudentReviewsAsync([Query] EnumReviewType reviewType);
 
-        [Post("/v1/interaction-action/execute-list-query")]
-        Task<IApiResponse<MethodResult<InteractionActionModel>>> ExecuteListActionQueryAsync([Body] BaseQueryModel query);
+        [Get("/v1/interaction-action/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<InteractionActionModel>>>> ExecuteListActionQueryAsync([Query] BaseQueryModel query);
 
+        [Get("/v1/comment/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<CommentModel>>>> ExecuteListCommentQueryAsync([Query] BaseQueryModel query);
     }
 }

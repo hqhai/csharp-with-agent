@@ -20,10 +20,10 @@ namespace Fsel.Interaction.Infrastructure.Configs
                    v => v.EnumParse<EnumInteractionActionType>());
 
             builder.Property(e => e.BusinessType)
-              .HasMaxLength(100)
-              .HasConversion(
-                  v => v.ToString(),
-                  v => v.EnumParse<EnumInteractionType>());
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.HasValue ? v.ToString() : null,
+                    v => !string.IsNullOrEmpty(v) ? v.EnumParse<EnumInteractionType>() : null);
         }
     }
 }
