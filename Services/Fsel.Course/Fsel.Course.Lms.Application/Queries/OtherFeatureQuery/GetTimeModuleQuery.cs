@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     workingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
             }
-            return (workingTime + request.AccessTime, videoTimeCodeResult.CreatedUserId);
+            return (workingTime, videoTimeCodeResult.CreatedUserId);
         }
 
         private async Task<(double, Guid)> GetSectionGroupResultAsync(GetTimeModuleQuery request)
