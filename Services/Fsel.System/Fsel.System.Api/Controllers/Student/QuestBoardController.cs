@@ -34,9 +34,9 @@ namespace Fsel.System.Api.Controllers.Student
         [HttpGet("get-quest-boards")]
         [ProducesResponseType(typeof(MethodResult<DashboardQuestBoardModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetQuestBoards([FromQuery] GetQuestBoardsByStudentQuery query)
+        public async Task<IActionResult> GetQuestBoards()
         {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new GetQuestBoardsByStudentQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
