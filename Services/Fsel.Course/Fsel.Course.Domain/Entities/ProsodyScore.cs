@@ -6,8 +6,6 @@ namespace Fsel.Course.Domain.Entities
 
     public class ProsodyScore : Entity
     {
-        public int PoinsInRange { get; }
-
         public double MinScore { get; set; }
 
         public double MaxScore { get; set; }
@@ -15,5 +13,13 @@ namespace Fsel.Course.Domain.Entities
         public double BandScore { get; set; }
 
         public string? BandComment { get; set; }
+
+        public int PoinsInRange
+        {
+            get
+            {
+                return (int)(MaxScore - MinScore + 1);
+            }
+        }
     }
 }
