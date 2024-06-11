@@ -240,17 +240,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             }
         }
 
-        private async Task SendToChatGpt(Guid sectionId, Guid sectionGroupId, Guid mockTestResultId, string? answer, CancellationToken cancellationToken)
-        {
-            await _submitMockTestAnswerPublisher.Publish(new MockTestAnswerResponseModel()
-            {
-                SectionId = sectionId,
-                SectionGroupId = sectionGroupId,
-                MockTestResultId = mockTestResultId,
-                WordContent = (answer == "null" || string.IsNullOrEmpty(answer)) ? string.Empty : answer,
-            }, cancellationToken);
-        }
-
         private static MockTestResult GetMockTestResult(IList<SectionGroupResult>? sectionGroupResults, MockTestResult mockTestResult)
         {
             var skillScores = sectionGroupResults?.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();

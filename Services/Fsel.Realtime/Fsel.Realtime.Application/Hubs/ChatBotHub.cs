@@ -40,7 +40,7 @@ namespace Fsel.Realtime.Application.Hubs
             ChatBotSendingMessageModel model = new ChatBotSendingMessageModel
             {
                 ChatbotId = config?.ChatBotId,
-                Message = config?.Content ?? string.Empty,
+                Content = config?.Content ?? string.Empty,
             };
 
             await _botPublisher.Publish(model, CancellationToken.None);
