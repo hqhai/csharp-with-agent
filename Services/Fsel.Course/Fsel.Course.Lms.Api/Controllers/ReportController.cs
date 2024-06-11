@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get Overall Report By Student
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<OverallClassForumReportModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<OverallReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetOverallReportByStudentQuery query)
         {

@@ -9,8 +9,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public int OverallScore { get; set; }
         public IList<OverallSkillReportModel>? OverallSkillReports { get; set; }
-        public OverallClassForumReportModel? Receive { get; set; }
-        public OverallClassForumReportModel? Give { get; set; }
+        public AggregateNumberOfLikesAndComments? Receive { get; set; }
+        public AggregateNumberOfLikesAndComments? Give { get; set; }
     }
 
     public class OverallSkillReportModel
@@ -19,7 +19,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int Value { get; set; }
     }
 
-    public class OverallClassForumReportModel
+    public class AggregateNumberOfLikesAndComments
     {
         public int LikeNumber { get; set; }
         public int CommentNumber { get; set; }

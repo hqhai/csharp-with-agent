@@ -23,5 +23,8 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
 
         [Get("/v1/comment/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<CommentModel>>>> ExecuteListCommentQueryAsync([Query] BaseQueryModel query);
+
+        [Post("/v1/interaction-action/aggregate-number-of-likes-and-comments")]
+        Task<IApiResponse<MethodResult<AggregateNumberOfLikesAndCommentsModels>>> AggregateNumberOfLikesAndComments([Body] AggregateNumberOfLikesAndCommentsQueryModel query);
     }
 }

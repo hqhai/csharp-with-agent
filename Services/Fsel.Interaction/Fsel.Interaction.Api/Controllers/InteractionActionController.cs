@@ -67,5 +67,17 @@ namespace Fsel.Interaction.Api.Controllers
             MethodResult<IList<InteractionActionModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Create action
+        /// </summary>
+        [HttpPost("aggregate-number-of-likes-and-comments")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetNumberLikeAndComment([FromBody] AggregateNumberOfLikesAndCommentsQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

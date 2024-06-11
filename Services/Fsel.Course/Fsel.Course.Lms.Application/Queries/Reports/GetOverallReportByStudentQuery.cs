@@ -5,17 +5,13 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Models;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.InteractionService;
-    using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -27,23 +23,19 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
     public class GetOverallReportByStudentQueryHandler : IRequestHandler<GetOverallReportByStudentQuery, MethodResult<OverallReportModel>>
     {
-        private readonly ICourseRepository _courseRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly AuthContext _authContext;
-        private readonly ISystemService _systemService;
         private readonly IInteractionService _interactionService;
         private readonly IUserService _userService;
 
-        public GetOverallReportByStudentQueryHandler(ICourseRepository courseRepository, ICourseResultRepository courseResultRepository, AuthContext authContext, ISystemService systemService, IInteractionService interactionService, IUserService userService, IClassForumResultRepository classForumResultRepository)
+        public GetOverallReportByStudentQueryHandler(ICourseResultRepository courseResultRepository, IClassForumResultRepository classForumResultRepository, AuthContext authContext, IInteractionService interactionService, IUserService userService)
         {
-            _courseRepository = courseRepository;
             _courseResultRepository = courseResultRepository;
+            _classForumResultRepository = classForumResultRepository;
             _authContext = authContext;
-            _systemService = systemService;
             _interactionService = interactionService;
             _userService = userService;
-            _classForumResultRepository = classForumResultRepository;
         }
 
         public async Task<MethodResult<OverallReportModel>> Handle(GetOverallReportByStudentQuery request, CancellationToken cancellationToken)
@@ -62,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     return methodResult;
                 }
                 studentId = studentResult.Content?.Result?.Id;
+                userId = _authContext.CurrentUserId;
             }
             else
             {
@@ -83,11 +76,18 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
 
-            var classForumResultIds = await _classForumResultRepository.Queryable.Include(p => p.LessonResult).Where(p => p.LessonResult != null && p.LessonResult.CourseId == request.CourseId && p.StudentId == studentId).Select(p => p.Id).ToListAsync(cancellationToken);
+            var courseClassForumResult = await _classForumResultRepository.Queryable.Include(p => p.LessonResult).Where(p => p.LessonResult != null && p.LessonResult.CourseId == request.CourseId).ToListAsync(cancellationToken);
 
-            var give = await Give(userId ?? default, request.CourseId);
+            var courseClassForumResultIds = courseClassForumResult.Select(p => p.Id).ToList();
+            var classForumResultIds = courseClassForumResult.Where(p => p.StudentId == studentId).Select(p => p.Id).ToList();
 
-            var receive = await Receive(classForumResultIds);
+            var aggregateNumberOfLikesAndCommentsResult = await _interactionService.AggregateNumberOfLikesAndComments(new AggregateNumberOfLikesAndCommentsQueryModel
+            {
+                UserId = userId ?? default,
+                ClassForumResultIds = classForumResultIds,
+                CourseClassForumResultIds = courseClassForumResultIds
+            });
+            var aggregateNumberOfLikesAndComments = aggregateNumberOfLikesAndCommentsResult.Content?.Result;
 
             var overallReportModel = new OverallReportModel()
             {
@@ -98,121 +98,20 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     Skill = s.Skill,
                     Value = (int)s.Percent
                 }).ToList(),
-                Give = new OverallClassForumReportModel()
+                Give = new AggregateNumberOfLikesAndComments()
                 {
-                    LikeNumber = give.Item2,
-                    CommentNumber = give.Item1
+                    LikeNumber = aggregateNumberOfLikesAndComments?.Give?.NumberLike ?? 0,
+                    CommentNumber = aggregateNumberOfLikesAndComments?.Give?.NumberComment ?? 0
                 },
-                Receive = new OverallClassForumReportModel()
+                Receive = new AggregateNumberOfLikesAndComments()
                 {
-                    LikeNumber = receive.Item2,
-                    CommentNumber = receive.Item1
+                    LikeNumber = aggregateNumberOfLikesAndComments?.Receive?.NumberLike ?? 0,
+                    CommentNumber = aggregateNumberOfLikesAndComments?.Receive?.NumberComment ?? 0
                 }
             };
 
             methodResult.Result = overallReportModel;
             return methodResult;
-        }
-
-        private async Task<(int, int)> Give(Guid userId, Guid courseId)
-        {
-            var classForumResultIds = new List<Guid>();
-
-            var commentResults = await _interactionService.ExecuteListCommentQueryAsync(new BaseQueryModel()
-            {
-                Filters = new List<GenericFilterModel>() {
-                    new GenericFilterModel()
-                    {
-                        Property = "UserId",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = userId
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "Type",
-                        Operator = EnumFilterOperator.NotEqual,
-                        Value = EnumInteractionType.DiscussionBoard
-                    }
-                }
-            });
-
-            var comments = commentResults.Content?.Result?.Select(p => p.ObjectId).ToList();
-            if (comments != null && comments.Count > 0)
-            {
-                classForumResultIds.AddRange(comments);
-            }
-
-            var actionResults = await _interactionService.ExecuteListActionQueryAsync(new BaseQueryModel()
-            {
-                Filters = new List<GenericFilterModel>() {
-                    new GenericFilterModel()
-                    {
-                        Property = "UserId",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = userId
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "Type",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = EnumInteractionActionType.Like
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "BusinessType",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = EnumInteractionType.ClassForum
-                    }
-                }
-            });
-            var actions = actionResults.Content?.Result?.Select(p => p.ObjectId).ToList();
-            if (actions != null && actions.Count > 0)
-            {
-                classForumResultIds.AddRange(actions);
-            }
-            classForumResultIds = classForumResultIds.Distinct().ToList();
-
-            var classForumResult = await _classForumResultRepository.Queryable.Include(p => p.LessonResult).Where(p => p.LessonResult != null && p.LessonResult.CourseId == courseId && classForumResultIds.Contains(p.Id)).ToListAsync(CancellationToken.None);
-
-            int commentNumber = classForumResult.Where(p => comments != null && comments.Count > 0 && comments.Contains(p.Id)).Count();
-            int commentLike = classForumResult.Where(p => actions != null && actions.Count > 0 && actions.Contains(p.Id)).Count();
-
-            return (commentNumber, commentLike);
-        }
-
-        private async Task<(int, int)> Receive(List<Guid>? classForumResultIds)
-        {
-            var commentResults = await _interactionService.ExecuteListCommentQueryAsync(new BaseQueryModel()
-            {
-                Filters = new List<GenericFilterModel>() {
-                    new GenericFilterModel()
-                    {
-                        Property = "ObjectId",
-                        Operator = EnumFilterOperator.In,
-                        Value = classForumResultIds
-                    }
-                }
-            });
-
-            var actionResults = await _interactionService.ExecuteListActionQueryAsync(new BaseQueryModel()
-            {
-                Filters = new List<GenericFilterModel>() {
-                    new GenericFilterModel()
-                    {
-                        Property = "ObjectId",
-                        Operator = EnumFilterOperator.In,
-                        Value = classForumResultIds
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "Type",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = EnumInteractionActionType.Like
-                    }
-                }
-            });
-
-            return (commentResults.Content?.Result?.Count ?? 0, actionResults.Content?.Result?.Count ?? 0);
         }
     }
 }

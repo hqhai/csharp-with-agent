@@ -22,8 +22,8 @@ namespace Fsel.Interaction.Infrastructure.Configs
             builder.Property(e => e.BusinessType)
                 .HasMaxLength(100)
                 .HasConversion(
-                    v => v.HasValue ? v.ToString() : null,
-                    v => !string.IsNullOrEmpty(v) ? v.EnumParse<EnumInteractionType>() : null);
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumInteractionType>());
         }
     }
 }
