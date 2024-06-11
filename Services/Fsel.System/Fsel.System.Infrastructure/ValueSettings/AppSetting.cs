@@ -37,6 +37,8 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? MailMarketingSheet { get; set; }
         public string? LandingPageSpreadSheetId { get; set; }
         public string? LandingPageSheet { get; set; }
+        public string? LandingPageFSELSpreadSheetId { get; set; }
+        public string? LandingPageFSELSheet { get; set; }
     }
 
     public class Services : BaseServices
