@@ -3,7 +3,6 @@
 namespace Fsel.Realtime.Application.Hubs
 {
     using Fsel.Core.Base;
-    using Fsel.Core.Base.Interfaces;
     using Fsel.Core.Extensions;
     using Fsel.Core.Services.IpApiServices;
     using Fsel.Realtime.Application.Queues.Publishers;
@@ -14,15 +13,15 @@ namespace Fsel.Realtime.Application.Hubs
     public class SetTimeModuleHub : BaseHub
     {
         private readonly SetTimeModulePublisher _setTimeModulePublisher;
+        private readonly GetTimeModulePublisher _getTimeModulePublisher;
         private readonly IHubContext<SetTimeModuleHub> _setTimeModuleHubContext;
-        private readonly IQueueProvider _queueProvider;
         private readonly AuthContext _authContext;
 
-        public SetTimeModuleHub(SetTimeModulePublisher setTimeModulePublisher, IHubContext<SetTimeModuleHub> setTimeModuleHubContext, IQueueProvider queueProvider, AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
+        public SetTimeModuleHub(SetTimeModulePublisher setTimeModulePublisher, GetTimeModulePublisher getTimeModulePublisher, IHubContext<SetTimeModuleHub> setTimeModuleHubContext, AuthContext authContext, IIpApiService ipApiService) : base(authContext, ipApiService)
         {
             _setTimeModulePublisher = setTimeModulePublisher;
+            _getTimeModulePublisher = getTimeModulePublisher;
             _setTimeModuleHubContext = setTimeModuleHubContext;
-            _queueProvider = queueProvider;
             _authContext = authContext;
         }
 
@@ -66,7 +65,14 @@ namespace Fsel.Realtime.Application.Hubs
 
         public async Task GetTime()
         {
-            await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "GetTime", WorkingTime = ConnectionTracker.Instance.GetTimeValue(Context.ConnectionId) });
+            string type = Context.GetHttpContext()?.Request.Query["Type"].ToString() ?? string.Empty;
+            string objectId = Context.GetHttpContext()?.Request.Query["ObjectId"].ToString() ?? string.Empty;
+            await _getTimeModulePublisher.Publish(new SetTimeModuleModel
+            {
+                AccessTime = ConnectionTracker.Instance.GetTimeValue(Context.ConnectionId) ?? default,
+                ObjectId = new Guid(objectId),
+                Type = type,
+            }, CancellationToken.None);
         }
 
         public async Task DisConnectAsync(string type, string objectId)
