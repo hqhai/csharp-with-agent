@@ -5,7 +5,9 @@ namespace Fsel.System.Application.Queries.ChabotQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
@@ -25,6 +27,8 @@ namespace Fsel.System.Application.Queries.ChabotQuery
         private readonly IMapper _mapper;
         private readonly IChatBotRepository _chatBotRepository;
         private readonly IChatbotConfigRepository _chatBotConfigRepository;
+
+
         public GetChatBotByIdQueryHandler(IMapper mapper, IChatBotRepository chatBotRepository, IChatbotConfigRepository chatBotConfigRepository)
         {
             _mapper = mapper;
@@ -57,8 +61,9 @@ namespace Fsel.System.Application.Queries.ChabotQuery
 
             ChatBotModel chatBotModel = new ChatBotModel();
             chatBotModel = _mapper.Map<ChatBotModel>(chatbotMessage);
-            chatBotModel.ProgressRatio = Math.Round(tokenRatio, 2);
+            chatBotModel.ProgressRatio = Math.Round(tokenRatio, ValueSettings.ChatBotSetup.RatioRound);
 
+            chatBotModel.Conversations = chatBotModel.Conversations != null ? ArrayHelper.RemoveFirstTwoElements(chatBotModel.Conversations, ValueSettings.ChatBotSetup.NumberDeletedElement) : null;
             methodResult.Result = chatBotModel;
             methodResult.StatusCode = StatusCodes.Status201Created;
             return methodResult;

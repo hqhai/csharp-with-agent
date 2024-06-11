@@ -4,7 +4,9 @@ namespace Fsel.System.Application.Queries.ChabotQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
@@ -45,7 +47,8 @@ namespace Fsel.System.Application.Queries.ChabotQuery
             foreach (var item in result)
             {
 
-                item.ProgressRatio = Math.Round((float)item.RemainToken / GetChatBotToken(item.Skill, chatBotTokenConfigs),2);
+                item.ProgressRatio = Math.Round((float)item.RemainToken / GetChatBotToken(item.Skill, chatBotTokenConfigs), ValueSettings.ChatBotSetup.RatioRound);
+                item.Conversations = item.Conversations != null ? ArrayHelper.RemoveFirstTwoElements(item.Conversations, ValueSettings.ChatBotSetup.NumberDeletedElement) : null;
             }
 
             methodResult.Result = result;
