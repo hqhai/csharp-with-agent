@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Diagnostics;
+using System.Globalization;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
@@ -34,6 +35,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         private readonly float _targetHeightResize = 180F;
         private readonly double _partSize = ByteSize.FromMegabytes(100).Bytes; // Size of each part (100 MB)
         private readonly ICognitiveProvider _cognitiveProvider;
+        private readonly RandomSecureHelper _randomSecure;
 
         private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
         {
@@ -60,6 +62,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             _systemFileProvider = systemFileProvider;
             _logger = logger;
             _cognitiveProvider = cognitiveProvider;
+            _randomSecure = new RandomSecureHelper();
         }
 
         private async Task<string> UploadFileAsync(EnumBucketType? bucketType, Stream? stream, string? key)
@@ -275,7 +278,8 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 return default;
             }
 
-            var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix());
+            var randomValue = _randomSecure.Next(9999).ToString(CultureInfo.InvariantCulture);
+            var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix(randomValue, DateTime.UtcNow));
             Stream stream;
             if (isResize)
             {
