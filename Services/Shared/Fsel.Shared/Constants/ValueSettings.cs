@@ -53,5 +53,11 @@ namespace Fsel.Shared.Constants
             public const string GrammarTopicList = "Grammar Topic List";
             public const string VocabularyLists = "Vocabulary Lists";
         }
+
+        public static class ChatBotSetup
+        {
+            public const int RatioRound = 2; // làm tròn đến số thật phân
+            public const int NumberDeletedElement = 2; // Số phần tử bị xóa đi trong mảng
+        }
     }
 }

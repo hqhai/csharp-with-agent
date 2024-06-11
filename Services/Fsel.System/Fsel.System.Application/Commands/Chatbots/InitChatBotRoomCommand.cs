@@ -7,6 +7,7 @@ namespace Fsel.System.Application.Commands.Chatbots
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Domain.Entities.ChatBot;
     using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.IRepositories;
@@ -27,7 +28,6 @@ namespace Fsel.System.Application.Commands.Chatbots
         private readonly IMapper _mapper;
         private readonly IChatBotRepository _chatBotRepository;
         private readonly IChatbotConfigRepository _chatBotConfigRepository;
-        private const int Number_Element_Config = 2;
         private readonly IMediator _mediator;
         public InitChatBotRoomCommandHandler(IMapper mapper, IChatBotRepository chatBotRepository, IChatbotConfigRepository chatBotConfigRepository, IMediator mediator)
         {
@@ -61,7 +61,7 @@ namespace Fsel.System.Application.Commands.Chatbots
             if (chatbotMessage != null)
             {
                 methodResult.Result = _mapper.Map<ChatBotModel>(chatbotMessage);
-                methodResult.Result.Conversations = RemoveFirstTwoElements(methodResult.Result.Conversations!);
+                methodResult.Result.Conversations = ArrayHelper.RemoveFirstTwoElements(methodResult.Result.Conversations!, ValueSettings.ChatBotSetup.NumberDeletedElement);
                 return methodResult;
             }
             #endregion
@@ -99,7 +99,7 @@ namespace Fsel.System.Application.Commands.Chatbots
                 await _chatBotRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ChatBotModel>(chatBot);
-                methodResult.Result.Conversations = RemoveFirstTwoElements(methodResult.Result.Conversations!);
+                methodResult.Result.Conversations = methodResult.Result.Conversations != null ? ArrayHelper.RemoveFirstTwoElements(methodResult.Result.Conversations!, ValueSettings.ChatBotSetup.NumberDeletedElement) : null;
                 return methodResult;
             });
             #endregion
@@ -168,26 +168,6 @@ namespace Fsel.System.Application.Commands.Chatbots
                     break;
             }
             return token;
-        }
-
-
-        /// <summary>
-        /// Loại bỏ 2 phần tử cấu hình ở đầu mảng
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list"></param>
-        /// <returns></returns>
-        private static IList<T> RemoveFirstTwoElements<T>(IList<T> list)
-        {
-            if (list.Count >= Number_Element_Config)
-            {
-                return list.Skip(Number_Element_Config).ToList();
-            }
-            else
-            {
-                // Danh sách rỗng, trả về danh sách rỗng
-                return new List<T>();
-            }
         }
     }
 }
