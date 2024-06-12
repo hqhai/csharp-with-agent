@@ -99,16 +99,16 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             }
 
             var courseResult = await _courseResultRepository.Queryable.Where(x => x.StudentId == student.Id)
-                                                                          .Where(x => x.Course != null && x.Course.CourseLevel == request.CourseLevel)
-                                                                          .OrderByDescending(x => x.CreatedDate)
-                                                                          .FirstOrDefaultAsync(cancellationToken);
+                                                                      .Where(x => x.Course != null && x.Course.CourseLevel == request.CourseLevel)
+                                                                      .OrderByDescending(x => x.CreatedDate)
+                                                                      .FirstOrDefaultAsync(cancellationToken);
             if (courseResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
                 return methodResult;
             }
             var isStudentsAchieveScore = await _changeCourseHelper.IsStudentsAchieveScoresAsync(student.Id, student.BaseCourseLevel);
-            if (!student.CourseLevel.CheckLevelByPass(request.CourseLevel, isStudentsAchieveScore))
+            if (!student.BaseCourseLevel.CheckLevelByPass(request.CourseLevel, isStudentsAchieveScore))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.CourseLevel));
                 return methodResult;
@@ -172,21 +172,24 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private async Task<MethodResult<CourseResult>> GetAndCreateCourseResultAsync(Course course, StudentModel student, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<CourseResult>();
+            await UpdateCourseActiveToInActiveAsync(student, course, cancellationToken);
+            CourseResult courseResultNew = new CourseResult();
+
             var courseResult = await _courseResultRepository.Queryable.Where(x => x.CourseId == course.Id && x.StudentId == student.Id).OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
             if (courseResult == null)
             {
-                courseResult = new CourseResult
+                courseResultNew = new CourseResult
                 {
                     CourseId = course.Id,
                     StudentId = student.Id,
                     Status = EnumResultStatus.New,
                     WorkingStatus = EnumWorkingStatus.Active
                 };
-                _courseResultRepository.Add(courseResult);
+                _courseResultRepository.Add(courseResultNew);
             }
             else
             {
-                courseResult = new CourseResult
+                courseResultNew = new CourseResult
                 {
                     StudentId = student.Id,
                     Status = EnumResultStatus.New,
@@ -202,17 +205,30 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                         return methodResult;
                     }
                     var courseCloneModel = courseCloneResult.Result;
-                    courseResult.CourseId = courseCloneModel?.Id ?? default;
+                    courseResultNew.CourseId = courseCloneModel?.Id ?? default;
                 }
                 else
                 {
-                    courseResult.CourseId = courseClone.Id;
+                    courseResultNew.CourseId = courseClone.Id;
                 }
-                _courseResultRepository.Add(courseResult);
+                _courseResultRepository.Add(courseResultNew);
             }
             await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            methodResult.Result = courseResult;
+            methodResult.Result = courseResultNew;
             return methodResult;
+        }
+
+        private async Task UpdateCourseActiveToInActiveAsync(StudentModel student, Course course, CancellationToken cancellationToken)
+        {
+            var courseResultActive = await _courseResultRepository.Queryable
+                .Where(x => x.Course != null)
+                .Where(x => x.StudentId == student.Id && x.WorkingStatus == EnumWorkingStatus.Active).FirstOrDefaultAsync(cancellationToken);
+            if (courseResultActive != null)
+            {
+                courseResultActive.WorkingStatus = EnumWorkingStatus.InActive;
+                _courseResultRepository.Update(courseResultActive);
+                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
         private async Task<Course?> GetCourseAsync(Course course, StudentModel student, CancellationToken cancellationToken)
