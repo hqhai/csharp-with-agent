@@ -8,9 +8,11 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
@@ -28,12 +30,14 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         private readonly UserManager<User> _userManager;
         private readonly IPlatformRepository _platformRepository;
         private readonly IInteractionService _interactionService;
+        private readonly IMediator _mediator;
 
-        public CreateAccountFromLandingPageCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IInteractionService interactionService)
+        public CreateAccountFromLandingPageCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IInteractionService interactionService, IMediator mediator)
         {
             _userManager = userManager;
             _platformRepository = platformRepository;
             _interactionService = interactionService;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateAccountFromLandingPageCommand request, CancellationToken cancellationToken)
@@ -120,6 +124,13 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
             await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+
+            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday }, cancellationToken);
+            if (!updateCode.IsOK)
+            {
+                methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
+                return methodResult;
+            }
 
             var createSurveyResult = await _interactionService.CreateSurvey(new CreateCustomerSurveyCommandModel
             {
