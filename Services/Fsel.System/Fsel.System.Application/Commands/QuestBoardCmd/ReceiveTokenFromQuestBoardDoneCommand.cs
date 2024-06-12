@@ -14,7 +14,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.QuestBoards;
-    using global::System.Globalization;
+    using global::System;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -117,7 +117,8 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                         new TokenHistoryQueueModel()
                         {
                             VolatileToken = questBoardOverall.Token,
-                            Feature = EnumTokenFeature.QuestBoardOverall,
+                            Feature = EnumTokenFeature.QuestBoard,
+                            Mission = GetEnumTokenMission(questBoardOverall),
                             UserId = _authContext.CurrentUserId,
                             Type = EnumTokenHistoryType.Recevived,
                             Config = $"{questBoardOverall.Type}: TargetValue: {questBoardOverall.TargetValue}"
@@ -132,6 +133,27 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 await _questBoardOverallStudentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return methodResult;
             });
+        }
+
+        private static EnumTokenMission? GetEnumTokenMission(QuestBoardOverall questBoardOverall)
+        {
+            if (questBoardOverall.Type == EnumQuestBoardType.LearningQuests)
+            {
+                return EnumTokenMission.CompleteWeeklyTasks;
+            }
+            else if (questBoardOverall.Type == EnumQuestBoardType.BeginnerQuests && questBoardOverall.TargetValue == 2)
+            {
+                return EnumTokenMission.CompleteTwoBeginnerMissions;
+            }
+            else if (questBoardOverall.Type == EnumQuestBoardType.BeginnerQuests && questBoardOverall.TargetValue == 4)
+            {
+                return EnumTokenMission.CompleteFourBeginnerMissions;
+            }
+            else if (questBoardOverall.Type == EnumQuestBoardType.BeginnerQuests && questBoardOverall.TargetValue == 6)
+            {
+                return EnumTokenMission.CompleteSixBeginnerMissions;
+            }
+            return null;
         }
 
         private async Task ReceiveTokenFromQuestBoard(ReceiveTokenFromQuestBoardDoneCommandModel request, Guid studentId, DateTime monDay, DateTime sunDay, MethodResult<VoidMethodResult> methodResult, CancellationToken cancellationToken)
@@ -184,6 +206,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                         {
                             VolatileToken = questBoard.Token,
                             Feature = EnumTokenFeature.QuestBoard,
+                            Mission = CheckEnum(questBoard.Category),
                             UserId = _authContext.CurrentUserId,
                             Type = EnumTokenHistoryType.Recevived,
                             Config =  $"{questBoard.Name} {questBoard.Description}"
@@ -224,6 +247,24 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
 
                 return methodResult;
             });
+        }
+
+        public static EnumTokenMission? CheckEnum(EnumQuestBoardCategory value)
+        {
+            // Lấy tất cả các giá trị của EnumB
+            var enumBValues = Enum.GetValues(typeof(EnumTokenMission));
+
+            // Duyệt qua các giá trị của EnumB và so sánh
+            foreach (EnumTokenMission enumBValue in enumBValues)
+            {
+                if (enumBValue.ToString() == value.ToString())
+                {
+                    return enumBValue;
+                }
+            }
+
+            // Nếu không tìm thấy, trả về null
+            return null;
         }
 
         private async Task DoQuestBoardOverallBeginnerQuests(Guid studentId, List<QuestBoardStudent>? questBoardStudents, int targetValue, CancellationToken cancellationToken)
