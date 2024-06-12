@@ -11,13 +11,11 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
-using Fsel.Storage.Domain.Enums;
 using Fsel.Storage.Domain.Enums.ErrorCodes;
 using Fsel.Storage.Infrastructure.ValueSettings;
 using Humanizer.Bytes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Nest;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
@@ -39,8 +37,9 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
 
         private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
         {
-            { EnumFolderType.Fsis, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (1 GB)
+            { EnumFolderType.Fsis, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
             { EnumFolderType.AG, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
+            { EnumFolderType.HRM, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
             { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
             { EnumFolderType.Files, ByteSize.FromGigabytes(5).Bytes }, //maximum file size (5 GB)
             { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes }, //maximum question size (6 MB)
