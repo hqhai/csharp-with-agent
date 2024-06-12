@@ -172,29 +172,22 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private async Task<MethodResult<CourseResult>> GetAndCreateCourseResultAsync(Course course, StudentModel student, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<CourseResult>();
-            await UpdateCourseActiveToInActiveAsync(student, course, cancellationToken);
-            CourseResult courseResultNew = new CourseResult();
-
-            var courseResult = await _courseResultRepository.Queryable.Where(x => x.CourseId == course.Id && x.StudentId == student.Id).OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-            if (courseResult == null)
+            await UpdateCourseActiveToInActiveAsync(student, cancellationToken);
+            CourseResult courseResultNew = new CourseResult
             {
-                courseResultNew = new CourseResult
-                {
-                    CourseId = course.Id,
-                    StudentId = student.Id,
-                    Status = EnumResultStatus.New,
-                    WorkingStatus = EnumWorkingStatus.Active
-                };
+                StudentId = student.Id,
+                Status = EnumResultStatus.New,
+                WorkingStatus = EnumWorkingStatus.Active
+            };
+
+            var isCourseResult = await _courseResultRepository.Queryable.AnyAsync(x => x.CourseId == course.Id && x.StudentId == student.Id, cancellationToken);
+            if (!isCourseResult)
+            {
+                courseResultNew.CourseId = course.Id;
                 _courseResultRepository.Add(courseResultNew);
             }
             else
             {
-                courseResultNew = new CourseResult
-                {
-                    StudentId = student.Id,
-                    Status = EnumResultStatus.New,
-                    WorkingStatus = EnumWorkingStatus.Active
-                };
                 var courseClone = await GetCourseAsync(course, student, cancellationToken);
                 if (courseClone == null)
                 {
@@ -218,7 +211,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             return methodResult;
         }
 
-        private async Task UpdateCourseActiveToInActiveAsync(StudentModel student, Course course, CancellationToken cancellationToken)
+        private async Task UpdateCourseActiveToInActiveAsync(StudentModel student, CancellationToken cancellationToken)
         {
             var courseResultActive = await _courseResultRepository.Queryable
                 .Where(x => x.Course != null)

@@ -23,7 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public long TimeSpent { get; set; }
 
         public string? Type { get; set; }
-        public Guid ObjectId { get; set; }
+        public Guid? ObjectId { get; set; }
         public int DisplayOrder { get; set; }
 
         public Guid? ObjectLessonId { get; set; }
