@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class ProsodyScoreModel : BaseModel
     {
-        public int PoinsInRange { get; }
+        public int PoinsInRange { get; set; }
 
         public double MinScore { get; set; }
 
