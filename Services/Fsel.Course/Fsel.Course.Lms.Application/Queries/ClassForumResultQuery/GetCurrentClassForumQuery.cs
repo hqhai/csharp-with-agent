@@ -158,7 +158,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             #region Do QuestBoard
 
-            if (classForumByStudentModel != null && !string.IsNullOrEmpty(classForumByStudentModel.ClassForumResultCurrentStudent.GradingAlFeedback))
+            if (classForumByStudentModel != null && !string.IsNullOrEmpty(classForumByStudentModel.ClassForumResultCurrentStudent?.GradingAlFeedback))
             {
                 await DoQuestBoard(student.Id, EnumQuestBoardCategory.MessagesFromAI, cancellationToken);
             }
