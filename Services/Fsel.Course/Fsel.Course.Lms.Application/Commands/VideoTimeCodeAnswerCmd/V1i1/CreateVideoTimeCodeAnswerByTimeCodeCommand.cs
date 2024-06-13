@@ -156,11 +156,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
                 #region Do QuestBoard
 
-                await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.DecodingTheNebula, cancellationToken);
-                await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.JourneyOfKnowledge, cancellationToken);
+                var countAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => p.VideoTimeCodeResultId == videoTimeCodeResult.Id).CountAsync(cancellationToken);
+
+                await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.DecodingTheNebula, countAnswers, cancellationToken);
+                await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.JourneyOfKnowledge, countAnswers, cancellationToken);
 
                 #endregion Do QuestBoard
             }
+
             var videoTimeCodeMethod = await _mediator.Send(new GetTimeCodeDetailQuery
             {
                 VideoTimeCodeId = request.VideoTimeCodeId,
@@ -173,14 +176,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             return methodResult;
         }
 
-        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardCategory category, CancellationToken cancellationToken)
+        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardCategory category, int value, CancellationToken cancellationToken)
         {
             await _questBoardPublisher.Publish(new QuestBoardQueueModel()
             {
                 StudentID = studentId,
                 Type = EnumQuestBoardType.LearningQuests,
                 Category = category,
-                Value = 1
+                Value = value
             }, cancellationToken);
         }
 
@@ -216,6 +219,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var updateVideoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var isTimeFeft = GetMandatoryAnswer(videoTimeCode, videoTimeCodeResult);
+
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);

@@ -6,6 +6,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Application.Commands.QuestBoardCmd;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
@@ -89,8 +90,9 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
                 if ((request.Type == EnumFeature.VideoLesson.ToString() || request.Type == EnumFeature.HomeWork.ToString() || request.Type == EnumFeature.MockTest.ToString() || request.Type == EnumFeature.FinalTest.ToString()) && request.AccessTime.HasValue)
                 {
-                    await DoQuestBoard(student!.Id, EnumQuestBoardCategory.ExploreTheLearningGalaxy, (int)request.AccessTime, cancellationToken);
-                    await DoQuestBoard(student!.Id, EnumQuestBoardCategory.LearningSpaceship, (int)request.AccessTime, cancellationToken);
+                    int minute = DateTimeHelper.ConvertSecondsToMinutes(request.AccessTime.Value);
+                    await DoQuestBoard(student!.Id, EnumQuestBoardCategory.ExploreTheLearningGalaxy, minute, cancellationToken);
+                    await DoQuestBoard(student!.Id, EnumQuestBoardCategory.LearningSpaceship, minute, cancellationToken);
                 }
 
                 return methodResult;
