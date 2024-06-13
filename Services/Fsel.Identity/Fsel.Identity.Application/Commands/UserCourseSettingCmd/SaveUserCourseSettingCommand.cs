@@ -39,13 +39,13 @@ namespace Fsel.Identity.Application.Commands.UserCourseSettingCmd
                 userCourseSetting = new UserCourseSetting
                 {
                     CourseLevel = request.CourseLevel,
-                    Value = MaxValue,
+                    Value = request.IsDeduction ? MaxValue - 1 : MaxValue,
                     Type = request.Type,
                     UserId = request.UserId
                 };
                 _userCourseSettingRepository.Add(userCourseSetting);
             }
-            else if (!request.IsCreate)
+            else
             {
                 userCourseSetting.Value = request.IsDeduction ? --userCourseSetting.Value : MaxValue;
                 if (userCourseSetting.Value < 0)

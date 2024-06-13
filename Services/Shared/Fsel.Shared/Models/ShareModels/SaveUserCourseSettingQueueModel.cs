@@ -9,7 +9,6 @@ namespace Fsel.Shared.Models.ShareModels
         public EnumUserCourseType Type { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public bool IsDeduction { get; set; }
-        public bool IsCreate { get; set; }
         public Guid UserId { get; set; }
     }
 }

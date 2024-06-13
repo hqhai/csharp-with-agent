@@ -108,7 +108,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                     await UpdateActiveClassStudentAsync(classStudent);
                 }
                 await InActiveClassStudent(classActive, student.Id);
-                await SaveCourseSettingAsync(course, request.UserId, cancellationToken);
 
                 var updateStudentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel
                 {
@@ -181,24 +180,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             {
                 throw new Exception("An error occurred while updating the class object.", ex);
             }
-        }
-
-        private async Task SaveCourseSettingAsync(CourseModel course, Guid? userId, CancellationToken cancellationToken)
-        {
-            await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
-            {
-                CourseLevel = course.CourseLevel,
-                Type = EnumUserCourseType.ResetAndLearnAgain,
-                IsCreate = true,
-                UserId = userId ?? _authContext.CurrentUserId
-            }, cancellationToken).ConfigureAwait(false);
-
-            await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
-            {
-                Type = EnumUserCourseType.ChangeLevel,
-                IsCreate = true,
-                UserId = userId ?? _authContext.CurrentUserId
-            }, cancellationToken).ConfigureAwait(false);
         }
     }
 }

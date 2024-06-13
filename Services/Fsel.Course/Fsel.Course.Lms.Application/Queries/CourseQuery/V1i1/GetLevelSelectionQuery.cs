@@ -75,8 +75,13 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.BaseCourseLevel));
                 return methodResult;
             }
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => x.StudentId == student.Id && x.WorkingStatus != EnumWorkingStatus.NotWorking).ToListAsync(cancellationToken);
             var isChangeLevelStudent = await _changeCourseHelper.CheckChangeLevelAllCourseAsync(student.Id);
+            if (isChangeLevelStudent)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(isChangeLevelStudent));
+                return methodResult;
+            }
+            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => x.StudentId == student.Id && x.WorkingStatus != EnumWorkingStatus.NotWorking).ToListAsync(cancellationToken);
             var isStudentsAchieveScore = await _changeCourseHelper.IsStudentsAchieveScoresAsync(student.Id, student.BaseCourseLevel);
             var levelDtos = ConvertHelper.Deserialize<List<LevelDtoModel>>(request.CourseType.GetListCourseLevels(student.BaseCourseLevel.Value, isStudentsAchieveScore));
             if (levelDtos != null && levelDtos.Any())
@@ -87,11 +92,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     var userCourseSetting = userCourseSettings?.FirstOrDefault(x => x.CourseLevel == item.CourseLevel && x.Type == EnumUserCourseType.ResetAndLearnAgain);
                     if (userCourseSetting != null)
                     {
-                        item.IsResetCourse = userCourseSetting.Value > MinLearnAgain;
+                        item.IsResetCourse = !isChangeLevelStudent && userCourseSetting.Value > MinLearnAgain;
                     }
                     else
                     {
-                        item.IsResetCourse = courseResultLevel != null ? true : null;
+                        item.IsResetCourse = courseResultLevel != null ? !isChangeLevelStudent : null;
                     }
                     item.IsUsedLevel = courseResultLevel?.WorkingStatus == EnumWorkingStatus.Active;
                     item.IsHiddenCourseLevel = isChangeLevelStudent;

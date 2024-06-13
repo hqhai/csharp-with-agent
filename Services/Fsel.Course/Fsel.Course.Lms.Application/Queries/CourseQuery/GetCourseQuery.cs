@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
@@ -20,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -43,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         private readonly IOrderService _orderService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
 
         public GetCourseQueryHandler(
@@ -58,6 +61,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             ITrainingService trainingService,
             IUnitResultRepository unitResultRepository,
             IMockTestResultRepository mockTestResultRepository,
+            SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
             IFinalTestResultRepository finalTestResultRepository)
         {
             _courseRepository = courseRepository;
@@ -72,6 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             _orderService = orderService;
             _unitResultRepository = unitResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
+            _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _finalTestResultRepository = finalTestResultRepository;
         }
 
@@ -104,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-
+            await SaveCourseSettingAsync(course, request.UserId ?? _authContext.CurrentUserId, cancellationToken);
             await UpdateCourse(course, student.Id, cancellationToken);
 
             var courseModel = await GetCourseAsync(course.Id, student.Id, @class.Code);
@@ -171,8 +176,29 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+
             methodResult.Result = (student, @class);
             return methodResult;
+        }
+
+        private async Task SaveCourseSettingAsync(Course course, Guid? userId, CancellationToken cancellationToken)
+        {
+            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync();
+            if (!userCourseSettingResults.IsSuccessStatusCode)
+            {
+                return;
+            }
+            var userCourseSetting = userCourseSettingResults.Content?.Result?.FirstOrDefault(x => x.CourseLevel == course.CourseLevel);
+            if (userCourseSetting != null)
+            {
+                return;
+            }
+            await _saveUserCourseSettingPublisher.Publish(new SaveUserCourseSettingQueueModel
+            {
+                CourseLevel = course.CourseLevel,
+                Type = EnumUserCourseType.ResetAndLearnAgain,
+                UserId = userId ?? _authContext.CurrentUserId
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<CourseModel?> GetCourseAsync(Guid id, Guid? studentId, string? classCode)
