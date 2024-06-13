@@ -292,6 +292,17 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 homeWorkResult.Status = EnumResultStatus.Done;
                 await _finishOneHomeWorkPublisher.Publish(homeWorkResult, CancellationToken.None);
+
+                #region Do QuestBoard
+
+                await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.BeginnerQuests, EnumQuestBoardCategory.CompleteHomeworkFirst, CancellationToken.None);
+                await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.LearningQuests, EnumQuestBoardCategory.TheMysteryOfTheStars, CancellationToken.None);
+                if (homeWorkResult.Percent > 50)
+                {
+                    await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.LearningQuests, EnumQuestBoardCategory.ConqueringAsteroids, CancellationToken.None);
+                }
+
+                #endregion Do QuestBoard
             }
             else
             {
@@ -306,17 +317,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 TotalQuestion = homeWorkQuestionCount.TotalQuestion,
             };
             homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
-
-            #region Do QuestBoard
-
-            await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.BeginnerQuests, EnumQuestBoardCategory.CompleteHomeworkFirst, CancellationToken.None);
-            await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.LearningQuests, EnumQuestBoardCategory.TheMysteryOfTheStars, CancellationToken.None);
-            if (homeWorkResult.Percent > 50)
-            {
-                await DoQuestBoard(homeWorkResult.StudentId, EnumQuestBoardType.LearningQuests, EnumQuestBoardCategory.ConqueringAsteroids, CancellationToken.None);
-            }
-
-            #endregion Do QuestBoard
 
             return homeWorkResult;
         }
