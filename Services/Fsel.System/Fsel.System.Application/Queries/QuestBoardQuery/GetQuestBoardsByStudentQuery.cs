@@ -86,7 +86,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
 
             learningQuests.QuestBoardModels.ForEach(p =>
             {
-                if (p.RepeatType == EnumRepeatType.Day)
+                if (p.RepeatType == EnumRepeatType.Daily)
                 {
                     var questBoardStudent = questBoardStudents.FirstOrDefault(x => x.QuestBoardId == p.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
                     p.Status = questBoardStudent == null ? EnumQuestBoardStudentStatus.NotReceived : questBoardStudent.Status;

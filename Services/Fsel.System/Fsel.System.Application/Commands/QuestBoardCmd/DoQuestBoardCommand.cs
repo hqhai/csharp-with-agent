@@ -78,7 +78,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             if (questBoard != null && questBoard.IsActive)
             {
                 var learningQuest = new QuestBoardStudent();
-                if (questBoard.RepeatType == EnumRepeatType.Day)
+                if (questBoard.RepeatType == EnumRepeatType.Daily)
                 {
                     learningQuest = await _questBoardStudentRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == request.StudentID && p.QuestBoardId == questBoard.Id && p.CreatedDate.Date == DateTime.UtcNow.Date, cancellationToken);
                 }
