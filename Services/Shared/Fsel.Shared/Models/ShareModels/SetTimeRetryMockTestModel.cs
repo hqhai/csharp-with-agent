@@ -1,0 +1,41 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Shared.Models.ShareModels
+{
+    public class SetTimeRetryMockTestModel
+    {
+        public Guid SectionId { get; set; }
+        public Guid SectionGroupId { get; set; }
+        public string? WordContent { get; set; }
+        public Guid MockTestResultId { get; set; }
+
+        public bool IsRetry { get; set; }
+
+        public string? SettingModel { get; set; }
+
+
+        public double SettingTemperature { get; set; }
+
+
+        public double SettingWordMaxLength { get; set; }
+
+
+        public double SettingTopP { get; set; }
+
+
+        public double SettingFrequecy { get; set; }
+
+
+        public double SettingPresence { get; set; }
+
+
+        public string? SystemRoleAlConfig { get; set; }
+
+
+        public string? UserAIConfig { get; set; }
+
+        public DateTime StartDate { get; set; }
+
+
+    }
+}

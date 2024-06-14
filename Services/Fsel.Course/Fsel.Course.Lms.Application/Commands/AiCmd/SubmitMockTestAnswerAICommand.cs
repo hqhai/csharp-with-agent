@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -33,11 +34,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly IMockTestAISettingRepository _aiGradeSettingRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly SetTimeRetryMockTestPublisher _setTimeRetryMockTestPublisher;
         private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
         private const int CorrectTotal_Writing = 36;
         private const int Last_DisplayOrder = 1;
+        private const int Max_Times_Retry = 3;
 
-        public SubmitMockTestAnswerCommandHandler(SubmitMockTestCriteriaPublisher submitMockTestCriteria, IUserService userService, ISectionRepository sectionRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository)
+        public SubmitMockTestAnswerCommandHandler(SubmitMockTestCriteriaPublisher submitMockTestCriteria, IUserService userService, ISectionRepository sectionRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, SetTimeRetryMockTestPublisher setTimeRetryMockTestPublisher, IMapper mapper)
         {
             _submitMockTestCriteria = submitMockTestCriteria;
             _userService = userService;
@@ -47,6 +51,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             _aiGradeSettingRepository = aiGradeSettingRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
+            _setTimeRetryMockTestPublisher = setTimeRetryMockTestPublisher;
+            _mapper = mapper;
         }
 
         public async Task<bool> Handle(SubmitMockTestAnswerAICommand request, CancellationToken cancellationToken)
@@ -84,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         return false;
                     }
 
-                    var aIResponse = await SendChatGPT(aiConfig, item.SystemRoleAlConfig! ,userAiConfig, cancellationToken);
+                    var aIResponse = await SendChatGPT(aiConfig, item.SystemRoleAlConfig!, userAiConfig, cancellationToken);
 
                     resultDictionary[item.Prompts![0].Type] = aIResponse!;
 
@@ -106,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         return false;
                     }
 
-                    var aIResponse = await SendChatGPT(aiConfig, aiConfig.SystemRoleAlConfig,userAiConfig, cancellationToken);
+                    var aIResponse = await SendChatGPT(aiConfig, aiConfig.SystemRoleAlConfig, userAiConfig, cancellationToken);
 
                     resultDictionary[item.Type] = aIResponse!;
 
@@ -126,6 +132,17 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             var coherence = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.Coherence);
             var lexicalResource = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.LexicalResource);
             var grammaticalRange = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.GrammaticalRange);
+
+            //set up thời gian retry
+
+            //if (mockTestAnswer != null && (taskResponse == null || coherence == null || lexicalResource == null || grammaticalRange == null) && mockTestAnswer.RetryTime <= Max_Times_Retry)
+            if (true)
+            {
+                var model = _mapper.Map<SetTimeRetryMockTestModel>(request);
+                model.StartDate = DateTime.UtcNow;
+                await _setTimeRetryMockTestPublisher.Publish(model, cancellationToken);
+                mockTestAnswer.RetryTime += 1;
+            }
 
             var mockTestResult = _mockTestResultRepository.Queryable.Include(x => x.MockTest).FirstOrDefault(x => x.Id == request.MockTestResultId);
             if (mockTestResult == null || mockTestResult.MockTest == null)
@@ -263,7 +280,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             return NumberHelper.RoundNumberDouble((average + firstScore * 2) / 3);
         }
 
-        private async Task<string> SendChatGPT(MockTestAISetting aiConfig,string systemRole,string userAiConfig, CancellationToken cancellationToken)
+        private async Task<string> SendChatGPT(MockTestAISetting aiConfig, string systemRole, string userAiConfig, CancellationToken cancellationToken)
         {
             string aIResponse = "";
             if (string.IsNullOrEmpty(userAiConfig))
