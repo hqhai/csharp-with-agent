@@ -271,5 +271,20 @@ namespace Fsel.Course.Lms.Api.Controllers
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "report_student_export.xlsx");
         }
+
+        /// <summary>
+        /// Report Student
+        /// </summary>
+        [HttpPost("export-report-progress-student")]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportProgressStudent([FromQuery] ImportEmailByReportProgressQuery query)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "report_progress_student_export.xlsx");
+        }
     }
 }
