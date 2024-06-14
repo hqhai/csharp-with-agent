@@ -48,7 +48,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
 
 
-            if (DateTime.UtcNow < _expiredCompetition)
+            if (DateTime.UtcNow > _expiredCompetition)
             {
                 string fileResult = request.CourseType == EnumCourseType.Academic ? ResourceSettings.AcademicStudentsResult : ResourceSettings.IeltsStudentResult;
                 string pathResult = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileResult);
