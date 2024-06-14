@@ -32,7 +32,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
         private readonly IStudentRepository _studentRepository;
         private const double Process_Ratio = 0.75;
         private const double Overall_Ratio = 0.25;
-        private DateTime _expiredCompetition = new DateTime(2024, 6, 14, 23, 59, 0); // thời điểm khóa leaderboard
+        private DateTime _expiredCompetition = new DateTime(2024, 6, 14, 16, 59, 0); // thời điểm khóa leaderboard
 
         public GetStudentRankingCompetitionQueryHandler(ILmsCourseService lmsCourseService, IHostEnvironment environment, IStudentRepository studentRepository)
         {
