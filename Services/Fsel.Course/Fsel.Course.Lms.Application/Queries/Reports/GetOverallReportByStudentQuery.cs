@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             }
 
             var courseResult = await _courseResultRepository.Queryable.Include(p => p.Course).FirstOrDefaultAsync(p => p.CourseId == request.CourseId && p.StudentId == studentId, cancellationToken);
-            if (courseResult == null)
+            if (courseResult == null || courseResult.Status != Domain.Enums.EnumResultStatus.Done)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
