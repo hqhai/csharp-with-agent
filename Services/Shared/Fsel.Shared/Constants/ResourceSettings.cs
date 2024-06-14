@@ -43,7 +43,7 @@ namespace Fsel.Shared.Constants
         public const string ChatbotUnitInfo = "Resources//Chatbots//UnitInfo.xml";
         public const string AppStore = "Resources//AppStore//PrivateKey.txt";
 
-        public const string IeltsStudentResult = "Resources//IelstStudentsResult.json";
+        public const string IeltsStudentResult = "Resources//IeltsStudentsResult.json";
         public const string AcademicStudentsResult = "Resources//AcademicStudentsResult.json";
 
 
