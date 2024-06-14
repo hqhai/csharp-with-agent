@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                         var order = orderResult.Content?.Result;
                         if (order != null && order.IsTrial && order.ExpireDate.HasValue)
                         {
-                            reportProgress.StartTrial = order.ExpireDate.Value.AddDays(-7);
+                            reportProgress.StartTrial = order.UpdatedDate ?? order.CreatedDate;
                             reportProgress.EndTrial = order.ExpireDate;
                         }
                     }

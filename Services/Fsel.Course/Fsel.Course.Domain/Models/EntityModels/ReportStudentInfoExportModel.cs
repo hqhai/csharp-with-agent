@@ -44,10 +44,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         [EpplusTableColumn(Header = "Course Level")]
         public EnumCourseLevel? CourseLevel { get; set; }
 
-        [EpplusTableColumn(Header = "Start Trial")]
+        [EpplusTableColumn(Header = "Start Trial", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
         public DateTime? StartTrial { get; set; }
 
-        [EpplusTableColumn(Header = "End Trial")]
+        [EpplusTableColumn(Header = "End Trial", NumberFormat = "dd/MM/yyyy HH:mm:ss")]
         public DateTime? EndTrial { get; set; }
 
         [EpplusTableColumn(Header = "Unit")]
