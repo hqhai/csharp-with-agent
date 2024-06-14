@@ -31,11 +31,13 @@ builder.Services.AddScoped<ReviewFselPublisher>();
 builder.Services.AddScoped<NoticeAccessTimePublisher>();
 builder.Services.AddScoped<WeeklyReportPublisher>();
 builder.Services.AddScoped<UpdateStatusTrialStudentPublisher>();
+builder.Services.AddScoped<RetryMockTestPublisher>();
 builder.Services.AddScoped<UpdateClassForumResultToExpiredTimePublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.LmsQueue.NameQueue.SetTimeToCompleteTest, typeof(SetTimeToCompleteTestConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SetTimeRetryMockTest, typeof(SetTimeToRetryMockTestConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SetCompleteApprovalPostTimeOut, typeof(SetTimeToCompleteApprovalConsumer) },
     { QueueSettings.UserQueue.NameQueue.SetTimeToSendReviewFsel, typeof(SetTimeToReviewFselConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SetTimeClassForumDone, typeof(SetTimeToClassForumApprovalConsumer) },

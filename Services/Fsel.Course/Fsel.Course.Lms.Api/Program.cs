@@ -113,6 +113,7 @@ builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAISer
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<SetTimeRetryMockTestPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -178,6 +179,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.UpdateClassForumResultToExpiredTime, typeof(UpdateClassForumResultToExpiredTimeConsumer) },
     { QueueSettings.LmsQueue.NameQueue.WeeklyReport, typeof(WeeklyReportConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.SetTimeModule, typeof(SetTimeModuleConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.RetryMockTestAction, typeof(RetryMockTestWhenScoreZeroConsumer) },
 });
 
 var app = builder.Build();
