@@ -10,5 +10,6 @@ namespace Fsel.Shared.Enums
         Questions,
         Fsis,
         AG,
+        HRM,
     }
 }

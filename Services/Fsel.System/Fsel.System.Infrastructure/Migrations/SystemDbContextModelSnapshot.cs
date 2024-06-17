@@ -1678,7 +1678,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Khám Phá Thiên Hà Học Tập",
-                            RepeatType = "Day",
+                            RepeatType = "Daily",
                             TargetValue = 20,
                             Token = 2,
                             Type = "LearningQuests"
@@ -1696,7 +1696,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = false,
                             IsDeleted = false,
                             Name = "Tương tác liên sao",
-                            RepeatType = "Day",
+                            RepeatType = "Daily",
                             TargetValue = 1,
                             Token = 2,
                             Type = "LearningQuests"
@@ -1714,7 +1714,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Hoàn Thành Sứ Mệnh Ngày",
-                            RepeatType = "Day",
+                            RepeatType = "Daily",
                             TargetValue = 1,
                             Token = 2,
                             Type = "LearningQuests"
@@ -1732,7 +1732,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = false,
                             IsDeleted = false,
                             Name = "Chinh Phục Tiểu Hành Tinh",
-                            RepeatType = "Day",
+                            RepeatType = "Daily",
                             TargetValue = 1,
                             Token = 2,
                             Type = "LearningQuests"
@@ -1750,7 +1750,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = false,
                             IsDeleted = false,
                             Name = "Kết Nối Đồng Minh",
-                            RepeatType = "Day",
+                            RepeatType = "Daily",
                             TargetValue = 1,
                             Token = 2,
                             Type = "LearningQuests"
@@ -1768,7 +1768,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = false,
                             IsDeleted = false,
                             Name = "Sao Lưu Ghi Chú",
-                            RepeatType = "Day",
+                            RepeatType = "Daily",
                             TargetValue = 1,
                             Token = 2,
                             Type = "LearningQuests"
@@ -1786,7 +1786,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = false,
                             IsDeleted = false,
                             Name = "Phóng Tên Lửa Chia Sẻ",
-                            RepeatType = "Day",
+                            RepeatType = "Daily",
                             TargetValue = 1,
                             Token = 2,
                             Type = "LearningQuests"
@@ -1804,7 +1804,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Ghi Chú Thiên Hà",
-                            RepeatType = "Day",
+                            RepeatType = "Daily",
                             TargetValue = 1,
                             Token = 2,
                             Type = "LearningQuests"
@@ -1822,7 +1822,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = false,
                             IsDeleted = false,
                             Name = "Giải Mã Tinh Vân",
-                            RepeatType = "Day",
+                            RepeatType = "Daily",
                             TargetValue = 1,
                             Token = 2,
                             Type = "LearningQuests"
@@ -1840,7 +1840,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = false,
                             IsDeleted = false,
                             Name = "Lịch sử khám phá",
-                            RepeatType = "Day",
+                            RepeatType = "Daily",
                             TargetValue = 1,
                             Token = 2,
                             Type = "LearningQuests"
@@ -1858,7 +1858,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Phi Thuyền Học Tập",
-                            RepeatType = "Week",
+                            RepeatType = "Weekly",
                             TargetValue = 120,
                             Token = 5,
                             Type = "LearningQuests"
@@ -1876,7 +1876,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Hành Trình Tri Thức",
-                            RepeatType = "Week",
+                            RepeatType = "Weekly",
                             TargetValue = 20,
                             Token = 5,
                             Type = "LearningQuests"
@@ -1894,7 +1894,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Thông Điệp Từ AI",
-                            RepeatType = "Week",
+                            RepeatType = "Weekly",
                             TargetValue = 1,
                             Token = 5,
                             Type = "LearningQuests"
@@ -1912,7 +1912,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Chế Độ Tập Trung Vô Cực",
-                            RepeatType = "Week",
+                            RepeatType = "Weekly",
                             TargetValue = 7,
                             Token = 5,
                             Type = "LearningQuests"
@@ -1930,7 +1930,7 @@ namespace Fsel.System.Infrastructure.Migrations
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Bí Ẩn Của Vì Sao",
-                            RepeatType = "Week",
+                            RepeatType = "Weekly",
                             TargetValue = 10,
                             Token = 5,
                             Type = "LearningQuests"

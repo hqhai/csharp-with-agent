@@ -12,7 +12,6 @@ namespace Fsel.Shared.Enums
         SkillMockTest,
         Achievement,
         MarketPlace,
-        QuestBoard,
-        QuestBoardOverall
+        QuestBoard
     }
 }
