@@ -93,7 +93,7 @@
     "targetValue": 20,
     "token": 2,
     "energy": 2,
-    "repeatType": "Day",
+    "repeatType": "Daily",
     "IsActive": true,
     "createdDate": "2024-05-24"
   },
@@ -107,7 +107,7 @@
     "targetValue": 1,
     "token": 2,
     "energy": 2,
-    "repeatType": "Day",
+    "repeatType": "Daily",
     "IsActive": false,
     "createdDate": "2024-05-24"
   },
@@ -121,7 +121,7 @@
     "targetValue": 1,
     "token": 2,
     "energy": 2,
-    "repeatType": "Day",
+    "repeatType": "Daily",
     "IsActive": true,
     "createdDate": "2024-05-24"
   },
@@ -135,7 +135,7 @@
     "targetValue": 1,
     "token": 2,
     "energy": 2,
-    "repeatType": "Day",
+    "repeatType": "Daily",
     "IsActive": false,
     "createdDate": "2024-05-24"
   },
@@ -149,7 +149,7 @@
     "targetValue": 1,
     "token": 2,
     "energy": 2,
-    "repeatType": "Day",
+    "repeatType": "Daily",
     "IsActive": false,
     "createdDate": "2024-05-24"
   },
@@ -163,7 +163,7 @@
     "targetValue": 1,
     "token": 2,
     "energy": 2,
-    "repeatType": "Day",
+    "repeatType": "Daily",
     "IsActive": false,
     "createdDate": "2024-05-24"
   },
@@ -177,7 +177,7 @@
     "targetValue": 1,
     "token": 2,
     "energy": 2,
-    "repeatType": "Day",
+    "repeatType": "Daily",
     "IsActive": false,
     "createdDate": "2024-05-24"
   },
@@ -191,7 +191,7 @@
     "targetValue": 1,
     "token": 2,
     "energy": 2,
-    "repeatType": "Day",
+    "repeatType": "Daily",
     "IsActive": true,
     "createdDate": "2024-05-24"
   },
@@ -205,7 +205,7 @@
     "targetValue": 1,
     "token": 2,
     "energy": 2,
-    "repeatType": "Day",
+    "repeatType": "Daily",
     "IsActive": false,
     "createdDate": "2024-05-24"
   },
@@ -219,7 +219,7 @@
     "targetValue": 1,
     "token": 2,
     "energy": 2,
-    "repeatType": "Day",
+    "repeatType": "Daily",
     "IsActive": false,
     "createdDate": "2024-05-24"
   },
@@ -233,7 +233,7 @@
     "targetValue": 120,
     "token": 5,
     "energy": 20,
-    "repeatType": "Week",
+    "repeatType": "Weekly",
     "IsActive": true,
     "createdDate": "2024-05-24"
   },
@@ -247,7 +247,7 @@
     "targetValue": 20,
     "token": 5,
     "energy": 20,
-    "repeatType": "Week",
+    "repeatType": "Weekly",
     "IsActive": true,
     "createdDate": "2024-05-24"
   },
@@ -261,7 +261,7 @@
     "targetValue": 1,
     "token": 5,
     "energy": 20,
-    "repeatType": "Week",
+    "repeatType": "Weekly",
     "IsActive": true,
     "createdDate": "2024-05-24"
   },
@@ -275,7 +275,7 @@
     "targetValue": 7,
     "token": 5,
     "energy": 20,
-    "repeatType": "Week",
+    "repeatType": "Weekly",
     "IsActive": true,
     "createdDate": "2024-05-24"
   },
@@ -289,7 +289,7 @@
     "targetValue": 10,
     "token": 5,
     "energy": 20,
-    "repeatType": "Week",
+    "repeatType": "Weekly",
     "IsActive": true,
     "createdDate": "2024-05-24"
   }
