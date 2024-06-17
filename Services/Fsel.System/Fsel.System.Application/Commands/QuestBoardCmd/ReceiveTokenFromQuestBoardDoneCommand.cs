@@ -174,7 +174,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             }
             else
             {
-                if (questBoard.RepeatType == EnumRepeatType.Day)
+                if (questBoard.RepeatType == EnumRepeatType.Daily)
                 {
                     questBoardStudent = await _questBoardStudentRepository.Queryable.Where(p => p.QuestBoardId == questBoard.Id && p.StudentId == studentId && p.CreatedDate.Date == DateTime.UtcNow.Date).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                 }
