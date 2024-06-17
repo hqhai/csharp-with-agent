@@ -9,6 +9,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Net.Http.Headers;
+    using Microsoft.Extensions.Hosting;
 
     public class CreateUserStudentsToAdminCommand : CreateUserStudentsToAdminCommandModel, IRequest<MethodResult<IList<UserModel>>>
     {
@@ -17,21 +19,32 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class CreateUserStudentsToAdminCommandHandler : IRequestHandler<CreateUserStudentsToAdminCommand, MethodResult<IList<UserModel>>>
     {
         private readonly IMediator _mediator;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHostEnvironment _environment;
 
-        public CreateUserStudentsToAdminCommandHandler(IMediator mediator)
+        public CreateUserStudentsToAdminCommandHandler(IMediator mediator, IHttpContextAccessor httpContextAccessor, IHostEnvironment environment)
         {
             _mediator = mediator;
+            _httpContextAccessor = httpContextAccessor;
+            _environment = environment;
         }
 
         public async Task<MethodResult<IList<UserModel>>> Handle(CreateUserStudentsToAdminCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<UserModel>>();
+            if (_environment.IsProduction())
+            {
+                methodResult.AddError(StatusCodes.Status401Unauthorized, "Not Have Access Production");
+                return methodResult;
+            }
+
             if (request.Emails == null || !request.Emails.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Emails));
                 return methodResult;
             }
+            var tokenAdmin = _httpContextAccessor.HttpContext?.Request.Headers[HeaderNames.Authorization].ToString();
             var listUser = new List<UserModel>();
             foreach (var email in request.Emails)
             {
@@ -44,6 +57,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 if (userResult.Result != null)
                 {
                     listUser.Add(userResult.Result);
+                }
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = tokenAdmin;
                 }
             }
             methodResult.Result = listUser;

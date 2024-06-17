@@ -71,19 +71,19 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(finalTestResult));
                 return methodResult;
             }
-            methodResult.Result = GetFinalTest(finalTest, finalTestResult);
+            methodResult.Result = await GetFinalTest(finalTest, finalTestResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private FinalTestModel GetFinalTest(FinalTest finalTest, FinalTestResult finalTestResult)
+        private async Task<FinalTestModel> GetFinalTest(FinalTest finalTest, FinalTestResult finalTestResult)
         {
             var finalTestDetail = _mapper.Map<FinalTestModel>(finalTest);
             var sectionGroups = finalTest.FinalTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             finalTestDetail.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(sectionGroups);
             finalTestDetail.FinalTestResult = _mapper.Map<FinalTestResultModel>(finalTestResult);
             finalTestDetail.FinalTestResult.ProgressPercent = NumberHelper.GetPercent(sectionGroups.SelectMany(x => x.SectionGroupResults).Count(x => x.Status == EnumResultStatus.Done), sectionGroups.Count);
-            finalTestDetail.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, finalTestDetail.FinalTestResult.Id, nameof(SectionGroupResult.FinalTestResultId));
+            finalTestDetail.SectionGroups = await _sectionGroupConverter.GetSectionGroupsAsync(sectionGroups, finalTestDetail.FinalTestResult.Id, nameof(SectionGroupResult.FinalTestResultId));
             return finalTestDetail;
         }
     }

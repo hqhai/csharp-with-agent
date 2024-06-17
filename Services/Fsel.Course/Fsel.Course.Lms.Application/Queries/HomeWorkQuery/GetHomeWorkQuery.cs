@@ -121,15 +121,12 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 
         private static EnumCorrectStatus? GetCorrectStatus(HomeWorkAnswer? homeWorkAnswer)
         {
-            if (homeWorkAnswer != null)
+            if (homeWorkAnswer == null)
             {
-                if (homeWorkAnswer.Status != EnumAnswerStatus.Done && homeWorkAnswer.IsCorrect.HasValue)
-                {
-                    return EnumCorrectStatus.Process;
-                }
-                return homeWorkAnswer.IsCorrect.HasValue ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
+                return default;
             }
-            return null;
+            return homeWorkAnswer.Status == EnumAnswerStatus.Done ? (homeWorkAnswer.IsCorrect.HasValue && homeWorkAnswer.IsCorrect.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail)
+                : EnumCorrectStatus.Process;
         }
     }
 }

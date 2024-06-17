@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-production
+spec:
+  selector:
+    matchLabels:
+      app: gateway-production
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: gateway-production
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-prod
+      containers:
+      - name: gateway-production
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway:..........
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
+      imagePullSecrets:
+        - name: gitlab-fsel-secret
+      tolerations:
+      - effect: NoSchedule
+        key: appnodes-prod
+        operator: Exists
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-production
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: gateway-production
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gateway-production-main
+  labels:
+    app.name: gateway-production
+  annotations:
+    nginx.ingress.kubernetes.io/client-body-buffer-size: 1024M
+    nginx.ingress.kubernetes.io/cors-allow-headers: DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata,transaction-name,access-control-allow-origin
+    nginx.ingress.kubernetes.io/cors-allow-origin: '*'
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx-public
+  rules:
+  - host: fsel-gateway-api.fsel.edu.vn
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: gateway-production
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - fsel-gateway-api.fsel.edu.vn
+    secretName: fsel-edu-vn-tls-wildcard
+
+
+

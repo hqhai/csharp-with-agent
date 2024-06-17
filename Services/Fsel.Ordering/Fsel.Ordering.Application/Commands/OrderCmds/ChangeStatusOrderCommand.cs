@@ -130,7 +130,16 @@ AppSetting appSetting)
 
                     allowOpenNextUnit = true;
 
-                    order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber);
+                    if (IsInteger(package.MonthBonusNumber))
+                    {
+                        int expireDate = package.MonthNumber + (int)package.MonthBonusNumber;
+                        order.ExpireDate = DateTime.UtcNow.AddMonths(expireDate);
+                    }
+                    else
+                    {
+                        int expireDate = package.MonthNumber + (int)package.MonthBonusNumber;
+                        order.ExpireDate = DateTime.UtcNow.AddMonths(expireDate).AddDays(15);
+                    }
 
                     if (!string.IsNullOrEmpty(student?.Human?.Email))
                     {
@@ -210,6 +219,11 @@ AppSetting appSetting)
                 }
             }
             return methodResult;
+        }
+
+        private bool IsInteger(double number)
+        {
+            return number == (int)number;
         }
     }
 }

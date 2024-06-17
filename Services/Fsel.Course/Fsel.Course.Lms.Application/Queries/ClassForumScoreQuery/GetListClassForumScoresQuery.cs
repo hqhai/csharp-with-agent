@@ -73,62 +73,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
                                             .Where(x => x.ClassForumResultId == request.ClassForumResultId)
                                             .ToListAsync(cancellationToken);
             var courseId = classForumResult?.LessonResult?.CourseId;
-            if (courseId != null)
-            {
-                //await DoQuestBoard(request.ClassForumResultId, classForumResult!.LessonResult!.CourseId, cancellationToken);
-                //await DoQuestBoardAllReviewsAndFeedback(request.ClassForumResultId, classForumResult!.LessonResult!.CourseId, cancellationToken);
-            }
 
             methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumScores);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        public async Task DoQuestBoard(Guid classForumResultId, Guid courseId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeFiveTeacherReview, EnumQuestBoardCategory.SeeTenTeacherReview };
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id ?? default;
-
-            var classForumResultsViewed = await _classForumResultRepository.Queryable
-                            .Where(x => x.Id == classForumResultId && x.IsViewed && x.StudentId == studentId)
-                            .ToListAsync(cancellationToken);
-            var classForumResultsViewedCount = classForumResultsViewed.Count;
-
-            await _questBoardPublisher.Publish(new QuestBoardQueueModel
-            {
-                StudentId = studentId,
-                Categories = categories,
-                AchievedPoint = classForumResultsViewedCount,
-                ObjectId = classForumResultId,
-                CourseId = courseId,
-            }, cancellationToken);
-        }
-
-        public async Task DoQuestBoardAllReviewsAndFeedback(Guid classForumResultId, Guid courseId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.SeeAllReviewsAndFeedback };
-
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var studentId = student?.Content?.Result?.Id ?? default;
-
-            var classForumResults = await _classForumResultRepository.Queryable
-                            .Where(x => x.StudentId == studentId && x.Status == EnumClassForumResultStatus.Graded)
-                            .ToListAsync(cancellationToken);
-
-            double checkViewedAllRatio = (double)classForumResults.Count(x => x.IsViewed) / classForumResults.Count;
-
-            if (checkViewedAllRatio == Standard_Ratio)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = studentId,
-                    Categories = categories,
-                    ObjectId = classForumResultId,
-                    CourseId = courseId,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                }, cancellationToken);
-            }
         }
     }
 }

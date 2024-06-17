@@ -102,8 +102,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 classForumReport.ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
                 {
                     Id = x.Id,
-                    CorrectCount = x.ClassForumScores.Count > 0 ? x.ClassForumScores.Sum(x => x.Score) : default,
-                    TotalCorrect = 36,
+                    CorrectCount = x.CorrectCount,
+                    TotalCorrect = x.CorrectTotal,
+                    Percent = x.Percent,
                     Status = x.Status,
                 }).FirstOrDefault();
                 return classForumReport;

@@ -94,18 +94,18 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 return methodResult;
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = GetPlacmentTestAsync(placementTest, placementTestResult);
+            methodResult.Result = await GetPlacmentTestAsync(placementTest, placementTestResult);
             return methodResult;
         }
 
-        private PlacementTestDtoModel GetPlacmentTestAsync(PlacementTest placementTest, PlacementTestResult placementTestResult)
+        private async Task<PlacementTestDtoModel> GetPlacmentTestAsync(PlacementTest placementTest, PlacementTestResult placementTestResult)
         {
             ArgumentNullException.ThrowIfNull(placementTest);
             var placementTestDto = _mapper.Map<PlacementTestDtoModel>(placementTest);
             var sectionGroups = placementTest.PlacementTestSections.OrderBy(x => x.CreatedDate).Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             placementTestDto.TotalQuestion = _sectionGroupConverter.GetTotalQuestion(sectionGroups);
             placementTestDto.PlacementTestResult = _mapper.Map<PlacementTestResultModel>(placementTestResult);
-            placementTestDto.SectionGroups = _sectionGroupConverter.GetSectionGroups(sectionGroups, placementTestDto.PlacementTestResult.Id, nameof(SectionGroupResult.PlacementTestResultId));
+            placementTestDto.SectionGroups = await _sectionGroupConverter.GetSectionGroupsAsync(sectionGroups, placementTestDto.PlacementTestResult.Id, nameof(SectionGroupResult.PlacementTestResultId));
             return placementTestDto;
         }
 

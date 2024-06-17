@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -16,13 +17,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetUnitByClassForumDetailQuery : IRequest<MethodResult<IList<ClassForumScoreModel>>>
+    public class GetUnitByClassForumDetailQuery : IRequest<MethodResult<IList<ClassForumAIModel>>>
     {
         public Guid LessonResultId { get; set; }
         public Guid ClassForumId { get; set; }
     }
 
-    public class GetUnitByClassForumDetailQueryHandler : IRequestHandler<GetUnitByClassForumDetailQuery, MethodResult<IList<ClassForumScoreModel>>>
+    public class GetUnitByClassForumDetailQueryHandler : IRequestHandler<GetUnitByClassForumDetailQuery, MethodResult<IList<ClassForumAIModel>>>
     {
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
@@ -43,10 +44,10 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<IList<ClassForumScoreModel>>> Handle(GetUnitByClassForumDetailQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<ClassForumAIModel>>> Handle(GetUnitByClassForumDetailQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<ClassForumScoreModel>> methodResult = new MethodResult<IList<ClassForumScoreModel>>();
+            MethodResult<IList<ClassForumAIModel>> methodResult = new MethodResult<IList<ClassForumAIModel>>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -66,14 +67,27 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
 
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.ClassForumId == request.ClassForumId, cancellationToken);
+            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
+                                                     .FirstOrDefaultAsync(x => x.Id == request.ClassForumId, cancellationToken);
+            if (classForum == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
+                return methodResult;
+            }
+            var classForumResult = classForum.ClassForumResults.Where(x => x.StudentId == studentId).FirstOrDefault();
             if (classForumResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
             }
+            if (string.IsNullOrEmpty(classForumResult.GradingAlFeedback))
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+            methodResult.Result = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumResult.GradingAlFeedback);
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumResult.ClassForumScores.OrderBy(x => x.Criteria));
             return methodResult;
         }
     }
