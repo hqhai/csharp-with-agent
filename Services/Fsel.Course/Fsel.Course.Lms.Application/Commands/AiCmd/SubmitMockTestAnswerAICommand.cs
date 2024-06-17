@@ -12,12 +12,16 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
+    using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1;
+    using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
+    using Kros.Extensions;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -37,11 +41,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly SetTimeRetryMockTestPublisher _setTimeRetryMockTestPublisher;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
+        private readonly AppSetting _appSetting;
         private const int CorrectTotal_Writing = 36;
         private const int Last_DisplayOrder = 1;
         private const int Max_Times_Retry = 3;
 
-        public SubmitMockTestAnswerCommandHandler(SubmitMockTestCriteriaPublisher submitMockTestCriteria, IUserService userService, ISectionRepository sectionRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, SetTimeRetryMockTestPublisher setTimeRetryMockTestPublisher, IMapper mapper)
+        public SubmitMockTestAnswerCommandHandler(SubmitMockTestCriteriaPublisher submitMockTestCriteria, IUserService userService, ISectionRepository sectionRepository, IMediator mediator, IMockTestAnswerRepository mockTestAnswerRepository, IMockTestAISettingRepository aiGradeSettingRepository, ISectionGroupResultRepository sectionGroupResultRepository, IMockTestResultRepository mockTestResultRepository, SetTimeRetryMockTestPublisher setTimeRetryMockTestPublisher, IMapper mapper, AppSetting appSetting)
         {
             _submitMockTestCriteria = submitMockTestCriteria;
             _userService = userService;
@@ -53,6 +58,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             _mockTestResultRepository = mockTestResultRepository;
             _setTimeRetryMockTestPublisher = setTimeRetryMockTestPublisher;
             _mapper = mapper;
+            _appSetting = appSetting;
         }
 
         public async Task<bool> Handle(SubmitMockTestAnswerAICommand request, CancellationToken cancellationToken)
@@ -133,17 +139,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             var lexicalResource = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.LexicalResource);
             var grammaticalRange = ConvertHelper.Deserialize<List<MockTestAIGradingModel>>(gradingAiFeedBackResult.GrammaticalRange);
 
-            //set up thời gian retry
-
-            //if (mockTestAnswer != null && (taskResponse == null || coherence == null || lexicalResource == null || grammaticalRange == null) && mockTestAnswer.RetryTime <= Max_Times_Retry)
-            if (true)
-            {
-                var model = _mapper.Map<SetTimeRetryMockTestModel>(request);
-                model.StartDate = DateTime.UtcNow;
-                await _setTimeRetryMockTestPublisher.Publish(model, cancellationToken);
-                mockTestAnswer.RetryTime += 1;
-            }
-
             var mockTestResult = _mockTestResultRepository.Queryable.Include(x => x.MockTest).FirstOrDefault(x => x.Id == request.MockTestResultId);
             if (mockTestResult == null || mockTestResult.MockTest == null)
             {
@@ -164,6 +159,39 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 return true;
             }
+
+            #region Retry
+            //set up thời gian retry
+            if (mockTestAnswer != null && (taskResponse == null || coherence == null || lexicalResource == null || grammaticalRange == null) && mockTestAnswer.RetryTime <= Max_Times_Retry)
+            {
+                var model = _mapper.Map<SetTimeRetryMockTestModel>(request);
+                model.StartDate = DateTime.UtcNow;
+                await _setTimeRetryMockTestPublisher.Publish(model, cancellationToken);
+                mockTestAnswer.RetryTime += 1;
+            }
+            else if (mockTestAnswer.RetryTime > Max_Times_Retry)
+            {
+                // quá ba lần retry sẽ gửi mail cho hỗ trợ
+                await _mediator.Send(new SenderCommand
+                {
+                    Email = _appSetting.CustomerSupportConfig?.Email ?? default,
+                    Content = ValueSettings.CustomerSupport.Content.Format(student.Human?.Email ?? default, mockTestResult.MockTest.Name),
+                    Subject = ValueSettings.CustomerSupport.TitleMail.Format(student.Human?.Email ?? default),
+                }, cancellationToken);
+            }
+
+            // Nếu là last mocktest mà retry 3 lần gpt vẫn chưa cho về kết quả thì khóa luồng, không cho đi tiếp, còn nếu không thì luồng vẫn done và học sinh có thể tiếp tục
+            var lastMockTest = mockTestResult.MockTest.CourseUnitMockTests
+                     .Where(x => x.MockTestId == mockTestResult.MockTestId)
+                     .OrderByDescending(x => x.DisplayOrder)
+                     .FirstOrDefault();
+
+            if (lastMockTest != null && mockTestAnswer!.RetryTime > Max_Times_Retry)
+            {
+                mockTestResult.Status = EnumResultStatus.Unfinished;
+            }
+            #endregion
+
 
             bool checkSkillMockTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
 

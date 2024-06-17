@@ -2,15 +2,20 @@
 
 namespace Fsel.Shared.Models.ShareModels
 {
-    public class SetTimeRetryMockTestModel
+    using Fsel.Shared.Enums;
+
+    public class SetTimeRetryMockTestModel : ChatGptConfigModel
     {
         public Guid SectionId { get; set; }
         public Guid SectionGroupId { get; set; }
         public string? WordContent { get; set; }
         public Guid MockTestResultId { get; set; }
-
         public bool IsRetry { get; set; }
+        public DateTime StartDate { get; set; }
+    }
 
+    public class ChatGptConfigModel
+    {
         public string? SettingModel { get; set; }
 
 
@@ -33,9 +38,23 @@ namespace Fsel.Shared.Models.ShareModels
 
 
         public string? UserAIConfig { get; set; }
+    }
+
+    public class SetTimeRetryClassForumModel : ChatGptConfigModel
+    {
+        public Guid ClassForumResultId { get; set; }
+
+        public Guid ClassForumDetailResultId { get; set; }
+
+        public string? WordContent { get; set; }
+        public bool? IsRetry { get; set; } = false;
+
+        public int DisplayOrder { get; set; }
+
+        public EnumSubmissionCount SubmissionCount { get; set; }
 
         public DateTime StartDate { get; set; }
 
-
     }
+
 }

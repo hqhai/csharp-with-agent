@@ -114,6 +114,7 @@ builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<SetTimeRetryMockTestPublisher>();
+builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();

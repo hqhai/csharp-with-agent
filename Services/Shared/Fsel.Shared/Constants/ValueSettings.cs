@@ -60,5 +60,12 @@ namespace Fsel.Shared.Constants
             public const int RatioRound = 2; // làm tròn đến số thật phân
             public const int NumberDeletedElement = 2; // Số phần tử bị xóa đi trong mảng
         }
+
+
+        public static class CustomerSupport
+        {
+            public const string TitleMail = "Xử lý sự cố ChatGPT học sinh {0}";
+            public const string Content = "Sự cố ChatGPT học sinh {0}\r\n\r\nVị trí gặp sự cố: tên {1}";
+        }
     }
 }
