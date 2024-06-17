@@ -25,7 +25,8 @@ namespace Fsel.Course.Infrastructure.ValueSettings
 
     public class CustomerSupportConfig
     {
-        public string Email { get; set; }
+        public string? Email { get; set; }
+        public IList<string> CCEmail { get; set; } = new List<string>();
     }
 
     public class ResourceContent

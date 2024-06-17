@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -34,8 +35,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly AppSetting _appSetting;
         private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
         private readonly SetTimeRetryClassForumPublisher _setTimeRetryClassForumPublisher;
+        private readonly ISenderService _senderService;
         private const int Max_Time_Retry = 3;
-        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeRetryClassForumPublisher setTimeRetryClassForumPublisher, IMapper mapper, AppSetting appSetting)
+        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository, SubmitAIResponsePublisher submitAIResponsePublisher, NotificationMessagePublisher notificationMessagePublisher, IMediator mediator, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeRetryClassForumPublisher setTimeRetryClassForumPublisher, IMapper mapper, AppSetting appSetting, ISenderService senderService)
         {
             _lessonResultRepository = lessonResultRepository;
             _submitAIResponsePublisher = submitAIResponsePublisher;
@@ -45,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             _setTimeRetryClassForumPublisher = setTimeRetryClassForumPublisher;
             _mapper = mapper;
             _appSetting = appSetting;
+            _senderService = senderService;
         }
 
         public async Task<bool> Handle(SubmitClassforumAICommand request, CancellationToken cancellationToken)
@@ -66,16 +69,29 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
 
             #region Retry
-            if (aIResponse == null && classForumDetailResult != null && classForumDetailResult.RetryTime <= Max_Time_Retry)
+
+            var checkDataClassForum = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+
+            if (checkDataClassForum == null && classForumDetailResult != null && classForumDetailResult.RetryTime <= Max_Time_Retry)
             {
                 var model = _mapper.Map<SetTimeRetryClassForumModel>(request);
                 await _setTimeRetryClassForumPublisher.Publish(model, cancellationToken);
                 classForumDetailResult.RetryTime += 1;
             }
+
+
             var classForumDetailResultOwner = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResult).FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
             if (classForumDetailResult != null && classForumDetailResult.RetryTime > Max_Time_Retry)
             {
+
+                SendEmailCommandModel model = new SendEmailCommandModel
+                {
+                    ToEmails = new List<string> { _appSetting!.CustomerSupportConfig!.Email! },
+                    Content = ValueSettings.CustomerSupport.Content.Format(classForumDetailResultOwner?.CreatedFullName ?? default, classForumDetailResult.ClassForumResult?.LessonResult?.Lesson?.Name ?? default),
+                    Subject = ValueSettings.CustomerSupport.TitleMail.Format(classForumDetailResultOwner?.CreatedFullName ?? default),
+                    CcEmails = _appSetting.CustomerSupportConfig.CCEmail
+                };
                 await _mediator.Send(new SenderCommand
                 {
                     Email = _appSetting!.CustomerSupportConfig!.Email,
