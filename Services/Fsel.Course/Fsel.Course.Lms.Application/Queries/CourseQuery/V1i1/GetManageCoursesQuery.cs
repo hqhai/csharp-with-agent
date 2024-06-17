@@ -133,6 +133,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                     StudentId = courseResult.StudentId
                 };
                 var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
+
                 var courseManager = new CourseManagerModel
                 {
                     CourseResultId = courseResult.Id,

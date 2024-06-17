@@ -237,5 +237,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByEmailsQuery { Emails = emails }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Update Course To Student
+        /// </summary>
+        [HttpPut("update-course-to-student/{courseId}")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateCourseToStudent([FromRoute] Guid courseId)
+        {
+            MethodResult<StudentModel> commandResult = await _mediator.Send(new UpdateStudentByCourseCommand { CourseId = courseId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

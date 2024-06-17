@@ -181,6 +181,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 Type = EnumUserCourseType.ChangeLevel,
                 UserId = _authContext.CurrentUserId
             }, cancellationToken).ConfigureAwait(false);
+
+            await _userService.UpdateCourseToStudentAsync(courseResult.CourseId);
             methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
