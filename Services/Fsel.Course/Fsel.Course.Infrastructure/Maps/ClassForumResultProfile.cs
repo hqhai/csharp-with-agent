@@ -17,6 +17,7 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<RateClassForumResultCommandModel, ClassForumResult>().IgnoreAllNonExisting();
             CreateMap<RetryClassForumResultCommandModel, ClassForumResult>().IgnoreAllNonExisting();
             CreateMap<ClassForumResult, ClassForumReportModel>().IgnoreAllNonExisting();
+            CreateMap<ClassForum, ClassForumReportModel>().IgnoreAllNonExisting();
             CreateMap<ClassForumResult, ClassForumResultInfoModel>()
                 .ForMember(p => p.UnitId, x => x.MapFrom(n => n.LessonResult!.UnitId))
                 .ForMember(p => p.CourseId, x => x.MapFrom(n => n.LessonResult!.CourseId));
