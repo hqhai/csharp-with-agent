@@ -79,6 +79,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Put("/v1/student/update-course-to-student/{courseId}")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateCourseToStudentAsync([FromRoute] Guid courseId);
 
+        [Post("/v1/student/get-student-by-full-names")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByFullNamesAsync([FromBody] IList<string> fullNames);
+
         [Get("/v1/user/get-by-student-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
 
