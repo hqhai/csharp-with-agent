@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -17,10 +16,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
@@ -115,18 +112,18 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
             if (sectionGroupResult == null)
             {
                 _logger.LoggerRequest(request);
-
                 sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, MockTestResultId = request.MockTestResultId, Status = EnumResultStatus.New });
                 await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-                if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking)
-                {
-                    await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
-                    {
-                        ExecutionTime = sectionGroup.ExecutionTime,
-                        ObjectResultId = sectionGroupResult.Id,
-                        ObjectResultType = nameof(MockTest)
-                    }, CancellationToken.None).ConfigureAwait(false);
-                }
+
+                //if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking)
+                //{
+                //    await _getTimeToCompleteTestPublisher.Publish(new SetTimeToCompleteTestModel
+                //    {
+                //        ExecutionTime = sectionGroup.ExecutionTime,
+                //        ObjectResultId = sectionGroupResult.Id,
+                //        ObjectResultType = nameof(MockTest)
+                //    }, CancellationToken.None).ConfigureAwait(false);
+                //}
             }
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
