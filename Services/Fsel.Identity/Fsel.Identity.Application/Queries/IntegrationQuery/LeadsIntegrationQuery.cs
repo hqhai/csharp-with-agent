@@ -144,6 +144,20 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
                 foreach (var orderItem in orderItems)
                 {
+                    if (ptTestResult != null)
+                    {
+                        item.PTLevel = ptTestResult.Level;
+                        item.Status = EnumIntegrationStatus.Placement;
+                        if (ptTestResult.Status == "Done")
+                        {
+                            item.StatusPT = "Done";
+                        }
+                        else
+                        {
+                            item.StatusPT = "Process";
+                        }
+                    }
+
                     if (orderItem.IsTrial)
                     {
                         item.Status = EnumIntegrationStatus.Trial;
@@ -153,20 +167,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     else
                     {
                         item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
-                    }
-                }
-
-                if (ptTestResult != null)
-                {
-                    item.PTLevel = ptTestResult.Level;
-                    item.Status = EnumIntegrationStatus.Placement;
-                    if (ptTestResult.Status == "Done")
-                    {
-                        item.StatusPT = "Done";
-                    }
-                    else
-                    {
-                        item.StatusPT = "Process";
                     }
                 }
             });
