@@ -237,5 +237,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByEmailsQuery { Emails = emails }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get student by FullNames
+        /// </summary>
+        [HttpPost("get-student-by-full-names")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentByFullNames([FromBody] IList<string> fullNames)
+        {
+            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByFullNamesQuery { FullNames = fullNames }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
