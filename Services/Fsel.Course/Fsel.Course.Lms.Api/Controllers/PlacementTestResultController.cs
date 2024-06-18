@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1;
+    using Fsel.Course.Lms.Application.Queries.IntegrationQuery;
     using Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
