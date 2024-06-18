@@ -137,7 +137,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                               .ThenInclude(x => x!.ParentStudents)
                                               .ThenInclude(x => x.Parent)
                                               .ThenInclude(x => x!.Human)
-                                              .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
+                                              .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
                                               .ToListAsync(cancellationToken);
             if (users == null)
             {
@@ -182,6 +182,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 {
                     item.PTLevel = ptTestResult.Level;
                     item.Status = EnumIntegrationStatus.Placement;
+                    item.PlacementTestResults = ptTestResult.PlacementTestResults;
                     if (ptTestResult.Status == "Done")
                     {
                         item.StatusPT = "Done";
