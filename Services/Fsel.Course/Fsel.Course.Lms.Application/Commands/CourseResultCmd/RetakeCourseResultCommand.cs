@@ -154,6 +154,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 UserId = _authContext.CurrentUserId
             }, cancellationToken).ConfigureAwait(false);
 
+            await _userService.UpdateCourseToStudentAsync(method.Result?.CourseId ?? default);
             methodResult.Result = _mapper.Map<CourseResultModel>(method.Result);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

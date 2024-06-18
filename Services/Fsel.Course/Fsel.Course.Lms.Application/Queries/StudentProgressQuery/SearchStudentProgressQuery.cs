@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.StudentProgress;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => !x.IsDeleted)
+            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => !x.IsDeleted && x.WorkingStatus == EnumWorkingStatus.Active)
                 .GroupBy(r => new { r.StudentId, r.CourseId })
                 .Select(group => new CourseResultModel
                 {
