@@ -332,12 +332,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 videoTimeCodeResult.Status = EnumResultStatus.Process;
             }
             videoTimeCodeResult.IsWorking = false;
-
-            //_dbContext.Attach(videoTimeCodeResult);
-            //_dbContext.Entry(videoTimeCodeResult).Property(r => r.RetryWorkingTime).IsModified = false;
-            //_dbContext.Entry(videoTimeCodeResult).Property(r => r.WorkingTime).IsModified = false;
-            //await _dbContext.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
             _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false, x => x.RetryWorkingTime, x => x.WorkingTime);
             await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
