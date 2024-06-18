@@ -75,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             }
 
             _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
-            await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync();
+            await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
         private async Task UpdateSectionGroupResultAsync(SetTimeModuleCommand request)
@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
                 _sectionGroupResultRepository.Update(sectionGroupResult);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync();
+                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }
