@@ -33,12 +33,13 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
 
             var lessonQuerys = await _lessonResultRepository.Queryable
                                                             .Include(x => x.Lesson)
-                                                            .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
+                                                            .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
                                                             .GroupBy(x => x.CreatedUserId)
                                                             .Select(x => new LessonIntegration
                                                             {
                                                                 UserId = x.Key,
-                                                                CurrentLesson = x.Where(c => c.CreatedUserId == x.Key).FirstOrDefault(c => c.Status == EnumResultStatus.New || c.Status == EnumResultStatus.Process).Lesson.Name,
+                                                                CurrentLesson = x.Where(c => c.CreatedUserId == x.Key).FirstOrDefault(c => c.Status == EnumResultStatus.New || c.Status == EnumResultStatus.Process) != null ?
+                                                                                x.Where(c => c.CreatedUserId == x.Key).FirstOrDefault(c => c.Status == EnumResultStatus.New || c.Status == EnumResultStatus.Process)!.Lesson!.Name : null,
                                                                 LessonCompleted = x.Where(c => c.CreatedUserId == x.Key).Where(x => x.Status == EnumResultStatus.Done).Count()
                                                             })
                                                             .ToListAsync(cancellationToken);
