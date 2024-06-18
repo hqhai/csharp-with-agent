@@ -66,8 +66,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
 
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Status == EnumOrderStatus.Payment && x.IsTrial && x.UserId == _authContext.CurrentUserId, cancellationToken))
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Status == EnumOrderStatus.Payment && x.IsTrial && x.UserId == _authContext.CurrentUserId, cancellationToken) && request.IsTrial)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.IsTrial));
                 return methodResult;
             }
 
@@ -84,6 +85,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             {
                 var orderPayment = await _orderRepository.Queryable.Where(p => p.Status == EnumOrderStatus.Payment && p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                 courseId = orderPayment?.CourseId;
+                request.CourseLevel = student?.CourseLevel;
             }
             else
             {
@@ -147,7 +149,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel.Value, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
+            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel!.Value, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
 
             string code = codeSend.Result?.Code ?? string.Empty;
 
@@ -157,7 +159,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && (p.Status == EnumOrderStatus.New), cancellationToken);
+            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && p.Status == EnumOrderStatus.New && !p.IsTrial, cancellationToken);
 
             if (order != null)
             {

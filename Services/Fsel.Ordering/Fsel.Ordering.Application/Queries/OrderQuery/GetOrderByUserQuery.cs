@@ -33,9 +33,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel?>();
-
             var order = await _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-
             methodResult.Result = _mapper.Map<OrderModel?>(order);
             return methodResult;
         }

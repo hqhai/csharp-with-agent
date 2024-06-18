@@ -79,6 +79,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                         //send mail
                         await SendMail(skillScores, percent, unit, unitResult, course, lessonResults.ToList(), cancellationToken);
+
+                        await DoQuestBoard(studentId, cancellationToken);
                     }
 
                     if (isUnitUpdate)
@@ -101,6 +103,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     }
                 }
             }
+        }
+
+        private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.BeginnerQuests,
+                Category = EnumQuestBoardCategory.CompleteTheFirstUnit,
+                Value = 1
+            }, cancellationToken);
         }
 
         public async Task SendMailMidCourseReport(Guid studentId, Course course, CancellationToken cancellationToken)
@@ -690,26 +703,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Template = model.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendMailMidCourseAcademic : EnumSenderTemplate.SendMailMidCourseIELT,
                 CcEmail = student?.ParentEmail,
             }, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task DoQuestBoard(Guid userId, Guid unitId, Guid courseId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneUnit };
-            var student = await _userService.GetStudentByUserIdAsync(userId);
-            var studentId = student?.Content?.Result?.Id;
-
-            bool checkFirstTimeDoneLesson = _unitResultRepository.Queryable.Any(u => u.UnitId == unitId && u.CourseId == courseId && u.Status == EnumResultStatus.Done);
-
-            if (!checkFirstTimeDoneLesson)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    CourseId = courseId
-                }, cancellationToken);
-            }
         }
     }
 }

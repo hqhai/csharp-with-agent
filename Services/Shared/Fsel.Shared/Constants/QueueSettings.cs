@@ -43,7 +43,9 @@ namespace Fsel.Shared.Constants
                 public const string ChatBot = $"{KeyQueue}_ChatBot";
                 public const string ChatBotRealTime = $"{KeyQueue}_ChatBotRealTime";
                 public const string SetTimeModule = $"{KeyQueue}_SetTimeModule";
+                public const string GetTimeModule = $"{KeyQueue}_GetTimeModule";
                 public const string MockTestWriting = $"{KeyQueue}_MockTestWriting";
+                public const string MockTestSpeaking = $"{KeyQueue}_MockTestSpeaking";
             }
         }
 
@@ -96,6 +98,7 @@ namespace Fsel.Shared.Constants
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
                 public const string UpdateClassForumResultToExpiredTime = $"{KeyQueue}_UpdateClassForumResultToExpiredTime";
                 public const string DisconnectSocketCalculateTime = $"{KeyQueue}_DisconnectSocketCalculateTime";
+                public const string DoQuestBoard = $"{KeyQueue}_DoQuestBoard";
             }
         }
 

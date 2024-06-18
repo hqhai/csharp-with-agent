@@ -21,4 +21,16 @@ namespace Fsel.Shared.Models.ShareModels
 
         public string? GradingAlFeedBack { get; set; }
     }
+
+
+    public class SubmitAiSpeakingResponseModel
+    {
+        public string? CriteriaName { get; set; }
+
+        public long BandScore { get; set; }
+
+        public string? BandDescriptionText { get; set; }
+
+        public Guid MockTestResultId { get; set; }
+    }
 }

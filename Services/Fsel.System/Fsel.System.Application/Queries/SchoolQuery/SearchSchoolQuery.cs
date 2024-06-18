@@ -8,7 +8,6 @@ namespace Fsel.System.Application.Queries.SchoolQuery
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels;
     using global::System;
-    using global::System.Globalization;
     using global::System.Linq;
     using global::System.Threading.Tasks;
     using MediatR;

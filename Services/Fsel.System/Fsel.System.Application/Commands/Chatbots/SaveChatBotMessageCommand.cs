@@ -76,12 +76,12 @@ namespace Fsel.System.Application.Commands.Chatbots
 
 
             // Khi token còn dưới 20% so với số lượng token ban đầu
-            if (tokenRatio < 0.2)
+            if (tokenRatio == 0)
             {
                 methodResult.AddError(nameof(EnumOutOfAIToken.TheNumberOfTokensHasReachedTheLimit));
                 return methodResult;
             }
-            else if (tokenRatio == 0.8)
+            else if (tokenRatio > 0)
             {
                 chatbotMessage.Status = EnumChatBotStatus.Done;
             }
@@ -108,7 +108,7 @@ namespace Fsel.System.Application.Commands.Chatbots
 
 
             // Push to Socket
-            await PushToWebSocket(request.ChatBotId, newMessage.Content, newMessage.FilePath, cancellationToken);
+            await PushToWebSocket(request.ChatBotId, newMessage.Content, newMessage.FilePath,tokenRatio, cancellationToken);
 
             //Lưu đoạn hội thoại vào database
             ChatBot chatBot = new ChatBot();
@@ -193,13 +193,14 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// <param name="filePath"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task PushToWebSocket(Guid? chatBotId, string? message, string? filePath, CancellationToken cancellationToken)
+        private async Task PushToWebSocket(Guid? chatBotId, string? message, string? filePath,double tokenRation, CancellationToken cancellationToken)
         {
             ChatBotSendingMessageModel model = new ChatBotSendingMessageModel
             {
                 ChatbotId = chatBotId,
-                Message = message,
-                FilePath = filePath
+                Content = message,
+                FilePath = filePath,
+                TokenRatio = tokenRation
             };
 
             await _chatBotPublisher.Publish(model, cancellationToken);

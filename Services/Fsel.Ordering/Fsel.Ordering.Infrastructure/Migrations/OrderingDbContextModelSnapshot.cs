@@ -262,13 +262,16 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<string>("DescriptionStr")
+                    b.Property<string>("IncentivesWhenPurchasing")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<double>("MonthBonusNumber")
+                        .HasColumnType("float");
 
                     b.Property<int>("MonthNumber")
                         .HasColumnType("int");
@@ -280,6 +283,13 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PriceMonth")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Suggest")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -303,40 +313,217 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         {
                             Id = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
                             Code = "BASIC",
-                            CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DescriptionStr = "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
                             IsDeleted = false,
+                            MonthBonusNumber = 0.0,
                             MonthNumber = 1,
                             Name = "Fsel_1_Month",
-                            Price = 650000m
+                            Price = 500000m,
+                            PriceMonth = 500000m
                         },
                         new
                         {
                             Id = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
-                            Code = "BASIC",
-                            CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Code = "STANDARD",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DescriptionStr = "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
                             IsDeleted = false,
+                            MonthBonusNumber = 1.5,
                             MonthNumber = 6,
                             Name = "Fsel_6_Months",
-                            Price = 2100000m
+                            Price = 2400000m,
+                            PriceMonth = 320000m,
+                            Suggest = "BestSeller"
                         },
                         new
                         {
                             Id = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
-                            Code = "BASIC",
-                            CreatedDate = new DateTime(2023, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Code = "PREMIUM",
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DescriptionStr = "[{\"content\":\"Giá trên đã bao gồm Chi phí chính sách Cambridge: 150,000 VND\",\"status\":true}]",
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
                             IsDeleted = false,
+                            MonthBonusNumber = 3.0,
                             MonthNumber = 12,
                             Name = "Fsel_12_Months",
-                            Price = 3100000m
+                            Price = 3600000m,
+                            PriceMonth = 240000m,
+                            Suggest = "Recommend"
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.PackageTranslation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("IncentivesWhenPurchasing")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Language")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PackageId");
+
+                    b.ToTable("PackageTranslations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("81c2c7d2-9b05-485c-9659-e7f8896955a8"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            PackageId = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b")
+                        },
+                        new
+                        {
+                            Id = new Guid("bb9cdf82-74aa-456b-9f8b-ac4902a908cf"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Free copyright fee from Cambridge University Press",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            PackageId = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b")
+                        },
+                        new
+                        {
+                            Id = new Guid("cc63e0ed-c6ed-480a-9f32-4952d296ef29"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            PackageId = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b")
+                        },
+                        new
+                        {
+                            Id = new Guid("dc09719c-78d6-45a3-bd11-1ee9b3fe8814"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            PackageId = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59")
+                        },
+                        new
+                        {
+                            Id = new Guid("ec9b607c-055e-43f6-a705-f8a0258b4136"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Free copyright fee from Cambridge University Press",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            PackageId = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59")
+                        },
+                        new
+                        {
+                            Id = new Guid("86f466db-ff5a-4aa7-846d-52e25ab1f38f"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            PackageId = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59")
+                        },
+                        new
+                        {
+                            Id = new Guid("edb73176-e5bd-4e13-9954-7eacf5968bb8"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Tặng phí bản quyền của NXB Đại học Cambridge",
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb")
+                        },
+                        new
+                        {
+                            Id = new Guid("b8a900bd-269a-410c-b8bd-22cc32623a38"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Free copyright fee from Cambridge University Press",
+                            IsDeleted = false,
+                            Language = "en-US",
+                            PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb")
+                        },
+                        new
+                        {
+                            Id = new Guid("5f1edb1d-ca8b-4006-b13f-797ffea98973"),
+                            CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IncentivesWhenPurchasing = "Faire don des droits d'auteur des Éditions de l'Université de Cambridge",
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            PackageId = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb")
                         });
                 });
 
@@ -645,6 +832,17 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Fsel.Ordering.Domain.Entities.PackageTranslation", b =>
+                {
+                    b.HasOne("Fsel.Ordering.Domain.Entities.Package", "Package")
+                        .WithMany("Translations")
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Package");
+                });
+
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.UserVoucher", b =>
                 {
                     b.HasOne("Fsel.Ordering.Domain.Entities.Voucher", "Voucher")
@@ -683,6 +881,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Ordering.Domain.Entities.Package", b =>
                 {
                     b.Navigation("Orders");
+
+                    b.Navigation("Translations");
 
                     b.Navigation("VoucherPackages");
                 });

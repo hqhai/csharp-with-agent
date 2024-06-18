@@ -13,6 +13,7 @@ using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Services.AiService;
 using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
+using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
@@ -104,7 +105,9 @@ builder.Services.AddScoped<IClassForumResultRandomRepository, ClassForumResultRa
 builder.Services.AddScoped<IVideoTimeCodeResultRepository, VideoTimeCodeResultRepository>();
 builder.Services.AddScoped<IMockTestAISettingRepository, MockTestAISettingRepository>();
 builder.Services.AddScoped<IClassForumDetailResultRepository, ClassForumDetailResultRepository>();
+builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
 builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
+builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
@@ -144,6 +147,8 @@ builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<SubmitMockTestCriteriaPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<DisconnectSocketCalculateTimePublisher>();
+builder.Services.AddScoped<SubmitAiSpeakingAnswerPublisher>();
+builder.Services.AddScoped<GetTimeModulePublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -174,6 +179,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.UpdateClassForumResultToExpiredTime, typeof(UpdateClassForumResultToExpiredTimeConsumer) },
     { QueueSettings.LmsQueue.NameQueue.WeeklyReport, typeof(WeeklyReportConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.SetTimeModule, typeof(SetTimeModuleConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
 });
 
 var app = builder.Build();

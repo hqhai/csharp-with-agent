@@ -49,5 +49,17 @@ namespace Fsel.System.Api.Controllers
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Add Contact Info From Landing Page FSEL To GoogleSheet
+        /// </summary>
+        [HttpPost("add-contact-info-from-landing-page")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddContactInfoFromLPFSELToGoogleSheet([FromBody] AddContactInfoFromLPFSELToGoogleSheetCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

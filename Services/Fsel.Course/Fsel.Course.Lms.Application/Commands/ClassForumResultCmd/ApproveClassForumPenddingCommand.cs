@@ -137,27 +137,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             return methodResult;
         }
 
-        public async Task DoQuestBoard(Guid classForumResultId, Guid courseId, Guid userId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.CommentOnOtherPost };
-            var student = await _userService.GetStudentByUserIdAsync(userId);
-            var studentId = student?.Content?.Result?.Id;
-
-            var hasFirstClassForumPost = _classForumResultRepository.Queryable.Any(c => c.CreatedUserId == userId && c.Status != EnumClassForumResultStatus.Pending && c.Status != EnumClassForumResultStatus.Draft && c.Status != EnumClassForumResultStatus.Denied);
-
-            if (!hasFirstClassForumPost)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    ObjectId = classForumResultId,
-                    CourseId = courseId
-                }, cancellationToken);
-            }
-        }
-
         public async Task SendNotification(ClassForumResult classForumResult, Dictionary<EnumNotificationType, EnumNotificationContent> enumNotification, CancellationToken cancellationToken)
         {
             var lessonResult = await _lessonResultRepository.GetIncludeByIdAsync(classForumResult.LessonResultId);

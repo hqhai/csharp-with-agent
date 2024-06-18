@@ -22,7 +22,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -129,7 +128,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var videoResults = await _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
             if (videoResults != null && videoResults.Any())
             {
-                skillScores = videoResults.SelectMany(x => x.VideoSkillScores!).Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
+                skillScores = videoResults.Where(x => x.VideoSkillScores != null && x.VideoSkillScores.Any()).SelectMany(x => x.VideoSkillScores!)
+                    .Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (courseType == EnumCourseType.Academic)
                 {
                     return (skillScores, GetDoublePercent(skillScores, PercentVideoAcademic));
@@ -294,7 +294,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (skillScorePercents.Any())
             {
                 var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                return (skillScoreSkills, NumberHelper.ConvertRound(skillScorePercents.Average(x => x.Item2)));
+                return (skillScoreSkills, NumberHelper.ConvertRound(skillScorePercents.Sum(x => x.Item2)));
             }
 
             return (new List<SkillScores>(), default);
@@ -501,27 +501,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 Params = sendStudentCompleteCourseModel,
                 Template = course?.CourseType == EnumCourseType.Academic ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
             }, cancellationToken).ConfigureAwait(false);
-        }
-
-        private async Task DoQuestBoard(Guid courseId, Guid userId, CancellationToken cancellationToken)
-        {
-            IList<EnumQuestBoardCategory> categories = new List<EnumQuestBoardCategory>() { EnumQuestBoardCategory.FinishOneLesson };
-            var student = await _userService.GetStudentByUserIdAsync(userId);
-            var studentId = student?.Content?.Result?.Id;
-
-            //Chỉ bài finaltest đầu tiên hoàn thành của khóa mới được tính là hoàn thành nhiệm vụ
-            bool checkFirstCourseResult = _courseResultRepository.Queryable.Any(c => c.CourseId == courseId && c.Status == EnumResultStatus.Done);
-
-            if (!checkFirstCourseResult)
-            {
-                await _questBoardPublisher.Publish(new QuestBoardQueueModel
-                {
-                    StudentId = (Guid)studentId!,
-                    Categories = categories,
-                    AchievedPoint = ValueSettings.QuestBoardPoint.Achieved_Point,
-                    CourseId = courseId
-                }, cancellationToken);
-            }
         }
 
         private async Task UpdateStudentTrialRegistration(EnumTrialRegistrationStatus status, Guid userId)

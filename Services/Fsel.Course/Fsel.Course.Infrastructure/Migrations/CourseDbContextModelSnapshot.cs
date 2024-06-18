@@ -3044,7 +3044,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("AnswerStr")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CorrectCount")
@@ -3089,6 +3088,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("MockTestResultId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<double?>("PronunciationScore")
+                        .HasColumnType("float");
 
                     b.Property<Guid?>("SectionGroupResultId")
                         .HasColumnType("uniqueidentifier");
@@ -3717,6 +3719,74 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("SectionGroupId");
 
                     b.ToTable("PlacementTestSections");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.ProsodyScore", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("BandComment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("BandScore")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<double>("MaxScore")
+                        .HasColumnType("float");
+
+                    b.Property<double>("MinScore")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProsodyScore");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Question", b =>
