@@ -32,8 +32,8 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
 
             var unitQuerys = await _unitResultRepository.Queryable
                                                         .Include(x => x.Unit)
-                                                        .Where(x => (x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) :
-                                                                                            (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date)) &&
+                                                        .Where(x => (x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) :
+                                                                                            (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate)) &&
                                                                                             (x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process))
                                                         .ToListAsync(cancellationToken);
 

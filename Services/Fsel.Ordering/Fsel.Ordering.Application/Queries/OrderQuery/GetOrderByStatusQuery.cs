@@ -43,7 +43,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
             var orders = await _orderRepository.Queryable
                                                .Include(p => p.Package)
-                                               .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
+                                               .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
                                                .Where(p => request.Status == false ? p.Status == EnumOrderStatus.New || p.IsTrial : p.Status == EnumOrderStatus.Payment && !p.IsDeleted)
                                                .Select(x => new OrderSearchModel
                                                {
