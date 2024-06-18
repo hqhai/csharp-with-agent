@@ -65,7 +65,6 @@ namespace Fsel.Realtime.Application.Hubs
             {
                 return;
             }
-            _logger.LogInformation($"Disconnect Socket SetTimeModule  Type : {type}, ObjectId : {objectId}, DateTime: {DateTime.UtcNow}");
             var connectionId = ConnectionTracker.Instance.RecordConnectionEndUser(userId);
             if (connectionId != null)
             {
@@ -74,6 +73,8 @@ namespace Fsel.Realtime.Application.Hubs
                 await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, "Disconnect");
                 await _setTimeModuleHubContext.Groups.RemoveGroupAsync(connectionId, userId);
             }
+
+            _logger.LogInformation($"Disconnect Socket SetTimeModule  Type : {setTimeModule.Type}, ObjectId : {setTimeModule.ObjectId.ToString()}, DateTime: {DateTime.UtcNow}");
         }
 
         public async Task StartTime()

@@ -58,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private readonly ILogger<object> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
 
-        public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(CourseDbContext dbContext, IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository, DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher, IVideoResultRepository videoResultRepository, IExerciseRepository exerciseRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoTimeCodeRepository videoTimeCodeRepository, VideoConverter videoConverter, IUserService userService, ISystemService systemService, AuthContext authContext, IMediator mediator, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, IQuestionRepository questionRepository, QuestionConverter questionConverter, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger)
+        public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(QuestBoardPublisher questBoardPublisher, CourseDbContext dbContext, IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository, DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher, IVideoResultRepository videoResultRepository, IExerciseRepository exerciseRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoTimeCodeRepository videoTimeCodeRepository, VideoConverter videoConverter, IUserService userService, ISystemService systemService, AuthContext authContext, IMediator mediator, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, IQuestionRepository questionRepository, QuestionConverter questionConverter, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<object> logger)
         {
             _dbContext = dbContext;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
@@ -331,15 +331,15 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 videoTimeCodeResult.Status = EnumResultStatus.Process;
             }
-
             videoTimeCodeResult.IsWorking = false;
-            videoTimeCodeResult.HighestStreak = 1;
 
-            _dbContext.Attach(videoTimeCodeResult);
-            _dbContext.Entry(videoTimeCodeResult).Property(r => r.RetryWorkingTime).IsModified = false;
-            _dbContext.Entry(videoTimeCodeResult).Property(r => r.WorkingTime).IsModified = false;
+            //_dbContext.Attach(videoTimeCodeResult);
+            //_dbContext.Entry(videoTimeCodeResult).Property(r => r.RetryWorkingTime).IsModified = false;
+            //_dbContext.Entry(videoTimeCodeResult).Property(r => r.WorkingTime).IsModified = false;
+            //await _dbContext.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-            await _dbContext.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false, x => x.RetryWorkingTime, x => x.WorkingTime);
+            await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private async Task SendTokenHistoryAsync(VideoTimeCodeResult videoTimeCodeResult, StudentModel student, CancellationToken cancellationToken)
