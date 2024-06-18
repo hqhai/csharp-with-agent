@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using Amazon.S3.Model;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Shared.Enums;
@@ -13,33 +14,34 @@ namespace Fsel.Ordering.Domain.Entities
         /// Code Order
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
 
         /// <summary>
         /// Tên Người dùng
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FullName { get; set; }
 
         /// <summary>
         /// Email Người dùng
         /// </summary>
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Email { get; set; }
 
         /// <summary>
         /// SDT Người dùng
         /// </summary>
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? PhoneNumber { get; set; }
-
-        /// <summary>
-        /// Quốc gia
-        /// </summary>
-        public string? Country { get; set; }
 
         /// <summary>
         /// Địa chỉ
         /// </summary>
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Address { get; set; }
 
         /// <summary>
@@ -96,11 +98,48 @@ namespace Fsel.Ordering.Domain.Entities
         /// </summary>
         public bool IsTrial { get; set; }
 
-        public Guid CourseId { get; set; }
         public Package? Package { get; set; }
+
         public Guid? PackageId { get; set; }
+
         public Guid UserId { get; set; }
-        public Guid ClassId { get; set; }
+
+        #region Company invoice information
+
+        /// <summary>
+        /// Tên công ty
+        /// </summary>
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? CompanyName { get; set; }
+
+        /// <summary>
+        /// Địa chỉ công ty
+        /// </summary>
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? CompanyAddress { get; set; }
+
+        /// <summary>
+        /// Mã số thuế
+        /// </summary>
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? CompanyTaxCode { get; set; }
+
+        #endregion Company invoice information
+
+        #region Không sử dụng
+
+        /// <summary>
+        /// Không sử dụng
+        /// </summary>
+        public Guid? CourseId { get; set; }
+
+        /// <summary>
+        /// Không sử dụng
+        /// </summary>
+        public Guid? ClassId { get; set; }
+
+        #endregion Không sử dụng
+
         public ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
     }
 }
