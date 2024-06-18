@@ -16,6 +16,7 @@ namespace Fsel.Identity.Application.Services.OrderService.Model
         public Guid CourseId { get; set; }
         public Guid PackageId { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
         public DateTime? ExpireDate { get; set; }
         public bool IsTrial { get; set; }
         public int MonthNumber { get; set; }

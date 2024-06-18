@@ -145,7 +145,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             if (classForumDetailResultAttemp1 != null && processDateResultAttemp1.HasValue && processDateResultAttemp1.Value <= DateTime.UtcNow)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.TimeUpPostClassForum), nameof(classForum));
                 return methodResult;
             }
             if (classForumResult != null)

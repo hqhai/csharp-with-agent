@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
+namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var methodResult = new MethodResult<IList<object>>();
 
             var querys = await _placementTestResultRepository.Queryable
-                                                             .Where(x => x.UpdatedDate == null ? (x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date) : (x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date))
+                                                             .Where(x => x.UpdatedDate == null ? x.CreatedDate.Date >= request.StartDate.Date && x.CreatedDate.Date <= request.EndDate.Date : x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date)
                                                              .GroupBy(x => x.CreatedUserId)
                                                              .Select(x => x.OrderByDescending(x => x.CreatedDate).FirstOrDefault())
                                                              .ToListAsync(cancellationToken);

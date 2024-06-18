@@ -16,11 +16,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ImportEmailStudentByProgressQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    public class ExportEmailStudentByProgressQuery : BaseImportCommandModel, IRequest<MethodResult<Stream>>
     {
     }
 
-    public class ImportEmailStudentByProgressQueryHandler : IRequestHandler<ImportEmailStudentByProgressQuery, MethodResult<Stream>>
+    public class ExportEmailStudentByProgressQueryHandler : IRequestHandler<ExportEmailStudentByProgressQuery, MethodResult<Stream>>
     {
         private readonly IUserService _userService;
         private readonly IUnitResultRepository _unitResultRepository;
@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
 
-        public ImportEmailStudentByProgressQueryHandler(
+        public ExportEmailStudentByProgressQueryHandler(
             IUserService userService,
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _courseResultRepository = courseResultRepository;
         }
 
-        public async Task<MethodResult<Stream>> Handle(ImportEmailStudentByProgressQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<Stream>> Handle(ExportEmailStudentByProgressQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();

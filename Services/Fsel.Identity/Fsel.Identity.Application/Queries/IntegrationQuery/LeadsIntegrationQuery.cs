@@ -95,10 +95,40 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var ptTestResults = ptTest.Content?.Result;
             if (ptTestResults == null)
             {
-                methodResult.AddError(orders.Error);
+                methodResult.AddError(ptTest.Error);
                 return methodResult;
             }
             var userPtTestIds = ptTestResults.Select(x => x.UserId).ToList();
+
+            // lấy unit
+            var queryUnits = await _lmsCourseService.GetUnitResults(queryPtTest);
+            if (!queryUnits.IsSuccessStatusCode)
+            {
+                methodResult.AddError(queryUnits.Error);
+                return methodResult;
+            }
+            var unitResults = queryUnits.Content?.Result;
+            if (unitResults == null)
+            {
+                methodResult.AddError(queryUnits.Error);
+                return methodResult;
+            }
+            var userUnitResultIds = unitResults.Select(x => x.UserId).ToList();
+
+            // lấy lesson
+            var queryLessons = await _lmsCourseService.GetLessonResults(queryPtTest);
+            if (!queryLessons.IsSuccessStatusCode)
+            {
+                methodResult.AddError(queryLessons.Error);
+                return methodResult;
+            }
+            var lessonResults = queryLessons.Content?.Result;
+            if (lessonResults == null)
+            {
+                methodResult.AddError(queryLessons.Error);
+                return methodResult;
+            }
+            var userLessonResultIds = lessonResults.Select(x => x.UserId).ToList();
 
             //lấy User
             var users = await _humanRepository.Queryable
@@ -117,7 +147,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var userIdentityIds = users.Select(x => x.UserId ?? Guid.Empty).ToList();
 
             // Hợp nhất UserId
-            var listUserIds = userIdentityIds.Concat(userPtTestIds).Concat(userOrderIds).ToList();
+            var listUserIds = userIdentityIds.Concat(userPtTestIds).Concat(userUnitResultIds).Concat(userLessonResultIds).Concat(userOrderIds).ToList();
             var distinctUserIds = listUserIds.Distinct().ToList();
 
             // lấy thông tin trường học
@@ -137,24 +167,16 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             {
                 var orderItems = orderResults.Where(x => x.UserId == item.UserId).ToList();
                 var ptTestResult = ptTestResults.FirstOrDefault(x => x.UserId == item.UserId);
+                var unitResult = unitResults.FirstOrDefault(x => x.UserId == item.UserId);
+                var lessonResult = lessonResults.FirstOrDefault(x => x.UserId == item.UserId);
                 item.LastDate = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.LastVisited;
+                item.AccessTime = featureAccessTimeResult?.FirstOrDefault(x => x.CreatedUserId == item.UserId)?.AccessTime;
                 item.Status = EnumIntegrationStatus.Register;
                 item.LongPathSchool = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.LongPath;
                 item.LongPathLocation = schoolResult?.FirstOrDefault(x => x.Id == item.SchoolId)?.Location?.LongPath;
-
-                foreach (var orderItem in orderItems)
-                {
-                    if (orderItem.IsTrial)
-                    {
-                        item.Status = EnumIntegrationStatus.Trial;
-                        item.ExpireDate = orderItem.ExpireDate ?? null;
-                        item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
-                    }
-                    else
-                    {
-                        item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
-                    }
-                }
+                item.CurrentUnit = unitResult?.Name;
+                item.CurrentLesson = lessonResult?.CurrentLesson;
+                item.LessonCompleted = lessonResult?.LessonCompleted;
 
                 if (ptTestResult != null)
                 {
@@ -167,6 +189,21 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     else
                     {
                         item.StatusPT = "Process";
+                    }
+                }
+
+                foreach (var orderItem in orderItems)
+                {
+                    if (orderItem.IsTrial)
+                    {
+                        item.Status = EnumIntegrationStatus.Trial;
+                        item.StartTrial = orderItem.CreatedDate ?? null;
+                        item.ExpireDate = orderItem.ExpireDate ?? null;
+                        item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
+                    }
+                    else
+                    {
+                        item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
                     }
                 }
             });
