@@ -118,7 +118,7 @@ build-prod-auth:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-gateway:
   stage: build-image
@@ -206,7 +206,7 @@ build-prod-gateway:
     - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-hangfire:
   stage: build-image
@@ -294,7 +294,7 @@ build-prod-hangfire:
     - Services/Fsel.Hangfire/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-interaction:
   stage: build-image
@@ -382,7 +382,7 @@ build-prod-interaction:
     - Services/Fsel.Interaction/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-lcmsapi:
   stage: build-image
@@ -470,7 +470,7 @@ build-prod-lcmsapi:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-lmsapi:
   stage: build-image
@@ -558,7 +558,7 @@ build-prod-lmsapi:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-notification:
   stage: build-image
@@ -646,7 +646,7 @@ build-prod-notification:
     - Services/Fsel.Notification/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-ordering:
   stage: build-image
@@ -734,7 +734,7 @@ build-prod-ordering:
     - Services/Fsel.Ordering/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-realtime:
   stage: build-image
@@ -822,7 +822,7 @@ build-prod-realtime:
     - Services/Fsel.Realtime/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-sender:
   stage: build-image
@@ -910,7 +910,7 @@ build-prod-sender:
     - Services/Fsel.Sender/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-storage:
   stage: build-image
@@ -998,7 +998,7 @@ build-prod-storage:
     - Services/Fsel.Storage/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-system:
   stage: build-image
@@ -1086,7 +1086,7 @@ build-prod-system:
     - Services/Fsel.System/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-training:
   stage: build-image
@@ -1174,7 +1174,7 @@ build-prod-training:
     - Services/Fsel.Training/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-identity:
   stage: build-image
@@ -1262,7 +1262,7 @@ build-prod-identity:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
 build-dev-cms:
   stage: build-image
@@ -1350,4 +1350,4 @@ build-prod-cms-planetdefender:
     - Services/Fsel.Cms.PlanetDefender/**/*
     - Services/Shared/**/*
     refs:
-    - main
+    - "/^prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
