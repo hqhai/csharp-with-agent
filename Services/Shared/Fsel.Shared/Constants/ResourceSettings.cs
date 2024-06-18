@@ -71,6 +71,7 @@ namespace Fsel.Shared.Constants
         public const string SpeakingLexical = "Resources//SpeakingAiConfig//LexicalResourceConfig.txt";
 
 
-
+        public const string IeltsStudentResult = "Resources//IeltsStudentsResult.json";
+        public const string AcademicStudentsResult = "Resources//AcademicStudentsResult.json";
     }
 }
