@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
 {
     using Fsel.Identity.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class IntegrationModel
     {
@@ -38,7 +39,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
 
         public DateTime? LastDate { get; set; }
 
-        public string? PTLevel { get; set; }
+        public EnumPlacementTestLevel? PTLevel { get; set; }
 
     }
 }

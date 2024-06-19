@@ -7,6 +7,9 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
     public class GetFeatureAccessTimeQueryModel
     {
         public Guid? CreatedUserId { get; set; }
+
         public DateTime? LastVisited { get; set; }
+
+        public long? AccessTime { get; set; }
     }
 }
