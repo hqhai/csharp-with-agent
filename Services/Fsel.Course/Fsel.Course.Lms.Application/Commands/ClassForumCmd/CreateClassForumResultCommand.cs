@@ -216,7 +216,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             }
             _mapper.Map(request, classForumDetailResult);
             classForumDetailResult.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
-
+            classForumDetailResult.ProcessDate = request.IsSubmit && classForumDetailResult.SubmissionCount == EnumSubmissionCount.FirstSubmit ? DateTime.UtcNow : null;
             classForumDetailResult.ClassForumResultFiles = request.FilePaths?.Select(x => new ClassForumResultFile
             {
                 FilePath = x,
