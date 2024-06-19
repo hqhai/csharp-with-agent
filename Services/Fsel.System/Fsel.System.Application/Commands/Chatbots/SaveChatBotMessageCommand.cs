@@ -82,7 +82,6 @@ namespace Fsel.System.Application.Commands.Chatbots
             // Khi token còn dưới 20% so với số lượng token ban đầu
             if (chatbotMessage.RemainToken == 0)
             {
-                chatbotMessage.Status = EnumChatBotStatus.Done;
                 methodResult.AddError(nameof(EnumOutOfAIToken.TheNumberOfTokensHasReachedTheLimit));
                 return methodResult;
             }
@@ -132,6 +131,11 @@ namespace Fsel.System.Application.Commands.Chatbots
                 // Đếm số token
                 int tokenCount = matches.Count + (totalTokenUse?.Completion_Tokens ?? default);
                 chatbotMessage.RemainToken = chatbotMessage.RemainToken > tokenCount ? chatbotMessage.RemainToken - tokenCount : 0;
+
+                if(chatbotMessage.RemainToken == 0)
+                {
+                    chatbotMessage.Status = EnumChatBotStatus.Done;
+                }
 
                 //Câp nhật xuống database
                 _chatBotRepository.Update(chatbotMessage);
