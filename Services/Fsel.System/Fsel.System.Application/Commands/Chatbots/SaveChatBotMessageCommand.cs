@@ -5,9 +5,13 @@ namespace Fsel.System.Application.Commands.Chatbots
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Queues.Publisher;
+    using Fsel.System.Application.Services.AIServices;
+    using Fsel.System.Application.Services.AIServices.Models;
     using Fsel.System.Application.Services.StorageServices;
     using Fsel.System.Application.Services.StorageServices.Models;
     using Fsel.System.Domain.Entities.ChatBot;
@@ -34,20 +38,20 @@ namespace Fsel.System.Application.Commands.Chatbots
         private readonly IMapper _mapper;
         private readonly IChatBotRepository _chatBotRepository;
         private readonly IChatbotConfigRepository _chatbotConfigRepository;
+        private readonly IOpenAIService _openAIService;
         private readonly IStorageService _storageService;
         private readonly ChatBotPublisher _chatBotPublisher;
-        private readonly IMediator _mediator;
         private const int Number_Of_Config = 2;
 
-        public SaveChatBotMessageCommandHandler(IMapper mapper, IChatBotRepository chatBotRepository, IStorageService storageService, ChatBotPublisher chatBotPublisher, IMediator mediator, IChatbotConfigRepository chatbotConfigRepository)
+        public SaveChatBotMessageCommandHandler(IMapper mapper, IChatBotRepository chatBotRepository, IStorageService storageService, ChatBotPublisher chatBotPublisher, IChatbotConfigRepository chatbotConfigRepository, IOpenAIService openAIService)
         {
             _mapper = mapper;
             _chatBotRepository = chatBotRepository;
 
             _storageService = storageService;
             _chatBotPublisher = chatBotPublisher;
-            _mediator = mediator;
             _chatbotConfigRepository = chatbotConfigRepository;
+            _openAIService = openAIService;
         }
 
         public async Task<MethodResult<ChatBotModel>> Handle(SaveChatBotMessageCommand request, CancellationToken cancellationToken)
@@ -76,14 +80,11 @@ namespace Fsel.System.Application.Commands.Chatbots
 
 
             // Khi token còn dưới 20% so với số lượng token ban đầu
-            if (tokenRatio == 0)
-            {
-                methodResult.AddError(nameof(EnumOutOfAIToken.TheNumberOfTokensHasReachedTheLimit));
-                return methodResult;
-            }
-            else if (tokenRatio > 0)
+            if (chatbotMessage.RemainToken == 0)
             {
                 chatbotMessage.Status = EnumChatBotStatus.Done;
+                methodResult.AddError(nameof(EnumOutOfAIToken.TheNumberOfTokensHasReachedTheLimit));
+                return methodResult;
             }
 
             ///Bổ sung câu hỏi của học sinh vào đoạn hội thoại
@@ -91,14 +92,22 @@ namespace Fsel.System.Application.Commands.Chatbots
             var chatBotMessageModel = _mapper.Map<IList<ChatBotMessageModel>>(chatbotMessage.Conversations);
             chatBotMessageModel.Add(newQuestion);
 
-            // Tìm câu trả lời
-            var response = await _mediator.Send(new SubmitAICommand
-            {
-                MaxToken = chatbotMessage.RemainToken,
-                ChatBotMessages = chatBotMessageModel,
-            }, cancellationToken);
 
-            bool isContainAudioScript = response?.Contains("Click to listen", StringComparison.OrdinalIgnoreCase) ?? false;
+            var chatGptResponse = await _openAIService.SubmitAICompletionsAsync(new RequestAIModel
+            {
+                Model = ValueSettings.ChatBotSetup.Model,
+                Messages = chatBotMessageModel,
+                Temperature = ValueSettings.ChatBotSetup.Temperature,
+                MaxTokens = chatbotMessage.RemainToken,
+                PresencePenalty = ValueSettings.ChatBotSetup.PresencePenalty,
+                TopP = ValueSettings.ChatBotSetup.TopP
+            });
+
+
+            string response = chatGptResponse?.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault() ?? string.Empty;
+            string tokenInUse = chatGptResponse?.Content?.Usage?.ToString() ?? string.Empty;
+            var totalTokenUse = ConvertHelper.Deserialize<TokenAIModel>(tokenInUse);
+            bool isContainAudioScript = response.Contains("Click to listen", StringComparison.OrdinalIgnoreCase);
             string filePath = await TextToSpeech(request.Skill, isContainAudioScript, response);
 
             // Bổ sung câu trả lời của GPT vào đoạn hội thoại
@@ -108,7 +117,7 @@ namespace Fsel.System.Application.Commands.Chatbots
 
 
             // Push to Socket
-            await PushToWebSocket(request.ChatBotId, newMessage.Content, newMessage.FilePath,tokenRatio, cancellationToken);
+            await PushToWebSocket(request.ChatBotId, newMessage.Content, newMessage.FilePath, tokenRatio, cancellationToken);
 
             //Lưu đoạn hội thoại vào database
             ChatBot chatBot = new ChatBot();
@@ -121,8 +130,8 @@ namespace Fsel.System.Application.Commands.Chatbots
                 MatchCollection matches = Regex.Matches(response ?? string.Empty, @"\b\w+\b");
 
                 // Đếm số token
-                int tokenCount = matches.Count;
-                chatbotMessage.RemainToken = chatbotMessage.RemainToken - tokenCount;
+                int tokenCount = matches.Count + (totalTokenUse?.Completion_Tokens ?? default);
+                chatbotMessage.RemainToken = chatbotMessage.RemainToken > tokenCount ? chatbotMessage.RemainToken - tokenCount : 0;
 
                 //Câp nhật xuống database
                 _chatBotRepository.Update(chatbotMessage);
