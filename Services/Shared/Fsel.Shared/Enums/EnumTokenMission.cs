@@ -11,8 +11,19 @@ namespace Fsel.Shared.Enums
         ClassForumSpeakingVideo,
         HomeworkFirstSubmit,
         HomeworkSecondSubmit,
+
         FocusMode,
+        FocusModeFifteenMinutes,
+        FocusModeThirtyMinutes,
+        FocusModeFortyFiveMinutes,
+        FocusModeSixtyMinutes,
+        FocusModeNinetyMinutes,
+
         DailyCheckin,
+        DailyCheckinLevelOne,
+        DailyCheckinLevelTwo,
+        DailyCheckinLevelThree,
+
         SkillTest,
         UnitTest,
         FinalTest,

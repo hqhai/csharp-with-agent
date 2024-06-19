@@ -83,6 +83,7 @@ namespace Fsel.Shared.Enums
 
         [Description("Revise your notes")]
         ReviseYourNotes,
+
         [Description("Mã giới thiệu của bạn được nhập thành công 1 lần")]
         SuccessfulIntroduceCode,
 

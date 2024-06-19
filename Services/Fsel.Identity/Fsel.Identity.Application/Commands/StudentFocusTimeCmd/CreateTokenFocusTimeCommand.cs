@@ -104,7 +104,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.UserNotEnoughTime), nameof(studentFocusTime.ExecuteTime));
                 return methodResult;
             }
-
+            double? numberOfToken = default;
             //Thực hiện các hành động lưu xuống database , gửi lên websocket
             await _studentFocusTimeRepository.ExecuteTransactionAsync(async () =>
             {
@@ -129,7 +129,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                     var tokenConfigResult = tokenConfig.Content?.Result;
                     var tokenConfigFocusModes = tokenConfigResult.GetTokenConfig<IList<TokenConfigFocusModes>>();
                     var targetNumber = tokenConfigFocusModes?.Where(x => x.FocusTimeId == systemConfigMap.Id)?.Max(x => x.BaseValue);
-
+                    numberOfToken = targetNumber;
                     if (targetNumber.HasValue)
                     {
                         await _createTokenHistoryPublisher.Publish(new List<TokenHistoryQueueModel>
@@ -140,7 +140,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                                 VolatileToken = targetNumber.Value,
                                 Type = EnumTokenHistoryType.Recevived,
                                 Feature = EnumTokenFeature.FocusMode,
-                                Mission = EnumTokenMission.FocusMode,
+                                Mission = studentFocusTime.TargetTime.GetEnumTokenMission(),
                                 UserId = student.Human?.UserId ?? default,
                             }
                         }, cancellationToken).ConfigureAwait(false);
@@ -149,8 +149,12 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 }
                 _studentFocusTimeRepository.Update(studentFocusTime);
                 await _studentFocusTimeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                var studentFocusTimeModel = _mapper.Map<StudentFocusTimeModel>(studentFocusTime);
+                studentFocusTimeModel.NumberOfToken = numberOfToken;
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<StudentFocusTimeModel>(studentFocusTime);
+                methodResult.Result = studentFocusTimeModel;
                 return methodResult;
             });
 
