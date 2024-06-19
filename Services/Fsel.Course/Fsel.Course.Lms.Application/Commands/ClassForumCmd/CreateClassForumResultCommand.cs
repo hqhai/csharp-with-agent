@@ -159,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     classForumResult = await CreateClassForumResultAsync(request, classForum, course, studentId, cancellationToken);
                     await CreateClassForumDetailResultAsync(request, classForum, classForumResult, EnumSubmissionCount.FirstSubmit, cancellationToken);
                 }
-                if (classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate.HasValue && classForumResult.ClassForumDetailResults.Any(x => x.SubmissionCount != EnumSubmissionCount.SecondSubmit))
+                else if (classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate.HasValue && classForumResult.ClassForumDetailResults.All(x => x.SubmissionCount != EnumSubmissionCount.SecondSubmit))
                 {
                     classForumResult = await CreateClassForumDetailResultAsync(request, classForum, classForumResult, EnumSubmissionCount.SecondSubmit, cancellationToken);
                 }
@@ -242,9 +242,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 {
                     await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
                     classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
-                    _classForumDetailResultRepository.Update(classForumDetailResult);
-                    await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
                     classForumResult = _classForumResultRepository.Update(classForumResult);
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
