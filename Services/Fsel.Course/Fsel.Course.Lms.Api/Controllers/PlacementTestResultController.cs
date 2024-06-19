@@ -71,6 +71,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpGet("export")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> Export([FromQuery] ExportPlacementTestQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -86,6 +87,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpPost("import-export")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ImportAndExport([FromForm] ImportAndExportPlacementTestQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -101,6 +103,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpPost("export-placement-test")]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> Export([FromForm] ExportPlacementTestsToStudentQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
