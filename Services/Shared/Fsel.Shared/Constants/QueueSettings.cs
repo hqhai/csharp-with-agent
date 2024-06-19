@@ -101,6 +101,7 @@ namespace Fsel.Shared.Constants
                 public const string WeeklyReport = $"{KeyQueue}_WeeklyReport";
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
                 public const string UpdateClassForumResultToExpiredTime = $"{KeyQueue}_UpdateClassForumResultToExpiredTime";
+                public const string DisconnectSocketCalculateTime = $"{KeyQueue}_DisconnectSocketCalculateTime";
                 public const string DoQuestBoard = $"{KeyQueue}_DoQuestBoard";
             }
         }

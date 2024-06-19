@@ -16,6 +16,8 @@ namespace Fsel.Course.Domain.Entities
 
     public class ClassForumDetailResult : Entity, ISubmissionCount
     {
+        private const int MaxScore = 2;
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
 
@@ -76,7 +78,16 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                return CorrectCount + Score;
+                double correctTotal = default;
+                if (!string.IsNullOrEmpty(GradingAlFeedback))
+                {
+                    var classForumAIs = Common.Helpers.ConvertHelper.Deserialize<List<ClassForumAIModel>>(GradingAlFeedback);
+                    if (classForumAIs != null && classForumAIs.Any())
+                    {
+                        correctTotal = classForumAIs.Count * MaxScore;
+                    }
+                }
+                return Score + correctTotal;
             }
         }
 

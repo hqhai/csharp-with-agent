@@ -21,11 +21,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class SubmitClassforumAICommand : ClassForumAIResponseModel, IRequest<bool>
+    public class SubmitClassForumAICommand : ClassForumAIResponseModel, IRequest<bool>
     {
     }
 
-    public class SubmitAIResponseCommandHandler : IRequestHandler<SubmitClassforumAICommand, bool>
+    public class SubmitAIResponseCommandHandler : IRequestHandler<SubmitClassForumAICommand, bool>
     {
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             _senderService = senderService;
         }
 
-        public async Task<bool> Handle(SubmitClassforumAICommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(SubmitClassForumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
@@ -102,18 +102,18 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             #endregion
 
+            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
+
             if (classForumDetailResult != null)
             {
-                var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(aIResponse);
                 classForumDetailResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
-
                 _classForumDetailResultRepository.Update(classForumDetailResult);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
             {
-                GradingAlFeedback = aIResponse,
+                GradingAlFeedback = ConvertHelper.Serialize(classForumAIs),
                 ClassForumResultId = request.ClassForumResultId,
                 EnumSubmissionCount = request.SubmissionCount
             }, cancellationToken);
